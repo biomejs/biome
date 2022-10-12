@@ -1,0 +1,28 @@
+[package]
+name = "rome_v8"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.57"
+v8 = { version = "0.51.0", default-features = false }
+serde_v8 = { version = "0.65.0" }
+serde = "1.0.33"
+
+rome_rowan = { path = "../rome_rowan", features = ["serde"] }
+rome_js_syntax = { path = "../rome_js_syntax" }
+rome_js_factory = { path = "../rome_js_factory" }
+
+[dev-dependencies]
+rome_console = { path = "../rome_console" }
+rome_diagnostics = { path = "../rome_diagnostics" }
+rome_fs = { path = "../rome_fs" }
+rome_js_parser = { path = "../rome_js_parser" }
+rome_service = { path = "../rome_service" }
+crossbeam = "0.8.1"
+pico-args = { version ="0.5.0", features=["eq-separator"] }
+
+[build-dependencies]
+rome_idl = { path = "../rome_idl" }

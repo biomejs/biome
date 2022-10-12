@@ -55,6 +55,7 @@ impl<N: fmt::Display, T: fmt::Display> fmt::Display for NodeOrToken<N, T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Direction {
     Next,
     Prev,

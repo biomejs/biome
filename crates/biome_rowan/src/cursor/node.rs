@@ -15,7 +15,7 @@ use std::{fmt, iter};
 use super::{GreenElement, NodeKind, WeakGreenElement};
 
 #[derive(Clone)]
-pub(crate) struct SyntaxNode {
+pub struct SyntaxNode {
     pub(super) ptr: Rc<NodeData>,
 }
 
@@ -122,26 +122,26 @@ impl SyntaxNode {
         TextRange::new(start, end.max(start))
     }
 
-    pub fn first_leading_trivia(&self) -> Option<SyntaxTrivia> {
+    pub(crate) fn first_leading_trivia(&self) -> Option<SyntaxTrivia> {
         self.first_token().map(|x| x.leading_trivia())
     }
 
-    pub fn last_trailing_trivia(&self) -> Option<SyntaxTrivia> {
+    pub(crate) fn last_trailing_trivia(&self) -> Option<SyntaxTrivia> {
         self.last_token().map(|x| x.trailing_trivia())
     }
 
     #[inline]
-    pub fn index(&self) -> usize {
+    pub(crate) fn index(&self) -> usize {
         self.data().slot() as usize
     }
 
     #[inline]
-    pub fn text(&self) -> SyntaxNodeText {
+    pub(crate) fn text(&self) -> SyntaxNodeText {
         SyntaxNodeText::new(self.clone())
     }
 
     #[inline]
-    pub fn text_trimmed(&self) -> SyntaxNodeText {
+    pub(crate) fn text_trimmed(&self) -> SyntaxNodeText {
         SyntaxNodeText::with_range(self.clone(), self.text_trimmed_range())
     }
 
@@ -156,27 +156,27 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn parent(&self) -> Option<SyntaxNode> {
+    pub(crate) fn parent(&self) -> Option<SyntaxNode> {
         self.data().parent_node()
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub(crate) fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
         iter::successors(Some(self.clone()), SyntaxNode::parent)
     }
 
     #[inline]
-    pub fn children(&self) -> SyntaxNodeChildren {
+    pub(crate) fn children(&self) -> SyntaxNodeChildren {
         SyntaxNodeChildren::new(self.clone())
     }
 
     #[inline]
-    pub fn children_with_tokens(&self) -> SyntaxElementChildren {
+    pub(crate) fn children_with_tokens(&self) -> SyntaxElementChildren {
         SyntaxElementChildren::new(self.clone())
     }
 
     #[inline]
-    pub fn tokens(&self) -> impl Iterator<Item = SyntaxToken> + DoubleEndedIterator + '_ {
+    pub(crate) fn tokens(&self) -> impl Iterator<Item = SyntaxToken> + DoubleEndedIterator + '_ {
         self.green().children().filter_map(|child| {
             child.element().into_token().map(|token| {
                 SyntaxToken::new(
@@ -189,7 +189,7 @@ impl SyntaxNode {
         })
     }
 
-    pub fn first_child(&self) -> Option<SyntaxNode> {
+    pub(crate) fn first_child(&self) -> Option<SyntaxNode> {
         self.green().children().find_map(|child| {
             child.element().into_node().map(|green| {
                 SyntaxNode::new_child(
@@ -202,7 +202,7 @@ impl SyntaxNode {
         })
     }
 
-    pub fn last_child(&self) -> Option<SyntaxNode> {
+    pub(crate) fn last_child(&self) -> Option<SyntaxNode> {
         self.green().children().rev().find_map(|child| {
             child.element().into_node().map(|green| {
                 SyntaxNode::new_child(
@@ -215,7 +215,7 @@ impl SyntaxNode {
         })
     }
 
-    pub fn first_child_or_token(&self) -> Option<SyntaxElement> {
+    pub(crate) fn first_child_or_token(&self) -> Option<SyntaxElement> {
         self.green().children().next().map(|child| {
             SyntaxElement::new(
                 child.element(),
@@ -225,7 +225,7 @@ impl SyntaxNode {
             )
         })
     }
-    pub fn last_child_or_token(&self) -> Option<SyntaxElement> {
+    pub(crate) fn last_child_or_token(&self) -> Option<SyntaxElement> {
         self.green().children().next_back().map(|child| {
             SyntaxElement::new(
                 child.element(),
@@ -236,26 +236,26 @@ impl SyntaxNode {
         })
     }
 
-    pub fn next_sibling(&self) -> Option<SyntaxNode> {
+    pub(crate) fn next_sibling(&self) -> Option<SyntaxNode> {
         self.data().next_sibling()
     }
-    pub fn prev_sibling(&self) -> Option<SyntaxNode> {
+    pub(crate) fn prev_sibling(&self) -> Option<SyntaxNode> {
         self.data().prev_sibling()
     }
 
-    pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
+    pub(crate) fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().next_sibling_or_token()
     }
-    pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
+    pub(crate) fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data().prev_sibling_or_token()
     }
 
-    pub fn first_token(&self) -> Option<SyntaxToken> {
+    pub(crate) fn first_token(&self) -> Option<SyntaxToken> {
         self.descendants_with_tokens(Direction::Next)
             .find_map(|x| x.into_token())
     }
 
-    pub fn last_token(&self) -> Option<SyntaxToken> {
+    pub(crate) fn last_token(&self) -> Option<SyntaxToken> {
         PreorderWithTokens::new(self.clone(), Direction::Prev)
             .filter_map(|event| match event {
                 WalkEvent::Enter(it) => Some(it),
@@ -265,7 +265,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode> {
+    pub(crate) fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode> {
         iter::successors(Some(self.clone()), move |node| match direction {
             Direction::Next => node.next_sibling(),
             Direction::Prev => node.prev_sibling(),
@@ -273,7 +273,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn siblings_with_tokens(
+    pub(crate) fn siblings_with_tokens(
         &self,
         direction: Direction,
     ) -> impl Iterator<Item = SyntaxElement> {
@@ -285,7 +285,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub(crate) fn descendants(&self) -> Descendants {
         self.preorder().filter_map(|event| match event {
             WalkEvent::Enter(node) => Some(node),
             WalkEvent::Leave(_) => None,
@@ -293,10 +293,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn descendants_with_tokens(
-        &self,
-        direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    pub(crate) fn descendants_with_tokens(&self, direction: Direction) -> DescendantsWithTokens {
         self.preorder_with_tokens(direction)
             .filter_map(|event| match event {
                 WalkEvent::Enter(it) => Some(it),
@@ -305,12 +302,12 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn preorder(&self) -> Preorder {
+    pub(crate) fn preorder(&self) -> Preorder {
         Preorder::new(self.clone())
     }
 
     #[inline]
-    pub fn preorder_with_tokens(&self, direction: Direction) -> PreorderWithTokens {
+    pub(crate) fn preorder_with_tokens(&self, direction: Direction) -> PreorderWithTokens {
         PreorderWithTokens::new(self.clone(), direction)
     }
 
@@ -318,7 +315,7 @@ impl SyntaxNode {
         SlotsPreorder::new(self.clone())
     }
 
-    pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
+    pub(crate) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
         // TODO: this could be faster if we first drill-down to node, and only
         // then switch to token search. We should also replace explicit
         // recursion with a loop.
@@ -354,7 +351,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn covering_element(&self, range: TextRange) -> SyntaxElement {
+    pub(crate) fn covering_element(&self, range: TextRange) -> SyntaxElement {
         let mut res: SyntaxElement = self.clone().into();
         loop {
             assert!(
@@ -373,7 +370,7 @@ impl SyntaxNode {
         }
     }
 
-    pub fn child_or_token_at_range(&self, range: TextRange) -> Option<SyntaxElement> {
+    pub(crate) fn child_or_token_at_range(&self, range: TextRange) -> Option<SyntaxElement> {
         let rel_range = range - self.offset();
         self.green()
             .slot_at_range(rel_range)
@@ -390,14 +387,14 @@ impl SyntaxNode {
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    pub fn detach(self) -> Self {
+    pub(crate) fn detach(self) -> Self {
         Self {
             ptr: self.ptr.detach(),
         }
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    pub fn splice_slots<R, I>(self, range: R, replace_with: I) -> Self
+    pub(crate) fn splice_slots<R, I>(self, range: R, replace_with: I) -> Self
     where
         R: ops::RangeBounds<usize>,
         I: Iterator<Item = Option<SyntaxElement>>,
@@ -416,7 +413,11 @@ impl SyntaxNode {
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    pub fn replace_child(self, prev_elem: SyntaxElement, next_elem: SyntaxElement) -> Option<Self> {
+    pub(crate) fn replace_child(
+        self,
+        prev_elem: SyntaxElement,
+        next_elem: SyntaxElement,
+    ) -> Option<Self> {
         Some(Self {
             ptr: self.ptr.replace_child(prev_elem, next_elem)?,
         })
@@ -512,7 +513,12 @@ impl Iterator for SyntaxElementChildren {
 
 impl FusedIterator for SyntaxElementChildren {}
 
-pub(crate) struct Preorder {
+pub type Descendants =
+    std::iter::FilterMap<Preorder, fn(WalkEvent<SyntaxNode>) -> Option<SyntaxNode>>;
+pub type DescendantsWithTokens =
+    std::iter::FilterMap<PreorderWithTokens, fn(WalkEvent<SyntaxElement>) -> Option<SyntaxElement>>;
+
+pub struct Preorder {
     start: SyntaxNode,
     next: Option<WalkEvent<SyntaxNode>>,
     skip_subtree: bool,
@@ -573,7 +579,7 @@ impl Iterator for Preorder {
 
 impl FusedIterator for Preorder {}
 
-pub(crate) struct PreorderWithTokens {
+pub struct PreorderWithTokens {
     start: SyntaxElement,
     next: Option<WalkEvent<SyntaxElement>>,
     skip_subtree: bool,

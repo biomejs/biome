@@ -1,0 +1,167 @@
+[RustType="rome_rowan::TextRange"]
+typedef sequence<unsigned long> TextRange;
+
+[RustType="rome_rowan::SyntaxNodeText"]
+interface SyntaxNodeText {
+    unsigned short len();
+    boolean is_empty();
+    DOMString to_string();
+};
+
+[RustType="rome_js_syntax::JsSyntaxKind"]
+typedef any JsSyntaxKind;
+
+interface JsSyntaxTriviaPiece {
+    DOMString text();
+    unsigned long text_len();
+    TextRange text_range();
+    boolean is_newline();
+    boolean is_whitespace();
+    boolean is_comments();
+    boolean is_skipped();
+    JsSyntaxToken token();
+};
+
+[RustType="rome_js_syntax::JsSyntaxTrivia"]
+interface JsSyntaxTrivia {
+    // pieces();
+    JsSyntaxTriviaPiece? last();
+    JsSyntaxTriviaPiece? first();
+    DOMString text();
+    TextRange text_range();
+    boolean is_empty();
+    boolean has_skipped();
+};
+
+[RustType="rome_js_syntax::JsSyntaxToken",Exposed="*"]
+interface JsSyntaxToken {
+    JsSyntaxKind kind();
+    TextRange text_range();
+    TextRange text_trimmed_range();
+    DOMString text();
+    DOMString text_trimmed();
+    JsSyntaxNode? parent();
+    // ancestors();
+    JsSyntaxElement? next_sibling_or_token();
+    JsSyntaxElement? prev_sibling_or_token();
+    // siblings_with_tokens();
+    JsSyntaxToken? next_token();
+    JsSyntaxToken? prev_token();
+    [ClonedThis] JsSyntaxToken detach();
+    // JsSyntaxToken with_leading_trivia();
+    // JsSyntaxToken with_trailing_trivia();
+    JsSyntaxTrivia leading_trivia();
+    JsSyntaxTrivia trailing_trivia();
+    boolean has_trailing_comments();
+    boolean has_leading_comments();
+    boolean has_leading_non_whitespace_trivia();
+};
+
+[RustType="rome_js_syntax::JsSyntaxElement"]
+typedef (JsSyntaxNode or JsSyntaxToken) JsSyntaxElement;
+
+[RustType="rome_js_syntax::JsSyntaxList",Exposed="*"]
+interface JsSyntaxList {
+    // iter();
+    unsigned long len();
+    boolean is_empty();
+    JsSyntaxNode? first();
+    JsSyntaxNode? last();
+    [ClonedResult] JsSyntaxNode node();
+};
+
+[RustType="rome_js_syntax::JsSyntaxNode",Exposed="*"]
+interface JsSyntaxNode {
+    JsSyntaxKind kind();
+    SyntaxNodeText text();
+    SyntaxNodeText text_trimmed();
+    TextRange text_range();
+    TextRange text_trimmed_range();
+    JsSyntaxTrivia? first_leading_trivia();
+    JsSyntaxTrivia? last_trailing_trivia();
+    JsSyntaxNode? parent();
+    JsSyntaxNode? grand_parent();
+    unsigned long index();
+    // ancestors();
+    // children();
+    // slots();
+    // children_with_tokens();
+    // tokens();
+    JsSyntaxNode? first_child();
+    JsSyntaxNode? last_child();
+    JsSyntaxElement? first_child_or_token();
+    JsSyntaxElement? last_child_or_token();
+    JsSyntaxNode? next_sibling();
+    JsSyntaxNode? prev_sibling();
+    JsSyntaxElement? next_sibling_or_token();
+    JsSyntaxElement? prev_sibling_or_token();
+    JsSyntaxToken? first_token();
+    JsSyntaxToken? last_token();
+    // siblings();
+    // siblings_with_tokens();
+    JsDescendants descendants();
+    JsDescendantsTokens descendants_tokens(optional Direction direction = "rome_rowan::Direction::Next");
+    JsDescendantsWithTokens descendants_with_tokens(optional Direction direction = "rome_rowan::Direction::Next");
+    JsPreorder preorder();
+    // JsPreorderWithTokens preorder_with_tokens();
+    // token_at_offset();
+    JsSyntaxElement covering_element(TextRange range);
+    JsSyntaxElement? child_or_token_at_range(TextRange range);
+    JsSyntaxNode clone_subtree();
+    [ClonedThis] JsSyntaxNode detach();
+    [CustomBinding] JsSyntaxNode splice_slots(sequence<unsigned long> range, sequence<JsSyntaxElement> replace_with);
+    [ClonedThis] JsSyntaxNode? replace_child(JsSyntaxElement prev_element, JsSyntaxElement next_element);
+    [ClonedThis] JsSyntaxList into_list();
+    boolean has_comments_descendants();
+    boolean has_comments_direct();
+    boolean first_or_last_token_have_comments();
+    boolean has_trailing_comments();
+    boolean last_token_has_comments();
+    boolean first_token_has_comments();
+    boolean has_leading_comments();
+};
+
+[RustType="rome_rowan::Direction"]
+enum Direction {
+    "Next",
+    "Prev"
+};
+
+interface JsDescendants {
+    iterable<JsSyntaxNode>;
+};
+
+interface JsDescendantsTokens {
+    iterable<JsSyntaxToken>;
+};
+
+interface JsDescendantsWithTokens {
+    iterable<JsSyntaxElement>;
+};
+
+interface JsPreorder {
+    iterable<JsWalkEvent>;
+};
+
+enum JsWalkEventKind {
+    "Enter",
+    "Leave"
+};
+
+interface JsWalkEvent {
+    attribute JsWalkEventKind kind;
+    attribute JsSyntaxNode elem;
+};
+
+[RustType="rome_js_factory::make",Exposed="*"]
+namespace make {
+    JsSyntaxToken ident([ByRef] DOMString text);
+};
+
+[Exposed="*"]
+interface JsBatchMutation {
+    constructor([Cloned] JsSyntaxNode root);
+    [MutableThis] undefined replace_element(JsSyntaxElement prev_element, JsSyntaxElement next_element);
+    [MutableThis] undefined replace_element_discard_trivia(JsSyntaxElement prev_element, JsSyntaxElement next_element);
+    [MutableThis] undefined remove_element(JsSyntaxElement prev_element);
+};

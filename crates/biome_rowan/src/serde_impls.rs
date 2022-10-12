@@ -1,9 +1,12 @@
-use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
+use serde::{
+    ser::{Serialize, SerializeMap, SerializeSeq, Serializer},
+    Deserialize, Deserializer,
+};
 use std::fmt;
 
 use crate::{
     syntax::{Language, SyntaxNode, SyntaxToken},
-    NodeOrToken,
+    NodeOrToken, RawSyntaxKind,
 };
 
 struct SerDisplay<T>(T);
@@ -68,6 +71,24 @@ impl<L: Language> Serialize for Children<&'_ SyntaxNode<L>> {
                 NodeOrToken::Token(it) => state.serialize_element(&it),
             })?;
         state.end()
+    }
+}
+
+impl Serialize for RawSyntaxKind {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u16(self.0)
+    }
+}
+
+impl<'de> Deserialize<'de> for RawSyntaxKind {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        u16::deserialize(deserializer).map(Self)
     }
 }
 

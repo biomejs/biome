@@ -4,7 +4,7 @@ use quote::{format_ident, quote};
 
 use super::kinds_src::KindsSrc;
 
-pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> Result<String> {
+pub fn generate_syntax_kinds(grammar: &KindsSrc, language_kind: LanguageKind) -> Result<String> {
     let syntax_kind = language_kind.syntax_kind();
     let punctuation_values = grammar.punct.iter().map(|(token, _name)| {
         // These tokens, when parsed to proc_macro2::TokenStream, generates a stream of bytes

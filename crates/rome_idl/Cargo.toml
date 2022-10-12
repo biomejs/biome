@@ -1,0 +1,13 @@
+[package]
+name = "rome_idl"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+weedle = "0.12.0"
+quote = "1.0.14"
+syn = "1.0.90"
+proc-macro2 = "1.0.43"
+prettyplease = "0.1.21"

@@ -10,7 +10,7 @@ use std::{fmt, iter};
 use super::{GreenElement, NodeKind, WeakGreenElement};
 
 #[derive(Clone, Debug)]
-pub(crate) struct SyntaxToken {
+pub struct SyntaxToken {
     ptr: Rc<NodeData>,
 }
 
@@ -222,12 +222,12 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn leading_trivia(&self) -> SyntaxTrivia {
+    pub(crate) fn leading_trivia(&self) -> SyntaxTrivia {
         SyntaxTrivia::leading(self.clone())
     }
 
     #[inline]
-    pub fn trailing_trivia(&self) -> SyntaxTrivia {
+    pub(crate) fn trailing_trivia(&self) -> SyntaxTrivia {
         SyntaxTrivia::trailing(self.clone())
     }
 }

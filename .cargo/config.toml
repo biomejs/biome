@@ -34,6 +34,7 @@ documentation = """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets --verbose -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
+codemod = "run -p biome_v8 --example codemod --"
 
 [target.'cfg(all())']
 rustflags = [

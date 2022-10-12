@@ -341,19 +341,16 @@ impl<L: Language> SyntaxNode<L> {
             .map(SyntaxElement::from)
     }
 
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn descendants(&self) -> Descendants<L> {
         self.raw.descendants().map(SyntaxNode::from)
     }
 
-    pub fn descendants_tokens(&self, direction: Direction) -> impl Iterator<Item = SyntaxToken<L>> {
+    pub fn descendants_tokens(&self, direction: Direction) -> DescendantsTokens<L> {
         self.descendants_with_tokens(direction)
             .filter_map(|x| x.as_token().cloned())
     }
 
-    pub fn descendants_with_tokens(
-        &self,
-        direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement<L>> {
+    pub fn descendants_with_tokens(&self, direction: Direction) -> DescendantsWithTokens<L> {
         self.raw
             .descendants_with_tokens(direction)
             .map(NodeOrToken::from)
@@ -872,6 +869,13 @@ impl<L: Language> Iterator for SyntaxElementChildren<L> {
         self.raw.next().map(NodeOrToken::from)
     }
 }
+
+pub type Descendants<L> =
+    std::iter::Map<cursor::Descendants, fn(cursor::SyntaxNode) -> SyntaxNode<L>>;
+pub type DescendantsTokens<L> =
+    std::iter::FilterMap<DescendantsWithTokens<L>, fn(SyntaxElement<L>) -> Option<SyntaxToken<L>>>;
+pub type DescendantsWithTokens<L> =
+    std::iter::Map<cursor::DescendantsWithTokens, fn(cursor::SyntaxElement) -> SyntaxElement<L>>;
 
 pub struct Preorder<L: Language> {
     raw: cursor::Preorder,

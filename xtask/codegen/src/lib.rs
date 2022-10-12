@@ -11,6 +11,7 @@ mod generate_nodes;
 mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
+mod generate_v8;
 mod json_kinds_src;
 mod kinds_src;
 mod parser_tests;
@@ -30,6 +31,30 @@ pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
+
+const JS_SYNTAX_KINDS: &str = "crates/rome_js_syntax/src/generated/kind.rs";
+const JS_AST_NODES: &str = "crates/rome_js_syntax/src/generated/nodes.rs";
+const JS_AST_NODES_MUT: &str = "crates/rome_js_syntax/src/generated/nodes_mut.rs";
+const JS_SYNTAX_FACTORY: &str = "crates/rome_js_factory/src/generated/syntax_factory.rs";
+const JS_NODE_FACTORY: &str = "crates/rome_js_factory/src/generated/node_factory.rs";
+const JS_AST_MACROS: &str = "crates/rome_js_syntax/src/generated/macros.rs";
+const JS_V8: &str = "crates/rome_v8/src/bindings/js.rs";
+
+const CSS_SYNTAX_KINDS: &str = "crates/rome_css_syntax/src/generated/kind.rs";
+const CSS_AST_NODES: &str = "crates/rome_css_syntax/src/generated/nodes.rs";
+const CSS_AST_NODES_MUT: &str = "crates/rome_css_syntax/src/generated/nodes_mut.rs";
+const CSS_SYNTAX_FACTORY: &str = "crates/rome_css_factory/src/generated/syntax_factory.rs";
+const CSS_NODE_FACTORY: &str = "crates/rome_css_factory/src/generated/node_factory.rs";
+const CSS_AST_MACROS: &str = "crates/rome_css_syntax/src/generated/macros.rs";
+const CSS_V8: &str = "crates/rome_v8/src/bindings/css.rs";
+
+const JSON_SYNTAX_KINDS: &str = "crates/rome_json_syntax/src/generated/kind.rs";
+const JSON_AST_NODES: &str = "crates/rome_json_syntax/src/generated/nodes.rs";
+const JSON_AST_NODES_MUT: &str = "crates/rome_json_syntax/src/generated/nodes_mut.rs";
+const JSON_SYNTAX_FACTORY: &str = "crates/rome_json_factory/src/generated/syntax_factory.rs";
+const JSON_NODE_FACTORY: &str = "crates/rome_json_factory/src/generated/node_factory.rs";
+const JSON_AST_MACROS: &str = "crates/rome_json_syntax/src/generated/macros.rs";
+const JSON_V8: &str = "crates/rome_v8/src/bindings/json.rs";
 
 pub enum UpdateResult {
     NotUpdated,
@@ -173,6 +198,7 @@ pub fn update(path: &Path, contents: &str, mode: &Mode) -> Result<UpdateResult> 
     }
 
     eprintln!("updating {}", path.display());
+    fs2::remove_file(path)?;
     fs2::write(path, contents)?;
     Ok(UpdateResult::Updated)
 }
