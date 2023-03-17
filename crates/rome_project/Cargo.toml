@@ -1,0 +1,13 @@
+[package]
+name = "rome_project"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rome_deserialize = { path = "../rome_deserialize" }
+rustc-hash = { workspace = true }
+rome_json_syntax = { path = "../rome_json_syntax" }
+rome_text_size = { path = "../rome_text_size" }
+rome_rowan = { path = "../rome_rowan" }
