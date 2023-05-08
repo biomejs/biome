@@ -11,6 +11,8 @@ codegen-schema = "run -p xtask_codegen --features schema -- schema"
 codegen-website = "run -p xtask_codegen --features website -- website"
 contributors = "run -p xtask_contributors --"
 coverage = "run -p xtask_coverage --profile=release-with-debug --"
+codegen-license = "run -p xtask_codegen --features license -- license"
+lintdoc = "run -p xtask_lintdoc --"
 documentation = """
     doc \
     -p biome_*formatter \

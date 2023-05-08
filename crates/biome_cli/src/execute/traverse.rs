@@ -4,6 +4,7 @@ use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
     FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
+use crate::execute::process_manifest::process_manifest;
 use crate::{
     CliDiagnostic, CliSession, Execution, FormatterReportFileDetail, FormatterReportSummary,
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
@@ -18,7 +19,7 @@ use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{
     workspace::{FeatureName, SupportsFeatureParams},
-    Workspace, WorkspaceError,
+    Manifests, Workspace, WorkspaceError,
 };
 use crossbeam::{
     channel::{unbounded, Receiver, Sender},
@@ -87,10 +88,25 @@ pub(crate) fn traverse(
     let mut warnings: usize = 0;
     let mut report = Report::default();
 
+    let manifest_base_paths = {
+        let mut vec = vec![];
+        if let Some(path) = fs.working_directory() {
+            for manifest in Manifests::KNOWN_MANIFESTS {
+                vec.push(path.join(manifest));
+            }
+        }
+        if let Some(path) = fs.get_configuration_base_path() {
+            for manifest in Manifests::KNOWN_MANIFESTS {
+                vec.push(path.join(manifest));
+            }
+        }
+        vec
+    };
+
     let duration = thread::scope(|s| {
         thread::Builder::new()
             .name(String::from("biome::console"))
-            .spawn_scoped(s, || {
+            .spawn_scoped(s.clone(), || {
                 process_messages(ProcessMessagesOptions {
                     execution: &execution,
                     console,
@@ -112,6 +128,7 @@ pub(crate) fn traverse(
         traverse_inputs(
             fs,
             inputs,
+            manifest_base_paths,
             &TraversalOptions {
                 fs,
                 workspace,
@@ -239,12 +256,23 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
+fn traverse_inputs(
+    fs: &dyn FileSystem,
+    inputs: Vec<OsString>,
+    manifest_base_paths: Vec<PathBuf>,
+    ctx: &TraversalOptions,
+) -> Duration {
     let start = Instant::now();
 
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
             scope.spawn(ctx, PathBuf::from(input));
+        }
+    }));
+
+    fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
+        for input in manifest_base_paths {
+            scope.spawn(ctx, input);
         }
     }));
 
@@ -705,7 +733,13 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 /// in a [catch_unwind] block and emit diagnostics in case of error (either the
 /// traversal function returns Err or panics)
 fn handle_file(ctx: &TraversalOptions, path: &Path) {
-    match catch_unwind(move || process_file(ctx, path)) {
+    match catch_unwind(move || {
+        if Manifests::is_manifest(path) {
+            process_manifest(ctx, path)
+        } else {
+            process_file(ctx, path)
+        }
+    }) {
         Ok(Ok(FileStatus::Success)) => {}
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.push_message(msg);

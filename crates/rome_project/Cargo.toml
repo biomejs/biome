@@ -11,3 +11,13 @@ rustc-hash = { workspace = true }
 rome_json_syntax = { path = "../rome_json_syntax" }
 rome_text_size = { path = "../rome_text_size" }
 rome_rowan = { path = "../rome_rowan" }
+node-semver = "2.1.0"
+rome_diagnostics = { path = "../rome_diagnostics" }
+rome_fs = { path = "../rome_fs"}
+rome_console = { path = "../rome_console", version = "0.0.1"}
+serde.workspace = true
+rome_parser.workspace = true
+
+[dev-dependencies]
+tests_macros = { path = "../tests_macros" }
+insta = { workspace = true }

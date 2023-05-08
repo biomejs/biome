@@ -345,7 +345,7 @@ mod test {
             deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default());
 
         assert!(result.has_errors());
-        for diagnostic in result.into_diagnostics() {
+        for diagnostic in result.into_error() {
             snap_diagnostic("deserialization_error", diagnostic)
         }
     }

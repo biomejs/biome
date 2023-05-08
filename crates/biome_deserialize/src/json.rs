@@ -17,7 +17,7 @@ pub trait JsonDeserialize: Sized {
     fn deserialize_from_ast(
         root: &JsonRoot,
         visitor: &mut impl VisitJsonNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
+        deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()>;
 }
 
@@ -25,7 +25,7 @@ impl JsonDeserialize for () {
     fn deserialize_from_ast(
         _root: &JsonRoot,
         _visitor: &mut impl VisitJsonNode,
-        _diagnostics: &mut Vec<DeserializationDiagnostic>,
+        _deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         Some(())
     }

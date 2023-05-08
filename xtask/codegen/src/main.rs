@@ -2,6 +2,8 @@
 mod generate_bindings;
 #[cfg(feature = "configuration")]
 mod generate_configuration;
+#[cfg(feature = "license")]
+mod generate_license;
 mod generate_new_lintrule;
 #[cfg(feature = "schema")]
 mod generate_schema;
@@ -18,6 +20,8 @@ use crate::generate_aria::generate_aria;
 use crate::generate_bindings::generate_workspace_bindings;
 #[cfg(feature = "configuration")]
 use crate::generate_configuration::generate_rules_configuration;
+#[cfg(feature = "license")]
+use crate::generate_license::generate_license;
 #[cfg(feature = "schema")]
 use crate::generate_schema::generate_configuration_schema;
 #[cfg(feature = "website")]
@@ -86,6 +90,11 @@ fn main() -> Result<()> {
             generate_files()?;
             Ok(())
         }
+        #[cfg(feature = "license")]
+        "license" => {
+            generate_license(Mode::Overwrite)?;
+            Ok(())
+        }
         "all" => {
             generate_tables()?;
             generate_grammar(args);
@@ -117,6 +126,7 @@ SUBCOMMANDS:
 	configuration    Generate the part of the configuration that depends on some metadata
 	schema          Generate the JSON schema for the Biome configuration file format
 	bindings        Generate TypeScript definitions for the JavaScript bindings to the Workspace API
+    license         It updates the file that contains licenses
 	grammar         Transforms ungram files into AST
 	formatter       Generates formatters for each language
 	test            Extracts parser inline comments into test files
