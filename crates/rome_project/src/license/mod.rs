@@ -7,7 +7,8 @@ impl LicenseList {
         let license_found = self
             .license_list
             .iter()
-            .find(|license| license.license_id == license_id)
-            .unwrap_or(false)?;
+            .find(|license| license.license_id == license_id);
+
+        true
     }
 }

@@ -25,7 +25,7 @@ impl Manifest for PackageJson {
     fn deserialize_manifest(root: &JsonSyntaxNode) -> Deserialized<Self> {
         let deserialized =
         // TODO handle unwrap, don't like it
-            deserialize_from_json_ast::<PackageJson>(JsonRoot::cast(root.clone()).unwrap());
+            deserialize_from_json_ast::<PackageJson>(&JsonRoot::cast(root.clone()).unwrap());
 
         deserialized
     }
@@ -36,7 +36,7 @@ pub struct Dependencies(FxHashMap<String, Version>);
 
 impl JsonDeserialize for PackageJson {
     fn deserialize_from_ast(
-        root: JsonRoot,
+        root: &JsonRoot,
         visitor: &mut impl VisitJsonNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
