@@ -1,7 +1,7 @@
 use std::{cell::Ref, sync::Once};
 
 use anyhow::{bail, ensure, Context, Result};
-use rome_js_syntax::{JsAnyRoot, JsLanguage, JsSyntaxNode};
+use rome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use rome_rowan::BatchMutation;
 use v8::inspector::{StringView, V8Inspector};
 
@@ -148,7 +148,7 @@ impl Instance {
         Ok(Script { context, function })
     }
 
-    pub fn run(&mut self, script: &Script, root: JsAnyRoot) -> Result<JsSyntaxNode> {
+    pub fn run(&mut self, script: &Script, root: AnyJsRoot) -> Result<JsSyntaxNode> {
         // Create a new `HandleScope` to manage the garbage collection of values accessed from Rust
         let scope = &mut v8::HandleScope::new(&mut self.isolate);
 
@@ -188,8 +188,8 @@ impl Instance {
 
 #[cfg(test)]
 mod tests {
-    use rome_js_parser::{parse, FileId};
-    use rome_js_syntax::SourceType;
+    use rome_js_parser::{parse, JsParserOptions};
+    use rome_js_syntax::JsFileSource;
 
     use super::Instance;
 
@@ -198,7 +198,7 @@ mod tests {
         const INPUT: &str = "function test() {}";
         const OUTPUT: &str = "function TEST() {}";
 
-        let module = parse(INPUT, FileId::zero(), SourceType::js_module());
+        let module = parse(INPUT, JsFileSource::js_module(), JsParserOptions::default());
         let root = module.tree();
 
         const CODE: &str = "export default function(root) {

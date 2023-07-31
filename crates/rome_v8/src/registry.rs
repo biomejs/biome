@@ -81,8 +81,8 @@ impl TemplateRegistry {
         }
     }
 
-    pub(crate) fn build_namespace<'scope, 'builder>(
-        &'builder mut self,
+    pub(crate) fn build_namespace<'scope>(
+        &mut self,
         scope: &mut v8::HandleScope<'scope, ()>,
         global: v8::Local<'_, v8::ObjectTemplate>,
         name: &str,

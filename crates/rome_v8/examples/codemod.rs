@@ -1,3 +1,4 @@
+use bpaf::{construct, long, positional, OptionParser, Parser};
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -7,55 +8,30 @@ use std::{
 };
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use pico_args::Arguments;
 
-use rome_console::{markup, Console, ConsoleExt, EnvConsole};
-use rome_diagnostics::v2::{Error, FileId, PrintDiagnostic};
+use rome_console::{markup, ColorMode, Console, ConsoleExt, EnvConsole};
+use rome_diagnostics::{Error, PrintDiagnostic};
 use rome_fs::{
-    self, AtomicInterner, FileSystem, FileSystemExt, OsFileSystem, PathInterner, RomePath,
-    TraversalContext,
+    self, FileSystem, FileSystemExt, OsFileSystem, PathInterner, RomePath, TraversalContext,
 };
-use rome_js_parser::parse;
-use rome_js_syntax::SourceType;
+use rome_js_parser::{parse, JsParserOptions};
+use rome_js_syntax::JsFileSource;
 use rome_service::{workspace, App, DynRef, WorkspaceRef};
 use rome_v8::{Instance, Script};
 
 pub fn main() {
-    let mut args = Arguments::from_env();
-
-    let no_colors = args.contains("--no-colors");
-    let mut app = App::new(
+    let mut console = EnvConsole::default();
+    console.set_color(ColorMode::Auto);
+    let app = App::new(
         DynRef::Owned(Box::new(OsFileSystem)),
-        DynRef::Owned(Box::new(EnvConsole::new(no_colors))),
+        &mut console,
         WorkspaceRef::Owned(workspace::server()),
     );
-
-    let (script_name, script) = load_script(&*app.fs, &mut args);
-
-    // Check that at least one input file / directory was specified in the command line
-    let mut inputs = vec![];
-
-    for input in args.finish() {
-        if let Some(maybe_arg) = input.to_str() {
-            let without_dashes = maybe_arg.trim_start_matches('-');
-            if without_dashes.is_empty() {
-                // `-` or `--`
-                continue;
-            }
-            // `--<some character>` or `-<some character>`
-            if without_dashes != input {
-                panic!("unexpected argument {input:?}");
-            }
-        }
-        inputs.push(input);
-    }
-
-    if inputs.is_empty() {
-        panic!("missing argument <INPUT>");
-    }
+    let options = options().run();
+    let (script_name, script) = load_script(&*app.fs, &options);
 
     let (send_diagnostics, recv_diagnostics) = unbounded();
-    let (interner, recv_files) = AtomicInterner::new();
+    let (interner, recv_files) = PathInterner::new();
 
     let console = &mut *app.console;
     let fs = &*app.fs;
@@ -75,51 +51,63 @@ pub fn main() {
 
         let ctx = &ctx;
         fs.traversal(Box::new(move |scope| {
-            for input in inputs {
-                scope.spawn(ctx, PathBuf::from(input));
+            for input in options.paths {
+                scope.spawn(ctx, input);
             }
         }));
     });
 }
 
-fn load_script(fs: &dyn FileSystem, args: &mut Arguments) -> (String, String) {
-    let script_name: String = args
-        .value_from_str("--script")
-        .expect("missing argument --script");
+struct CliOptions {
+    script_path: PathBuf,
+    paths: Vec<PathBuf>,
+}
 
-    let script_path = Path::new(&script_name);
-    let mut script = fs
-        .read(script_path)
-        .unwrap_or_else(|err| panic!("could not open file {}: {err}", script_path.display()));
+fn options() -> OptionParser<CliOptions> {
+    let script_path = long("script")
+        .help("Script to load at runtime")
+        .argument::<PathBuf>("PATH");
+    let paths = positional::<PathBuf>("PATH").many();
+
+    construct!(CliOptions { script_path, paths }).to_options()
+}
+
+fn load_script(fs: &dyn FileSystem, options: &CliOptions) -> (String, String) {
+    let mut script = fs.read(&options.script_path).unwrap_or_else(|err| {
+        panic!(
+            "could not open file {}: {err}",
+            options.script_path.display()
+        )
+    });
 
     let mut buffer = String::new();
     script.read_to_string(&mut buffer).unwrap();
 
-    (script_name, buffer)
+    (options.script_path.display().to_string(), buffer)
 }
 
 fn console_thread(
     console: &mut dyn Console,
     recv_diagnostics: Receiver<Error>,
-    _recv_files: Receiver<(FileId, PathBuf)>,
+    _recv_files: Receiver<PathBuf>,
 ) {
     while let Ok(error) = recv_diagnostics.recv() {
         console.error(markup! {
-            {PrintDiagnostic(&error)}
+            {PrintDiagnostic::simple(&error)}
         });
     }
 }
 
 struct CodemodContext<'app> {
     fs: &'app dyn FileSystem,
-    interner: AtomicInterner,
+    interner: PathInterner,
     diagnostics: Sender<Error>,
     script_name: String,
     script: String,
 }
 
 impl TraversalContext for CodemodContext<'_> {
-    fn interner(&self) -> &dyn PathInterner {
+    fn interner(&self) -> &PathInterner {
         &self.interner
     }
 
@@ -139,7 +127,7 @@ impl TraversalContext for CodemodContext<'_> {
         )
     }
 
-    fn handle_file(&self, path: &Path, file_id: FileId) {
+    fn handle_file(&self, path: &Path) {
         let mut file = self
             .fs
             .open(path)
@@ -148,8 +136,8 @@ impl TraversalContext for CodemodContext<'_> {
         let mut buffer = String::new();
         file.read_to_string(&mut buffer).unwrap();
 
-        let source_type = SourceType::try_from(path).unwrap();
-        let parse = parse(&buffer, file_id, source_type);
+        let source_type = JsFileSource::try_from(path).unwrap();
+        let parse = parse(&buffer, source_type, JsParserOptions::default());
         let root = parse.tree();
 
         thread_local! {

@@ -9,6 +9,7 @@ codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
 codegen-schema = "run -p xtask_codegen --features schema -- schema"
 codegen-website = "run -p xtask_codegen --features website -- website"
+codemod = "run -p biome_v8 --example codemod --"
 contributors = "run -p xtask_contributors --"
 coverage = "run -p xtask_coverage --profile=release-with-debug --"
 documentation = """
@@ -34,7 +35,6 @@ documentation = """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets --verbose -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
-codemod = "run -p biome_v8 --example codemod --"
 
 [target.'cfg(all())']
 rustflags = [
