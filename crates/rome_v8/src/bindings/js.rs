@@ -116,7 +116,9 @@ pub(super) fn register_interfaces(
         .variant("STATIC_KW", rome_js_syntax::JsSyntaxKind::STATIC_KW)
         .variant("YIELD_KW", rome_js_syntax::JsSyntaxKind::YIELD_KW)
         .variant("ABSTRACT_KW", rome_js_syntax::JsSyntaxKind::ABSTRACT_KW)
+        .variant("ACCESSOR_KW", rome_js_syntax::JsSyntaxKind::ACCESSOR_KW)
         .variant("AS_KW", rome_js_syntax::JsSyntaxKind::AS_KW)
+        .variant("SATISFIES_KW", rome_js_syntax::JsSyntaxKind::SATISFIES_KW)
         .variant("ASSERTS_KW", rome_js_syntax::JsSyntaxKind::ASSERTS_KW)
         .variant("ASSERT_KW", rome_js_syntax::JsSyntaxKind::ASSERT_KW)
         .variant("ANY_KW", rome_js_syntax::JsSyntaxKind::ANY_KW)
@@ -151,13 +153,14 @@ pub(super) fn register_interfaces(
         .variant("BIGINT_KW", rome_js_syntax::JsSyntaxKind::BIGINT_KW)
         .variant("OVERRIDE_KW", rome_js_syntax::JsSyntaxKind::OVERRIDE_KW)
         .variant("OF_KW", rome_js_syntax::JsSyntaxKind::OF_KW)
+        .variant("OUT_KW", rome_js_syntax::JsSyntaxKind::OUT_KW)
         .variant(
             "JS_NUMBER_LITERAL",
             rome_js_syntax::JsSyntaxKind::JS_NUMBER_LITERAL,
         )
         .variant(
-            "JS_BIG_INT_LITERAL",
-            rome_js_syntax::JsSyntaxKind::JS_BIG_INT_LITERAL,
+            "JS_BIGINT_LITERAL",
+            rome_js_syntax::JsSyntaxKind::JS_BIGINT_LITERAL,
         )
         .variant(
             "JS_STRING_LITERAL",
@@ -537,8 +540,8 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
         )
         .variant(
-            "JS_BIG_INT_LITERAL_EXPRESSION",
-            rome_js_syntax::JsSyntaxKind::JS_BIG_INT_LITERAL_EXPRESSION,
+            "JS_BIGINT_LITERAL_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION,
         )
         .variant(
             "JS_BOOLEAN_LITERAL_EXPRESSION",
@@ -552,7 +555,10 @@ pub(super) fn register_interfaces(
             "JS_REGEX_LITERAL_EXPRESSION",
             rome_js_syntax::JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION,
         )
-        .variant("JS_TEMPLATE", rome_js_syntax::JsSyntaxKind::JS_TEMPLATE)
+        .variant(
+            "JS_TEMPLATE_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::JS_TEMPLATE_EXPRESSION,
+        )
         .variant(
             "JS_TEMPLATE_ELEMENT",
             rome_js_syntax::JsSyntaxKind::JS_TEMPLATE_ELEMENT,
@@ -569,8 +575,14 @@ pub(super) fn register_interfaces(
             "JS_IMPORT_CALL_EXPRESSION",
             rome_js_syntax::JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
         )
-        .variant("NEW_TARGET", rome_js_syntax::JsSyntaxKind::NEW_TARGET)
-        .variant("IMPORT_META", rome_js_syntax::JsSyntaxKind::IMPORT_META)
+        .variant(
+            "JS_NEW_TARGET_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::JS_NEW_TARGET_EXPRESSION,
+        )
+        .variant(
+            "JS_IMPORT_META_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::JS_IMPORT_META_EXPRESSION,
+        )
         .variant(
             "JS_SHORTHAND_PROPERTY_OBJECT_MEMBER",
             rome_js_syntax::JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER,
@@ -641,6 +653,10 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::JS_STATIC_MODIFIER,
         )
         .variant(
+            "JS_ACCESSOR_MODIFIER",
+            rome_js_syntax::JsSyntaxKind::JS_ACCESSOR_MODIFIER,
+        )
+        .variant(
             "TS_DECLARE_MODIFIER",
             rome_js_syntax::JsSyntaxKind::TS_DECLARE_MODIFIER,
         )
@@ -659,6 +675,18 @@ pub(super) fn register_interfaces(
         .variant(
             "TS_ACCESSIBILITY_MODIFIER",
             rome_js_syntax::JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER,
+        )
+        .variant(
+            "TS_CONST_MODIFIER",
+            rome_js_syntax::JsSyntaxKind::TS_CONST_MODIFIER,
+        )
+        .variant(
+            "TS_IN_MODIFIER",
+            rome_js_syntax::JsSyntaxKind::TS_IN_MODIFIER,
+        )
+        .variant(
+            "TS_OUT_MODIFIER",
+            rome_js_syntax::JsSyntaxKind::TS_OUT_MODIFIER,
         )
         .variant(
             "JS_EXTENDS_CLAUSE",
@@ -759,6 +787,10 @@ pub(super) fn register_interfaces(
         .variant(
             "TS_AS_ASSIGNMENT",
             rome_js_syntax::JsSyntaxKind::TS_AS_ASSIGNMENT,
+        )
+        .variant(
+            "TS_SATISFIES_ASSIGNMENT",
+            rome_js_syntax::JsSyntaxKind::TS_SATISFIES_ASSIGNMENT,
         )
         .variant(
             "TS_TYPE_ASSERTION_ASSIGNMENT",
@@ -925,6 +957,11 @@ pub(super) fn register_interfaces(
         .variant(
             "JS_AWAIT_EXPRESSION",
             rome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION,
+        )
+        .variant("JS_DECORATOR", rome_js_syntax::JsSyntaxKind::JS_DECORATOR)
+        .variant(
+            "JS_DECORATOR_LIST",
+            rome_js_syntax::JsSyntaxKind::JS_DECORATOR_LIST,
         )
         .variant(
             "TS_IDENTIFIER_BINDING",
@@ -1151,6 +1188,10 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::TS_TYPE_PARAMETER,
         )
         .variant(
+            "TS_TYPE_PARAMETER_MODIFIER_LIST",
+            rome_js_syntax::JsSyntaxKind::TS_TYPE_PARAMETER_MODIFIER_LIST,
+        )
+        .variant(
             "TS_TYPE_PARAMETER_NAME",
             rome_js_syntax::JsSyntaxKind::TS_TYPE_PARAMETER_NAME,
         )
@@ -1171,8 +1212,8 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::TS_NUMBER_LITERAL_TYPE,
         )
         .variant(
-            "TS_BIG_INT_LITERAL_TYPE",
-            rome_js_syntax::JsSyntaxKind::TS_BIG_INT_LITERAL_TYPE,
+            "TS_BIGINT_LITERAL_TYPE",
+            rome_js_syntax::JsSyntaxKind::TS_BIGINT_LITERAL_TYPE,
         )
         .variant(
             "TS_BOOLEAN_LITERAL_TYPE",
@@ -1225,6 +1266,10 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::TS_AS_EXPRESSION,
         )
         .variant(
+            "TS_SATISFIES_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::TS_SATISFIES_EXPRESSION,
+        )
+        .variant(
             "TS_INSTANTIATION_EXPRESSION",
             rome_js_syntax::JsSyntaxKind::TS_INSTANTIATION_EXPRESSION,
         )
@@ -1257,6 +1302,10 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION,
         )
         .variant(
+            "TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION",
+            rome_js_syntax::JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        )
+        .variant(
             "TS_DECLARE_STATEMENT",
             rome_js_syntax::JsSyntaxKind::TS_DECLARE_STATEMENT,
         )
@@ -1267,6 +1316,10 @@ pub(super) fn register_interfaces(
         .variant(
             "TS_PROPERTY_SIGNATURE_CLASS_MEMBER",
             rome_js_syntax::JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER,
+        )
+        .variant(
+            "TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER",
+            rome_js_syntax::JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER,
         )
         .variant(
             "TS_PROPERTY_SIGNATURE_MODIFIER_LIST",
@@ -1366,46 +1419,45 @@ pub(super) fn register_interfaces(
             rome_js_syntax::JsSyntaxKind::JSX_SPREAD_CHILD,
         )
         .variant("JSX_STRING", rome_js_syntax::JsSyntaxKind::JSX_STRING)
-        .variant("JS_UNKNOWN", rome_js_syntax::JsSyntaxKind::JS_UNKNOWN)
+        .variant("JS_BOGUS", rome_js_syntax::JsSyntaxKind::JS_BOGUS)
         .variant(
-            "JS_UNKNOWN_EXPRESSION",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_EXPRESSION,
+            "JS_BOGUS_EXPRESSION",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_EXPRESSION,
         )
         .variant(
-            "JS_UNKNOWN_STATEMENT",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_STATEMENT,
+            "JS_BOGUS_STATEMENT",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_STATEMENT,
         )
         .variant(
-            "JS_UNKNOWN_MEMBER",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_MEMBER,
+            "JS_BOGUS_MEMBER",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_MEMBER,
         )
         .variant(
-            "JS_UNKNOWN_BINDING",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_BINDING,
+            "JS_BOGUS_BINDING",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_BINDING,
         )
         .variant(
-            "JS_UNKNOWN_PARAMETER",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_PARAMETER,
+            "JS_BOGUS_PARAMETER",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_PARAMETER,
         )
         .variant(
-            "JS_UNKNOWN_IMPORT_ASSERTION_ENTRY",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_IMPORT_ASSERTION_ENTRY,
+            "JS_BOGUS_IMPORT_ASSERTION_ENTRY",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_IMPORT_ASSERTION_ENTRY,
         )
         .variant(
-            "JS_UNKNOWN_NAMED_IMPORT_SPECIFIER",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_NAMED_IMPORT_SPECIFIER,
+            "JS_BOGUS_NAMED_IMPORT_SPECIFIER",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_NAMED_IMPORT_SPECIFIER,
         )
         .variant(
-            "JS_UNKNOWN_ASSIGNMENT",
-            rome_js_syntax::JsSyntaxKind::JS_UNKNOWN_ASSIGNMENT,
+            "JS_BOGUS_ASSIGNMENT",
+            rome_js_syntax::JsSyntaxKind::JS_BOGUS_ASSIGNMENT,
         )
+        .variant("TS_BOGUS_TYPE", rome_js_syntax::JsSyntaxKind::TS_BOGUS_TYPE)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::ImportMeta>(scope, global, "ImportMeta")
+        .build_class::<rome_js_syntax::JsAccessorModifier>(scope, global, "JsAccessorModifier")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "import_token", ImportMeta_import_token)
-        .method(scope, "dot_token", ImportMeta_dot_token)
-        .method(scope, "meta_token", ImportMeta_meta_token)
+        .method(scope, "modifier_token", JsAccessorModifier_modifier_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsArrayAssignmentPattern>(
@@ -1539,13 +1591,13 @@ pub(super) fn register_interfaces(
         .method(scope, "argument", JsAwaitExpression_argument)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsBigIntLiteralExpression>(
+        .build_class::<rome_js_syntax::JsBigintLiteralExpression>(
             scope,
             global,
-            "JsBigIntLiteralExpression",
+            "JsBigintLiteralExpression",
         )
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "value_token", JsBigIntLiteralExpression_value_token)
+        .method(scope, "value_token", JsBigintLiteralExpression_value_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsBinaryExpression>(scope, global, "JsBinaryExpression")
@@ -1633,6 +1685,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsClassDeclaration>(scope, global, "JsClassDeclaration")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", JsClassDeclaration_decorators)
         .method(scope, "abstract_token", JsClassDeclaration_abstract_token)
         .method(scope, "class_token", JsClassDeclaration_class_token)
         .method(scope, "id", JsClassDeclaration_id)
@@ -1654,6 +1707,11 @@ pub(super) fn register_interfaces(
             "JsClassExportDefaultDeclaration",
         )
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(
+            scope,
+            "decorators",
+            JsClassExportDefaultDeclaration_decorators,
+        )
         .method(
             scope,
             "abstract_token",
@@ -1695,6 +1753,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsClassExpression>(scope, global, "JsClassExpression")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", JsClassExpression_decorators)
         .method(scope, "class_token", JsClassExpression_class_token)
         .method(scope, "id", JsClassExpression_id)
         .method(scope, "type_parameters", JsClassExpression_type_parameters)
@@ -1830,6 +1889,12 @@ pub(super) fn register_interfaces(
         )
         .finish(scope);
     registry
+        .build_class::<rome_js_syntax::JsDecorator>(scope, global, "JsDecorator")
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "at_token", JsDecorator_at_token)
+        .method(scope, "expression", JsDecorator_expression)
+        .finish(scope);
+    registry
         .build_class::<rome_js_syntax::JsDefaultClause>(scope, global, "JsDefaultClause")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
         .method(scope, "default_token", JsDefaultClause_default_token)
@@ -1886,6 +1951,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsExport>(scope, global, "JsExport")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", JsExport_decorators)
         .method(scope, "export_token", JsExport_export_token)
         .method(scope, "export_clause", JsExport_export_clause)
         .finish(scope);
@@ -1944,6 +2010,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsExportFromClause>(scope, global, "JsExportFromClause")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "type_token", JsExportFromClause_type_token)
         .method(scope, "star_token", JsExportFromClause_star_token)
         .method(scope, "export_as", JsExportFromClause_export_as)
         .method(scope, "from_token", JsExportFromClause_from_token)
@@ -2111,6 +2178,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsFormalParameter>(scope, global, "JsFormalParameter")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", JsFormalParameter_decorators)
         .method(scope, "binding", JsFormalParameter_binding)
         .method(
             scope,
@@ -2280,7 +2348,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsImportAssertion>(scope, global, "JsImportAssertion")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "assert_token", JsImportAssertion_assert_token)
+        .method(scope, "assertion_kind", JsImportAssertion_assertion_kind)
         .method(scope, "l_curly_token", JsImportAssertion_l_curly_token)
         .method(scope, "assertions", JsImportAssertion_assertions)
         .method(scope, "r_curly_token", JsImportAssertion_r_curly_token)
@@ -2324,6 +2392,17 @@ pub(super) fn register_interfaces(
         .method(scope, "from_token", JsImportDefaultClause_from_token)
         .method(scope, "source", JsImportDefaultClause_source)
         .method(scope, "assertion", JsImportDefaultClause_assertion)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::JsImportMetaExpression>(
+            scope,
+            global,
+            "JsImportMetaExpression",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "import_token", JsImportMetaExpression_import_token)
+        .method(scope, "dot_token", JsImportMetaExpression_dot_token)
+        .method(scope, "meta_token", JsImportMetaExpression_meta_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsImportNamedClause>(scope, global, "JsImportNamedClause")
@@ -2517,6 +2596,17 @@ pub(super) fn register_interfaces(
         .method(scope, "callee", JsNewExpression_callee)
         .method(scope, "type_arguments", JsNewExpression_type_arguments)
         .method(scope, "arguments", JsNewExpression_arguments)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::JsNewTargetExpression>(
+            scope,
+            global,
+            "JsNewTargetExpression",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "new_token", JsNewTargetExpression_new_token)
+        .method(scope, "dot_token", JsNewTargetExpression_dot_token)
+        .method(scope, "target_token", JsNewTargetExpression_target_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsNullLiteralExpression>(
@@ -2807,6 +2897,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::JsRestParameter>(scope, global, "JsRestParameter")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", JsRestParameter_decorators)
         .method(scope, "dotdotdot_token", JsRestParameter_dotdotdot_token)
         .method(scope, "binding", JsRestParameter_binding)
         .method(scope, "type_annotation", JsRestParameter_type_annotation)
@@ -2972,15 +3063,6 @@ pub(super) fn register_interfaces(
         .method(scope, "r_curly_token", JsSwitchStatement_r_curly_token)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsTemplate>(scope, global, "JsTemplate")
-        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "tag", JsTemplate_tag)
-        .method(scope, "type_arguments", JsTemplate_type_arguments)
-        .method(scope, "l_tick_token", JsTemplate_l_tick_token)
-        .method(scope, "elements", JsTemplate_elements)
-        .method(scope, "r_tick_token", JsTemplate_r_tick_token)
-        .finish(scope);
-    registry
         .build_class::<rome_js_syntax::JsTemplateChunkElement>(
             scope,
             global,
@@ -3003,6 +3085,15 @@ pub(super) fn register_interfaces(
         )
         .method(scope, "expression", JsTemplateElement_expression)
         .method(scope, "r_curly_token", JsTemplateElement_r_curly_token)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::JsTemplateExpression>(scope, global, "JsTemplateExpression")
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "tag", JsTemplateExpression_tag)
+        .method(scope, "type_arguments", JsTemplateExpression_type_arguments)
+        .method(scope, "l_tick_token", JsTemplateExpression_l_tick_token)
+        .method(scope, "elements", JsTemplateExpression_elements)
+        .method(scope, "r_tick_token", JsTemplateExpression_r_tick_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsThisExpression>(scope, global, "JsThisExpression")
@@ -3288,13 +3379,6 @@ pub(super) fn register_interfaces(
         .method(scope, "value_token", JsxText_value_token)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::NewTarget>(scope, global, "NewTarget")
-        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "new_token", NewTarget_new_token)
-        .method(scope, "dot_token", NewTarget_dot_token)
-        .method(scope, "target_token", NewTarget_target_token)
-        .finish(scope);
-    registry
         .build_class::<rome_js_syntax::TsAbstractModifier>(scope, global, "TsAbstractModifier")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
         .method(scope, "modifier_token", TsAbstractModifier_modifier_token)
@@ -3352,10 +3436,10 @@ pub(super) fn register_interfaces(
         .method(scope, "predicate", TsAssertsReturnType_predicate)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::TsBigIntLiteralType>(scope, global, "TsBigIntLiteralType")
+        .build_class::<rome_js_syntax::TsBigintLiteralType>(scope, global, "TsBigintLiteralType")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
-        .method(scope, "minus_token", TsBigIntLiteralType_minus_token)
-        .method(scope, "literal_token", TsBigIntLiteralType_literal_token)
+        .method(scope, "minus_token", TsBigintLiteralType_minus_token)
+        .method(scope, "literal_token", TsBigintLiteralType_literal_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::TsBigintType>(scope, global, "TsBigintType")
@@ -3410,6 +3494,11 @@ pub(super) fn register_interfaces(
         .method(scope, "true_type", TsConditionalType_true_type)
         .method(scope, "colon_token", TsConditionalType_colon_token)
         .method(scope, "false_type", TsConditionalType_false_type)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsConstModifier>(scope, global, "TsConstModifier")
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "modifier_token", TsConstModifier_modifier_token)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::TsConstructSignatureTypeMember>(
@@ -3507,6 +3596,45 @@ pub(super) fn register_interfaces(
             scope,
             "semicolon_token",
             TsDeclareFunctionDeclaration_semicolon_token,
+        )
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration>(
+            scope,
+            global,
+            "TsDeclareFunctionExportDefaultDeclaration",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(
+            scope,
+            "async_token",
+            TsDeclareFunctionExportDefaultDeclaration_async_token,
+        )
+        .method(
+            scope,
+            "function_token",
+            TsDeclareFunctionExportDefaultDeclaration_function_token,
+        )
+        .method(scope, "id", TsDeclareFunctionExportDefaultDeclaration_id)
+        .method(
+            scope,
+            "type_parameters",
+            TsDeclareFunctionExportDefaultDeclaration_type_parameters,
+        )
+        .method(
+            scope,
+            "parameters",
+            TsDeclareFunctionExportDefaultDeclaration_parameters,
+        )
+        .method(
+            scope,
+            "return_type_annotation",
+            TsDeclareFunctionExportDefaultDeclaration_return_type_annotation,
+        )
+        .method(
+            scope,
+            "semicolon_token",
+            TsDeclareFunctionExportDefaultDeclaration_semicolon_token,
         )
         .finish(scope);
     registry
@@ -3811,6 +3939,11 @@ pub(super) fn register_interfaces(
         .method(scope, "right", TsImportTypeQualifier_right)
         .finish(scope);
     registry
+        .build_class::<rome_js_syntax::TsInModifier>(scope, global, "TsInModifier")
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "modifier_token", TsInModifier_modifier_token)
+        .finish(scope);
+    registry
         .build_class::<rome_js_syntax::TsIndexSignatureClassMember>(
             scope,
             global,
@@ -3900,7 +4033,41 @@ pub(super) fn register_interfaces(
         .build_class::<rome_js_syntax::TsInferType>(scope, global, "TsInferType")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
         .method(scope, "infer_token", TsInferType_infer_token)
-        .method(scope, "type_parameter", TsInferType_type_parameter)
+        .method(scope, "name", TsInferType_name)
+        .method(scope, "constraint", TsInferType_constraint)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsInitializedPropertySignatureClassMember>(
+            scope,
+            global,
+            "TsInitializedPropertySignatureClassMember",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(
+            scope,
+            "modifiers",
+            TsInitializedPropertySignatureClassMember_modifiers,
+        )
+        .method(
+            scope,
+            "name",
+            TsInitializedPropertySignatureClassMember_name,
+        )
+        .method(
+            scope,
+            "question_mark_token",
+            TsInitializedPropertySignatureClassMember_question_mark_token,
+        )
+        .method(
+            scope,
+            "value",
+            TsInitializedPropertySignatureClassMember_value,
+        )
+        .method(
+            scope,
+            "semicolon_token",
+            TsInitializedPropertySignatureClassMember_semicolon_token,
+        )
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::TsInstantiationExpression>(
@@ -4212,6 +4379,11 @@ pub(super) fn register_interfaces(
         )
         .finish(scope);
     registry
+        .build_class::<rome_js_syntax::TsOutModifier>(scope, global, "TsOutModifier")
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "modifier_token", TsOutModifier_modifier_token)
+        .finish(scope);
+    registry
         .build_class::<rome_js_syntax::TsOverrideModifier>(scope, global, "TsOverrideModifier")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
         .method(scope, "modifier_token", TsOverrideModifier_modifier_token)
@@ -4241,6 +4413,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::TsPropertyParameter>(scope, global, "TsPropertyParameter")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "decorators", TsPropertyParameter_decorators)
         .method(scope, "modifiers", TsPropertyParameter_modifiers)
         .method(
             scope,
@@ -4349,6 +4522,36 @@ pub(super) fn register_interfaces(
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
         .method(scope, "colon_token", TsReturnTypeAnnotation_colon_token)
         .method(scope, "ty", TsReturnTypeAnnotation_ty)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsSatisfiesAssignment>(
+            scope,
+            global,
+            "TsSatisfiesAssignment",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "assignment", TsSatisfiesAssignment_assignment)
+        .method(
+            scope,
+            "satisfies_token",
+            TsSatisfiesAssignment_satisfies_token,
+        )
+        .method(scope, "ty", TsSatisfiesAssignment_ty)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsSatisfiesExpression>(
+            scope,
+            global,
+            "TsSatisfiesExpression",
+        )
+        .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "expression", TsSatisfiesExpression_expression)
+        .method(
+            scope,
+            "satisfies_token",
+            TsSatisfiesExpression_satisfies_token,
+        )
+        .method(scope, "ty", TsSatisfiesExpression_ty)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::TsSetterSignatureClassMember>(
@@ -4573,6 +4776,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_js_syntax::TsTypeParameter>(scope, global, "TsTypeParameter")
         .extends::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>(scope)
+        .method(scope, "modifiers", TsTypeParameter_modifiers)
         .method(scope, "name", TsTypeParameter_name)
         .method(scope, "constraint", TsTypeParameter_constraint)
         .method(scope, "default", TsTypeParameter_default)
@@ -4622,39 +4826,42 @@ pub(super) fn register_interfaces(
         .method(scope, "void_token", TsVoidType_void_token)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknown>(scope, global, "JsUnknown")
+        .build_class::<rome_js_syntax::JsBogus>(scope, global, "JsBogus")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownAssignment>(scope, global, "JsUnknownAssignment")
+        .build_class::<rome_js_syntax::JsBogusAssignment>(scope, global, "JsBogusAssignment")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownBinding>(scope, global, "JsUnknownBinding")
+        .build_class::<rome_js_syntax::JsBogusBinding>(scope, global, "JsBogusBinding")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownExpression>(scope, global, "JsUnknownExpression")
+        .build_class::<rome_js_syntax::JsBogusExpression>(scope, global, "JsBogusExpression")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownImportAssertionEntry>(
+        .build_class::<rome_js_syntax::JsBogusImportAssertionEntry>(
             scope,
             global,
-            "JsUnknownImportAssertionEntry",
+            "JsBogusImportAssertionEntry",
         )
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownMember>(scope, global, "JsUnknownMember")
+        .build_class::<rome_js_syntax::JsBogusMember>(scope, global, "JsBogusMember")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownNamedImportSpecifier>(
+        .build_class::<rome_js_syntax::JsBogusNamedImportSpecifier>(
             scope,
             global,
-            "JsUnknownNamedImportSpecifier",
+            "JsBogusNamedImportSpecifier",
         )
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownParameter>(scope, global, "JsUnknownParameter")
+        .build_class::<rome_js_syntax::JsBogusParameter>(scope, global, "JsBogusParameter")
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsUnknownStatement>(scope, global, "JsUnknownStatement")
+        .build_class::<rome_js_syntax::JsBogusStatement>(scope, global, "JsBogusStatement")
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::TsBogusType>(scope, global, "TsBogusType")
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsArrayAssignmentPatternElementList>(
@@ -4699,6 +4906,10 @@ pub(super) fn register_interfaces(
             "JsConstructorParameterList",
         )
         .method(scope, "iter", JsConstructorParameterList_iter)
+        .finish(scope);
+    registry
+        .build_class::<rome_js_syntax::JsDecoratorList>(scope, global, "JsDecoratorList")
+        .method(scope, "iter", JsDecoratorList_iter)
         .finish(scope);
     registry
         .build_class::<rome_js_syntax::JsDirectiveList>(scope, global, "JsDirectiveList")
@@ -4885,6 +5096,14 @@ pub(super) fn register_interfaces(
         .method(scope, "iter", TsTypeParameterList_iter)
         .finish(scope);
     registry
+        .build_class::<rome_js_syntax::TsTypeParameterModifierList>(
+            scope,
+            global,
+            "TsTypeParameterModifierList",
+        )
+        .method(scope, "iter", TsTypeParameterModifierList_iter)
+        .finish(scope);
+    registry
         .build_class::<rome_js_syntax::TsUnionTypeVariantList>(
             scope,
             global,
@@ -4895,124 +5114,184 @@ pub(super) fn register_interfaces(
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyArrayAssignmentPatternElement,
+            rome_js_syntax::AnyJsArrayAssignmentPatternElement,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyArrayBindingPatternElement,
+            rome_js_syntax::AnyJsArrayBindingPatternElement,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyArrayElement,
+            rome_js_syntax::AnyJsArrayElement,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyCallArgument,
+            rome_js_syntax::AnyJsCallArgument,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyClassMember,
+            rome_js_syntax::AnyJsClassMember,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyConstructorParameter,
+            rome_js_syntax::AnyJsConstructorParameter,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyExportNamedSpecifier,
+            rome_js_syntax::AnyJsExportNamedSpecifier,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyImportAssertionEntry,
+            rome_js_syntax::AnyJsImportAssertionEntry,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyMethodModifier,
+            rome_js_syntax::AnyJsMethodModifier,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyModuleItem > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsModuleItem > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyNamedImportSpecifier,
+            rome_js_syntax::AnyJsNamedImportSpecifier,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyObjectAssignmentPatternMember,
+            rome_js_syntax::AnyJsObjectAssignmentPatternMember,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyObjectBindingPatternMember,
+            rome_js_syntax::AnyJsObjectBindingPatternMember,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyObjectMember,
+            rome_js_syntax::AnyJsObjectMember,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyParameter,
+            rome_js_syntax::AnyJsParameter,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyPropertyModifier,
+            rome_js_syntax::AnyJsPropertyModifier,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyStatement > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsStatement > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnySwitchClause,
+            rome_js_syntax::AnyJsSwitchClause,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
-            rome_js_syntax::JsAnyTemplateElement,
+            rome_js_syntax::AnyJsTemplateElement,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsxAttribute > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsxChild > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsIndexSignatureModifier,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsMethodSignatureModifier,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsPropertyParameterModifier,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsPropertySignatureModifier,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsTemplateElement,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsTupleTypeElement,
+        >>(scope)
+        .iterable(scope, AstSeparatedListNodesIterator_next)
+        .finish(scope);
+    registry
+        .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsType,
+        >>(scope)
+        .iterable(scope, AstSeparatedListNodesIterator_next)
+        .finish(scope);
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsTypeMember > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry
+        .build_interface::<rome_rowan::AstNodeListIterator<
+            rome_js_syntax::JsLanguage,
+            rome_js_syntax::AnyTsTypeParameterModifier,
+        >>(scope)
+        .iterable(scope, ToV8::to_v8)
+        .finish(scope);
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsDecorator > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsDirective > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
@@ -5028,8 +5307,6 @@ pub(super) fn register_interfaces(
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsxAnyAttribute > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsxAnyChild > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_js_syntax::JsLanguage,
@@ -5037,49 +5314,6 @@ pub(super) fn register_interfaces(
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstNodeListIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyIndexSignatureModifier,
-        >>(scope)
-        .iterable(scope, ToV8::to_v8)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstNodeListIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyMethodSignatureModifier,
-        >>(scope)
-        .iterable(scope, ToV8::to_v8)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstNodeListIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyPropertyParameterModifier,
-        >>(scope)
-        .iterable(scope, ToV8::to_v8)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstNodeListIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyPropertySignatureModifier,
-        >>(scope)
-        .iterable(scope, ToV8::to_v8)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstNodeListIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyTemplateElement,
-        >>(scope)
-        .iterable(scope, ToV8::to_v8)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsAnyTupleTypeElement,
-        >>(scope)
-        .iterable(scope, AstSeparatedListNodesIterator_next)
-        .finish(scope);
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyTypeMember > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
@@ -5091,13 +5325,6 @@ pub(super) fn register_interfaces(
         .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
             rome_js_syntax::JsLanguage,
             rome_js_syntax::TsNameWithTypeArguments,
-        >>(scope)
-        .iterable(scope, AstSeparatedListNodesIterator_next)
-        .finish(scope);
-    registry
-        .build_interface::<rome_rowan::AstSeparatedListNodesIterator<
-            rome_js_syntax::JsLanguage,
-            rome_js_syntax::TsType,
         >>(scope)
         .iterable(scope, AstSeparatedListNodesIterator_next)
         .finish(scope);
@@ -5116,18 +5343,18 @@ fn AstSeparatedListNodesIterator_next<'s, T: ToV8<'s>>(
 ) -> anyhow::Result<v8::Local<'s, v8::Value>> {
     ToV8::to_v8(item?, scope)
 }
-impl<'s> ToV8<'s> for rome_js_syntax::ImportMeta {
+impl<'s> ToV8<'s> for rome_js_syntax::JsAccessorModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
         crate::registry::instantiate_as::<
-            rome_js_syntax::ImportMeta,
+            rome_js_syntax::JsAccessorModifier,
             rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
         >(scope, node)
         .map(Into::into)
     }
 }
 #[allow(non_snake_case)]
-fn ImportMeta_import_token<'s>(
+fn JsAccessorModifier_modifier_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -5136,58 +5363,8 @@ fn ImportMeta_import_token<'s>(
     let this =
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
-    let this = rome_js_syntax::ImportMeta::cast_ref(&*this).unwrap();
-    let result = this.import_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
-#[allow(non_snake_case)]
-fn ImportMeta_dot_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::ImportMeta::cast_ref(&*this).unwrap();
-    let result = this.dot_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
-#[allow(non_snake_case)]
-fn ImportMeta_meta_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::ImportMeta::cast_ref(&*this).unwrap();
-    let result = this.meta_token();
+    let this = rome_js_syntax::JsAccessorModifier::cast_ref(&*this).unwrap();
+    let result = this.modifier_token();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -5928,18 +6105,18 @@ fn JsAwaitExpression_argument<'s>(
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsBigIntLiteralExpression {
+impl<'s> ToV8<'s> for rome_js_syntax::JsBigintLiteralExpression {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
         crate::registry::instantiate_as::<
-            rome_js_syntax::JsBigIntLiteralExpression,
+            rome_js_syntax::JsBigintLiteralExpression,
             rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
         >(scope, node)
         .map(Into::into)
     }
 }
 #[allow(non_snake_case)]
-fn JsBigIntLiteralExpression_value_token<'s>(
+fn JsBigintLiteralExpression_value_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -5948,7 +6125,7 @@ fn JsBigIntLiteralExpression_value_token<'s>(
     let this =
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
-    let this = rome_js_syntax::JsBigIntLiteralExpression::cast_ref(&*this).unwrap();
+    let this = rome_js_syntax::JsBigintLiteralExpression::cast_ref(&*this).unwrap();
     let result = this.value_token();
     match result {
         Ok(result) => {
@@ -6783,6 +6960,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsClassDeclaration {
     }
 }
 #[allow(non_snake_case)]
+fn JsClassDeclaration_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsClassDeclaration::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn JsClassDeclaration_abstract_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -6984,6 +7176,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsClassExportDefaultDeclaration {
     }
 }
 #[allow(non_snake_case)]
+fn JsClassExportDefaultDeclaration_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsClassExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn JsClassExportDefaultDeclaration_abstract_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -7177,6 +7384,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsClassExpression {
         >(scope, node)
         .map(Into::into)
     }
+}
+#[allow(non_snake_case)]
+fn JsClassExpression_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsClassExpression::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
 }
 #[allow(non_snake_case)]
 fn JsClassExpression_class_token<'s>(
@@ -8105,6 +8327,66 @@ fn JsDebuggerStatement_semicolon_token<'s>(
         res.set_undefined();
     }
 }
+impl<'s> ToV8<'s> for rome_js_syntax::JsDecorator {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::JsDecorator,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn JsDecorator_at_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsDecorator::cast_ref(&*this).unwrap();
+    let result = this.at_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsDecorator_expression<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsDecorator::cast_ref(&*this).unwrap();
+    let result = this.expression();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
 impl<'s> ToV8<'s> for rome_js_syntax::JsDefaultClause {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -8614,6 +8896,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsExport {
     }
 }
 #[allow(non_snake_case)]
+fn JsExport_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsExport::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn JsExport_export_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -8889,6 +9186,25 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsExportFromClause {
             rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
         >(scope, node)
         .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn JsExportFromClause_type_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsExportFromClause::cast_ref(&*this).unwrap();
+    let result = this.type_token();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
     }
 }
 #[allow(non_snake_case)]
@@ -10479,6 +10795,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsFormalParameter {
     }
 }
 #[allow(non_snake_case)]
+fn JsFormalParameter_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsFormalParameter::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn JsFormalParameter_binding<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -11868,7 +12199,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsImportAssertion {
     }
 }
 #[allow(non_snake_case)]
-fn JsImportAssertion_assert_token<'s>(
+fn JsImportAssertion_assertion_kind<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -11878,7 +12209,7 @@ fn JsImportAssertion_assert_token<'s>(
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
     let this = rome_js_syntax::JsImportAssertion::cast_ref(&*this).unwrap();
-    let result = this.assert_token();
+    let result = this.assertion_kind();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -12277,6 +12608,91 @@ fn JsImportDefaultClause_assertion<'s>(
         res.set(result);
     } else {
         res.set_undefined();
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::JsImportMetaExpression {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::JsImportMetaExpression,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn JsImportMetaExpression_import_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsImportMetaExpression::cast_ref(&*this).unwrap();
+    let result = this.import_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsImportMetaExpression_dot_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsImportMetaExpression::cast_ref(&*this).unwrap();
+    let result = this.dot_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsImportMetaExpression_meta_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsImportMetaExpression::cast_ref(&*this).unwrap();
+    let result = this.meta_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
     }
 }
 impl<'s> ToV8<'s> for rome_js_syntax::JsImportNamedClause {
@@ -13936,6 +14352,91 @@ fn JsNewExpression_arguments<'s>(
         res.set_undefined();
     }
 }
+impl<'s> ToV8<'s> for rome_js_syntax::JsNewTargetExpression {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::JsNewTargetExpression,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn JsNewTargetExpression_new_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsNewTargetExpression::cast_ref(&*this).unwrap();
+    let result = this.new_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsNewTargetExpression_dot_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsNewTargetExpression::cast_ref(&*this).unwrap();
+    let result = this.dot_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsNewTargetExpression_target_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsNewTargetExpression::cast_ref(&*this).unwrap();
+    let result = this.target_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
 impl<'s> ToV8<'s> for rome_js_syntax::JsNullLiteralExpression {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -15427,6 +15928,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsRestParameter {
     }
 }
 #[allow(non_snake_case)]
+fn JsRestParameter_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsRestParameter::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn JsRestParameter_dotdotdot_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -16771,119 +17287,6 @@ fn JsSwitchStatement_r_curly_token<'s>(
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsTemplate {
-    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
-        let node = self.into_syntax();
-        crate::registry::instantiate_as::<
-            rome_js_syntax::JsTemplate,
-            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
-        >(scope, node)
-        .map(Into::into)
-    }
-}
-#[allow(non_snake_case)]
-fn JsTemplate_tag<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::JsTemplate::cast_ref(&*this).unwrap();
-    let result = this.tag();
-    if let Some(result) = result {
-        let result = ToV8::to_v8(result, scope).unwrap();
-        res.set(result);
-    } else {
-        res.set_undefined();
-    }
-}
-#[allow(non_snake_case)]
-fn JsTemplate_type_arguments<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::JsTemplate::cast_ref(&*this).unwrap();
-    let result = this.type_arguments();
-    if let Some(result) = result {
-        let result = ToV8::to_v8(result, scope).unwrap();
-        res.set(result);
-    } else {
-        res.set_undefined();
-    }
-}
-#[allow(non_snake_case)]
-fn JsTemplate_l_tick_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::JsTemplate::cast_ref(&*this).unwrap();
-    let result = this.l_tick_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
-#[allow(non_snake_case)]
-fn JsTemplate_elements<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::JsTemplate::cast_ref(&*this).unwrap();
-    let result = this.elements();
-    let result = ToV8::to_v8(result, scope).unwrap();
-    res.set(result);
-}
-#[allow(non_snake_case)]
-fn JsTemplate_r_tick_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::JsTemplate::cast_ref(&*this).unwrap();
-    let result = this.r_tick_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
 impl<'s> ToV8<'s> for rome_js_syntax::JsTemplateChunkElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -16991,6 +17394,119 @@ fn JsTemplateElement_r_curly_token<'s>(
             .unwrap();
     let this = rome_js_syntax::JsTemplateElement::cast_ref(&*this).unwrap();
     let result = this.r_curly_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::JsTemplateExpression {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::JsTemplateExpression,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn JsTemplateExpression_tag<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsTemplateExpression::cast_ref(&*this).unwrap();
+    let result = this.tag();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn JsTemplateExpression_type_arguments<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsTemplateExpression::cast_ref(&*this).unwrap();
+    let result = this.type_arguments();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn JsTemplateExpression_l_tick_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsTemplateExpression::cast_ref(&*this).unwrap();
+    let result = this.l_tick_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn JsTemplateExpression_elements<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsTemplateExpression::cast_ref(&*this).unwrap();
+    let result = this.elements();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
+fn JsTemplateExpression_r_tick_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::JsTemplateExpression::cast_ref(&*this).unwrap();
+    let result = this.r_tick_token();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -19487,91 +20003,6 @@ fn JsxText_value_token<'s>(
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::NewTarget {
-    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
-        let node = self.into_syntax();
-        crate::registry::instantiate_as::<
-            rome_js_syntax::NewTarget,
-            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
-        >(scope, node)
-        .map(Into::into)
-    }
-}
-#[allow(non_snake_case)]
-fn NewTarget_new_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::NewTarget::cast_ref(&*this).unwrap();
-    let result = this.new_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
-#[allow(non_snake_case)]
-fn NewTarget_dot_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::NewTarget::cast_ref(&*this).unwrap();
-    let result = this.dot_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
-#[allow(non_snake_case)]
-fn NewTarget_target_token<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    args: v8::FunctionCallbackArguments<'s>,
-    mut res: v8::ReturnValue,
-) {
-    let this = args.this().into();
-    let this =
-        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
-            .unwrap();
-    let this = rome_js_syntax::NewTarget::cast_ref(&*this).unwrap();
-    let result = this.target_token();
-    match result {
-        Ok(result) => {
-            let result = ToV8::to_v8(result, scope).unwrap();
-            res.set(result);
-        }
-        Err(err) => {
-            let message = err.to_string();
-            let message = v8::String::new(scope, &message).unwrap();
-            let exception = v8::Exception::error(scope, message);
-            scope.throw_exception(exception);
-        }
-    }
-}
 impl<'s> ToV8<'s> for rome_js_syntax::TsAbstractModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -20071,18 +20502,18 @@ fn TsAssertsReturnType_predicate<'s>(
         res.set_undefined();
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsBigIntLiteralType {
+impl<'s> ToV8<'s> for rome_js_syntax::TsBigintLiteralType {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
         crate::registry::instantiate_as::<
-            rome_js_syntax::TsBigIntLiteralType,
+            rome_js_syntax::TsBigintLiteralType,
             rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
         >(scope, node)
         .map(Into::into)
     }
 }
 #[allow(non_snake_case)]
-fn TsBigIntLiteralType_minus_token<'s>(
+fn TsBigintLiteralType_minus_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -20091,7 +20522,7 @@ fn TsBigIntLiteralType_minus_token<'s>(
     let this =
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
-    let this = rome_js_syntax::TsBigIntLiteralType::cast_ref(&*this).unwrap();
+    let this = rome_js_syntax::TsBigintLiteralType::cast_ref(&*this).unwrap();
     let result = this.minus_token();
     if let Some(result) = result {
         let result = ToV8::to_v8(result, scope).unwrap();
@@ -20101,7 +20532,7 @@ fn TsBigIntLiteralType_minus_token<'s>(
     }
 }
 #[allow(non_snake_case)]
-fn TsBigIntLiteralType_literal_token<'s>(
+fn TsBigintLiteralType_literal_token<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -20110,7 +20541,7 @@ fn TsBigIntLiteralType_literal_token<'s>(
     let this =
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
-    let this = rome_js_syntax::TsBigIntLiteralType::cast_ref(&*this).unwrap();
+    let this = rome_js_syntax::TsBigintLiteralType::cast_ref(&*this).unwrap();
     let result = this.literal_token();
     match result {
         Ok(result) => {
@@ -20494,6 +20925,41 @@ fn TsConditionalType_false_type<'s>(
             .unwrap();
     let this = rome_js_syntax::TsConditionalType::cast_ref(&*this).unwrap();
     let result = this.false_type();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::TsConstModifier {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsConstModifier,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsConstModifier_modifier_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsConstModifier::cast_ref(&*this).unwrap();
+    let result = this.modifier_token();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -21019,6 +21485,161 @@ fn TsDeclareFunctionDeclaration_semicolon_token<'s>(
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
     let this = rome_js_syntax::TsDeclareFunctionDeclaration::cast_ref(&*this).unwrap();
+    let result = this.semicolon_token();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_async_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.async_token();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_function_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.function_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_id<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.id();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_type_parameters<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.type_parameters();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_parameters<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.parameters();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_return_type_annotation<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
+    let result = this.return_type_annotation();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn TsDeclareFunctionExportDefaultDeclaration_semicolon_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration::cast_ref(&*this).unwrap();
     let result = this.semicolon_token();
     if let Some(result) = result {
         let result = ToV8::to_v8(result, scope).unwrap();
@@ -22952,6 +23573,41 @@ fn TsImportTypeQualifier_right<'s>(
         }
     }
 }
+impl<'s> ToV8<'s> for rome_js_syntax::TsInModifier {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsInModifier,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsInModifier_modifier_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInModifier::cast_ref(&*this).unwrap();
+    let result = this.modifier_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
 impl<'s> ToV8<'s> for rome_js_syntax::TsIndexSignatureClassMember {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -23450,7 +24106,7 @@ fn TsInferType_infer_token<'s>(
     }
 }
 #[allow(non_snake_case)]
-fn TsInferType_type_parameter<'s>(
+fn TsInferType_name<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -23460,7 +24116,7 @@ fn TsInferType_type_parameter<'s>(
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
     let this = rome_js_syntax::TsInferType::cast_ref(&*this).unwrap();
-    let result = this.type_parameter();
+    let result = this.name();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -23472,6 +24128,138 @@ fn TsInferType_type_parameter<'s>(
             let exception = v8::Exception::error(scope, message);
             scope.throw_exception(exception);
         }
+    }
+}
+#[allow(non_snake_case)]
+fn TsInferType_constraint<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInferType::cast_ref(&*this).unwrap();
+    let result = this.constraint();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::TsInitializedPropertySignatureClassMember {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsInitializedPropertySignatureClassMember,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsInitializedPropertySignatureClassMember_modifiers<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInitializedPropertySignatureClassMember::cast_ref(&*this).unwrap();
+    let result = this.modifiers();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
+fn TsInitializedPropertySignatureClassMember_name<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInitializedPropertySignatureClassMember::cast_ref(&*this).unwrap();
+    let result = this.name();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsInitializedPropertySignatureClassMember_question_mark_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInitializedPropertySignatureClassMember::cast_ref(&*this).unwrap();
+    let result = this.question_mark_token();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
+    }
+}
+#[allow(non_snake_case)]
+fn TsInitializedPropertySignatureClassMember_value<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInitializedPropertySignatureClassMember::cast_ref(&*this).unwrap();
+    let result = this.value();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsInitializedPropertySignatureClassMember_semicolon_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsInitializedPropertySignatureClassMember::cast_ref(&*this).unwrap();
+    let result = this.semicolon_token();
+    if let Some(result) = result {
+        let result = ToV8::to_v8(result, scope).unwrap();
+        res.set(result);
+    } else {
+        res.set_undefined();
     }
 }
 impl<'s> ToV8<'s> for rome_js_syntax::TsInstantiationExpression {
@@ -25335,6 +26123,41 @@ fn TsOptionalTupleTypeElement_question_mark_token<'s>(
         }
     }
 }
+impl<'s> ToV8<'s> for rome_js_syntax::TsOutModifier {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsOutModifier,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsOutModifier_modifier_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsOutModifier::cast_ref(&*this).unwrap();
+    let result = this.modifier_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
 impl<'s> ToV8<'s> for rome_js_syntax::TsOverrideModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         let node = self.into_syntax();
@@ -25549,6 +26372,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsPropertyParameter {
         >(scope, node)
         .map(Into::into)
     }
+}
+#[allow(non_snake_case)]
+fn TsPropertyParameter_decorators<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsPropertyParameter::cast_ref(&*this).unwrap();
+    let result = this.decorators();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
 }
 #[allow(non_snake_case)]
 fn TsPropertyParameter_modifiers<'s>(
@@ -26154,6 +26992,176 @@ fn TsReturnTypeAnnotation_ty<'s>(
         std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
             .unwrap();
     let this = rome_js_syntax::TsReturnTypeAnnotation::cast_ref(&*this).unwrap();
+    let result = this.ty();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::TsSatisfiesAssignment {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsSatisfiesAssignment,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesAssignment_assignment<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesAssignment::cast_ref(&*this).unwrap();
+    let result = this.assignment();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesAssignment_satisfies_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesAssignment::cast_ref(&*this).unwrap();
+    let result = this.satisfies_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesAssignment_ty<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesAssignment::cast_ref(&*this).unwrap();
+    let result = this.ty();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::TsSatisfiesExpression {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_js_syntax::TsSatisfiesExpression,
+            rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesExpression_expression<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesExpression::cast_ref(&*this).unwrap();
+    let result = this.expression();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesExpression_satisfies_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesExpression::cast_ref(&*this).unwrap();
+    let result = this.satisfies_token();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+#[allow(non_snake_case)]
+fn TsSatisfiesExpression_ty<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsSatisfiesExpression::cast_ref(&*this).unwrap();
     let result = this.ty();
     match result {
         Ok(result) => {
@@ -27589,6 +28597,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsTypeParameter {
     }
 }
 #[allow(non_snake_case)]
+fn TsTypeParameter_modifiers<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this =
+        std::cell::Ref::<rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>>::from_v8(scope, this)
+            .unwrap();
+    let this = rome_js_syntax::TsTypeParameter::cast_ref(&*this).unwrap();
+    let result = this.modifiers();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
 fn TsTypeParameter_name<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
@@ -27989,92 +29012,93 @@ fn TsVoidType_void_token<'s>(
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyArrayAssignmentPatternElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsArrayAssignmentPatternElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyAssignmentPattern(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsAssignmentPattern(node) => ToV8::to_v8(node, scope),
             Self::JsArrayAssignmentPatternRestElement(node) => ToV8::to_v8(node, scope),
             Self::JsArrayHole(node) => ToV8::to_v8(node, scope),
             Self::JsAssignmentWithDefault(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyArrayBindingPatternElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsArrayBindingPatternElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyBindingPattern(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsBindingPattern(node) => ToV8::to_v8(node, scope),
             Self::JsArrayBindingPatternRestElement(node) => ToV8::to_v8(node, scope),
             Self::JsArrayHole(node) => ToV8::to_v8(node, scope),
             Self::JsBindingPatternWithDefault(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyArrayElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsArrayElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsExpression(node) => ToV8::to_v8(node, scope),
             Self::JsArrayHole(node) => ToV8::to_v8(node, scope),
             Self::JsSpread(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyArrowFunctionParameters {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsArrowFunctionParameters {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyBinding(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsBinding(node) => ToV8::to_v8(node, scope),
             Self::JsParameters(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyAssignment {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsAssignment {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsComputedMemberAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsIdentifierAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsParenthesizedAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsStaticMemberAssignment(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownAssignment(node) => ToV8::to_v8(node, scope),
             Self::TsAsAssignment(node) => ToV8::to_v8(node, scope),
             Self::TsNonNullAssertionAssignment(node) => ToV8::to_v8(node, scope),
+            Self::TsSatisfiesAssignment(node) => ToV8::to_v8(node, scope),
             Self::TsTypeAssertionAssignment(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyAssignmentPattern {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsAssignmentPattern {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyAssignment(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsArrayAssignmentPattern(node) => ToV8::to_v8(node, scope),
             Self::JsObjectAssignmentPattern(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyBinding {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsBinding {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusBinding(node) => ToV8::to_v8(node, scope),
             Self::JsIdentifierBinding(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownBinding(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyBindingPattern {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsBindingPattern {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyBinding(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsBinding(node) => ToV8::to_v8(node, scope),
             Self::JsArrayBindingPattern(node) => ToV8::to_v8(node, scope),
             Self::JsObjectBindingPattern(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyCallArgument {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsCallArgument {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsExpression(node) => ToV8::to_v8(node, scope),
             Self::JsSpread(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClass {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsClass {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsClassDeclaration(node) => ToV8::to_v8(node, scope),
@@ -28083,9 +29107,10 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClass {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClassMember {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsClassMember {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusMember(node) => ToV8::to_v8(node, scope),
             Self::JsConstructorClassMember(node) => ToV8::to_v8(node, scope),
             Self::JsEmptyClassMember(node) => ToV8::to_v8(node, scope),
             Self::JsGetterClassMember(node) => ToV8::to_v8(node, scope),
@@ -28093,17 +29118,17 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClassMember {
             Self::JsPropertyClassMember(node) => ToV8::to_v8(node, scope),
             Self::JsSetterClassMember(node) => ToV8::to_v8(node, scope),
             Self::JsStaticInitializationBlockClassMember(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownMember(node) => ToV8::to_v8(node, scope),
             Self::TsConstructorSignatureClassMember(node) => ToV8::to_v8(node, scope),
             Self::TsGetterSignatureClassMember(node) => ToV8::to_v8(node, scope),
             Self::TsIndexSignatureClassMember(node) => ToV8::to_v8(node, scope),
+            Self::TsInitializedPropertySignatureClassMember(node) => ToV8::to_v8(node, scope),
             Self::TsMethodSignatureClassMember(node) => ToV8::to_v8(node, scope),
             Self::TsPropertySignatureClassMember(node) => ToV8::to_v8(node, scope),
             Self::TsSetterSignatureClassMember(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClassMemberName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsClassMemberName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsComputedMemberName(node) => ToV8::to_v8(node, scope),
@@ -28112,16 +29137,16 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyClassMemberName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyConstructorParameter {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsConstructorParameter {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyFormalParameter(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsFormalParameter(node) => ToV8::to_v8(node, scope),
             Self::JsRestParameter(node) => ToV8::to_v8(node, scope),
             Self::TsPropertyParameter(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyDeclaration {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsDeclaration {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsClassDeclaration(node) => ToV8::to_v8(node, scope),
@@ -28138,7 +29163,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyDeclaration {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyDeclarationClause {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsDeclarationClause {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsClassDeclaration(node) => ToV8::to_v8(node, scope),
@@ -28155,10 +29180,21 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyDeclarationClause {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExportClause {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsDecorator {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyDeclarationClause(node) => ToV8::to_v8(node, scope),
+            Self::JsBogusExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsCallExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsIdentifierExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsParenthesizedExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsStaticMemberExpression(node) => ToV8::to_v8(node, scope),
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsExportClause {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        match self {
+            Self::AnyJsDeclarationClause(node) => ToV8::to_v8(node, scope),
             Self::JsExportDefaultDeclarationClause(node) => ToV8::to_v8(node, scope),
             Self::JsExportDefaultExpressionClause(node) => ToV8::to_v8(node, scope),
             Self::JsExportFromClause(node) => ToV8::to_v8(node, scope),
@@ -28170,17 +29206,17 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExportClause {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExportDefaultDeclaration {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsExportDefaultDeclaration {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsClassExportDefaultDeclaration(node) => ToV8::to_v8(node, scope),
             Self::JsFunctionExportDefaultDeclaration(node) => ToV8::to_v8(node, scope),
-            Self::TsDeclareFunctionDeclaration(node) => ToV8::to_v8(node, scope),
+            Self::TsDeclareFunctionExportDefaultDeclaration(node) => ToV8::to_v8(node, scope),
             Self::TsInterfaceDeclaration(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExportNamedSpecifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsExportNamedSpecifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsExportNamedShorthandSpecifier(node) => ToV8::to_v8(node, scope),
@@ -28188,16 +29224,16 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExportNamedSpecifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExpression {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsExpression {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::ImportMeta(node) => ToV8::to_v8(node, scope),
-            Self::JsAnyLiteralExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsLiteralExpression(node) => ToV8::to_v8(node, scope),
             Self::JsArrayExpression(node) => ToV8::to_v8(node, scope),
             Self::JsArrowFunctionExpression(node) => ToV8::to_v8(node, scope),
             Self::JsAssignmentExpression(node) => ToV8::to_v8(node, scope),
             Self::JsAwaitExpression(node) => ToV8::to_v8(node, scope),
             Self::JsBinaryExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsBogusExpression(node) => ToV8::to_v8(node, scope),
             Self::JsCallExpression(node) => ToV8::to_v8(node, scope),
             Self::JsClassExpression(node) => ToV8::to_v8(node, scope),
             Self::JsComputedMemberExpression(node) => ToV8::to_v8(node, scope),
@@ -28205,10 +29241,12 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExpression {
             Self::JsFunctionExpression(node) => ToV8::to_v8(node, scope),
             Self::JsIdentifierExpression(node) => ToV8::to_v8(node, scope),
             Self::JsImportCallExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsImportMetaExpression(node) => ToV8::to_v8(node, scope),
             Self::JsInExpression(node) => ToV8::to_v8(node, scope),
             Self::JsInstanceofExpression(node) => ToV8::to_v8(node, scope),
             Self::JsLogicalExpression(node) => ToV8::to_v8(node, scope),
             Self::JsNewExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsNewTargetExpression(node) => ToV8::to_v8(node, scope),
             Self::JsObjectExpression(node) => ToV8::to_v8(node, scope),
             Self::JsParenthesizedExpression(node) => ToV8::to_v8(node, scope),
             Self::JsPostUpdateExpression(node) => ToV8::to_v8(node, scope),
@@ -28216,45 +29254,44 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyExpression {
             Self::JsSequenceExpression(node) => ToV8::to_v8(node, scope),
             Self::JsStaticMemberExpression(node) => ToV8::to_v8(node, scope),
             Self::JsSuperExpression(node) => ToV8::to_v8(node, scope),
-            Self::JsTemplate(node) => ToV8::to_v8(node, scope),
+            Self::JsTemplateExpression(node) => ToV8::to_v8(node, scope),
             Self::JsThisExpression(node) => ToV8::to_v8(node, scope),
             Self::JsUnaryExpression(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownExpression(node) => ToV8::to_v8(node, scope),
             Self::JsYieldExpression(node) => ToV8::to_v8(node, scope),
             Self::JsxTagExpression(node) => ToV8::to_v8(node, scope),
-            Self::NewTarget(node) => ToV8::to_v8(node, scope),
             Self::TsAsExpression(node) => ToV8::to_v8(node, scope),
             Self::TsInstantiationExpression(node) => ToV8::to_v8(node, scope),
             Self::TsNonNullAssertionExpression(node) => ToV8::to_v8(node, scope),
+            Self::TsSatisfiesExpression(node) => ToV8::to_v8(node, scope),
             Self::TsTypeAssertionExpression(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyForInOrOfInitializer {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsForInOrOfInitializer {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyAssignmentPattern(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsAssignmentPattern(node) => ToV8::to_v8(node, scope),
             Self::JsForVariableDeclaration(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyForInitializer {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsForInitializer {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsExpression(node) => ToV8::to_v8(node, scope),
             Self::JsVariableDeclaration(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyFormalParameter {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsFormalParameter {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusParameter(node) => ToV8::to_v8(node, scope),
             Self::JsFormalParameter(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownParameter(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyFunction {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsFunction {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsArrowFunctionExpression(node) => ToV8::to_v8(node, scope),
@@ -28264,23 +29301,23 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyFunction {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyFunctionBody {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsFunctionBody {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsExpression(node) => ToV8::to_v8(node, scope),
             Self::JsFunctionBody(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyImportAssertionEntry {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsImportAssertionEntry {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusImportAssertionEntry(node) => ToV8::to_v8(node, scope),
             Self::JsImportAssertionEntry(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownImportAssertionEntry(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyImportClause {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsImportClause {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsImportBareClause(node) => ToV8::to_v8(node, scope),
@@ -28290,18 +29327,18 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyImportClause {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyInProperty {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsInProperty {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyExpression(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsExpression(node) => ToV8::to_v8(node, scope),
             Self::JsPrivateName(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyLiteralExpression {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsLiteralExpression {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsBigIntLiteralExpression(node) => ToV8::to_v8(node, scope),
+            Self::JsBigintLiteralExpression(node) => ToV8::to_v8(node, scope),
             Self::JsBooleanLiteralExpression(node) => ToV8::to_v8(node, scope),
             Self::JsNullLiteralExpression(node) => ToV8::to_v8(node, scope),
             Self::JsNumberLiteralExpression(node) => ToV8::to_v8(node, scope),
@@ -28310,25 +29347,26 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyLiteralExpression {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyMethodModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsMethodModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsDecorator(node) => ToV8::to_v8(node, scope),
             Self::JsStaticModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAccessibilityModifier(node) => ToV8::to_v8(node, scope),
             Self::TsOverrideModifier(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyModuleItem {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsModuleItem {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyStatement(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsStatement(node) => ToV8::to_v8(node, scope),
             Self::JsExport(node) => ToV8::to_v8(node, scope),
             Self::JsImport(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsName(node) => ToV8::to_v8(node, scope),
@@ -28336,7 +29374,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyNamedImport {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsNamedImport {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsNamedImportSpecifiers(node) => ToV8::to_v8(node, scope),
@@ -28344,49 +29382,49 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyNamedImport {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyNamedImportSpecifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsNamedImportSpecifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusNamedImportSpecifier(node) => ToV8::to_v8(node, scope),
             Self::JsNamedImportSpecifier(node) => ToV8::to_v8(node, scope),
             Self::JsShorthandNamedImportSpecifier(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownNamedImportSpecifier(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyObjectAssignmentPatternMember {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsObjectAssignmentPatternMember {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusAssignment(node) => ToV8::to_v8(node, scope),
             Self::JsObjectAssignmentPatternProperty(node) => ToV8::to_v8(node, scope),
             Self::JsObjectAssignmentPatternRest(node) => ToV8::to_v8(node, scope),
             Self::JsObjectAssignmentPatternShorthandProperty(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownAssignment(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyObjectBindingPatternMember {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsObjectBindingPatternMember {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusBinding(node) => ToV8::to_v8(node, scope),
             Self::JsObjectBindingPatternProperty(node) => ToV8::to_v8(node, scope),
             Self::JsObjectBindingPatternRest(node) => ToV8::to_v8(node, scope),
             Self::JsObjectBindingPatternShorthandProperty(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownBinding(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyObjectMember {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsObjectMember {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsBogusMember(node) => ToV8::to_v8(node, scope),
             Self::JsGetterObjectMember(node) => ToV8::to_v8(node, scope),
             Self::JsMethodObjectMember(node) => ToV8::to_v8(node, scope),
             Self::JsPropertyObjectMember(node) => ToV8::to_v8(node, scope),
             Self::JsSetterObjectMember(node) => ToV8::to_v8(node, scope),
             Self::JsShorthandPropertyObjectMember(node) => ToV8::to_v8(node, scope),
             Self::JsSpread(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownMember(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyObjectMemberName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsObjectMemberName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsComputedMemberName(node) => ToV8::to_v8(node, scope),
@@ -28394,18 +29432,20 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyObjectMemberName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyParameter {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsParameter {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsAnyFormalParameter(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsFormalParameter(node) => ToV8::to_v8(node, scope),
             Self::JsRestParameter(node) => ToV8::to_v8(node, scope),
             Self::TsThisParameter(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyPropertyModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsPropertyModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsAccessorModifier(node) => ToV8::to_v8(node, scope),
+            Self::JsDecorator(node) => ToV8::to_v8(node, scope),
             Self::JsStaticModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAccessibilityModifier(node) => ToV8::to_v8(node, scope),
             Self::TsOverrideModifier(node) => ToV8::to_v8(node, scope),
@@ -28413,7 +29453,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyPropertyModifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyRoot {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsRoot {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsExpressionSnipped(node) => ToV8::to_v8(node, scope),
@@ -28422,10 +29462,11 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyRoot {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyStatement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsStatement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsBlockStatement(node) => ToV8::to_v8(node, scope),
+            Self::JsBogusStatement(node) => ToV8::to_v8(node, scope),
             Self::JsBreakStatement(node) => ToV8::to_v8(node, scope),
             Self::JsClassDeclaration(node) => ToV8::to_v8(node, scope),
             Self::JsContinueStatement(node) => ToV8::to_v8(node, scope),
@@ -28444,7 +29485,6 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyStatement {
             Self::JsThrowStatement(node) => ToV8::to_v8(node, scope),
             Self::JsTryFinallyStatement(node) => ToV8::to_v8(node, scope),
             Self::JsTryStatement(node) => ToV8::to_v8(node, scope),
-            Self::JsUnknownStatement(node) => ToV8::to_v8(node, scope),
             Self::JsVariableStatement(node) => ToV8::to_v8(node, scope),
             Self::JsWhileStatement(node) => ToV8::to_v8(node, scope),
             Self::JsWithStatement(node) => ToV8::to_v8(node, scope),
@@ -28460,7 +29500,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyStatement {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnySwitchClause {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsSwitchClause {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsCaseClause(node) => ToV8::to_v8(node, scope),
@@ -28468,7 +29508,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnySwitchClause {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsAnyTemplateElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsTemplateElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsTemplateChunkElement(node) => ToV8::to_v8(node, scope),
@@ -28476,7 +29516,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsAnyTemplateElement {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyAttribute {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxAttribute {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxAttribute(node) => ToV8::to_v8(node, scope),
@@ -28484,7 +29524,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyAttribute {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyAttributeName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxAttributeName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxName(node) => ToV8::to_v8(node, scope),
@@ -28492,16 +29532,16 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyAttributeName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyAttributeValue {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxAttributeValue {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::JsxAnyTag(node) => ToV8::to_v8(node, scope),
+            Self::AnyJsxTag(node) => ToV8::to_v8(node, scope),
             Self::JsxExpressionAttributeValue(node) => ToV8::to_v8(node, scope),
             Self::JsxString(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyChild {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxChild {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxElement(node) => ToV8::to_v8(node, scope),
@@ -28513,7 +29553,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyChild {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyElementName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxElementName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxMemberName(node) => ToV8::to_v8(node, scope),
@@ -28523,7 +29563,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyElementName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxName(node) => ToV8::to_v8(node, scope),
@@ -28531,7 +29571,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyObjectName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxObjectName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxMemberName(node) => ToV8::to_v8(node, scope),
@@ -28540,7 +29580,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyObjectName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyTag {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyJsxTag {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsxElement(node) => ToV8::to_v8(node, scope),
@@ -28549,7 +29589,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::JsxAnyTag {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyExternalModuleDeclarationBody {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsExternalModuleDeclarationBody {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsEmptyExternalModuleDeclarationBody(node) => ToV8::to_v8(node, scope),
@@ -28557,7 +29597,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyExternalModuleDeclarationBody {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyIndexSignatureModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsIndexSignatureModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsStaticModifier(node) => ToV8::to_v8(node, scope),
@@ -28565,9 +29605,10 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyIndexSignatureModifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyMethodSignatureModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsMethodSignatureModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsDecorator(node) => ToV8::to_v8(node, scope),
             Self::JsStaticModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAbstractModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAccessibilityModifier(node) => ToV8::to_v8(node, scope),
@@ -28575,7 +29616,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyMethodSignatureModifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyModuleName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsModuleName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsIdentifierBinding(node) => ToV8::to_v8(node, scope),
@@ -28583,15 +29624,15 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyModuleName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyModuleReference {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsModuleReference {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::TsAnyName(node) => ToV8::to_v8(node, scope),
+            Self::AnyTsName(node) => ToV8::to_v8(node, scope),
             Self::TsExternalModuleReference(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyName {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsName {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::JsReferenceIdentifier(node) => ToV8::to_v8(node, scope),
@@ -28599,7 +29640,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyName {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertyAnnotation {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsPropertyAnnotation {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsDefinitePropertyAnnotation(node) => ToV8::to_v8(node, scope),
@@ -28608,7 +29649,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertyAnnotation {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertyParameterModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsPropertyParameterModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsAccessibilityModifier(node) => ToV8::to_v8(node, scope),
@@ -28617,7 +29658,7 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertyParameterModifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertySignatureAnnotation {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsPropertySignatureAnnotation {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsOptionalPropertyAnnotation(node) => ToV8::to_v8(node, scope),
@@ -28625,9 +29666,11 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertySignatureAnnotation {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertySignatureModifier {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsPropertySignatureModifier {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::JsAccessorModifier(node) => ToV8::to_v8(node, scope),
+            Self::JsDecorator(node) => ToV8::to_v8(node, scope),
             Self::JsStaticModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAbstractModifier(node) => ToV8::to_v8(node, scope),
             Self::TsAccessibilityModifier(node) => ToV8::to_v8(node, scope),
@@ -28637,16 +29680,16 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyPropertySignatureModifier {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyReturnType {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsReturnType {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::AnyTsType(node) => ToV8::to_v8(node, scope),
             Self::TsAssertsReturnType(node) => ToV8::to_v8(node, scope),
             Self::TsPredicateReturnType(node) => ToV8::to_v8(node, scope),
-            Self::TsType(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyTemplateElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsTemplateElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsTemplateChunkElement(node) => ToV8::to_v8(node, scope),
@@ -28654,53 +29697,24 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsAnyTemplateElement {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyTupleTypeElement {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsTupleTypeElement {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
+            Self::AnyTsType(node) => ToV8::to_v8(node, scope),
             Self::TsNamedTupleTypeElement(node) => ToV8::to_v8(node, scope),
             Self::TsOptionalTupleTypeElement(node) => ToV8::to_v8(node, scope),
             Self::TsRestTupleTypeElement(node) => ToV8::to_v8(node, scope),
-            Self::TsType(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyTypeMember {
-    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
-        match self {
-            Self::JsUnknownMember(node) => ToV8::to_v8(node, scope),
-            Self::TsCallSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsConstructSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsGetterSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsIndexSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsMethodSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsPropertySignatureTypeMember(node) => ToV8::to_v8(node, scope),
-            Self::TsSetterSignatureTypeMember(node) => ToV8::to_v8(node, scope),
-        }
-    }
-}
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyTypePredicateParameterName {
-    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
-        match self {
-            Self::JsReferenceIdentifier(node) => ToV8::to_v8(node, scope),
-            Self::TsThisType(node) => ToV8::to_v8(node, scope),
-        }
-    }
-}
-impl<'s> ToV8<'s> for rome_js_syntax::TsAnyVariableAnnotation {
-    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
-        match self {
-            Self::TsDefiniteVariableAnnotation(node) => ToV8::to_v8(node, scope),
-            Self::TsTypeAnnotation(node) => ToV8::to_v8(node, scope),
-        }
-    }
-}
-impl<'s> ToV8<'s> for rome_js_syntax::TsType {
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsType {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::TsAnyType(node) => ToV8::to_v8(node, scope),
             Self::TsArrayType(node) => ToV8::to_v8(node, scope),
-            Self::TsBigIntLiteralType(node) => ToV8::to_v8(node, scope),
+            Self::TsBigintLiteralType(node) => ToV8::to_v8(node, scope),
             Self::TsBigintType(node) => ToV8::to_v8(node, scope),
+            Self::TsBogusType(node) => ToV8::to_v8(node, scope),
             Self::TsBooleanLiteralType(node) => ToV8::to_v8(node, scope),
             Self::TsBooleanType(node) => ToV8::to_v8(node, scope),
             Self::TsConditionalType(node) => ToV8::to_v8(node, scope),
@@ -28734,15 +29748,55 @@ impl<'s> ToV8<'s> for rome_js_syntax::TsType {
         }
     }
 }
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknown);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownAssignment);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownBinding);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownExpression);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownImportAssertionEntry);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownMember);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownNamedImportSpecifier);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownParameter);
-crate::convert::impl_convert_native!(rome_js_syntax::JsUnknownStatement);
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsTypeMember {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        match self {
+            Self::JsBogusMember(node) => ToV8::to_v8(node, scope),
+            Self::TsCallSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsConstructSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsGetterSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsIndexSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsMethodSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsPropertySignatureTypeMember(node) => ToV8::to_v8(node, scope),
+            Self::TsSetterSignatureTypeMember(node) => ToV8::to_v8(node, scope),
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsTypeParameterModifier {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        match self {
+            Self::TsConstModifier(node) => ToV8::to_v8(node, scope),
+            Self::TsInModifier(node) => ToV8::to_v8(node, scope),
+            Self::TsOutModifier(node) => ToV8::to_v8(node, scope),
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsTypePredicateParameterName {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        match self {
+            Self::JsReferenceIdentifier(node) => ToV8::to_v8(node, scope),
+            Self::TsThisType(node) => ToV8::to_v8(node, scope),
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_js_syntax::AnyTsVariableAnnotation {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        match self {
+            Self::TsDefiniteVariableAnnotation(node) => ToV8::to_v8(node, scope),
+            Self::TsTypeAnnotation(node) => ToV8::to_v8(node, scope),
+        }
+    }
+}
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogus);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusAssignment);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusBinding);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusExpression);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusImportAssertionEntry);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusMember);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusNamedImportSpecifier);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusParameter);
+crate::convert::impl_convert_native!(rome_js_syntax::JsBogusStatement);
+crate::convert::impl_convert_native!(rome_js_syntax::TsBogusType);
 crate::convert::impl_convert_native!(rome_js_syntax::JsArrayAssignmentPatternElementList);
 #[allow(non_snake_case)]
 fn JsArrayAssignmentPatternElementList_iter<'s>(
@@ -28836,6 +29890,19 @@ fn JsConstructorParameterList_iter<'s>(
     let this = args.this().into();
     let this =
         std::cell::Ref::<rome_js_syntax::JsConstructorParameterList>::from_v8(scope, this).unwrap();
+    let iter = this.iter();
+    let iter = ToV8::to_v8(iter, scope).unwrap();
+    res.set(iter);
+}
+crate::convert::impl_convert_native!(rome_js_syntax::JsDecoratorList);
+#[allow(non_snake_case)]
+fn JsDecoratorList_iter<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this = std::cell::Ref::<rome_js_syntax::JsDecoratorList>::from_v8(scope, this).unwrap();
     let iter = this.iter();
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
@@ -29255,6 +30322,20 @@ fn TsTypeParameterList_iter<'s>(
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
 }
+crate::convert::impl_convert_native!(rome_js_syntax::TsTypeParameterModifierList);
+#[allow(non_snake_case)]
+fn TsTypeParameterModifierList_iter<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this = std::cell::Ref::<rome_js_syntax::TsTypeParameterModifierList>::from_v8(scope, this)
+        .unwrap();
+    let iter = this.iter();
+    let iter = ToV8::to_v8(iter, scope).unwrap();
+    res.set(iter);
+}
 crate::convert::impl_convert_native!(rome_js_syntax::TsUnionTypeVariantList);
 #[allow(non_snake_case)]
 fn TsUnionTypeVariantList_iter<'s>(
@@ -29269,39 +30350,41 @@ fn TsUnionTypeVariantList_iter<'s>(
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
 }
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyArrayAssignmentPatternElement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyArrayBindingPatternElement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyArrayElement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyCallArgument >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyClassMember >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyConstructorParameter >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyExportNamedSpecifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyImportAssertionEntry >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyMethodModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyModuleItem >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyNamedImportSpecifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyObjectAssignmentPatternMember >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyObjectBindingPatternMember >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyObjectMember >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyParameter >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyPropertyModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyStatement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnySwitchClause >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsAnyTemplateElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsArrayAssignmentPatternElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsArrayBindingPatternElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsArrayElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsCallArgument >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsClassMember >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsConstructorParameter >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsExportNamedSpecifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsImportAssertionEntry >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsMethodModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsModuleItem >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsNamedImportSpecifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsObjectAssignmentPatternMember >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsObjectBindingPatternMember >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsObjectMember >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsParameter >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsPropertyModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsStatement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsSwitchClause >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsTemplateElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsxAttribute >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyJsxChild >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsIndexSignatureModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsMethodSignatureModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsPropertyParameterModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsPropertySignatureModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsTemplateElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsTupleTypeElement >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsType >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsTypeMember >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: AnyTsTypeParameterModifier >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsDecorator >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsDirective >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsExportNamedFromSpecifier >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsVariableDeclarator >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsxAnyAttribute >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: JsxAnyChild >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAccessibilityModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyIndexSignatureModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyMethodSignatureModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyPropertyParameterModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyPropertySignatureModifier >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyTemplateElement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyTupleTypeElement >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsAnyTypeMember >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsEnumMember >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsNameWithTypeArguments >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsType >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_js_syntax :: JsLanguage , rome_js_syntax :: TsTypeParameter >);

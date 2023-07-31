@@ -48,6 +48,8 @@ pub(super) fn register_interfaces(
         .variant("AT", rome_css_syntax::CssSyntaxKind::AT)
         .variant("DOLLAR_EQ", rome_css_syntax::CssSyntaxKind::DOLLAR_EQ)
         .variant("TILDE_EQ", rome_css_syntax::CssSyntaxKind::TILDE_EQ)
+        .variant("CDC", rome_css_syntax::CssSyntaxKind::CDC)
+        .variant("CDO", rome_css_syntax::CssSyntaxKind::CDO)
         .variant("ALICEBLUE_KW", rome_css_syntax::CssSyntaxKind::ALICEBLUE_KW)
         .variant(
             "ANTIQUEWHITE_KW",
@@ -386,7 +388,15 @@ pub(super) fn register_interfaces(
         .variant("NEWLINE", rome_css_syntax::CssSyntaxKind::NEWLINE)
         .variant("WHITESPACE", rome_css_syntax::CssSyntaxKind::WHITESPACE)
         .variant("COMMENT", rome_css_syntax::CssSyntaxKind::COMMENT)
+        .variant(
+            "MULTILINE_COMMENT",
+            rome_css_syntax::CssSyntaxKind::MULTILINE_COMMENT,
+        )
         .variant("CSS_ROOT", rome_css_syntax::CssSyntaxKind::CSS_ROOT)
+        .variant(
+            "CSS_RULE_LIST",
+            rome_css_syntax::CssSyntaxKind::CSS_RULE_LIST,
+        )
         .variant(
             "CSS_ID_SELECTOR_PATTERN",
             rome_css_syntax::CssSyntaxKind::CSS_ID_SELECTOR_PATTERN,
@@ -566,7 +576,7 @@ pub(super) fn register_interfaces(
             "CSS_DECLARATION_IMPORTANT",
             rome_css_syntax::CssSyntaxKind::CSS_DECLARATION_IMPORTANT,
         )
-        .variant("CSS_UNKNOWN", rome_css_syntax::CssSyntaxKind::CSS_UNKNOWN)
+        .variant("CSS_BOGUS", rome_css_syntax::CssSyntaxKind::CSS_BOGUS)
         .finish(scope);
     registry
         .build_class::<rome_css_syntax::CssAnyFunction>(scope, global, "CssAnyFunction")
@@ -907,7 +917,7 @@ pub(super) fn register_interfaces(
     registry
         .build_class::<rome_css_syntax::CssParameter>(scope, global, "CssParameter")
         .extends::<rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>>(scope)
-        .method(scope, "css_any_value", CssParameter_css_any_value)
+        .method(scope, "any_css_value", CssParameter_any_css_value)
         .finish(scope);
     registry
         .build_class::<rome_css_syntax::CssPercentage>(scope, global, "CssPercentage")
@@ -962,6 +972,12 @@ pub(super) fn register_interfaces(
         .extends::<rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>>(scope)
         .method(scope, "numerator", CssRatio_numerator)
         .method(scope, "denominator", CssRatio_denominator)
+        .finish(scope);
+    registry
+        .build_class::<rome_css_syntax::CssRoot>(scope, global, "CssRoot")
+        .extends::<rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>>(scope)
+        .method(scope, "rules", CssRoot_rules)
+        .method(scope, "eof_token", CssRoot_eof_token)
         .finish(scope);
     registry
         .build_class::<rome_css_syntax::CssRule>(scope, global, "CssRule")
@@ -1021,7 +1037,7 @@ pub(super) fn register_interfaces(
         .method(scope, "value", CssVarFunctionValue_value)
         .finish(scope);
     registry
-        .build_class::<rome_css_syntax::CssUnknown>(scope, global, "CssUnknown")
+        .build_class::<rome_css_syntax::CssBogus>(scope, global, "CssBogus")
         .finish(scope);
     registry
         .build_class::<rome_css_syntax::CssAnySelectorPatternList>(
@@ -1064,18 +1080,18 @@ pub(super) fn register_interfaces(
         .method(scope, "iter", CssParameterList_iter)
         .finish(scope);
     registry
-        .build_class::<rome_css_syntax::CssRoot>(scope, global, "CssRoot")
-        .method(scope, "iter", CssRoot_iter)
+        .build_class::<rome_css_syntax::CssRuleList>(scope, global, "CssRuleList")
+        .method(scope, "iter", CssRuleList_iter)
         .finish(scope);
     registry
         .build_class::<rome_css_syntax::CssSelectorList>(scope, global, "CssSelectorList")
         .method(scope, "iter", CssSelectorList_iter)
         .finish(scope);
-    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssAnyRule > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
+    registry . build_interface :: < rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: AnyCssRule > > (scope) . iterable (scope , ToV8 :: to_v8) . finish (scope) ;
     registry
         .build_interface::<rome_rowan::AstNodeListIterator<
             rome_css_syntax::CssLanguage,
-            rome_css_syntax::CssAnySelectorPattern,
+            rome_css_syntax::AnyCssSelectorPattern,
         >>(scope)
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
@@ -3725,7 +3741,7 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssParameter {
     }
 }
 #[allow(non_snake_case)]
-fn CssParameter_css_any_value<'s>(
+fn CssParameter_any_css_value<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
@@ -3736,7 +3752,7 @@ fn CssParameter_css_any_value<'s>(
     )
     .unwrap();
     let this = rome_css_syntax::CssParameter::cast_ref(&*this).unwrap();
-    let result = this.css_any_value();
+    let result = this.any_css_value();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -4031,6 +4047,58 @@ fn CssRatio_denominator<'s>(
     .unwrap();
     let this = rome_css_syntax::CssRatio::cast_ref(&*this).unwrap();
     let result = this.denominator();
+    match result {
+        Ok(result) => {
+            let result = ToV8::to_v8(result, scope).unwrap();
+            res.set(result);
+        }
+        Err(err) => {
+            let message = err.to_string();
+            let message = v8::String::new(scope, &message).unwrap();
+            let exception = v8::Exception::error(scope, message);
+            scope.throw_exception(exception);
+        }
+    }
+}
+impl<'s> ToV8<'s> for rome_css_syntax::CssRoot {
+    fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
+        let node = self.into_syntax();
+        crate::registry::instantiate_as::<
+            rome_css_syntax::CssRoot,
+            rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>,
+        >(scope, node)
+        .map(Into::into)
+    }
+}
+#[allow(non_snake_case)]
+fn CssRoot_rules<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this = std::cell::Ref::<rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>>::from_v8(
+        scope, this,
+    )
+    .unwrap();
+    let this = rome_css_syntax::CssRoot::cast_ref(&*this).unwrap();
+    let result = this.rules();
+    let result = ToV8::to_v8(result, scope).unwrap();
+    res.set(result);
+}
+#[allow(non_snake_case)]
+fn CssRoot_eof_token<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    args: v8::FunctionCallbackArguments<'s>,
+    mut res: v8::ReturnValue,
+) {
+    let this = args.this().into();
+    let this = std::cell::Ref::<rome_rowan::SyntaxNode<rome_css_syntax::CssLanguage>>::from_v8(
+        scope, this,
+    )
+    .unwrap();
+    let this = rome_css_syntax::CssRoot::cast_ref(&*this).unwrap();
+    let result = this.eof_token();
     match result {
         Ok(result) => {
             let result = ToV8::to_v8(result, scope).unwrap();
@@ -4530,7 +4598,7 @@ fn CssVarFunctionValue_value<'s>(
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtMediaQueryFeatureType {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssAtMediaQueryFeatureType {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::CssAtMediaQueryFeatureBoolean(node) => ToV8::to_v8(node, scope),
@@ -4540,7 +4608,7 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtMediaQueryFeatureType {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtMediaQueryType {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssAtMediaQueryType {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::CssAtMediaQueryFeature(node) => ToV8::to_v8(node, scope),
@@ -4548,7 +4616,7 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtMediaQueryType {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtRule {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssAtRule {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::CssAtKeyframes(node) => ToV8::to_v8(node, scope),
@@ -4556,15 +4624,15 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssAnyAtRule {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnyRule {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssRule {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
-            Self::CssAnyAtRule(node) => ToV8::to_v8(node, scope),
+            Self::AnyCssAtRule(node) => ToV8::to_v8(node, scope),
             Self::CssRule(node) => ToV8::to_v8(node, scope),
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnySelectorPattern {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssSelectorPattern {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::CssAttributeSelectorPattern(node) => ToV8::to_v8(node, scope),
@@ -4577,7 +4645,7 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssAnySelectorPattern {
         }
     }
 }
-impl<'s> ToV8<'s> for rome_css_syntax::CssAnyValue {
+impl<'s> ToV8<'s> for rome_css_syntax::AnyCssValue {
     fn to_v8(self, scope: &mut v8::HandleScope<'s>) -> anyhow::Result<v8::Local<'s, v8::Value>> {
         match self {
             Self::CssAnyFunction(node) => ToV8::to_v8(node, scope),
@@ -4590,7 +4658,7 @@ impl<'s> ToV8<'s> for rome_css_syntax::CssAnyValue {
         }
     }
 }
-crate::convert::impl_convert_native!(rome_css_syntax::CssUnknown);
+crate::convert::impl_convert_native!(rome_css_syntax::CssBogus);
 crate::convert::impl_convert_native!(rome_css_syntax::CssAnySelectorPatternList);
 #[allow(non_snake_case)]
 fn CssAnySelectorPatternList_iter<'s>(
@@ -4686,15 +4754,15 @@ fn CssParameterList_iter<'s>(
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
 }
-crate::convert::impl_convert_native!(rome_css_syntax::CssRoot);
+crate::convert::impl_convert_native!(rome_css_syntax::CssRuleList);
 #[allow(non_snake_case)]
-fn CssRoot_iter<'s>(
+fn CssRuleList_iter<'s>(
     scope: &mut v8::HandleScope<'s>,
     args: v8::FunctionCallbackArguments<'s>,
     mut res: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = std::cell::Ref::<rome_css_syntax::CssRoot>::from_v8(scope, this).unwrap();
+    let this = std::cell::Ref::<rome_css_syntax::CssRuleList>::from_v8(scope, this).unwrap();
     let iter = this.iter();
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
@@ -4712,8 +4780,8 @@ fn CssSelectorList_iter<'s>(
     let iter = ToV8::to_v8(iter, scope).unwrap();
     res.set(iter);
 }
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssAnyRule >);
-crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssAnySelectorPattern >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: AnyCssRule >);
+crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: AnyCssSelectorPattern >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstSeparatedListNodesIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssAtMediaQuery >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssAttribute >);
 crate :: convert :: impl_convert_native ! (rome_rowan :: AstNodeListIterator < rome_css_syntax :: CssLanguage , rome_css_syntax :: CssDeclaration >);

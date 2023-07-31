@@ -13,7 +13,7 @@ pub fn generate_v8(
     let mut stmts = Vec::new();
     let mut ops = Vec::new();
 
-    let syntax_crate = language_kind.syntax_crate();
+    let syntax_crate = language_kind.syntax_crate_ident();
     let syntax_kind = language_kind.syntax_kind();
     let language = language_kind.language();
 
@@ -183,19 +183,19 @@ pub fn generate_v8(
         });
     }
 
-    for unknown in &ast.unknowns {
-        let unknown_name = format_ident!("{}", unknown);
-        let unknown_type = quote! {
-            #syntax_crate::#unknown_name
+    for bogus in &ast.bogus {
+        let bogus_name = format_ident!("{}", bogus);
+        let bogus_type = quote! {
+            #syntax_crate::#bogus_name
         };
 
         ops.push(quote! {
-            crate::convert::impl_convert_native!(#unknown_type);
+            crate::convert::impl_convert_native!(#bogus_type);
         });
 
-        let unknown_name = unknown_name.to_string();
+        let unknown_name = bogus_name.to_string();
         stmts.push(quote! {
-            registry.build_class::<#unknown_type>(scope, global, #unknown_name)
+            registry.build_class::<#bogus_type>(scope, global, #unknown_name)
                 .finish(scope);
         });
     }

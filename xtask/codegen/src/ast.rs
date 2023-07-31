@@ -79,6 +79,9 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         .join("crates")
         .join(language_kind.factory_crate_name())
         .join("src/generated");
+    let v8_bindings_generated_path = project_root()
+        .join("crates/rome_v8/src/bindings")
+        .join(language_kind.v8_bindings_create_name());
 
     let kind_src = match language_kind {
         LanguageKind::Js => JS_KINDS_SRC,
@@ -142,7 +145,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
     let contents = generate_macros(&ast, language_kind)?;
     update(ast_macros_file.as_path(), &contents, mode)?;
 
-    let ast_v8_file = project_root().join(v8);
+    let ast_v8_file = project_root().join(v8_bindings_generated_path);
     let contents = generate_v8(&kind_src, &ast, language_kind)?;
     update(ast_v8_file.as_path(), &contents, mode)?;
 
