@@ -130,6 +130,12 @@ do {
 } while (x);
 
 var result = x !== 0 ? a : b;
+
+// Exception
+while (true) {
+    if (x) { break; }
+    x = f();
+}
 ```
 
 ## Related links

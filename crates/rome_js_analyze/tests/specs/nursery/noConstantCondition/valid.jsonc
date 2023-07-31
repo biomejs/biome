@@ -142,5 +142,7 @@
     "if (foo.Boolean(1)) { }",
     "function foo(Boolean) { if (Boolean(12)) { } }",
     "const Boolean = () => { }; if (Boolean(1)) { }",
-    "const undefined = 'lol'; if (undefined) { }"
+    "const undefined = 'lol'; if (undefined) { }",
+    "while (true);",
+    "function foo(Boolean) { while (true); }"
 ]
