@@ -7,9 +7,9 @@ version = "0.1.0"
 
 [dependencies]
 anyhow   = "1.0.57"
-serde    = "1.0.33"
-serde_v8 = { version = "0.65.0" }
-v8       = { version = "0.51.0", default-features = false }
+serde    = { workspace = true }
+serde_v8 = { version = "0.108.0" }
+v8       = { version = "0.74.3", default-features = false }
 
 rome_js_factory = { workspace = true }
 rome_js_syntax  = { workspace = true }
@@ -17,7 +17,7 @@ rome_rowan      = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 bpaf             = { workspace = true }
-crossbeam        = "0.8.2"
+crossbeam        = { workspace = true }
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_fs          = { workspace = true }
