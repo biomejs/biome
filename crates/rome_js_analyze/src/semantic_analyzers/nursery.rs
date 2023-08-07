@@ -8,6 +8,7 @@ pub(crate) mod no_constant_condition;
 pub(crate) mod no_global_is_finite;
 pub(crate) mod no_global_is_nan;
 pub(crate) mod no_unsafe_declaration_merging;
+pub(crate) mod no_useless_this_alias;
 pub(crate) mod use_exhaustive_dependencies;
 pub(crate) mod use_hook_at_top_level;
 pub(crate) mod use_is_array;
@@ -23,6 +24,7 @@ declare_group! {
             self :: no_global_is_finite :: NoGlobalIsFinite ,
             self :: no_global_is_nan :: NoGlobalIsNan ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
+            self :: no_useless_this_alias :: NoUselessThisAlias ,
             self :: use_exhaustive_dependencies :: UseExhaustiveDependencies ,
             self :: use_hook_at_top_level :: UseHookAtTopLevel ,
             self :: use_is_array :: UseIsArray ,

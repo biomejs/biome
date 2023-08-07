@@ -1782,6 +1782,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noStaticOnlyClass",
                 "noUnsafeDeclarationMerging",
                 "noUselessEmptyExport",
+                "noUselessThisAlias",
                 "noVoid",
                 "useAriaPropTypes",
                 "useArrowFunction",
@@ -2218,6 +2219,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_useless_empty_export = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noUselessThisAlias" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_useless_this_alias = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noUselessThisAlias",
+                        diagnostics,
+                    )?;
+                    self.no_useless_this_alias = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

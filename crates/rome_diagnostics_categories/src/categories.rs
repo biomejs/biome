@@ -98,6 +98,7 @@ define_categories! {
     "lint/nursery/noStaticOnlyClass": "https://biomejs.dev/lint/rules/noStaticOnlyClass",
     "lint/nursery/noUnsafeDeclarationMerging": "https://biomejs.dev/lint/rules/noUnsafeDeclarationMerging",
     "lint/nursery/noUselessEmptyExport": "https://biomejs.dev/lint/rules/noUselessEmptyExport",
+    "lint/nursery/noUselessThisAlias": "https://biomejs.dev/lint/rules/noUselessThisAlias",
     "lint/nursery/noVoid": "https://biomejs.dev/lint/rules/noVoid",
     "lint/nursery/useAriaPropTypes": "https://biomejs.dev/lint/rules/useAriaPropTypes",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/lint/rules/useArrowFunction",
