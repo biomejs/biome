@@ -12,6 +12,7 @@ pub(crate) mod no_static_only_class;
 pub(crate) mod no_useless_empty_export;
 pub(crate) mod no_void;
 pub(crate) mod use_arrow_function;
+pub(crate) mod use_getter_return;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
 pub(crate) mod use_literal_enum_members;
@@ -30,6 +31,7 @@ declare_group! {
             self :: no_useless_empty_export :: NoUselessEmptyExport ,
             self :: no_void :: NoVoid ,
             self :: use_arrow_function :: UseArrowFunction ,
+            self :: use_getter_return :: UseGetterReturn ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,

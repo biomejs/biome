@@ -102,6 +102,7 @@ define_categories! {
     "lint/nursery/useAriaPropTypes": "https://biomejs.dev/lint/rules/useAriaPropTypes",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/lint/rules/useArrowFunction",
     "lint/nursery/useExhaustiveDependencies": "https://biomejs.dev/lint/rules/useExhaustiveDependencies",
+    "lint/nursery/useGetterReturn": "https://biomejs.dev/lint/rules/useGetterReturn",
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/lint/rules/useGroupedTypeImport",
     "lint/nursery/useHookAtTopLevel": "https://biomejs.dev/lint/rules/useHookAtTopLevel",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/lint/rules/useImportRestrictions",

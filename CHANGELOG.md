@@ -223,6 +223,17 @@ New entries must be placed in a section entitled `Unreleased`.
 
   This rule proposes using `Array.isArray()` instead of `instanceof Array`.
 
+- Add [`useGetterReturn`](https://docs.rome.tools/lint/rules/useGetterReturn/)
+
+  This rule enforces the presence of non-empty return statements in getters.
+  This makes the following code incorrect:
+
+  ```js
+  class Person {
+      get firstName() {}
+  }
+  ```
+
 #### Promoted rules
 
 New rules are promoted, please check [#4750](https://github.com/rome/tools/discussions/4750) for more details:

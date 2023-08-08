@@ -660,6 +660,10 @@ export interface Nursery {
 	 */
 	useExhaustiveDependencies?: RuleConfiguration;
 	/**
+	 * Enforces the presence of non-empty return statements in getters.
+	 */
+	useGetterReturn?: RuleConfiguration;
+	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
 	useGroupedTypeImport?: RuleConfiguration;
@@ -1224,6 +1228,7 @@ export type Category =
 	| "lint/nursery/useAriaPropTypes"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useExhaustiveDependencies"
+	| "lint/nursery/useGetterReturn"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useHookAtTopLevel"
 	| "lint/nursery/useImportRestrictions"
