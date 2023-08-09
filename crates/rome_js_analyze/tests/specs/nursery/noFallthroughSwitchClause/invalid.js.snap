@@ -6,11 +6,73 @@ expression: invalid.js
 ```js
 switch(bar) { case 0: a(); case 1: b() }
 
+switch(foo) { case 0: a(); default: b() }
+
 switch (bar) { case 0: a(); default: b(); case 1: c() }
+
+switch(foo) { case 0: if (a) { break; } default: b() }
+
+switch(foo) { case 0: try { throw 0; } catch (err) {} default: b() }
+
+switch(foo) { case 0: while (a) { break; } default: b() }
+
+switch(foo) { case 0: do { break; } while (a); default: b() }
+
+switch(foo) { case 0: {} default: b() }
+
+switch(foo) { case 0: a(); { /* falls through */ } default: b() }
+
+switch(foo) { case 0: { /* falls through */ } a(); default: b() }
+
+switch(foo) { case 0: if (a) { /* falls through */ } default: b() }
+
+switch(foo) { case 0: { { /* falls through */ } } default: b() }
+
+switch(foo) { case 0: { /* comment */ } default: b() }
+
+switch(foo) { case 0: a(); /* falling through */ default: b() }
+
+switch(foo) { case 0: a(); /* no break */ case 1: b(); }
+
+switch(foo) { case 0: a(); /* no break */ /* todo: fix readability */ default: b() }
+
+switch(foo) { case 0: { a(); /* no break */ /* todo: fix readability */ } default: b() }
+
+switch (a) { case 1: ; case 2: ; case 3: }
+
+function f () {
+    switch (a) {
+        case 0:
+            try { return foo(); } catch {} finally {}
+        case 1:
+            f();
+    }
+}
+
+switch (foo) { case 0: {} case 1: case 2: f(); }
 
 ```
 
 # Diagnostics
+```
+invalid.js:39:9 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    37 │ function f () {
+    38 │     switch (a) {
+  > 39 │         case 0:
+       │         ^^^^^^^
+  > 40 │             try { return foo(); } catch {} finally {}
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │         case 1:
+    42 │             f();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
 ```
 invalid.js:1:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -19,7 +81,7 @@ invalid.js:1:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━�
   > 1 │ switch(bar) { case 0: a(); case 1: b() }
       │               ^^^^^^^^^^^^
     2 │ 
-    3 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
+    3 │ switch(foo) { case 0: a(); default: b() }
   
   i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
   
@@ -27,15 +89,33 @@ invalid.js:1:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━�
 ```
 
 ```
-invalid.js:3:16 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This case is falling through to the next case.
   
     1 │ switch(bar) { case 0: a(); case 1: b() }
     2 │ 
-  > 3 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
+  > 3 │ switch(foo) { case 0: a(); default: b() }
+      │               ^^^^^^^^^^^^
+    4 │ 
+    5 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:5:16 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    3 │ switch(foo) { case 0: a(); default: b() }
+    4 │ 
+  > 5 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
       │                ^^^^^^^^^^^^
-    4 │ 
+    6 │ 
+    7 │ switch(foo) { case 0: if (a) { break; } default: b() }
   
   i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
   
@@ -43,15 +123,304 @@ invalid.js:3:16 lint/nursery/noFallthroughSwitchClause ━━━━━━━━�
 ```
 
 ```
-invalid.js:3:29 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:29 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This case is falling through to the next case.
   
-    1 │ switch(bar) { case 0: a(); case 1: b() }
-    2 │ 
-  > 3 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
-      │                             ^^^^^^^^^^^^^
+    3 │ switch(foo) { case 0: a(); default: b() }
     4 │ 
+  > 5 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
+      │                             ^^^^^^^^^^^^^
+    6 │ 
+    7 │ switch(foo) { case 0: if (a) { break; } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:7:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    5 │ switch (bar) { case 0: a(); default: b(); case 1: c() }
+    6 │ 
+  > 7 │ switch(foo) { case 0: if (a) { break; } default: b() }
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ switch(foo) { case 0: try { throw 0; } catch (err) {} default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:9:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+     7 │ switch(foo) { case 0: if (a) { break; } default: b() }
+     8 │ 
+   > 9 │ switch(foo) { case 0: try { throw 0; } catch (err) {} default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ switch(foo) { case 0: while (a) { break; } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:11:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+     9 │ switch(foo) { case 0: try { throw 0; } catch (err) {} default: b() }
+    10 │ 
+  > 11 │ switch(foo) { case 0: while (a) { break; } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ switch(foo) { case 0: do { break; } while (a); default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:13:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    11 │ switch(foo) { case 0: while (a) { break; } default: b() }
+    12 │ 
+  > 13 │ switch(foo) { case 0: do { break; } while (a); default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ switch(foo) { case 0: {} default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:15:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    13 │ switch(foo) { case 0: do { break; } while (a); default: b() }
+    14 │ 
+  > 15 │ switch(foo) { case 0: {} default: b() }
+       │               ^^^^^^^^^^
+    16 │ 
+    17 │ switch(foo) { case 0: a(); { /* falls through */ } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:17:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    15 │ switch(foo) { case 0: {} default: b() }
+    16 │ 
+  > 17 │ switch(foo) { case 0: a(); { /* falls through */ } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ switch(foo) { case 0: { /* falls through */ } a(); default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:19:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    17 │ switch(foo) { case 0: a(); { /* falls through */ } default: b() }
+    18 │ 
+  > 19 │ switch(foo) { case 0: { /* falls through */ } a(); default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ switch(foo) { case 0: if (a) { /* falls through */ } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:21:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    19 │ switch(foo) { case 0: { /* falls through */ } a(); default: b() }
+    20 │ 
+  > 21 │ switch(foo) { case 0: if (a) { /* falls through */ } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ switch(foo) { case 0: { { /* falls through */ } } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:23:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    21 │ switch(foo) { case 0: if (a) { /* falls through */ } default: b() }
+    22 │ 
+  > 23 │ switch(foo) { case 0: { { /* falls through */ } } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ switch(foo) { case 0: { /* comment */ } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:25:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    23 │ switch(foo) { case 0: { { /* falls through */ } } default: b() }
+    24 │ 
+  > 25 │ switch(foo) { case 0: { /* comment */ } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ switch(foo) { case 0: a(); /* falling through */ default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:27:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    25 │ switch(foo) { case 0: { /* comment */ } default: b() }
+    26 │ 
+  > 27 │ switch(foo) { case 0: a(); /* falling through */ default: b() }
+       │               ^^^^^^^^^^^^
+    28 │ 
+    29 │ switch(foo) { case 0: a(); /* no break */ case 1: b(); }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:29:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    27 │ switch(foo) { case 0: a(); /* falling through */ default: b() }
+    28 │ 
+  > 29 │ switch(foo) { case 0: a(); /* no break */ case 1: b(); }
+       │               ^^^^^^^^^^^^
+    30 │ 
+    31 │ switch(foo) { case 0: a(); /* no break */ /* todo: fix readability */ default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:31:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    29 │ switch(foo) { case 0: a(); /* no break */ case 1: b(); }
+    30 │ 
+  > 31 │ switch(foo) { case 0: a(); /* no break */ /* todo: fix readability */ default: b() }
+       │               ^^^^^^^^^^^^
+    32 │ 
+    33 │ switch(foo) { case 0: { a(); /* no break */ /* todo: fix readability */ } default: b() }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:33:15 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    31 │ switch(foo) { case 0: a(); /* no break */ /* todo: fix readability */ default: b() }
+    32 │ 
+  > 33 │ switch(foo) { case 0: { a(); /* no break */ /* todo: fix readability */ } default: b() }
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ switch (a) { case 1: ; case 2: ; case 3: }
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:35:14 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    33 │ switch(foo) { case 0: { a(); /* no break */ /* todo: fix readability */ } default: b() }
+    34 │ 
+  > 35 │ switch (a) { case 1: ; case 2: ; case 3: }
+       │              ^^^^^^^^^
+    36 │ 
+    37 │ function f () {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:35:24 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    33 │ switch(foo) { case 0: { a(); /* no break */ /* todo: fix readability */ } default: b() }
+    34 │ 
+  > 35 │ switch (a) { case 1: ; case 2: ; case 3: }
+       │                        ^^^^^^^^^
+    36 │ 
+    37 │ function f () {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:46:16 lint/nursery/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is falling through to the next case.
+  
+    44 │ }
+    45 │ 
+  > 46 │ switch (foo) { case 0: {} case 1: case 2: f(); }
+       │                ^^^^^^^^^^
+    47 │ 
   
   i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
   
