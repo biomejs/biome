@@ -1,12 +1,12 @@
 [package]
 authors.workspace    = true
 description          = "Rome's formatter shared infrastructure"
-documentation        = "https://rustdocs.rome.tools/rome_formatter/index.html"
+documentation        = "https://docs.rs/rome_formatter"
 edition.workspace    = true
 license.workspace    = true
 name                 = "rome_formatter"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.1.0"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

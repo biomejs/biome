@@ -32,4 +32,4 @@
 
 # `rome_js_formatter`
 
-Rome's JavaScript formatter implementation. Follow the [documentation](https://rustdocs.rome.tools/rome_js_formatter/index.html).
+Rome's JavaScript formatter implementation. Follow the [documentation](https://docs.rs/rome_js_formatter/latest).

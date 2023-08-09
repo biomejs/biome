@@ -47,7 +47,7 @@
 				"mdast-util-to-hast": "^12.3.0",
 				"mermaid": "^9.4.3",
 				"postcss": "^8.4.23",
-				"prettier": "^3.0.0",
+				"prettier": "^2.8.8",
 				"react": "^17.0.2",
 				"react-dom": "^17.0.2",
 				"rehype-autolink-headings": "^6.1.1",
@@ -62,6 +62,9 @@
 				"vite-plugin-svgr": "^2.2.2"
 		},
 		"engines": {
-			"pnpm": "^8.0.0"
+				"pnpm": "^8.0.0"
+		},
+		"dependencies": {
+				"@otterlord/astro-compress": "^1.1.48"
 		}
 }

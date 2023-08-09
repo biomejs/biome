@@ -3,7 +3,7 @@ title: Lint Rule noVoid
 parent: lint/rules/index
 ---
 
-# noVoid (since vnext)
+# noVoid (since v13.0.0)
 
 Disallow the use of `void` operators, which is not a familiar operator.
 

@@ -61,7 +61,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoControlCharactersInRegex {
-        version: "next",
+        version: "13.0.0",
         name: "noControlCharactersInRegex",
         recommended: true,
     }

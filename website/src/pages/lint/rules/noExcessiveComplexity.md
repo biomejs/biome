@@ -3,7 +3,7 @@ title: Lint Rule noExcessiveComplexity
 parent: lint/rules/index
 ---
 
-# noExcessiveComplexity (since vnext)
+# noExcessiveComplexity (since v13.0.0)
 
 Disallow functions that exceed a given complexity score.
 
@@ -56,7 +56,7 @@ function tooComplex() {
 
 Allows to specify the maximum allowed complexity.
 
-```
+```json
 {
     "//": "...",
     "options": {

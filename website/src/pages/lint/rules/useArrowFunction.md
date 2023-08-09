@@ -3,7 +3,7 @@ title: Lint Rule useArrowFunction
 parent: lint/rules/index
 ---
 
-# useArrowFunction (since vnext)
+# useArrowFunction (since v13.0.0)
 
 Use arrow functions over function expressions.
 

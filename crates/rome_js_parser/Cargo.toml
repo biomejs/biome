@@ -2,13 +2,13 @@
 authors.workspace    = true
 categories           = ["parser-implementations", "development-tools"]
 description          = "An extremely fast ECMAScript parser for Rome, forked from the RSlint project"
-documentation        = "https://rustdocs.rome.tools/rome_js_parser/index.html"
+documentation        = "https://docs.rs/rome_js_parser"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
 name                 = "rome_js_parser"
 repository.workspace = true
-version              = "0.0.2"
+version              = "0.1.0"
 
 [dependencies]
 bitflags              = { workspace = true }

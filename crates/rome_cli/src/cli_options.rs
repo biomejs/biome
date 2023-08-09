@@ -42,7 +42,7 @@ pub struct CliOptions {
     pub error_on_warnings: bool,
 
     /// Reports information using the JSON format
-    #[bpaf(long("json"), switch, hide_usage)]
+    #[bpaf(long("json"), switch, hide_usage, hide)]
     pub json: bool,
 }
 

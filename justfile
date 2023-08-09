@@ -10,12 +10,12 @@ alias l := lint
 # Installs the tools needed to develop with Rome
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces
 
 # Upgrades the tools needed to develop with Rome
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools --force
+	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 codegen:

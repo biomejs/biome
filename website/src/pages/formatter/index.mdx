@@ -24,57 +24,20 @@ Other formatting options are available for specific languages as well.  See the 
 
 ## Use the formatter with the CLI
 
-You can start by running the CLI with the `--help` flag:
+By default, the formatter **checks** the code and emit diagnostics if there are changes in formatting:
+
+<PackageManagerRomeCommand command="format ./src" />
+
+If you want to **apply** the new formatting, pass the `--write` option:
+
+<PackageManagerRomeCommand command="format --write ./src" />
+
+Use the  `--help` flag to know what are the available options:
 
 <PackageManagerRomeCommand command="format --help" />
 
-Which will show you the options available at the moment:
+Or check the [CLI reference section](/cli#rome-format).
 
-```plaintext
-Run the formatter on a set of files.
-
-Usage: [--write] <PATH>...
-
-Available positional items:
-    <PATH>  Single file, single path or list of paths
-
-Available options:
-        --indent-style <tab|space>  The indent style.
-        --indent-size <NUMBER>  The size of the indentation, 2 by default
-        --line-width <NUMBER>  What's the max width of a line. Defaults to 80.
-        --quote-style <double|single>  The style for quotes. Defaults to double.
-        --quote-properties <preserve|as-needed>  When properties in objects are quoted. Defaults to
-                       asNeeded.
-        --trailing-comma <all|es5|none>  Print trailing commas wherever possible in multi-line
-                       comma-separated syntactic structures. Defaults to "all".
-        --semicolons <always|as-needed>  Whether the formatter prints semicolons for all statements
-                       or only in for statements where it is necessary because of ASI.
-        --vcs-client-kind <git>  The kind of client.
-        --vcs-enabled <true|false>  Whether Rome should integrate itself with the VCS client
-        --vcs-use-ignore-file <true|false>  Whether Rome should use the VCS ignore file. When [true],
-                       Rome will ignore the files specified in the ignore file.
-        --vcs-root <PATH>  The folder where Rome should check for VCS files. By default, Rome will
-                       use the same folder where `rome.json` was found. If Rome can't fine the
-                       configuration, it will attempt to use the current working directory. If no
-                       current working directory can't be found, Rome won't use the VCS integration.
-        --files-max-size <NUMBER>  The maximum allowed size for source code files in bytes. Files
-                       above this limit will be ignored for performance reason. Defaults to 1 MiB
-        --stdin-file-path <PATH>  A file name with its extension to pass when reading from standard
-                       in, e.g. echo 'let a;' | rome format --stdin-file-path=file.js"
-        --colors <off|force>  Set the formatting mode for markup: "off" prints everything as plain
-                       text, "force" forces the formatting of markup using ANSI even if the console
-                       output is determined to be incompatible
-        --use-server   Connect to a running instance of the Rome daemon server.
-        --verbose      Print additional verbose advices on diagnostics
-        --config-path <PATH>  Set the filesystem path to the directory of the rome.json configuration
-                       file
-        --max-diagnostics <NUMBER>  Cap the amount of diagnostics displayed (default: 20)
-        --skip-errors  Skip over files containing syntax errors instead of emitting an error
-                       diagnostic.
-        --json         Reports information using the JSON format
-        --write
-    -h, --help         Prints help information
-```
 
 ## Configuration
 

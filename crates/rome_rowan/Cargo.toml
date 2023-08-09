@@ -1,12 +1,12 @@
 [package]
 authors              = ["Aleksey Kladov <aleksey.kladov@gmail.com>"]
 description          = "Library for generic lossless syntax trees"
-documentation        = "https://rustdocs.rome.tools/rome_rowan/index.html"
+documentation        = "https://docs.rs/rome_rowan"
 edition.workspace    = true
 license              = "MIT OR Apache-2.0"
 name                 = "rome_rowan"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.2.0"
 
 [dependencies]
 countme        = { workspace = true }

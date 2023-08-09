@@ -3,7 +3,7 @@ description       = ""
 edition.workspace = true
 license.workspace = true
 name              = "tests_macros"
-version           = "0.0.0"
+version           = "0.2.0"
 
 [lib]
 proc-macro = true

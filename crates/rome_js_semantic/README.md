@@ -32,5 +32,5 @@
 
 # `rome_js_semantic`
 
-Rome's semantic model for JavaScript. Follow the [documentation](https://rustdocs.rome.tools/rome_js_semantic/index.html).
+Rome's semantic model for JavaScript. Follow the [documentation](https://docs.rs/rome_js_semantic/).
 

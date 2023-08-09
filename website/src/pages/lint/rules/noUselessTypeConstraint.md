@@ -3,7 +3,7 @@ title: Lint Rule noUselessTypeConstraint
 parent: lint/rules/index
 ---
 
-# noUselessTypeConstraint (since vnext)
+# noUselessTypeConstraint (since v13.0.0)
 
 > This rule is recommended by Rome.
 

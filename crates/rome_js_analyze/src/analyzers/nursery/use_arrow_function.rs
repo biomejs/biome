@@ -67,7 +67,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) UseArrowFunction {
-        version: "next",
+        version: "13.0.0",
         name: "useArrowFunction",
         recommended: true,
     }

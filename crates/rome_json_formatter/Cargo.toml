@@ -2,13 +2,13 @@
 authors.workspace    = true
 categories           = ["development-tools"]
 description          = "Rome's JSON formatter"
-documentation        = "https://rustdocs.rome.tools/rome_js_formatter/index.html"
+documentation        = "https://docs.rs/rome_js_formatter"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
 name                 = "rome_json_formatter"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

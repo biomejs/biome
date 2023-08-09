@@ -91,6 +91,56 @@ If you have problems with resolving the physical file, you can use the one publi
 }
 ```
 
+## `extends`
+
+A list of paths to other JSON files that will extend the current configuration file.
+
+<CodeBlockHeader filename="rome.json" />
+
+```json
+{
+  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "extends": ["./formatter.json", "./linter.json"]
+}
+```
+<CodeBlockHeader filename="formatter.json" />
+
+```json
+{
+  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "formatter": {
+    "indentSize": 2
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
+```
+<CodeBlockHeader filename="linter.json" />
+
+```json
+{
+  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "linter": {
+    "rules": {
+      "complexity": {
+        "noUselessConstructor": "off"
+      }
+    }
+  }
+}
+```
+
+The files defined in this array:
+- must exist in the file system;
+- are resolved from the path where the `rome.json` file is defined;
+- must be relative paths. Paths to libraries are not resolved;
+- must be reachable by Rome, e.g. symbolic links might not be resolved by Rome;
+- will be processed in order: from the first one to the last one;
+- can override the same properties, but ultimately only the last one will be used by Rome;
+
 ## `files`
 
 ### `files.maxSize`
@@ -111,6 +161,20 @@ match these patterns.
 {
   "files": {
     "ignore": ["scripts/*.js"]
+  }
+}
+```
+
+ ### `files.allowUnknown`
+
+Rome won't emit diagnostics if it encounters files that can't handle.
+
+<CodeBlockHeader filename="rome.json" />
+
+```json
+{
+  "files": {
+    "allowUnknown": true
   }
 }
 ```
@@ -329,9 +393,11 @@ How many characters can be written on a single line.
 
 ## `organizeImports`
 
-### `organizeImports.enabled` (experimental)
+### `organizeImports.enabled`
 
 Enables Rome's sort imports.
+
+> Default: `true`
 
 ### `organizeImports.ignore`
 
@@ -355,19 +421,35 @@ match these patterns.
 
 These options apply only to JavaScript (and TypeScript) files.
 
+### `javascript.parser.unsafeParameterDecoratorsEnabled`
+
+Allows to support the unsafe/experimental parameter decorators.
+
+<CodeBlockHeader filename="rome.json" />
+
+```json
+{
+  "javascript": {
+    "parser": {
+	    "unsafeParameterDecoratorsEnabled": true
+      }
+  }
+}
+```
+
+> Default: `false`
+
 ### `javascript.formatter.quoteStyle`
 
 The type of quote used when representing string literals. It can be `single` or `double`.
 
 > Default: `double`
 
-[//]: # (### `javascript.formatter.jsxQuoteStyle`)
+### `javascript.formatter.jsxQuoteStyle`
 
-[//]: # ()
-[//]: # (The type of quote used when representing jsx string literals. It can be `single` or `double`.)
+The type of quote used when representing jsx string literals. It can be `single` or `double`.
 
-[//]: # ()
-[//]: # (> Default: `double`)
+> Default: `double`
 
 ### `javascript.formatter.quoteProperties`
 
@@ -389,6 +471,14 @@ Print trailing commas wherever possible in multi-line comma-separated syntactic 
 It configures where the formatter prints semicolons:
 - `always`, the semicolons is always added at the end of each statement;
 - `asNeeded`, the semicolons are added only in places where it's needed, to protect from [ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
+
+> Default: `always`
+
+### `javascript.formatter.arrowParentheses`
+
+Whether to add non-necessary parentheses to arrow functions:
+- `always`, the parentheses are always added;
+- `asNeeded`, the parentheses are added only when they are needed;
 
 > Default: `always`
 
@@ -415,6 +505,26 @@ A list of global names that Rome should ignore (analyzer, linter, etc.)
 {
   "javascript": {
     "globals": ["$", "_", "externalVariable"]
+  }
+}
+```
+
+## `json`
+
+Options applied to the JSON files.
+
+### `json.parser.allowComments`
+
+Enables the parsing of comments in JSON files.
+
+<CodeBlockHeader filename="rome.json" />
+
+```json
+{
+  "json": {
+    "parser": {
+      "allowComments": true
+    }
   }
 }
 ```

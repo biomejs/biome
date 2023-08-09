@@ -91,7 +91,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoStaticOnlyClass {
-        version: "next",
+        version: "13.0.0",
         name: "noStaticOnlyClass",
         recommended: true,
     }

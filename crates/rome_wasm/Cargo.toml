@@ -5,7 +5,7 @@ edition     = "2021"
 license     = "MIT"
 name        = "rome_wasm"
 repository  = "https://github.com/rome/tools"
-version     = "0.0.0"
+version     = "0.2.0"
 
 
 [lib]

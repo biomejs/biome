@@ -155,7 +155,7 @@ pub enum BiomeCommand {
     Init,
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
-    LspProxy(#[bpaf(external(cli_options))] CliOptions),
+    LspProxy(#[bpaf(external(cli_options), hide_usage)] CliOptions),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate(

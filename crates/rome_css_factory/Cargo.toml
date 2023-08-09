@@ -4,7 +4,7 @@ edition.workspace    = true
 license.workspace    = true
 name                 = "rome_css_factory"
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.2.0"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

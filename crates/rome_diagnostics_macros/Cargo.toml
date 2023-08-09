@@ -1,7 +1,7 @@
 [package]
 authors.workspace    = true
 description          = "A Macro to make a struct type a Rome diagnostic."
-documentation        = "https://rustdocs.rome.tools/rome_diagnostics/index.html"
+documentation        = "https://docs.rs/rome_diagnostics"
 edition.workspace    = true
 license.workspace    = true
 name                 = "rome_diagnostics_macros"

@@ -666,7 +666,7 @@ impl PartialEq for ImportKey {
 /// are listed before imports closer to the source file.
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 enum ImportCategory {
-    /// Anythign with an explicit `node:` prefix, or one of the recognized
+    /// Anything with an explicit `node:` prefix, or one of the recognized
     /// Node built-ins, such `"fs"`, `"child_process"`, etc..
     NodeBuiltin,
     /// NPM dependencies with an explicit `npm:` prefix, such as supported by
