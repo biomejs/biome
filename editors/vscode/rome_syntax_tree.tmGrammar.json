@@ -1,7 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 
-	"scopeName": "source.rome_syntax_tree",
+	"scopeName": "source.biome_syntax_tree",
 	"patterns": [
 		{ "include": "#node_type" },
 		{ "include": "#node_range_index" },

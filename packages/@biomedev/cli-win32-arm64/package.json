@@ -1,0 +1,30 @@
+
+{
+	"name": "@biomedev/cli-win32-arm64",
+	"version": "0.1.0",
+	"bin": "bin/boime",
+	"homepage": "https://biomejs.dev",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/biomejs/biome.git",
+		"directory": "npm/rome"
+	},
+	"author": "Sebastian McKenzie",
+	"license": "MIT",
+	"bugs": "https://github.com/rome/tools/issues",
+	"description": "Rome is a toolchain for the web: formatter, linter and more",
+	"files": [
+		"bin/rome"
+	],
+	"keywords": [
+		"JavaScript",
+		"TypeScript",
+		"format",
+		"lint",
+		"toolchain",
+		"JSON"
+	],
+	"engines": {
+		"node": ">=14.*"
+	},
+	"os":["win32"],"cpu":["arm64"]}

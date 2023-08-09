@@ -36,7 +36,7 @@ let client: LanguageClient;
 const IN_ROME_PROJECT = "inRomeProject";
 
 export async function activate(context: ExtensionContext) {
-	const outputChannel = window.createOutputChannel("Rome");
+	const outputChannel = window.createOutputChannel("Biome");
 	const traceOutputChannel = window.createOutputChannel("Rome Trace");
 
 	const command = await getServerPath(context, outputChannel);
@@ -45,7 +45,7 @@ export async function activate(context: ExtensionContext) {
 		await window.showErrorMessage(
 			"The Rome extensions doesn't ship with prebuilt binaries for your platform yet. " +
 				"You can still use it by cloning the rome/tools repo from GitHub to build the LSP " +
-				"yourself and use it with this extension with the rome.lspBin setting",
+				"yourself and use it with this extension with the biome.lspBin setting",
 		);
 		return;
 	}
@@ -72,7 +72,7 @@ export async function activate(context: ExtensionContext) {
 		traceOutputChannel,
 	};
 
-	client = new LanguageClient("rome_lsp", "Rome", serverOptions, clientOptions);
+	client = new LanguageClient("biome_lsp", "Biome", serverOptions, clientOptions);
 
 	const session = new Session(context, client);
 
@@ -183,7 +183,7 @@ async function getServerPath(
 	}
 
 	const config = workspace.getConfiguration();
-	const explicitPath = config.get("rome.lspBin");
+	const explicitPath = config.get("biome.lspBin");
 	if (typeof explicitPath === "string" && explicitPath !== "") {
 		return getWorkspaceRelativePath(explicitPath);
 	}
@@ -219,7 +219,7 @@ async function getWorkspaceDependency(
 	const manifestName = `${packageName}/package.json`;
 	const binaryName =
 		process.platform === "win32"
-			? `${packageName}/rome.exe`
+			? `${packageName}/biome.exe`
 			: `${packageName}/rome`;
 
 	for (const workspaceFolder of workspace.workspaceFolders) {

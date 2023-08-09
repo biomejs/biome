@@ -29,12 +29,12 @@ export class StatusBar {
 
 	constructor() {
 		this.statusBarItem = window.createStatusBarItem(
-			"rome.status",
+			"biome.status",
 			StatusBarAlignment.Right,
 			-1,
 		);
 
-		this.statusBarItem.name = "Rome";
+		this.statusBarItem.name = "Biome";
 		this.statusBarItem.command = Commands.ServerStatus;
 		this.update();
 	}

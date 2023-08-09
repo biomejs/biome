@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Configuration",
-	"description": "The configuration that is contained inside the file `rome.json`",
+	"description": "The configuration that is contained inside the file `biome.json`",
 	"type": "object",
 	"properties": {
 		"$schema": {
@@ -1684,7 +1684,7 @@
 					"type": ["boolean", "null"]
 				},
 				"root": {
-					"description": "The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.\n\nIf Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted",
+					"description": "The folder where Rome should check for VCS files. By default, Rome will use the same folder where `biome.json` was found.\n\nIf Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted",
 					"type": ["string", "null"]
 				},
 				"useIgnoreFile": {

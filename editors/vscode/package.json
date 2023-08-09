@@ -1,8 +1,8 @@
 {
-	"name": "rome",
-	"publisher": "rome",
-	"displayName": "Rome",
-	"description": "Rome LSP VS Code Extension",
+	"name": "biome",
+	"publisher": "biome",
+	"displayName": "Biome",
+	"description": "Biome LSP VS Code Extension",
 	"version": "0.28.0",
 	"icon": "icon.png",
 	"activationEvents": [
@@ -11,16 +11,16 @@
 		"onLanguage:typescript",
 		"onLanguage:typescriptreact",
 		"onLanguage:json",
-		"onCommand:rome.syntaxTree"
+		"onCommand:biome.syntaxTree"
 	],
 	"main": "./out/main.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/rome/tools.git",
+		"url": "https://github.com/biomejs/biome.git",
 		"directory": "editors/vscode"
 	},
 	"bugs": {
-		"url": "https://github.com/rome/tools/issues"
+		"url": "https://github.com/biomejs/biome/issues"
 	},
 	"engines": {
 		"vscode": "^1.70.0",
@@ -30,14 +30,14 @@
 		"untrustedWorkspaces": {
 			"supported": "limited",
 			"restrictedConfigurations": [
-				"rome.lspBin"
+				"biome.lspBin"
 			]
 		}
 	},
 	"contributes": {
 		"languages": [
 			{
-				"id": "rome_syntax_tree",
+				"id": "biome_syntax_tree",
 				"extensions": [
 					".rast"
 				]
@@ -45,36 +45,36 @@
 		],
 		"grammars": [
 			{
-				"language": "rome_syntax_tree",
-				"scopeName": "source.rome_syntax_tree",
-				"path": "rome_syntax_tree.tmGrammar.json"
+				"language": "biome_syntax_tree",
+				"scopeName": "source.biome_syntax_tree",
+				"path": "biome_syntax_tree.tmGrammar.json"
 			}
 		],
 		"commands": [
 			{
-				"command": "rome.syntaxTree",
+				"command": "biome.syntaxTree",
 				"title": "Show Syntax Tree",
-				"category": "Rome"
+				"category": "Biome"
 			},
 			{
-				"command": "rome.restartLspServer",
+				"command": "biome.restartLspServer",
 				"title": "Restart LSP Server",
-				"category": "Rome"
+				"category": "Biome"
 			}
 		],
 		"menus": {
 			"commandPalette": [
 				{
-					"command": "rome.syntaxTree",
+					"command": "biome.syntaxTree",
 					"when": "inRomeProject"
 				}
 			]
 		},
 		"configuration": {
-			"title": "Rome",
+			"title": "Biome",
 			"type": "object",
 			"properties": {
-				"rome_lsp.trace.server": {
+				"biome_lsp.trace.server": {
 					"type": "string",
 					"scope": "window",
 					"enum": [
@@ -90,7 +90,7 @@
 					"default": "off",
 					"description": "Traces the communication between VS Code and the language server."
 				},
-				"rome.lspBin": {
+				"biome.lspBin": {
 					"type": [
 						"string",
 						"null"
@@ -98,7 +98,7 @@
 					"default": null,
 					"markdownDescription": "The rome lsp server executable. If the path is relative, the workspace folder will be used as base path"
 				},
-				"rome.rename": {
+				"biome.rename": {
 					"type": [
 						"boolean",
 						"null"
@@ -106,7 +106,7 @@
 					"default": null,
 					"markdownDescription": "Enable/Disable Rome handling renames in the workspace. (Experimental)"
 				},
-				"rome.requireConfiguration": {
+				"biome.requireConfiguration": {
 					"type": "boolean",
 					"default": true,
 					"markdownDescription": "Require a Rome configuration file to enable syntax errors, formatting and linting. Requires Rome 12 or newer."
@@ -115,7 +115,7 @@
 		},
 		"jsonValidation": [
 			{
-				"fileMatch": "rome.json",
+				"fileMatch": "biome.json",
 				"url": "./configuration_schema.json"
 			}
 		]
@@ -132,9 +132,9 @@
 	"scripts": {
 		"compile": "esbuild src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node14",
 		"watch": "npm run compile -- --sourcemap --watch",
-		"package": "vsce package -o rome_lsp.vsix",
+		"package": "vsce package -o biome_lsp.vsix",
 		"build": "npm run compile -- --minify && npm run package",
-		"install-extension": "code --install-extension rome_lsp.vsix --force",
+		"install-extension": "code --install-extension biome_lsp.vsix --force",
 		"format": "cargo rome-cli-dev format ./src/ ./scripts --write",
 		"check": "cargo rome-cli-dev check ./src/ ./scripts",
 		"check:apply": "cargo rome-cli-dev check ./src/ ./scripts --apply-unsafe",

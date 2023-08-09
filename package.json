@@ -1,0 +1,13 @@
+{
+  "name": "@biomedev/monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test": ""
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@changesets/cli": "^2.26.2"
+  }
+}

@@ -11,7 +11,7 @@ export const syntaxTreeRequest = new RequestType<
 	SyntaxTreeParams,
 	string,
 	void
->("rome_lsp/syntaxTree");
+>("biome_lsp/syntaxTree");
 
 // Empty parameters
 export interface UpdateSettingsParams {

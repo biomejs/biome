@@ -131,7 +131,7 @@ export function syntaxTree(session: Session): Command {
 	);
 
 	session.subscriptions.push(
-		languages.setLanguageConfiguration("rome_syntax_tree", {
+		languages.setLanguageConfiguration("biome_syntax_tree", {
 			brackets: [["[", ")"]],
 		}),
 	);

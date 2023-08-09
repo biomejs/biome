@@ -1,5 +1,5 @@
 {
-		"name": "rome-website",
+		"name": "@biomedev/website",
 		"private": true,
 		"scripts": {
 				"start": "astro dev",

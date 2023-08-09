@@ -4,7 +4,7 @@
 !out/main.js
 !package.json
 !server/rome
-!server/rome.exe
-!rome_syntax_tree.tmGrammar.json
+!server/biome.exe
+!biome_syntax_tree.tmGrammar.json
 !configuration_schema.json
 !README.md
