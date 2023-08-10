@@ -23,20 +23,7 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0
 
-  packages/@biomedev/biome:
-    optionalDependencies:
-      '@biomedev/cli-darwin-arm64':
-        specifier: workspace:*
-        version: link:../cli-darwin-arm64
-      '@biomedev/cli-darwin-x64':
-        specifier: workspace:*
-        version: link:../cli-darwin-x64
-      '@biomedev/cli-linux-arm64':
-        specifier: workspace:*
-        version: link:../cli-linux-arm64
-      '@biomedev/cli-linux-x64':
-        specifier: workspace:*
-        version: link:../cli-linux-x64
+  packages/@biomedev/biome: {}
 
   packages/@biomedev/js-api:
     devDependencies:
@@ -58,6 +45,8 @@ importers:
       vitest:
         specifier: ^0.22.0
         version: 0.22.0
+
+  packages/@biomedev/wasm-web: {}
 
   website:
     devDependencies:

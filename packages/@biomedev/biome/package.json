@@ -31,13 +31,5 @@
     ],
     "engines": {
         "node": ">=14.*"
-    },
-		"optionalDependencies": {
-			"@biomedev/cli-linux-x64": "workspace:*",
-			"@biomedev/cli-darwin-x64": "workspace:*",
-			"@biomedev/cli-win-x64": "workspace:*",
-			"@biomedev/cli-linux-arm64": "workspace:*",
-			"@biomedev/cli-darwin-arm64": "workspace:*",
-			"@biomedev/cli-win-arm64": "workspace:*"
-		}
+    }
 }
