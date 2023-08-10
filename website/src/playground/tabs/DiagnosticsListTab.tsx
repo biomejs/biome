@@ -1,5 +1,5 @@
 import { EditorSelection } from "@codemirror/state";
-import type { Diagnostic } from "@rometools/wasm-web";
+import type { Diagnostic } from "@biomedev/wasm-web";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import errorIcon from "../../svg/error.svg";
 import infoIcon from "../../svg/info.svg";

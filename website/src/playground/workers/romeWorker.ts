@@ -4,7 +4,7 @@ import init, {
 	RomePath,
 	RuleCategories,
 	Workspace,
-} from "@rometools/wasm-web";
+} from "@biomedev/wasm-web";
 import {
 	ArrowParentheses,
 	IndentStyle,
