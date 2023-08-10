@@ -1,4 +1,4 @@
 [build]
 base = "./"
 publish = "./website/build/"
-command = "pnpm i && cd website && pnpm deploy"
+command = "pnpm i && cd website && pnpm build"
