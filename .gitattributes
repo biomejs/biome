@@ -9,10 +9,10 @@ crates/rome_js_analyze/src/assists/*.rs linguist-generated=true text=auto eol=lf
 crates/rome_js_analyze/src/semantic_analyzers/*.rs linguist-generated=true text=auto eol=lf
 crates/rome_js_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
 crates/rome_service/src/configuration/linter/rules.rs linguist-generated=true text=auto eol=lf
-npm/backend-jsonrpc/src/workspace.ts linguist-generated=true text=auto eol=lf
+packages/@biomedev/backend-jsonrpc/src/workspace.ts linguist-generated=true text=auto eol=lf
 website/src/pages/lint/rules/**/*.md linguist-generated=true text=auto eol=lf
 website/src/components/generated/.astro linguist-generated=true text=auto eol=lf
-npm/rome/configuration_schema.json linguist-generated=true text=auto eol=lf
+packages/@biomedev/biome/configuration_schema.json linguist-generated=true text=auto eol=lf
 editors/vscode/configuration_schema.json linguist-generated=true text=auto eol=lf
 crates/rome_service/src/configuration/parse/json/rules.rs linguist-generated=true text=auto eol=lf
 

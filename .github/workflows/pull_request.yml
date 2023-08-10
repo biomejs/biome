@@ -135,17 +135,17 @@ jobs:
           version: 'latest'
       - name: Build TypeScript code
         run: |
-          pnpm --prefix npm/backend-jsonrpc i
-          pnpm --prefix npm/backend-jsonrpc run build
-          pnpm --prefix npm/js-api run build:wasm-bundler
-          pnpm --prefix npm/js-api run build:wasm-node
-          pnpm --prefix npm/js-api run build:wasm-web
-          pnpm --prefix npm/js-api i
-          pnpm --prefix npm/js-api run build
+          pnpm --prefix packages/@biomedev/backend-jsonrpc i
+          pnpm --prefix packages/@biomedev/backend-jsonrpc run build
+          pnpm --prefix packages/@biomedev/js-api run build:wasm-bundler
+          pnpm --prefix packages/@biomedev/js-api run build:wasm-node
+          pnpm --prefix packages/@biomedev/js-api run build:wasm-web
+          pnpm --prefix packages/@biomedev/js-api i
+          pnpm --prefix packages/@biomedev/js-api run build
       - name: Run JS tests
         run: |
-          pnpm --prefix npm/backend-jsonrpc test:ci
-          pnpm --prefix npm/js-api test:ci
+          pnpm --prefix packages/@biomedev/backend-jsonrpc test:ci
+          pnpm --prefix packages/@biomedev/js-api test:ci
 
   documentation:
     name: Documentation

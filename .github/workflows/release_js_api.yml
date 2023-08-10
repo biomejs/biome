@@ -1,163 +1,163 @@
-name: Release JavaScript API
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 2-6'
-  push:
-    branches:
-      - main
-    paths:
-      - npm/js-api/package.json
-
-jobs:
-  check:
-    name: Check version
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ env.version }}
-      prerelease: ${{ env.prerelease }}
-      nightly: ${{ env.nightly }}
-      version_changed: ${{ steps.version.outputs.changed }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Check nightly status
-        id: nightly
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: echo "nightly=true" >> $GITHUB_ENV
-
-      - name: Check version changes
-        uses: EndBug/version-check@v1
-        if: env.nightly != 'true'
-        id: version
-        with:
-          diff-search: true
-          file-name: npm/js-api/package.json
-
-      - name: Set version name
-        run: echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
-
-      - name: Check prerelease status
-        id: prerelease
-        if: env.nightly == 'true'
-        run: echo "prerelease=true" >> $GITHUB_ENV
-
-      - name: Check version status
-        if: steps.version.outputs.changed == 'true'
-        run: 'echo "Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
-
-  build:
-    name: Package JavaScript APIs
-    runs-on: ubuntu-latest
-
-    needs: check
-    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
-    outputs:
-      version: ${{ env.version }}
-      prerelease: ${{ env.prerelease }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
-        with:
-          version: 'latest'
-
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-      - uses: pnpm/action-setup@v2.2.4
-        with:
-          version: 8
-
-      - name: Set release infos
-        if: needs.check.outputs.prerelease == 'true'
-        run: |
-          echo "prerelease=true" >> $GITHUB_ENV
-          node npm/js-api/scripts/update-nightly-version.mjs >> $GITHUB_ENV
-      - name: Set release infos
-        if: needs.check.outputs.prerelease != 'true'
-        run: |
-          echo "prerelease=false" >> $GITHUB_ENV
-          echo "version=${{ needs.check.outputs.version }}" >> $GITHUB_ENV
-
-      - name: Compile backends
-        run: |
-          pnpm --prefix npm/js-api build:wasm-bundler
-          pnpm --prefix npm/js-api build:wasm-node
-          pnpm --prefix npm/js-api build:wasm-web
-          pnpm --prefix npm/backend-jsonrpc i
-          pnpm --prefix npm/backend-jsonrpc run build
-
-      - name: Build package
-        working-directory: npm/js-api
-        run: |
-          pnpm i
-          pnpm build
-
-      - name: Upload JS API artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: js-api
-          path: |
-            ./npm/js-api/dist
-          if-no-files-found: error
-
-  publish:
-    name: Publish
-    runs-on: ubuntu-latest
-    needs: build
-    environment: npm-publish
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Download package artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: js-api
-          path: npm/js-api/dist
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Set release infos
-        if: needs.build.outputs.prerelease == 'true'
-        run: node npm/js-api/scripts/update-nightly-version.mjs
-
-      - name: Publish npm package as latest
-        run: npm publish npm/js-api --tag latest --access public
-        if: needs.build.outputs.prerelease != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish npm package as nightly
-        run: npm publish npm/js-api --tag nightly --access public
-        if: needs.build.outputs.prerelease == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: JavaScript APIs v${{ needs.build.outputs.version }}
-          tag_name: js-api/v${{ needs.build.outputs.version }}
-          draft: false
-          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
-          generate_release_notes: true
+#name: Release JavaScript API
+#on:
+#  workflow_dispatch:
+#  schedule:
+#    - cron: '0 0 * * 2-6'
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - npm/js-api/package.json
+#
+#jobs:
+#  check:
+#    name: Check version
+#    runs-on: ubuntu-latest
+#    outputs:
+#      version: ${{ env.version }}
+#      prerelease: ${{ env.prerelease }}
+#      nightly: ${{ env.nightly }}
+#      version_changed: ${{ steps.version.outputs.changed }}
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Check nightly status
+#        id: nightly
+#        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+#        run: echo "nightly=true" >> $GITHUB_ENV
+#
+#      - name: Check version changes
+#        uses: EndBug/version-check@v1
+#        if: env.nightly != 'true'
+#        id: version
+#        with:
+#          diff-search: true
+#          file-name: npm/js-api/package.json
+#
+#      - name: Set version name
+#        run: echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
+#
+#      - name: Check prerelease status
+#        id: prerelease
+#        if: env.nightly == 'true'
+#        run: echo "prerelease=true" >> $GITHUB_ENV
+#
+#      - name: Check version status
+#        if: steps.version.outputs.changed == 'true'
+#        run: 'echo "Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
+#
+#  build:
+#    name: Package JavaScript APIs
+#    runs-on: ubuntu-latest
+#
+#    needs: check
+#    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
+#    outputs:
+#      version: ${{ env.version }}
+#      prerelease: ${{ env.prerelease }}
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 1
+#
+#      - name: Install Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 18
+#
+#      - name: Install wasm-pack
+#        uses: jetli/wasm-pack-action@v0.4.0
+#        with:
+#          version: 'latest'
+#
+#      - name: Cache pnpm modules
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.pnpm-store
+#          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-
+#      - uses: pnpm/action-setup@v2.2.4
+#        with:
+#          version: 8
+#
+#      - name: Set release infos
+#        if: needs.check.outputs.prerelease == 'true'
+#        run: |
+#          echo "prerelease=true" >> $GITHUB_ENV
+#          node npm/js-api/scripts/update-nightly-version.mjs >> $GITHUB_ENV
+#      - name: Set release infos
+#        if: needs.check.outputs.prerelease != 'true'
+#        run: |
+#          echo "prerelease=false" >> $GITHUB_ENV
+#          echo "version=${{ needs.check.outputs.version }}" >> $GITHUB_ENV
+#
+#      - name: Compile backends
+#        run: |
+#          pnpm --prefix packages/@biomedev/js-api build:wasm-bundler
+#          pnpm --prefix packages/@biomedev/js-api build:wasm-node
+#          pnpm --prefix packages/@biomedev/js-api build:wasm-web
+#          pnpm --prefix packages/@biomedev/backend-jsonrpc i
+#          pnpm --prefix packages/@biomedev/backend-jsonrpc run build
+#
+#      - name: Build package
+#        working-directory: npm/js-api
+#        run: |
+#          pnpm i
+#          pnpm build
+#
+#      - name: Upload JS API artifact
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: js-api
+#          path: |
+#            ./npm/js-api/dist
+#          if-no-files-found: error
+#
+#  publish:
+#    name: Publish
+#    runs-on: ubuntu-latest
+#    needs: build
+#    environment: npm-publish
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - name: Download package artifact
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: js-api
+#          path: npm/js-api/dist
+#
+#      - name: Install Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 18
+#          registry-url: 'https://registry.npmjs.org'
+#
+#      - name: Set release infos
+#        if: needs.build.outputs.prerelease == 'true'
+#        run: node npm/js-api/scripts/update-nightly-version.mjs
+#
+#      - name: Publish npm package as latest
+#        run: npm publish npm/js-api --tag latest --access public
+#        if: needs.build.outputs.prerelease != 'true'
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#      - name: Publish npm package as nightly
+#        run: npm publish npm/js-api --tag nightly --access public
+#        if: needs.build.outputs.prerelease == 'true'
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#
+#      - name: Create GitHub release and tag
+#        uses: softprops/action-gh-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          name: JavaScript APIs v${{ needs.build.outputs.version }}
+#          tag_name: js-api/v${{ needs.build.outputs.version }}
+#          draft: false
+#          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+#          generate_release_notes: true

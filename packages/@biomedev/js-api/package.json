@@ -1,5 +1,5 @@
 {
-  "name": "@rometools/js-api",
+  "name": "@biomedev/js-api",
   "version": "0.3.0",
   "description": "JavaScript APIs for the Rome package",
   "scripts": {
@@ -9,12 +9,12 @@
     "check": "pnpm rome:check && tsc --noEmit",
 		"rome:check": "cargo rome-cli-dev check ./",
 		"check:apply": "cargo rome-cli-dev check ./ --apply-unsafe",
-    "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../npm/wasm-bundler --target bundler --dev --scope rometools ../../crates/rome_wasm",
-    "build:wasm-bundler": "wasm-pack build --out-dir ../../npm/wasm-bundler --target bundler --release --scope rometools ../../crates/rome_wasm",
-    "build:wasm-node-dev": "wasm-pack build --out-dir ../../npm/wasm-nodejs --target nodejs --dev --scope rometools ../../crates/rome_wasm",
-    "build:wasm-node": "wasm-pack build --out-dir ../../npm/wasm-nodejs --target nodejs --release --scope rometools ../../crates/rome_wasm",
-    "build:wasm-web-dev": "wasm-pack build --out-dir ../../npm/wasm-web --target web --dev --scope rometools ../../crates/rome_wasm",
-    "build:wasm-web": "wasm-pack build --out-dir ../../npm/wasm-web --target web --release --scope rometools ../../crates/rome_wasm",
+    "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-bundler --target bundler --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-bundler --target bundler --release --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-nodejs --target nodejs --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-node": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-nodejs --target nodejs --release --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-web-dev": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-web --target web --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-web": "wasm-pack build --out-dir ../../packages/@biomedev/wasm-web --target web --release --scope biomedev ../../crates/rome_wasm",
     "test": "vitest",
     "test:ci": "vitest --run",
     "build": "tsc "
@@ -44,23 +44,23 @@
     "typescript": "^4.8.2",
     "vitest": "^0.22.0",
     "vite": "^3.0.8",
-    "@rometools/wasm-bundler": "../wasm-bundler",
-    "@rometools/wasm-nodejs": "../wasm-nodejs",
-    "@rometools/wasm-web": "../wasm-web"
+    "@biomedev/wasm-bundler": "../wasm-bundler",
+    "@biomedev/wasm-nodejs": "../wasm-nodejs",
+    "@biomedev/wasm-web": "../wasm-web"
   },
   "peerDependencies": {
-    "@rometools/wasm-bundler": "^10.0.0",
-    "@rometools/wasm-nodejs": "^10.0.0",
-    "@rometools/wasm-web": "^10.0.0"
+    "@biomedev/wasm-bundler": "^10.0.0",
+    "@biomedev/wasm-nodejs": "^10.0.0",
+    "@biomedev/wasm-web": "^10.0.0"
   },
   "peerDependenciesMeta": {
-    "@rometools/wasm-bundler": {
+    "@biomedev/wasm-bundler": {
       "optional": true
     },
-    "@rometools/wasm-nodejs": {
+    "@biomedev/wasm-nodejs": {
       "optional": true
     },
-    "@rometools/wasm-web": {
+    "@biomedev/wasm-web": {
       "optional": true
     }
   }

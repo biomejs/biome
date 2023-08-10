@@ -1,5 +1,5 @@
 {
-	"$schema": "../../../../npm/rome/configuration_schema.json",
+	"$schema": "../../../../packages/@biomedev/biome/configuration_schema.json",
 	"linter": {
 		"rules": {
 			"nursery": {

@@ -9,9 +9,9 @@
     "repository": {
       "type": "git",
       "url": "https://github.com/biomejs/biome.git",
-      "directory": "npm/rome"
+      "directory": "packages/@biomedev/biome"
     },
-    "author": "Sebastian McKenzie",
+    "author": "Emanuele Stoppa",
     "license": "MIT",
     "bugs": "https://github.com/rome/tools/issues",
     "description": "Rome is a toolchain for the web: formatter, linter and more",

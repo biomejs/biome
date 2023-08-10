@@ -48,11 +48,11 @@ jobs:
         run: pnpm i
       - name: Compile backends
         run: |
-          pnpm --prefix npm/js-api build:wasm-bundler
-          pnpm --prefix npm/js-api build:wasm-node
-          pnpm --prefix npm/js-api build:wasm-web
-          pnpm --prefix npm/backend-jsonrpc i
-          pnpm --prefix npm/backend-jsonrpc run build
+          pnpm --prefix packages/@biomedev/js-api build:wasm-bundler
+          pnpm --prefix packages/@biomedev/js-api build:wasm-node
+          pnpm --prefix packages/@biomedev/js-api build:wasm-web
+          pnpm --prefix packages/@biomedev/backend-jsonrpc i
+          pnpm --prefix packages/@biomedev/backend-jsonrpc run build
       - name: CI checks
         working-directory: npm/js-api
         run: pnpm run ci

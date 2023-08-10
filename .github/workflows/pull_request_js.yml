@@ -8,8 +8,8 @@ on:
     paths: # Only run when changes are made to js code
       - 'website/**'
       - 'editors/**'
-      - 'crates/**'
-      - 'npm/js-api/**'
+#      - 'crates/**'
+      - 'packages/@biomedev/js-api/**'
 
 env:
   RUST_LOG: info
@@ -51,7 +51,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../npm/wasm-web --target web --scope rometools crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomedev/wasm-web --target web --scope biomedev crates/rome_wasm
       - name: Install libraries
         working-directory: website
         run: pnpm i
