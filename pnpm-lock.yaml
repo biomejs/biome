@@ -76,6 +76,9 @@ importers:
       '@astrojs/rss':
         specifier: ^2.4.1
         version: 2.4.1
+      '@biomedev/wasm-web':
+        specifier: ../packages/@biomedev/wasm-web
+        version: link:../packages/@biomedev/wasm-web
       '@codemirror/lang-javascript':
         specifier: ^6.1.8
         version: 6.1.8
@@ -103,9 +106,6 @@ importers:
       '@otterlord/astro-compress':
         specifier: ^1.1.48
         version: 1.1.48
-      '@rometools/wasm-web':
-        specifier: ../npm/wasm-web
-        version: link:../npm/wasm-web
       '@types/mermaid':
         specifier: ^9.1.0
         version: 9.1.0
