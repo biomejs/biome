@@ -174,7 +174,7 @@ pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
 /// The events received by the subscriber are filtered at the `info` level,
 /// then printed using the [HierarchicalLayer] layer, and the resulting text
 /// is written to log files rotated on a hourly basis (in
-/// `rome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
+/// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber() {
     let file_appender = tracing_appender::rolling::hourly(rome_log_dir(), log_file_name_prefix());
@@ -194,9 +194,9 @@ fn setup_tracing_subscriber() {
 }
 
 pub(super) fn rome_log_dir() -> PathBuf {
-    match env::var_os("ROME_LOG_DIR") {
+    match env::var_os("BIOME_LOG_DIR") {
         Some(directory) => PathBuf::from(directory),
-        None => env::temp_dir().join("rome-logs"),
+        None => env::temp_dir().join("biome-logs"),
     }
 }
 

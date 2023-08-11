@@ -1,8 +1,8 @@
+import type { Diagnostic as RomeDiagnostic } from "@biomedev/wasm-web";
 import type { Diagnostic as CodeMirrorDiagnostic } from "@codemirror/lint";
 import { lintGutter, setDiagnostics } from "@codemirror/lint";
 import type { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import type { Diagnostic as RomeDiagnostic } from "@biomedev/wasm-web";
 import type {
 	ReactCodeMirrorProps,
 	ReactCodeMirrorRef,

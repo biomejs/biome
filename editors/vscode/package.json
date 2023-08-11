@@ -135,9 +135,9 @@
 		"package": "vsce package -o biome_lsp.vsix",
 		"build": "npm run compile -- --minify && npm run package",
 		"install-extension": "code --install-extension biome_lsp.vsix --force",
-		"format": "cargo rome-cli-dev format ./src/ ./scripts --write",
-		"check": "cargo rome-cli-dev check ./src/ ./scripts",
-		"check:apply": "cargo rome-cli-dev check ./src/ ./scripts --apply-unsafe",
+		"format": "cargo biome-cli-dev format ./src/ ./scripts --write",
+		"check": "cargo biome-cli-dev check ./src/ ./scripts",
+		"check:apply": "cargo biome-cli-dev check ./src/ ./scripts --apply-unsafe",
 		"pack:dev": "npm run compile && npm run package && npm run install-extension",
 		"tsc": "tsc"
 	},

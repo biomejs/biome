@@ -19,7 +19,7 @@ description: Available commands and arguments in the Rome CLI.
 ---
 "#;
 
-const SCHEMA_TEMPLATE: &str = r#"// Run `ROME_VERSION=<version number> cargo codegen-website
+const SCHEMA_TEMPLATE: &str = r#"// Run `BIOME_VERSION=<version number> cargo codegen-website
 // to generate a new schema
 import {readFileSync} from "fs";
 import {join, resolve} from "path"

@@ -27,7 +27,7 @@ use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
-pub use crate::commands::{rome_command, RomeCommand};
+pub use crate::commands::{biome_command, BiomeCommand};
 pub use diagnostics::CliDiagnostic;
 pub(crate) use execute::{execute_mode, Execution, TraversalMode};
 pub use panic::setup_panic_handler;
@@ -37,7 +37,7 @@ pub use reports::{
 };
 pub use service::{open_transport, SocketTransport};
 
-pub(crate) const VERSION: &str = match option_env!("ROME_VERSION") {
+pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => env!("CARGO_PKG_VERSION"),
 };
@@ -63,18 +63,18 @@ impl<'app> CliSession<'app> {
     }
 
     /// Main function to run Rome CLI
-    pub fn run(self, command: RomeCommand) -> Result<(), CliDiagnostic> {
+    pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
         let has_metrics = command.has_metrics();
         if has_metrics {
             crate::metrics::init_metrics();
         }
 
         let result = match command {
-            RomeCommand::Version(_) => commands::version::full_version(self),
-            RomeCommand::Rage(_) => commands::rage::rage(self),
-            RomeCommand::Start => commands::daemon::start(self),
-            RomeCommand::Stop => commands::daemon::stop(self),
-            RomeCommand::Check {
+            BiomeCommand::Version(_) => commands::version::full_version(self),
+            BiomeCommand::Rage(_) => commands::rage::rage(self),
+            BiomeCommand::Start => commands::daemon::start(self),
+            BiomeCommand::Stop => commands::daemon::stop(self),
+            BiomeCommand::Check {
                 apply,
                 apply_unsafe,
                 cli_options,
@@ -98,7 +98,7 @@ impl<'app> CliSession<'app> {
                     formatter_enabled,
                 },
             ),
-            RomeCommand::Lint {
+            BiomeCommand::Lint {
                 apply,
                 apply_unsafe,
                 cli_options,
@@ -116,7 +116,7 @@ impl<'app> CliSession<'app> {
                     stdin_file_path,
                 },
             ),
-            RomeCommand::Ci {
+            BiomeCommand::Ci {
                 linter_enabled,
                 formatter_enabled,
                 organize_imports_enabled,
@@ -134,7 +134,7 @@ impl<'app> CliSession<'app> {
                     cli_options,
                 },
             ),
-            RomeCommand::Format {
+            BiomeCommand::Format {
                 javascript_formatter,
                 formatter_configuration,
                 stdin_file_path,
@@ -156,15 +156,15 @@ impl<'app> CliSession<'app> {
                     files_configuration,
                 },
             ),
-            RomeCommand::Init => commands::init::init(self),
-            RomeCommand::LspProxy(_) => commands::daemon::lsp_proxy(),
-            RomeCommand::Migrate(cli_options, write) => {
+            BiomeCommand::Init => commands::init::init(self),
+            BiomeCommand::LspProxy(_) => commands::daemon::lsp_proxy(),
+            BiomeCommand::Migrate(cli_options, write) => {
                 commands::migrate::migrate(self, cli_options, write)
             }
-            RomeCommand::RunServer { stop_on_disconnect } => {
+            BiomeCommand::RunServer { stop_on_disconnect } => {
                 commands::daemon::run_server(stop_on_disconnect)
             }
-            RomeCommand::PrintSocket => commands::daemon::print_socket(),
+            BiomeCommand::PrintSocket => commands::daemon::print_socket(),
         };
 
         if has_metrics {

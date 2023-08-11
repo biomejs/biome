@@ -131,7 +131,7 @@ jobs:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols"
-          ROME_VERSION: ${{ needs.check.outputs.rome_version }}
+          BIOME_VERSION: ${{ needs.check.outputs.rome_version }}
 
       - name: Copy LSP binary
         if: matrix.os == 'windows-2022'

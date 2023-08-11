@@ -8,7 +8,7 @@ version              = "0.0.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
-name = "rome"
+name = "biome"
 path = "src/main.rs"
 
 [dependencies]

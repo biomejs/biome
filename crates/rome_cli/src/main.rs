@@ -6,8 +6,8 @@
 
 use bpaf::{Args, ParseFailure};
 use rome_cli::{
-    open_transport, rome_command, setup_panic_handler, to_color_mode, CliDiagnostic, CliSession,
-    RomeCommand,
+    open_transport, biome_command, setup_panic_handler, to_color_mode, CliDiagnostic, CliSession,
+    BiomeCommand,
 };
 use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_diagnostics::{set_bottom_frame, PrintDiagnostic};
@@ -28,7 +28,7 @@ fn main() -> ExitCode {
     set_bottom_frame(main as usize);
 
     let mut console = EnvConsole::default();
-    let command = rome_command().run_inner(Args::current_args());
+    let command = biome_command().run_inner(Args::current_args());
     match command {
         Ok(command) => {
             let color_mode = to_color_mode(command.get_color());
@@ -59,7 +59,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn run_workspace(console: &mut EnvConsole, command: RomeCommand) -> Result<(), CliDiagnostic> {
+fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), CliDiagnostic> {
     // If the `--use-server` CLI flag is set, try to open a connection to an
     // existing Rome server socket
     let workspace = if command.should_use_server() {

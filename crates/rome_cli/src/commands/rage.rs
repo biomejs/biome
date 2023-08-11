@@ -27,7 +27,7 @@ pub(crate) fn rage(session: CliSession) -> Result<(), CliDiagnostic> {
     {KeyValuePair("OS", markup!({std::env::consts::OS}))}
 
     {Section("Environment")}
-    {EnvVarOs("ROME_LOG_DIR")}
+    {EnvVarOs("BIOME_LOG_DIR")}
     {EnvVarOs("NO_COLOR")}
     {EnvVarOs("TERM")}
     {EnvVarOs("JS_RUNTIME_VERSION")}

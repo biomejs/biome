@@ -21,8 +21,8 @@ pub(crate) mod version;
 
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options, version(VERSION))]
-/// Rome official CLI. Use it to check the health of your project or run it to check single files.
-pub enum RomeCommand {
+/// Biome official CLI. Use it to check the health of your project or run it to check single files.
+pub enum BiomeCommand {
     /// Shows the Rome version information and quit
     #[bpaf(command)]
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
@@ -174,40 +174,40 @@ pub enum RomeCommand {
     PrintSocket,
 }
 
-impl RomeCommand {
+impl BiomeCommand {
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self {
-            RomeCommand::Version(cli_options) => cli_options.colors.as_ref(),
-            RomeCommand::Rage(cli_options) => cli_options.colors.as_ref(),
-            RomeCommand::Start => None,
-            RomeCommand::Stop => None,
-            RomeCommand::Check { cli_options, .. } => cli_options.colors.as_ref(),
-            RomeCommand::Lint { cli_options, .. } => cli_options.colors.as_ref(),
-            RomeCommand::Ci { cli_options, .. } => cli_options.colors.as_ref(),
-            RomeCommand::Format { cli_options, .. } => cli_options.colors.as_ref(),
-            RomeCommand::Init => None,
-            RomeCommand::LspProxy(cli_options) => cli_options.colors.as_ref(),
-            RomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
-            RomeCommand::RunServer { .. } => None,
-            RomeCommand::PrintSocket => None,
+            BiomeCommand::Version(cli_options) => cli_options.colors.as_ref(),
+            BiomeCommand::Rage(cli_options) => cli_options.colors.as_ref(),
+            BiomeCommand::Start => None,
+            BiomeCommand::Stop => None,
+            BiomeCommand::Check { cli_options, .. } => cli_options.colors.as_ref(),
+            BiomeCommand::Lint { cli_options, .. } => cli_options.colors.as_ref(),
+            BiomeCommand::Ci { cli_options, .. } => cli_options.colors.as_ref(),
+            BiomeCommand::Format { cli_options, .. } => cli_options.colors.as_ref(),
+            BiomeCommand::Init => None,
+            BiomeCommand::LspProxy(cli_options) => cli_options.colors.as_ref(),
+            BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
+            BiomeCommand::RunServer { .. } => None,
+            BiomeCommand::PrintSocket => None,
         }
     }
 
     pub const fn should_use_server(&self) -> bool {
         match self {
-            RomeCommand::Version(cli_options) => cli_options.use_server,
-            RomeCommand::Rage(cli_options) => cli_options.use_server,
-            RomeCommand::Start => false,
-            RomeCommand::Stop => false,
-            RomeCommand::Check { cli_options, .. } => cli_options.use_server,
-            RomeCommand::Lint { cli_options, .. } => cli_options.use_server,
-            RomeCommand::Ci { cli_options, .. } => cli_options.use_server,
-            RomeCommand::Format { cli_options, .. } => cli_options.use_server,
-            RomeCommand::Init => false,
-            RomeCommand::LspProxy(cli_options) => cli_options.use_server,
-            RomeCommand::Migrate(cli_options, _) => cli_options.use_server,
-            RomeCommand::RunServer { .. } => false,
-            RomeCommand::PrintSocket => false,
+            BiomeCommand::Version(cli_options) => cli_options.use_server,
+            BiomeCommand::Rage(cli_options) => cli_options.use_server,
+            BiomeCommand::Start => false,
+            BiomeCommand::Stop => false,
+            BiomeCommand::Check { cli_options, .. } => cli_options.use_server,
+            BiomeCommand::Lint { cli_options, .. } => cli_options.use_server,
+            BiomeCommand::Ci { cli_options, .. } => cli_options.use_server,
+            BiomeCommand::Format { cli_options, .. } => cli_options.use_server,
+            BiomeCommand::Init => false,
+            BiomeCommand::LspProxy(cli_options) => cli_options.use_server,
+            BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
+            BiomeCommand::RunServer { .. } => false,
+            BiomeCommand::PrintSocket => false,
         }
     }
 
@@ -217,19 +217,19 @@ impl RomeCommand {
 
     pub fn is_verbose(&self) -> bool {
         match self {
-            RomeCommand::Version(_) => false,
-            RomeCommand::Rage(_) => false,
-            RomeCommand::Start => false,
-            RomeCommand::Stop => false,
-            RomeCommand::Check { cli_options, .. } => cli_options.verbose,
-            RomeCommand::Lint { cli_options, .. } => cli_options.verbose,
-            RomeCommand::Format { cli_options, .. } => cli_options.verbose,
-            RomeCommand::Ci { cli_options, .. } => cli_options.verbose,
-            RomeCommand::Init => false,
-            RomeCommand::LspProxy(cli_options) => cli_options.verbose,
-            RomeCommand::Migrate(cli_options, _) => cli_options.verbose,
-            RomeCommand::RunServer { .. } => false,
-            RomeCommand::PrintSocket => false,
+            BiomeCommand::Version(_) => false,
+            BiomeCommand::Rage(_) => false,
+            BiomeCommand::Start => false,
+            BiomeCommand::Stop => false,
+            BiomeCommand::Check { cli_options, .. } => cli_options.verbose,
+            BiomeCommand::Lint { cli_options, .. } => cli_options.verbose,
+            BiomeCommand::Format { cli_options, .. } => cli_options.verbose,
+            BiomeCommand::Ci { cli_options, .. } => cli_options.verbose,
+            BiomeCommand::Init => false,
+            BiomeCommand::LspProxy(cli_options) => cli_options.verbose,
+            BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
+            BiomeCommand::RunServer { .. } => false,
+            BiomeCommand::PrintSocket => false,
         }
     }
 }

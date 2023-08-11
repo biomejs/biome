@@ -181,7 +181,7 @@ fn assert_rage_snapshot(payload: SnapshotPayload<'_>) {
             .lines()
             .map(|line| match line.trim_start().split_once(':') {
                 Some((
-                    "CPU Architecture" | "OS" | "NO_COLOR" | "TERM" | "ROME_LOG_DIR"
+                    "CPU Architecture" | "OS" | "NO_COLOR" | "TERM" | "BIOME_LOG_DIR"
                     | "Color support",
                     value,
                 )) => line.replace(value.trim_start(), "**PLACEHOLDER**"),
@@ -221,7 +221,7 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        env::set_var("ROME_LOG_DIR", &path);
+        env::set_var("BIOME_LOG_DIR", &path);
 
         Self {
             path,
@@ -233,6 +233,6 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        env::remove_var("ROME_LOG_DIR");
+        env::remove_var("BIOME_LOG_DIR");
     }
 }

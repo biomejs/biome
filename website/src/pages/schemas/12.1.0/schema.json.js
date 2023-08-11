@@ -1,4 +1,4 @@
-// Run `ROME_VERSION=<version number> cargo codegen-website
+// Run `BIOME_VERSION=<version number> cargo codegen-website
 // to generate a new schema
 import { readFileSync } from "fs";
 import { join, resolve } from "path";

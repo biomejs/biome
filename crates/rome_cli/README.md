@@ -7,5 +7,5 @@ the `rome` VSCode extension
 # Logs
 
 When the server is run in daemon mode, it will output logs to a file created in
-a `rome-logs` directory inside the system temporary directory. The log file
+a `biome-logs` directory inside the system temporary directory. The log file
 will be rotated on a hourly basis.

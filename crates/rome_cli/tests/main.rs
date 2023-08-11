@@ -10,7 +10,7 @@ use snap_test::assert_cli_snapshot;
 use bpaf::ParseFailure;
 use std::path::Path;
 
-use rome_cli::{rome_command, CliDiagnostic, CliSession};
+use rome_cli::{ CliDiagnostic, CliSession, biome_command};
 use rome_console::{markup, BufferConsole, Console, ConsoleExt};
 use rome_fs::{FileSystem, MemoryFileSystem};
 use rome_service::{App, DynRef};
@@ -422,7 +422,7 @@ pub(crate) fn run_cli<'app>(
     let app = App::new(fs, console, WorkspaceRef::Owned(workspace));
 
     let mut session = CliSession { app };
-    let command = rome_command().run_inner(args);
+    let command = biome_command().run_inner(args);
     match command {
         Ok(command) => session.run(command),
         Err(failure) => {

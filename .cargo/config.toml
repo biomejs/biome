@@ -32,8 +32,8 @@ documentation = """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets --verbose -- --deny warnings -W clippy::cargo -W clippy::dbg_macro -A clippy::cargo_common_metadata -A clippy::multiple_crate_versions"
 lintdoc = "run -p xtask_lintdoc --"
-rome-cli = "run -p rome_cli --release --"
-rome-cli-dev = "run -p rome_cli --"
+biome-cli = "run -p rome_cli --release --"
+biome-cli-dev = "run -p rome_cli --"
 
 [profile.release]
 lto = true
