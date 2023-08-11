@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/comments/mapped_types.ts
 ---
 
@@ -55,7 +54,7 @@ type M = { [m in M] /* commentG */: string }
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -24,7 +24,7 @@
  };
  

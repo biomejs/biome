@@ -57,7 +57,7 @@ type D6 /*0*/ = /*1*/ (| a & b);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -23,21 +23,21 @@
  type B3 = C;
  type B4 = C;

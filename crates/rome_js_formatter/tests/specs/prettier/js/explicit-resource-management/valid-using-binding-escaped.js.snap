@@ -15,7 +15,7 @@ info: js/explicit-resource-management/valid-using-binding-escaped.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,3 +1,3 @@
  {
 -  using ab = c;

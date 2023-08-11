@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/babel-plugins/do-expressions.js
 ---
 
@@ -26,7 +25,7 @@ let a = x > 10 ? 'big' : 'small';
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,10 +1,11 @@
  // https://babeljs.io/docs/en/babel-plugin-proposal-do-expressions
  

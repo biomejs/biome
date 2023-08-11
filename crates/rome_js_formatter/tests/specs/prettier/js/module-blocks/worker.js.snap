@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/module-blocks/worker.js
 ---
 
@@ -30,7 +29,7 @@ worker.postMessage(module { export function fn() { return "hello!" } });
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,22 +1,15 @@
  let worker = new Worker(module {
 -  onmessage = function ({ data }) {

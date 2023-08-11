@@ -19,7 +19,7 @@ info: js/ignore/class-expression-decorator.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,5 @@
 -// prettier-ignore
  (

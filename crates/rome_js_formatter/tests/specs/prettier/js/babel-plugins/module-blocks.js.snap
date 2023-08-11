@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/babel-plugins/module-blocks.js
 ---
 
@@ -19,7 +18,7 @@ let m = module {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,5 @@
 -let m = module {
 +let m = module;

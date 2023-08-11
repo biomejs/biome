@@ -39,7 +39,7 @@ type X = {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -12,14 +12,12 @@
  
  type X = {

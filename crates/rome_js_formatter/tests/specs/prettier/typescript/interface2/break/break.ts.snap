@@ -80,7 +80,7 @@ export interface ExtendsLongOneWithGenerics extends Bar< SomeLongTypeSomeLongTyp
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,8 @@
 -export interface Environment1
 -  extends GenericEnvironment<SomeType, AnotherType, YetAnotherType> {

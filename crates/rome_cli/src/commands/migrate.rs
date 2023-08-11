@@ -4,7 +4,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{execute_mode, Execution, TraversalMode};
 use crate::{CliDiagnostic, CliSession};
 
-/// Handler for the "check" command of the Rome CLI
+/// Handler for the "check" command of the Biome CLI
 pub(crate) fn migrate(
     mut session: CliSession,
     cli_options: CliOptions,
@@ -29,7 +29,7 @@ pub(crate) fn migrate(
         )
     } else {
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: "Rome couldn't find the configuration file".to_string(),
+            reason: "Biome couldn't find the configuration file".to_string(),
         }))
     }
 }

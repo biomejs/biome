@@ -47,7 +47,7 @@ function makeChainWalker<
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -21,7 +21,7 @@
  
  function parseFunctionBodyAndFinish<

@@ -15,7 +15,7 @@ import module foo from "./module.wasm";
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1,4 @@
 -import module foo from "./module.wasm";
 +import module

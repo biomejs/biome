@@ -41,7 +41,7 @@ type Foo6 = [
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,6 +1,4 @@
 -type Foo1 = [
 -  /* comment */

@@ -96,7 +96,7 @@ info: js/template-literals/indention.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -10,8 +10,8 @@
        2. Go to "${chalk.green.underline(
          "https://www.example.com/drupedalKangarooTransformer",

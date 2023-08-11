@@ -29,7 +29,7 @@ fs.readdirSync(suiteLoc).forEach(function (testName) {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,7 @@
  fs.readdirSync(suiteLoc).forEach(function (testName) {
 -  (skip ? it.skip : it)(

@@ -1,4 +1,4 @@
-import type { Diagnostic } from "@biomedev/wasm-web";
+import type { Diagnostic } from "@biomejs/wasm-web";
 import { EditorSelection } from "@codemirror/state";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import errorIcon from "../../svg/error.svg";

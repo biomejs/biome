@@ -1,4 +1,4 @@
-import type { Diagnostic } from "@biomedev/wasm-web";
+import type { Diagnostic } from "@biomejs/wasm-web";
 import type { parser } from "codemirror-lang-rome-ast";
 import type { Dispatch, SetStateAction } from "react";
 

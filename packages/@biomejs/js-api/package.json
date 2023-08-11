@@ -1,0 +1,67 @@
+{
+  "name": "@biomejs/js-api",
+  "version": "0.3.0",
+  "description": "JavaScript APIs for the Rome package",
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "format": "cargo biome-cli-dev format ./ --write",
+    "ci": "cargo biome-cli-dev ci ./src && tsc --noEmit",
+    "check": "pnpm rome:check && tsc --noEmit",
+		"rome:check": "cargo biome-cli-dev check ./",
+		"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
+    "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-node": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-web-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --dev --scope biomedev ../../crates/rome_wasm",
+    "build:wasm-web": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev ../../crates/rome_wasm",
+    "test": "vitest",
+    "test:ci": "vitest --run",
+    "build": "tsc "
+  },
+  "files": [
+    "README.md",
+    "dist/"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "JavaScript",
+    "bindings",
+    "APIs",
+    "rome"
+  ],
+  "license": "MIT",
+  "homepage": "https://rome.tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rome/tools.git",
+    "directory": "npm/js-api"
+  },
+  "author": "Rome Tools Developers and Contributors",
+  "bugs": "https://github.com/rome/tools/issues",
+  "devDependencies": {
+    "typescript": "^4.8.2",
+    "vitest": "^0.22.0",
+    "vite": "^3.0.8",
+    "@biomejs/wasm-bundler": "../wasm-bundler",
+    "@biomejs/wasm-nodejs": "../wasm-nodejs",
+    "@biomejs/wasm-web": "../wasm-web"
+  },
+  "peerDependencies": {
+    "@biomejs/wasm-bundler": "^10.0.0",
+    "@biomejs/wasm-nodejs": "^10.0.0",
+    "@biomejs/wasm-web": "^10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@biomejs/wasm-bundler": {
+      "optional": true
+    },
+    "@biomejs/wasm-nodejs": {
+      "optional": true
+    },
+    "@biomejs/wasm-web": {
+      "optional": true
+    }
+  }
+}

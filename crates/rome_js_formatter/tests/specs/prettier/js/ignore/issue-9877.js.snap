@@ -25,7 +25,7 @@ export default function test() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,11 +1,6 @@
  export default function test() {
    return {

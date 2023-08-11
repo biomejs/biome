@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/trailing-comma/type-parameters-vs-arguments.ts
 ---
 
@@ -30,7 +29,7 @@ const instance = new FooClass<
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -5,7 +5,7 @@
  }
  

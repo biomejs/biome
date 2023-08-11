@@ -15,7 +15,7 @@ declare /* module */ namespace A {}
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -declare namespace /* module */ A {}
 +declare /* module */ namespace A {}

@@ -2,11 +2,11 @@
 //! Parenthesizing an expression can be desired to change the precedence of an expression or to ease
 //! readability.
 //!
-//! Rome is opinionated about which parentheses to keep or where to insert parentheses.
+//! Biome is opinionated about which parentheses to keep or where to insert parentheses.
 //! It removes parentheses that aren't necessary to keep the same semantics as in the source document, nor aren't improving readability.
-//! Rome also inserts parentheses around nodes where we believe that they're helpful to improve readability.
+//! Biome also inserts parentheses around nodes where we believe that they're helpful to improve readability.
 //!
-//! The [NeedsParentheses] trait forms the foundation of Rome's parentheses formatting and is implemented
+//! The [NeedsParentheses] trait forms the foundation of Biome's parentheses formatting and is implemented
 //! by all nodes supporting parentheses (expressions, assignments, and types). The trait's main method
 //! is the [NeedsParentheses::needs_parentheses]
 //! method that implements the rules when a node requires parentheses.
@@ -20,7 +20,7 @@
 //! formatting `(a + 3) + 5` must yield the same formatted output as `a + 3 + 5` or `a + (3 + 5)` or even
 //! `(((a + 3) + 5))` even though all these trees differ by the number of parenthesized expressions.
 //!
-//! There are two measures taken by Rome to ensure formatting is stable regardless of the number of parenthesized nodes in a tree:
+//! There are two measures taken by Biome to ensure formatting is stable regardless of the number of parenthesized nodes in a tree:
 //!
 //! ## Removing parenthesized nodes
 //!

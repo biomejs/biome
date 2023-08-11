@@ -578,7 +578,7 @@ fn process_messages(options: ProcessMessagesOptions) {
 
     if !mode.is_ci() && not_printed_diagnostics > 0 {
         console.log(markup! {
-            <Warn>"The number of diagnostics exceeds the number allowed by Rome.\n"</Warn>
+            <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
             <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed_diagnostics}</Emphasis><Info>"."</Info>
         })
     }
@@ -687,7 +687,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             }
             TraversalMode::Format { .. } => file_features.supports_for(&FeatureName::Format),
             TraversalMode::Lint { .. } => file_features.supports_for(&FeatureName::Lint),
-            // Imagine if Rome can't handle its own configuration file...
+            // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
         }
     }

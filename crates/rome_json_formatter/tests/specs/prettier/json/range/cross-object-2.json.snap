@@ -1,7 +1,6 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-info:
-  test_file: json/range/cross-object-2.json
+info: json/range/cross-object-2.json
 ---
 
 # Input
@@ -20,7 +19,7 @@ c: {d:     6}
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1,5 @@
 -{ "a": { "b": 2, "c": 3, "d": { "d": 4 } }, "c": { "d": 6 } }
 +{a:

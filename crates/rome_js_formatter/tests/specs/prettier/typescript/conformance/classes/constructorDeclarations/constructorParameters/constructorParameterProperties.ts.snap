@@ -34,7 +34,7 @@ var r4 = d.z; // error
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,6 @@
  class C {
    y: string;

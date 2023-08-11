@@ -21,7 +21,7 @@ async function foo() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,7 @@
  async function foo() {
 -  // prettier-ignore

@@ -21,7 +21,7 @@ import * as baz from "baz.json" with { /* comment */ }
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,7 @@
  export * as foo from "foo.json";
 -export * as bar from "bar.json";

@@ -251,13 +251,13 @@ pub struct FilesConfiguration {
     #[bpaf(long("files-max-size"), argument("NUMBER"))]
     pub max_size: Option<NonZeroU64>,
 
-    /// A list of Unix shell style patterns. Rome tools will ignore files/folders that will
+    /// A list of Unix shell style patterns. Biome tools will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub ignore: Option<StringSet>,
 
-    /// Tells Rome to not emit diagnostics when handling files that doesn't know
+    /// Tells Biome to not emit diagnostics when handling files that doesn't know
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     pub ignore_unknown: Option<bool>,
@@ -321,7 +321,7 @@ impl ConfigurationBasePath {
 /// The function will try to traverse upwards the file system until if finds a `rome.json` file, or there
 /// aren't directories anymore.
 ///
-/// If a the configuration base path was provided by the user, the function will error. If not, Rome will use
+/// If a the configuration base path was provided by the user, the function will error. If not, Biome will use
 /// its defaults.
 pub fn load_config(
     file_system: &DynRef<dyn FileSystem>,

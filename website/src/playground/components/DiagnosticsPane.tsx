@@ -1,4 +1,4 @@
-import type { Diagnostic } from "@biomedev/wasm-web";
+import type { Diagnostic } from "@biomejs/wasm-web";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { useState } from "react";
 import DiagnosticsConsoleTab from "../tabs/DiagnosticsConsoleTab";

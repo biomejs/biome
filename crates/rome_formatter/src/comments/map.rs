@@ -33,10 +33,10 @@ use std::ops::Range;
 /// it is generally desired to keep the comments in the same order as in the source document. This translates to
 /// inserting the comments per node and for every node in leading, dangling, trailing order (same order as this map optimises for).
 ///
-/// Running Rome formatter on real world use cases showed that more than 99.99% of comments get inserted in
+/// Running Biome formatter on real world use cases showed that more than 99.99% of comments get inserted in
 /// the described order.
 ///
-/// The size limitation isn't a concern for comments because Rome supports source documents with a size up to 4GB (`u32::MAX`)
+/// The size limitation isn't a concern for comments because Biome supports source documents with a size up to 4GB (`u32::MAX`)
 /// and every comment has at least a size of 2 bytes:
 /// * 1 byte for the start sequence, e.g. `#`
 /// * 1 byte for the end sequence, e.g. `\n`

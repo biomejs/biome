@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/identifier/parentheses/let.js
 ---
 
@@ -118,7 +117,7 @@ a[1] + (let[2] = 2);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,15 +2,15 @@
  
  let.a[0] = 1;

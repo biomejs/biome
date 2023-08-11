@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/satisfies-operators/comments-unstable.ts
 ---
 
@@ -22,7 +21,7 @@ Record<string, number>;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,4 +2,6 @@
    prop1: 1,
    prop2: 2,

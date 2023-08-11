@@ -39,7 +39,7 @@ export type c =
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -4,7 +4,7 @@
    // bar
    | (bar1 & bar2)

@@ -24,7 +24,7 @@ call(function () {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,23 +1,17 @@
 -call(
 -  function () {

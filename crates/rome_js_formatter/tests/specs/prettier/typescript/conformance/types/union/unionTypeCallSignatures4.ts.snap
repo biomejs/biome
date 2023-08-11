@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/types/union/unionTypeCallSignatures4.ts
 ---
 
@@ -40,7 +39,7 @@ f12345("a", "b", "c");  // error
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -﻿type F1 = (a: string, b?: string) => void;
 +type F1 = (a: string, b?: string) => void;

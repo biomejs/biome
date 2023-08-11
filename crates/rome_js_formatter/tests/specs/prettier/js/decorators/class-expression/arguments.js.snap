@@ -16,7 +16,7 @@ console.log(@deco class {})
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,12 @@
  console.log(
 -  @deco

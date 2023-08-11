@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/types/tuple/indexerWithTuple.ts
 ---
 
@@ -47,7 +46,7 @@ var eleUnion26 = unionTuple2["1"]; // string | number
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -﻿var strNumTuple: [string, number] = ["foo", 10];
 +var strNumTuple: [string, number] = ["foo", 10];

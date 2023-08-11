@@ -141,7 +141,7 @@ impl JsFormatSyntaxRewriter {
             (Ok(l_paren), Ok(inner), Ok(r_paren)) => {
                 let prev_token = l_paren.prev_token();
 
-                // Keep parentheses around unknown expressions. Rome can't know the precedence.
+                // Keep parentheses around unknown expressions. Biome can't know the precedence.
                 if inner.kind().is_bogus()
                     // Don't remove parentheses if the expression is a decorator
                     || inner.grand_parent().map_or(false, |node| node.kind() == JsSyntaxKind::JS_DECORATOR)

@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/comments/declare_function.ts
 ---
 
@@ -20,7 +19,7 @@ declare function /* foo */ f( /* baz */ a /* taz */) /* bar */;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,4 +3,4 @@
    // TODO this is a very very very very long comment that makes it go > 80 columns
  ): number;

@@ -19,7 +19,7 @@ foo.a().b().c(#{n, o})
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,5 @@
  foo.a().b().c([n, o]);
 -foo.a().b().c(#[n, o]);

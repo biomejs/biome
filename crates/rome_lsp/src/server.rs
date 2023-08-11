@@ -226,7 +226,7 @@ impl LanguageServer for LSPServer {
         )
     )]
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
-        info!("Starting Rome Language Server...");
+        info!("Starting Biome Language Server...");
         self.is_initialized.store(true, Ordering::Relaxed);
 
         let server_capabilities = server_capabilities(&params.capabilities);
@@ -240,11 +240,11 @@ impl LanguageServer for LSPServer {
         );
 
         if params.root_path.is_some() {
-            warn!("The Rome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
+            warn!("The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
         }
 
         if params.workspace_folders.is_some() {
-            warn!("The Rome Server was initialized with the `workspace_folders` parameter: this is unsupported at the moment, use `root_uri` instead");
+            warn!("The Biome Server was initialized with the `workspace_folders` parameter: this is unsupported at the moment, use `root_uri` instead");
         }
 
         //

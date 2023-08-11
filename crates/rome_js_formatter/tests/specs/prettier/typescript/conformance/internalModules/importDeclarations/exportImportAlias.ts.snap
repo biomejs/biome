@@ -81,7 +81,7 @@ var p: M.D.Point;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,10 +3,7 @@
  module A {
    export var x = "hello world";

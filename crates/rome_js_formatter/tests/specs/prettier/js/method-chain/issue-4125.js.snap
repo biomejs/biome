@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/method-chain/issue-4125.js
 ---
 
@@ -164,7 +163,7 @@ var l = base
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -161,7 +161,4 @@
    .b()
    .c(a(a(b(c(d().p).p).p).p));

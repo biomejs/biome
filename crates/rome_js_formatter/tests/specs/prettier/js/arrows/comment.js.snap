@@ -65,7 +65,7 @@ func(() => () => () => // comment
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -31,54 +31,50 @@
  />;
  

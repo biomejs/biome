@@ -21,7 +21,7 @@ Environment:
   JS_RUNTIME_NAME:              unset
   NODE_PACKAGE_MANAGER:         unset
 
-Rome Configuration:
+Biome Configuration:
   Status:                       unset
 
 Server:

@@ -34,7 +34,7 @@ a = (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,15 +1,11 @@
 -a; /* a */ // b
 -/* c */

@@ -6,7 +6,7 @@ use rome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRa
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
-/// has the risk that Rome misinterprets the structure of the code and formatting it could
+/// has the risk that Biome misinterprets the structure of the code and formatting it could
 /// "mess up" the developers, yet incomplete, work or accidentally introduce new syntax errors.
 ///
 /// You may be inclined to call `node.text` directly. However, using `text` doesn't track the nodes

@@ -16,10 +16,10 @@ fn panic_handler(info: &PanicInfo) {
     // panic at the same time
     let mut error = String::new();
 
-    writeln!(error, "Rome encountered an unexpected error").unwrap();
+    writeln!(error, "Biome encountered an unexpected error").unwrap();
     writeln!(error).unwrap();
 
-    writeln!(error, "This is a bug in Rome, not an error in your code, and we would appreciate it if you could report it to https://github.com/rome/tools/issues/ along with the following information to help us fixing the issue:").unwrap();
+    writeln!(error, "This is a bug in Biome, not an error in your code, and we would appreciate it if you could report it to https://github.com/rome/tools/issues/ along with the following information to help us fixing the issue:").unwrap();
     writeln!(error).unwrap();
 
     if let Some(location) = info.location() {

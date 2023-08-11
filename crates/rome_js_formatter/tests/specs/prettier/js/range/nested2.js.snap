@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/range/nested2.js
 ---
 
@@ -21,7 +20,7 @@ catch (err) {}
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,4 +2,5 @@
    if (condition) {
      body;

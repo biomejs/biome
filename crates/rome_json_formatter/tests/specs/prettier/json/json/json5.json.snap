@@ -1,7 +1,6 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-info:
-  test_file: json/json/json5.json
+info: json/json/json5.json
 ---
 
 # Input
@@ -40,7 +39,7 @@ No \\n's!",
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,22 +1,25 @@
  [
 -  {

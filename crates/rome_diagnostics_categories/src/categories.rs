@@ -1,4 +1,4 @@
-// This file contains the list of all diagnostic categories for the Rome
+// This file contains the list of all diagnostic categories for the Biome
 // toolchain
 //
 // The `define_categories` macro is preprocessed in the build script for the

@@ -4,7 +4,7 @@ import init, {
 	RomePath,
 	RuleCategories,
 	Workspace,
-} from "@biomedev/wasm-web";
+} from "@biomejs/wasm-web";
 import {
 	ArrowParentheses,
 	IndentStyle,

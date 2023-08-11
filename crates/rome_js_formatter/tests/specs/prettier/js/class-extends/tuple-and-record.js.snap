@@ -19,7 +19,7 @@ class D extends #[] {}
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,7 @@
  class A extends ({}) {}
 -class B extends #{} {}

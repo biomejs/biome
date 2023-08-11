@@ -96,11 +96,11 @@
 #
 #      - name: Compile backends
 #        run: |
-#          pnpm --prefix packages/@biomedev/js-api build:wasm-bundler
-#          pnpm --prefix packages/@biomedev/js-api build:wasm-node
-#          pnpm --prefix packages/@biomedev/js-api build:wasm-web
-#          pnpm --prefix packages/@biomedev/backend-jsonrpc i
-#          pnpm --prefix packages/@biomedev/backend-jsonrpc run build
+#          pnpm --prefix packages/@biomejs/js-api build:wasm-bundler
+#          pnpm --prefix packages/@biomejs/js-api build:wasm-node
+#          pnpm --prefix packages/@biomejs/js-api build:wasm-web
+#          pnpm --prefix packages/@biomejs/backend-jsonrpc i
+#          pnpm --prefix packages/@biomejs/backend-jsonrpc run build
 #
 #      - name: Build package
 #        working-directory: npm/js-api

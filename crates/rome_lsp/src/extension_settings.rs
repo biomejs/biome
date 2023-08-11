@@ -15,7 +15,7 @@ pub struct WorkspaceSettings {
     /// Enable rename capability
     pub rename: Option<bool>,
 
-    /// Only run Rome if a `rome.json` configuration file exists.
+    /// Only run Biome if a `rome.json` configuration file exists.
     pub require_configuration: Option<bool>,
 }
 

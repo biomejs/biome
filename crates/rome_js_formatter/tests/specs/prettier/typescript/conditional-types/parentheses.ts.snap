@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conditional-types/parentheses.ts
 ---
 
@@ -35,7 +34,7 @@ type Test<T> = T extends (new (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,22 +1,25 @@
  // #13275
  type Foo<T> = T extends ((...a: any[]) => infer R extends string) ? R : never;

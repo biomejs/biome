@@ -4,7 +4,7 @@ expression: content
 ---
 example/ internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Rome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: example/
+  × Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: example/
   
 
 

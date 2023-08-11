@@ -1,5 +1,5 @@
 {
-  "name": "@biomedev/monorepo",
+  "name": "@biomejs/monorepo",
   "private": true,
   "version": "0.0.0",
   "scripts": {

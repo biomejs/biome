@@ -42,7 +42,7 @@ function value(type, value) {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,6 +1,7 @@
  const issues = {
    see: "#7724 and #12653",

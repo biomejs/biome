@@ -16,7 +16,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) stdin_file_path: Option<String>,
 }
 
-/// Handler for the "lint" command of the Rome CLI
+/// Handler for the "lint" command of the Biome CLI
 pub(crate) fn lint(
     mut session: CliSession,
     payload: LintCommandPayload,

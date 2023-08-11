@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/template-literals/styled-jsx-with-expressions.js
 ---
 
@@ -56,7 +55,7 @@ info: js/template-literals/styled-jsx-with-expressions.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,27 +1,27 @@
  <style jsx>{`
    div {

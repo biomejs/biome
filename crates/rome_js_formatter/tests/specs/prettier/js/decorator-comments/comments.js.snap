@@ -19,7 +19,7 @@ class Something {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,5 @@
  class Something {
    @Annotateme()

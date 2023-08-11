@@ -8,7 +8,7 @@ pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
     create_config(fs, Configuration::default())?;
 
     session.app.console.log(markup! {
-"\n"<Inverse>"Welcome to Rome! Let's get you started..."</Inverse>"
+"\n"<Inverse>"Welcome to Biome! Let's get you started..."</Inverse>"
 
 "<Info><Emphasis>"Files created "</Emphasis></Info>{HorizontalLine::new(106)}"
 

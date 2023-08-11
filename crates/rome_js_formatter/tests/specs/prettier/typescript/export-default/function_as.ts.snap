@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/export-default/function_as.ts
 ---
 
@@ -16,7 +15,7 @@ export default (function log(){} as typeof console.log);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -export default (function log() {} as typeof console.log);
 +export default (function log() {}) as typeof console.log;

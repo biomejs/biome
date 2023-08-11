@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/non-null/optional-chain.ts
 ---
 
@@ -33,7 +32,7 @@ a?.().b!.c?.c;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -4,15 +4,15 @@
  a!.b?.c;
  a?.b!?.c;

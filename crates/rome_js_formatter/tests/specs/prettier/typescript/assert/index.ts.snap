@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/assert/index.ts
 ---
 
@@ -42,7 +41,7 @@ class AssertsFoo {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -15,7 +15,7 @@
  }
  

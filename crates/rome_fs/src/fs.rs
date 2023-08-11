@@ -73,7 +73,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
 
                     if from_parent {
                         info!(
-                        "Rome auto discovered the file at following path that wasn't in the working directory: {}",
+                        "Biome auto discovered the file at following path that wasn't in the working directory: {}",
                         file_path.display()
                     );
                     }
@@ -313,7 +313,7 @@ pub enum ErrorKind {
 impl console::fmt::Display for ErrorKind {
     fn fmt(&self, fmt: &mut console::fmt::Formatter) -> io::Result<()> {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Rome couldn't read the file"),
+            ErrorKind::CantReadFile(_) => fmt.write_str("Biome couldn't read the file"),
             ErrorKind::UnknownFileType => fmt.write_str("Unknown file type"),
             ErrorKind::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
             ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
@@ -326,7 +326,7 @@ impl console::fmt::Display for ErrorKind {
 impl std::fmt::Display for ErrorKind {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Rome couldn't read the file"),
+            ErrorKind::CantReadFile(_) => fmt.write_str("Biome couldn't read the file"),
             ErrorKind::UnknownFileType => write!(fmt, "Unknown file type"),
             ErrorKind::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
             ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
@@ -341,20 +341,20 @@ impl Advices for ErrorKind {
         match self {
 			ErrorKind::CantReadFile(path) => visitor.record_log(
 		LogCategory::Error,
-			&format!("Rome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {}", path)
+			&format!("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {}", path)
 			),
 
             ErrorKind::UnknownFileType => visitor.record_log(
                 LogCategory::Info,
-                &"Rome encountered a file system entry that's neither a file, directory or symbolic link",
+                &"Biome encountered a file system entry that's neither a file, directory or symbolic link",
             ),
             ErrorKind::DereferencedSymlink(path) => visitor.record_log(
                 LogCategory::Info,
-                &format!("Rome encountered a file system entry that is a broken symbolic link: {}", path),
+                &format!("Biome encountered a file system entry that is a broken symbolic link: {}", path),
             ),
             ErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
                 LogCategory::Error,
-                &format!("Rome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {}", path),
+                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {}", path),
             ),
         }
     }

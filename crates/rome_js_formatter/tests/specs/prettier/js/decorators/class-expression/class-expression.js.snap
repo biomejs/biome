@@ -28,7 +28,7 @@ const b2 = []
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,13 @@
  const a1 =
 -  @deco

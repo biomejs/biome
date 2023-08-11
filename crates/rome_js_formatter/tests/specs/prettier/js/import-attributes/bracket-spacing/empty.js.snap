@@ -14,7 +14,7 @@ export * as bar from "bar.json" with { }
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -export * as bar from "bar.json";
 +export * as bar from "bar.json" with {};

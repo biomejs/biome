@@ -214,7 +214,7 @@ fn handle_continue_break_comment(
     // ```javascript
     // continue /* comment */ a;
     // ```
-    // This differs from Prettier because other ASTs use an identifier for the label whereas Rome uses
+    // This differs from Prettier because other ASTs use an identifier for the label whereas Biome uses
     // a token.
     match enclosing.kind() {
         JsSyntaxKind::JS_CONTINUE_STATEMENT | JsSyntaxKind::JS_BREAK_STATEMENT => {

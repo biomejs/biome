@@ -8,7 +8,7 @@ importers:
         specifier: ^2.26.2
         version: 2.26.2
 
-  packages/@biomedev/backend-jsonrpc:
+  packages/@biomejs/backend-jsonrpc:
     devDependencies:
       '@types/node':
         specifier: ^18.7.2
@@ -23,17 +23,17 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0
 
-  packages/@biomedev/biome: {}
+  packages/@biomejs/biome: {}
 
-  packages/@biomedev/js-api:
+  packages/@biomejs/js-api:
     devDependencies:
-      '@biomedev/wasm-bundler':
+      '@biomejs/wasm-bundler':
         specifier: ../wasm-bundler
         version: link:../wasm-bundler
-      '@biomedev/wasm-nodejs':
+      '@biomejs/wasm-nodejs':
         specifier: ../wasm-nodejs
         version: link:../wasm-nodejs
-      '@biomedev/wasm-web':
+      '@biomejs/wasm-web':
         specifier: ../wasm-web
         version: link:../wasm-web
       typescript:
@@ -46,7 +46,7 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0
 
-  packages/@biomedev/wasm-web: {}
+  packages/@biomejs/wasm-web: {}
 
   website:
     devDependencies:
@@ -65,9 +65,9 @@ importers:
       '@astrojs/rss':
         specifier: ^2.4.1
         version: 2.4.1
-      '@biomedev/wasm-web':
-        specifier: ../packages/@biomedev/wasm-web
-        version: link:../packages/@biomedev/wasm-web
+      '@biomejs/wasm-web':
+        specifier: ../packages/@biomejs/wasm-web
+        version: link:../packages/@biomejs/wasm-web
       '@codemirror/lang-javascript':
         specifier: ^6.1.8
         version: 6.1.8

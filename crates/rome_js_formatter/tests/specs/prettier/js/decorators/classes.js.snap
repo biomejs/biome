@@ -29,7 +29,7 @@ const bar =
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -8,13 +8,17 @@
  export default class Baz {}
  

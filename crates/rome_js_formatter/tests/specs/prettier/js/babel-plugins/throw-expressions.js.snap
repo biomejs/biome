@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/babel-plugins/throw-expressions.js
 ---
 
@@ -20,7 +19,7 @@ function test(param = throw new Error('required!')) {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,8 @@
  // https://babeljs.io/docs/en/babel-plugin-proposal-throw-expressions
  

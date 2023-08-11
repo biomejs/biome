@@ -6,7 +6,7 @@ example.js format  INTERNAL  ━━━━━━━━━━━━━━━━━
 
   × Invalid document: Expected start tag of kind Align but found start tag of kind ConditionalContent.
   
-  ! This diagnostic was derived from an internal Rome error. Potential bug, please report it if necessary.
+  ! This diagnostic was derived from an internal Biome error. Potential bug, please report it if necessary.
   
 
 

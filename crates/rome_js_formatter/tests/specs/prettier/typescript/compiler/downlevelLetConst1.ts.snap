@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/compiler/downlevelLetConst1.ts
 ---
 
@@ -15,7 +14,7 @@ const
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -const;
 +const

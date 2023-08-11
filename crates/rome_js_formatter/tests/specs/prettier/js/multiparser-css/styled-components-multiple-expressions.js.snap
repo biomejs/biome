@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/multiparser-css/styled-components-multiple-expressions.js
 ---
 
@@ -36,7 +35,7 @@ font-family: "${a}", "${b}";
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,27 +1,21 @@
  const Header = styled.div`
    ${something()}

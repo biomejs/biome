@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/identifier/parentheses/const.js
 ---
 
@@ -16,7 +15,7 @@ const [a = ((let)[0] = 1)] = 2;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -const [a = (let[0] = 1)] = 2;
 +const [a = ((let)[0] = 1)] = 2;

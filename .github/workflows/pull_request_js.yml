@@ -9,7 +9,7 @@ on:
       - 'website/**'
       - 'editors/**'
 #      - 'crates/**'
-      - 'packages/@biomedev/js-api/**'
+      - 'packages/@biomejs/js-api/**'
 
 env:
   RUST_LOG: info
@@ -28,7 +28,7 @@ jobs:
           shared-key: "cli-release"
 
       - name: Run Rome Format
-        run: cargo rome-cli ci editors website npm/js-api
+        run: cargo biome-cli ci editors website npm/js-api
   type-check:
     name: Type-check JS Files
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomedev/wasm-web --target web --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/rome_wasm
       - name: Install libraries
         working-directory: website
         run: pnpm i

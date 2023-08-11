@@ -28,7 +28,7 @@ async function f() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,13 +1,12 @@
  async function f() {
    {

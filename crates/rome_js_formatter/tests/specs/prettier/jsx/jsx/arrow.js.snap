@@ -35,7 +35,7 @@ info: jsx/jsx/arrow.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,16 +3,18 @@
      <Children />
    </Component>

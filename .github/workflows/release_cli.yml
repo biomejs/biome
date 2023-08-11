@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - packages/@biomedev/biome/package.json
+      - packages/@biomejs/biome/package.json
 
 jobs:
   check:
@@ -32,7 +32,7 @@ jobs:
         id: version
         with:
           diff-search: true
-          file-name: packages/@biomedev/biome/package.json
+          file-name: packages/@biomejs/biome/package.json
 
       - name: Set version name
         if: steps.version.outputs.changed == 'true'
@@ -44,7 +44,7 @@ jobs:
         if: env.nightly == 'true'
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
-          echo "version=$(node packages/@biomedev/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+          echo "version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
 
   build:
     strategy:
@@ -148,20 +148,20 @@ jobs:
         uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Build WASM module for bundlers
-        run: wasm-pack build --out-dir ../../packages/@biomedev/wasm-bundler --target bundler --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev crates/rome_wasm
       - name: Build WASM module for node.js
-        run: wasm-pack build --out-dir ../../packages/@biomedev/wasm-nodejs --target nodejs --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomedev crates/rome_wasm
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomedev/wasm-web --target web --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev crates/rome_wasm
 
       - name: Upload WASM artifact
         uses: actions/upload-artifact@v3
         with:
           name: wasm
           path: |
-            ./packages/@biomedev/biome/wasm-bundler
-            ./packages/@biomedev/biome/wasm-nodejs
-            ./packages/@biomedev/biome/wasm-web
+            ./packages/@biomejs/biome/wasm-bundler
+            ./packages/@biomejs/biome/wasm-nodejs
+            ./packages/@biomejs/biome/wasm-web
           if-no-files-found: error
 
   publish:
@@ -182,7 +182,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: wasm
-          path: packages/@biomedev/biome
+          path: packages/@biomejs/biome
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -192,17 +192,17 @@ jobs:
 
       - name: Set release infos
         if: needs.build.outputs.prerelease == 'true'
-        run: node packages/@biomedev/biome/scripts/update-nightly-version.mjs
+        run: node packages/@biomejs/biome/scripts/update-nightly-version.mjs
       - name: Generate npm packages
-        run: node packages/@biomedev/biome/scripts/generate-packages.mjs
+        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomedev/*; do if [ $package != "packages/@biomedev/js-api" ]; then npm publish $package --tag latest --access public; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public; fi; done
         if: needs.build.outputs.prerelease != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish npm packages as nightly
-        run: for package in packages/@biomedev/*; do if [ $package != "packages/@biomedev/js-api" ]; then npm publish $package --tag nightly --access public; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag nightly --access public; fi; done
         if: needs.build.outputs.prerelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

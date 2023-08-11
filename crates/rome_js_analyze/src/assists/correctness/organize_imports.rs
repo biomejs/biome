@@ -262,7 +262,7 @@ impl Rule for OrganizeImports {
         Some(JsRuleAction {
             category: ActionCategory::Source(SourceActionKind::OrganizeImports),
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Organize Imports (Rome)" }.to_owned(),
+            message: markup! { "Organize Imports (Biome)" }.to_owned(),
             mutation,
         })
     }

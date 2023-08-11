@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/v8_intrinsic/intrinsic_call.js
 ---
 
@@ -39,7 +38,7 @@ function doSmth()     {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,10 +1,22 @@
  function doSmth() {
 -  %DebugPrint(foo);

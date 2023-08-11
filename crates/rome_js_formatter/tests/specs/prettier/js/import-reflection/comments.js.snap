@@ -15,7 +15,7 @@ info: js/import-reflection/comments.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1,3 @@
 -/* 0 */ import module /* 1 */ /* 2 */ from /* 3 */ from /* 4 */ "./module.wasm" /* 5 */;
 +/* 0 */ import /* 1 */module /* 2 */from /* 3 */

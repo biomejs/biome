@@ -53,7 +53,7 @@ abstract class Test {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,11 +1,11 @@
  interface foo1 {
    bar3 /* foo */(/* baz */); // bat

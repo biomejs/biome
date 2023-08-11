@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/declare/trailing-comma/function-rest-trailing-comma.ts
 ---
 
@@ -17,7 +16,7 @@ declare function foo(...long_long_long_long_long_long_long_long_long_long_long_l
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,2 @@
 -declare function foo(...args: any[]);
 -declare function foo(

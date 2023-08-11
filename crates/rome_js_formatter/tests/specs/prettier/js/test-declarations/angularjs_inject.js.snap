@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/test-declarations/angularjs_inject.js
 ---
 
@@ -41,7 +40,7 @@ function x() { inject(() => {}) }
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -14,10 +14,7 @@
    // code
  }));

@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/module-blocks/range.js
 ---
 
@@ -19,7 +18,7 @@ foo(module { export let foo = "foo"; })
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,5 @@
  let moduleBlock = module {
    export let y = 1;

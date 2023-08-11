@@ -74,7 +74,7 @@ a(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,8 @@
  Y(() => (a ? b : c));
  

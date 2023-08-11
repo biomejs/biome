@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/conditional/comments.js
 ---
 
@@ -137,7 +136,7 @@ c */? foo : bar : bar;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -99,12 +99,13 @@
  // It is at least possible to delete the extra newline that was
  // unfortunately added before the second condition above:

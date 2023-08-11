@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations2.ts
 ---
 
@@ -64,7 +63,7 @@ class H {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -51,5 +51,5 @@
  }
  

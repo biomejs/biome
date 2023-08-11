@@ -18,7 +18,7 @@ f(x => { y }, err.message.includes("asd") && err.message.includes("id") &&
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,11 +1,8 @@
 -f(
 -  (x) => {

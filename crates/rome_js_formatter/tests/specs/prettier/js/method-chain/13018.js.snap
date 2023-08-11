@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/method-chain/13018.js
 ---
 
@@ -23,7 +22,7 @@ foo(a--).bar().leet();
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,20 @@
  foo(_a).bar().leet();
  foo(-a).bar().leet();

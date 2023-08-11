@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/conditional/postfix-ternary-regressions.js
 ---
 
@@ -165,7 +164,7 @@ function foo7() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -103,8 +103,9 @@
  
  const delayedDataProvider = new Proxy(restProvider, {

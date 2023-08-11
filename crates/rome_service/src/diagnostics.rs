@@ -23,7 +23,7 @@ pub enum WorkspaceError {
     /// The file does not exist in the [crate::Workspace]
     NotFound(NotFound),
     /// A file is not supported. It contains the language and path of the file
-    /// Use this error if Rome is trying to process a file that Rome can't understand
+    /// Use this error if Biome is trying to process a file that Biome can't understand
     SourceFileNotSupported(SourceFileNotSupported),
     /// The formatter encountered an error while formatting the file
     FormatError(FormatError),
@@ -33,13 +33,13 @@ pub enum WorkspaceError {
     FormatWithErrorsDisabled(FormatWithErrorsDisabled),
     /// The file could not be analyzed because a rule caused an error.
     RuleError(RuleError),
-    /// Thrown when Rome can't read a generic directory
+    /// Thrown when Biome can't read a generic directory
     CantReadDirectory(CantReadDirectory),
-    /// Thrown when Rome can't read a generic file
+    /// Thrown when Biome can't read a generic file
     CantReadFile(CantReadFile),
     /// Error thrown when validating the configuration. Once deserialized, further checks have to be done.
     Configuration(ConfigurationDiagnostic),
-    /// Error thrown when Rome cannot rename a symbol.
+    /// Error thrown when Biome cannot rename a symbol.
     RenameError(RenameError),
     /// Error emitted by the underlying transport layer for a remote Workspace
     TransportError(TransportError),
@@ -360,8 +360,8 @@ pub struct FormatWithErrorsDisabled;
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Rome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Rome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: "{self.path}),
+        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exists: {path}"
     )
 )]
 pub struct CantReadDirectory {
@@ -373,8 +373,8 @@ pub struct CantReadDirectory {
 #[diagnostic(
     category = "internalError/fs",
     message(
-        message("Rome couldn't read the following file, maybe for permissions reasons or it doesn't exists: "{self.path}),
-        description = "Rome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {path}"
+        message("Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: "{self.path}),
+        description = "Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: {path}"
     )
 )]
 pub struct CantReadFile {
@@ -448,16 +448,16 @@ impl Diagnostic for SourceFileNotSupported {
     fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         if self.language != Language::Unknown {
             fmt.write_markup(markup! {
-                "Rome doesn't support this feature for the language "{{&self.language}}
+                "Biome doesn't support this feature for the language "{{&self.language}}
             })
         } else if let Some(ext) = self.extension.as_ref() {
             fmt.write_markup(markup! {
-                "Rome could not determine the language for the file extension "{{ext}}
+                "Biome could not determine the language for the file extension "{{ext}}
             })
         } else {
             fmt.write_markup(
                 markup!{
-                    "Rome could not determine the language for the file "{self.path}" because it doesn't have a clear extension"
+                    "Biome could not determine the language for the file "{self.path}" because it doesn't have a clear extension"
                 }
             )
         }

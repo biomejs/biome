@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/record/destructuring.js
 ---
 
@@ -24,7 +23,7 @@ assert(rest.c === 3);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,16 @@
 -const { a, b } = #{ a: 1, b: 2 };
 +const { a, b } = #;

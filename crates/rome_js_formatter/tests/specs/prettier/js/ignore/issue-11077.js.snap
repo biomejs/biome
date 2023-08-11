@@ -34,7 +34,7 @@ function HelloWorld(x) {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,12 +1,15 @@
  function HelloWorld(x) {
 -  // prettier-ignore

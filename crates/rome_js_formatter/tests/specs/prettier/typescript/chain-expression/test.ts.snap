@@ -18,7 +18,7 @@ info: typescript/chain-expression/test.ts
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -(a?.b)!.c;
 -(a?.())!.b;

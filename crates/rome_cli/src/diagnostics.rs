@@ -204,7 +204,7 @@ pub struct IoDiagnostic {
 #[diagnostic(
     category = "internalError/io",
     severity = Error,
-    message = "No running instance of the Rome daemon server was found."
+    message = "No running instance of the Biome daemon server was found."
 )]
 // TODO: add advice
 pub struct ServerNotRunning;
@@ -248,8 +248,8 @@ pub struct MigrationDiagnostic {
     category = "internalError/fs",
     severity = Error,
     message(
-		description = "Rome couldn't find the VCS folder at the following path: {path}",
-		message("Rome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
+		description = "Biome couldn't find the VCS folder at the following path: {path}",
+		message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
 	)
 )]
 pub struct NoVcsFolderFound {
@@ -264,7 +264,7 @@ pub struct NoVcsFolderFound {
 #[diagnostic(
 	category = "internalError/fs",
 	severity = Warning,
-	message = "Rome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
+	message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
 )]
 pub struct DisabledVcs {}
 

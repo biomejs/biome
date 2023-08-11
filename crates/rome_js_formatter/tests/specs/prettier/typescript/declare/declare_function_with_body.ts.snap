@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/declare/declare_function_with_body.ts
 ---
 
@@ -20,7 +19,7 @@ declare function bar() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,5 +1,5 @@
  // Invalid, but recoverable
 -declare function foo() {};

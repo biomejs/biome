@@ -73,7 +73,7 @@ pub(crate) fn validate_vcs_configuration(
                 "You enabled the VCS integration, but you didn't specify a client."
             })
             .with_range(node.range())
-            .with_note("Rome will disable the VCS integration until the issue is fixed."),
+            .with_note("Biome will disable the VCS integration until the issue is fixed."),
         );
         configuration.enabled = Some(false);
     }

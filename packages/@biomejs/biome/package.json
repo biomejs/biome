@@ -1,5 +1,5 @@
 {
-    "name": "@biomedev/biome",
+    "name": "@biomejs/biome",
     "version": "0.1.0",
     "bin": "bin/boime",
     "scripts": {
@@ -9,7 +9,7 @@
     "repository": {
       "type": "git",
       "url": "https://github.com/biomejs/biome.git",
-      "directory": "packages/@biomedev/biome"
+      "directory": "packages/@biomejs/biome"
     },
     "author": "Emanuele Stoppa",
     "license": "MIT",

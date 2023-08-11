@@ -60,7 +60,7 @@ impl LoadedConfiguration {
 					.map_err(|err| {
 						CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
 							markup!{
-								"Rome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
+								"Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
 							}
 						)
 					})?;
@@ -100,7 +100,7 @@ impl LoadedConfiguration {
             }
             return Err(CliDiagnostic::workspace_error(
                 WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
-                    "Rome exited because the configuration resulted in errors. Please fix them.",
+                    "Biome exited because the configuration resulted in errors. Please fix them.",
                 )),
             ));
         }

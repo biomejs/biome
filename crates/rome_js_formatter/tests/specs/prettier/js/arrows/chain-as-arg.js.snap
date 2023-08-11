@@ -52,7 +52,7 @@ const z = a.b(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,17 +1,17 @@
  const w = a.b(
    (

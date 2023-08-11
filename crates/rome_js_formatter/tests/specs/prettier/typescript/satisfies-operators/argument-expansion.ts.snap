@@ -33,7 +33,7 @@ const bar5 = [1,2,3].reduce((carry, value) => {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,6 @@
 -const bar1 = [1, 2, 3].reduce(
 -  (carry, value) => {

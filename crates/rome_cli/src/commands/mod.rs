@@ -23,18 +23,18 @@ pub(crate) mod version;
 #[bpaf(options, version(VERSION))]
 /// Biome official CLI. Use it to check the health of your project or run it to check single files.
 pub enum BiomeCommand {
-    /// Shows the Rome version information and quit
+    /// Shows the Biome version information and quit
     #[bpaf(command)]
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
 
     #[bpaf(command)]
     /// Prints information for debugging
     Rage(#[bpaf(external(cli_options), hide_usage)] CliOptions),
-    /// Start the Rome daemon server process
+    /// Start the Biome daemon server process
     #[bpaf(command)]
     Start,
 
-    /// Stop the Rome daemon server process
+    /// Stop the Biome daemon server process
     #[bpaf(command)]
     Stop,
 

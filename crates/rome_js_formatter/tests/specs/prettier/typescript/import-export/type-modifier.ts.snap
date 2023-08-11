@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/import-export/type-modifier.ts
 ---
 
@@ -30,7 +29,7 @@ import type foo, { bar } from 'bar';
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -12,4 +12,4 @@
  import type { foo as bar } from "baz";
  import type * as foo from "./bar";

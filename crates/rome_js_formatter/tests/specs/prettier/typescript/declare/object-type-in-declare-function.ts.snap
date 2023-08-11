@@ -25,7 +25,7 @@ declare function bar(...x: { a: boolean, b: string, c: number }):
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,6 @@
 -declare function foo(this: {
 -  a: boolean;

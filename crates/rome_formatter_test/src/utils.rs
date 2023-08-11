@@ -147,7 +147,7 @@ pub fn get_prettier_diff(
 
         TextDiff::from_lines(prettier_snapshot.as_str(), formatted)
             .unified_diff()
-            .header("Prettier", "Rome")
+            .header("Prettier", "Biome")
             .to_writer(&mut prettier_differences)
             .unwrap();
 

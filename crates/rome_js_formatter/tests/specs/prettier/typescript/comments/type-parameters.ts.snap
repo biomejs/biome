@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/comments/type-parameters.ts
 ---
 
@@ -44,7 +43,7 @@ type T = <
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,7 +3,7 @@
  functionName</* comment */>();
  function foo</* comment */>() {}

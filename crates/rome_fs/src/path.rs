@@ -1,4 +1,4 @@
-//! This module is responsible to manage paths inside Rome.
+//! This module is responsible to manage paths inside Biome.
 //! It is a small wrapper around [path::PathBuf] but it is also able to
 //! give additional information around the the file that holds:
 //! - the [FileHandlers] for the specific file

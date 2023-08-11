@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/mapped-type/issue-11098.ts
 ---
 
@@ -66,7 +65,7 @@ type Type = {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -40,11 +40,11 @@
  };
  

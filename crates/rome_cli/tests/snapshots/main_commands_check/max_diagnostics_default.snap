@@ -296,7 +296,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-The number of diagnostics exceeds the number allowed by Rome.
+The number of diagnostics exceeds the number allowed by Biome.
 Diagnostics not shown: 180.
 ```
 

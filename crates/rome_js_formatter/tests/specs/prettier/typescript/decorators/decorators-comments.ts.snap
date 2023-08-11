@@ -50,7 +50,7 @@ class Something2 {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,7 @@
  class Foo1 {
    @foo

@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/babel-plugins/pipeline-operator-fsharp.js
 ---
 
@@ -49,7 +48,7 @@ let newScore = boundScore(0, 100, add(7, double(person.score)));
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,25 +3,32 @@
  
  promise

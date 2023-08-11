@@ -33,7 +33,7 @@ let tuple = // Comment
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -4,16 +4,16 @@
      key: "value",
    };

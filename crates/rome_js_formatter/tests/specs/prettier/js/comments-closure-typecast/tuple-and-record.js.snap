@@ -41,7 +41,7 @@ foo = /** @type A */ (#[
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -5,12 +5,14 @@
    ...margins,
  });

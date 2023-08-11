@@ -1,6 +1,6 @@
 //! # Authoring Parse Rules
 //!
-//! This is a short, or not so short, guide to implement parse rules using the Rome parser infrastructure.
+//! This is a short, or not so short, guide to implement parse rules using the Biome parser infrastructure.
 //!
 //! ## Naming
 //! The convention is to prefix your parse rule with `parse_` and then use the name defined in the grammar file.
@@ -100,7 +100,7 @@
 //! }
 //! ```
 //!
-//! Hold on, what are these *missing* markers? Rome's AST facade uses fixed offsets to retrieve a particular child from a node.
+//! Hold on, what are these *missing* markers? Biome's AST facade uses fixed offsets to retrieve a particular child from a node.
 //! For example, the 3rd child of the if statement is the condition. However, the condition would become the second element
 //! if the opening parentheses `(` isn't present in the source text. That's where missing elements come into play.
 //!

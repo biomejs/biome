@@ -72,7 +72,7 @@ info: json/json/pass1.json
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -48,6 +48,7 @@
    0.5,
    98.6,

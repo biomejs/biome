@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/spread/child.js
 ---
 
@@ -36,7 +35,7 @@ info: jsx/spread/child.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,7 +2,7 @@
  
  <div>{...a /* comment */}</div>;

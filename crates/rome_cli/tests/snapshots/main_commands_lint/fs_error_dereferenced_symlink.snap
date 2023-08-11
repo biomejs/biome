@@ -20,7 +20,7 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink
   
-  i Rome encountered a file system entry that is a broken symbolic link: <TEMP_DIR>/lint_rome_test_broken_symlink/broken_symlink
+  i Biome encountered a file system entry that is a broken symbolic link: <TEMP_DIR>/lint_rome_test_broken_symlink/broken_symlink
   
 
 ```

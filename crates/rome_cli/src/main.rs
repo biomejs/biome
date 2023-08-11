@@ -1,6 +1,6 @@
-//! This is the main binary of Rome.
+//! This is the main binary of Biome.
 //!
-//! If you're curious about how to use it, check Rome's [website]
+//! If you're curious about how to use it, check Biome's [website]
 //!
 //! [website]: https://rome.tools
 
@@ -61,7 +61,7 @@ fn main() -> ExitCode {
 
 fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), CliDiagnostic> {
     // If the `--use-server` CLI flag is set, try to open a connection to an
-    // existing Rome server socket
+    // existing Biome server socket
     let workspace = if command.should_use_server() {
         let runtime = Runtime::new()?;
         match open_transport(runtime)? {

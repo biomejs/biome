@@ -34,7 +34,7 @@ call(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,18 +2,12 @@
    return 1;
  }, 200_000_000_000n * askTrovenaBeenaDependsRowans);

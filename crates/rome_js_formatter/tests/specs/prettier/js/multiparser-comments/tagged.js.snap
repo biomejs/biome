@@ -16,7 +16,7 @@ foo(html // oops
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,4 @@
  foo(
    html // oops

@@ -24,11 +24,11 @@ pub(crate) fn start(session: CliSession) -> Result<(), CliDiagnostic> {
 
     if did_spawn {
         session.app.console.log(markup! {
-            "The Rome server was successfully started"
+            "The Biome server was successfully started"
         });
     } else {
         session.app.console.log(markup! {
-            "The Rome server was already running"
+            "The Biome server was already running"
         });
     }
 
@@ -48,11 +48,11 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
         };
 
         session.app.console.log(markup! {
-            "The Rome server was successfully stopped"
+            "The Biome server was successfully stopped"
         });
     } else {
         session.app.console.log(markup! {
-            "The Rome server was not running"
+            "The Biome server was not running"
         });
     }
 

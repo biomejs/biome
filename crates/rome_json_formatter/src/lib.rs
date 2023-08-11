@@ -277,7 +277,7 @@ impl IntoFormat<JsonFormatContext> for JsonSyntaxToken {
     }
 }
 
-/// Formats a range within a file, supported by Rome
+/// Formats a range within a file, supported by Biome
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [JsonFormatOptions], which
@@ -306,7 +306,7 @@ pub fn format_node(
     rome_formatter::format_node(root, JsonFormatLanguage::new(options))
 }
 
-/// Formats a single node within a file, supported by Rome.
+/// Formats a single node within a file, supported by Biome.
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [JsonFormatOptions], which

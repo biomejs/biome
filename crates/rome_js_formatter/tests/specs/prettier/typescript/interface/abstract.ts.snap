@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/interface/abstract.ts
 ---
 
@@ -18,7 +17,7 @@ abstract interface I {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1,2 @@
 -abstract interface I {}
 +abstract;

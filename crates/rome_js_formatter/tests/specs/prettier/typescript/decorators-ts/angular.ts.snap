@@ -22,7 +22,7 @@ export class HeroButtonComponent {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,6 +1,6 @@
  @Component({
    selector: "toh-hero-button",

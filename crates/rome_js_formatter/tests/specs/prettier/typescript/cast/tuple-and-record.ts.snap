@@ -19,7 +19,7 @@ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,11 @@
  breakAfterCast = <PermissionsChecker<any> | undefined>(
    (<any>permissions)[receiverType]

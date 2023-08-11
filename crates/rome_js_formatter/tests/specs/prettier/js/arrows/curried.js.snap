@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/arrows/curried.js
 ---
 
@@ -223,7 +222,7 @@ import( (argument1) =>
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -109,42 +109,38 @@
        3,
  );

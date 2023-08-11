@@ -53,7 +53,7 @@ pub(crate) struct Session {
     /// The parameters provided by the client in the "initialize" request
     initialize_params: OnceCell<InitializeParams>,
 
-    /// The settings of the Rome extension (under the `rome` namespace)
+    /// The settings of the Biome extension (under the `rome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
     pub(crate) workspace: Arc<dyn Workspace>,
@@ -280,7 +280,7 @@ impl Session {
         })?;
 
         let diagnostics = if self.is_linting_and_formatting_disabled() {
-            tracing::trace!("Linting disabled because Rome configuration is missing and `requireConfiguration` is true.");
+            tracing::trace!("Linting disabled because Biome configuration is missing and `requireConfiguration` is true.");
             vec![]
         } else if !file_features.supports_for(&FeatureName::Lint)
             && !file_features.supports_for(&FeatureName::OrganizeImports)
@@ -398,7 +398,7 @@ impl Session {
             Ok(Some(payload)) => {
                 let (configuration, diagnostics) = payload.deserialized.consume();
                 if !diagnostics.is_empty() {
-                    warn!("The deserialization of the configuration resulted in errors. Rome will use its defaults where possible.");
+                    warn!("The deserialization of the configuration resulted in errors. Biome will use its defaults where possible.");
                 }
 
                 info!("Loaded workspace settings: {configuration:#?}");

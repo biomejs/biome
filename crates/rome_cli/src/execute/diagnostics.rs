@@ -103,7 +103,7 @@ pub(crate) struct PanicDiagnostic {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     category = "files/missingHandler",
-    message = "Rome doesn't know how to process this file",
+    message = "Biome doesn't know how to process this file",
 	severity = Warning
 )]
 pub(crate) struct UnhandledDiagnostic;

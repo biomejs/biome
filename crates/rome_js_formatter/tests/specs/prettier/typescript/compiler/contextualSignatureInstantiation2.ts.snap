@@ -18,7 +18,7 @@ var r23 = dot(id)(id);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,7 +2,7 @@
  var dot: <T, S>(f: (_: T) => S) => <U>(g: (_: U) => T) => (_: U) => S;
  dot =

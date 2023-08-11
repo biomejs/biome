@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/newlines/test.js
 ---
 
@@ -109,7 +108,7 @@ regression_extra_newline_2 = (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -33,7 +33,9 @@
      </div>
      hi

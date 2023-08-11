@@ -245,7 +245,7 @@ pub(crate) fn are_recommended_and_all_correct(
                     <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
                 ))
                     .with_range(current_node.range())
-                    .with_note(markup!("Rome will fallback to its defaults for this section.")));
+                    .with_note(markup!("Biome will fallback to its defaults for this section.")));
             return Some(false);
         }
     }

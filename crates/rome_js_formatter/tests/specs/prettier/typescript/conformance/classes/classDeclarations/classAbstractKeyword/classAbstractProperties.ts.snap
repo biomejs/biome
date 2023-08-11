@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
 ---
 
@@ -27,7 +26,7 @@ abstract class A {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,12 +2,12 @@
    abstract x: number;
    public abstract y: number;

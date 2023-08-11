@@ -36,7 +36,7 @@ export class Board {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -15,6 +15,9 @@
    @Column()
    description: string;

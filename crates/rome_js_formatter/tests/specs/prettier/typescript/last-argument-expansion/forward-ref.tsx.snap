@@ -41,7 +41,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,9 @@
 -export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
 -  function Link(props, ref) {

@@ -22,7 +22,7 @@ export { foooooooooooooooooooooooooooooooooooooooooooooo, fooooooooooooooooooooo
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,10 +1,23 @@
  export * as ns from "mod";
 -export v from "mod";

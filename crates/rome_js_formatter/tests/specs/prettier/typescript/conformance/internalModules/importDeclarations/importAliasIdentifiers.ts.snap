@@ -59,7 +59,7 @@ var p: { x: number; y: number; };
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,9 +1,6 @@
  module moduleA {
    export class Point {

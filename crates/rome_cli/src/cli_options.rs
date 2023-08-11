@@ -8,7 +8,7 @@ pub struct CliOptions {
     #[bpaf(long("colors"), argument("off|force"))]
     pub colors: Option<ColorsArg>,
 
-    /// Connect to a running instance of the Rome daemon server.
+    /// Connect to a running instance of the Biome daemon server.
     #[bpaf(long("use-server"), switch, fallback(false))]
     pub use_server: bool,
 
@@ -37,7 +37,7 @@ pub struct CliOptions {
     #[bpaf(long("no-errors-on-unmatched"), switch)]
     pub no_errors_on_unmatched: bool,
 
-    /// Tell Rome to exit with an error code if some diagnostics emit warnings.
+    /// Tell Biome to exit with an error code if some diagnostics emit warnings.
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 

@@ -21,7 +21,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) paths: Vec<OsString>,
 }
 
-/// Handler for the "format" command of the Rome CLI
+/// Handler for the "format" command of the Biome CLI
 pub(crate) fn format(
     mut session: CliSession,
     payload: FormatCommandPayload,

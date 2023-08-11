@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/pipeline-operator/minimal_pipeline_operator.js
 ---
 
@@ -64,7 +63,7 @@ const result2 = [4, 9].map( x => x |> inc |> double )
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,48 +3,47 @@
  a |> (b |> c);
  

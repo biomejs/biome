@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/pipeline-operator/hack_pipeline_operator.js
 ---
 
@@ -67,7 +66,7 @@ async function * f () {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,50 +1,56 @@
 -a |> (await %) |> % * 3;
 +a |> await % |> % * 3;

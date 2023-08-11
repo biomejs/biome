@@ -36,7 +36,7 @@ const CONNECTION_STATUS = exports.CONNECTION_STATUS = {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -5,9 +5,11 @@
    NOT_CONNECTED: Object.freeze({ kind: "NOT_CONNECTED" }),
  });

@@ -33,7 +33,7 @@ foo = foo || #{
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,7 +3,8 @@
    a,
  ];

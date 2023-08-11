@@ -16,7 +16,7 @@ info: json/range/unary-expression-2.json
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1,2 @@
 --2.0
 +-

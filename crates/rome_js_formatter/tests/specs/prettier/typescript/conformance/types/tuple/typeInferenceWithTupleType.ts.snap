@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/types/tuple/typeInferenceWithTupleType.ts
 ---
 
@@ -39,7 +38,7 @@ var zipResultEleEle = zipResult[0][0]; // string
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -﻿function combine<T, U>(x: T, y: U): [T, U] {
 +function combine<T, U>(x: T, y: U): [T, U] {

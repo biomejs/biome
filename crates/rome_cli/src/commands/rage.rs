@@ -43,7 +43,7 @@ pub(crate) fn rage(session: CliSession) -> Result<(), CliDiagnostic> {
         session
             .app
             .console
-            .log(markup!("Discovering running Rome servers..."));
+            .log(markup!("Discovering running Biome servers..."));
         session.app.console.log(markup!({ RunningRomeServer }));
     }
 
@@ -92,7 +92,7 @@ impl Display for RunningRomeServer {
         let versions = match enumerate_pipes() {
             Ok(iter) => iter,
             Err(err) => {
-                (markup! {<Error>"\u{2716} Enumerating Rome instances failed:"</Error>}).fmt(f)?;
+                (markup! {<Error>"\u{2716} Enumerating Biome instances failed:"</Error>}).fmt(f)?;
                 return writeln!(f, " {err}");
             }
         };
@@ -110,9 +110,9 @@ impl Display for RunningRomeServer {
                         continue;
                     }
                     Ok(Some(transport)) => {
-                        markup!("\n"<Emphasis>"Running Rome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                        markup!("\n"<Emphasis>"Running Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
 
-"<Info>"\u{2139} The client isn't connected to any server but rage discovered this running Rome server."</Info>"
+"<Info>"\u{2139} The client isn't connected to any server but rage discovered this running Biome server."</Info>"
 ")
                 .fmt(f)?;
 
@@ -132,9 +132,9 @@ impl Display for RunningRomeServer {
 
                 RomeServerLog.fmt(f)?;
             } else {
-                markup!("\n"<Emphasis>"Incompatible Rome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                markup!("\n"<Emphasis>"Incompatible Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
 
-"<Info>"\u{2139} Rage discovered this running server using an incompatible version of Rome."</Info>"
+"<Info>"\u{2139} Rage discovered this running server using an incompatible version of Biome."</Info>"
 ")
         .fmt(f)?;
 
@@ -161,7 +161,7 @@ struct RageConfiguration<'a, 'app>(&'a DynRef<'app, dyn FileSystem>);
 
 impl Display for RageConfiguration<'_, '_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        Section("Rome Configuration").fmt(fmt)?;
+        Section("Biome Configuration").fmt(fmt)?;
 
         match load_config(self.0, ConfigurationBasePath::default()) {
             Ok(None) => KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?,
@@ -255,7 +255,7 @@ struct RomeServerLog;
 impl Display for RomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file() {
-            markup!("\n"<Emphasis><Underline>"Rome Server Log:"</Underline></Emphasis>"
+            markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"
 
 "<Warn>"\u{26a0} Please review the content of the log file before sharing it publicly as it may contain sensitive information:
   * Path names that may reveal your name, a project name, or the name of your employer.

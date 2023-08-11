@@ -62,7 +62,7 @@ impl<'app> CliSession<'app> {
         })
     }
 
-    /// Main function to run Rome CLI
+    /// Main function to run Biome CLI
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
         let has_metrics = command.has_metrics();
         if has_metrics {

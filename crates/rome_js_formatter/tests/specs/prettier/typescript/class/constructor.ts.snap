@@ -30,7 +30,7 @@ class B {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -15,7 +15,7 @@
  }
  

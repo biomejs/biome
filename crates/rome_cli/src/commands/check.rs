@@ -21,7 +21,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) organize_imports_enabled: Option<bool>,
 }
 
-/// Handler for the "check" command of the Rome CLI
+/// Handler for the "check" command of the Biome CLI
 pub(crate) fn check(
     mut session: CliSession,
     payload: CheckCommandPayload,

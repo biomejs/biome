@@ -27,7 +27,7 @@ type A7 = { readonly [A in B]: T
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,13 +1,11 @@
  type A1 = { readonly [A in B]: T };
 -type A2 = {

@@ -22,7 +22,7 @@ const x = a.b ?? (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,8 @@
  const x =
    a.b ??

@@ -74,7 +74,7 @@ class Thing3 extends Thing2 {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,18 +3,11 @@
  type Constructor<T> = new (...args: any[]) => T;
  

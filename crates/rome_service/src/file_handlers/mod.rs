@@ -22,7 +22,7 @@ mod javascript;
 mod json;
 mod unknown;
 
-/// Supported languages by Rome
+/// Supported languages by Biome
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Language {
@@ -272,7 +272,7 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_on_type: Option<FormatOnType>,
 }
 
-/// Main trait to use to add a new language to Rome
+/// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
     /// The language of the file. It can be a super language.
     /// For example, a ".js" file can have [Language::Ts]

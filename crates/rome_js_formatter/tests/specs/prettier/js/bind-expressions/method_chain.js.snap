@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/bind-expressions/method_chain.js
 ---
 
@@ -32,7 +31,7 @@ function test(observable) {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -6,12 +6,12 @@
  import { takeUntil } from "rxjs/operator/takeUntil";
  

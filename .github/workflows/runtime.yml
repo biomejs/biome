@@ -44,15 +44,15 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
       - name: Install libraries
-        working-directory: npm/js-api
+        working-directory: packages/@biomejs/js-api
         run: pnpm i
       - name: Compile backends
         run: |
-          pnpm --prefix packages/@biomedev/js-api build:wasm-bundler
-          pnpm --prefix packages/@biomedev/js-api build:wasm-node
-          pnpm --prefix packages/@biomedev/js-api build:wasm-web
-          pnpm --prefix packages/@biomedev/backend-jsonrpc i
-          pnpm --prefix packages/@biomedev/backend-jsonrpc run build
+          pnpm --prefix packages/@biomejs/js-api build:wasm-bundler
+          pnpm --prefix packages/@biomejs/js-api build:wasm-node
+          pnpm --prefix packages/@biomejs/js-api build:wasm-web
+          pnpm --prefix packages/@biomejs/backend-jsonrpc i
+          pnpm --prefix packages/@biomejs/backend-jsonrpc run build
       - name: CI checks
         working-directory: npm/js-api
         run: pnpm run ci

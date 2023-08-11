@@ -311,7 +311,7 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
                 error.message = msg.to_string();
             }
             Err(_) => {
-                error.message = String::from("Rome encountered an unknown error");
+                error.message = String::from("Biome encountered an unknown error");
             }
         },
     }

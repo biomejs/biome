@@ -2,16 +2,16 @@ const { platform, arch } = process;
 
 const PLATFORMS = {
 	win32: {
-		x64: "@biomedev/cli-win32-x64/rome.exe",
-		arm64: "@biomedev/cli-win32-arm64/rome.exe",
+		x64: "@biomejs/cli-win32-x64/rome.exe",
+		arm64: "@biomejs/cli-win32-arm64/rome.exe",
 	},
 	darwin: {
-		x64: "@biomedev/cli-darwin-x64/rome",
-		arm64: "@biomedev/cli-darwin-arm64/rome",
+		x64: "@biomejs/cli-darwin-x64/rome",
+		arm64: "@biomejs/cli-darwin-arm64/rome",
 	},
 	linux: {
-		x64: "@biomedev/cli-linux-x64/rome",
-		arm64: "@biomedev/cli-linux-arm64/rome",
+		x64: "@biomejs/cli-linux-x64/rome",
+		arm64: "@biomejs/cli-linux-arm64/rome",
 	},
 };
 

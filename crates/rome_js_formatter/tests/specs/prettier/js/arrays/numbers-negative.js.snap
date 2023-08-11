@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/arrays/numbers-negative.js
 ---
 
@@ -26,7 +25,7 @@ const numbers2 = [-234, -342 // comment3
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,10 +2,12 @@
    -2017, -506252, -744011292, -7224, -70.4, -83353.6, -708.4, -174023963.52,
    -40385,

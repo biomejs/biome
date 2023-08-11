@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/compiler/decrementAndIncrementOperators.ts
 ---
 
@@ -52,7 +51,7 @@ x[x++]++;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,11 +3,11 @@
  // errors
  1++;

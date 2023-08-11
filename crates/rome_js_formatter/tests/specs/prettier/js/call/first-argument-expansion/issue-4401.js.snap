@@ -20,7 +20,7 @@ export function test() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,5 @@
  export function test() {
 -  setTimeout(

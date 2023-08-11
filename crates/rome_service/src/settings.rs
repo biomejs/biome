@@ -268,7 +268,7 @@ pub struct FilesSettings {
     /// List of paths/files to matcher
     pub ignored_files: Matcher,
 
-    /// Files not recognized by Rome should not emit a diagnostic
+    /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: bool,
 }
 

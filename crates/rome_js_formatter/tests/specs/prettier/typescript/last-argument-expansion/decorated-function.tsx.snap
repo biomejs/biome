@@ -69,7 +69,7 @@ const Counter =
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,53 +1,48 @@
 -const Counter = decorator("my-counter")((props: {
 -  initialCount?: number;

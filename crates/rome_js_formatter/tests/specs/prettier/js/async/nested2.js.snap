@@ -20,7 +20,7 @@ await Promise.all(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,6 +1,8 @@
  async function f() {
    await Promise.all(

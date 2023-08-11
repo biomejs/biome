@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/jsx/await.js
 ---
 
@@ -50,7 +49,7 @@ async function testFunction() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -13,10 +13,12 @@
  
    const long = (

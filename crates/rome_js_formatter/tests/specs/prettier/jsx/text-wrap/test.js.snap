@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/text-wrap/test.js
 ---
 
@@ -473,7 +472,7 @@ let myDiv = ReactTestUtils.renderIntoDocument(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -318,7 +318,11 @@
  
  line_after_br_2 = (

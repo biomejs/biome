@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/export-default/escaped/default-escaped.js
 ---
 
@@ -16,7 +15,7 @@ export n\u{63} from "async";
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,2 +1,5 @@
  // export asyn\u{63} from "async";
 -export nc from "async";

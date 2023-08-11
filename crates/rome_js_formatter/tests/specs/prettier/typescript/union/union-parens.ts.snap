@@ -125,7 +125,7 @@ type Ctor = (new () => X) | Y;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -85,13 +85,13 @@
  type A3 = C;
  type A4 = C;

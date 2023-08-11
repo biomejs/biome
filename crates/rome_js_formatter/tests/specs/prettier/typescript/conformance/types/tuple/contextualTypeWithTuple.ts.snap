@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/types/tuple/contextualTypeWithTuple.ts
 ---
 
@@ -40,7 +39,7 @@ numStrTuple = unionTuple3;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -﻿// no error
 +// no error

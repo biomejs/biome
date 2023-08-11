@@ -487,7 +487,7 @@ check.js:5:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```
 
 ```block
-The number of diagnostics exceeds the number allowed by Rome.
+The number of diagnostics exceeds the number allowed by Biome.
 Diagnostics not shown: 77.
 ```
 

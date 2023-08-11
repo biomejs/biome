@@ -20,7 +20,7 @@ prefix/ci.js internalError/fs ━━━━━━━━━━━━━━━━�
 
   ! Unknown file type
   
-  i Rome encountered a file system entry that's neither a file, directory or symbolic link
+  i Biome encountered a file system entry that's neither a file, directory or symbolic link
   
 
 ```

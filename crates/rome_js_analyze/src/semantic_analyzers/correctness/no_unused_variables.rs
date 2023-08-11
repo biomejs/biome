@@ -19,7 +19,7 @@ declare_rule! {
     /// 2. the `React` variable;
     ///
     /// The pattern of having an underscore as prefix of a name of variable is a very diffuse
-    /// pattern among programmers, and Rome decided to follow it.
+    /// pattern among programmers, and Biome decided to follow it.
     ///
     /// Importing the `React` variable was a mandatory pattern until some time ago:
     ///

@@ -1009,7 +1009,7 @@ where
     TextRange::new(start, end)
 }
 
-/// Formats a range within a file, supported by Rome
+/// Formats a range within a file, supported by Biome
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [FormatContext], which
@@ -1270,7 +1270,7 @@ pub fn format_range<Language: FormatLanguage>(
     ))
 }
 
-/// Formats a single node within a file, supported by Rome.
+/// Formats a single node within a file, supported by Biome.
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [FormatContext], which

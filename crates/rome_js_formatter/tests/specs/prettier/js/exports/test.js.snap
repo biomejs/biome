@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/exports/test.js
 ---
 
@@ -24,7 +23,7 @@ export { undefinedExport };
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -6,10 +6,19 @@
    value5,
  } from "exports";

@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/tuple/tuple-trailing-comma.js
 ---
 
@@ -16,7 +15,7 @@ info: js/tuple/tuple-trailing-comma.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -#[1];
 +#[1,]

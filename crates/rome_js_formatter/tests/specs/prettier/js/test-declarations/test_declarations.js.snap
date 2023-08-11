@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/test-declarations/test_declarations.js
 ---
 
@@ -177,7 +176,7 @@ it(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -93,35 +93,25 @@
  
  test.describe(`does something really long and complicated so I have to write a very long name for the test`, () => {});

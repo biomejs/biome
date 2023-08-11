@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/module-blocks/comments.js
 ---
 
@@ -25,7 +24,7 @@ const m2 = module/* B1 */{
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,12 +1,13 @@
 -const m = /*A1*/ module {
 -  /*A2*/ /*A3*/

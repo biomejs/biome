@@ -33,7 +33,7 @@ a = [
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -4,9 +4,9 @@
  ];
  

@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/arrows/currying-2.js
 ---
 
@@ -29,7 +28,7 @@ request.get('https://preview-9992--prettier.netlify.app', head => body => modyLo
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -5,18 +5,14 @@
    console.log(head, body);
  });

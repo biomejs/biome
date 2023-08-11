@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/comments/in-attributes.js
 ---
 
@@ -45,7 +44,7 @@ info: jsx/comments/in-attributes.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -3,11 +3,13 @@
  <div attr=/* comment */
  "foo"></div>;

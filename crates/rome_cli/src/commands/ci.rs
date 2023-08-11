@@ -20,7 +20,7 @@ pub(crate) struct CiCommandPayload {
     pub(crate) cli_options: CliOptions,
 }
 
-/// Handler for the "ci" command of the Rome CLI
+/// Handler for the "ci" command of the Biome CLI
 pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
     let LoadedConfiguration {
         mut configuration,

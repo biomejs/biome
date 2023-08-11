@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/export-default/function_tostring.js
 ---
 
@@ -16,7 +15,7 @@ export default (function() {}).toString();
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1 +1 @@
 -export default (function () {}.toString());
 +export default (function () {}).toString();

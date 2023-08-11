@@ -18,7 +18,7 @@ export const foo = (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,2 +1,5 @@
 -export const foo = // prettier-ignore
 -  (bar as Baz).qux;

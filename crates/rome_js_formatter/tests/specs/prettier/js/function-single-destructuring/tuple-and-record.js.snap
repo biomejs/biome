@@ -61,7 +61,7 @@ function StatelessFunctionalComponent4([
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -16,9 +16,10 @@
    onSubmitAndDeselect = () => null,
    onCancel = () => null,

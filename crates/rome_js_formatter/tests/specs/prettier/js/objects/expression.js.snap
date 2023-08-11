@@ -38,7 +38,7 @@ const a3 = {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -2,8 +2,10 @@
  ({})``;
  a = () => ({}).x;

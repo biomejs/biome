@@ -13,9 +13,9 @@ content
 ```block
 test/rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Rome couldn't read the file
+  × Biome couldn't read the file
   
-  × Rome couldn't read the following file, maybe for permissions reasons or it doesn't exists: test/rome.json
+  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: test/rome.json
   
 
 

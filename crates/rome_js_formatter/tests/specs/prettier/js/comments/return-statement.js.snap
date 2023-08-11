@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/comments/return-statement.js
 ---
 
@@ -136,7 +135,7 @@ function inlineComment() {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -80,10 +80,12 @@
  }
  

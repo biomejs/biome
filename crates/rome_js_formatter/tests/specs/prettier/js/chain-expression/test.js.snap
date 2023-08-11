@@ -22,7 +22,7 @@ new (a?.())();
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,8 @@
 -(a?.b).c;
 -(a?.()).b;

@@ -36,9 +36,9 @@ impl std::fmt::Display for FormatError {
                 fmt,
                 "formatting range {input:?} is larger than syntax tree {tree:?}"
             ),
-            FormatError::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}\n\n This is an internal Rome error. Please report if necessary."),
+            FormatError::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}\n\n This is an internal Biome error. Please report if necessary."),
             FormatError::PoorLayout => {
-                std::write!(fmt, "Poor layout: The formatter wasn't able to pick a good layout for your document. This is an internal Rome error. Please report if necessary.")
+                std::write!(fmt, "Poor layout: The formatter wasn't able to pick a good layout for your document. This is an internal Biome error. Please report if necessary.")
             }
         }
     }

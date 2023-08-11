@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/for/continue-and-break-comment-1.js
 ---
 
@@ -136,7 +135,7 @@ label2: {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -87,9 +87,9 @@
  } while (true);
  

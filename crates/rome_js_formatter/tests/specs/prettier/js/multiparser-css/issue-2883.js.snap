@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/multiparser-css/issue-2883.js
 ---
 
@@ -32,7 +31,7 @@ button.${foo}.${bar} {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,17 +1,17 @@
  export const foo = css`
 -  &.foo .${bar}::before,&.foo[value="hello"] .${bar}::before {

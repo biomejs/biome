@@ -35,7 +35,7 @@ class OneParameterProperty {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,24 +1,15 @@
  class MyClass {
 -  constructor(

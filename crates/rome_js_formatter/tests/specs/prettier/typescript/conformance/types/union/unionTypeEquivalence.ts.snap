@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/conformance/types/union/unionTypeEquivalence.ts
 ---
 
@@ -33,7 +32,7 @@ var z1: string | typeof BC;
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,4 +1,4 @@
 -﻿// A | B is equivalent to A if B is a subtype of A
 +// A | B is equivalent to A if B is a subtype of A

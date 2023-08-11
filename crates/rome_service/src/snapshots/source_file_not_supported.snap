@@ -4,7 +4,7 @@ expression: content
 ---
 not_supported.toml internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Rome could not determine the language for the file extension toml
+  × Biome could not determine the language for the file extension toml
   
 
 

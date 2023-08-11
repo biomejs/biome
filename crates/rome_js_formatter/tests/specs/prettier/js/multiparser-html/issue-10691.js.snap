@@ -24,7 +24,7 @@ export default function include_photoswipe(
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,8 @@
  export default function include_photoswipe(gallery_selector = ".my-gallery") {
 -  return /* HTML */ ` <script>

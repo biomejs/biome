@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/fbt/test.js
 ---
 
@@ -130,7 +129,7 @@ third = (
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,15 +1,12 @@
  x = (
    <fbt>

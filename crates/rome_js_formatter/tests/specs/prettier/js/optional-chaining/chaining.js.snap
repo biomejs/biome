@@ -97,7 +97,7 @@ new (foo?.())();
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -10,14 +10,14 @@
  a?.b.c(++x).d;
  a?.b[3].c?.(x).d;

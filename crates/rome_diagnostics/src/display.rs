@@ -425,11 +425,11 @@ where
     D: Diagnostic + ?Sized,
 {
     if diagnostic.severity() == Severity::Fatal {
-        visitor.record_log(LogCategory::Warn, &"Rome exited as this error could not be handled and resulted in a fatal error. Please report it if necessary.")?;
+        visitor.record_log(LogCategory::Warn, &"Biome exited as this error could not be handled and resulted in a fatal error. Please report it if necessary.")?;
     }
 
     if diagnostic.tags().contains(DiagnosticTags::INTERNAL) {
-        visitor.record_log(LogCategory::Warn, &"This diagnostic was derived from an internal Rome error. Potential bug, please report it if necessary.")?;
+        visitor.record_log(LogCategory::Warn, &"This diagnostic was derived from an internal Biome error. Potential bug, please report it if necessary.")?;
     }
 
     Ok(())

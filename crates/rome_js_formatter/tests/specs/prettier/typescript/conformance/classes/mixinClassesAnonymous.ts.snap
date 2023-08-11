@@ -78,7 +78,7 @@ const Timestamped = <CT extends Constructor<object>>(Base: CT) => {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,18 +1,11 @@
  type Constructor<T> = new (...args: any[]) => T;
  

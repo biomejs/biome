@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/range/module-export3.js
 ---
 
@@ -24,7 +23,7 @@ export   default    42
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,9 @@
 -import def, { named } from "x";
 +import  def , {named}  from    'x'

@@ -39,7 +39,7 @@ map(() => (#{
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -4,28 +4,32 @@
    baz: foo,
  });

@@ -22,7 +22,7 @@ setTimeout(() => {
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,11 +1,8 @@
 -setTimeout(
 -  () => {

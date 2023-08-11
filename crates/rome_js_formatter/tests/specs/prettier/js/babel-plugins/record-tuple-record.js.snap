@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/babel-plugins/record-tuple-record.js
 ---
 
@@ -22,7 +21,7 @@ const record2 = #{...record1, b: 5};
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,7 +1,11 @@
 -const record1 = #{
 -  a: 1,

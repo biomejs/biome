@@ -64,7 +64,7 @@ info: js/decorators/member-expression.js
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -12,7 +12,7 @@
      method() {}
    },

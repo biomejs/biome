@@ -1,6 +1,5 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: typescript/error-recovery/jsdoc_only_types.ts
 ---
 
@@ -23,7 +22,7 @@ let h: !(string | number);
 
 ```diff
 --- Prettier
-+++ Rome
++++ Biome
 @@ -1,8 +1,15 @@
 -let a: *;
 +let a:

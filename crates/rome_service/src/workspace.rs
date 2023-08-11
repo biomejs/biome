@@ -1,6 +1,6 @@
-//! The [Workspace] is the main entry point for high-level clients (the Rome
+//! The [Workspace] is the main entry point for high-level clients (the Biome
 //! CLI and Language Server) into the various language-specific services of the
-//! Rome toolchain (parser, formatter, analyzer ...)
+//! Biome toolchain (parser, formatter, analyzer ...)
 //!
 //! # Documents
 //!
@@ -488,7 +488,7 @@ pub struct IsPathIgnoredParams {
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Checks whether a certain feature is supported. There are different conditions:
-    /// - Rome doesn't recognize a file, so it can't provide the feature;
+    /// - Biome doesn't recognize a file, so it can't provide the feature;
     /// - the feature is disabled inside the configuration;
     /// - the file is ignored
     fn file_features(
