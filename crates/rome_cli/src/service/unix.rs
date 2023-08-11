@@ -31,11 +31,11 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
             let file_name = entry.file_name()?;
             let file_name = file_name.to_str()?;
 
-            let rome_version = file_name.strip_prefix("rome-socket")?;
-            if rome_version.is_empty() {
+            let version = file_name.strip_prefix("rome-socket")?;
+            if version.is_empty() {
                 Some(String::new())
             } else {
-                Some(rome_version.strip_prefix('-')?.to_string())
+                Some(version.strip_prefix('-')?.to_string())
             }
         })
     })

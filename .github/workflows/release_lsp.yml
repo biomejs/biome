@@ -17,8 +17,8 @@ jobs:
       # LSP Extension Version
       version: ${{ env.version }}
 
-      # Version of the Rome binary
-      rome_version: ${{ env.rome_version }}
+      # Version of the Biome binary
+      biome_version: ${{ env.biome_version }}
       prerelease: ${{ env.prerelease }}
       nightly: ${{ env.nightly }}
       version_changed: ${{ steps.version.outputs.changed }}
@@ -38,10 +38,10 @@ jobs:
           diff-search: true
           file-name: editors/vscode/package.json
 
-      - name: Check Rome version changes
+      - name: Check Biome version changes
         uses: EndBug/version-check@v1
         if: env.nightly != 'true'
-        id: rome_version
+        id: biome_version
         with:
           diff-search: true
           file-name: packages/@biomejs/biome/package.json
@@ -49,7 +49,7 @@ jobs:
       - name: Set version name
         run: |
           echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
-          echo "rome_version=${{ steps.rome_version.outputs.version }}" >> $GITHUB_ENV
+          echo "biome_version=${{ steps.biome_version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Check prerelease status
         id: prerelease
@@ -57,15 +57,15 @@ jobs:
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
           node ./editors/vscode/scripts/update-nightly-version.mjs >> $GITHUB_ENV
-          echo "rome_version=$(node ./npm/rome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+          echo "biome_version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
 
       - name: Check version status
         if: steps.version.outputs.changed == 'true'
         run: 'echo "Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
 
-      - name: Rome Check version status
-        if: steps.rome_version.outputs.changed == 'true'
-        run: 'echo "Rome Version change found! New version: ${{ steps.rome_version.outputs.version }} (${{ steps.rome_version.outputs.version_type }})"'
+      - name: Biome Check version status
+        if: steps.biome_version.outputs.changed == 'true'
+        run: 'echo "Biome Version change found! New version: ${{ steps.biome_version.outputs.version }} (${{ steps.biome_version.outputs.version_type }})"'
 
   build:
     strategy:
@@ -131,7 +131,7 @@ jobs:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols"
-          BIOME_VERSION: ${{ needs.check.outputs.rome_version }}
+          BIOME_VERSION: ${{ needs.check.outputs.biome_version }}
 
       - name: Copy LSP binary
         if: matrix.os == 'windows-2022'

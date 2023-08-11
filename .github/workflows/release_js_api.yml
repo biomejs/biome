@@ -32,7 +32,7 @@ jobs:
         id: version
         with:
           diff-search: true
-          file-name: npm/js-api/package.json
+          file-name: packages/@biomejs/js-api/package.json
 
       - name: Set version name
         run: echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
@@ -87,7 +87,7 @@ jobs:
         if: needs.check.outputs.prerelease == 'true'
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
-          node npm/js-api/scripts/update-nightly-version.mjs >> $GITHUB_ENV
+          node packages/@biomejs/js-api/scripts/update-nightly-version.mjs >> $GITHUB_ENV
       - name: Set release infos
         if: needs.check.outputs.prerelease != 'true'
         run: |
@@ -103,7 +103,7 @@ jobs:
           pnpm --prefix packages/@biomejs/backend-jsonrpc run build
 
       - name: Build package
-        working-directory: npm/js-api
+        working-directory: packages/@biomejs/js-api
         run: |
           pnpm i
           pnpm build
@@ -113,7 +113,7 @@ jobs:
         with:
           name: js-api
           path: |
-            ./npm/js-api/dist
+            ./packages/@biomejs/js-api/dist
           if-no-files-found: error
 
   publish:
@@ -128,7 +128,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: js-api
-          path: npm/js-api/dist
+          path: packages/@biomejs/js-api/dist
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -138,15 +138,15 @@ jobs:
 
       - name: Set release infos
         if: needs.build.outputs.prerelease == 'true'
-        run: node npm/js-api/scripts/update-nightly-version.mjs
+        run: node packages/@biomejs/js-api/scripts/update-nightly-version.mjs
 
       - name: Publish npm package as latest
-        run: npm publish npm/js-api --tag latest --access public
+        run: npm publish packages/@biomejs/js-api --tag latest --access public
         if: needs.build.outputs.prerelease != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish npm package as nightly
-        run: npm publish npm/js-api --tag nightly --access public
+        run: npm publish packages/@biomejs/js-api --tag nightly --access public
         if: needs.build.outputs.prerelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
