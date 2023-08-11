@@ -14,7 +14,7 @@ use xtask::{project_root, Mode, Result};
 use xtask_codegen::{to_camel_case, update};
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
-    let bindings_path = project_root().join("npm/backend-jsonrpc/src/workspace.ts");
+    let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
     let methods = methods();
 
     let mut declarations = Vec::new();

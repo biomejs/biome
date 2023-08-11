@@ -28,7 +28,7 @@ jobs:
           shared-key: "cli-release"
 
       - name: Run Rome Format
-        run: cargo biome-cli ci editors website npm/js-api
+        run: cargo biome-cli ci editors website packages/@biomejs/js-api
   type-check:
     name: Type-check JS Files
     runs-on: ubuntu-latest

@@ -66,11 +66,11 @@ export type StringSet = string[];
  */
 export interface FilesConfiguration {
 	/**
-	 * A list of Unix shell style patterns. Rome tools will ignore files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome tools will ignore files/folders that will match these patterns.
 	 */
 	ignore?: StringSet;
 	/**
-	 * Tells Rome to not emit diagnostics when handling files that doesn't know
+	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
 	ignoreUnknown?: boolean;
 	/**
@@ -143,7 +143,7 @@ export interface OrganizeImports {
 	ignore?: StringSet;
 }
 /**
- * Set of properties to integrate Rome with a VCS software.
+ * Set of properties to integrate Biome with a VCS software.
  */
 export interface VcsConfiguration {
 	/**
@@ -151,17 +151,17 @@ export interface VcsConfiguration {
 	 */
 	clientKind?: VcsClientKind;
 	/**
-	 * Whether Rome should integrate itself with the VCS client
+	 * Whether Biome should integrate itself with the VCS client
 	 */
 	enabled?: boolean;
 	/**
-	* The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.
+	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
 
-If Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted 
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
 	 */
 	root?: string;
 	/**
-	 * Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.
+	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 	 */
 	useIgnoreFile?: boolean;
 }
@@ -224,7 +224,7 @@ export interface Rules {
 	nursery?: Nursery;
 	performance?: Performance;
 	/**
-	 * It enables the lint rules recommended by Rome. `true` by default.
+	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
 	security?: Security;
@@ -1039,7 +1039,7 @@ export interface OpenFileParams {
 	version: number;
 }
 /**
- * Supported languages by Rome
+ * Supported languages by Biome
  */
 export type Language =
 	| "JavaScript"
@@ -1409,7 +1409,7 @@ export type ActionCategory =
 	| { Source: SourceActionKind }
 	| { Other: string };
 /**
- * A Suggestion that is provided by Rome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
+ * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
 export interface CodeSuggestion {
 	applicability: Applicability;

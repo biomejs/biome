@@ -587,11 +587,11 @@
 			"type": "object",
 			"properties": {
 				"ignore": {
-					"description": "A list of Unix shell style patterns. Rome tools will ignore files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome tools will ignore files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"ignoreUnknown": {
-					"description": "Tells Rome to not emit diagnostics when handling files that doesn't know",
+					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"type": ["boolean", "null"]
 				},
 				"maxSize": {
@@ -1149,7 +1149,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Performance" }, { "type": "null" }]
 				},
 				"recommended": {
-					"description": "It enables the lint rules recommended by Rome. `true` by default.",
+					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
 				},
 				"security": {
@@ -1669,7 +1669,7 @@
 			]
 		},
 		"VcsConfiguration": {
-			"description": "Set of properties to integrate Rome with a VCS software.",
+			"description": "Set of properties to integrate Biome with a VCS software.",
 			"type": "object",
 			"properties": {
 				"clientKind": {
@@ -1680,15 +1680,15 @@
 					]
 				},
 				"enabled": {
-					"description": "Whether Rome should integrate itself with the VCS client",
+					"description": "Whether Biome should integrate itself with the VCS client",
 					"type": ["boolean", "null"]
 				},
 				"root": {
-					"description": "The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.\n\nIf Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted",
+					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
 					"type": ["string", "null"]
 				},
 				"useIgnoreFile": {
-					"description": "Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.",
+					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.",
 					"type": ["boolean", "null"]
 				}
 			},

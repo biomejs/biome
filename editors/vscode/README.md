@@ -42,7 +42,7 @@ This configuration sets Rome as the default formatter for JavaScript files. All 
 
 ## Configuration Resolution
 
-The extension automatically loads the `biome.json` file from the workspace’s root directory.
+The extension automatically loads the `rome.json` file from the workspace’s root directory.
 
 ## Rome Resolution
 
@@ -94,7 +94,7 @@ Enables Rome to handle renames in the workspace (experimental).
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `biome.json` file. Requires Rome 12 or newer.
+Disables formatting, linting, and syntax errors for projects without a `rome.json` file. Requires Rome 12 or newer.
 Enabled by default.
 
 ## Versioning

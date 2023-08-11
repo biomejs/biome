@@ -44,7 +44,7 @@ jobs:
         id: rome_version
         with:
           diff-search: true
-          file-name: npm/rome/package.json
+          file-name: packages/@biomejs/biome/package.json
 
       - name: Set version name
         run: |

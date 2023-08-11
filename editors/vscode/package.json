@@ -115,7 +115,7 @@
 		},
 		"jsonValidation": [
 			{
-				"fileMatch": "biome.json",
+				"fileMatch": "rome.json",
 				"url": "./configuration_schema.json"
 			}
 		]

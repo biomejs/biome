@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'npm/**'
+      - 'packages/**'
       - 'crates/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'npm/**'
+      - 'packages/**'
       - 'crates/**'
 
 env:
@@ -54,5 +54,5 @@ jobs:
           pnpm --prefix packages/@biomejs/backend-jsonrpc i
           pnpm --prefix packages/@biomejs/backend-jsonrpc run build
       - name: CI checks
-        working-directory: npm/js-api
+        working-directory: packages/@biomejs/js-api
         run: pnpm run ci
