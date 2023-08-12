@@ -97,7 +97,7 @@ impl Rule for {rule_name_upper_camel} {{
     if !categories.contains(&rule_name_lower_camel) {
         // We sort rules to reduce conflicts between contributions made in parallel.
         let rule_line = format!(
-            r#"    "lint/nursery/{rule_name_lower_camel}": "https://docs.rome.tools/lint/rules/{rule_name_lower_camel}","#
+            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/lint/rules/{rule_name_lower_camel}","#
         );
         let nursery_start = "    // nursery\n";
         let nursery_end = "\n    // nursery end";
