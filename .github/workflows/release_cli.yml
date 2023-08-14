@@ -159,9 +159,9 @@ jobs:
         with:
           name: wasm
           path: |
-            ./packages/@biomejs/biome/wasm-bundler
-            ./packages/@biomejs/biome/wasm-nodejs
-            ./packages/@biomejs/biome/wasm-web
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
           if-no-files-found: error
 
   publish:
