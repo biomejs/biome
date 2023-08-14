@@ -2,13 +2,13 @@
 authors.workspace    = true
 categories           = ["parser-implementations", "development-tools"]
 description          = "An extremely fast JSON parser"
-documentation        = "https://rustdocs.rome.tools/rome_json_parser/index.html"
+documentation        = "https://docs.rs/rome_json_parser"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
 name                 = "rome_json_parser"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.1.0"
 
 [dependencies]
 rome_console          = { workspace = true }

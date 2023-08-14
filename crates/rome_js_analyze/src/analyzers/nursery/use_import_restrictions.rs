@@ -71,7 +71,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseImportRestrictions {
-        version: "next",
+        version: "13.0.0",
         name: "useImportRestrictions",
         recommended: false,
     }

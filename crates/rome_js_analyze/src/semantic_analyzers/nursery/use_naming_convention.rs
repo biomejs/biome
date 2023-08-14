@@ -268,7 +268,7 @@ declare_rule! {
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`CONSTANT_CASE`]: https://en.wikipedia.org/wiki/Snake_case
     pub(crate)  UseNamingConvention {
-        version: "next",
+        version: "13.0.0",
         name: "useNamingConvention",
         recommended: false,
     }

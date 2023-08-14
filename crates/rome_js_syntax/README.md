@@ -32,5 +32,5 @@
 
 # `rome_js_syntax`
 
-Rome's JavaScript parser implementation. Follow the [documentation](https://rustdocs.rome.tools/rome_js_parser/index.html).
+Rome's JavaScript parser implementation. Follow the [documentation](https://docs.rs/rome_js_parser/).
 

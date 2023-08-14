@@ -1,17 +1,17 @@
 [package]
 authors.workspace    = true
 description          = "SyntaxKind and common rowan definitions for rome_js_parser"
-documentation        = "https://rustdocs.rome.tools/rome_js_syntax/index.html"
+documentation        = "https://docs.rs/rome_js_syntax"
 edition.workspace    = true
 license.workspace    = true
 name                 = "rome_js_syntax"
 repository.workspace = true
-version              = "0.0.2"
+version              = "0.2.0"
 
 [dependencies]
 rome_console     = { version = "0.0.1", path = "../rome_console" }
-rome_diagnostics = { version = "0.0.1", path = "../rome_diagnostics" }
-rome_rowan       = { version = "0.0.1", path = "../rome_rowan" }
+rome_diagnostics = { version = "0.2.0", path = "../rome_diagnostics" }
+rome_rowan       = { version = "0.2.0", path = "../rome_rowan" }
 schemars         = { version = "0.8.10", optional = true }
 serde            = { version = "1.0.136", features = ["derive"], optional = true }
 

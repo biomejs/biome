@@ -279,15 +279,18 @@ fn parse_documentation(
                 // re-generating the language ID from the source type
                 write!(content, "```")?;
                 if !meta.is_empty() {
-                    if let BlockType::Js(source_type) = test.block_type {
-                        match source_type.language() {
-                            Language::JavaScript => write!(content, "js")?,
-                            Language::TypeScript { .. } => write!(content, "ts")?,
+                    match test.block_type {
+                        BlockType::Js(source_type) => {
+                            match source_type.language() {
+                                Language::JavaScript => write!(content, "js")?,
+                                Language::TypeScript { .. } => write!(content, "ts")?,
+                            }
+                            match source_type.variant() {
+                                LanguageVariant::Standard => {}
+                                LanguageVariant::Jsx => write!(content, "x")?,
+                            }
                         }
-                        match source_type.variant() {
-                            LanguageVariant::Standard => {}
-                            LanguageVariant::Jsx => write!(content, "x")?,
-                        }
+                        BlockType::Json => write!(content, "json")?,
                     }
                 }
                 writeln!(content)?;

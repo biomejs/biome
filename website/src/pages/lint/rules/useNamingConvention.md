@@ -3,7 +3,7 @@ title: Lint Rule useNamingConvention
 parent: lint/rules/index
 ---
 
-# useNamingConvention (since vnext)
+# useNamingConvention (since v13.0.0)
 
 Enforce naming conventions for everything across a codebase.
 
@@ -299,7 +299,7 @@ namespace MathExtra {
 
 The rule provides two options that are detailed in the following subsections.
 
-```
+```json
 {
     "//": "...",
     "options": {

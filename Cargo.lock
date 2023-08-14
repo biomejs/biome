@@ -152,18 +152,18 @@ checksum = "630be753d4e58660abd17930c71b647fe46c27ea6b63cc59e1e3851406972e42"
 
 [[package]]
 name = "bpaf"
-version = "0.9.2"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "affa4185035a12636b90d7064d64fff3cca6ff5a2f65c3325a7eef0da2f272bb"
+checksum = "c359c5e742f51d3238e83af24b289903591fbce38990eb9fcc903c7f8d5d95f9"
 dependencies = [
  "bpaf_derive",
 ]
 
 [[package]]
 name = "bpaf_derive"
-version = "0.5.2"
+version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac88f5e10b620a207805c5a6f538a7777dc55e5469bbc0eec27e2bf75d5ee0f6"
+checksum = "136d1184f80d42a8fa311570a1458e54e2e9f5537fbd19b4d2fba04110e30307"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1648,7 +1648,7 @@ dependencies = [
 
 [[package]]
 name = "rome_analyze"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "bitflags 2.3.3",
  "rome_console",
@@ -1733,14 +1733,14 @@ dependencies = [
 
 [[package]]
 name = "rome_control_flow"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "rome_rowan",
 ]
 
 [[package]]
 name = "rome_css_factory"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "rome_css_syntax",
  "rome_rowan",
@@ -1748,7 +1748,7 @@ dependencies = [
 
 [[package]]
 name = "rome_css_parser"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "insta",
  "quickcheck",
@@ -1766,14 +1766,14 @@ dependencies = [
 
 [[package]]
 name = "rome_css_syntax"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "rome_rowan",
 ]
 
 [[package]]
 name = "rome_deserialize"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "indexmap",
  "rome_console",
@@ -1789,7 +1789,7 @@ dependencies = [
 
 [[package]]
 name = "rome_diagnostics"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "backtrace",
  "bitflags 2.3.3",
@@ -1810,7 +1810,7 @@ dependencies = [
 
 [[package]]
 name = "rome_diagnostics_categories"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "quote",
  "schemars",
@@ -1833,7 +1833,7 @@ version = "0.0.0"
 
 [[package]]
 name = "rome_formatter"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "cfg-if",
  "countme",
@@ -1854,7 +1854,7 @@ dependencies = [
 
 [[package]]
 name = "rome_formatter_test"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "insta",
  "rome_console",
@@ -1872,7 +1872,7 @@ dependencies = [
 
 [[package]]
 name = "rome_fs"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "crossbeam",
  "indexmap",
@@ -1887,7 +1887,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_analyze"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "bpaf",
  "countme",
@@ -1921,7 +1921,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_factory"
-version = "0.0.2"
+version = "0.2.0"
 dependencies = [
  "rome_js_syntax",
  "rome_rowan",
@@ -1929,7 +1929,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_formatter"
-version = "0.0.2"
+version = "0.1.0"
 dependencies = [
  "cfg-if",
  "countme",
@@ -1960,7 +1960,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_parser"
-version = "0.0.2"
+version = "0.1.0"
 dependencies = [
  "bitflags 2.3.3",
  "cfg-if",
@@ -1987,7 +1987,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_semantic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "rome_console",
  "rome_diagnostics",
@@ -2001,7 +2001,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_syntax"
-version = "0.0.2"
+version = "0.2.0"
 dependencies = [
  "rome_console",
  "rome_diagnostics",
@@ -2013,7 +2013,7 @@ dependencies = [
 
 [[package]]
 name = "rome_js_transform"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "insta",
  "lazy_static",
@@ -2035,7 +2035,7 @@ version = "0.0.1"
 
 [[package]]
 name = "rome_json_analyze"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "insta",
  "lazy_static",
@@ -2053,7 +2053,7 @@ dependencies = [
 
 [[package]]
 name = "rome_json_factory"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "rome_json_syntax",
  "rome_rowan",
@@ -2061,7 +2061,7 @@ dependencies = [
 
 [[package]]
 name = "rome_json_formatter"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "countme",
  "insta",
@@ -2082,7 +2082,7 @@ dependencies = [
 
 [[package]]
 name = "rome_json_parser"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "insta",
  "quickcheck",
@@ -2100,7 +2100,7 @@ dependencies = [
 
 [[package]]
 name = "rome_json_syntax"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "rome_rowan",
 ]
@@ -2141,7 +2141,7 @@ dependencies = [
 
 [[package]]
 name = "rome_migrate"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "lazy_static",
  "rome_analyze",
@@ -2153,7 +2153,7 @@ dependencies = [
 
 [[package]]
 name = "rome_parser"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "drop_bomb",
  "rome_console",
@@ -2163,7 +2163,7 @@ dependencies = [
 
 [[package]]
 name = "rome_rowan"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "countme",
  "hashbrown",
@@ -2217,7 +2217,7 @@ dependencies = [
 
 [[package]]
 name = "rome_suppression"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
  "rome_console",
  "rome_diagnostics",
@@ -2267,7 +2267,7 @@ dependencies = [
 
 [[package]]
 name = "rome_wasm"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
@@ -2626,7 +2626,7 @@ dependencies = [
 
 [[package]]
 name = "tests_macros"
-version = "0.0.0"
+version = "0.2.0"
 dependencies = [
  "case",
  "globwalk",
@@ -3373,6 +3373,7 @@ dependencies = [
  "rome_js_analyze",
  "rome_js_factory",
  "rome_js_formatter",
+ "rome_js_parser",
  "rome_js_syntax",
  "rome_json_analyze",
  "rome_json_formatter",

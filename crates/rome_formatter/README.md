@@ -32,4 +32,4 @@
 
 # `rome_formatter`
 
-Rome's formatter implementation. Follow the [documentation](https://rustdocs.rome.tools/rome_formatter/index.html).
+Rome's formatter implementation. Follow the [documentation](https://docs.rs/rome_formatter/).

@@ -2,11 +2,11 @@
 authors.workspace = true
 categories        = ["development-tools"]
 description       = "Pretty error reporting library"
-documentation     = "https://rustdocs.rome.tools/rome_diagnostics/index.html"
+documentation     = "https://docs.rs/rome_diagnostics"
 edition.workspace = true
 license.workspace = true
 name              = "rome_diagnostics"
-version           = "0.0.1"
+version           = "0.2.0"
 
 [[example]]
 name = "cli"

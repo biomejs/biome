@@ -32,5 +32,5 @@
 
 # `rome_css_parser`
 
-Rome's CSS parser implementation. Follow the [documentation](https://rustdocs.rome.tools/rome_css_parser/index.html).
+Rome's CSS parser implementation. Follow the [documentation](https://docs.rs/rome_css_parser/latest).
 

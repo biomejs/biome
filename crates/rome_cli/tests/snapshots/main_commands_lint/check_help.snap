@@ -26,8 +26,8 @@ The configuration that is contained inside the file `rome.json`
         --indent-style=<tab|space>  The indent style.
         --indent-size=NUMBER  The size of the indentation, 2 by default
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --quote-style=<double|single>  The style for quotes. Defaults to double.
-        --jsx-quote-style=<double|single>  The style for JSX quotes. Defaults to double.
+        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
+        --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
                               syntactic structures. Defaults to "all".
@@ -50,7 +50,6 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --json                Reports information using the JSON format
 
 Available positional items:
     PATH                      Single file, single path or list of paths

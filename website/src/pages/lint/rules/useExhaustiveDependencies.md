@@ -184,7 +184,7 @@ function component() {
 
 Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
 
-```
+```json
 {
     "//": "...",
     "options": {

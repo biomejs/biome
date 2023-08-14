@@ -23,7 +23,6 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --json                Reports information using the JSON format
 
 Available options:
         --write               Writes the new configuration file to disk

@@ -10,7 +10,7 @@ description: What the Rome analyzer provides
 Rome's analyzer provides a series of features that users can leverage.
 
 
-### Imports Sorting
+## Imports Sorting
 
 Rome allows to sort import statement using [natural ordering](https://en.wikipedia.org/wiki/Natural_sort_order).
 
@@ -24,17 +24,55 @@ This feature is opt-in via configuration:
 }
 ```
 
-You can apply the sorting in two way: via LSP or CLI
+### How imports are sorted
 
-### Imports sorting via CLI
+Import statements are sorted by "distance". Modules that are "farther" from the user are put on the top, modules "closer" to the user are put on the bottom:
 
-Due the nature of the language, the sorting of imports is categorised as **unsafe**, and you can apply it using the `--apply-unsafe` option:
+1. built-in Node.js modules that are explicitly imported using the `node:` protocol;
+2. modules imported via `npm:` protocol. This is a valid syntax when writing code run by Deno, for example;
+3. modules imported via URL;
+4. modules imported from libraries;
+5. modules imported via relative imports;
+6. modules that couldn't be identified by the previous criteria;
+
+For example, given the following code:
+
+```js
+import uncle from "../uncle";
+import sibling from "./sibling";
+import express from "npm:epxress";
+import imageUrl from "url:./image.png";
+import assert from "node:assert";
+import aunt from "../aunt";
+import { VERSION } from "https://deno.land/std/version.ts";
+import { mock, test } from "node:test";
+```
+
+They will be sorted like this:
+
+```js
+ import assert from "node:assert";
+ import { mock, test } from "node:test";
+ import express from "npm:epxress";
+ import { VERSION } from "https://deno.land/std/version.ts";
+ import aunt from "../aunt";
+ import uncle from "../uncle";
+ import sibling from "./sibling";
+ import imageUrl from "url:./image.png";
+```
+
+
+You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension)
+
+### Import sorting via CLI
+
+Due to the nature of the language, the sorting of imports is categorised as **unsafe**, and you can apply it using the `--apply-unsafe` option:
 
 ```shell
 rome check --apply-unsafe ./path/to/src
 ```
 
-### Imports sorting via VSCode extension
+### Import sorting via VSCode extension
 
 
 The Rome VS Code extension has experimental support for imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.

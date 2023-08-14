@@ -79,7 +79,7 @@ export interface FilesConfiguration {
 	maxSize?: number;
 }
 /**
- * Options applied to the formatter
+ * Generic options applied to all files
  */
 export interface FormatterConfiguration {
 	enabled?: boolean;
@@ -104,7 +104,13 @@ export interface FormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 }
+/**
+ * A set of options applied to the JavaScript files
+ */
 export interface JavascriptConfiguration {
+	/**
+	 * Formatting options
+	 */
 	formatter?: JavascriptFormatter;
 	/**
 	* A list of global bindings that should be ignored by the analyzers
@@ -113,9 +119,18 @@ If defined here, they should not emit diagnostics.
 	 */
 	globals?: StringSet;
 	organize_imports?: JavascriptOrganizeImports;
+	/**
+	 * Parsing options
+	 */
 	parser?: JavascriptParser;
 }
+/**
+ * Options applied to JSON files
+ */
 export interface JsonConfiguration {
+	/**
+	 * Parsing options
+	 */
 	parser?: JsonParser;
 }
 export interface LinterConfiguration {
@@ -172,13 +187,16 @@ export type PlainIndentStyle = "tab" | "space";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+/**
+ * Formatting options specific to the JavaScript files
+ */
 export interface JavascriptFormatter {
 	/**
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The style for JSX quotes. Defaults to double.
+	 * The type of quotes used in JSX. Defaults to double.
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
@@ -186,7 +204,7 @@ export interface JavascriptFormatter {
 	 */
 	quoteProperties?: QuoteProperties;
 	/**
-	 * The style for quotes. Defaults to double.
+	 * The type of quotes used in JavaScript code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
 	/**
@@ -199,6 +217,9 @@ export interface JavascriptFormatter {
 	trailingComma?: TrailingComma;
 }
 export interface JavascriptOrganizeImports {}
+/**
+ * Options that changes how the JavaScript parser behaves
+ */
 export interface JavascriptParser {
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
@@ -207,6 +228,9 @@ These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
+/**
+ * Options that changes how the JSON parser behaves
+ */
 export interface JsonParser {
 	/**
 	 * Allow parsing comments in `.json` files

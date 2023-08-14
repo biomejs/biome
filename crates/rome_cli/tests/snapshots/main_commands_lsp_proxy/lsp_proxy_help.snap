@@ -7,8 +7,7 @@ expression: content
 ```block
 Acts as a server for the Language Server Protocol over stdin/stdout
 
-Usage: lsp-proxy [--colors=<off|force>] [--use-server] [--verbose] [--config-path=PATH] [--max-diagnostics
-=NUMBER] [--skip-errors] [--no-errors-on-unmatched] [--error-on-warnings]
+Usage: lsp-proxy 
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
@@ -24,7 +23,6 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --json                Reports information using the JSON format
 
 Available options:
     -h, --help                Prints help information

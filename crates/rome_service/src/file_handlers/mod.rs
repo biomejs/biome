@@ -45,8 +45,10 @@ pub enum Language {
 
 impl Language {
     /// Files that can be bypassed, because correctly handled by the JSON parser
-    pub(crate) const ALLOWED_FILES: &'static [&'static str; 13] = &[
+    pub(crate) const ALLOWED_FILES: &'static [&'static str; 15] = &[
         "typescript.json",
+        "tsconfig.json",
+        "jsconfig.json",
         "tslint.json",
         "babel.config.json",
         ".babelrc.json",

@@ -74,7 +74,7 @@ declare_rule! {
     /// The allowed values range from 1 through 254. The default is 10.
     ///
     pub(crate) NoExcessiveComplexity {
-        version: "next",
+        version: "13.0.0",
         name: "noExcessiveComplexity",
         recommended: false,
     }

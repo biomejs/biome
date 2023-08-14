@@ -1,7 +1,7 @@
 [package]
 authors              = ["Rome Tools and Contributors"]
 description          = "Unicode table for JavaScript IDs"
-documentation        = "https://rustdocs.rome.tools/rome_js_parser/index.html"
+documentation        = "https://docs.rs/rome_js_parser"
 edition.workspace    = true
 license.workspace    = true
 name                 = "rome_js_unicode_table"

@@ -44,7 +44,7 @@ function f(event) {
 Use the options to specify additional globals that you want to restrict in your
 source code.
 
-```
+```json
 {
     "//": "...",
     "options": {

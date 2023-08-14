@@ -605,7 +605,7 @@
 			"additionalProperties": false
 		},
 		"FormatterConfiguration": {
-			"description": "Options applied to the formatter",
+			"description": "Generic options applied to all files",
 			"type": "object",
 			"properties": {
 				"enabled": { "default": true, "type": ["boolean", "null"] },
@@ -675,9 +675,11 @@
 			"additionalProperties": false
 		},
 		"JavascriptConfiguration": {
+			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
 				"formatter": {
+					"description": "Formatting options",
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptFormatter" },
 						{ "type": "null" }
@@ -694,6 +696,7 @@
 					]
 				},
 				"parser": {
+					"description": "Parsing options",
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptParser" },
 						{ "type": "null" }
@@ -703,6 +706,7 @@
 			"additionalProperties": false
 		},
 		"JavascriptFormatter": {
+			"description": "Formatting options specific to the JavaScript files",
 			"type": "object",
 			"properties": {
 				"arrowParentheses": {
@@ -713,7 +717,7 @@
 					]
 				},
 				"jsxQuoteStyle": {
-					"description": "The style for JSX quotes. Defaults to double.",
+					"description": "The type of quotes used in JSX. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"quoteProperties": {
@@ -724,7 +728,7 @@
 					]
 				},
 				"quoteStyle": {
-					"description": "The style for quotes. Defaults to double.",
+					"description": "The type of quotes used in JavaScript code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"semicolons": {
@@ -746,6 +750,7 @@
 			"additionalProperties": false
 		},
 		"JavascriptParser": {
+			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
 				"unsafeParameterDecoratorsEnabled": {
@@ -756,15 +761,18 @@
 			"additionalProperties": false
 		},
 		"JsonConfiguration": {
+			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
 				"parser": {
+					"description": "Parsing options",
 					"anyOf": [{ "$ref": "#/definitions/JsonParser" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"JsonParser": {
+			"description": "Options that changes how the JSON parser behaves",
 			"type": "object",
 			"properties": {
 				"allowComments": {

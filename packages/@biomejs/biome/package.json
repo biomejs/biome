@@ -1,7 +1,7 @@
 {
     "name": "@biomejs/biome",
     "version": "0.1.0",
-    "bin": "bin/boime",
+    "bin": "bin/biome",
     "scripts": {
         "postinstall": "node scripts/postinstall.js"
     },
