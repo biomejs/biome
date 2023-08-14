@@ -20,6 +20,7 @@
 				"@astrojs/prism": "^2.1.1",
 				"@astrojs/react": "^2.1.2",
 				"@astrojs/rss": "^2.4.1",
+				"@biomejs/wasm-web": "../packages/@biomejs/wasm-web",
 				"@codemirror/lang-javascript": "^6.1.8",
 				"@codemirror/lang-json": "^6.0.1",
 				"@codemirror/lint": "^6.2.1",
@@ -28,7 +29,6 @@
 				"@docsearch/css": "^3.3.0",
 				"@docsearch/js": "^3.3.0",
 				"@fontsource/inter": "^4.5.14",
-				"@biomejs/wasm-web": "../packages/@biomejs/wasm-web",
 				"@types/mermaid": "^9.1.0",
 				"@types/node": "^18.16.3",
 				"@types/prettier": "^2.7.1",
@@ -37,7 +37,7 @@
 				"@uiw/react-codemirror": "^4.20.2",
 				"@vitejs/plugin-react": "^2.1.0",
 				"astro": "^2.5.7",
-				"@otterlord/astro-compress": "^1.1.48",
+				"astro-compress": "^2.0.8",
 				"autoprefixer": "^10.4.12",
 				"codemirror-lang-rome-ast": "0.0.6",
 				"fast-diff": "^1.2.0",
@@ -63,8 +63,5 @@
 		},
 		"engines": {
 				"pnpm": "^8.0.0"
-		},
-		"dependencies": {
-				"@otterlord/astro-compress": "^1.1.48"
 		}
 }
