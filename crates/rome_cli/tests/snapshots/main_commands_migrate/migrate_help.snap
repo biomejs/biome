@@ -13,7 +13,7 @@ Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
                               "force" forces the formatting of markup using ANSI even if the console
                               output is determined to be incompatible
-        --use-server          Connect to a running instance of the Rome daemon server.
+        --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional verbose advices on diagnostics
         --config-path=PATH    Set the filesystem path to the directory of the rome.json configuration
                               file
@@ -22,7 +22,7 @@ Global options applied to all commands
         --skip-errors         Skip over files containing syntax errors instead of emitting an error diagnostic.
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
-        --error-on-warnings   Tell Rome to exit with an error code if some diagnostics emit warnings.
+        --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 Available options:
         --write               Writes the new configuration file to disk
