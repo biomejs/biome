@@ -119,19 +119,19 @@ jobs:
         if: matrix.os == 'windows-2022'
         run: |
           mkdir dist
-          cp target/${{ matrix.target }}/release/rome.exe ./dist/rome-${{ matrix.code-target }}.exe
+          cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
         if: matrix.os != 'windows-2022'
         run: |
           mkdir dist
-          cp target/${{ matrix.target }}/release/rome ./dist/rome-${{ matrix.code-target }}
+          cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
 
       # Upload the CLI binary as a build artifact
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v3
         with:
           name: cli
-          path: ./dist/rome-*
+          path: ./dist/biome-*
           if-no-files-found: error
 
   build-wasm:
@@ -159,9 +159,9 @@ jobs:
         with:
           name: wasm
           path: |
-            ./packages/@biomejs/biome/wasm-bundler
-            ./packages/@biomejs/biome/wasm-nodejs
-            ./packages/@biomejs/biome/wasm-web
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
           if-no-files-found: error
 
   publish:
