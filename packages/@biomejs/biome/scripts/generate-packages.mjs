@@ -40,8 +40,8 @@ function generateNativePackage(platform, arch) {
 
 	// Copy the CLI binary
 	const ext = platform === "win32" ? ".exe" : "";
-	const binarySource = resolve(REPO_ROOT, `rome-${platform}-${arch}${ext}`);
-	const binaryTarget = resolve(packageRoot, `rome${ext}`);
+	const binarySource = resolve(REPO_ROOT, `biome-${platform}-${arch}${ext}`);
+	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
 	console.log(`Copy binary ${binaryTarget}`);
 	fs.copyFileSync(binarySource, binaryTarget);
@@ -85,8 +85,8 @@ function writeManifest(packagePath) {
 	fs.writeFileSync(manifestPath, content);
 }
 
-const PLATFORMS = [  "linux"];
-const ARCHITECTURES = [ "arm64"];
+const PLATFORMS = ["linux"];
+const ARCHITECTURES = ["arm64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 
 for (const target of WASM_TARGETS) {
@@ -99,5 +99,5 @@ for (const platform of PLATFORMS) {
 	}
 }
 
-writeManifest("rome");
+writeManifest("biome");
 writeManifest("backend-jsonrpc");
