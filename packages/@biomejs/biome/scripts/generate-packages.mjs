@@ -85,8 +85,8 @@ function writeManifest(packagePath) {
 	fs.writeFileSync(manifestPath, content);
 }
 
-const PLATFORMS = [  "linux"];
-const ARCHITECTURES = [ "arm64"];
+const PLATFORMS = ["linux"];
+const ARCHITECTURES = ["arm64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 
 for (const target of WASM_TARGETS) {
@@ -99,5 +99,5 @@ for (const platform of PLATFORMS) {
 	}
 }
 
-writeManifest("rome");
+writeManifest("biome");
 writeManifest("backend-jsonrpc");
