@@ -182,7 +182,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: wasm
-          path: packages/@biomejs/biome
+          path: packages/@biomejs
 
       - name: Install Node.js
         uses: actions/setup-node@v3
