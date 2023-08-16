@@ -161,14 +161,14 @@ jobs:
         run: |
           npm ci
           npm run compile
-          npx vsce package -o "../../dist/rome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+          npx vsce package -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease != 'true'
       - name: Package extension (pre-release)
         run: |
           npm ci
           npm run compile
-          npx vsce package --pre-release -o "../../dist/rome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+          npx vsce package --pre-release -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease == 'true'
 
@@ -176,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: vscode_packages
-          path: ./dist/rome_lsp-${{ matrix.code-target }}.vsix
+          path: ./dist/biome_lsp-${{ matrix.code-target }}.vsix
           if-no-files-found: error
 
   publish:
@@ -199,23 +199,23 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish extension to Microsoft Marketplace (pre-release)
-        run: npx vsce publish --pre-release --packagePath rome_lsp-*.vsix
+        run: npx vsce publish --pre-release --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease == 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Publish extension to Microsoft Marketplace
-        run: npx vsce publish --packagePath rome_lsp-*.vsix
+        run: npx vsce publish --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease != 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish extension to Open VSX (pre-release)
-        run: npx ovsx publish --pre-release --packagePath rome_lsp-*.vsix
+        run: npx ovsx publish --pre-release --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease == 'true'
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
       - name: Publish extension to Open VSX
-        run: npx ovsx publish --packagePath rome_lsp-*.vsix
+        run: npx ovsx publish --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease != 'true'
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
@@ -230,6 +230,6 @@ jobs:
           draft: false
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           files: |
-            rome_lsp-*.vsix
+            biome_lsp-*.vsix
           fail_on_unmatched_files: true
           generate_release_notes: true
