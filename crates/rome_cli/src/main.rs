@@ -6,8 +6,8 @@
 
 use bpaf::{Args, ParseFailure};
 use rome_cli::{
-    open_transport, biome_command, setup_panic_handler, to_color_mode, CliDiagnostic, CliSession,
-    BiomeCommand,
+    biome_command, open_transport, setup_panic_handler, to_color_mode, BiomeCommand, CliDiagnostic,
+    CliSession,
 };
 use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_diagnostics::{set_bottom_frame, PrintDiagnostic};

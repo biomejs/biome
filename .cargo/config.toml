@@ -2,6 +2,8 @@
 bench_analyzer = "run -p xtask_bench --release -- --feature analyzer"
 bench_formatter = "run -p xtask_bench --release -- --feature formatter"
 bench_parser = "run -p xtask_bench --release -- --feature parser"
+biome-cli = "run -p rome_cli --release --"
+biome-cli-dev = "run -p rome_cli --"
 codegen = "run -p xtask_codegen --"
 codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
@@ -32,8 +34,6 @@ documentation = """
 format = "fmt --all --verbose"
 lint = "clippy --workspace --all-targets --verbose -- --deny warnings -W clippy::cargo -W clippy::dbg_macro -A clippy::cargo_common_metadata -A clippy::multiple_crate_versions"
 lintdoc = "run -p xtask_lintdoc --"
-biome-cli = "run -p rome_cli --release --"
-biome-cli-dev = "run -p rome_cli --"
 
 [profile.release]
 lto = true

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
-import compress from "@otterlord/astro-compress";
+import compress from "astro-compress";
 import type { AstroIntegration } from "astro";
 import { defineConfig } from "astro/config";
 import { globby } from "globby";

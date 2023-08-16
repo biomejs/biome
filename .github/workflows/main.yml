@@ -89,27 +89,6 @@ jobs:
       - name: Clean cache
         run: cargo cache --autoclean
 
-  documentation:
-    name: Documentation
-    environment: netlify-rustdocs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Install netlify-cli
-        run: npm i -g netlify-cli
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
-      - name: Run doc command
-        run: cargo documentation
-      - name: Write index.html
-        run: echo '<meta http-equiv="refresh" content="0; url=/rome/index.html">' >target/doc/index.html
-      - name: Write _redirects
-        run: echo '/ /rome/index.html' >target/doc/_redirects
-      - name: Deploy documentation
-        run: |
-          netlify deploy --dir=./target/doc --prod --site rustdocs-rometools --auth ${{ secrets.NETLIFY_AUTH_TOKEN }}
-
   coverage:
     name: Test262 Coverage
     runs-on: ${{ matrix.os }}
