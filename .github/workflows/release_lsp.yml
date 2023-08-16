@@ -138,13 +138,13 @@ jobs:
         run: |
           mkdir dist
           mkdir editors/vscode/server
-          cp target/${{ matrix.target }}/release/rome.exe editors/vscode/server/rome.exe
+          cp target/${{ matrix.target }}/release/biome.exe editors/vscode/server/biome.exe
       - name: Copy LSP binary
         if: matrix.os != 'windows-2022'
         run: |
           mkdir dist
           mkdir editors/vscode/server
-          cp target/${{ matrix.target }}/release/rome editors/vscode/server/rome
+          cp target/${{ matrix.target }}/release/biome editors/vscode/server/biome
 
       - name: Install Node.js
         uses: actions/setup-node@v3
