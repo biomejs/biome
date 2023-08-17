@@ -14,9 +14,9 @@
     "author": "Emanuele Stoppa",
     "license": "MIT",
     "bugs": "https://github.com/biomejs/biome/issues",
-    "description": "Rome is a toolchain for the web: formatter, linter and more",
+    "description": "Biome is a toolchain for the web: formatter, linter and more",
     "files": [
-        "bin/rome",
+        "bin/biome",
         "scripts/postinstall.js",
         "configuration_schema.json",
         "README.md"
@@ -27,7 +27,7 @@
         "format",
         "lint",
         "toolchain",
-				"JSON"
+		"JSON"
     ],
     "engines": {
         "node": ">=14.*"
