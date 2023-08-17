@@ -23,13 +23,13 @@ Rules are divided by capabilities:
 
 Most of the rules will go under `analyzers/` or `semantic_analyzer/`.
 
-Inside these four folders, we have a folder for each group that _Rome_ supports.
+Inside these four folders, we have a folder for each group that _Biome_ supports.
 
 When implementing **new rules**, they have to be implemented under the group `nursery`.
 New rules should always be considered unstable/not exhaustive.
 
 In addition to selecting a group, rules may be flagged as `recommended`.
-The **recommended rules** are enabled in the default configuration of the _Rome_ linter.
+The **recommended rules** are enabled in the default configuration of the _Biome_ linter.
 As a general principle, a recommended rule should catch actual programming errors.
 For instance, detecting a coding pattern that will throw an exception at runtime.
 Pedantic rules that check for specific unwanted patterns but may have high false positive rates,
@@ -45,12 +45,12 @@ Our CI ensures that this code is not out of sync and fails otherwise.
 See the [code generation section](#code-generation) for more details.
 
 To create a new rule, you have to create and update several files.
-Because it is a bit tedious, _Rome_ provides an easy way to create and test your rule using [Just](https://just.systems/man/en/).
+Because it is a bit tedious, _Biome_ provides an easy way to create and test your rule using [Just](https://just.systems/man/en/).
 _Just_ is not part of the rust toolchain, you have to install it with [a package manager](https://just.systems/man/en/chapter_4.html).
 
 ### Choose a name
 
-_Rome_ follows a naming convention according to what the rule do:
+_Biome_ follows a naming convention according to what the rule do:
 
 1. Forbid a concept
 
@@ -112,7 +112,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    }
    ```
 
-   While implementing the diagnostic, please keep [Rome's technical principals](https://rome.tools/#technical) in mind.
+   While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/#technical) in mind.
    This function is called for every signal emitted by the `run` function, and it may return
    zero or one diagnostic.
 
@@ -198,7 +198,7 @@ The doc-comment for the rule is mandatory and is used to generate the
 documentation page for the rule on the website.
 Importantly, the tool used to generate those pages also runs tests on the
 code blocks included in the documentation written in languages supported by
-the _Rome_ toolchain (JavaScript, JSX, TypeScript, ...) similar to how
+the _Biome_ toolchain (JavaScript, JSX, TypeScript, ...) similar to how
 `rustdoc` generates tests from code blocks written in Rust. Because code
 blocks in Rust doc-comments are assumed to be written in Rust by default
 the language of the test must be explicitly specified, for instance:

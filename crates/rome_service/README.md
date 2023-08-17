@@ -1,6 +1,6 @@
 # `rome_service`
 
-The crate contains the core functionality of Rome.
+The crate contains the core functionality of Biome.
 
 ## Local installation
 

@@ -2,7 +2,7 @@
 
 Currently, rome supports the following file extensions: `js`, `jsx`, `ts`, `tsx` and `d.ts`. 
 
-Rome has a an `lsp-proxy` command that acts as a server for the Language Server Protocol over stdin/stdout.
+Biome has a an `lsp-proxy` command that acts as a server for the Language Server Protocol over stdin/stdout.
 
 
 ## Helix 23.05

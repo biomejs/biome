@@ -56,7 +56,7 @@ Here's a list of internal conventions that we follow to write grammar:
 	```
 
 1. Nodes used to track broken code should contain the **Bogus** word in its name (case sensitive).
-This is needed because it will generate a different type of code, useful in case of errors inside the source code Rome will parse.
+This is needed because it will generate a different type of code, useful in case of errors inside the source code Biome will parse.
 
 ## `cargo codegen test`
 This command extracts inline comment tests inside `rome_js_parser` into the directory `rome_js_parser/test_data/`.
