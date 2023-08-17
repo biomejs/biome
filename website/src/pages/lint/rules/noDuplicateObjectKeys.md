@@ -21,7 +21,7 @@ const obj = {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateObjectKeys.js:2:5 <a href="https://docs.rome.tools/lint/rules/noDuplicateObjectKeys">lint/suspicious/noDuplicateObjectKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateObjectKeys.js:2:5 <a href="https://biomejs.dev/lint/rules/noDuplicateObjectKeys">lint/suspicious/noDuplicateObjectKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This property value named a is later overwritten by an object member with the same name.</span>
   
@@ -60,7 +60,7 @@ const obj = {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateObjectKeys.js:2:5 <a href="https://docs.rome.tools/lint/rules/noDuplicateObjectKeys">lint/suspicious/noDuplicateObjectKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateObjectKeys.js:2:5 <a href="https://biomejs.dev/lint/rules/noDuplicateObjectKeys">lint/suspicious/noDuplicateObjectKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This setter named a is later overwritten by an object member with the same name.</span>
   

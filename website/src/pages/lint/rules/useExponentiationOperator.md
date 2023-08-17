@@ -23,7 +23,7 @@ Source: https://eslint.org/docs/latest/rules/prefer-exponentiation-operator
 const foo = Math.pow(2, 8);
 ```
 
-<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:13 <a href="https://docs.rome.tools/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:13 <a href="https://biomejs.dev/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the '**' operator instead of 'Math.pow'.</span>
   
@@ -43,7 +43,7 @@ const foo = Math.pow(2, 8);
 const bar = Math.pow(a, b);
 ```
 
-<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:13 <a href="https://docs.rome.tools/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:13 <a href="https://biomejs.dev/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the '**' operator instead of 'Math.pow'.</span>
   
@@ -63,7 +63,7 @@ const bar = Math.pow(a, b);
 let baz = Math.pow(a + b, c + d);
 ```
 
-<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:11 <a href="https://docs.rome.tools/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:11 <a href="https://biomejs.dev/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the '**' operator instead of 'Math.pow'.</span>
   
@@ -83,7 +83,7 @@ let baz = Math.pow(a + b, c + d);
 let quux = Math.pow(-1, n);
 ```
 
-<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:12 <a href="https://docs.rome.tools/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useExponentiationOperator.js:1:12 <a href="https://biomejs.dev/lint/rules/useExponentiationOperator">lint/style/useExponentiationOperator</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the '**' operator instead of 'Math.pow'.</span>
   

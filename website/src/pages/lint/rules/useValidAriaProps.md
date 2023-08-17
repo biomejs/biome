@@ -17,7 +17,7 @@ Ensures that ARIA properties `aria-*` are all valid.
 <input className="" aria-labell="" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAriaProps.js:1:1 <a href="https://docs.rome.tools/lint/rules/useValidAriaProps">lint/a11y/useValidAriaProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaProps.js:1:1 <a href="https://biomejs.dev/lint/rules/useValidAriaProps">lint/a11y/useValidAriaProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The element contains invalid ARIA attribute(s)</span>
   
@@ -37,7 +37,7 @@ Ensures that ARIA properties `aria-*` are all valid.
 <div aria-lorem="foobar"  aria-ipsum="foobar" />;
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidAriaProps.js:1:1 <a href="https://docs.rome.tools/lint/rules/useValidAriaProps">lint/a11y/useValidAriaProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaProps.js:1:1 <a href="https://biomejs.dev/lint/rules/useValidAriaProps">lint/a11y/useValidAriaProps</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The element contains invalid ARIA attribute(s)</span>
   

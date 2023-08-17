@@ -22,7 +22,7 @@ function Component1({ a }) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useHookAtTopLevel.js:3:9 <a href="https://docs.rome.tools/lint/rules/useHookAtTopLevel">lint/nursery/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useHookAtTopLevel.js:3:9 <a href="https://biomejs.dev/lint/rules/useHookAtTopLevel">lint/nursery/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.</span>
   

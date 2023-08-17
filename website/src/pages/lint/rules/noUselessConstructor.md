@@ -24,7 +24,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://docs.rome.tools/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
@@ -51,7 +51,7 @@ class B extends A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://docs.rome.tools/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
@@ -84,7 +84,7 @@ class C {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:5:5 <a href="https://docs.rome.tools/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:5:5 <a href="https://biomejs.dev/lint/rules/noUselessConstructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   

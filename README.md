@@ -18,8 +18,8 @@
 [mit-url]: LICENSE
 [discord-badge]: https://img.shields.io/discord/678763474494423051?logo=discord&label=discord&color=brightgreen
 [discord-url]: https://discord.gg/rome
-[ci-badge]: https://github.com/rome/tools/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/rome/tools/actions/workflows/main.yml
+[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
+[ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [npm-badge]: https://img.shields.io/npm/v/rome/latest?color=brightgreen
 [npm-url]: https://www.npmjs.com/package/rome/v/latest
 [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/rome.rome?color=brightgreen&label=vscode
@@ -40,7 +40,7 @@
 **Rome** has first-class IDE support, with a sophisticated parser that represents the source text in full fidelity
 and top-notch error recovery.
 
-**Rome** is [MIT licensed](https://github.com/rome/tools/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/rome/tools/tree/main/CODE_OF_CONDUCT.md).
+**Rome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
 
 ## Documentation

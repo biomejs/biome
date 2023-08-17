@@ -7,8 +7,8 @@
     "format": "cargo biome-cli-dev format ./ --write",
     "ci": "cargo biome-cli-dev ci ./src && tsc --noEmit",
     "check": "pnpm rome:check && tsc --noEmit",
-		"rome:check": "cargo biome-cli-dev check ./",
-		"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
+	"rome:check": "cargo biome-cli-dev check ./",
+	"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
     "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --dev --scope biomedev ../../../crates/rome_wasm",
     "build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev ../../../crates/rome_wasm",
     "build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --dev --scope biomedev ../../../crates/rome_wasm",
@@ -29,17 +29,17 @@
     "JavaScript",
     "bindings",
     "APIs",
-    "rome"
+    "biome"
   ],
   "license": "MIT",
-  "homepage": "https://rome.tools",
+  "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rome/tools.git",
+    "url": "https://github.com/biomejs/biome.git",
     "directory": "packages/@biomejs/js-api"
   },
   "author": "Rome Tools Developers and Contributors",
-  "bugs": "https://github.com/rome/tools/issues",
+  "bugs": "https://github.com/biomejs/biome/issues",
   "devDependencies": {
     "typescript": "^4.8.2",
     "vitest": "^0.22.0",

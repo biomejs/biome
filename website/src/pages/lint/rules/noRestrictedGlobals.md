@@ -19,7 +19,7 @@ global variables by enabling an environment, but still want to disallow some of 
 console.log(event)
 ```
 
-<pre class="language-text"><code class="language-text">style/noRestrictedGlobals.js:1:13 <a href="https://docs.rome.tools/lint/rules/noRestrictedGlobals">lint/style/noRestrictedGlobals</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noRestrictedGlobals.js:1:13 <a href="https://biomejs.dev/lint/rules/noRestrictedGlobals">lint/style/noRestrictedGlobals</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Do not use the global variable </span><span style="color: Orange;"><strong>event</strong></span><span style="color: Orange;">.</span>
   

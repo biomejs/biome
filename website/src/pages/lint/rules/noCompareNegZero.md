@@ -17,7 +17,7 @@ Disallow comparing against `-0`
 (1 >= -0)
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noCompareNegZero.js:1:2 <a href="https://docs.rome.tools/lint/rules/noCompareNegZero">lint/suspicious/noCompareNegZero</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noCompareNegZero.js:1:2 <a href="https://biomejs.dev/lint/rules/noCompareNegZero">lint/suspicious/noCompareNegZero</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not use the &gt;= operator to compare against -0.</span>
   

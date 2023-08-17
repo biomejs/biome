@@ -17,7 +17,7 @@ Enforces the usage of the attribute `type` for the element `button`
 <button>Do something</button>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:1 <a href="https://docs.rome.tools/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:1 <a href="https://biomejs.dev/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide an explicit </span><span style="color: Tomato;"><strong>type</strong></span><span style="color: Tomato;"> prop for the </span><span style="color: Tomato;"><strong>button</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -35,7 +35,7 @@ Enforces the usage of the attribute `type` for the element `button`
 <button type="incorrectType">Do something</button>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:14 <a href="https://docs.rome.tools/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:14 <a href="https://biomejs.dev/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid </span><span style="color: Tomato;"><strong>type</strong></span><span style="color: Tomato;"> prop for the </span><span style="color: Tomato;"><strong>button</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -53,7 +53,7 @@ Enforces the usage of the attribute `type` for the element `button`
 React.createElement('button');
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:21 <a href="https://docs.rome.tools/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useButtonType.js:1:21 <a href="https://biomejs.dev/lint/rules/useButtonType">lint/a11y/useButtonType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide an explicit </span><span style="color: Tomato;"><strong>type</strong></span><span style="color: Tomato;"> prop for the </span><span style="color: Tomato;"><strong>button</strong></span><span style="color: Tomato;"> element.</span>
   

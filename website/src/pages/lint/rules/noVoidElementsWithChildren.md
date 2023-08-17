@@ -17,7 +17,7 @@ This rules prevents void elements (AKA self-closing elements) from having childr
 <br>invalid child</br>
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://docs.rome.tools/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://biomejs.dev/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>br</strong></span><span style="color: Tomato;"> is a void element tag and must not have </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;">.</span>
   
@@ -35,7 +35,7 @@ This rules prevents void elements (AKA self-closing elements) from having childr
 <img alt="some text" children={"some child"} />
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://docs.rome.tools/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://biomejs.dev/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>img</strong></span><span style="color: Tomato;"> is a void element tag and must not have </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;">.</span>
   
@@ -53,7 +53,7 @@ This rules prevents void elements (AKA self-closing elements) from having childr
 React.createElement('img', {}, 'child')
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://docs.rome.tools/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noVoidElementsWithChildren.js:1:1 <a href="https://biomejs.dev/lint/rules/noVoidElementsWithChildren">lint/correctness/noVoidElementsWithChildren</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>img</strong></span><span style="color: Tomato;"> is a void element tag and must not have </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;">.</span>
   

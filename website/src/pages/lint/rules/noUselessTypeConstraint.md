@@ -24,7 +24,7 @@ Source: https://typescript-eslint.io/rules/no-unnecessary-type-constraint/
 interface FooAny<T extends any> {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -44,7 +44,7 @@ interface FooAny<T extends any> {}
 type BarAny<T extends any> = {};
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:15 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:15 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -65,7 +65,7 @@ class BazAny<T extends any> {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:16 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:16 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -88,7 +88,7 @@ class BazAny {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:2:12 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:2:12 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -110,7 +110,7 @@ class BazAny {
 const QuuxAny = <T extends any>() => {};
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -130,7 +130,7 @@ const QuuxAny = <T extends any>() => {};
 function QuuzAny<T extends any>() {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:20 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -150,7 +150,7 @@ function QuuzAny<T extends any>() {}
 interface FooUnknown<T extends unknown> {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -170,7 +170,7 @@ interface FooUnknown<T extends unknown> {}
 type BarUnknown<T extends unknown> = {};
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:19 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:19 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -215,7 +215,7 @@ class BazUnknown {
 const QuuxUnknown = <T extends unknown>() => {};
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   
@@ -235,7 +235,7 @@ const QuuxUnknown = <T extends unknown>() => {};
 function QuuzUnknown<T extends unknown>() {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://docs.rome.tools/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessTypeConstraint.js:1:24 <a href="https://biomejs.dev/lint/rules/noUselessTypeConstraint">lint/complexity/noUselessTypeConstraint</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Constraining a type parameter to </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>unknown</strong></span><span style="color: Tomato;"> is useless.</span>
   

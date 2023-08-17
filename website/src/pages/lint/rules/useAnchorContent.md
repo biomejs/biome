@@ -20,7 +20,7 @@ Refer to the references to learn about why this is important.
 <a />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://docs.rome.tools/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide screen reader accessible content when using </span><span style="color: Tomato;"><strong>`a`</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -36,7 +36,7 @@ Refer to the references to learn about why this is important.
 <a></a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://docs.rome.tools/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide screen reader accessible content when using </span><span style="color: Tomato;"><strong>`a`</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -52,7 +52,7 @@ Refer to the references to learn about why this is important.
 <a>    </a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://docs.rome.tools/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide screen reader accessible content when using </span><span style="color: Tomato;"><strong>`a`</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -68,7 +68,7 @@ Refer to the references to learn about why this is important.
 <a aria-hidden>content</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://docs.rome.tools/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide screen reader accessible content when using </span><span style="color: Tomato;"><strong>`a`</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -84,7 +84,7 @@ Refer to the references to learn about why this is important.
 <a><span aria-hidden="true">content</span></a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://docs.rome.tools/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAnchorContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useAnchorContent">lint/a11y/useAnchorContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide screen reader accessible content when using </span><span style="color: Tomato;"><strong>`a`</strong></span><span style="color: Tomato;"> elements.</span>
   

@@ -30,7 +30,7 @@ The following TypeScript example is perfectly valid:
 const n: {} = 0
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:10 <a href="https://docs.rome.tools/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:10 <a href="https://biomejs.dev/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use '{}' as a type.</span>
   
@@ -77,7 +77,7 @@ Source: https://typescript-eslint.io/rules/ban-types
 let foo: String = "bar";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:10 <a href="https://docs.rome.tools/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:10 <a href="https://biomejs.dev/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use 'String' as a type.</span>
   
@@ -99,7 +99,7 @@ let foo: String = "bar";
 let bool = true as Boolean;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:20 <a href="https://docs.rome.tools/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:20 <a href="https://biomejs.dev/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use 'Boolean' as a type.</span>
   
@@ -121,7 +121,7 @@ let bool = true as Boolean;
 let invalidTuple: [string, Boolean] = ["foo", false];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:28 <a href="https://docs.rome.tools/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noBannedTypes.js:1:28 <a href="https://biomejs.dev/lint/rules/noBannedTypes">lint/nursery/noBannedTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use 'Boolean' as a type.</span>
   

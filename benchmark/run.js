@@ -7,13 +7,13 @@ const { dir } = require("console");
 const TMP_DIRECTORY = path.resolve("./target");
 
 function buildRome() {
-	console.log("Build Rome...");
+	console.log("Build Biome...");
 
-	child_process.execSync("cargo build --bin rome --release", {
+	child_process.execSync("cargo build --bin biome --release", {
 		stdio: "inherit",
 	});
 
-	return path.resolve("../target/release/rome");
+	return path.resolve("../target/release/biome");
 }
 
 const BENCHMARKS = {

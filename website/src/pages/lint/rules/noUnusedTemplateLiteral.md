@@ -17,7 +17,7 @@ Disallow template literals if interpolation and special-character handling are n
 const foo = `bar`
 ```
 
-<pre class="language-text"><code class="language-text">style/noUnusedTemplateLiteral.js:1:13 <a href="https://docs.rome.tools/lint/rules/noUnusedTemplateLiteral">lint/style/noUnusedTemplateLiteral</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUnusedTemplateLiteral.js:1:13 <a href="https://biomejs.dev/lint/rules/noUnusedTemplateLiteral">lint/style/noUnusedTemplateLiteral</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not use template literals if interpolation and special-character handling are not needed.</span>
   
@@ -37,7 +37,7 @@ const foo = `bar`
 const foo = `bar `
 ```
 
-<pre class="language-text"><code class="language-text">style/noUnusedTemplateLiteral.js:1:13 <a href="https://docs.rome.tools/lint/rules/noUnusedTemplateLiteral">lint/style/noUnusedTemplateLiteral</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUnusedTemplateLiteral.js:1:13 <a href="https://biomejs.dev/lint/rules/noUnusedTemplateLiteral">lint/style/noUnusedTemplateLiteral</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not use template literals if interpolation and special-character handling are not needed.</span>
   

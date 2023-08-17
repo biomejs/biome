@@ -17,7 +17,7 @@ Enforce that elements with ARIA roles must have all required ARIA attributes for
 <span role="checkbox"></span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropsForRole.js:1:7 <a href="https://docs.rome.tools/lint/rules/useAriaPropsForRole">lint/a11y/useAriaPropsForRole</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropsForRole.js:1:7 <a href="https://biomejs.dev/lint/rules/useAriaPropsForRole">lint/a11y/useAriaPropsForRole</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The element with the </span><span style="color: Tomato;"><strong>checkbox</strong></span><span style="color: Tomato;"> ARIA role does not have the required ARIA attributes.</span>
   
@@ -35,7 +35,7 @@ Enforce that elements with ARIA roles must have all required ARIA attributes for
 <span role="heading"></span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropsForRole.js:1:7 <a href="https://docs.rome.tools/lint/rules/useAriaPropsForRole">lint/a11y/useAriaPropsForRole</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropsForRole.js:1:7 <a href="https://biomejs.dev/lint/rules/useAriaPropsForRole">lint/a11y/useAriaPropsForRole</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The element with the </span><span style="color: Tomato;"><strong>heading</strong></span><span style="color: Tomato;"> ARIA role does not have the required ARIA attributes.</span>
   

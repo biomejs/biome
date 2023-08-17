@@ -17,7 +17,7 @@ The shorthand fragment syntax saves keystrokes and is only inapplicable when key
 <Fragment>child</Fragment>
 ```
 
-<pre class="language-text"><code class="language-text">style/useFragmentSyntax.js:1:1 <a href="https://docs.rome.tools/lint/rules/useFragmentSyntax">lint/style/useFragmentSyntax</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useFragmentSyntax.js:1:1 <a href="https://biomejs.dev/lint/rules/useFragmentSyntax">lint/style/useFragmentSyntax</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use shorthand syntax for Fragment elements instead of standard syntax.</span>
   
@@ -37,7 +37,7 @@ The shorthand fragment syntax saves keystrokes and is only inapplicable when key
 <React.Fragment>child</React.Fragment>
 ```
 
-<pre class="language-text"><code class="language-text">style/useFragmentSyntax.js:1:1 <a href="https://docs.rome.tools/lint/rules/useFragmentSyntax">lint/style/useFragmentSyntax</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useFragmentSyntax.js:1:1 <a href="https://biomejs.dev/lint/rules/useFragmentSyntax">lint/style/useFragmentSyntax</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use shorthand syntax for Fragment elements instead of standard syntax.</span>
   

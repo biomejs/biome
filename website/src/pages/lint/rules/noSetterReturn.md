@@ -25,7 +25,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:3:9 <a href="https://docs.rome.tools/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:3:9 <a href="https://biomejs.dev/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The setter should not </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   
@@ -59,7 +59,7 @@ const b = {
 };
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:3:9 <a href="https://docs.rome.tools/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:3:9 <a href="https://biomejs.dev/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The setter should not </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   
@@ -95,7 +95,7 @@ const c = {
 };
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:4:13 <a href="https://docs.rome.tools/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSetterReturn.js:4:13 <a href="https://biomejs.dev/lint/rules/noSetterReturn">lint/correctness/noSetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The setter should not </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   

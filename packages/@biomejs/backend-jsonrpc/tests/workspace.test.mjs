@@ -9,8 +9,8 @@ describe("Workspace API", () => {
 		const extension = process.platform === "win32" ? ".exe" : "";
 		const command = resolve(
 			fileURLToPath(import.meta.url),
-			"../../../..",
-			`target/release/rome${extension}`,
+			"../../../../..",
+			`target/release/biome${extension}`,
 		);
 
 		const workspace = await createWorkspaceWithBinary(command);

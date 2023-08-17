@@ -2,11 +2,11 @@
 title: VSCode extension
 emoji: 💻
 category: reference
-description: Notes about the Rome's VSCode extension
+description: Notes about the Biome's VSCode extension
 ---
 # Rome VS Code Extension
 
-[Rome](https://rome.tools/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Rome to your editor so that you can:
+[Rome](https://biome.tools/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Rome to your editor so that you can:
 
 - Format files *on save* or when issuing the *Format Document* command
 - See lints while you type and apply code fixes
@@ -14,10 +14,10 @@ description: Notes about the Rome's VSCode extension
 
 ## Installation
 
-You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=rome.rome) or from within VS Code by either:
+You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=biome.rome) or from within VS Code by either:
 
 - Open the *extensions* tab (_View_ → _Extensions)_ and search for Rome.
-- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install rome.rome`, and hit enter.
+- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install biome.rome`, and hit enter.
 
 ## Getting Started
 
@@ -33,13 +33,13 @@ Configure Rome as the default formatter for supported files to ensure that VS Co
 You can also enable Rome for specific languages only:
 
 - [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
-- And set the `editor.defaultFormatter` to `rome.rome` for the desired language
+- And set the `editor.defaultFormatter` to `biome.rome` for the desired language
 
 ```json
 {
 	"editor.defaultFormatter": "<other formatter>",
 	"[javascript]": {
-		"editor.defaultFormatter": "rome.rome"
+		"editor.defaultFormatter": "biome.rome"
 	}
 }
 ```
@@ -54,7 +54,7 @@ The extension automatically loads the `rome.json` file from the workspace’s ro
 
 The extension tries to use Rome from your project's local dependencies (`node_modules/rome`). We recommend adding Rome as a project dependency to ensure that NPM scripts and the extension use the same Rome version.
 
-You can also explicitly specify the `rome` binary the extension should use by configuring the `rome.lspBin` setting in your editor options.
+You can also explicitly specify the `rome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
 
 If the project has no dependency on Rome and no explicit path is configured, the extension uses the Rome version included in its bundle.
 
@@ -90,15 +90,15 @@ You can add the following to your editor configuration if you want the action to
 
 ## Extension Settings
 
-### `rome.lspBin`
+### `biome.lspBin`
 
-The `rome.lspBin` option overrides the Rome binary used by the extension. The workspace folder is used as the base path if the path is relative.
+The `biome.lspBin` option overrides the Rome binary used by the extension. The workspace folder is used as the base path if the path is relative.
 
-### `rome.rename`
+### `biome.rename`
 
 Enables Rome to handle renames in the workspace (experimental).
 
-### `rome.requireConfiguration`
+### `biome.requireConfiguration`
 
 Disables formatting, linting, and syntax errors for projects without a `rome.json` file. Requires Rome 12 or newer.
 Enabled by default.

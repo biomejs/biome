@@ -20,7 +20,7 @@ class A {}
 A = 0;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:2:1 <a href="https://docs.rome.tools/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:2:1 <a href="https://biomejs.dev/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'A' is a class.</span>
   
@@ -43,7 +43,7 @@ A = 0;
 class A {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:1:1 <a href="https://docs.rome.tools/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'A' is a class.</span>
   
@@ -69,7 +69,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:3:3 <a href="https://docs.rome.tools/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:3:3 <a href="https://biomejs.dev/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'A' is a class.</span>
   
@@ -98,7 +98,7 @@ let A = class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:3:3 <a href="https://docs.rome.tools/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noClassAssign.js:3:3 <a href="https://biomejs.dev/lint/rules/noClassAssign">lint/suspicious/noClassAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'A' is a class.</span>
   

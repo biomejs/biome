@@ -17,7 +17,7 @@ if (false) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   
@@ -34,7 +34,7 @@ if (Boolean(1)) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   
@@ -51,7 +51,7 @@ if (undefined) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:5 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   
@@ -68,7 +68,7 @@ for (;-2;) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:7 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:7 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   
@@ -85,7 +85,7 @@ while (typeof x) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:8 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:8 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   
@@ -100,7 +100,7 @@ while (typeof x) {
 var result = 0 ? a : b;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:14 <a href="https://docs.rome.tools/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConstantCondition.js:1:14 <a href="https://biomejs.dev/lint/rules/noConstantCondition">lint/nursery/noConstantCondition</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected constant condition.</span>
   

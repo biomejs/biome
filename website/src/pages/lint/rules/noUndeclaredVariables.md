@@ -17,7 +17,7 @@ If you need to allow-list some global bindings, you can use the [`javascript.glo
 foobar;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUndeclaredVariables.js:1:1 <a href="https://docs.rome.tools/lint/rules/noUndeclaredVariables">lint/correctness/noUndeclaredVariables</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUndeclaredVariables.js:1:1 <a href="https://biomejs.dev/lint/rules/noUndeclaredVariables">lint/correctness/noUndeclaredVariables</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The </span><span style="color: Orange;"><strong>foobar</strong></span><span style="color: Orange;"> variable is undeclared</span>
   
@@ -32,7 +32,7 @@ foobar;
 PromiseLike;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUndeclaredVariables.js:2:1 <a href="https://docs.rome.tools/lint/rules/noUndeclaredVariables">lint/correctness/noUndeclaredVariables</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUndeclaredVariables.js:2:1 <a href="https://biomejs.dev/lint/rules/noUndeclaredVariables">lint/correctness/noUndeclaredVariables</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The </span><span style="color: Orange;"><strong>PromiseLike</strong></span><span style="color: Orange;"> variable is undeclared</span>
   

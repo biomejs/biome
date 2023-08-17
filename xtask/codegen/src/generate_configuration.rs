@@ -163,7 +163,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
-            /// It enables the lint rules recommended by Rome. `true` by default.
+            /// It enables the lint rules recommended by Biome. `true` by default.
             #[serde(skip_serializing_if = "Option::is_none")]
             #[bpaf(hide)]
             pub recommended: Option<bool>,

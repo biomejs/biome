@@ -22,7 +22,7 @@ function component() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://docs.rome.tools/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook do not specify all of its dependencies.</span>
   
@@ -54,7 +54,7 @@ function component() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://docs.rome.tools/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook specifies more dependencies than necessary.</span>
   
@@ -88,7 +88,7 @@ function component() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://docs.rome.tools/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook specifies more dependencies than necessary.</span>
   
@@ -122,7 +122,7 @@ function component() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:6:5 <a href="https://docs.rome.tools/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useExhaustiveDependencies.js:6:5 <a href="https://biomejs.dev/lint/rules/useExhaustiveDependencies">lint/nursery/useExhaustiveDependencies</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook do not specify all of its dependencies.</span>
   

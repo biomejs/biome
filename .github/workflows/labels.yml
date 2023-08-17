@@ -8,7 +8,7 @@ on:
 jobs:
   triage:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'rome'
+    if: github.repository_owner == 'biomejs'
     steps:
       - uses: actions/labeler@v4
         with:

@@ -21,7 +21,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useSingleCaseStatement.js:4:9 <a href="https://docs.rome.tools/lint/rules/useSingleCaseStatement">lint/style/useSingleCaseStatement</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useSingleCaseStatement.js:4:9 <a href="https://biomejs.dev/lint/rules/useSingleCaseStatement">lint/style/useSingleCaseStatement</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">A </span><span style="color: Orange;"><strong>switch clause</strong></span><span style="color: Orange;"> should only have a single statement.</span>
   
