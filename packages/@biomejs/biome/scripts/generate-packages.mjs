@@ -85,12 +85,12 @@ function writeManifest(packagePath) {
 	fs.writeFileSync(manifestPath, content);
 }
 
-const PLATFORMS = ["linux"];
-const ARCHITECTURES = ["arm64"];
+const PLATFORMS = ["win32", "darwin", "linux"];
+const ARCHITECTURES = ["x64", "arm64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
 
 for (const target of WASM_TARGETS) {
-	// updateWasmPackage(target);
+	updateWasmPackage(target);
 }
 
 for (const platform of PLATFORMS) {
