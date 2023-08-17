@@ -11,24 +11,24 @@ description: Available commands and arguments in the Rome CLI.
 
 # Command summary
 
-  * [`rome`↴](#rome)
-  * [`rome version`↴](#rome-version)
-  * [`rome rage`↴](#rome-rage)
-  * [`rome start`↴](#rome-start)
-  * [`rome stop`↴](#rome-stop)
-  * [`rome check`↴](#rome-check)
-  * [`rome lint`↴](#rome-lint)
-  * [`rome format`↴](#rome-format)
-  * [`rome ci`↴](#rome-ci)
-  * [`rome init`↴](#rome-init)
-  * [`rome lsp-proxy`↴](#rome-lsp-proxy)
-  * [`rome migrate`↴](#rome-migrate)
+  * [`biome`↴](#biome)
+  * [`biome version`↴](#biome-version)
+  * [`biome rage`↴](#biome-rage)
+  * [`biome start`↴](#biome-start)
+  * [`biome stop`↴](#biome-stop)
+  * [`biome check`↴](#biome-check)
+  * [`biome lint`↴](#biome-lint)
+  * [`biome format`↴](#biome-format)
+  * [`biome ci`↴](#biome-ci)
+  * [`biome init`↴](#biome-init)
+  * [`biome lsp-proxy`↴](#biome-lsp-proxy)
+  * [`biome migrate`↴](#biome-migrate)
 
-## rome
+## biome
 
-Rome official CLI. Use it to check the health of your project or run it to check single files.
+Biome official CLI. Use it to check the health of your project or run it to check single files.
 
-**Usage**: **`rome`** _`COMMAND ...`_
+**Usage**: **`biome`** _`COMMAND ...`_
 
 **Available options:**
 - **`-h`**, **`--help`** &mdash; 
@@ -40,13 +40,13 @@ Rome official CLI. Use it to check the health of your project or run it to check
 
 **Available commands:**
 - **`version`** &mdash; 
-  Shows the Rome version information and quit
+  Shows the Biome version information and quit
 - **`rage`** &mdash; 
   Prints information for debugging
 - **`start`** &mdash; 
-  Start the Rome daemon server process
+  Start the Biome daemon server process
 - **`stop`** &mdash; 
-  Stop the Rome daemon server process
+  Stop the Biome daemon server process
 - **`check`** &mdash; 
   Run various checks on a set of files.
 - **`lint`** &mdash; 
@@ -63,17 +63,17 @@ Rome official CLI. Use it to check the health of your project or run it to check
   It updates the configuration when there are breaking changes
 
 
-## rome version
+## biome version
 
-Shows the Rome version information and quit
+Shows the Biome version information and quit
 
-**Usage**: **`rome`** **`version`** 
+**Usage**: **`biome`** **`version`** 
 
 **Global options applied to all commands**
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -87,7 +87,7 @@ Shows the Rome version information and quit
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -96,17 +96,17 @@ Shows the Rome version information and quit
   Prints help information
 
 
-## rome rage
+## biome rage
 
 Prints information for debugging
 
-**Usage**: **`rome`** **`rage`** 
+**Usage**: **`biome`** **`rage`** 
 
 **Global options applied to all commands**
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -120,7 +120,7 @@ Prints information for debugging
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -129,49 +129,49 @@ Prints information for debugging
   Prints help information
 
 
-## rome start
+## biome start
 
-Start the Rome daemon server process
+Start the Biome daemon server process
 
-**Usage**: **`rome`** **`start`** 
-
-**Available options:**
-- **`-h`**, **`--help`** &mdash; 
-  Prints help information
-
-
-## rome stop
-
-Stop the Rome daemon server process
-
-**Usage**: **`rome`** **`stop`** 
+**Usage**: **`biome`** **`start`** 
 
 **Available options:**
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
 
-## rome check
+## biome stop
+
+Stop the Biome daemon server process
+
+**Usage**: **`biome`** **`stop`** 
+
+**Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome check
 
 Run various checks on a set of files.
 
-**Usage**: **`rome`** **`check`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+**Usage**: **`biome`** **`check`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
 
 **The configuration that is contained inside the file `rome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
-  Whether Rome should integrate itself with the VCS client
+  Whether Biome should integrate itself with the VCS client
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
-  Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
 
-  If Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
   The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reason. Defaults to 1 MiB
 - **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
-  Tells Rome to not emit diagnostics when handling files that doesn't know
+  Tells Biome to not emit diagnostics when handling files that doesn't know
 - **`    --indent-style`**=_`<tab|space>`_ &mdash; 
   The indent style.
 - **`    --indent-size`**=_`NUMBER`_ &mdash; 
@@ -197,7 +197,7 @@ Run various checks on a set of files.
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -211,7 +211,7 @@ Run various checks on a set of files.
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -238,27 +238,27 @@ Run various checks on a set of files.
   Prints help information
 
 
-## rome lint
+## biome lint
 
 Run various checks on a set of files.
 
-**Usage**: **`rome`** **`lint`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+**Usage**: **`biome`** **`lint`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
 
 **The configuration that is contained inside the file `rome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
-  Whether Rome should integrate itself with the VCS client
+  Whether Biome should integrate itself with the VCS client
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
-  Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
 
-  If Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
   The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reason. Defaults to 1 MiB
 - **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
-  Tells Rome to not emit diagnostics when handling files that doesn't know
+  Tells Biome to not emit diagnostics when handling files that doesn't know
 - **`    --indent-style`**=_`<tab|space>`_ &mdash; 
   The indent style.
 - **`    --indent-size`**=_`NUMBER`_ &mdash; 
@@ -284,7 +284,7 @@ Run various checks on a set of files.
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -298,7 +298,7 @@ Run various checks on a set of files.
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -319,11 +319,11 @@ Run various checks on a set of files.
   Prints help information
 
 
-## rome format
+## biome format
 
 Run the formatter on a set of files.
 
-**Usage**: **`rome`** **`format`** \[**`--write`**\] \[_`PATH`_\]...
+**Usage**: **`biome`** **`format`** \[**`--write`**\] \[_`PATH`_\]...
 
 **Generic options applied to all files**
 - **`    --indent-style`**=_`<tab|space>`_ &mdash; 
@@ -351,17 +351,17 @@ Run the formatter on a set of files.
 
 
 
-**Set of properties to integrate Rome with a VCS software.**
+**Set of properties to integrate Biome with a VCS software.**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
-  Whether Rome should integrate itself with the VCS client
+  Whether Biome should integrate itself with the VCS client
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
-  Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
 
-  If Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 
 
 
@@ -369,7 +369,7 @@ Run the formatter on a set of files.
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
   The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reason. Defaults to 1 MiB
 - **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
-  Tells Rome to not emit diagnostics when handling files that doesn't know
+  Tells Biome to not emit diagnostics when handling files that doesn't know
 
 
 
@@ -377,7 +377,7 @@ Run the formatter on a set of files.
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -391,7 +391,7 @@ Run the formatter on a set of files.
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -410,27 +410,27 @@ Run the formatter on a set of files.
   Prints help information
 
 
-## rome ci
+## biome ci
 
 Command to use in CI environments. Run various checks of a set of files.
 
-**Usage**: **`rome`** **`ci`** \[**`--formatter-enabled`**=_`<true|false>`_\] \[**`--linter-enabled`**=_`<true|false>`_\] \[**`--organize-imports-enabled`**=_`<true|false>`_\] \[_`PATH`_\]...
+**Usage**: **`biome`** **`ci`** \[**`--formatter-enabled`**=_`<true|false>`_\] \[**`--linter-enabled`**=_`<true|false>`_\] \[**`--organize-imports-enabled`**=_`<true|false>`_\] \[_`PATH`_\]...
 
 **The configuration that is contained inside the file `rome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
-  Whether Rome should integrate itself with the VCS client
+  Whether Biome should integrate itself with the VCS client
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
-  Whether Rome should use the VCS ignore file. When [true], Rome will ignore the files specified in the ignore file.
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Rome should check for VCS files. By default, Rome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
 
-  If Rome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic will be emitted
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
   The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reason. Defaults to 1 MiB
 - **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
-  Tells Rome to not emit diagnostics when handling files that doesn't know
+  Tells Biome to not emit diagnostics when handling files that doesn't know
 - **`    --indent-style`**=_`<tab|space>`_ &mdash; 
   The indent style.
 - **`    --indent-size`**=_`NUMBER`_ &mdash; 
@@ -456,7 +456,7 @@ Command to use in CI environments. Run various checks of a set of files.
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -470,7 +470,7 @@ Command to use in CI environments. Run various checks of a set of files.
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -491,28 +491,28 @@ Command to use in CI environments. Run various checks of a set of files.
   Prints help information
 
 
-## rome init
+## biome init
 
 Bootstraps a new rome project. Creates a configuration file with some defaults.
 
-**Usage**: **`rome`** **`init`** 
+**Usage**: **`biome`** **`init`** 
 
 **Available options:**
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
 
-## rome lsp-proxy
+## biome lsp-proxy
 
 Acts as a server for the Language Server Protocol over stdin/stdout
 
-**Usage**: **`rome`** **`lsp-proxy`** 
+**Usage**: **`biome`** **`lsp-proxy`** 
 
 **Global options applied to all commands**
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -526,7 +526,7 @@ Acts as a server for the Language Server Protocol over stdin/stdout
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 
@@ -535,17 +535,17 @@ Acts as a server for the Language Server Protocol over stdin/stdout
   Prints help information
 
 
-## rome migrate
+## biome migrate
 
 It updates the configuration when there are breaking changes
 
-**Usage**: **`rome`** **`migrate`** \[**`--write`**\]
+**Usage**: **`biome`** **`migrate`** \[**`--write`**\]
 
 **Global options applied to all commands**
 - **`    --colors`**=_`<off|force>`_ &mdash; 
   Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
 - **`    --use-server`** &mdash; 
-  Connect to a running instance of the Rome daemon server.
+  Connect to a running instance of the Biome daemon server.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
@@ -559,7 +559,7 @@ It updates the configuration when there are breaking changes
 - **`    --no-errors-on-unmatched`** &mdash; 
   Silence errors that would be emitted in case no files were processed during the execution of the command.
 - **`    --error-on-warnings`** &mdash; 
-  Tell Rome to exit with an error code if some diagnostics emit warnings.
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
 
 
 

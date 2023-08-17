@@ -1,4 +1,4 @@
-use rome_cli::rome_command;
+use rome_cli::biome_command;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
 use rome_js_parser::{parse_module, JsParserOptions};
@@ -11,7 +11,7 @@ const FRONTMATTER: &str = r#"---
 title: VSCode extension
 emoji: 💻
 category: reference
-description: Notes about the Rome's VSCode extension
+description: Notes about the Biome's VSCode extension
 ---
 "#;
 
@@ -40,8 +40,8 @@ pub(crate) fn generate_files() -> Result<()> {
     fs::write(project_root().join("website/src/pages/vscode.mdx"), page)?;
 
     if VERSION != "0.0.0" {
-        let parser = rome_command();
-        let markdown = parser.render_markdown("rome");
+        let parser = biome_command();
+        let markdown = parser.render_markdown("biome");
         let mut cli_content = fs::read_to_string(project_root().join("website/src/pages/cli.mdx"))?;
 
         let start = "\n[//]: # (Start-codegen)\n";
