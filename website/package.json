@@ -20,6 +20,7 @@
 				"@astrojs/prism": "^2.1.2",
 				"@astrojs/react": "^2.2.2",
 				"@astrojs/rss": "^2.4.4",
+				"@astrojs/vercel": "^3.8.1",
 				"@codemirror/lang-javascript": "^6.1.8",
 				"@codemirror/lang-json": "^6.0.1",
 				"@codemirror/lint": "^6.2.1",
