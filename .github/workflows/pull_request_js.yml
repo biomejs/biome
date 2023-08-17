@@ -22,13 +22,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: "cli-release"
 
       - name: Run Rome Format
-        run: cargo biome-cli ci editors website packages/@biomejs/js-api
+        run: cargo biome-cli-dev ci editors website packages/@biomejs/js-api
   type-check:
     name: Type-check JS Files
     runs-on: ubuntu-latest

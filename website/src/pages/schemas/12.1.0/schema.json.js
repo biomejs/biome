@@ -5,7 +5,7 @@ import { join, resolve } from "path";
 
 export function get() {
 	const schemaPath = resolve(
-		join("..", "npm", "rome", "configuration_schema.json"),
+		join("..", "packages", "@biomejs", "biome", "configuration_schema.json"),
 	);
 	const schema = readFileSync(schemaPath, "utf8");
 

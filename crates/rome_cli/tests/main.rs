@@ -10,7 +10,7 @@ use snap_test::assert_cli_snapshot;
 use bpaf::ParseFailure;
 use std::path::Path;
 
-use rome_cli::{ CliDiagnostic, CliSession, biome_command};
+use rome_cli::{biome_command, CliDiagnostic, CliSession};
 use rome_console::{markup, BufferConsole, Console, ConsoleExt};
 use rome_fs::{FileSystem, MemoryFileSystem};
 use rome_service::{App, DynRef};
