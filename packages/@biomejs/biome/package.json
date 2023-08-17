@@ -13,7 +13,7 @@
     },
     "author": "Emanuele Stoppa",
     "license": "MIT",
-    "bugs": "https://github.com/rome/tools/issues",
+    "bugs": "https://github.com/biomejs/biome/issues",
     "description": "Rome is a toolchain for the web: formatter, linter and more",
     "files": [
         "bin/rome",

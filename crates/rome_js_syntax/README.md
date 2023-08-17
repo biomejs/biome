@@ -19,8 +19,8 @@
 [mit-url]: LICENSE
 [discord-badge]: https://img.shields.io/discord/678763474494423051?logo=discord&label=discord&color=brightgreen
 [discord-url]: https://discord.gg/rome
-[ci-badge]: https://github.com/rome/tools/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/rome/tools/actions/workflows/main.yml
+[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
+[ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [npm-badge]: https://img.shields.io/npm/v/rome/latest?color=brightgreen
 [npm-url]: https://www.npmjs.com/package/rome/v/latest
 [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/rome.rome?color=brightgreen&label=vscode

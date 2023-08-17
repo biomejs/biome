@@ -72,7 +72,12 @@ export async function activate(context: ExtensionContext) {
 		traceOutputChannel,
 	};
 
-	client = new LanguageClient("biome_lsp", "Biome", serverOptions, clientOptions);
+	client = new LanguageClient(
+		"biome_lsp",
+		"Biome",
+		serverOptions,
+		clientOptions,
+	);
 
 	const session = new Session(context, client);
 

@@ -1,6 +1,6 @@
-export type WasmBundler = typeof import("@rometools/wasm-bundler");
-export type WasmNodejs = typeof import("@rometools/wasm-nodejs");
-export type WasmWeb = typeof import("@rometools/wasm-web");
+export type WasmBundler = typeof import("@biomejs/wasm-bundler");
+export type WasmNodejs = typeof import("@biomejs/wasm-nodejs");
+export type WasmWeb = typeof import("@biomejs/wasm-web");
 
 export type WasmModule = WasmBundler | WasmNodejs | WasmWeb;
 
@@ -33,15 +33,15 @@ export async function loadModule(dist: Distribution): Promise<WasmModule> {
 
 	switch (dist) {
 		case Distribution.BUNDLER: {
-			modulePromise = import("@rometools/wasm-bundler");
+			modulePromise = import("@biomejs/wasm-bundler");
 			break;
 		}
 		case Distribution.NODE: {
-			modulePromise = import("@rometools/wasm-nodejs");
+			modulePromise = import("@biomejs/wasm-nodejs");
 			break;
 		}
 		case Distribution.WEB: {
-			modulePromise = import("@rometools/wasm-web");
+			modulePromise = import("@biomejs/wasm-web");
 			break;
 		}
 	}

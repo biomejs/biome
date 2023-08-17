@@ -13,14 +13,14 @@ npm i @rometools/wasm-<dist>
 ```
 
 You need to install one of the `@rometools/wasm-*` package as a **peer dependency** for this package to work correctly, out of the following distributions:
-- `@rometools/wasm-bundler`: Install this package if you're using a bundler that supports importing `*.wasm` files directly
-- `@rometools/wasm-nodejs`: Install this package if you're using Node.js to load the WebAssembly bundle use the `fs` API
-- `@rometools/wasm-web`: Install this package if you are targeting the web platform to load the WASM bundle using the `fetch` API
+- `@biomejs/wasm-bundler`: Install this package if you're using a bundler that supports importing `*.wasm` files directly
+- `@biomejs/wasm-nodejs`: Install this package if you're using Node.js to load the WebAssembly bundle use the `fs` API
+- `@biomejs/wasm-web`: Install this package if you are targeting the web platform to load the WASM bundle using the `fetch` API
 
 ## Usage
 
 ```js
-import { Rome, Distribution } from "@rometools/js-api";
+import { Rome, Distribution } from "@biomejs/js-api";
 
 const rome = await Rome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed

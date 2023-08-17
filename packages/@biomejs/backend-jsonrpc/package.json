@@ -8,14 +8,14 @@
     "tsc": "tsc --noEmit",
     "build": "tsc"
   },
-  "homepage": "https://rome.tools",
+  "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rome/tools.git",
+    "url": "https://github.com/biomejs/biome.git",
     "directory": "npm/backend-jsonrpc"
   },
   "author": "Rome Tools Developers and Contributors",
-  "bugs": "https://github.com/rome/tools/issues",
+  "bugs": "https://github.com/biomejs/biome/issues",
   "description": "Bindings to the JSON-RPC Workspace API of the Rome daemon",
   "keywords": [
     "JavaScript",

@@ -173,7 +173,7 @@ just test-lintrule myRuleName
  and if you've done everything correctly,
 you should see some snapshots emitted with diagnostics and code actions.
 
-Check our main [contribution document](https://github.com/rome/tools/blob/main/CONTRIBUTING.md#snapshot-tests)
+Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#snapshot-tests)
 to know how to deal with the snapshot tests.
 
 ### Promote a rule
