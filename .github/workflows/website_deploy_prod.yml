@@ -1,4 +1,4 @@
-name: Website preview
+name: Website production
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -38,7 +38,7 @@ jobs:
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
         working-directory: website
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes  --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/rome_wasm
       - name: Install libraries
@@ -48,5 +48,5 @@ jobs:
         working-directory: website
         run: pnpm build:js
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: website
