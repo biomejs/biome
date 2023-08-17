@@ -1,5 +1,5 @@
 {
-  "name": "@rometools/backend-jsonrpc",
+  "name": "@biomejs/backend-jsonrpc",
   "version": "0.0.0",
   "main": "dist/index.js",
   "scripts": {

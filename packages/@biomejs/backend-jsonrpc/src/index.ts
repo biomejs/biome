@@ -39,7 +39,7 @@ export async function createWorkspaceWithBinary(
 	await transport.request("initialize", {
 		capabilities: {},
 		client_info: {
-			name: "@rometools/backend-jsonrpc",
+			name: "@biomejs/backend-jsonrpc",
 			version: "0.10.1-next",
 		},
 	});
