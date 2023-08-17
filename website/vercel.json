@@ -1,3 +1,0 @@
-{
-	"buildCommand": "npm i -g wasm-pack && pnpm build:wasm && pnpm build:js"
-}
