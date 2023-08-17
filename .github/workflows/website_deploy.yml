@@ -9,6 +9,7 @@ on:
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
+    environment: Website deployment
     steps:
       - uses: actions/checkout@v2
         with:
