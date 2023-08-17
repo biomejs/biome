@@ -7,6 +7,9 @@ on:
 
 jobs:
   triage:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     if: github.repository_owner == 'biomejs'
     steps:
