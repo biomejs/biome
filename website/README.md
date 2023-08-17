@@ -1,4 +1,4 @@
-# [`rome.tools`](https://rome.tools/)
+# [`biomejs.dev`](https://biomejs.dev/)
 
 ## Installation
 

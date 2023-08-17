@@ -1,7 +1,7 @@
 ---
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro"
 let {command} = Astro.props;
-command = `rome ${command}`;
+command = `biome ${command}`;
 ---
 
 <PackageManagerCommand yarn={command} pnpm={command} npx={command} />

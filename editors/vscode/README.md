@@ -8,10 +8,10 @@
 
 ## Installation
 
-You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=biome.rome) or from within VS Code by either:
+You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or from within VS Code by either:
 
 - Open the *extensions* tab (_View_ → _Extensions)_ and search for Rome.
-- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install biome.rome`, and hit enter.
+- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install biomejs.biome`, and hit enter.
 
 ## Getting Started
 
@@ -27,13 +27,13 @@ Configure Rome as the default formatter for supported files to ensure that VS Co
 You can also enable Rome for specific languages only:
 
 - [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
-- And set the `editor.defaultFormatter` to `biome.rome` for the desired language
+- And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
 
 ```json
 {
 	"editor.defaultFormatter": "<other formatter>",
 	"[javascript]": {
-		"editor.defaultFormatter": "biome.rome"
+		"editor.defaultFormatter": "biomejs.biome"
 	}
 }
 ```

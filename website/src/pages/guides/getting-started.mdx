@@ -2,7 +2,7 @@
 title: Getting Started
 category: guides
 emoji: 🎉
-description: Learn how to set up a new project with Rome.
+description: Learn how to set up a new project with Biome.
 ---
 
 import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
@@ -19,27 +19,30 @@ import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 ## Installation
 
-The fastest way to download Rome is to use `npm` or your preferred package manager. The CLI is also available as a [standalone executable](/standalone-executable) if you want to use Rome without installing Node.js.
+The fastest way to download Biome is to use `npm` or your preferred package manager. The CLI is also available as a [standalone executable](/standalone-executable) if you want to use Biome without installing Node.js.
 
-Run the following commands in a directory with a `package.json` file to install Rome.
+Run the following commands in a directory with a `package.json` file to install Biome.
 
 <PackageManagerCommand
-  npm="install --save-dev --save-exact rome"
-  pnpm="add --save-dev --save-exact rome"
-  yarn="add --dev --exact rome"
+  npm="install --save-dev --save-exact @biomejs/biome"
+  pnpm="add --save-dev --save-exact @biomejs/biome"
+  yarn="add --dev --exact @biomejs/biome"
 />
 
-> **Note**: It is also possible to install Rome globally rather than locally. However, this is not recommended.
+> **Note**: It is also possible to install Biome globally rather than locally.
+However, this is not recommended.
 
-It's **highly recommended** to not use range operators when installing Rome. Check the [versioning page](/internals/versioning/) for more info.
+It's **highly recommended** to not use range operators when installing Biome.
+Check the [versioning page](/internals/versioning/) for more info.
 
-You can now run Rome with:
+You can now run Biome with:
 
 <PackageManagerRomeCommand command="" />
 
 ## Configuration
 
-We recommend creating a `rome.json` configuration file for each project. It eliminates  the need to repeat the CLI options every time you run a command and ensures that Rome applies the same configuration in your editor. If you're happy with Rome's defaults, you don't have to create the configuration.
+We recommend creating a `rome.json` configuration file for each project.
+It eliminates  the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
 
 To create the configuration, run the `init` command in the root folder of your project:
 
@@ -51,7 +54,7 @@ After running the `init` command, you'll now have a new `rome.json` file in your
 
 ```json
 {
-  "$schema": "./node_modules/rome/configuration_schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -82,43 +85,44 @@ or format your files and directories with:
 
 ## Editor Setup
 
-We recommend installing our editor integration to get the most out of Rome. The Rome editor integration allows you to:
+We recommend installing our editor integration to get the most out of Biome.
+The Biome editor integration allows you to:
 
 * Format files on save or when issuing the Format command.
 * Lint files and apply code fixes
 
 ### VS Code
 
-Install our official [Rome VS Code extension](https://marketplace.visualstudio.com/items?itemName=rome.rome) from the Visual Studio Marketplace.
+Install our official [Biome VS Code extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) from the Visual Studio Marketplace.
 
-To make Rome the default formatter open a supported file (JavaScript or TypeScript) and:
+To make Biome the default formatter open a supported file (JavaScript or TypeScript) and:
 
 * open the *Command Palette* (View or <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>)
 * select  *Format Document With...*
 * select *Configure Default Formatter*
-* select *Rome*.
+* select *Biome*.
 
 ### Other Editors
 
-We would love to support more editors, but we don't have the capacity to implement and maintain multiple editor integrations at the moment. You can help us prioritize by [voting](https://github.com/rome/tools/discussions/3544) for your favourite editor. If you're interested in building an integration for Rome, please [reach out](https://github.com/rome/tools/issues/2390), and we would be more than happy to support you.
+We would love to support more editors, but we don't have the capacity to implement and maintain multiple editor integrations at the moment. You can help us prioritize by [voting](https://github.com/biomejs/biome/discussions/3544) for your favourite editor. If you're interested in building an integration for Biome, please [reach out](https://github.com/biomejs/biome/issues/2390), and we would be more than happy to support you.
 
 If you are looking for editor support in a JetBrains IDE like WebStorm, then visit the relevant [issue](https://youtrack.jetbrains.com/issue/WEB-46895/Support-for-Romejs) to upvote the ticket.
 
 
 ## CI Setup
 
-If you're using Node.js, the recommended way to run Rome in CI is to use [your favourite package manager](/guides/getting-started#installation). This ensures that your CI pipeline uses the same version of Rome as you do inside of the editor or when running local CLI commands.
+If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation). This ensures that your CI pipeline uses the same version of Biome as you do inside of the editor or when running local CLI commands.
 
 
-If you are working on a project that isn't using Node.js, then the best way to integrate Rome into your CI is to use the [setup-rome](https://github.com/rome/setup-rome#usage) GitHub Action or install the [standalone executable](/standalone-executable).
+If you are working on a project that isn't using Node.js, then the best way to integrate Biome into your CI is to use the [setup-rome](https://github.com/rome/setup-rome#usage) GitHub Action or install the [standalone executable](/standalone-executable).
 
 
 ## Next Steps
 
-Success! You're now ready to use Rome. 🥳
+Success! You're now ready to use Biome. 🥳
 
 * Learn more about how to use and configure the [formatter](/formatter)
 * Learn more about how to use and configure the [linter](/linter)
 * Get familiar with the [CLI options](/cli)
 * Get familiar with the [configuration options](/configuration)
-* Join our [community on Discord](https://discord.gg/rome)
+* Join our [community on Discord](https://discord.gg/JXe7dnnc)

@@ -2,23 +2,23 @@
 title: Formatter
 emoji: 🖌️
 category: tools
-description: How to use the Rome formatter.
+description: How to use the Biome formatter.
 ---
 
 import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
 
 # Formatter
 
-Rome's an opinionated formatter that has the goal to stop all ongoing debates over styles. It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html), only supporting
-few options to avoid that debates over styles turn into debates over Rome options. It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+Biome's an opinionated formatter that has the goal to stop all ongoing debates over styles. It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html), only supporting
+few options to avoid that debates over styles turn into debates over Biome options. It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
 
 ## Options
 
-The language agnostic options supported by Rome are:
+The language agnostic options supported by Biome are:
 
 - indent style (default: `tab`): Use spaces or tabs for indention
 - tab width (default: `2`): The number of spaces per indention level
-- line width (default: `80`): The column width at which Rome wraps code
+- line width (default: `80`): The column width at which Biome wraps code
 
 Other formatting options are available for specific languages as well.  See the [configuration](/configuration) options for details.
 
@@ -36,12 +36,12 @@ Use the  `--help` flag to know what are the available options:
 
 <PackageManagerRomeCommand command="format --help" />
 
-Or check the [CLI reference section](/cli#rome-format).
+Or check the [CLI reference section](/cli#biome-format).
 
 
 ## Configuration
 
-You may want to [configure rome](/configuration/#formatter) using `rome.json`. The following defaults are applied:
+You may want to [configure Biome](/configuration/#formatter) using `rome.json`. The following defaults are applied:
 
 ```json
 {

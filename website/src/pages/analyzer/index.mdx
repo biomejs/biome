@@ -2,17 +2,17 @@
 title: Analyzer
 emoji: 🔍
 category: tools
-description: What the Rome analyzer provides
+description: What the Biome analyzer provides
 ---
 
 # Analyzer
 
-Rome's analyzer provides a series of features that users can leverage.
+Biome's analyzer provides a series of features that users can leverage.
 
 
 ## Imports Sorting
 
-Rome allows to sort import statement using [natural ordering](https://en.wikipedia.org/wiki/Natural_sort_order).
+Biome allows to sort import statement using [natural ordering](https://en.wikipedia.org/wiki/Natural_sort_order).
 
 This feature is opt-in via configuration:
 
@@ -69,13 +69,13 @@ You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VS
 Due to the nature of the language, the sorting of imports is categorised as **unsafe**, and you can apply it using the `--apply-unsafe` option:
 
 ```shell
-rome check --apply-unsafe ./path/to/src
+biome check --apply-unsafe ./path/to/src
 ```
 
 ### Import sorting via VSCode extension
 
 
-The Rome VS Code extension has experimental support for imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+The Biome VS Code extension has experimental support for imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 

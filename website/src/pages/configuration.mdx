@@ -2,7 +2,7 @@
 title: Configuration
 emoji: ⚙️
 category: reference
-description: How to customize and configure Rome with rome.json.
+description: How to customize and configure Biome with rome.json.
 ---
 
 import LintGroups from "@src/components/generated/Groups.astro";
@@ -12,10 +12,10 @@ import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 # Configuration
 
-The configuration file is considered **optional**, Rome has good defaults. Use the configuration
+The configuration file is considered **optional**, Biome has good defaults. Use the configuration
 file to change those defaults.
 
-The Rome configuration file is named `rome.json` and should be placed in the root directory of your project. The root
+The Biome configuration file is named `rome.json` and should be placed in the root directory of your project. The root
 directory is usually the directory containing your project's `package.json`.
 
 Here's an example:
@@ -39,10 +39,10 @@ This configuration file enables the formatter and sets the preferred indent styl
 
 ## Configuration file resolution
 
-Rome uses auto discovery to find the nearest `rome.json` file. It starts looking for `rome.json` in the current
+Biome uses auto discovery to find the nearest `rome.json` file. It starts looking for `rome.json` in the current
 working directory, and then it starts looking in the parent directories until:
 - it finds a `rome.json` file;
-- it applies Rome's defaults if **no `rome.json` is found**;
+- it applies Biome's defaults if **no `rome.json` is found**;
 
 Here's an example:
 
@@ -87,7 +87,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ```json
 {
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json"
+  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json"
 }
 ```
 
@@ -99,7 +99,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
@@ -107,7 +107,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -122,7 +122,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -137,9 +137,9 @@ The files defined in this array:
 - must exist in the file system;
 - are resolved from the path where the `rome.json` file is defined;
 - must be relative paths. Paths to libraries are not resolved;
-- must be reachable by Rome, e.g. symbolic links might not be resolved by Rome;
+- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
 - will be processed in order: from the first one to the last one;
-- can override the same properties, but ultimately only the last one will be used by Rome;
+- can override the same properties, but ultimately only the last one will be used by Biome;
 
 ## `files`
 
@@ -152,7 +152,7 @@ this limit will be ignored for performance reason.
 
  ### `files.ignore`
 
-A list of Unix shell style patterns. Rome ignores files and folders that
+A list of Unix shell style patterns. Biome ignores files and folders that
 match these patterns.
 
 <CodeBlockHeader filename="rome.json" />
@@ -167,7 +167,7 @@ match these patterns.
 
  ### `files.allowUnknown`
 
-Rome won't emit diagnostics if it encounters files that can't handle.
+Biome won't emit diagnostics if it encounters files that can't handle.
 
 <CodeBlockHeader filename="rome.json" />
 
@@ -181,11 +181,11 @@ Rome won't emit diagnostics if it encounters files that can't handle.
 
 ## `vcs`
 
-Set of properties to integrate Rome with a VCS software.
+Set of properties to integrate Biome with a VCS software.
 
 ### `vcs.enabled`
 
-Whether Rome should integrate itself with the VCS client
+Whether Biome should integrate itself with the VCS client
 
 > Default: false
 
@@ -198,23 +198,23 @@ Values:
 
 ### `vcs.useIgnoreFile`
 
-Whether Rome should use the VCS ignore file. When `true`, Rome will ignore the files
+Whether Biome should use the VCS ignore file. When `true`, Biome will ignore the files
 specified in the ignore file.
 
 ### `vcs.root`
 
-The folder where Rome should check for VCS files. By default, Rome will use the same
+The folder where Biome should check for VCS files. By default, Biome will use the same
 folder where `rome.json` was found.
 
-If Rome can't find the configuration, it will attempt to use the current working directory.
-If no current working directory can't be found, Rome won't use the VCS integration, and a diagnostic
+If Biome can't find the configuration, it will attempt to use the current working directory.
+If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
 will be emitted
 
 ## `linter`
 
 ### `linter.enabled`
 
-Enables Rome's linter
+Enables Biome's linter
 
 > Default: `true`
 
@@ -243,7 +243,7 @@ Enables the [recommended rules](/lint/rules) for all groups.
 
 Enable or disable all [rules](/lint/rules) for all groups.
 
-If `recommended` and `all` are both `true`, Rome will emit a diagnostic and fallback to its defaults.
+If `recommended` and `all` are both `true`, Biome will emit a diagnostic and fallback to its defaults.
 
 <CodeBlockHeader filename="rome.json" />
 
@@ -279,12 +279,12 @@ It's also possible to combine this flag to enable/disable different rule groups:
 }
 ```
 
-In the previous example, Rome will enable all rules, exception for rules that belong to the `style` and `complexity` groups.
+In the previous example, Biome will enable all rules, exception for rules that belong to the `style` and `complexity` groups.
 
 
 ### `linter.rules.[group]`
 
-Options that influence the rules of a single group. Rome supports the following groups:
+Options that influence the rules of a single group. Biome supports the following groups:
 
 <LintGroups />
 
@@ -337,7 +337,7 @@ These options apply to all languages.  There are additional language-specific fo
 
 ### `formatter.enabled`
 
-Enables Rome's formatter
+Enables Biome's formatter
 
 > Default: `true`
 
@@ -377,7 +377,7 @@ The style of the indentation. It can be `"tab"` or `"space"`.
 
 > Default: `tab`
 
-Rome's default is `"tab"`.
+Biome's default is `"tab"`.
 
 ### `formatter.indentSize`
 
@@ -395,14 +395,14 @@ How many characters can be written on a single line.
 
 ### `organizeImports.enabled`
 
-Enables Rome's sort imports.
+Enables Biome's sort imports.
 
 > Default: `true`
 
 ### `organizeImports.ignore`
 
 
-A list of Unix shell style patterns. Rome ignores files and folders that
+A list of Unix shell style patterns. Biome ignores files and folders that
 match these patterns.
 
 <CodeBlockHeader filename="rome.json" />
@@ -497,7 +497,7 @@ Example:
 ```
 ### `javascript.globals`
 
-A list of global names that Rome should ignore (analyzer, linter, etc.)
+A list of global names that Biome should ignore (analyzer, linter, etc.)
 
 <CodeBlockHeader filename="rome.json" />
 

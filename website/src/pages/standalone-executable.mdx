@@ -4,11 +4,13 @@ title: Standalone Executable
 
 # Standalone CLI
 
-## Use Rome without Node.js
+## Use Biome without Node.js
 
-Using Rome's standalone CLI binary can be a great choice if you aren't already using Node or npm (or any other package manager). Or in other words, Rome shouldn't be the only reason for you to have a `package.json`.
+Using Biome's standalone CLI binary can be a great choice if you aren't already using Node or npm (or any other package manager).
+Or in other words, Biome shouldn't be the only reason for you to have a `package.json`.
 
-> Note: If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Rome. You're already familiar with the tooling, and installing and updating are simpler.
+> Note: If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Biome.
+You're already familiar with the tooling, and installing and updating are simpler.
 
 
 ### System Requirements
@@ -18,7 +20,7 @@ Using Rome's standalone CLI binary can be a great choice if you aren't already u
 
 ### Picking the right binary
 
-You have to pick the correct binary for your platform for Rome work. The following table should help you do so.
+You have to pick the correct binary for your platform for Biome work. The following table should help you do so.
 
 | CPU Architecture | Windows        | macOS                          | Linux         |
 |------------------|----------------|--------------------------------|---------------|
@@ -27,27 +29,27 @@ You have to pick the correct binary for your platform for Rome work. The followi
 
 > NOTE: Use the Linux variant for Windows Subsystem for Linux (WSL)
 
-### Install Rome
+### Install Biome
 
-To install Rome, grab the executable for your platform from the [latest CLI release](https://github.com/rome/tools/releases) on GitHub and give it execution permission.
+To install Biome, grab the executable for your platform from the [latest CLI release](https://github.com/biomejs/biome/releases) on GitHub and give it execution permission.
 
 ```shell
 # macOS arm (M1 or newer)
-curl -L https://github.com/rome/tools/releases/download/cli%2Fv<version>/rome-darwin-arm64 -o rome
-chmod +x rome
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-darwin-arm64 -o biome
+chmod +x biome
 
 # Linux (x86_64)
-curl -L https://github.com/rome/tools/releases/download/cli%2Fv<version>/rome-linux-x64 -o rome
-chmod +x rome
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-linux-x64 -o biome
+chmod +x biome
 
 # Windows (x86_64, Powershell)
-Invoke-WebRequest -Uri "https://github.com/rome/tools/releases/download/cli%2Fv<version>/rome-win32-x64.exe" -OutFile "rome.exe"
+Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-win32-x64.exe" -OutFile "biome.exe"
 ```
 
-> Note: Make sure to replace `<version>` with the Rome version you want to install.
+> Note: Make sure to replace `<version>` with the Biome version you want to install.
 
-Now you can use Rome by simply running `./rome`.
+Now you can use Biome by simply running `./biome`.
 
 ### Next Steps
 
-Read more about how to use Rome in our getting [started section](/configuration).
+Read more about how to use Biome in our getting [started section](/configuration).
