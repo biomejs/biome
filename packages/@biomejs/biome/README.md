@@ -1,55 +1,57 @@
 <p align="center">
-	<picture>
-		<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/rome/brand/main/PNG/logo_white_yellow_transparent.png" width="700">
-		<img alt="Rome's logo depicting an ancient Roman arch with the word Rome to its side" src="https://raw.githubusercontent.com/rome/brand/main/PNG/logo_transparent.png" width="700">
-	</picture>
+    <img alt="Biome - Toolchain of the web"
+         src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
+         width="400">
 </p>
 
 <div align="center">
 
-[![MIT licensed][mit-badge]][mit-url]
 [![Discord chat][discord-badge]][discord-url]
-[![CI on main][ci-badge]][ci-url]
+[![CI][ci-badge]][ci-url]
 [![npm version][npm-badge]][npm-url]
 [![VSCode version][vscode-badge]][vscode-url]
 
-
-[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg?color=brightgreen
-[mit-url]: LICENSE
-[discord-badge]: https://img.shields.io/discord/678763474494423051?logo=discord&label=discord&color=brightgreen
-[discord-url]: https://discord.gg/rome
+[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
+[discord-url]: https://discord.gg/BypW39g6Yc
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[npm-badge]: https://img.shields.io/npm/v/rome/latest?color=brightgreen
-[npm-url]: https://www.npmjs.com/package/rome/v/latest
-[vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/rome.rome?color=brightgreen&label=vscode
-[vscode-url]: https://marketplace.visualstudio.com/items?itemName=rome.rome
+[npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=green
+[npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+[vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=green
+[vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
 
 </div>
 
-**Rome** is a formatter, linter, bundler, and [more](https://rome.tools/) for JavaScript, TypeScript, JSON, HTML, Markdown, and CSS.
+**Biome** formats, lints, and transforms your code in a [fraction of a second][biomejs].
 
-**Rome** is designed to replace [Babel](https://babeljs.io/), [ESLint](https://eslint.org/), [webpack](https://webpack.js.org/), [Prettier](https://prettier.io/), [Jest](https://jestjs.io/), and others.
+**Biome** supports JavaScript, TypeScript, JSON, and CSS.
+It aims to support [all main languages][language-support] of modern web development.
 
-**Rome** unifies functionality that has previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelizing work, caching, and configuration.
+**Biome** has sane defaults and requires minimal configuration.
+**Biome** helps you as much as possible by displaying detailed and contextualized diagnostics.
+Read more about our [project philosophy][biome-philosophy].
 
-**Rome** has strong conventions and aims to have minimal configuration. Read more about our [project philosophy](https://docs.rome.tools/internals/philosophy/).
+**Biome** unifies functionality that has previously been separate tools.
+Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelizing work, caching, and configuration.
 
-**Rome** is [written in Rust](https://rome.tools/blog/2021/09/21/rome-will-be-rewritten-in-rust.html).
+**Biome** is designed to eventually replace [Babel](https://babeljs.io/), [ESLint](https://eslint.org/), [webpack](https://webpack.js.org/), [Prettier](https://prettier.io/), [Jest](https://jestjs.io/), and others.
 
-**Rome** has first-class IDE support, with a sophisticated parser that represents the source text in full fidelity
-and top-notch error recovery.
+**Biome** has first-class IDE support,
+with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
 
-**Rome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
-
+**Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
 ## Documentation
 
-Check out our [homepage](https://rome.tools) to learn more about Rome, or directly head to the [Getting Started guide](https://docs.rome.tools/guides/getting-started/) if you want to start using Rome.
+Check out our [homepage][biomejs] to learn more about Biome,
+or directly head to the [Getting Started guide][getting-started] to start using Biome.
 
 ## Technical documentation
 
-Browse Rome's internal [Rust API Documentation] if you're interested to learn more about how Rome works.
+Browse Biome's internal [Rust API Documentation] if you're interested to learn more about how Rome works.
 
-[Rust API Documentation]: https://rustdocs.rome.tools/
-
+[biomejs]: https://biomejs.dev/
+[biome-philosophy]: https://biomejs.dev/
+[Rust API Documentation]: https://rustdocs.biomejs.dev/
+[language-support]: https://biomejs.dev/internals/language_support/
+[getting-started]: https://biomejs.dev/guides/getting-started/
