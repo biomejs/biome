@@ -86,7 +86,8 @@ You can add the following to your editor configuration if you want the action to
 
 ### `biome.lspBin`
 
-The `biome.lspBin` option overrides the Biome binary used by the extension. The workspace folder is used as the base path if the path is relative.
+The `biome.lspBin` option overrides the Biome binary used by the extension.
+The workspace folder is used as the base path if the path is relative.
 
 ### `biome.rename`
 
@@ -94,7 +95,7 @@ Enables Biome to handle renames in the workspace (experimental).
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `Biome.json` file. Requires Biome 12 or newer.
+Disables formatting, linting, and syntax errors for projects without a `rome.json` file.
 Enabled by default.
 
 ## Versioning
