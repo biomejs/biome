@@ -35,7 +35,7 @@ jobs:
         with:
           version: 'latest'
       - name: Install Vercel CLI
-        run: npm install --global vercel@canary
+        run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
         working-directory: website
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
@@ -47,9 +47,6 @@ jobs:
       - name: Build JS
         working-directory: website
         run: pnpm build:js
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: website
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: website
