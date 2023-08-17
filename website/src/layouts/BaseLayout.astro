@@ -17,11 +17,11 @@ const description = frontmatter.description ?? props.description ?? "";
 
 let title = props.title ?? frontmatter.title ?? "";
 title = title.trim();
-if (!title.includes("Rome")) {
+if (!title.includes("Biome")) {
 	if (title !== "") {
 		title += " \u2014 ";
 	}
-	title += "Rome";
+	title += "Biome";
 }
 
 function encodeSVG(buffer: string) {
