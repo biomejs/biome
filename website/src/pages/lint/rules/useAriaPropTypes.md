@@ -15,7 +15,7 @@ Enforce that ARIA state and property values are valid.
 <span role="checkbox" aria-checked="test">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:23 <a href="https://docs.rome.tools/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:23 <a href="https://biomejs.dev/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-checked</strong></span><span style="color: Orange;"> is not correct.</span>
   
@@ -35,7 +35,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-labelledby="">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://docs.rome.tools/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-labelledby</strong></span><span style="color: Orange;"> is not correct.</span>
   
@@ -51,7 +51,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-valuemax="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://docs.rome.tools/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-valuemax</strong></span><span style="color: Orange;"> is not correct.</span>
   
@@ -67,7 +67,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-orientation="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://docs.rome.tools/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/lint/rules/useAriaPropTypes">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-orientation</strong></span><span style="color: Orange;"> is not correct.</span>
   

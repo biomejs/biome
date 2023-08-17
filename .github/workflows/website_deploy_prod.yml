@@ -4,7 +4,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
   push:
-    branches-ignore:
+    branches:
       - main
 jobs:
   Deploy-Preview:

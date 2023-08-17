@@ -19,7 +19,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noArguments.js:2:16 <a href="https://docs.rome.tools/lint/rules/noArguments">lint/style/noArguments</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noArguments.js:2:16 <a href="https://biomejs.dev/lint/rules/noArguments">lint/style/noArguments</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the </span><span style="color: Tomato;"><strong>rest parameters</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>arguments</strong></span><span style="color: Tomato;">.</span>
   

@@ -22,7 +22,7 @@ let a, b;
 a = (b = 1) + 1;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:6 <a href="https://docs.rome.tools/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:6 <a href="https://biomejs.dev/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>assignment</strong></span><span style="color: Tomato;"> should not be in an </span><span style="color: Tomato;"><strong>expression</strong></span><span style="color: Tomato;">.</span>
   
@@ -46,7 +46,7 @@ if (a = 1) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:5 <a href="https://docs.rome.tools/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:5 <a href="https://biomejs.dev/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>assignment</strong></span><span style="color: Tomato;"> should not be in an </span><span style="color: Tomato;"><strong>expression</strong></span><span style="color: Tomato;">.</span>
   
@@ -71,7 +71,7 @@ function f(a) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:12 <a href="https://docs.rome.tools/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noAssignInExpressions.js:2:12 <a href="https://biomejs.dev/lint/rules/noAssignInExpressions">lint/suspicious/noAssignInExpressions</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>assignment</strong></span><span style="color: Tomato;"> should not be in an </span><span style="color: Tomato;"><strong>expression</strong></span><span style="color: Tomato;">.</span>
   

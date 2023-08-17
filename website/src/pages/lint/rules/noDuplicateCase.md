@@ -27,7 +27,7 @@ switch (a) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://docs.rome.tools/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://biomejs.dev/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate case label.</span>
   
@@ -59,7 +59,7 @@ switch (a) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://docs.rome.tools/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://biomejs.dev/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate case label.</span>
   
@@ -91,7 +91,7 @@ switch (a) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://docs.rome.tools/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateCase.js:4:10 <a href="https://biomejs.dev/lint/rules/noDuplicateCase">lint/suspicious/noDuplicateCase</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate case label.</span>
   

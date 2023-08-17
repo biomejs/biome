@@ -17,7 +17,7 @@ The scope prop should be used only on `<th>` elements.
 <div scope={scope} />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noHeaderScope.js:1:6 <a href="https://docs.rome.tools/lint/rules/noHeaderScope">lint/a11y/noHeaderScope</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noHeaderScope.js:1:6 <a href="https://biomejs.dev/lint/rules/noHeaderScope">lint/a11y/noHeaderScope</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using the </span><span style="color: Tomato;"><strong>scope</strong></span><span style="color: Tomato;"> attribute on elements other than </span><span style="color: Tomato;"><strong>th</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -35,7 +35,7 @@ The scope prop should be used only on `<th>` elements.
 <div scope="col" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noHeaderScope.js:1:6 <a href="https://docs.rome.tools/lint/rules/noHeaderScope">lint/a11y/noHeaderScope</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noHeaderScope.js:1:6 <a href="https://biomejs.dev/lint/rules/noHeaderScope">lint/a11y/noHeaderScope</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using the </span><span style="color: Tomato;"><strong>scope</strong></span><span style="color: Tomato;"> attribute on elements other than </span><span style="color: Tomato;"><strong>th</strong></span><span style="color: Tomato;"> elements.</span>
   

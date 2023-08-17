@@ -32,7 +32,7 @@ The Intl object does not have a [[Call]] internal method; it is not possible to 
 var math = Math();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Math</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -46,7 +46,7 @@ var math = Math();
 var newMath = new Math();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Math</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -60,7 +60,7 @@ var newMath = new Math();
 var json = JSON();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Json</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -74,7 +74,7 @@ var json = JSON();
 var newJSON = new JSON();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Json</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -88,7 +88,7 @@ var newJSON = new JSON();
 var reflect = Reflect();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:15 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:15 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Reflect</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -102,7 +102,7 @@ var reflect = Reflect();
 var newReflect = new Reflect();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:22 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:22 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Reflect</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -116,7 +116,7 @@ var newReflect = new Reflect();
 var atomics = Atomics();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:15 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:15 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Atomics</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -130,7 +130,7 @@ var atomics = Atomics();
 var newAtomics = new Atomics();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:22 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:22 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Atomics</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -144,7 +144,7 @@ var newAtomics = new Atomics();
 var intl = Intl();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:12 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Intl</strong></span><span style="color: Tomato;"> is not a function.</span>
   
@@ -158,7 +158,7 @@ var intl = Intl();
 var newIntl = new Intl();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://docs.rome.tools/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noGlobalObjectCalls.js:1:19 <a href="https://biomejs.dev/lint/rules/noGlobalObjectCalls">lint/correctness/noGlobalObjectCalls</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Intl</strong></span><span style="color: Tomato;"> is not a function.</span>
   

@@ -25,7 +25,7 @@ switch(bar) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFallthroughSwitchClause.js:2:2 <a href="https://docs.rome.tools/lint/rules/noFallthroughSwitchClause">lint/nursery/noFallthroughSwitchClause</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noFallthroughSwitchClause.js:2:2 <a href="https://biomejs.dev/lint/rules/noFallthroughSwitchClause">lint/nursery/noFallthroughSwitchClause</a> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This case is falling through to the next case.</span>
   

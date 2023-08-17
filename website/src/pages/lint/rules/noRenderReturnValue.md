@@ -25,7 +25,7 @@ Source: [ReactDOM documentation](https://facebook.github.io/react/docs/react-dom
 const foo = ReactDOM.render(<div />, document.body);
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noRenderReturnValue.js:1:13 <a href="https://docs.rome.tools/lint/rules/noRenderReturnValue">lint/correctness/noRenderReturnValue</a> ━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noRenderReturnValue.js:1:13 <a href="https://biomejs.dev/lint/rules/noRenderReturnValue">lint/correctness/noRenderReturnValue</a> ━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not depend on the value returned by the function </span><span style="color: Tomato;"><strong>ReactDOM.render()</strong></span><span style="color: Tomato;">.</span>
   

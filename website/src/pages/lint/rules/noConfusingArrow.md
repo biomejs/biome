@@ -20,7 +20,7 @@ Source: https://eslint.org/docs/latest/rules/no-confusing-arrow
 var x = a => 1 ? 2 : 3;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConfusingArrow.js:1:11 <a href="https://docs.rome.tools/lint/rules/noConfusingArrow">lint/nursery/noConfusingArrow</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingArrow.js:1:11 <a href="https://biomejs.dev/lint/rules/noConfusingArrow">lint/nursery/noConfusingArrow</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Fat arrows can be confused with some comparison operators (</span><span style="color: Orange;"><strong>&lt;</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>&gt;</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>&lt;=</strong></span><span style="color: Orange;">, </span><span style="color: Orange;"><strong>&gt;=</strong></span><span style="color: Orange;">).</span>
   

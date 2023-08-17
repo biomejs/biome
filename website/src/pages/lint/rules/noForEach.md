@@ -32,7 +32,7 @@ els.forEach(el => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://docs.rome.tools/lint/rules/noForEach">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://biomejs.dev/lint/rules/noForEach">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer for...of instead of Array.forEach</span>
   
@@ -51,7 +51,7 @@ els['forEach'](el => {
 })
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://docs.rome.tools/lint/rules/noForEach">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noForEach.js:1:1 <a href="https://biomejs.dev/lint/rules/noForEach">lint/complexity/noForEach</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer for...of instead of Array.forEach</span>
   

@@ -30,7 +30,7 @@ const foo = new Foo();
 foo.f(); // Runtime Error: Cannot read properties of undefined.
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnsafeDeclarationMerging.js:5:7 <a href="https://docs.rome.tools/lint/rules/noUnsafeDeclarationMerging">lint/nursery/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUnsafeDeclarationMerging.js:5:7 <a href="https://biomejs.dev/lint/rules/noUnsafeDeclarationMerging">lint/nursery/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>class</strong></span><span style="color: Tomato;"> is unsafely merged with an </span><span style="color: Tomato;"><strong>interface</strong></span><span style="color: Tomato;">.</span>
   

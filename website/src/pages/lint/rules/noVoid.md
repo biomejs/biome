@@ -21,7 +21,7 @@ Source: https://eslint.org/docs/latest/rules/no-void
 void 0;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noVoid.js:1:1 <a href="https://docs.rome.tools/lint/rules/noVoid">lint/nursery/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noVoid.js:1:1 <a href="https://biomejs.dev/lint/rules/noVoid">lint/nursery/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The use of </span><span style="color: Orange;"><strong>void</strong></span><span style="color: Orange;"> is not allowed.</span>
   

@@ -17,7 +17,7 @@ import { type A, type B } from "mod-1";
 import type { C, D } from "mod-2";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useGroupedTypeImport.js:1:8 <a href="https://docs.rome.tools/lint/rules/useGroupedTypeImport">lint/nursery/useGroupedTypeImport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useGroupedTypeImport.js:1:8 <a href="https://biomejs.dev/lint/rules/useGroupedTypeImport">lint/nursery/useGroupedTypeImport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>type</strong></span><span style="color: Tomato;"> qualifier can be moved just after </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;"> to completely remove the </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;"> at compile time.</span>
   
@@ -65,7 +65,7 @@ Source: https://typescript-eslint.io/rules/no-import-type-side-effects/
 import { type A } from "mod";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useGroupedTypeImport.js:1:8 <a href="https://docs.rome.tools/lint/rules/useGroupedTypeImport">lint/nursery/useGroupedTypeImport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useGroupedTypeImport.js:1:8 <a href="https://biomejs.dev/lint/rules/useGroupedTypeImport">lint/nursery/useGroupedTypeImport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>type</strong></span><span style="color: Tomato;"> qualifier can be moved just after </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;"> to completely remove the </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;"> at compile time.</span>
   

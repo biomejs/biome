@@ -585,7 +585,7 @@ async fn pull_diagnostics() -> Result<()> {
                         "lint/suspicious/noDoubleEquals",
                     ))),
                     code_description: Some(CodeDescription {
-                        href: Url::parse("https://docs.rome.tools/lint/rules/noDoubleEquals")
+                        href: Url::parse("https://biomejs.dev/lint/rules/noDoubleEquals")
                             .unwrap()
                     }),
                     source: Some(String::from("rome")),

@@ -23,7 +23,7 @@ function* foo() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useYield.js:1:1 <a href="https://docs.rome.tools/lint/rules/useYield">lint/correctness/useYield</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useYield.js:1:1 <a href="https://biomejs.dev/lint/rules/useYield">lint/correctness/useYield</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This generator function doesn't contain </span><span style="color: Tomato;"><strong>yield</strong></span><span style="color: Tomato;">.</span>
   

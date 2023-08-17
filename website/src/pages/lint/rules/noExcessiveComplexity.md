@@ -39,7 +39,7 @@ function tooComplex() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noExcessiveComplexity.js:1:10 <a href="https://docs.rome.tools/lint/rules/noExcessiveComplexity">lint/nursery/noExcessiveComplexity</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noExcessiveComplexity.js:1:10 <a href="https://biomejs.dev/lint/rules/noExcessiveComplexity">lint/nursery/noExcessiveComplexity</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Excessive complexity detected.</span>
   

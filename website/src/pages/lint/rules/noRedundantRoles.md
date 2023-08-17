@@ -17,7 +17,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <article role='article'></article>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:15 <a href="https://docs.rome.tools/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:15 <a href="https://biomejs.dev/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'article' on the 'article' element is redundant.</span>
   
@@ -35,7 +35,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <button role='button'></button>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:14 <a href="https://docs.rome.tools/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:14 <a href="https://biomejs.dev/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'button' on the 'button' element is redundant.</span>
   
@@ -53,7 +53,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <h1 role='heading' aria-level='1'>title</h1>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:10 <a href="https://docs.rome.tools/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:10 <a href="https://biomejs.dev/lint/rules/noRedundantRoles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'heading' on the 'h1' element is redundant.</span>
   

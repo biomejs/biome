@@ -28,7 +28,7 @@ enum Computed {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useLiteralEnumMembers.js:4:9 <a href="https://docs.rome.tools/lint/rules/useLiteralEnumMembers">lint/nursery/useLiteralEnumMembers</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useLiteralEnumMembers.js:4:9 <a href="https://biomejs.dev/lint/rules/useLiteralEnumMembers">lint/nursery/useLiteralEnumMembers</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The enum member should be initialized with a literal value such as a number or a string.</span>
   

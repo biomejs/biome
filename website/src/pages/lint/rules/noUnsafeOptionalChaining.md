@@ -21,7 +21,7 @@ Also, parentheses limit the scope of short-circuiting in chains.
 1 in obj?.foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:9 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:9 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -41,7 +41,7 @@ Also, parentheses limit the scope of short-circuiting in chains.
 with (obj?.foo);
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:10 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:10 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -61,7 +61,7 @@ with (obj?.foo);
 for (bar of obj?.foo);
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:16 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:16 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -81,7 +81,7 @@ for (bar of obj?.foo);
 bar instanceof obj?.foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:19 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:19 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -101,7 +101,7 @@ bar instanceof obj?.foo;
 const { bar } = obj?.foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:20 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:20 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -121,7 +121,7 @@ const { bar } = obj?.foo;
 (obj?.foo)();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:5 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:5 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   
@@ -141,7 +141,7 @@ const { bar } = obj?.foo;
 (baz?.bar).foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:5 <a href="https://docs.rome.tools/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnsafeOptionalChaining.js:1:5 <a href="https://biomejs.dev/lint/rules/noUnsafeOptionalChaining">lint/correctness/noUnsafeOptionalChaining</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unsafe usage of optional chaining.</span>
   

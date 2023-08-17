@@ -26,7 +26,7 @@ Source: [no-self-compare](https://eslint.org/docs/latest/rules/no-self-compare).
 if (x === x) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSelfCompare.js:1:5 <a href="https://docs.rome.tools/lint/rules/noSelfCompare">lint/suspicious/noSelfCompare</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSelfCompare.js:1:5 <a href="https://biomejs.dev/lint/rules/noSelfCompare">lint/suspicious/noSelfCompare</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Comparing to itself is potentially pointless.</span>
   
@@ -40,7 +40,7 @@ if (x === x) {}
 if (a.b.c() !== a.b .c()) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noSelfCompare.js:1:5 <a href="https://docs.rome.tools/lint/rules/noSelfCompare">lint/suspicious/noSelfCompare</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noSelfCompare.js:1:5 <a href="https://biomejs.dev/lint/rules/noSelfCompare">lint/suspicious/noSelfCompare</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Comparing to itself is potentially pointless.</span>
   

@@ -16,7 +16,7 @@ const boolExp = true;
 const r = true && boolExp;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:11 <a href="https://docs.rome.tools/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:11 <a href="https://biomejs.dev/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Logical expression contains unnecessary complexity.</span>
   
@@ -36,7 +36,7 @@ const boolExp2 = true;
 const r2 = boolExp || true;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:12 <a href="https://docs.rome.tools/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:12 <a href="https://biomejs.dev/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Logical expression contains unnecessary complexity.</span>
   
@@ -56,7 +56,7 @@ const nonNullExp = 123;
 const r3 = null ?? nonNullExp;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:12 <a href="https://docs.rome.tools/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:2:12 <a href="https://biomejs.dev/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Logical expression contains unnecessary complexity.</span>
   
@@ -77,7 +77,7 @@ const boolExpr2 = false;
 const r4 = !boolExpr1 || !boolExpr2;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:3:12 <a href="https://docs.rome.tools/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useSimplifiedLogicExpression.js:3:12 <a href="https://biomejs.dev/lint/rules/useSimplifiedLogicExpression">lint/complexity/useSimplifiedLogicExpression</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Logical expression contains unnecessary complexity.</span>
   
