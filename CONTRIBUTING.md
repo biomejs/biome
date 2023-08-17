@@ -1,31 +1,50 @@
-# Contributing
+# 🚀 Contributing
 
-We can use help in a bunch of areas and any help is appreciated. Our [GitHub issues](https://github.com/rome/tools/issues) serve as a place for any discussion, whether it's bug reports, questions, project direction etc. As the project grows this policy may change.
+We can use help in a bunch of areas and any help is greatly appreciated!
 
-Our [Discord server](https://discord.gg/rome) is open for help and more adhoc discussion. All activity on the Discord is still moderated and will be strictly enforced under the project's [Code of Conduct](./CODE_OF_CONDUCT.md).
+## Asking questions, making proposals
+
+If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/bare-ts/tools/discussions).
+Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
+
+Our [Discord server](https://discord.gg/) is open for help and more ad-hoc discussion.
+All activity on the Discord is still moderated and will be strictly enforced under the project's [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+Remember that we are doing this project on our own time.
+We are humans: we like support, and we expect kindness :)
+
+## Reporting bugs
+
+Our [GitHub issues](https://github.com/biomejs/biome/issues/) serve as a place for submitting bugs.
+Make sure that the bugs is not reported yet and is not fixed in the main branch.
+You can test on the main branch, thanks to the [playground](https://biomejs.dev/playground/).
 
 ## Getting Started
 
 Building this project requires a `stable` Rust toolchain, which can be installed using [rustup](https://www.rust-lang.org/tools/install).
 
 Clone the repository and navigate to the `tools` directory:
+
 ```bash
-git clone https://github.com/rome/tools
-cd tools
+git clone https://github.com/biomejs/biome
+cd biome
 ```
+
 Compile all packages and dependencies:
+
 ```bash
 cargo build
 ```
-Rome can be used via the `rome` bin in the `rome_cli` package:
+
+Biome can be used via the `biome` bin:
+
 ```bash
-cargo run --bin rome -- --help
+cargo run --bin biome -- --help
 ```
 
 ## Install the required tools
 
-We use [Just](https://just.systems/man/en/) to run scripts or tasks, to make our
-life easier.
+We use [Just](https://just.systems/man/en/) to run scripts and tasks, to make our life easier.
 
 You can install `just` using cargo:
 
@@ -34,7 +53,7 @@ cargo install just
 ```
 
 But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),
-so you won't need to prefix the every command with `cargo`.
+so you won't need to prefix every command with `cargo`.
 
 Once installed, run the following command install the required tools:
 
@@ -42,7 +61,7 @@ Once installed, run the following command install the required tools:
 just install-tools
 ```
 
-And you're good to go hack with Rome and Rust! 🚀
+And you're good to go hack with Biome and Rust! 🚀
 
 ## Testing
 
@@ -58,15 +77,18 @@ If you want to test the tests for a single crate:
 just test-crate rome_cli
 ```
 
-If you to run only the doctests, you would need to pass an argument to the command:
+To run only the doctests, you would need to pass an argument to the command:
+
 ```shell
-jus test-doc
+just test-doc
 ```
 
-In some crates, we use snapshot testing. The majority of snapshot testing is done using [`insta`](https://insta.rs).
+In some crates, we use snapshot testing.
+The majority of snapshot testing is done using [`insta`](https://insta.rs).
 `insta` is already installed by the command `just install-tools`.
 
 When a snapshot test fails, you can run:
+
 - `cargo insta accept` to accept all the changes and update all the snapshots;
 - `cargo insta reject` to reject all the changes;
 - `cargo insta review` to review snapshots singularly;
@@ -81,32 +103,32 @@ just ready
 ```
 
 This command will run the same commands of the CI: format, lint, tests and code generation.
-Eventually everything should be "green" 🟢 and commit all the code that was
-generated.
+Eventually everything should be "green" 🟢 and commit all the code that was generated.
 
 ## Language Server and VS Code Extension Development
 
-The Rome language server is the binary crate `rome` which can be built using the command:
+The Biome language server is the binary crate `biome` which can be built using the command:
 
 ```bash
-cargo build --bin rome
+cargo build --bin biome
 ```
+
 If benchmarking the language server, be sure to build with the `--release` flag.
 
-The VS Code extension can be installed from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=rome.rome) and can be used with a development build of the language server by setting the `"rome.lspBin"` VS Code setting to the path of the binary:
+The VS Code extension can be installed from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) and can be used with a development build of the language server by setting the `"biome.lspBin"` VS Code setting to the path of the binary:
 
 ```json
 {
-  "rome.lspBin": "/path/to/rome/target/debug/rome"
+  "biome.lspBin": "/path/to/biome/target/debug/biome"
 }
 ```
 
 Please note that Windows disallows modifying an executable while it's running,
-meaning you won't be able to recompile the Rome binary once the extension was activated in your editor.
+meaning you won't be able to recompile the Biome binary once the extension was activated in your editor.
 
 The server is spawned as a background daemon, and continues to run even after the editor is closed.
 
-To stop the running daemon instance use the `rome stop` command, with the editor closed as the extension
+To stop the running daemon instance use the `biome stop` command, with the editor closed as the extension
 will try to restart it otherwise.
 
 To build the VS Code extension from source, navigate to the `editors/vscode` directory and run:
@@ -116,13 +138,13 @@ npm install
 npm run build
 ```
 
-This will create a `rome_lsp.vsix` which you can install into VS Code by running:
+This will create a `biome_lsp.vsix` which you can install into VS Code by running:
 
 ```bash
 npm run install-extension
 ```
 
-The `"rome.lspBin"` VS Code setting will still need to be set as described above.
+The `"biome.lspBin"` VS Code setting will still need to be set as described above.
 
 When the extension is running, it will connect to a daemon server - or it will bootstrap one.
 
@@ -131,19 +153,19 @@ When you apply changes to the binary, you need to do two things:
 - kill the daemon process, so you can spawn a new server session
 with the new changes
 
-When the daemon is running, it's possible to inspect its logs in the folder `rome-logs`, placed
+When the daemon is running, it's possible to inspect its logs in the folder `biome-logs`, placed
 in the temporary folder of the operative system.
 
 
 ### User files
 
-If files specific to your local development environment should be ignored, please add these files to a global git ignore file rather than to a git ignore file within Rome.
+If files specific to your local development environment should be ignored, please add these files to a global git ignore file rather than to a git ignore file within Biome.
 
 You can find more information on this process [here](https://help.github.com/en/github/using-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer).
 
 ## Node.js development
 
-The npm module npm/rome contains Rome's Node JS API that supports different backends:
+The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
 - `wasm-nodejs` (WebAssembly)
 - `backend-jsonrpc` (Connection to the daemon)
 
@@ -159,7 +181,8 @@ The tests are run against the compiled files, which means that you need to run t
 
 ## Website
 
-The [Rome website](https://rome.tools/) is built with [Astro](https://astro.build). To start a development server you can run the following commands:
+The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
+To start a development server you can run the following commands:
 
 ```bash
 cd website
@@ -175,7 +198,7 @@ If you work on some parser and you create new nodes or modify existing ones, wil
 
 This command will update the syntax of the parsers.
 
-The source is generated from the [`ungram` files](https://github.com/rome/tools/blob/main/xtask/codegen/js.ungram).
+The source is generated from the [`ungram` files](https://github.com/biomejs/biome/blob/main/xtask/codegen/js.ungram).
 
 #### `cargo codegen test`
 
@@ -204,7 +227,7 @@ git submodule update --init --recursive
 
 ## Commit messages
 
-Internally, the Rome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
+Internally, the Biome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
 The following this convention encourages commit best-practices and facilitates commit-powered features like change log generation.
 
 The following commit prefixes are supported:
@@ -234,7 +257,7 @@ Please use the template provided.
 
 #### Changelog
 
-If the PR you're about to open is a bugfix/feature around Rome, you can add a new line to the `CHANGELOG.md`, but it's not mandatory.
+If the PR you're about to open is a bugfix/feature around Biome, you can add a new line to the `CHANGELOG.md`, but it's not mandatory.
 
 At the top of the file you will see a `[Unreleased]` section. The headings divide the sections by "feature", make sure
 to add a new bullet point.
@@ -285,17 +308,17 @@ When adding new features, the documentation should be part of a new PR, which wi
 ### Analyzers and lint rules
 
 To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_analyze/index.html)
+documentation page](https://rustdocs.biomejs.dev/rome_analyze/index.html)
 
 ### JavaScript Parser
 
 To know the technical details of how our JavaScript works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_js_parser/index.html)
+documentation page](https://rustdocs.biomejs.dev/rome_js_parser/index.html)
 
 ### Formatter
 
 To know the technical details of how our formatter works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_js_formatter/index.html)
+documentation page](https://rustdocs.biomejs.dev/rome_js_formatter/index.html)
 
 ### Versioning
 
