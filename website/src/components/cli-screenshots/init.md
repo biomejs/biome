@@ -1,4 +1,4 @@
-<pre class="language-text collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> rome init
+<pre class="language-text collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> biome init
 
 <strong> Welcome to Rome! Let&apos;s get you started... </strong>
 
@@ -21,17 +21,17 @@
      <a href="https://rome.tools/#editor-integration">https://rome.tools/#editor-integration</a>
 
   <span style="opacity: 0.8;">2. </span><strong>Try a command</strong>
-     <i>rome ci</i> is used to validate your code, verify formatting, and
-     check for lint errors. Run <i>rome --help</i> for a full list of commands
+     <i>biome ci</i> is used to validate your code, verify formatting, and
+     check for lint errors. Run <i>biome --help</i> for a full list of commands
      and flags.
 
   <span style="opacity: 0.8;">3. </span><strong>Read documentation</strong>
      Our website serves as a comprehensive source of guides and
-     documentation <a href="https://rome.tools/">https://rome.tools/</a>
+     documentation <a href="https://biomejs.dev/">https://biomejs.dev/</a>
 
   <span style="opacity: 0.8;">4. </span><strong>Get involved in the community</strong>
      Ask questions, get support, or contribute by participating on
-     GitHub (<a href="https://github.com/rome/tools">https://github.com/rome/tools</a>) or our community
-     Discord (<a href="https://discord.gg/rome">https://discord.gg/rome</a>)
+     GitHub (<a href="https://github.com/biomejs/biome">https://github.com/biomejs/biome</a>) or our community
+     Discord (<a href="https://discord.gg/JXe7dnnc">https://discord.gg/JXe7dnnc</a>)
 
 </code><button aria-hidden="true" class="expand">Click to Expand</button></pre>

@@ -2,7 +2,7 @@
 title: Versioning
 emoji: 🔢
 category: internals
-description: How we version Rome.
+description: How we version Biome.
 ---
 
 # Versioning
@@ -14,7 +14,7 @@ This methodology will make sure that your script won't fail unexpectedly.
 
 ## Semantic Versioning
 
-Rome follows [semantic versioning](https://semver.org/). Due to the nature of Rome as a toolchain, it can be unclear what changes are considered major, minor, or patch. That's why Rome uses the following versioning guide:
+Biome follows [semantic versioning](https://semver.org/). Due to the nature of Biome as a toolchain, it can be unclear what changes are considered major, minor, or patch. That's why Biome uses the following versioning guide:
 
 ### Patch Release
 
@@ -22,7 +22,7 @@ Rome follows [semantic versioning](https://semver.org/). Due to the nature of Ro
 * Fixing incorrect code suggestions
 * Fixing the formatting of a syntax that results in invalid code or changes the semantics of the program.
 * Improvements to the documentation
-* Internal changes that don't change Rome's functionality:
+* Internal changes that don't change Biome's functionality:
   * Refactors
   * Performance improvements
   * Increase or change in test coverage
@@ -42,12 +42,12 @@ Rome follows [semantic versioning](https://semver.org/). Due to the nature of Ro
 
 ### Major Release
 * Changes to the configuration that result in different formatting or more reported lint errors (adding/removing options, changing the default value)
-* Changes to Rome's public API
+* Changes to Biome's public API
 * Promotion of new features or tools that require some spotlight
 
 ## Visual Studio Code Extension
 
-Visual Studio Code [doesn't support pre-release tags](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) for extensions. That's why Rome uses the following version schema to distinguish stable and previews:
+Visual Studio Code [doesn't support pre-release tags](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) for extensions. That's why Biome uses the following version schema to distinguish stable and previews:
 * Stable releases use even version numbers: 10, 12, 14, 16, ...
 * Previews use odd version numbers: 11, 13, 15, 17, ...
 

@@ -2,7 +2,7 @@
 title: CLI
 emoji: ⌨️
 category: reference
-description: Available commands and arguments in the Rome CLI.
+description: Available commands and arguments in the Biome CLI.
 ---
 
 [//]: # (Start-codegen)
@@ -56,7 +56,7 @@ Biome official CLI. Use it to check the health of your project or run it to chec
 - **`ci`** &mdash; 
   Command to use in CI environments. Run various checks of a set of files.
 - **`init`** &mdash; 
-  Bootstraps a new rome project. Creates a configuration file with some defaults.
+  Bootstraps a new Biome project. Creates a configuration file with some defaults.
 - **`lsp-proxy`** &mdash; 
   Acts as a server for the Language Server Protocol over stdin/stdout
 - **`migrate`** &mdash; 
@@ -233,7 +233,7 @@ Run various checks on a set of files.
 - **`    --organize-imports-enabled`**=_`<true|false>`_ &mdash; 
   Allow to enable or disable the organize imports.
 - **`    --stdin-file-path`**=_`PATH`_ &mdash; 
-  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome check --stdin-file-path=file.js"
+  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome check --stdin-file-path=file.js"
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
@@ -314,7 +314,7 @@ Run various checks on a set of files.
 - **`    --apply-unsafe`** &mdash; 
   Apply safe fixes and unsafe fixes, formatting and import sorting
 - **`    --stdin-file-path`**=_`PATH`_ &mdash; 
-  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome lint --stdin-file-path=file.js"
+  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
@@ -403,7 +403,7 @@ Run the formatter on a set of files.
 
 **Available options:**
 - **`    --stdin-file-path`**=_`PATH`_ &mdash; 
-  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome format --stdin-file-path=file.js".
+  A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
 - **`    --write`** &mdash; 
   Writes formatted files to file system.
 - **`-h`**, **`--help`** &mdash; 
@@ -493,7 +493,7 @@ Command to use in CI environments. Run various checks of a set of files.
 
 ## biome init
 
-Bootstraps a new rome project. Creates a configuration file with some defaults.
+Bootstraps a new biome project. Creates a configuration file with some defaults.
 
 **Usage**: **`biome`** **`init`** 
 
@@ -577,13 +577,13 @@ It updates the configuration when there are breaking changes
 
 ### `ROME_BINARY`
 
-Overrides the Rome binary being used. This allows you, for example, to use a system wide Rome binary.
+Overrides the Biome binary being used. This allows you, for example, to use a system-wide Biome binary.
 
-If you don't define this variable, Rome will automatically detect the correct binary for your platform.
+If you don't define this variable, Biome will automatically detect the correct binary for your platform.
 
 ```
-# Nix derivation example; the binary path comes from "${pkgs.rome}/bin/rome"
-ROME_BINARY=/nix/store/68fyfw1hidsqkal1839whi3nzgvqv4pa-rome-12.1.0/bin/rome npx rome format .
+# Nix derivation example; the binary path comes from "${pkgs.biome}/bin/biome"
+ROME_BINARY=/nix/store/68fyfw1hidsqkal1839whi3nzgvqv4pa-biome-1.0.0/bin/biome npx biome format .
 ```
 
 ## Useful information

@@ -152,7 +152,7 @@ function remarkDefaultLayoutPlugin() {
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://rome.tools",
+	site: "https://biomejs.dev",
 	output: "static",
 
 	integrations: [

@@ -2,7 +2,7 @@
 title: Linter
 emoji: ✅
 category: tools
-description: How to use the Rome linter.
+description: How to use the Biome linter.
 ---
 
 import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
@@ -10,7 +10,7 @@ import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
 
 # Linter
 
-Rome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
+Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
 
 <NumberOfRules />
 
@@ -34,13 +34,13 @@ Available options:
         --apply         Apply safe fixes, formatting
         --apply-unsafe  Apply safe fixes and unsafe fixes, formatting and import sorting
         --vcs-client-kind <git>  The kind of client.
-        --vcs-enabled <true|false>  Whether Rome should integrate itself with the VCS client
-        --vcs-use-ignore-file <true|false>  Whether Rome should use the VCS ignore file. When [true],
-                        Rome will ignore the files specified in the ignore file.
-        --vcs-root <PATH>  The folder where Rome should check for VCS files. By default, Rome will
-                        use the same folder where `rome.json` was found. If Rome can't fine the
+        --vcs-enabled <true|false>  Whether Biome should integrate itself with the VCS client
+        --vcs-use-ignore-file <true|false>  Whether Biome should use the VCS ignore file. When [true],
+                        Biome will ignore the files specified in the ignore file.
+        --vcs-root <PATH>  The folder where Biome should check for VCS files. By default, Biome will
+                        use the same folder where `rome.json` was found. If Biome can't fine the
                         configuration, it will attempt to use the current working directory. If no
-                        current working directory can't be found, Rome won't use the VCS integration.
+                        current working directory can't be found, Biome won't use the VCS integration.
         --files-max-size <NUMBER>  The maximum allowed size for source code files in bytes. Files
                         above this limit will be ignored for performance reason. Defaults to 1 MiB
         --indent-style <tab|space>  The indent style.
@@ -57,7 +57,7 @@ Available options:
         --colors <off|force>  Set the formatting mode for markup: "off" prints everything as plain
                         text, "force" forces the formatting of markup using ANSI even if the console
                         output is determined to be incompatible
-        --use-server    Connect to a running instance of the Rome daemon server.
+        --use-server    Connect to a running instance of the Biome daemon server.
         --verbose       Print additional verbose advices on diagnostics
         --config-path <PATH>  Set the filesystem path to the directory of the rome.json configuration
                         file
@@ -73,7 +73,7 @@ Available options:
 ## Code fixes
 
 Lint rules may provide automatic code fixes.
-Rome distinguishes between two types of fixes:
+Biome distinguishes between two types of fixes:
 
 - safe fixes
 - unsafe fixes
@@ -84,7 +84,7 @@ They can be applied without explicit review.
 To apply _safe fixes_, use `--apply`:
 
 ```shell
-rome check --apply ./src
+biome check --apply ./src
 ```
 
 Unsafe fixes may change the semantic of your program.
@@ -93,7 +93,7 @@ Therefore, it's advised to manually review the changes.
 To apply _unsafe fixes_, use `--apply-unsafe`:
 
 ```shell
-rome check --apply-unsafe ./src
+biome check --apply-unsafe ./src
 ```
 
 ## Ignoring Code
@@ -172,7 +172,7 @@ Just add `"off"` as value inside its configuration. For example:
 
 ### Change the diagnostic severity
 
-Most of Rome's rules will emit an **error**, but you are free to change their severity.
+Most of Biome's rules will emit an **error**, but you are free to change their severity.
 Just add `"warn"` as value of the rule. Example:
 
 ```json

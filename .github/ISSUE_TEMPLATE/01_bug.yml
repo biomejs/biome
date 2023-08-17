@@ -27,7 +27,7 @@ body:
         Provide a detailed list of steps that reproduce the issue
         The more information and included steps, the quicker your report can be triaged and addressed!
         
-        You can also use the [playground](https://play.rome.tools) to share code snippets.
+        You can also use the [playground](https://biomejs.dev/playground/) to share code snippets.
         This is useful to reproduce the issue.
       placeholder: |
         1.
