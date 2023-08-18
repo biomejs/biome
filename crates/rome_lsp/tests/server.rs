@@ -714,7 +714,7 @@ async fn pull_quick_fixes() -> Result<()> {
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Replace -0 with 0"),
         kind: Some(lsp::CodeActionKind::new(
-            "quickfix.rome.suspicious.noCompareNegZero",
+            "quickfix.biome.suspicious.noCompareNegZero",
         )),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
@@ -751,7 +751,7 @@ async fn pull_quick_fixes() -> Result<()> {
     let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
         kind: Some(lsp::CodeActionKind::new(
-            "quickfix.suppressRule.rome.suspicious.noCompareNegZero",
+            "quickfix.suppressRule.biome.suspicious.noCompareNegZero",
         )),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
@@ -1014,7 +1014,7 @@ async fn pull_refactors() -> Result<()> {
     let _expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Inline variable"),
         kind: Some(lsp::CodeActionKind::new(
-            "refactor.inline.rome.correctness.inlineVariable",
+            "refactor.inline.biome.correctness.inlineVariable",
         )),
         diagnostics: None,
         edit: Some(lsp::WorkspaceEdit {
