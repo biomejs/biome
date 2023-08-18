@@ -48,5 +48,5 @@ jobs:
         working-directory: website
         run: pnpm build:js
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
         working-directory: website
