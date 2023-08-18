@@ -3,7 +3,7 @@
 	"publisher": "biome",
 	"displayName": "Biome",
 	"description": "Biome LSP VS Code Extension",
-	"version": "0.28.0",
+	"version": "0.1.0",
 	"icon": "icon.png",
 	"activationEvents": [
 		"onLanguage:javascript",
@@ -23,7 +23,7 @@
 		"url": "https://github.com/biomejs/biome/issues"
 	},
 	"engines": {
-		"vscode": "^1.70.0",
+		"vscode": "^1.81.0",
 		"npm": "^9"
 	},
 	"capabilities": {
@@ -142,15 +142,15 @@
 		"tsc": "tsc"
 	},
 	"devDependencies": {
-		"@types/node": "^18.0.0",
+		"@types/node": "^18.17.5",
 		"@types/resolve": "^1.20.2",
-		"@types/vscode": "^1.70.0",
-		"esbuild": "^0.14.47",
-		"typescript": "^4.8.2",
-		"vsce": "^2.11.0"
+		"@types/vscode": "^1.81.0",
+		"esbuild": "^0.19.2",
+		"typescript": "^5.1.6",
+		"@vscode/vsce": "^2.20.1"
 	},
 	"dependencies": {
-		"resolve": "^1.22.1",
-		"vscode-languageclient": "^8.0.2"
+		"resolve": "^1.22.4",
+		"vscode-languageclient": "^8.1.0"
 	}
 }
