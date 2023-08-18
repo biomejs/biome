@@ -82,7 +82,9 @@ impl ActionCategory {
             ActionCategory::Refactor(RefactorKind::Extract) => {
                 Cow::Borrowed("refactor.extract.biome")
             }
-            ActionCategory::Refactor(RefactorKind::Inline) => Cow::Borrowed("refactor.inline.biome"),
+            ActionCategory::Refactor(RefactorKind::Inline) => {
+                Cow::Borrowed("refactor.inline.biome")
+            }
             ActionCategory::Refactor(RefactorKind::Rewrite) => {
                 Cow::Borrowed("refactor.rewrite.biome")
             }
@@ -91,7 +93,9 @@ impl ActionCategory {
             }
 
             ActionCategory::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
-            ActionCategory::Source(SourceActionKind::FixAll) => Cow::Borrowed("source.fixAll.biome"),
+            ActionCategory::Source(SourceActionKind::FixAll) => {
+                Cow::Borrowed("source.fixAll.biome")
+            }
             ActionCategory::Source(SourceActionKind::OrganizeImports) => {
                 Cow::Borrowed("source.organizeImports.biome")
             }
