@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUselessRename (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow renaming import, export, and destructured assignments to the same name.
 

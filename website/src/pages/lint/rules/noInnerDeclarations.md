@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noInnerDeclarations (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow `function` and `var` declarations that are accessible outside their block.
 

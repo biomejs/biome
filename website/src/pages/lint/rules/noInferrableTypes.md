@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noInferrableTypes (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
 

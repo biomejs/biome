@@ -109,7 +109,7 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
-            if action.category.matches("source.organizeImports.rome")
+            if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_for(&FeatureName::OrganizeImports)
             {
                 return None;

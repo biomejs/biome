@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noMultipleSpacesInRegularExpressionLiterals (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow unclear usage of multiple space characters in regular expression literals
 

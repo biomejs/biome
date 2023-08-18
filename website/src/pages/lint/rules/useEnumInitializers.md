@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useEnumInitializers (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require that each enum member value be explicitly initialized.
 

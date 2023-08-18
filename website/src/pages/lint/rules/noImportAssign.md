@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noImportAssign (since v0.9.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow assigning to imported bindings
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useIsNan (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require calls to `isNaN()` when checking for `NaN`.
 

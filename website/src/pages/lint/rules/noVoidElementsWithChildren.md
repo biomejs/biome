@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noVoidElementsWithChildren (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 This rules prevents void elements (AKA self-closing elements) from having children.
 

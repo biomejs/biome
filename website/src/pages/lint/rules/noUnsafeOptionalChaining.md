@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUnsafeOptionalChaining (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow the use of optional chaining in contexts where the undefined value is not allowed.
 

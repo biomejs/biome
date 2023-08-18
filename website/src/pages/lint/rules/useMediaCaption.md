@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useMediaCaption (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforces that `audio` and `video` elements must have a `track` for captions.
 

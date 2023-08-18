@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noNewSymbol (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow `new` operators with the `Symbol` object.
 

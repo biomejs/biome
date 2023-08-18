@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUnreachableSuper (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Ensures the `super()` constructor is called exactly once on every code
 path in a class constructor before `this` is accessed if the class has

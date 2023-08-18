@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDuplicateCase (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow duplicate case labels.
 If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression.

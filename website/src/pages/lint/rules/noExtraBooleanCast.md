@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noExtraBooleanCast (since v0.9.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow unnecessary boolean casts
 

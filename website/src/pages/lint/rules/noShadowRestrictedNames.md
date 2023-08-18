@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noShadowRestrictedNames (since v0.9.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow identifiers from shadowing restricted names.
 

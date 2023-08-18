@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useLiteralKeys (since v12.1.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce the usage of a literal access to properties over computed property access.
 

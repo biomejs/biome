@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noNonNullAssertion (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow non-null assertions using the `!` postfix operator.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noVoidTypeReturn (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow returning a value from a function with the return type 'void'
 

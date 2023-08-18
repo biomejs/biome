@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noInvalidConstructorSuper (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents the incorrect use of `super()` inside classes.
 It also checks whether a call `super()` is missing from classes that extends other constructors.

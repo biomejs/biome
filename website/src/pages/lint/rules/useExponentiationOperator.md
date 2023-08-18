@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useExponentiationOperator (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow the use of `Math.pow` in favor of the `**` operator.
 

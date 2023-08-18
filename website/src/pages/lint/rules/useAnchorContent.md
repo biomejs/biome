@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useAnchorContent (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that anchors have content and that the content is accessible to screen readers.
 

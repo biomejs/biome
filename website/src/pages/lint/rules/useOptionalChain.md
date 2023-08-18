@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useOptionalChain (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce using concise optional chain instead of chained logical expressions.
 

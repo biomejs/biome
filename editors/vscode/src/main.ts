@@ -33,18 +33,18 @@ const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
 
 let client: LanguageClient;
 
-const IN_ROME_PROJECT = "inRomeProject";
+const IN_ROME_PROJECT = "inBiomeProject";
 
 export async function activate(context: ExtensionContext) {
 	const outputChannel = window.createOutputChannel("Biome");
-	const traceOutputChannel = window.createOutputChannel("Rome Trace");
+	const traceOutputChannel = window.createOutputChannel("Biome Trace");
 
 	const command = await getServerPath(context, outputChannel);
 
 	if (!command) {
 		await window.showErrorMessage(
-			"The Rome extensions doesn't ship with prebuilt binaries for your platform yet. " +
-				"You can still use it by cloning the rome/tools repo from GitHub to build the LSP " +
+			"The Biome extensions doesn't ship with prebuilt binaries for your platform yet. " +
+				"You can still use it by cloning the biomejs/biome repo from GitHub to build the LSP " +
 				"yourself and use it with this extension with the biome.lspBin setting",
 		);
 		return;
@@ -84,7 +84,7 @@ export async function activate(context: ExtensionContext) {
 	const codeDocumentSelector =
 		client.protocol2CodeConverter.asDocumentSelector(documentSelector);
 
-	// we are now in a rome project
+	// we are now in a biome project
 	setContextValue(IN_ROME_PROJECT, true);
 
 	session.registerCommand(Commands.SyntaxTree, syntaxTree(session));
@@ -142,31 +142,31 @@ const PLATFORMS: PlatformTriplets = {
 	win32: {
 		x64: {
 			triplet: "x86_64-pc-windows-msvc",
-			package: "@rometools/cli-win32-x64",
+			package: "@biomejs/cli-win32-x64",
 		},
 		arm64: {
 			triplet: "aarch64-pc-windows-msvc",
-			package: "@rometools/cli-win32-arm64",
+			package: "@biomejs/cli-win32-arm64",
 		},
 	},
 	darwin: {
 		x64: {
 			triplet: "x86_64-apple-darwin",
-			package: "@rometools/cli-darwin-x64",
+			package: "@biomejs/cli-darwin-x64",
 		},
 		arm64: {
 			triplet: "aarch64-apple-darwin",
-			package: "@rometools/cli-darwin-arm64",
+			package: "@biomejs/cli-darwin-arm64",
 		},
 	},
 	linux: {
 		x64: {
 			triplet: "x86_64-unknown-linux-gnu",
-			package: "@rometools/cli-linux-x64",
+			package: "@biomejs/cli-linux-x64",
 		},
 		arm64: {
 			triplet: "aarch64-unknown-linux-gnu",
-			package: "@rometools/cli-linux-arm64",
+			package: "@biomejs/cli-linux-arm64",
 		},
 	},
 };
@@ -175,14 +175,14 @@ async function getServerPath(
 	context: ExtensionContext,
 	outputChannel: OutputChannel,
 ): Promise<string | undefined> {
-	// Only allow the bundled Rome binary in untrusted workspaces
+	// Only allow the bundled Biome binary in untrusted workspaces
 	if (!workspace.isTrusted) {
 		return getBundledBinary(context, outputChannel);
 	}
 
 	if (process.env.DEBUG_SERVER_PATH) {
 		outputChannel.appendLine(
-			`Rome DEBUG_SERVER_PATH detected: ${process.env.DEBUG_SERVER_PATH}`,
+			`Biome DEBUG_SERVER_PATH detected: ${process.env.DEBUG_SERVER_PATH}`,
 		);
 		return process.env.DEBUG_SERVER_PATH;
 	}
@@ -215,7 +215,7 @@ async function getWorkspaceRelativePath(path: string) {
 	}
 }
 
-// Tries to resolve a path to `@rometools/cli-*` binary package from the root of the workspace
+// Tries to resolve a path to `@biomejs/cli-*` binary package from the root of the workspace
 async function getWorkspaceDependency(
 	outputChannel: OutputChannel,
 ): Promise<string | undefined> {
@@ -225,7 +225,7 @@ async function getWorkspaceDependency(
 	const binaryName =
 		process.platform === "win32"
 			? `${packageName}/biome.exe`
-			: `${packageName}/rome`;
+			: `${packageName}/biome`;
 
 	for (const workspaceFolder of workspace.workspaceFolders) {
 		try {
@@ -257,7 +257,7 @@ async function getWorkspaceDependency(
 				const minorVal = parseInt(minor);
 				if (minorVal < 9) {
 					outputChannel.appendLine(
-						`Ignoring incompatible Rome version "${version}"`,
+						`Ignoring incompatible Biome version "${version}"`,
 					);
 					continue;
 				}
@@ -270,7 +270,7 @@ async function getWorkspaceDependency(
 	return undefined;
 }
 
-// Returns the path of the binary distribution of Rome included in the bundle of the extension
+// Returns the path of the binary distribution of Biome included in the bundle of the extension
 async function getBundledBinary(
 	context: ExtensionContext,
 	outputChannel: OutputChannel,
@@ -284,7 +284,7 @@ async function getBundledBinary(
 	}
 
 	const binaryExt = triplet.includes("windows") ? ".exe" : "";
-	const binaryName = `rome${binaryExt}`;
+	const binaryName = `biome${binaryExt}`;
 
 	const bundlePath = Uri.joinPath(context.extensionUri, "server", binaryName);
 	const bundleExists = await fileExists(bundlePath);
@@ -405,7 +405,7 @@ async function getSocket(
 function wrapConnectionError(err: Error, path: string): Error {
 	return Object.assign(
 		new Error(
-			`Could not connect to the Rome server at "${path}": ${err.message}`,
+			`Could not connect to the Biome server at "${path}": ${err.message}`,
 		),
 		{ name: err.name, stack: err.stack },
 	);

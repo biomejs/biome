@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noWith (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow `with` statements in non-strict contexts.
 

@@ -13,7 +13,7 @@ fn command_name() -> String {
     current_exe()
         .ok()
         .and_then(|path| Some(path.file_name()?.to_str()?.to_string()))
-        .unwrap_or_else(|| String::from("rome"))
+        .unwrap_or_else(|| String::from("biome"))
 }
 
 /// A diagnostic that is emitted when running rome via CLI.

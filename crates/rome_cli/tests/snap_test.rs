@@ -141,7 +141,7 @@ fn redact_snapshot(input: &str) -> Cow<'_, str> {
         .and_then(|path| Some(path.file_name()?.to_str()?.to_string()));
 
     if let Some(current_exe) = current_exe {
-        replace(&mut output, &current_exe, "rome");
+        replace(&mut output, &current_exe, "biome");
     }
 
     output = replace_temp_dir(output);

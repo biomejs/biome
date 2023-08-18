@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noPositiveTabindex (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevent the usage of positive integers on `tabIndex` property
 

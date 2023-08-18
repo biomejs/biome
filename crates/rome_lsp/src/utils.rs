@@ -237,7 +237,7 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
         span,
         Some(severity),
         code,
-        Some("rome".into()),
+        Some("biome".into()),
         message,
         related_information,
         tags,

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noCommentText (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevent comments from being inserted as text nodes
 

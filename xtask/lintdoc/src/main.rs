@@ -150,7 +150,7 @@ fn main() -> Result<()> {
 
     let number_of_rules_buffer = format!(
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->\n \
-    <p>Rome's linter has a total of <strong><a href='/lint/rules'>{} rules</a></strong><p>",
+    <p>Biome's linter has a total of <strong><a href='/lint/rules'>{} rules</a></strong><p>",
         number_or_rules
     );
     fs2::write(root.join("index.mdx"), index)?;
@@ -225,7 +225,7 @@ fn generate_rule(
     writeln!(content)?;
 
     if recommended {
-        writeln!(content, "> This rule is recommended by Rome.")?;
+        writeln!(content, "> This rule is recommended by Biome.")?;
         writeln!(content)?;
     }
 

@@ -11,7 +11,7 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   
   i Type the following command for more information
   
-  $ rome format --help
+  $ biome format --help
   
 
 

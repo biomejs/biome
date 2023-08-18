@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useKeyWithMouseEvents (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce `onMouseOver` / `onMouseOut` are accompanied by `onFocus` / `onBlur`.
 

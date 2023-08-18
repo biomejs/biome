@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noRenderReturnValue (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevent the usage of the return value of `React.render`.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDoubleEquals (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require the use of `===` and `!==`
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDangerouslySetInnerHtmlWithChildren (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Report when a DOM element or a component uses both `children` and `dangerouslySetInnerHTML` prop.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noNoninteractiveElementToInteractiveRole (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
 

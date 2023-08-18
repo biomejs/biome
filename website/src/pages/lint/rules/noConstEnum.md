@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noConstEnum (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow TypeScript `const enum`
 

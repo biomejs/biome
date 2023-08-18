@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noRedundantAlt (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
 

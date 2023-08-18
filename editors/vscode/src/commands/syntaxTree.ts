@@ -17,7 +17,7 @@ import {
 } from "vscode";
 import { SyntaxTreeParams, syntaxTreeRequest } from "../lsp_requests";
 import { Command, Session } from "../session";
-import { isRomeEditor } from "../utils";
+import { isBiomeEditor } from "../utils";
 import { SyntaxTreeDocument } from "./syntaxTreeDocument";
 
 type FilePath = string;
@@ -26,7 +26,7 @@ class SyntaxTreeProvider
 	implements TextDocumentContentProvider, DocumentLinkProvider, Disposable
 {
 	readonly session: Session;
-	static scheme = "rome";
+	static scheme = "biome";
 	public readonly uri: Uri = Uri.parse(
 		`${SyntaxTreeProvider.scheme}:syntax_tree/tree.rast`,
 	);
@@ -63,7 +63,7 @@ class SyntaxTreeProvider
 	}
 
 	private onDidChangeActiveTextEditor(editor: TextEditor | undefined) {
-		if (editor && isRomeEditor(editor)) {
+		if (editor && isBiomeEditor(editor)) {
 			this.eventEmitter.fire(this.uri);
 		}
 	}

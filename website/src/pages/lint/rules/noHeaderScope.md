@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noHeaderScope (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 The scope prop should be used only on `<th>` elements.
 

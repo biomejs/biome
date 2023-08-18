@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useButtonType (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforces the usage of the attribute `type` for the element `button`
 

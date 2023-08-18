@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noExplicitAny (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow the `any` type usage.
 
