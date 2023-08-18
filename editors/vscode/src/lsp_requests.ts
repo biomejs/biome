@@ -24,4 +24,4 @@ export const updateSettingsRequest = new RequestType<
 	UpdateSettingsParams,
 	string,
 	void
->("rome/update_settings");
+>("biome/update_settings");

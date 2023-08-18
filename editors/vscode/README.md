@@ -1,6 +1,6 @@
-# Rome VS Code Extension
+# Biome VS Code Extension
 
-[Rome](https://biome.tools/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Rome to your editor so that you can:
+[Biome](https://biome.tools/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Biome to your editor so that you can:
 
 - Format files *on save* or when issuing the *Format Document* command
 - See lints while you type and apply code fixes
@@ -17,14 +17,14 @@ You can install the code extension by heading to the extension's [Visual Studio 
 
 ### Default Formatter
 
-Configure Rome as the default formatter for supported files to ensure that VS Code uses Rome over other formatters that you may have installed. You can do so by opening a JavaScript or TypeScript and then:
+Configure Biome as the default formatter for supported files to ensure that VS Code uses Biome over other formatters that you may have installed. You can do so by opening a JavaScript or TypeScript and then:
 
 - Open the Command Palette (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> or View → Command Palette)
 - Select _Format Document With…_
 - Select _Configure Default Formatter…_
-- Select Rome
+- Select Biome
 
-You can also enable Rome for specific languages only:
+You can also enable Biome for specific languages only:
 
 - [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
 - And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
@@ -38,19 +38,19 @@ You can also enable Rome for specific languages only:
 }
 ```
 
-This configuration sets Rome as the default formatter for JavaScript files. All other files will be formatted using `<other formatter>`
+This configuration sets Biome as the default formatter for JavaScript files. All other files will be formatted using `<other formatter>`
 
 ## Configuration Resolution
 
-The extension automatically loads the `rome.json` file from the workspace’s root directory.
+The extension automatically loads the `Biome.json` file from the workspace’s root directory.
 
-## Rome Resolution
+## Biome Resolution
 
-The extension tries to use Rome from your project's local dependencies (`node_modules/rome`). We recommend adding Rome as a project dependency to ensure that NPM scripts and the extension use the same Rome version.
+The extension tries to use Biome from your project's local dependencies (`node_modules/Biome`). We recommend adding Biome as a project dependency to ensure that NPM scripts and the extension use the same Biome version.
 
-You can also explicitly specify the `rome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
+You can also explicitly specify the `Biome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
 
-If the project has no dependency on Rome and no explicit path is configured, the extension uses the Rome version included in its bundle.
+If the project has no dependency on Biome and no explicit path is configured, the extension uses the Biome version included in its bundle.
 
 ## Usage
 
@@ -62,22 +62,22 @@ To format a text range, select the text you want to format, open the _Command Pa
 
 ### Format on save
 
-Rome respects VS Code's _Format on Save_ setting. To enable format on save, open the settings (_File_ -> _Preferences_ -> _Settings_), search for `editor.formatOnSave`, and enable the option.
+Biome respects VS Code's _Format on Save_ setting. To enable format on save, open the settings (_File_ -> _Preferences_ -> _Settings_), search for `editor.formatOnSave`, and enable the option.
 
 ### Fix on save
 
-Rome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add `"editor.codeActionsOnSave": { "quickfix.rome": true }` in vscode settings.json.
+Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add `"editor.codeActionsOnSave": { "quickfix.Biome": true }` in vscode settings.json.
 
 ### Imports Sorting [Experimental]
 
-The Rome VS Code extension has experimental support for imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+The Biome VS Code extension has experimental support for imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 
 ```json
 {
 	"editor.codeActionsOnSave":{
-		"source.organizeImports.rome": true
+		"source.organizeImports.Biome": true
 	}
 }
 ```
@@ -86,15 +86,15 @@ You can add the following to your editor configuration if you want the action to
 
 ### `biome.lspBin`
 
-The `biome.lspBin` option overrides the Rome binary used by the extension. The workspace folder is used as the base path if the path is relative.
+The `biome.lspBin` option overrides the Biome binary used by the extension. The workspace folder is used as the base path if the path is relative.
 
 ### `biome.rename`
 
-Enables Rome to handle renames in the workspace (experimental).
+Enables Biome to handle renames in the workspace (experimental).
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `rome.json` file. Requires Rome 12 or newer.
+Disables formatting, linting, and syntax errors for projects without a `Biome.json` file. Requires Biome 12 or newer.
 Enabled by default.
 
 ## Versioning

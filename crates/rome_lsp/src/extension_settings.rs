@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
 use tracing::trace;
 
-pub(crate) const CONFIGURATION_SECTION: &str = "rome";
+pub(crate) const CONFIGURATION_SECTION: &str = "biome";
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]

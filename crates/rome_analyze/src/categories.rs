@@ -76,30 +76,30 @@ impl ActionCategory {
     /// Returns the representation of this [ActionCategory] as a `CodeActionKind` string
     pub fn to_str(&self) -> Cow<'static, str> {
         match self {
-            ActionCategory::QuickFix => Cow::Borrowed("quickfix.rome"),
+            ActionCategory::QuickFix => Cow::Borrowed("quickfix.biome"),
 
-            ActionCategory::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.rome"),
+            ActionCategory::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
             ActionCategory::Refactor(RefactorKind::Extract) => {
-                Cow::Borrowed("refactor.extract.rome")
+                Cow::Borrowed("refactor.extract.biome")
             }
-            ActionCategory::Refactor(RefactorKind::Inline) => Cow::Borrowed("refactor.inline.rome"),
+            ActionCategory::Refactor(RefactorKind::Inline) => Cow::Borrowed("refactor.inline.biome"),
             ActionCategory::Refactor(RefactorKind::Rewrite) => {
-                Cow::Borrowed("refactor.rewrite.rome")
+                Cow::Borrowed("refactor.rewrite.biome")
             }
             ActionCategory::Refactor(RefactorKind::Other(tag)) => {
-                Cow::Owned(format!("refactor.{tag}.rome"))
+                Cow::Owned(format!("refactor.{tag}.biome"))
             }
 
-            ActionCategory::Source(SourceActionKind::None) => Cow::Borrowed("source.rome"),
-            ActionCategory::Source(SourceActionKind::FixAll) => Cow::Borrowed("source.fixAll.rome"),
+            ActionCategory::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
+            ActionCategory::Source(SourceActionKind::FixAll) => Cow::Borrowed("source.fixAll.biome"),
             ActionCategory::Source(SourceActionKind::OrganizeImports) => {
-                Cow::Borrowed("source.organizeImports.rome")
+                Cow::Borrowed("source.organizeImports.biome")
             }
             ActionCategory::Source(SourceActionKind::Other(tag)) => {
-                Cow::Owned(format!("source.{tag}.rome"))
+                Cow::Owned(format!("source.{tag}.biome"))
             }
 
-            ActionCategory::Other(tag) => Cow::Owned(format!("{tag}.rome")),
+            ActionCategory::Other(tag) => Cow::Owned(format!("{tag}.biome")),
         }
     }
 }

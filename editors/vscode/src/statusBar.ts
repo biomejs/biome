@@ -71,20 +71,20 @@ export class StatusBar {
 		}
 
 		this.statusBarItem.text =
-			`$(${status}) Rome ${this.serverVersion}`.trimEnd();
+			`$(${status}) Biome ${this.serverVersion}`.trimEnd();
 
 		switch (status) {
 			case Status.Pending: {
-				this.statusBarItem.tooltip = "Rome is initializing ...";
+				this.statusBarItem.tooltip = "Biome is initializing ...";
 				break;
 			}
 			case Status.Ready: {
-				this.statusBarItem.tooltip = "Rome is active";
+				this.statusBarItem.tooltip = "Biome is active";
 				break;
 			}
 			case Status.Inactive: {
 				this.statusBarItem.tooltip =
-					"The current file is not supported or ignored by Rome";
+					"The current file is not supported or ignored by Biome";
 				break;
 			}
 			// @ts-expect-error Reserved for future use
@@ -93,7 +93,7 @@ export class StatusBar {
 				break;
 			}
 			case Status.Error: {
-				this.statusBarItem.tooltip = "Rome encountered a fatal error";
+				this.statusBarItem.tooltip = "Biome encountered a fatal error";
 				break;
 			}
 		}

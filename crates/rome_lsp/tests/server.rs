@@ -587,7 +587,7 @@ async fn pull_diagnostics() -> Result<()> {
                     code_description: Some(CodeDescription {
                         href: Url::parse("https://biomejs.dev/lint/rules/noDoubleEquals").unwrap()
                     }),
-                    source: Some(String::from("rome")),
+                    source: Some(String::from("biome")),
                     message: String::from(
                         "Use === instead of ==.\n== is only allowed when comparing against `null`",
                     ),
@@ -636,7 +636,7 @@ fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
             "lint/suspicious/noCompareNegZero",
         ))),
         code_description: None,
-        source: Some(String::from("rome")),
+        source: Some(String::from("biome")),
         message: String::from("Do not use the === operator to compare against -0."),
         related_information: None,
         tags: None,
@@ -824,7 +824,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from("deserialize",))),
                     code_description: None,
-                    source: Some(String::from("rome")),
+                    source: Some(String::from("biome")),
                     message: String::from("Found an unknown value `magic`.",),
                     related_information: None,
                     tags: None,
@@ -1114,7 +1114,7 @@ async fn pull_fix_all() -> Result<()> {
 
     let expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Fix all auto-fixable issues"),
-        kind: Some(lsp::CodeActionKind::new("source.fixAll.rome")),
+        kind: Some(lsp::CodeActionKind::new("source.fixAll.biome")),
         diagnostics: Some(vec![
             fixable_diagnostic(0)?,
             fixable_diagnostic(1)?,

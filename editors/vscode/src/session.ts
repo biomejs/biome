@@ -1,7 +1,7 @@
 import { Disposable, ExtensionContext, commands, window } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { Commands } from "./commands";
-import { RomeEditor, isRomeEditor } from "./utils";
+import { BiomeEditor, isBiomeEditor } from "./utils";
 
 export type Command = (...args: unknown[]) => unknown;
 
@@ -26,8 +26,8 @@ export class Session {
 		return this.context.subscriptions;
 	}
 
-	get editor(): RomeEditor | undefined {
+	get editor(): BiomeEditor | undefined {
 		const editor = window.activeTextEditor;
-		return editor && isRomeEditor(editor) ? editor : undefined;
+		return editor && isBiomeEditor(editor) ? editor : undefined;
 	}
 }
