@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noSvgWithoutTitle (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforces the usage of the `title` element for the `svg` element.
 

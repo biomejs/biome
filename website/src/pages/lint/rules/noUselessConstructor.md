@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUselessConstructor (since v12.1.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow unnecessary constructors.
 

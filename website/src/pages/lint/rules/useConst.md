@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useConst (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require `const` declarations for variables that are never reassigned after declared.
 

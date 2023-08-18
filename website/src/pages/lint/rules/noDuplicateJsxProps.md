@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDuplicateJsxProps (since v12.1.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents JSX properties to be assigned multiple times.
 

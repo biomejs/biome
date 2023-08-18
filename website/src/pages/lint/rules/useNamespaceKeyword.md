@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useNamespaceKeyword (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require using the `namespace` keyword over the `module` keyword to declare TypeScript namespaces.
 

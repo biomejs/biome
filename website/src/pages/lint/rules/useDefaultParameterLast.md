@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useDefaultParameterLast (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce default function parameters and optional function parameters to be last.
 

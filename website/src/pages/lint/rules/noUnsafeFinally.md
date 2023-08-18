@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUnsafeFinally (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow control flow statements in finally blocks.
 

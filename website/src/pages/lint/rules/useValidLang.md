@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useValidLang (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
 

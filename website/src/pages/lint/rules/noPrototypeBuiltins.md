@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noPrototypeBuiltins (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow direct use of `Object.prototype` builtins.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noBlankTarget (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow `target="_blank"` attribute without `rel="noreferrer"`
 

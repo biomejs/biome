@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noRedundantUseStrict (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents from having redundant `"use strict"`.
 

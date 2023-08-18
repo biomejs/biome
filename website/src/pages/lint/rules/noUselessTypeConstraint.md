@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noUselessTypeConstraint (since v13.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow using `any` or `unknown` as type constraint.
 

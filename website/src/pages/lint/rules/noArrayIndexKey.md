@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noArrayIndexKey (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Discourage the usage of Array index in keys.
 

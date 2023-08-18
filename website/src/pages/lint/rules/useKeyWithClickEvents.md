@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useKeyWithClickEvents (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noSelfCompare (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow comparisons where both sides are exactly the same.
 

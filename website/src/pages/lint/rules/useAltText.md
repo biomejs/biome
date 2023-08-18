@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useAltText (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
 

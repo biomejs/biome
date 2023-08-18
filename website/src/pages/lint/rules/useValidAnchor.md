@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useValidAnchor (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that all anchors are valid, and they are navigable elements.
 

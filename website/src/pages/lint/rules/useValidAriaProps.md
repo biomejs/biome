@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useValidAriaProps (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Ensures that ARIA properties `aria-*` are all valid.
 

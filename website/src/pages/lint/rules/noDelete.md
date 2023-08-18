@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDelete (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow the use of the `delete` operator.
 

@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useAriaPropsForRole (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 

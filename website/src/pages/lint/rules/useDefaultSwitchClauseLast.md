@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useDefaultSwitchClauseLast (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce default clauses in switch statements to be last
 

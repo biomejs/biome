@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDistractingElements (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforces that no distracting elements are used.
 

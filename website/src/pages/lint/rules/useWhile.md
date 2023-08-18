@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useWhile (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce the use of `while` loops instead of `for` loops when the
 initializer and update expressions are not needed

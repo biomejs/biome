@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noConstAssign (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents from having `const` variables being re-assigned.
 

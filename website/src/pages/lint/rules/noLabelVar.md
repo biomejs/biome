@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noLabelVar (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow labels that share a name with a variable
 

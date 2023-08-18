@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noConfusingLabels (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow labeled statements that are not loops.
 

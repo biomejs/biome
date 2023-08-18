@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noAutofocus (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce that autoFocus prop is not used on elements.
 

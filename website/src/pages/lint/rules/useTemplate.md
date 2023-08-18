@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useTemplate (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Template literals are preferred over string concatenation.
 

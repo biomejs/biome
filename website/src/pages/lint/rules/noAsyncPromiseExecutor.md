@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noAsyncPromiseExecutor (since v0.7.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallows using an async function as a Promise executor.
 

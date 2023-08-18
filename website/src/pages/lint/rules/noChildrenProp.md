@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noChildrenProp (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevent passing of **children** as props.
 

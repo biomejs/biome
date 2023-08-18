@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDuplicateObjectKeys (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents object literals having more than one property declaration for the same name.
 If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake.

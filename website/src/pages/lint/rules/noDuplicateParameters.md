@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDuplicateParameters (since v0.9.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow duplicate function parameter name.
 

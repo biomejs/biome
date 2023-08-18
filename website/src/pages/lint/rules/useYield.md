@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useYield (since v12.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Require generator functions to contain `yield`.
 

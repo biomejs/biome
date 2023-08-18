@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noExtraNonNullAssertion (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevents the wrong usage of the non-null assertion operator (`!`) in TypeScript files.
 

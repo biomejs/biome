@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noSetterReturn (since v11.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Disallow returning a value from a setter
 

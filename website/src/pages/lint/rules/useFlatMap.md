@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useFlatMap (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Promotes the use of `.flatMap()` when `map().flat()` are used together.
 

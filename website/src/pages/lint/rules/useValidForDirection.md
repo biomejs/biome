@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # useValidForDirection (since v10.0.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Enforce "for" loop update clause moving the counter in the right direction.
 

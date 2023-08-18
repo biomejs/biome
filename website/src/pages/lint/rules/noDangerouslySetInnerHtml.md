@@ -5,7 +5,7 @@ parent: lint/rules/index
 
 # noDangerouslySetInnerHtml (since v0.10.0)
 
-> This rule is recommended by Rome.
+> This rule is recommended by Biome.
 
 Prevent the usage of dangerous JSX props
 
