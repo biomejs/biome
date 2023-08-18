@@ -202,12 +202,12 @@ jobs:
         run: npx vsce publish --pre-release --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease == 'true'
         env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
       - name: Publish extension to Microsoft Marketplace
         run: npx vsce publish --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease != 'true'
         env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
       - name: Publish extension to Open VSX (pre-release)
         run: npx ovsx publish --pre-release --packagePath biome_lsp-*.vsix
