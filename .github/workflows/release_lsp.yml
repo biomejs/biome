@@ -187,6 +187,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment: marketplace
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
 
