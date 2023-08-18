@@ -31,7 +31,7 @@ jobs:
         run: echo "nightly=true" >> $GITHUB_ENV
 
       - name: Check version changes
-        uses: EndBug/version-check@v1
+        uses: EndBug/version-check@v2
         if: env.nightly != 'true'
         id: version
         with:
@@ -39,7 +39,7 @@ jobs:
           file-name: editors/vscode/package.json
 
       - name: Check Biome version changes
-        uses: EndBug/version-check@v1
+        uses: EndBug/version-check@v2
         if: env.nightly != 'true'
         id: biome_version
         with:
@@ -157,18 +157,21 @@ jobs:
         run: |
           node ./scripts/update-nightly-version.mjs >> $GITHUB_ENV
 
+      - name: Install VCSE
+        run: npm i -g @vscode/vsce
+
       - name: Package extension
         run: |
           npm ci
           npm run compile
-          npx vsce package -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+          vsce package -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease != 'true'
       - name: Package extension (pre-release)
         run: |
           npm ci
           npm run compile
-          npx vsce package --pre-release -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
+          vsce package --pre-release -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease == 'true'
 
@@ -198,13 +201,16 @@ jobs:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install VCSE
+        run: npm i -g @vscode/vsce
+
       - name: Publish extension to Microsoft Marketplace (pre-release)
-        run: npx vsce publish --pre-release --packagePath biome_lsp-*.vsix
+        run: vsce publish --pre-release --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease == 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Publish extension to Microsoft Marketplace
-        run: npx vsce publish --packagePath biome_lsp-*.vsix
+        run: vsce publish --packagePath biome_lsp-*.vsix
         if: needs.build.outputs.prerelease != 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
