@@ -216,15 +216,11 @@ jobs:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish extension to Open VSX (pre-release)
-        run: npx ovsx publish --pre-release --packagePath biome_lsp-*.vsix
+        run: npx ovsx publish --pre-release --packagePath -p ${{ secrets.OVSX_PAT }} biome_lsp-*.vsix
         if: needs.build.outputs.prerelease == 'true'
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
       - name: Publish extension to Open VSX
-        run: npx ovsx publish --packagePath biome_lsp-*.vsix
+        run: npx ovsx publish --packagePath -p ${{ secrets.OVSX_PAT }} biome_lsp-*.vsix
         if: needs.build.outputs.prerelease != 'true'
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
       - name: Create GitHub release and tag
         uses: softprops/action-gh-release@v1
