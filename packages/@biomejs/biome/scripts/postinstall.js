@@ -22,7 +22,7 @@ if (binName) {
 		binPath = require.resolve(binName);
 	} catch {
 		console.warn(
-			`The Biome CLI postinstall script failed to resolve the binary file "${binName}". Running Rome from the npm package will probably not work correctly.`,
+			`The Biome CLI postinstall script failed to resolve the binary file "${binName}". Running Biome from the npm package will probably not work correctly.`,
 		);
 	}
 } else {

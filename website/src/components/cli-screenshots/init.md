@@ -1,6 +1,6 @@
 <pre class="language-text collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> biome init
 
-<strong> Welcome to Rome! Let&apos;s get you started... </strong>
+<strong> Welcome to Biome! Let&apos;s get you started... </strong>
 
  <strong>Summary</strong> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

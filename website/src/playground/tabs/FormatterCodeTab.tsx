@@ -60,7 +60,7 @@ export default function FormatterCodeTab({
 				<CodeMirror
 					value={rome}
 					extensions={extensions}
-					placeholder="Rome Output"
+					placeholder="Biome Output"
 					readOnly={true}
 				/>
 			</Collapsible>

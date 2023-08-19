@@ -1,4 +1,11 @@
-# Rome changelog
+# Biome changelog
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Due to the nature of Biome as a toolchain,
+it can be unclear what changes are considered major, minor, or patch.
+Read our [guidelines](https://biomejs.dev/internals/versioning) to categorize a change.
+
+New entries must be placed in a section entitled `Unreleased`.
 
 ## [Unreleased]
 

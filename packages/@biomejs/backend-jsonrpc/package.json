@@ -14,9 +14,9 @@
     "url": "https://github.com/biomejs/biome.git",
     "directory": "npm/backend-jsonrpc"
   },
-  "author": "Rome Tools Developers and Contributors",
+  "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
-  "description": "Bindings to the JSON-RPC Workspace API of the Rome daemon",
+  "description": "Bindings to the JSON-RPC Workspace API of the Biome daemon",
   "keywords": [
     "JavaScript",
     "TypeScript",

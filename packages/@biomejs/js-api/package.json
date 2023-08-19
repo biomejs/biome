@@ -1,7 +1,7 @@
 {
   "name": "@biomejs/js-api",
   "version": "0.3.0",
-  "description": "JavaScript APIs for the Rome package",
+  "description": "JavaScript APIs for the Biome package",
   "scripts": {
     "tsc": "tsc --noEmit",
     "format": "cargo biome-cli-dev format ./ --write",
@@ -38,7 +38,7 @@
     "url": "https://github.com/biomejs/biome.git",
     "directory": "packages/@biomejs/js-api"
   },
-  "author": "Rome Tools Developers and Contributors",
+  "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
   "devDependencies": {
     "typescript": "^4.8.2",
