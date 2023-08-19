@@ -135,6 +135,7 @@ impl AnyJsBindingDeclaration {
                 AnyJsBindingDeclaration::TsModuleDeclaration(_),
                 AnyJsBindingDeclaration::JsClassDeclaration(_)
                 | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                 | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
                 | AnyJsBindingDeclaration::TsEnumDeclaration(_)
                 | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
