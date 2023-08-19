@@ -14,14 +14,14 @@
 
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
 [discord-url]: https://discord.gg/BypW39g6Yc
-[ci-badge]: https://badgen.net/github/checks/biomejs/biome?label=CI
+[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=green&label=%40biomejs%2Fbiome
 [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
 [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=green
 [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
-[open-vsx-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
+[open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
 
 </div>
@@ -52,7 +52,7 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 
 ## Technical documentation
 
-Browse Biome's internal [Rust API Documentation] if you're interested to learn more about how Rome works.
+Browse Biome's internal [Rust API Documentation] if you're interested to learn more about how Biome works.
 
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/
