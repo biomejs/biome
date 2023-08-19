@@ -1,14 +1,5 @@
 MIT License
 
-Biome is a fork of Rome Tools (https://github.com/rome/tools).
-Rome Tools is licensed under the MIT License.
-The copyright holder of Rome Tools is Rome Tools, Inc. and its affiliates.
-
-The Biome parser and lexer are forks of the RSLint parser and lexer
-(https://github.com/rslint/rslint).
-RSLint is licensed under the MIT License.
-The copyright holder of RSLint is Riccardo D'Ambrosio.
-
 Copyright (c) 2023 Biome Developers and Contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

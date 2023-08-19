@@ -1,4 +1,6 @@
-This crate contains derivative work from the https://github.com/prettier/prettier project. Notably we have either taken heavy inspiration or copied the semantics and heuristics for code formatting JavaScript. This has been done to provide ecosystem compatibility for what is currently a community standard. Below you will find the LICENSE from the Prettier project:
+This crate contains derivative work from the https://github.com/prettier/prettier project.
+Notably we have either taken heavy inspiration or copied the semantics and heuristics for code formatting JavaScript.
+This has been done to provide ecosystem compatibility for what is currently a community standard. Below you will find the LICENSE from the Prettier project:
 
 ------------------------------------------------------
 
