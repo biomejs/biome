@@ -13,11 +13,11 @@ members = [
 resolver = "2"
 
 [workspace.package]
-authors    = ["Rome Tools Developers and Contributors"]
+authors    = ["Biome Developers and Contributors"]
 edition    = "2021"
-homepage   = "https://rome.tools"
+homepage   = "https://biomejs.dev/"
 license    = "MIT"
-repository = "https://github.com/rome/tools"
+repository = "https://github.com/biomejs/biome"
 
 [profile.release-with-debug]
 debug    = true

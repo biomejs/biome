@@ -104,12 +104,12 @@
 						"null"
 					],
 					"default": null,
-					"markdownDescription": "Enable/Disable Rome handling renames in the workspace. (Experimental)"
+					"markdownDescription": "Enable/Disable Biome handling renames in the workspace. (Experimental)"
 				},
 				"biome.requireConfiguration": {
 					"type": "boolean",
 					"default": true,
-					"markdownDescription": "Require a Rome configuration file to enable syntax errors, formatting and linting. Requires Rome 12 or newer."
+					"markdownDescription": "Require a Biome configuration file to enable syntax errors, formatting and linting."
 				}
 			}
 		},

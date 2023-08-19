@@ -7,12 +7,12 @@ alias r := ready
 alias l := lint
 
 
-# Installs the tools needed to develop with Rome
+# Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
 	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces
 
-# Upgrades the tools needed to develop with Rome
+# Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
 	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces --force
