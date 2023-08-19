@@ -1,6 +1,6 @@
 # rome-fuzz
 
-Fuzzers and associated utilities for automatic testing of Rome.
+Fuzzers and associated utilities for automatic testing of Biome.
 
 ## Usage
 
@@ -70,8 +70,8 @@ added to the corpus.
 
 ## Each fuzzer harness in detail
 
-Each fuzzer harness is designed to test different aspects of Rome.
-Since Rome's primary function is parsing, formatting, and linting, we can use fuzzing not only to
+Each fuzzer harness is designed to test different aspects of Biome.
+Since Biome's primary function is parsing, formatting, and linting, we can use fuzzing not only to
 detect crashes or panics, but also to detect violations of guarantees of the crate.
 This concept is used extensively throughout the fuzzers.
 

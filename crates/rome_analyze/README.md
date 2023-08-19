@@ -1,4 +1,4 @@
-# Rome Analyze
+# Biome Analyze
 
 ## This entire crate is a WIP with a clunky and unstable API. 
 

@@ -1,8 +1,8 @@
 # Overview
 
-Rome is a toolchain where users can use only Rome to manage their code. On the other hand, users should be free to use only specific tools in their workflow, without too much hassle.
+Biome is a toolchain where users can use only Biome to manage their code. On the other hand, users should be free to use only specific tools in their workflow, without too much hassle.
 
-While the latter is desirable, using Rome as all-in-one tool is preferred on the long run because it creates a homogeneous user experience in terms of:
+While the latter is desirable, using Biome as all-in-one tool is preferred on the long run because it creates a homogeneous user experience in terms of:
 - performance
 - error messaging
 - caching
@@ -21,9 +21,9 @@ From now on the document will use some terms, here's their context inside the do
 - **Runtime Workspace**: it's the shared code used by the different Frontends;
 
 
-## Use case for Rome
+## Use case for Biome
 
-The first and foremost important tool that users should access to is Rome's compiler. The compiler,
+The first and foremost important tool that users should access to is Biome's compiler. The compiler,
 as this time, it's not ready yet - at least not all the features we intend to implement,
 but this was a design decision when it was first created.
 
@@ -33,10 +33,10 @@ Exposing the compiler should allow a user to do multiple things (not limited to 
 - bundle some code
 - generate documentation
 
-The end goal of how Rome can expose its compiler is via plugins. **Plugins are a non-goal for this
+The end goal of how Biome can expose its compiler is via plugins. **Plugins are a non-goal for this
 RFC**, but this first proposal should start taking them into consideration.
 
-As for today, Rome can expose a formatter and a linter (analyzer).
+As for today, Biome can expose a formatter and a linter (analyzer).
 
 ## The aim of the APIs
 
@@ -137,23 +137,23 @@ cat input.css | postcss -u autoprefixer > output.css
 
 Even though the approach is slightly different from `eslint`, the result is the same.
 
-# Rome's APIs
+# Biome's APIs
 
-Here's a list possible proposals of how Rome could be used.
+Here's a list possible proposals of how Biome could be used.
 
-There might be various cases, but first we need to understand how Rome is designed, and make proposal
+There might be various cases, but first we need to understand how Biome is designed, and make proposal
 based its design **AND** end-goal.
 
 ![Runtime design](./Runtime%20design.png)
 
 
-1. Rome is configuration aware, meaning that when communicating with Rust Workspace,
+1. Biome is configuration aware, meaning that when communicating with Rust Workspace,
    all configuration defaults are automatically applied. If the APIs are run
-   inside a Rome project, the configuration is automatically picked up from the `rome.json` file.
-2. Rome's APIs should reflect the CLIs commands and arguments. What it's possible to do
+   inside a Biome project, the configuration is automatically picked up from the `rome.json` file.
+2. Biome's APIs should reflect the CLIs commands and arguments. What it's possible to do
    via CLI, should be done also via APIs, but not vice-versa. This constraint would allow the team
    to first design and test the feature natively, and expose it once it's stable.
-3. Rome should be able, in the future, to expose plugins or a way to users to use its compiler capabilities
+3. Biome should be able, in the future, to expose plugins or a way to users to use its compiler capabilities
 
 > Point `2.` might not be true for ALL cases. For example, as for today, we can't format by
 > range via CLI. Maybe this should be more of a guideline, and not a constraint.
@@ -194,10 +194,10 @@ const diagnostics = rome.checkContent(content);  // not part of this paragraph
 ```
 
 The first parameter of the instance should be a personalized configuration. The configuration
-passed to the instance **will override** Rome's defaults  **_BUT_** not the options inside a possible
+passed to the instance **will override** Biome's defaults  **_BUT_** not the options inside a possible
 `rome.json` file.
 
-This is an import point, because we might have cases where a user is using Rome for linting/formatting
+This is an import point, because we might have cases where a user is using Biome for linting/formatting
 of the project, but this project is actually using the runtime API to do some ad-hoc work. For example
 scripts, some generated code, etc.
 
@@ -304,7 +304,7 @@ Which will translate to
 echo "function f()  { return   {}}" | rome format --file-type=js
 ```
 
-`filePath` is required to tell Rome how it should parse the file.
+`filePath` is required to tell Biome how it should parse the file.
 
 ### Format range
 
@@ -325,7 +325,7 @@ console.log(result.errors); // possible parse errors
 
 
 As you noticed each call accepts an object as second argument. This object could contain a
-`debug` property, which allows us to return the IR emitted by Rome.
+`debug` property, which allows us to return the IR emitted by Biome.
 
 ```js
 import { Rome } from "rome";
@@ -334,7 +334,7 @@ const rome = new Rome();
 const result = rome.formatFiles(["./path/to/file.js"], { debug: true });
 console.log(result.code); // formatted content
 console.log(result.errors); // possible parse errors
-console.log(result.ir); // the IR emitted by Rome
+console.log(result.ir); // the IR emitted by Biome
 const content = "function f()  { return   {}}";
 const result2 = rome.formatContent(content, { filePath: "example.js", range: [7, 10], debug: true });
 console.log(result2.ir); // the IR emitted by the call formatContent
@@ -342,7 +342,7 @@ console.log(result2.ir); // the IR emitted by the call formatContent
 
 ## Linter
 
-> **Note**: nowadays, Rome doesn't have a CLI command to _only lint_ files. We have the `check`
+> **Note**: nowadays, Biome doesn't have a CLI command to _only lint_ files. We have the `check`
 > command that does that *now*, but the command is designed to run multiple checks.
 
 It's also possible to run the linter and retrieve possible diagnostics
@@ -411,7 +411,7 @@ maybe a `sub_code` e.g. `ConfigurationError::ConfigAlreadyExists`,
 > Why not expose also functions like `format`, `lint`, etc.?
 
 While this can be an option, and it could be done, I think they don't exactly fit in the grand
-scheme of what Rome should be.
+scheme of what Biome should be.
 
 Of course there are exceptions, for example for a future testing framework:
 

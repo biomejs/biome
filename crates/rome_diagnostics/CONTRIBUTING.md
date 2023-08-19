@@ -1,21 +1,21 @@
 # Writing Diagnostics
 
 The `rome_diagnostics` crate implements "Diagnostics", the generic concept of
-how the various errors and issues that can be raised in the Rome codebase,
+how the various errors and issues that can be raised in the Biome codebase,
 and displayed to the final user. This guide is aimed at
-contributors to the Rome codebase to help writing diagnostics, both at the
+contributors to the Biome codebase to help writing diagnostics, both at the
 technical level, and as general best practices to make diagnostics easier to
 understand for the final user.
 
 ## What is a Diagnostic
 
-Diagnostics are at the core of the experience of the Rome toolchain for the
+Diagnostics are at the core of the experience of the Biome toolchain for the
 users, and providing high quality diagnostics is crucial to making the usage of
-Rome as frictionless as possible even when errors happen. What follows is a
+Biome as frictionless as possible even when errors happen. What follows is a
 list of best practice for writing good diagnostics:
 
-- The Diagnostic should follow the [Technical Principles](https://rome.tools/#technical)
-of the Rome project
+- The Diagnostic should follow the [Technical Principles](https://biomejs.dev/#technical)
+of the Biome project
 - A diagnostic should not simply state that something went wrong, it should
 	explain why it went wrong. Add explanations in log advices, and show hyperlinks
 	to relevant documentation pages in case the user wants to know more.
@@ -62,7 +62,7 @@ for instance by passing a `--verbose` flag to the CLI). Verbose advices are
 printed in a separate section below the main advices and can be used to provide
 further information about a given diagnostic (for instance a fixable linter
 diagnostic may print a verbose advice instructing the user to run
-`rome check --apply` to automatically apply the fix).
+`biome check --apply` to automatically apply the fix).
 - A `location` describing where the error happened. It can be a path to a file
 on the file system, a command line argument, or an arbitrary memory buffer. It may
 optionally specify a specific range within the text content of this resource,
@@ -71,7 +71,7 @@ code frames in the diagnostic. Conceptually the `location` points to a
 "resource" this error originated from.
 - `tags` conveying additional informations about the diagnostic: if the
 diagnostic has information on how it can be fixed, if it resulted from an
-internal error in Rome and was not directly caused by the user, if it is being
+internal error in Biome and was not directly caused by the user, if it is being
 emitted to warn the user about unused or deprecated code.
 - An optional `source`, another diagnostic that details the low-level reason
 why this diagnostic was emitted: for instance a diagnostic reporting a failed
@@ -135,4 +135,3 @@ allocates).
 The category may also require some special care if you're declaring a new one,
 since all diagnostic categories have to be statically registered you'll need to
 add it to `crates/rome_diagnostics_categories/src/categories.rs`
-
