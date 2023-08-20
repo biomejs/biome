@@ -989,6 +989,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGetterReturn": {
+					"description": "Enforces the presence of non-empty return statements in getters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [
