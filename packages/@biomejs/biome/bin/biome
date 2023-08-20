@@ -3,16 +3,16 @@ const { platform, arch, env, version, release } = process;
 
 const PLATFORMS = {
 	win32: {
-		x64: "@biomejs/cli-win32-x64/rome.exe",
-		arm64: "@biomejs/cli-win32-arm64/rome.exe",
+		x64: "@biomejs/cli-win32-x64/biome.exe",
+		arm64: "@biomejs/cli-win32-arm64/biome.exe",
 	},
 	darwin: {
-		x64: "@biomejs/cli-darwin-x64/rome",
-		arm64: "@biomejs/cli-darwin-arm64/rome",
+		x64: "@biomejs/cli-darwin-x64/biome",
+		arm64: "@biomejs/cli-darwin-arm64/biome",
 	},
 	linux: {
-		x64: "@biomejs/cli-linux-x64/rome",
-		arm64: "@biomejs/cli-linux-arm64/rome",
+		x64: "@biomejs/cli-linux-x64/biome",
+		arm64: "@biomejs/cli-linux-arm64/biome",
 	},
 };
 
@@ -41,7 +41,7 @@ if (binPath) {
 } else {
 	console.error(
 		"The Biome CLI package doesn't ship with prebuilt binaries for your platform yet. " +
-			"You can still use the CLI by cloning the rome/tools repo from GitHub, " +
+			"You can still use the CLI by cloning the biome/tools repo from GitHub, " +
 			"and follow the instructions there to build the CLI for your platform.",
 	);
 	process.exitCode = 1;
