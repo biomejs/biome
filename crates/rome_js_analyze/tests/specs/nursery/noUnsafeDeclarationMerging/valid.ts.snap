@@ -34,6 +34,20 @@ declare class Foo8 {}
 export interface Foo9 {}
 export declare class Foo9 {}
 
+declare namespace A {
+  namespace B {
+    export interface Foo10 {}
+    export class Foo10 {}
+  }
+}
+
+export declare namespace A {
+  namespace B {
+    export interface Foo11 {}
+    export class Foo11 {}
+  }
+}
+
 ```
 
 
