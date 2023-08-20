@@ -36,3 +36,12 @@ export enum IndexedColor {
 	Green = "1",
 	Blue,
 }
+
+export namespace A {
+    export namespace B {
+        export enum Enum {
+            A,
+            B,
+        }
+    }
+}
