@@ -30,6 +30,24 @@ declare enum Weather2 {
     Sunny,
 }
 
+export declare namespace A {
+    export namespace B {
+        export enum Enum {
+            A,
+            B,
+        }
+    }
+}
+
+declare namespace A2 {
+    export namespace B2 {
+        export enum Enum {
+            A,
+            B,
+        }
+    }
+}
+
 ```
 
 

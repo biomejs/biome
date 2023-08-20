@@ -4,10 +4,7 @@ use rome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make;
-use rome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, TsDeclareStatement, TsEnumDeclaration,
-    TsExportDeclareClause,
-};
+use rome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, TsEnumDeclaration};
 use rome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
@@ -86,9 +83,7 @@ impl Rule for UseEnumInitializers {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_declaration = ctx.query();
-        if enum_declaration.parent::<TsDeclareStatement>().is_some()
-            || enum_declaration.parent::<TsExportDeclareClause>().is_some()
-        {
+        if enum_declaration.is_ambient() {
             // In ambient declarations, enum members without initializers are opaque types.
             // They generally represent an enum with complex initializers.
             return None;

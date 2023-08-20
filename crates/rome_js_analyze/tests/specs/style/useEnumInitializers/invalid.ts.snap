@@ -42,6 +42,16 @@ export enum IndexedColor {
 	Green = "1",
 	Blue,
 }
+
+export namespace A {
+    export namespace B {
+        export enum Enum {
+            A,
+            B,
+        }
+    }
+}
+
 ```
 
 # Diagnostics
@@ -266,8 +276,55 @@ invalid.ts:34:13 lint/style/useEnumInitializers ━━━━━━━━━━�
   > 37 │ 	Blue,
        │ 	^^^^
     38 │ }
+    39 │ 
   
   i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+
+```
+
+```
+invalid.ts:42:21 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    40 │ export namespace A {
+    41 │     export namespace B {
+  > 42 │         export enum Enum {
+       │                     ^^^^
+    43 │             A,
+    44 │             B,
+  
+  i This enum member should be explicitly initialized.
+  
+    41 │     export namespace B {
+    42 │         export enum Enum {
+  > 43 │             A,
+       │             ^
+    44 │             B,
+    45 │         }
+  
+  i This enum member should be explicitly initialized.
+  
+    42 │         export enum Enum {
+    43 │             A,
+  > 44 │             B,
+       │             ^
+    45 │         }
+    46 │     }
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Suggested fix: Initialize all enum members.
+  
+    41 41 │       export namespace B {
+    42 42 │           export enum Enum {
+    43    │ - ············A,
+    44    │ - ············B,
+       43 │ + ············A·=·0,
+       44 │ + ············B·=·1,
+    45 45 │           }
+    46 46 │       }
   
 
 ```
