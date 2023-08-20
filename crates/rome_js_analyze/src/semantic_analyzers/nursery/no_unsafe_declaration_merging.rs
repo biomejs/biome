@@ -1,10 +1,7 @@
 use crate::semantic_services::Semantic;
 use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, TsDeclareStatement, TsExportDeclareClause,
-    TsInterfaceDeclaration,
-};
+use rome_js_syntax::{binding_ext::AnyJsBindingDeclaration, TsInterfaceDeclaration};
 use rome_rowan::{AstNode, TextRange};
 
 declare_rule! {
@@ -69,9 +66,7 @@ impl Rule for NoUnsafeDeclarationMerging {
                 binding.tree().declaration()
             {
                 // This is not unsafe of merging an interface and an ambient class.
-                if class.parent::<TsDeclareStatement>().is_none()
-                    && class.parent::<TsExportDeclareClause>().is_none()
-                {
+                if !class.is_ambient() {
                     if let Ok(id) = class.id() {
                         if let Some(id) = id.as_js_identifier_binding() {
                             if let Ok(name) = id.name_token() {
