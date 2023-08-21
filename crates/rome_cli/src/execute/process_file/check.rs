@@ -73,11 +73,11 @@ pub(crate) fn check_file<'ctx>(
     if has_errors {
         if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
             Ok(FileStatus::Message(Message::ApplyError(
-                CliDiagnostic::file_apply_error(path.display().to_string(), category),
+                CliDiagnostic::file_check_apply_error(path.display().to_string(), category),
             )))
         } else {
             Ok(FileStatus::Message(Message::ApplyError(
-                CliDiagnostic::check_error(category),
+                CliDiagnostic::file_check_error(path.display().to_string(), category),
             )))
         }
     } else {

@@ -60,7 +60,7 @@ file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━
 ```block
 file1.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Fixes applied to the file, but there are still diagnostics to address.
+  × The file contains diagnostics that needs to be addressed.
   
 
 ```

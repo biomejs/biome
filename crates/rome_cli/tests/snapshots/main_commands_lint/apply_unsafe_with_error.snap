@@ -52,7 +52,7 @@ test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```block
 test1.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Fixes applied to the file, but there are still diagnostics to address.
+  × The file contains diagnostics that needs to be addressed.
   
 
 ```
@@ -76,7 +76,7 @@ test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```block
 test2.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Fixes applied to the file, but there are still diagnostics to address.
+  × The file contains diagnostics that needs to be addressed.
   
 
 ```
