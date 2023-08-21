@@ -5,13 +5,24 @@ expression: content
 ## `biome.json`
 
 ```json
-{ "linter": { "enabled": true } }
+{
+  "formatter": {
+    "enabled": false
+  }
+}
+
+```
+
+## `file.js`
+
+```js
+  statement(  )  
 ```
 
 # Emitted Messages
 
 ```block
-Your configuration file is up to date.
+Checked 1 file(s) in <TIME>
 ```
 
 

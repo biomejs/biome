@@ -2,20 +2,21 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
-  "organizeImports": {
-    "enabled": true
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  }
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	}
 }
+
 ```
 
 # Emitted Messages

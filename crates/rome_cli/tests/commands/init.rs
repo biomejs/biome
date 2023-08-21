@@ -43,7 +43,7 @@ fn creates_config_file() {
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
 
     let mut file = fs
         .open(file_path)
@@ -86,7 +86,7 @@ fn creates_config_file_when_rome_installed_via_package_manager() {
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
 
     let mut file = fs
         .open(file_path)

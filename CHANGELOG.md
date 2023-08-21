@@ -45,6 +45,8 @@ New entries must be placed in a section entitled `Unreleased`.
 
   This aligns with semantic and behaviour meant for the command `biome check`.
 
+- `init` command emits a `biome.json` file;
+
 #### Other changes
 
 - Fix [#4670](https://github.com/rome/tools/issues/4670), don't crash at empty default export.
@@ -95,7 +97,7 @@ New entries must be placed in a section entitled `Unreleased`.
   - `.swcrc`;
   - `.hintrc`;
   - `.babelrc`;
-
+- Add support for `biome.json`;
 ### Configuration
 
 #### Other changes

@@ -10,7 +10,7 @@ use futures::future::ready;
 use futures::FutureExt;
 use rome_console::markup;
 use rome_diagnostics::panic::PanicError;
-use rome_fs::CONFIG_NAME;
+use rome_fs::{BIOME_JSON, ROME_JSON};
 use rome_service::workspace::{RageEntry, RageParams, RageResult};
 use rome_service::{workspace, Workspace};
 use serde_json::json;
@@ -308,7 +308,9 @@ impl LanguageServer for LSPServer {
                     if let Some(base_path) = base_path {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
                         if let Ok(possible_rome_json) = possible_rome_json {
-                            if possible_rome_json.display().to_string() == CONFIG_NAME {
+                            if possible_rome_json.display().to_string() == ROME_JSON
+                                || possible_rome_json.display().to_string() == BIOME_JSON
+                            {
                                 self.session.load_workspace_settings().await;
                                 self.setup_capabilities().await;
                                 self.session.update_all_diagnostics().await;

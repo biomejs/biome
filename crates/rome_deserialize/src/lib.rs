@@ -6,11 +6,12 @@ pub mod string_set;
 
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic};
 use rome_diagnostics::Error;
+use std::fmt::Debug;
 pub use string_set::{deserialize_string_set, serialize_string_set, StringSet};
 pub use visitor::VisitNode;
 
 /// A small type to interrogate the result of a JSON deserialization
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Deserialized<P> {
     diagnostics: Vec<Error>,
     deserialized: P,
