@@ -13,7 +13,7 @@ use tracing::{error, info};
 mod memory;
 mod os;
 
-pub const CONFIG_NAMES: &'static [&str; 2] = &[ROME_JSON, BIOME_JSON];
+pub const CONFIG_NAMES: [&str; 2] = [ROME_JSON, BIOME_JSON];
 
 pub const ROME_JSON: &str = "rome.json";
 pub const BIOME_JSON: &str = "biome.json";
@@ -29,7 +29,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
 
     /// Returns the temporary configuration files that are supported
-    fn config_names(&self) -> &'static [&'static str; 2] {
+    fn config_names(&self) -> [&str; 2] {
         CONFIG_NAMES
     }
 
