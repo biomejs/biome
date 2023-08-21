@@ -3,7 +3,7 @@ title: Lint Rule useButtonType
 parent: lint/rules/index
 ---
 
-# useButtonType (since v0.10.0)
+# useButtonType (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noImportAssign
 parent: lint/rules/index
 ---
 
-# noImportAssign (since v0.9.0)
+# noImportAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

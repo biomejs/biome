@@ -59,7 +59,7 @@ declare_rule! {
     /// import { A, type B } from "mod";
     /// ```
     pub(crate) UseGroupedTypeImport {
-        version: "12.1.0",
+        version: "1.0.0",
         name: "useGroupedTypeImport",
         recommended: true,
     }

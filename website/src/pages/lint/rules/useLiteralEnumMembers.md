@@ -3,7 +3,7 @@ title: Lint Rule useLiteralEnumMembers
 parent: lint/rules/index
 ---
 
-# useLiteralEnumMembers (since v12.1.0)
+# useLiteralEnumMembers (since v1.0.0)
 
 Require all enum members to be literal values.
 

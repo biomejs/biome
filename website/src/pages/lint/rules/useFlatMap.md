@@ -3,7 +3,7 @@ title: Lint Rule useFlatMap
 parent: lint/rules/index
 ---
 
-# useFlatMap (since v10.0.0)
+# useFlatMap (since v1.0.0)
 
 > This rule is recommended by Biome.
 

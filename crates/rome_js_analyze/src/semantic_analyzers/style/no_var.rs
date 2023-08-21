@@ -33,7 +33,7 @@ declare_rule! {
     /// let bar = 1;
     ///```
     pub(crate) NoVar {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noVar",
         recommended: true,
     }

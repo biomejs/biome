@@ -3,7 +3,7 @@ title: Lint Rule useEnumInitializers
 parent: lint/rules/index
 ---
 
-# useEnumInitializers (since v11.0.0)
+# useEnumInitializers (since v1.0.0)
 
 > This rule is recommended by Biome.
 

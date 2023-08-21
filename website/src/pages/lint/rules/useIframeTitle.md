@@ -3,7 +3,7 @@ title: Lint Rule useIframeTitle
 parent: lint/rules/index
 ---
 
-# useIframeTitle (since v12.0.0)
+# useIframeTitle (since v1.0.0)
 
 > This rule is recommended by Biome.
 

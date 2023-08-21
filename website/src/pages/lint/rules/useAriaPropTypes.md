@@ -3,7 +3,7 @@ title: Lint Rule useAriaPropTypes
 parent: lint/rules/index
 ---
 
-# useAriaPropTypes (since v12.0.0)
+# useAriaPropTypes (since v1.0.0)
 
 Enforce that ARIA state and property values are valid.
 

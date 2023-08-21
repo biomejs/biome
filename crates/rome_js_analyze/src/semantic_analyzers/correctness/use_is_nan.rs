@@ -59,7 +59,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseIsNan {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "useIsNan",
         recommended: true,
     }

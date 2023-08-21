@@ -3,7 +3,7 @@ title: Lint Rule noGlobalObjectCalls
 parent: lint/rules/index
 ---
 
-# noGlobalObjectCalls (since v12.0.0)
+# noGlobalObjectCalls (since v1.0.0)
 
 > This rule is recommended by Biome.
 

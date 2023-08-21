@@ -3,7 +3,7 @@ title: Lint Rule noSparseArray
 parent: lint/rules/index
 ---
 
-# noSparseArray (since v0.7.0)
+# noSparseArray (since v1.0.0)
 
 > This rule is recommended by Biome.
 

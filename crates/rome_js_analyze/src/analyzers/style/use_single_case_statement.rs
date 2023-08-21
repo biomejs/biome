@@ -36,7 +36,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) UseSingleCaseStatement {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useSingleCaseStatement",
         recommended: false,
     }

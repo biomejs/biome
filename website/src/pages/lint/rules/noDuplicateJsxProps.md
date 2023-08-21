@@ -3,7 +3,7 @@ title: Lint Rule noDuplicateJsxProps
 parent: lint/rules/index
 ---
 
-# noDuplicateJsxProps (since v12.1.0)
+# noDuplicateJsxProps (since v1.0.0)
 
 > This rule is recommended by Biome.
 

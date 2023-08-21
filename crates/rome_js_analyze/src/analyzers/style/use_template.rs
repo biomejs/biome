@@ -46,7 +46,7 @@ declare_rule! {
     /// console.log(foo() + "\n");
     /// ```
     pub(crate) UseTemplate {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useTemplate",
         recommended: true,
     }

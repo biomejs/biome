@@ -3,7 +3,7 @@ title: Lint Rule noUnusedLabels
 parent: lint/rules/index
 ---
 
-# noUnusedLabels (since v12.0.0)
+# noUnusedLabels (since v1.0.0)
 
 > This rule is recommended by Biome.
 

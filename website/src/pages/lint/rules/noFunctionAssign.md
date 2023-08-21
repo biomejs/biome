@@ -3,7 +3,7 @@ title: Lint Rule noFunctionAssign
 parent: lint/rules/index
 ---
 
-# noFunctionAssign (since v0.7.0)
+# noFunctionAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noUnreachable
 parent: lint/rules/index
 ---
 
-# noUnreachable (since v0.7.0)
+# noUnreachable (since v1.0.0)
 
 > This rule is recommended by Biome.
 

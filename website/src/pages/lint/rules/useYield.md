@@ -3,7 +3,7 @@ title: Lint Rule useYield
 parent: lint/rules/index
 ---
 
-# useYield (since v12.0.0)
+# useYield (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noMultipleSpacesInRegularExpressionLiterals
 parent: lint/rules/index
 ---
 
-# noMultipleSpacesInRegularExpressionLiterals (since v0.7.0)
+# noMultipleSpacesInRegularExpressionLiterals (since v1.0.0)
 
 > This rule is recommended by Biome.
 

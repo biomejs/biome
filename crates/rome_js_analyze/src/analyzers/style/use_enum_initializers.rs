@@ -67,7 +67,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) UseEnumInitializers {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "useEnumInitializers",
         recommended: true,
     }

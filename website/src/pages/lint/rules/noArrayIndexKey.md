@@ -3,7 +3,7 @@ title: Lint Rule noArrayIndexKey
 parent: lint/rules/index
 ---
 
-# noArrayIndexKey (since v0.10.0)
+# noArrayIndexKey (since v1.0.0)
 
 > This rule is recommended by Biome.
 

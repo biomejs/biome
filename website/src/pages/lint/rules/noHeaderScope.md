@@ -3,7 +3,7 @@ title: Lint Rule noHeaderScope
 parent: lint/rules/index
 ---
 
-# noHeaderScope (since v11.0.0)
+# noHeaderScope (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noConstAssign
 parent: lint/rules/index
 ---
 
-# noConstAssign (since v10.0.0)
+# noConstAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

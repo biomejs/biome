@@ -3,7 +3,7 @@ title: Lint Rule noDuplicateObjectKeys
 parent: lint/rules/index
 ---
 
-# noDuplicateObjectKeys (since v11.0.0)
+# noDuplicateObjectKeys (since v1.0.0)
 
 > This rule is recommended by Biome.
 

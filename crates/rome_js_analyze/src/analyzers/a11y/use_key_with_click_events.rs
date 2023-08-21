@@ -57,7 +57,7 @@ declare_rule! {
     /// - [WCAG 2.1.1](https://www.w3.org/WAI/WCAG21/Understanding/keyboard)
     ///
     pub(crate) UseKeyWithClickEvents {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "useKeyWithClickEvents",
         recommended: true,
     }

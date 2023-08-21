@@ -47,7 +47,7 @@ declare_rule! {
     /// - [ARIA Spec, States and Properties](https://www.w3.org/TR/wai-aria/#states_and_properties)
     /// - [Chrome Audit Rules, AX_ARIA_04](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_04)
     pub(crate) UseAriaPropTypes {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "useAriaPropTypes",
         recommended: false,
     }

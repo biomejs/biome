@@ -60,7 +60,7 @@ declare_rule! {
     /// a = 1;
     /// ```
     pub(crate) NoAssignInExpressions {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noAssignInExpressions",
         recommended: true,
     }

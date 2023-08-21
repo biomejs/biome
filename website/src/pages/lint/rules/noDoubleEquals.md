@@ -3,7 +3,7 @@ title: Lint Rule noDoubleEquals
 parent: lint/rules/index
 ---
 
-# noDoubleEquals (since v0.7.0)
+# noDoubleEquals (since v1.0.0)
 
 > This rule is recommended by Biome.
 

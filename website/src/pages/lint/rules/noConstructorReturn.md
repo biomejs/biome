@@ -3,7 +3,7 @@ title: Lint Rule noConstructorReturn
 parent: lint/rules/index
 ---
 
-# noConstructorReturn (since v11.0.0)
+# noConstructorReturn (since v1.0.0)
 
 > This rule is recommended by Biome.
 

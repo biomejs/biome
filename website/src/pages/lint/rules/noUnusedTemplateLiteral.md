@@ -3,7 +3,7 @@ title: Lint Rule noUnusedTemplateLiteral
 parent: lint/rules/index
 ---
 
-# noUnusedTemplateLiteral (since v0.7.0)
+# noUnusedTemplateLiteral (since v1.0.0)
 
 > This rule is recommended by Biome.
 

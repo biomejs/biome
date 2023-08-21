@@ -26,7 +26,7 @@ declare_rule! {
     /// });
     /// ```
     pub(crate) NoDangerouslySetInnerHtml {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
         recommended: true,
     }

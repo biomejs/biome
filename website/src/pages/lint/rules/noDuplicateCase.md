@@ -3,7 +3,7 @@ title: Lint Rule noDuplicateCase
 parent: lint/rules/index
 ---
 
-# noDuplicateCase (since v12.0.0)
+# noDuplicateCase (since v1.0.0)
 
 > This rule is recommended by Biome.
 

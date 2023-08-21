@@ -23,7 +23,7 @@ declare_rule! {
     /// React.createElement('div', { children: 'foo' });
     /// ```
     pub(crate) NoChildrenProp {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noChildrenProp",
         recommended: true,
     }

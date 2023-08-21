@@ -3,7 +3,7 @@ title: Lint Rule noCommentText
 parent: lint/rules/index
 ---
 
-# noCommentText (since v0.7.0)
+# noCommentText (since v1.0.0)
 
 > This rule is recommended by Biome.
 

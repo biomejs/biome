@@ -3,7 +3,7 @@ title: Lint Rule noUnsafeNegation
 parent: lint/rules/index
 ---
 
-# noUnsafeNegation (since v0.7.0)
+# noUnsafeNegation (since v1.0.0)
 
 > This rule is recommended by Biome.
 

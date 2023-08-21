@@ -88,7 +88,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoInnerDeclarations {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noInnerDeclarations",
         recommended: true,
     }

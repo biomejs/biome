@@ -18,7 +18,7 @@ declare_rule! {
     /// (a < b)
     /// ```
     pub(crate) FlipBinExp {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "flipBinExp",
         recommended: false,
     }

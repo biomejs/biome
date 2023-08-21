@@ -53,7 +53,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoUselessCatch {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noUselessCatch",
         recommended: true,
     }

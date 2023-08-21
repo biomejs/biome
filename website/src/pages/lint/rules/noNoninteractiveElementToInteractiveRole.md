@@ -3,7 +3,7 @@ title: Lint Rule noNoninteractiveElementToInteractiveRole
 parent: lint/rules/index
 ---
 
-# noNoninteractiveElementToInteractiveRole (since v12.0.0)
+# noNoninteractiveElementToInteractiveRole (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -31,7 +31,7 @@ declare_rule! {
     /// function test(JSON) {console.log(JSON)}
     /// ```
     pub(crate) NoShadowRestrictedNames {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "noShadowRestrictedNames",
         recommended: true,
     }

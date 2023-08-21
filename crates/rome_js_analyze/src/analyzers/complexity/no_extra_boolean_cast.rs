@@ -55,7 +55,7 @@ declare_rule! {
     /// ```
 
     pub(crate) NoExtraBooleanCast {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "noExtraBooleanCast",
         recommended: true,
     }

@@ -3,7 +3,7 @@ title: Lint Rule useValidTypeof
 parent: lint/rules/index
 ---
 
-# useValidTypeof (since v0.7.0)
+# useValidTypeof (since v1.0.0)
 
 > This rule is recommended by Biome.
 

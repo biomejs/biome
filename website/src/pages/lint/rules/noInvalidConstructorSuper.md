@@ -3,7 +3,7 @@ title: Lint Rule noInvalidConstructorSuper
 parent: lint/rules/index
 ---
 
-# noInvalidConstructorSuper (since v10.0.0)
+# noInvalidConstructorSuper (since v1.0.0)
 
 > This rule is recommended by Biome.
 

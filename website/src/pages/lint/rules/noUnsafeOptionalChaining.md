@@ -3,7 +3,7 @@ title: Lint Rule noUnsafeOptionalChaining
 parent: lint/rules/index
 ---
 
-# noUnsafeOptionalChaining (since v12.0.0)
+# noUnsafeOptionalChaining (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noCommaOperator
 parent: lint/rules/index
 ---
 
-# noCommaOperator (since v12.0.0)
+# noCommaOperator (since v1.0.0)
 
 > This rule is recommended by Biome.
 

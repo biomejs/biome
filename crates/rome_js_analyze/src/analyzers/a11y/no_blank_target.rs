@@ -49,7 +49,7 @@ declare_rule! {
     /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
     /// ```
     pub(crate) NoBlankTarget {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "noBlankTarget",
         recommended: true,
     }

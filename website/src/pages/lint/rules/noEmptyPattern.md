@@ -3,7 +3,7 @@ title: Lint Rule noEmptyPattern
 parent: lint/rules/index
 ---
 
-# noEmptyPattern (since v0.7.0)
+# noEmptyPattern (since v1.0.0)
 
 > This rule is recommended by Biome.
 

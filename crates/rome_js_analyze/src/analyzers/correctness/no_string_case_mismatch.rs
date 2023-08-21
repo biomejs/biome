@@ -32,7 +32,7 @@ declare_rule! {
     /// for (let s = "abc"; s === "abc"; s = s.toUpperCase()) {}
     /// ```
     pub(crate) NoStringCaseMismatch {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noStringCaseMismatch",
         recommended: true,
     }

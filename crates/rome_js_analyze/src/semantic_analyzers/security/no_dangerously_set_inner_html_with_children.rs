@@ -35,7 +35,7 @@ declare_rule! {
     /// React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')
     /// ```
     pub(crate) NoDangerouslySetInnerHtmlWithChildren {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noDangerouslySetInnerHtmlWithChildren",
         recommended: true,
     }

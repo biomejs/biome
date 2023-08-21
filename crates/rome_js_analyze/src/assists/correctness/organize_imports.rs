@@ -48,7 +48,7 @@ declare_rule! {
     /// import { createConnection } from '@server/database';
     /// ```
     pub(crate) OrganizeImports {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "organizeImports",
         recommended: false,
     }

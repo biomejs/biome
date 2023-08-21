@@ -3,7 +3,7 @@ title: Lint Rule useNamespaceKeyword
 parent: lint/rules/index
 ---
 
-# useNamespaceKeyword (since v12.0.0)
+# useNamespaceKeyword (since v1.0.0)
 
 > This rule is recommended by Biome.
 

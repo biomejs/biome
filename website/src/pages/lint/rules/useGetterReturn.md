@@ -3,7 +3,7 @@ title: Lint Rule useGetterReturn
 parent: lint/rules/index
 ---
 
-# useGetterReturn (since vnext)
+# useGetterReturn (since v1.0.0)
 
 Enforces the presence of non-empty `return` statements in getters.
 

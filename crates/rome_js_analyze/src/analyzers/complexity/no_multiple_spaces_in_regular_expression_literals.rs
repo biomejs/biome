@@ -56,7 +56,7 @@ declare_rule! {
     /// /foo /
     ///```
     pub(crate) NoMultipleSpacesInRegularExpressionLiterals {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
         recommended: true,
     }

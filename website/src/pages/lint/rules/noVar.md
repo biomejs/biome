@@ -3,7 +3,7 @@ title: Lint Rule noVar
 parent: lint/rules/index
 ---
 
-# noVar (since v11.0.0)
+# noVar (since v1.0.0)
 
 > This rule is recommended by Biome.
 

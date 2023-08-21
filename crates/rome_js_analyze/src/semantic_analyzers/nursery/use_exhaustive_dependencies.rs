@@ -133,7 +133,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseExhaustiveDependencies {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "useExhaustiveDependencies",
         recommended: true,
     }

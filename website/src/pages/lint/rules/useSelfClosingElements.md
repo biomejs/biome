@@ -3,7 +3,7 @@ title: Lint Rule useSelfClosingElements
 parent: lint/rules/index
 ---
 
-# useSelfClosingElements (since v0.7.0)
+# useSelfClosingElements (since v1.0.0)
 
 > This rule is recommended by Biome.
 

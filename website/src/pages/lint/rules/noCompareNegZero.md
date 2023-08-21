@@ -3,7 +3,7 @@ title: Lint Rule noCompareNegZero
 parent: lint/rules/index
 ---
 
-# noCompareNegZero (since v0.7.0)
+# noCompareNegZero (since v1.0.0)
 
 > This rule is recommended by Biome.
 

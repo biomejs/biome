@@ -3,7 +3,7 @@ title: Lint Rule noForEach
 parent: lint/rules/index
 ---
 
-# noForEach (since v12.1.0)
+# noForEach (since v1.0.0)
 
 Prefer `for...of` statement instead of `Array.forEach`.
 

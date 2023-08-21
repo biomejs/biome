@@ -33,7 +33,7 @@ declare_rule! {
     /// const a2 = <div className={"cls" /* comment */}></div>;
     /// ```
     pub(crate) NoCommentText {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noCommentText",
         recommended: true,
     }

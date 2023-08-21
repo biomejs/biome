@@ -25,7 +25,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoArguments {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noArguments",
         recommended: true,
     }

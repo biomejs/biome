@@ -3,7 +3,7 @@ title: Lint Rule useAltText
 parent: lint/rules/index
 ---
 
-# useAltText (since v10.0.0)
+# useAltText (since v1.0.0)
 
 > This rule is recommended by Biome.
 

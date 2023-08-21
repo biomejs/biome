@@ -3,7 +3,7 @@ title: Lint Rule noVoidTypeReturn
 parent: lint/rules/index
 ---
 
-# noVoidTypeReturn (since v11.0.0)
+# noVoidTypeReturn (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule useValidForDirection
 parent: lint/rules/index
 ---
 
-# useValidForDirection (since v10.0.0)
+# useValidForDirection (since v1.0.0)
 
 > This rule is recommended by Biome.
 

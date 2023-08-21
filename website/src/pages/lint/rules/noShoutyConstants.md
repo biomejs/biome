@@ -3,7 +3,7 @@ title: Lint Rule noShoutyConstants
 parent: lint/rules/index
 ---
 
-# noShoutyConstants (since v0.7.0)
+# noShoutyConstants (since v1.0.0)
 
 Disallow the use of constants which its value is the upper-case version of its name.
 

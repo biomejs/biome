@@ -3,7 +3,7 @@ title: Lint Rule noParameterProperties
 parent: lint/rules/index
 ---
 
-# noParameterProperties (since v12.0.0)
+# noParameterProperties (since v1.0.0)
 
 Disallow the use of parameter properties in class constructors.
 

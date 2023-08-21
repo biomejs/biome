@@ -3,7 +3,7 @@ title: Lint Rule useLiteralKeys
 parent: lint/rules/index
 ---
 
-# useLiteralKeys (since v12.1.0)
+# useLiteralKeys (since v1.0.0)
 
 > This rule is recommended by Biome.
 

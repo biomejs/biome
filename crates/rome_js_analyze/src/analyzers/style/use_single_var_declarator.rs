@@ -28,7 +28,7 @@ declare_rule! {
     /// for (let i = 0, x = 1; i < arr.length; i++) {}
     /// ```
     pub(crate) UseSingleVarDeclarator {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useSingleVarDeclarator",
         recommended: true,
     }

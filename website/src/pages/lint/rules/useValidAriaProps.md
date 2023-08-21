@@ -3,7 +3,7 @@ title: Lint Rule useValidAriaProps
 parent: lint/rules/index
 ---
 
-# useValidAriaProps (since v12.0.0)
+# useValidAriaProps (since v1.0.0)
 
 > This rule is recommended by Biome.
 

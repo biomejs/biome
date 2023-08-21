@@ -3,7 +3,7 @@ title: Lint Rule noExtraBooleanCast
 parent: lint/rules/index
 ---
 
-# noExtraBooleanCast (since v0.9.0)
+# noExtraBooleanCast (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -35,7 +35,7 @@ declare_rule! {
     /// true ? consequent : alternate
     ///```
     pub(crate) NoNegationElse {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noNegationElse",
         recommended: false,
     }

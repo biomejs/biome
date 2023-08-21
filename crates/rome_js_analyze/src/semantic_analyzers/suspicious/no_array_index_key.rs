@@ -37,7 +37,7 @@ declare_rule! {
     /// ))
     /// ```
     pub(crate) NoArrayIndexKey {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noArrayIndexKey",
         recommended: true,
     }

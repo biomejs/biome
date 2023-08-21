@@ -38,7 +38,7 @@ declare_rule! {
     /// - [WCAG 4.1.1](https://www.w3.org/WAI/WCAG21/Understanding/parsing)
     ///
     pub(crate) NoHeaderScope {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noHeaderScope",
         recommended: true,
     }

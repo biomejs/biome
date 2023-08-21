@@ -3,7 +3,7 @@ title: Lint Rule noNamespace
 parent: lint/rules/index
 ---
 
-# noNamespace (since v12.0.0)
+# noNamespace (since v1.0.0)
 
 Disallow the use of TypeScript's `namespace`s.
 

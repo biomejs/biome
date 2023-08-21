@@ -3,7 +3,7 @@ title: Lint Rule useDefaultSwitchClauseLast
 parent: lint/rules/index
 ---
 
-# useDefaultSwitchClauseLast (since v11.0.0)
+# useDefaultSwitchClauseLast (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noUselessFragments
 parent: lint/rules/index
 ---
 
-# noUselessFragments (since v0.10.0)
+# noUselessFragments (since v1.0.0)
 
 > This rule is recommended by Biome.
 

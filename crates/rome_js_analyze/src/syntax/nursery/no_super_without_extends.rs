@@ -18,7 +18,7 @@ declare_rule! {
     // }
     /// ```
     pub(crate) NoSuperWithoutExtends {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "noSuperWithoutExtends",
         recommended: false,
     }

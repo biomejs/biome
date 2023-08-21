@@ -370,7 +370,7 @@ declare_rule! {
     /// var a, b;
     /// ```
     pub(crate) NoVar {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noVar",
         deprecated: "Use the rule `noAnotherVar`",
         recommended: false,

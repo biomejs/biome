@@ -3,7 +3,7 @@ title: Lint Rule noExcessiveComplexity
 parent: lint/rules/index
 ---
 
-# noExcessiveComplexity (since v13.0.0)
+# noExcessiveComplexity (since v1.0.0)
 
 Disallow functions that exceed a given complexity score.
 

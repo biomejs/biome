@@ -39,7 +39,7 @@ declare_rule! {
     /// function foo([[a, b], [c, d]]) {}
     /// ```
     pub(crate) NoDuplicateParameters {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "noDuplicateParameters",
         recommended: true,
     }

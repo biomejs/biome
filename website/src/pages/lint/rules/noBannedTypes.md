@@ -3,7 +3,7 @@ title: Lint Rule noBannedTypes
 parent: lint/rules/index
 ---
 
-# noBannedTypes (since v10.0.0)
+# noBannedTypes (since v1.0.0)
 
 Disallow primitive type aliases and misleading types.
 

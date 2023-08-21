@@ -55,7 +55,7 @@ declare_rule! {
     /// - [The accessibility of HTML 5 autofocus](https://brucelawson.co.uk/2009/the-accessibility-of-html-5-autofocus/)
     ///
     pub(crate) NoAutoFocus {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "noAutofocus",
         recommended: true,
     }

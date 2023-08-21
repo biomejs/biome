@@ -46,7 +46,7 @@ declare_rule! {
     /// - [WCAG 2.4.6](https://www.w3.org/TR/UNDERSTANDING-WCAG20/navigation-mechanisms-descriptive.html)
     ///
     pub(crate) UseHeadingContent {
-        version: "12.1.0",
+        version: "1.0.0",
         name: "useHeadingContent",
         recommended: false,
     }

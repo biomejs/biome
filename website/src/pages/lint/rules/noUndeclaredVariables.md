@@ -3,7 +3,7 @@ title: Lint Rule noUndeclaredVariables
 parent: lint/rules/index
 ---
 
-# noUndeclaredVariables (since v0.10.0)
+# noUndeclaredVariables (since v1.0.0)
 
 Prevents the usage of variables that haven't been declared inside the document.
 

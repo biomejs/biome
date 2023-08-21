@@ -45,7 +45,7 @@ declare_rule! {
     /// null != foo
     ///```
     pub(crate) NoDoubleEquals {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noDoubleEquals",
         recommended: true,
     }

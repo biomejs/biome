@@ -3,7 +3,7 @@ title: Lint Rule useNumericLiterals
 parent: lint/rules/index
 ---
 
-# useNumericLiterals (since v11.0.0)
+# useNumericLiterals (since v1.0.0)
 
 > This rule is recommended by Biome.
 

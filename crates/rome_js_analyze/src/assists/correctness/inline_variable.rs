@@ -20,7 +20,7 @@ declare_rule! {
     /// statement(variable);
     /// ```
     pub(crate) InlineVariable {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "inlineVariable",
         recommended: false,
     }

@@ -3,7 +3,7 @@ title: Lint Rule noDuplicateParameters
 parent: lint/rules/index
 ---
 
-# noDuplicateParameters (since v0.9.0)
+# noDuplicateParameters (since v1.0.0)
 
 > This rule is recommended by Biome.
 

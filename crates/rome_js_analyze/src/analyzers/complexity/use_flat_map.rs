@@ -33,7 +33,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseFlatMap {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "useFlatMap",
         recommended: true,
     }

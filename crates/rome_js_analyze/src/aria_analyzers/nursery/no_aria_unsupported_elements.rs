@@ -33,7 +33,7 @@ declare_rule! {
     ///
     ///
     pub(crate) NoAriaUnsupportedElements {
-        version: "12.1.0",
+        version: "1.0.0",
         name: "noAriaUnsupportedElements",
         recommended: true,
     }

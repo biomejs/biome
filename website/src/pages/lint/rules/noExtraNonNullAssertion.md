@@ -3,7 +3,7 @@ title: Lint Rule noExtraNonNullAssertion
 parent: lint/rules/index
 ---
 
-# noExtraNonNullAssertion (since v11.0.0)
+# noExtraNonNullAssertion (since v1.0.0)
 
 > This rule is recommended by Biome.
 

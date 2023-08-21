@@ -99,7 +99,7 @@ declare_rule! {
     /// used_overloaded();
     /// ```
     pub(crate) NoUnusedVariables {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "noUnusedVariables",
         recommended: false,
     }

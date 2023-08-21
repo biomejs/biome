@@ -3,7 +3,7 @@ title: Lint Rule noUnnecessaryContinue
 parent: lint/rules/index
 ---
 
-# noUnnecessaryContinue (since v0.7.0)
+# noUnnecessaryContinue (since v1.0.0)
 
 > This rule is recommended by Biome.
 

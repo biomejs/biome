@@ -3,7 +3,7 @@ title: Lint Rule noDangerouslySetInnerHtml
 parent: lint/rules/index
 ---
 
-# noDangerouslySetInnerHtml (since v0.10.0)
+# noDangerouslySetInnerHtml (since v1.0.0)
 
 > This rule is recommended by Biome.
 
