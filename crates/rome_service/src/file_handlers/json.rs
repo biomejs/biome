@@ -17,7 +17,7 @@ use rome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use rome_deserialize::json::deserialize_from_json_ast;
 use rome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
-use rome_fs::{RomePath, CONFIG_NAME};
+use rome_fs::{RomePath, BIOME_JSON, ROME_JSON};
 use rome_json_analyze::analyze;
 use rome_json_formatter::context::JsonFormatOptions;
 use rome_json_formatter::format_node;
@@ -224,7 +224,7 @@ fn lint(params: LintParams) -> LintResults {
 
         // if we're parsing the `rome.json` file, we deserialize it, so we can emit diagnostics for
         // malformed configuration
-        if params.path.ends_with(CONFIG_NAME) {
+        if params.path.ends_with(ROME_JSON) || params.path.ends_with(BIOME_JSON) {
             let deserialized = deserialize_from_json_ast::<Configuration>(&root);
             diagnostics.extend(
                 deserialized

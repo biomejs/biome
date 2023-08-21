@@ -2,3 +2,4 @@
 //! case that affects many commands
 
 mod config_extends;
+mod biome_json_support;

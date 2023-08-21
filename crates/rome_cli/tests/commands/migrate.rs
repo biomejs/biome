@@ -35,7 +35,7 @@ fn migrate_config_up_to_date() {
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
 
-    let configuration_path = Path::new("rome.json");
+    let configuration_path = Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
     let result = run_cli(
