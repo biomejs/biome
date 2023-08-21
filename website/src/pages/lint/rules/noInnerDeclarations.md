@@ -3,7 +3,7 @@ title: Lint Rule noInnerDeclarations
 parent: lint/rules/index
 ---
 
-# noInnerDeclarations (since v12.0.0)
+# noInnerDeclarations (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -18,7 +18,7 @@ declare_rule! {
     /// [1,,2]
     /// ```
     pub(crate) NoSparseArray {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noSparseArray",
         recommended: true,
     }

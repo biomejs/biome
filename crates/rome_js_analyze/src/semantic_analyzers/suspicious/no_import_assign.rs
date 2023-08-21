@@ -50,7 +50,7 @@ declare_rule! {
     /// e = 1;
     /// ```
     pub(crate) NoImportAssign {
-        version: "0.9.0",
+        version: "1.0.0",
         name: "noImportAssign",
         recommended: true,
     }

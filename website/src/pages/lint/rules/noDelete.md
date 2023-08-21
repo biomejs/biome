@@ -3,7 +3,7 @@ title: Lint Rule noDelete
 parent: lint/rules/index
 ---
 
-# noDelete (since v0.7.0)
+# noDelete (since v1.0.0)
 
 > This rule is recommended by Biome.
 

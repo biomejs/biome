@@ -3,7 +3,7 @@ title: Lint Rule useAnchorContent
 parent: lint/rules/index
 ---
 
-# useAnchorContent (since v10.0.0)
+# useAnchorContent (since v1.0.0)
 
 > This rule is recommended by Biome.
 

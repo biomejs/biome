@@ -3,7 +3,7 @@ title: Lint Rule noDistractingElements
 parent: lint/rules/index
 ---
 
-# noDistractingElements (since v11.0.0)
+# noDistractingElements (since v1.0.0)
 
 > This rule is recommended by Biome.
 

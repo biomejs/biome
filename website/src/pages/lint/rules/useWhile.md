@@ -3,7 +3,7 @@ title: Lint Rule useWhile
 parent: lint/rules/index
 ---
 
-# useWhile (since v0.7.0)
+# useWhile (since v1.0.0)
 
 > This rule is recommended by Biome.
 

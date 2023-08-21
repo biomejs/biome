@@ -32,7 +32,7 @@ declare_rule! {
     /// type B<T> = PromiseLike<T>
     /// ```
     pub(crate) NoUndeclaredVariables {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noUndeclaredVariables",
         recommended: false,
     }

@@ -3,7 +3,7 @@ title: Lint Rule noControlCharactersInRegex
 parent: lint/rules/index
 ---
 
-# noControlCharactersInRegex (since v13.0.0)
+# noControlCharactersInRegex (since v1.0.0)
 
 Prevents from having control characters and some escape sequences that match control characters in regular expressions.
 

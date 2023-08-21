@@ -3,7 +3,7 @@ title: Lint Rule noEmptyInterface
 parent: lint/rules/index
 ---
 
-# noEmptyInterface (since v11.0.0)
+# noEmptyInterface (since v1.0.0)
 
 > This rule is recommended by Biome.
 

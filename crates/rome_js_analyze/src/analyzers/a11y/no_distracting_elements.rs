@@ -38,7 +38,7 @@ declare_rule! {
     /// - [WCAG 2.2.2](https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide)
     ///
     pub(crate) NoDistractingElements {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noDistractingElements",
         recommended: true,
     }

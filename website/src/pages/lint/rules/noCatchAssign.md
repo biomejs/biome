@@ -3,7 +3,7 @@ title: Lint Rule noCatchAssign
 parent: lint/rules/index
 ---
 
-# noCatchAssign (since v0.7.0)
+# noCatchAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

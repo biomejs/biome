@@ -59,7 +59,7 @@ declare_rule! {
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     pub(crate) UseIframeTitle {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "useIframeTitle",
         recommended: true,
     }

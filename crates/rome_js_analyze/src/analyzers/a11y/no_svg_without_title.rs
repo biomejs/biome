@@ -74,7 +74,7 @@ declare_rule! {
     /// [Contextually Marking up accessible images and SVGs | scottohara.me](https://www.scottohara.me/blog/2019/05/22/contextual-images-svgs-and-a11y.html)
     ///
     pub(crate) NoSvgWithoutTitle {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noSvgWithoutTitle",
         recommended: true,
     }

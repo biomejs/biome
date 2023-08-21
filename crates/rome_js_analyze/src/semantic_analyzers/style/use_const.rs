@@ -55,7 +55,7 @@ declare_rule! {
     /// b = 3;
     /// ```
     pub(crate) UseConst {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "useConst",
         recommended: true,
     }

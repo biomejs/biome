@@ -3,7 +3,7 @@ title: Lint Rule useHeadingContent
 parent: lint/rules/index
 ---
 
-# useHeadingContent (since v12.1.0)
+# useHeadingContent (since v1.0.0)
 
 Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
 Accessible means that it is not hidden using the aria-hidden prop.

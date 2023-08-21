@@ -3,7 +3,7 @@ title: Lint Rule noVoidElementsWithChildren
 parent: lint/rules/index
 ---
 
-# noVoidElementsWithChildren (since v0.10.0)
+# noVoidElementsWithChildren (since v1.0.0)
 
 > This rule is recommended by Biome.
 

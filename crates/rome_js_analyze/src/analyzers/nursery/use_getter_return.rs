@@ -51,7 +51,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseGetterReturn {
-        version: "next",
+        version: "1.0.0",
         name: "useGetterReturn",
         recommended: true,
     }

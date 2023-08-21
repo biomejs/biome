@@ -35,7 +35,7 @@ declare_rule! {
     /// - [MDN `accesskey` documentation](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/accesskey)
     ///
     pub(crate) NoAccessKey {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noAccessKey",
         recommended: false,
     }

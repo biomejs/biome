@@ -69,7 +69,7 @@ declare_rule! {
     /// typeof bar === typeof qux
     /// ```
     pub(crate) UseValidTypeof {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useValidTypeof",
         recommended: true,
     }

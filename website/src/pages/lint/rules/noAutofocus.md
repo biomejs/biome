@@ -3,7 +3,7 @@ title: Lint Rule noAutofocus
 parent: lint/rules/index
 ---
 
-# noAutofocus (since v10.0.0)
+# noAutofocus (since v1.0.0)
 
 > This rule is recommended by Biome.
 

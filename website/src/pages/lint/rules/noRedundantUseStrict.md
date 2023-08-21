@@ -3,7 +3,7 @@ title: Lint Rule noRedundantUseStrict
 parent: lint/rules/index
 ---
 
-# noRedundantUseStrict (since v11.0.0)
+# noRedundantUseStrict (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -44,7 +44,7 @@ declare_rule! {
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
     pub(crate) NoNoninteractiveElementToInteractiveRole {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noNoninteractiveElementToInteractiveRole",
         recommended: true,
     }

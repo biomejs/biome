@@ -94,7 +94,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoFunctionAssign {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noFunctionAssign",
         recommended: true,
     }

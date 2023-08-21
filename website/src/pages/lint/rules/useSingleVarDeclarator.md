@@ -3,7 +3,7 @@ title: Lint Rule useSingleVarDeclarator
 parent: lint/rules/index
 ---
 
-# useSingleVarDeclarator (since v0.7.0)
+# useSingleVarDeclarator (since v1.0.0)
 
 > This rule is recommended by Biome.
 

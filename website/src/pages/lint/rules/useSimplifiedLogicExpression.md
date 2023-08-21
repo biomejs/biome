@@ -3,7 +3,7 @@ title: Lint Rule useSimplifiedLogicExpression
 parent: lint/rules/index
 ---
 
-# useSimplifiedLogicExpression (since v0.7.0)
+# useSimplifiedLogicExpression (since v1.0.0)
 
 Discard redundant terms from logical expressions.
 

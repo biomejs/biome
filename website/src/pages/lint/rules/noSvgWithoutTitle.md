@@ -3,7 +3,7 @@ title: Lint Rule noSvgWithoutTitle
 parent: lint/rules/index
 ---
 
-# noSvgWithoutTitle (since v12.0.0)
+# noSvgWithoutTitle (since v1.0.0)
 
 > This rule is recommended by Biome.
 

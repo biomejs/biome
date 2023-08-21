@@ -3,7 +3,7 @@ title: Lint Rule noArguments
 parent: lint/rules/index
 ---
 
-# noArguments (since v0.7.0)
+# noArguments (since v1.0.0)
 
 > This rule is recommended by Biome.
 

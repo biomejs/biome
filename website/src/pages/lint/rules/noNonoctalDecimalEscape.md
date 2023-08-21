@@ -3,7 +3,7 @@ title: Lint Rule noNonoctalDecimalEscape
 parent: lint/rules/index
 ---
 
-# noNonoctalDecimalEscape (since v13.0.0)
+# noNonoctalDecimalEscape (since v1.0.0)
 
 Disallow `\8` and `\9` escape sequences in string literals.
 

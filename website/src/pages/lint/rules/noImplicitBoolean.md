@@ -3,7 +3,7 @@ title: Lint Rule noImplicitBoolean
 parent: lint/rules/index
 ---
 
-# noImplicitBoolean (since v0.7.0)
+# noImplicitBoolean (since v1.0.0)
 
 Disallow implicit `true` values on JSX boolean attributes
 

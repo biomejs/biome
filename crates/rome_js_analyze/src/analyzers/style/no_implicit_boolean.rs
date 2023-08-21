@@ -42,7 +42,7 @@ declare_rule! {
     /// <input disabled='false' />
     ///```
     pub(crate) NoImplicitBoolean {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noImplicitBoolean",
         recommended: false,
     }

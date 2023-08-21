@@ -3,7 +3,7 @@ title: Lint Rule noRedundantAlt
 parent: lint/rules/index
 ---
 
-# noRedundantAlt (since v12.0.0)
+# noRedundantAlt (since v1.0.0)
 
 > This rule is recommended by Biome.
 

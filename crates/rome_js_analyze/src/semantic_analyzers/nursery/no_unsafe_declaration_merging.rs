@@ -43,7 +43,7 @@ declare_rule! {
     /// enum Baz {}
     /// ```
     pub(crate) NoUnsafeDeclarationMerging {
-        version: "13.0.0",
+        version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
         recommended: true,
     }

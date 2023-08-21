@@ -33,7 +33,7 @@ declare_rule! {
     /// var [a] = foo;
     /// ```
     pub(crate) NoEmptyPattern {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noEmptyPattern",
         recommended: true,
     }

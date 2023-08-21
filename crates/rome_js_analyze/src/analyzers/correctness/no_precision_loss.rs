@@ -54,7 +54,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoPrecisionLoss {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "noPrecisionLoss",
         recommended: true,
     }

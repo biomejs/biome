@@ -3,7 +3,7 @@ title: Lint Rule noRenderReturnValue
 parent: lint/rules/index
 ---
 
-# noRenderReturnValue (since v0.10.0)
+# noRenderReturnValue (since v1.0.0)
 
 > This rule is recommended by Biome.
 

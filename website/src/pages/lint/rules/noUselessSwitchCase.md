@@ -3,7 +3,7 @@ title: Lint Rule noUselessSwitchCase
 parent: lint/rules/index
 ---
 
-# noUselessSwitchCase (since v12.0.0)
+# noUselessSwitchCase (since v1.0.0)
 
 > This rule is recommended by Biome.
 

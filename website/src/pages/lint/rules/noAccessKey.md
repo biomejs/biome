@@ -3,7 +3,7 @@ title: Lint Rule noAccessKey
 parent: lint/rules/index
 ---
 
-# noAccessKey (since v11.0.0)
+# noAccessKey (since v1.0.0)
 
 Enforce that the `accessKey` attribute is not used on any HTML element.
 

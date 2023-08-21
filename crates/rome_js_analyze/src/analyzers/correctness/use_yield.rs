@@ -39,7 +39,7 @@ declare_rule! {
     /// function* foo() { }
     /// ```
     pub(crate) UseYield {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "useYield",
         recommended: true,
     }

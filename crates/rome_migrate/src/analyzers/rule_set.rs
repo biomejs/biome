@@ -5,7 +5,7 @@ use rome_json_syntax::JsonObjectValue;
 
 declare_migration! {
     pub(crate) RuleSet {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "ruleSet",
     }
 }

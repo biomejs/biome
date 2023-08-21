@@ -24,7 +24,7 @@ declare_rule! {
     /// test.debugger;
     ///```
     pub(crate) NoDebugger {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noDebugger",
         recommended: true,
     }

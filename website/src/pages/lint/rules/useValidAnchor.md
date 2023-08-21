@@ -3,7 +3,7 @@ title: Lint Rule useValidAnchor
 parent: lint/rules/index
 ---
 
-# useValidAnchor (since v10.0.0)
+# useValidAnchor (since v1.0.0)
 
 > This rule is recommended by Biome.
 

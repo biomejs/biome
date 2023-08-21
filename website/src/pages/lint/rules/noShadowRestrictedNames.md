@@ -3,7 +3,7 @@ title: Lint Rule noShadowRestrictedNames
 parent: lint/rules/index
 ---
 
-# noShadowRestrictedNames (since v0.9.0)
+# noShadowRestrictedNames (since v1.0.0)
 
 > This rule is recommended by Biome.
 

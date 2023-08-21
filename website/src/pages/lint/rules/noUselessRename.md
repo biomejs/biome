@@ -3,7 +3,7 @@ title: Lint Rule noUselessRename
 parent: lint/rules/index
 ---
 
-# noUselessRename (since v12.0.0)
+# noUselessRename (since v1.0.0)
 
 > This rule is recommended by Biome.
 

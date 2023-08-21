@@ -3,7 +3,7 @@ title: Lint Rule useSimpleNumberKeys
 parent: lint/rules/index
 ---
 
-# useSimpleNumberKeys (since v12.1.0)
+# useSimpleNumberKeys (since v1.0.0)
 
 Disallow number literal object member names which are not base10 or uses underscore as separator
 

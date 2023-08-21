@@ -3,7 +3,7 @@ title: Lint Rule useNamingConvention
 parent: lint/rules/index
 ---
 
-# useNamingConvention (since v13.0.0)
+# useNamingConvention (since v1.0.0)
 
 Enforce naming conventions for everything across a codebase.
 

@@ -3,7 +3,7 @@ title: Lint Rule noRedeclare
 parent: lint/rules/index
 ---
 
-# noRedeclare (since v12.0.0)
+# noRedeclare (since v1.0.0)
 
 > This rule is recommended by Biome.
 

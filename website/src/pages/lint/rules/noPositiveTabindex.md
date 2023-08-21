@@ -3,7 +3,7 @@ title: Lint Rule noPositiveTabindex
 parent: lint/rules/index
 ---
 
-# noPositiveTabindex (since v10.0.0)
+# noPositiveTabindex (since v1.0.0)
 
 > This rule is recommended by Biome.
 

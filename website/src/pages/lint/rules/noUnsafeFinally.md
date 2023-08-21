@@ -3,7 +3,7 @@ title: Lint Rule noUnsafeFinally
 parent: lint/rules/index
 ---
 
-# noUnsafeFinally (since v11.0.0)
+# noUnsafeFinally (since v1.0.0)
 
 > This rule is recommended by Biome.
 

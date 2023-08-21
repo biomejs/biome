@@ -3,7 +3,7 @@ title: Lint Rule noConstEnum
 parent: lint/rules/index
 ---
 
-# noConstEnum (since v11.0.0)
+# noConstEnum (since v1.0.0)
 
 > This rule is recommended by Biome.
 

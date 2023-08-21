@@ -3,7 +3,7 @@ title: Lint Rule noChildrenProp
 parent: lint/rules/index
 ---
 
-# noChildrenProp (since v0.10.0)
+# noChildrenProp (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -41,7 +41,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoForEach {
-        version: "12.1.0",
+        version: "1.0.0",
         name: "noForEach",
         recommended: false,
     }

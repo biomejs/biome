@@ -3,7 +3,7 @@ title: Lint Rule useConst
 parent: lint/rules/index
 ---
 
-# useConst (since v11.0.0)
+# useConst (since v1.0.0)
 
 > This rule is recommended by Biome.
 

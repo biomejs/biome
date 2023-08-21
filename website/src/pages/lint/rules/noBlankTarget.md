@@ -3,7 +3,7 @@ title: Lint Rule noBlankTarget
 parent: lint/rules/index
 ---
 
-# noBlankTarget (since v10.0.0)
+# noBlankTarget (since v1.0.0)
 
 > This rule is recommended by Biome.
 

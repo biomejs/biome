@@ -3,7 +3,7 @@ title: Lint Rule noStaticOnlyClass
 parent: lint/rules/index
 ---
 
-# noStaticOnlyClass (since v13.0.0)
+# noStaticOnlyClass (since v1.0.0)
 
 This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 

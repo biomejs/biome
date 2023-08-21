@@ -63,7 +63,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoRedeclare {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noRedeclare",
         recommended: true,
     }

@@ -52,7 +52,7 @@ declare_rule! {
     /// creating a local variable.
     ///
     pub(crate) NoRestrictedGlobals {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noRestrictedGlobals",
         recommended: false,
     }

@@ -47,7 +47,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseSimplifiedLogicExpression {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useSimplifiedLogicExpression",
         recommended: false,
     }

@@ -3,7 +3,7 @@ title: Lint Rule useMediaCaption
 parent: lint/rules/index
 ---
 
-# useMediaCaption (since v12.0.0)
+# useMediaCaption (since v1.0.0)
 
 > This rule is recommended by Biome.
 

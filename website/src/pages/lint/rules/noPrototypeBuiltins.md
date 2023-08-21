@@ -3,7 +3,7 @@ title: Lint Rule noPrototypeBuiltins
 parent: lint/rules/index
 ---
 
-# noPrototypeBuiltins (since v12.0.0)
+# noPrototypeBuiltins (since v1.0.0)
 
 > This rule is recommended by Biome.
 

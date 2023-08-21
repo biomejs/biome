@@ -3,7 +3,7 @@ title: Lint Rule noDuplicateClassMembers
 parent: lint/rules/index
 ---
 
-# noDuplicateClassMembers (since v12.0.0)
+# noDuplicateClassMembers (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule noPrecisionLoss
 parent: lint/rules/index
 ---
 
-# noPrecisionLoss (since v11.0.0)
+# noPrecisionLoss (since v1.0.0)
 
 > This rule is recommended by Biome.
 

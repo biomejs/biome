@@ -3,7 +3,7 @@ title: Lint Rule noParameterAssign
 parent: lint/rules/index
 ---
 
-# noParameterAssign (since v12.0.0)
+# noParameterAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

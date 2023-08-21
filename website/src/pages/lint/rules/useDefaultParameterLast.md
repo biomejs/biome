@@ -3,7 +3,7 @@ title: Lint Rule useDefaultParameterLast
 parent: lint/rules/index
 ---
 
-# useDefaultParameterLast (since v11.0.0)
+# useDefaultParameterLast (since v1.0.0)
 
 > This rule is recommended by Biome.
 

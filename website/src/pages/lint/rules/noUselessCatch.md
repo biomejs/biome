@@ -3,7 +3,7 @@ title: Lint Rule noUselessCatch
 parent: lint/rules/index
 ---
 
-# noUselessCatch (since v12.0.0)
+# noUselessCatch (since v1.0.0)
 
 > This rule is recommended by Biome.
 

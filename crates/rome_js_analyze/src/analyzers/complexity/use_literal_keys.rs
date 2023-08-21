@@ -45,7 +45,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseLiteralKeys {
-        version: "12.1.0",
+        version: "1.0.0",
         name: "useLiteralKeys",
         recommended: true,
     }

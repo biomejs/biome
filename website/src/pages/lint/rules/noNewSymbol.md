@@ -3,7 +3,7 @@ title: Lint Rule noNewSymbol
 parent: lint/rules/index
 ---
 
-# noNewSymbol (since v0.10.0)
+# noNewSymbol (since v1.0.0)
 
 > This rule is recommended by Biome.
 

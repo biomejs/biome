@@ -3,7 +3,7 @@ title: Lint Rule noClassAssign
 parent: lint/rules/index
 ---
 
-# noClassAssign (since v12.0.0)
+# noClassAssign (since v1.0.0)
 
 > This rule is recommended by Biome.
 

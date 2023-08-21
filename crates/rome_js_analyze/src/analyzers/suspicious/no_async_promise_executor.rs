@@ -35,7 +35,7 @@ declare_rule! {
     ///   new Foo((( (resolve, reject) => {} )))
     /// ```
     pub(crate) NoAsyncPromiseExecutor {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noAsyncPromiseExecutor",
         recommended: true,
     }

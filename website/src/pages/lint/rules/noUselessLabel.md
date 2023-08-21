@@ -3,7 +3,7 @@ title: Lint Rule noUselessLabel
 parent: lint/rules/index
 ---
 
-# noUselessLabel (since v12.0.0)
+# noUselessLabel (since v1.0.0)
 
 > This rule is recommended by Biome.
 

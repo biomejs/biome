@@ -28,7 +28,7 @@ declare_rule! {
     /// Number.isFinite(false); // false
     /// ```
     pub(crate) NoGlobalIsFinite {
-        version: "13.0.0",
+        version: "1.0.0",
         name: "noGlobalIsFinite",
         recommended: true,
     }

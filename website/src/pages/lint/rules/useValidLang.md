@@ -3,7 +3,7 @@ title: Lint Rule useValidLang
 parent: lint/rules/index
 ---
 
-# useValidLang (since v12.0.0)
+# useValidLang (since v1.0.0)
 
 > This rule is recommended by Biome.
 

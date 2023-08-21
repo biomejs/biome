@@ -3,7 +3,7 @@ title: Lint Rule noInferrableTypes
 parent: lint/rules/index
 ---
 
-# noInferrableTypes (since v12.0.0)
+# noInferrableTypes (since v1.0.0)
 
 > This rule is recommended by Biome.
 

@@ -3,7 +3,7 @@ title: Lint Rule useOptionalChain
 parent: lint/rules/index
 ---
 
-# useOptionalChain (since v0.10.0)
+# useOptionalChain (since v1.0.0)
 
 > This rule is recommended by Biome.
 

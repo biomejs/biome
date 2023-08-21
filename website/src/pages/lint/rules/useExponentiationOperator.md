@@ -3,7 +3,7 @@ title: Lint Rule useExponentiationOperator
 parent: lint/rules/index
 ---
 
-# useExponentiationOperator (since v11.0.0)
+# useExponentiationOperator (since v1.0.0)
 
 > This rule is recommended by Biome.
 

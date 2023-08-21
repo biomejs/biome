@@ -3,7 +3,7 @@ title: Lint Rule noSelfCompare
 parent: lint/rules/index
 ---
 
-# noSelfCompare (since v12.0.0)
+# noSelfCompare (since v1.0.0)
 
 > This rule is recommended by Biome.
 

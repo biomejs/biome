@@ -3,7 +3,7 @@ title: Lint Rule noSelfAssign
 parent: lint/rules/index
 ---
 
-# noSelfAssign (since v12.0.0)
+# noSelfAssign (since v1.0.0)
 
 Disallow assignments where both sides are exactly the same.
 

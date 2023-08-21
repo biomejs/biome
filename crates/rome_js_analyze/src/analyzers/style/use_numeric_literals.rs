@@ -46,7 +46,7 @@ declare_rule! {
     /// Number.parseInt(foo, 2);
     /// ```
     pub(crate) UseNumericLiterals {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "useNumericLiterals",
         recommended: true,
     }

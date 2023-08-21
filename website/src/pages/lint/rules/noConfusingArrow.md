@@ -3,7 +3,7 @@ title: Lint Rule noConfusingArrow
 parent: lint/rules/index
 ---
 
-# noConfusingArrow (since v12.1.0)
+# noConfusingArrow (since v1.0.0)
 
 Disallow arrow functions where they could be confused with comparisons.
 

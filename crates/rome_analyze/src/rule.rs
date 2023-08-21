@@ -69,7 +69,7 @@ pub trait RuleMeta {
 /// declare_rule! {
 ///     /// Documentation
 ///     pub(crate) ExampleRule {
-///         version: "0.7.0",
+///         version: "1.0.0",
 ///         name: "ruleName",
 ///         recommended: false,
 ///     }

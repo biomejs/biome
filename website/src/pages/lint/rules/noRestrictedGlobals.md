@@ -3,7 +3,7 @@ title: Lint Rule noRestrictedGlobals
 parent: lint/rules/index
 ---
 
-# noRestrictedGlobals (since v0.10.0)
+# noRestrictedGlobals (since v1.0.0)
 
 This rule allows you to specify global variable names that you don’t want to use in your application.
 

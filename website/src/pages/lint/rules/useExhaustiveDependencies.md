@@ -3,7 +3,7 @@ title: Lint Rule useExhaustiveDependencies
 parent: lint/rules/index
 ---
 
-# useExhaustiveDependencies (since v10.0.0)
+# useExhaustiveDependencies (since v1.0.0)
 
 Enforce all dependencies are correctly specified.
 

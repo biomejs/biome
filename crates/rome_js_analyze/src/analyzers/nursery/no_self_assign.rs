@@ -65,7 +65,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoSelfAssign {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noSelfAssign",
         recommended: true,
     }

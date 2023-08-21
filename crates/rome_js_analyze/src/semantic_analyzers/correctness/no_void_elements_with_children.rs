@@ -31,7 +31,7 @@ declare_rule! {
     /// React.createElement('img', {}, 'child')
     /// ```
     pub(crate) NoVoidElementsWithChildren {
-        version: "0.10.0",
+        version: "1.0.0",
         name: "noVoidElementsWithChildren",
         recommended: true,
     }

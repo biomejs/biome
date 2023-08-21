@@ -3,7 +3,7 @@ title: Lint Rule useAriaPropsForRole
 parent: lint/rules/index
 ---
 
-# useAriaPropsForRole (since v11.0.0)
+# useAriaPropsForRole (since v1.0.0)
 
 > This rule is recommended by Biome.
 

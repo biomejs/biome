@@ -50,7 +50,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoConfusingLabels {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noConfusingLabels",
         recommended: true,
     }

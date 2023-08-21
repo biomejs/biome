@@ -3,7 +3,7 @@ title: Lint Rule useShorthandArrayType
 parent: lint/rules/index
 ---
 
-# useShorthandArrayType (since v0.7.0)
+# useShorthandArrayType (since v1.0.0)
 
 When expressing array types, this rule promotes the usage of `T[]` shorthand instead of `Array<T>`.
 

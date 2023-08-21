@@ -44,7 +44,7 @@ declare_rule! {
     /// - [WCAG 1.1.1](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html)
     ///
     pub(crate) UseAltText {
-        version: "10.0.0",
+        version: "1.0.0",
         name: "useAltText",
         recommended: true,
     }

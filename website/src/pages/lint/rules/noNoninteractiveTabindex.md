@@ -3,7 +3,7 @@ title: Lint Rule noNoninteractiveTabindex
 parent: lint/rules/index
 ---
 
-# noNoninteractiveTabindex (since v12.1.0)
+# noNoninteractiveTabindex (since v1.0.0)
 
 Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
 

@@ -73,7 +73,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoSwitchDeclarations {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "noSwitchDeclarations",
         recommended: true,
     }

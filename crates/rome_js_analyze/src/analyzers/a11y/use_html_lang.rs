@@ -53,7 +53,7 @@ declare_rule! {
     /// - [WCAG 3.1.1](https://www.w3.org/WAI/WCAG21/Understanding/language-of-page)
     ///
     pub(crate) UseHtmlLang {
-        version: "12.0.0",
+        version: "1.0.0",
         name: "useHtmlLang",
         recommended: true,
     }

@@ -3,7 +3,7 @@ title: Lint Rule noExplicitAny
 parent: lint/rules/index
 ---
 
-# noExplicitAny (since v10.0.0)
+# noExplicitAny (since v1.0.0)
 
 > This rule is recommended by Biome.
 

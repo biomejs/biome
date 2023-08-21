@@ -3,7 +3,7 @@ title: Lint Rule noStringCaseMismatch
 parent: lint/rules/index
 ---
 
-# noStringCaseMismatch (since v11.0.0)
+# noStringCaseMismatch (since v1.0.0)
 
 > This rule is recommended by Biome.
 

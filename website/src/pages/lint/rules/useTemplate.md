@@ -3,7 +3,7 @@ title: Lint Rule useTemplate
 parent: lint/rules/index
 ---
 
-# useTemplate (since v0.7.0)
+# useTemplate (since v1.0.0)
 
 > This rule is recommended by Biome.
 

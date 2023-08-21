@@ -3,7 +3,7 @@ title: Lint Rule noSwitchDeclarations
 parent: lint/rules/index
 ---
 
-# noSwitchDeclarations (since v12.0.0)
+# noSwitchDeclarations (since v1.0.0)
 
 > This rule is recommended by Biome.
 

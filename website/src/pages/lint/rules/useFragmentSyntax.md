@@ -3,7 +3,7 @@ title: Lint Rule useFragmentSyntax
 parent: lint/rules/index
 ---
 
-# useFragmentSyntax (since v0.10.0)
+# useFragmentSyntax (since v1.0.0)
 
 This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.
 

@@ -39,7 +39,7 @@ declare_rule! {
     /// - [ARIA Spec, Roles](https://www.w3.org/TR/wai-aria/#roles)
     /// - [Chrome Audit Rules, AX_ARIA_03](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_03)
     pub(crate) UseAriaPropsForRole {
-        version: "11.0.0",
+        version: "1.0.0",
         name: "useAriaPropsForRole",
         recommended: true,
     }

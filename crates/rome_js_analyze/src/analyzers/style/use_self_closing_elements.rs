@@ -52,7 +52,7 @@ declare_rule! {
     /// <Foo.bar>child</Foo.bar>
     ///```
     pub(crate) UseSelfClosingElements {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "useSelfClosingElements",
         recommended: true,
     }

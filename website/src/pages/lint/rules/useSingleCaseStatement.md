@@ -3,7 +3,7 @@ title: Lint Rule useSingleCaseStatement
 parent: lint/rules/index
 ---
 
-# useSingleCaseStatement (since v0.7.0)
+# useSingleCaseStatement (since v1.0.0)
 
 Enforces switch clauses have a single statement, emits a quick fix wrapping
 the statements in a block.

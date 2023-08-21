@@ -3,7 +3,7 @@ title: Lint Rule noConsoleLog
 parent: lint/rules/index
 ---
 
-# noConsoleLog (since v12.1.0)
+# noConsoleLog (since v1.0.0)
 
 Disallow the use of `console.log`
 

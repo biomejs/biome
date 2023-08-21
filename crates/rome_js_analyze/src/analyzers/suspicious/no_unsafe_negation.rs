@@ -31,7 +31,7 @@ declare_rule! {
     /// +1 instanceof [1,2];
     /// ```
     pub(crate) NoUnsafeNegation {
-        version: "0.7.0",
+        version: "1.0.0",
         name: "noUnsafeNegation",
         recommended: true,
     }
