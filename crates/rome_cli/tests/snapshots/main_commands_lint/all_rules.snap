@@ -49,7 +49,7 @@ fix.js:1:2 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━�
 ```block
 fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Fixes applied to the file, but there are still diagnostics to address.
+  × The file contains diagnostics that needs to be addressed.
   
 
 ```

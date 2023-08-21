@@ -64,12 +64,21 @@ pub(crate) fn lint_with_guard<'ctx>(
     }
 
     if errors > 0 {
-        Ok(FileStatus::Message(Message::ApplyError(
-            CliDiagnostic::file_apply_error(
-                workspace_file.path.display().to_string(),
-                category!("lint"),
-            ),
-        )))
+        if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
+            Ok(FileStatus::Message(Message::ApplyError(
+                CliDiagnostic::file_check_apply_error(
+                    workspace_file.path.display().to_string(),
+                    category!("lint"),
+                ),
+            )))
+        } else {
+            Ok(FileStatus::Message(Message::ApplyError(
+                CliDiagnostic::file_check_error(
+                    workspace_file.path.display().to_string(),
+                    category!("lint"),
+                ),
+            )))
+        }
     } else {
         Ok(FileStatus::Success)
     }

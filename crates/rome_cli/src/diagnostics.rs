@@ -40,7 +40,7 @@ pub enum CliDiagnostic {
     /// Emitted when a file is fixed, but it still contains diagnostics.
     ///
     /// This happens when these diagnostics come from rules that don't have a code action.
-    FileCheckApply(FileCheckApply),
+    FileCheck(FileCheck),
     /// When an argument is higher than the expected maximum
     OverflowNumberArgument(OverflowNumberArgument),
     /// Wrapper for an underlying `rome_service` error
@@ -165,9 +165,12 @@ pub struct CheckError {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     severity = Error,
-    message = "Fixes applied to the file, but there are still diagnostics to address."
 )]
-pub struct FileCheckApply {
+pub struct FileCheck {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+
     #[location(resource)]
     pub file_path: String,
 
@@ -414,10 +417,33 @@ impl CliDiagnostic {
     }
 
     /// Emitted for a file that has code fixes, but still has diagnostics to address
-    pub fn file_apply_error(file_path: impl Into<String>, category: &'static Category) -> Self {
-        Self::FileCheckApply(FileCheckApply {
+    pub fn file_check_apply_error(
+        file_path: impl Into<String>,
+        category: &'static Category,
+    ) -> Self {
+        Self::FileCheck(FileCheck {
             file_path: file_path.into(),
             category,
+            message: MessageAndDescription::from(
+                markup! {
+                    "Fixes applied to the file, but there are still diagnostics to address."
+                }
+                .to_owned(),
+            ),
+        })
+    }
+
+    /// Emitted when the file has diagnostics.
+    pub fn file_check_error(file_path: impl Into<String>, category: &'static Category) -> Self {
+        Self::FileCheck(FileCheck {
+            file_path: file_path.into(),
+            category,
+            message: MessageAndDescription::from(
+                markup! {
+                    "The file contains diagnostics that needs to be addressed."
+                }
+                .to_owned(),
+            ),
         })
     }
 
@@ -469,7 +495,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.category(),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.category(),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.category(),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.category(),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.category(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.category(),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.category(),
         }
@@ -491,7 +517,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.tags(),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.tags(),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.tags(),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.tags(),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.tags(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.tags(),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.tags(),
         }
@@ -513,7 +539,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.severity(),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.severity(),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.severity(),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.severity(),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.severity(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.severity(),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.severity(),
         }
@@ -535,7 +561,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.location(),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.location(),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.location(),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.location(),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.location(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.location(),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.location(),
         }
@@ -557,7 +583,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.message(fmt),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.message(fmt),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.message(fmt),
         }
@@ -579,7 +605,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.description(fmt),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.description(fmt),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.description(fmt),
         }
@@ -601,7 +627,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.advices(visitor),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.advices(visitor),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.advices(visitor),
         }
@@ -627,7 +653,7 @@ impl Diagnostic for CliDiagnostic {
                 diagnostic.verbose_advices(visitor)
             }
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.verbose_advices(visitor),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.verbose_advices(visitor),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.verbose_advices(visitor),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.verbose_advices(visitor),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.verbose_advices(visitor),
         }
@@ -649,7 +675,7 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::ServerNotRunning(diagnostic) => diagnostic.source(),
             CliDiagnostic::IncompatibleEndConfiguration(diagnostic) => diagnostic.source(),
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.source(),
-            CliDiagnostic::FileCheckApply(diagnostic) => diagnostic.source(),
+            CliDiagnostic::FileCheck(diagnostic) => diagnostic.source(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.source(),
             CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.source(),
         }
