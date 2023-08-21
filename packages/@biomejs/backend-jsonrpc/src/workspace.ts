@@ -660,7 +660,7 @@ export interface Nursery {
 	 */
 	useExhaustiveDependencies?: RuleConfiguration;
 	/**
-	 * Enforces the presence of non-empty return statements in getters.
+	 * Enforce get methods to always return a value.
 	 */
 	useGetterReturn?: RuleConfiguration;
 	/**

@@ -2026,7 +2026,7 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_dependencies: Option<RuleConfiguration>,
-    #[doc = "Enforces the presence of non-empty return statements in getters."]
+    #[doc = "Enforce get methods to always return a value."]
     #[bpaf(long("use-getter-return"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_getter_return: Option<RuleConfiguration>,
