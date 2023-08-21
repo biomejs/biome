@@ -71,7 +71,7 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 
 	<body class={bodyClass}>
 		<div class="docs-header">
-			<a class="logo" href="https://biomejs.dev/">
+			<a class="logo" href="/">
 				<InlineSVG src="biome-logo" />
 
 				<span class="logo-text sr-only">Biome</span>
@@ -79,7 +79,7 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 
 			<ul class="desktop-navigation">
 				<li><a href="/" class={Astro.url.pathname.startsWith("/playground") ? "" : "active"}>Docs</a></li>
-				<li class="blog"><a href="https://rome.tools/blog/">Blog</a></li>
+				<li class="blog"><a href="/blog">Blog</a></li>
 				<li><ActiveLink href="/playground">Playground</ActiveLink></li>
 			</ul>
 

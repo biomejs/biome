@@ -1,0 +1,11 @@
+---
+import BasePage from "./BaseLayout.astro";
+---
+
+<BasePage {...Astro.props}>
+	<div class="container">
+		<main class="main page-main content">
+			<slot />
+		</main>
+	</div>
+</BasePage>

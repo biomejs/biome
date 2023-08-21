@@ -1,0 +1,35 @@
+---
+export interface Props {
+	frontmatter: {
+		coauthorName?: string;
+		coauthorAvatar?: string;
+		authorName: string;
+		authorUrl?: string;
+		authorAvatar?: string;
+		pubDate: string;
+	};
+}
+
+const {coauthorName, coauthorAvatar, authorName, authorUrl, authorAvatar, pubDate} = Astro.props.frontmatter;
+---
+
+<div class="blog-info">
+	<div>
+
+		<span class="avatar-stack">
+			<span class="avatar"><img src={authorAvatar}></span>
+			{coauthorAvatar && <span class="avatar"><img src={coauthorAvatar}></span>}
+		</span>
+
+		{authorUrl ? <a href={authorUrl}><span>{authorName}</span></a> : <span>{authorName}</span>}
+
+		{coauthorName && <span> &amp; {coauthorName}</span>}
+	</div>
+
+	<time datetime={pubDate}>{new Date(pubDate).toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		timeZone: "UTC",
+	})}</time>
+</div>

@@ -1,0 +1,32 @@
+---
+export interface Props {
+  coverImage?: string;
+	coverImageCaption?: string;
+	coverImageAltText?: string;
+	subtitle: string;
+	title: string;
+}
+
+import BlogPostInfo from "../components/BlogPostInfo.astro";
+import Page from "./Page.astro";
+
+const {coverImage, coverImageCaption, coverImageAltText, subtitle, title} = Astro.props.frontmatter;
+---
+
+<Page {...Astro.props}>
+	<main class="main blog post">
+		{coverImage && <figure class="blog-cover">
+			<img alt={coverImageAltText} src={`/img/${coverImage}`}>
+			{coverImageCaption && <figcaption class="blog-cover-caption">{coverImageCaption}</figcaption>}
+		</figure>}
+	
+		<h1 id="{{ title | kebabCase }} ">{title}</h1>
+	
+		{subtitle && <div class="subtitle">{subtitle}</div>}
+	
+		<BlogPostInfo {...Astro.props} />
+	
+		<slot />
+	</main>
+	
+</Page>
