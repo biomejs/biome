@@ -216,6 +216,10 @@ New entries must be placed in a section entitled `Unreleased`.
 
   This rule disallows declaration merging between an interface and a class.
 
+- Add [noUselessThisAlias](https://biomejs.dev/lint/rules/noUselessThisAlias/)
+
+  This rule disallows useless aliasing of `this` in arrow functions.
+
 - Add [useArrowFunction](https://biomejs.dev/lint/rules/usearrowfunction/)
 
   This rule proposes turning function expressions into arrow functions.
