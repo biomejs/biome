@@ -1,12 +1,12 @@
-const fs = require("node:fs");
-const child_process = require("node:child_process");
-const path = require("node:path");
-const os = require("node:os");
+import fs from "fs";
+import child_process from "child_process";
+import path from "path";
+import os from "os";
 
 const TMP_DIRECTORY = path.resolve("./target");
 
 function buildBiome() {
-	console.log("Building Biome...");
+	console.log("Build Biome...");
 
 	child_process.execSync("cargo build --bin biome --release", {
 		stdio: "inherit",
@@ -90,16 +90,10 @@ function benchmarkFormatter(biome) {
 			})
 			.join(" ");
 
-		const prettierCommand = `node '${resolvePrettier()}' ${prettierPaths} --write --loglevel=error`;
-		const parallelPrettierCommand = `node '${resolveParallelPrettier()}' ${prettierPaths} --write --concurrency ${
-			os.cpus().length
-		}`;
+		const prettierCommand = `node '${resolvePrettier()}' ${prettierPaths} --write --log-level=error`;
+		const parallelPrettierCommand = `node '${resolveParallelPrettier()}' ${prettierPaths} --write --concurrency ${os.cpus().length}`;
 
-		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${require.resolve(
-			"./dprint.json",
-		)}' ${Object.keys(configuration.sourceDirectories)
-			.map((path) => `'${path}/**/*'`)
-			.join(" ")}`;
+		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${resolveDprintConfig()}' ${Object.keys(configuration.sourceDirectories).map(path => `'${path}/**/*'`).join(" ")}`;
 
 		const biomeCommand = `${biome} format --max-diagnostics=0 ${Object.keys(
 			configuration.sourceDirectories,
@@ -125,7 +119,7 @@ function benchmarkFormatter(biome) {
 }
 
 function resolvePrettier() {
-	return path.resolve("node_modules/prettier/standalone.js");
+	return path.resolve("node_modules/prettier/bin/prettier.cjs");
 }
 
 function resolveParallelPrettier() {
@@ -134,6 +128,10 @@ function resolveParallelPrettier() {
 
 function resolveDprint() {
 	return path.resolve("node_modules/dprint/dprint");
+}
+
+function resolveDprintConfig() {
+	return path.resolve("dprint.json");
 }
 
 function benchmarkLinter(biome) {
@@ -152,17 +150,14 @@ function benchmarkLinter(biome) {
 		);
 
 		deleteFile(path.join(projectDirectory, ".eslintignore"));
-		deleteFile(path.join(projectDirectory, "/eslintrc.js"));
-
-		// Override eslint config
-		const eslintConfig = fs.readFileSync("./bench.eslint.js");
-		fs.writeFileSync(
-			path.join(projectDirectory, "eslint.config.js"),
-			eslintConfig,
-		);
-
-		const biomeConfig = fs.readFileSync("./bench.biome.json");
-		fs.writeFileSync(path.join(projectDirectory, "biome.json"), biomeConfig);
+		deleteFile(path.join(projectDirectory, ".eslintrc.js"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.cjs"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.json"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.yaml"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.yml"));
+		deleteFile(path.join(projectDirectory, "eslint.config.js"));
+		deleteFile(path.join(projectDirectory, "rome.json"));
+		deleteFile(path.join(projectDirectory, "biome.json"));
 
 		const eslintPaths = configuration.sourceDirectories
 			.map((directory) => `'${directory}/**'`)
@@ -175,7 +170,7 @@ function benchmarkLinter(biome) {
 			.join(" ");
 
 		// Don't compute the code frames for pulled diagnostics. ESLint doesn't do so as well.
-		const biomeCommand = `${biome} check --max-diagnostics=0 ${biomePaths}`;
+		const biomeCommand = `${biome} lint --max-diagnostics=0 ${biomePaths}`;
 
 		const biomeSingleCoreCommand = withEnvVariable(
 			"RAYON_NUM_THREADS",
