@@ -149,7 +149,7 @@ based its design **AND** end-goal.
 
 1. Biome is configuration aware, meaning that when communicating with Rust Workspace,
    all configuration defaults are automatically applied. If the APIs are run
-   inside a Biome project, the configuration is automatically picked up from the `rome.json` file.
+   inside a Biome project, the configuration is automatically picked up from the `biome.json` file.
 2. Biome's APIs should reflect the CLIs commands and arguments. What it's possible to do
    via CLI, should be done also via APIs, but not vice-versa. This constraint would allow the team
    to first design and test the feature natively, and expose it once it's stable.
@@ -195,7 +195,7 @@ const diagnostics = rome.checkContent(content);  // not part of this paragraph
 
 The first parameter of the instance should be a personalized configuration. The configuration
 passed to the instance **will override** Biome's defaults  **_BUT_** not the options inside a possible
-`rome.json` file.
+`biome.json` file.
 
 This is an import point, because we might have cases where a user is using Biome for linting/formatting
 of the project, but this project is actually using the runtime API to do some ad-hoc work. For example

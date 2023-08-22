@@ -321,7 +321,7 @@ impl Rule for UseExhaustiveDependencies {
 }
 ```
 
-This allows the rule to be configured inside `rome.json` file like:
+This allows the rule to be configured inside `biome.json` file like:
 
 ```json
 {

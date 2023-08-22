@@ -9,7 +9,7 @@
 
  <strong>Files created</strong> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  <span style="opacity: 0.8;">- </span><strong><span style="text-decoration-style: dashed; text-decoration-line: underline;">rome.json</span></strong>: Your project configuration. Documentation:
+  <span style="opacity: 0.8;">- </span><strong><span style="text-decoration-style: dashed; text-decoration-line: underline;">biome.json</span></strong>: Your project configuration. Documentation:
     <a href="https://rome.tools/#project-configuration">https://rome.tools/#project-configuration</a>
   <span style="opacity: 0.8;">- </span><strong><span style="text-decoration-style: dashed; text-decoration-line: underline;">.editorconfig</span></strong>: Sets editor formatting and indentation options.
     Documentation: <a href="https://editorconfig.org/">https://editorconfig.org/</a>

@@ -20,7 +20,7 @@ export interface UpdateSettingsParams {
 	configuration: Configuration;
 }
 /**
- * The configuration that is contained inside the file `rome.json`
+ * The configuration that is contained inside the file `biome.json`
  */
 export interface Configuration {
 	/**
@@ -170,7 +170,7 @@ export interface VcsConfiguration {
 	 */
 	enabled?: boolean;
 	/**
-	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
+	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
 If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
 	 */
