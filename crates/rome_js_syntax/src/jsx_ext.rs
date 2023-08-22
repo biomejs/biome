@@ -83,13 +83,13 @@ impl JsxOpeningElement {
     /// use rome_js_factory::make::{ident, jsx_attribute, jsx_name, jsx_opening_element, token, jsx_attribute_list, jsx_self_closing_element, jsx_spread_attribute, jsx_ident, js_identifier_expression, js_reference_identifier};
     /// use rome_js_syntax::{AnyJsExpression, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxElementName, T};
     ///
-    /// let div = AnyJsxAttribute::JsxAttribute(jsx_attribute(
+    /// let div = jsx_attribute(
     ///     AnyJsxAttributeName::JsxName(
     ///         jsx_name(ident("div"))
     ///     )
-    /// ).build());
+    /// ).build();
     ///
-    /// let spread = AnyJsxAttribute::JsxSpreadAttribute(jsx_spread_attribute(
+    /// let spread = AnyJsxAttribute::from(jsx_spread_attribute(
     ///     token(T!['{']),
     ///     token(T![...]),
     ///     AnyJsExpression::JsIdentifierExpression(js_identifier_expression(
@@ -98,10 +98,8 @@ impl JsxOpeningElement {
     ///     token(T!['}']),
     /// ));
     ///
-    ///
-    ///
     /// let attributes = jsx_attribute_list(vec![
-    ///     div,
+    ///     AnyJsxAttribute::from(div.clone()),
     ///     spread
     /// ]);
     ///
@@ -115,9 +113,9 @@ impl JsxOpeningElement {
     /// ).build();
     ///
     /// let div = opening_element.find_attribute_by_name("div").unwrap().unwrap();
-    /// assert!(opening_element.has_trailing_spread_prop(div.clone()));
+    /// assert!(opening_element.has_trailing_spread_prop(&div));
     /// ```
-    pub fn has_trailing_spread_prop(&self, current_attribute: impl Into<AnyJsxAttribute>) -> bool {
+    pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         self.attributes()
             .has_trailing_spread_prop(current_attribute)
     }
@@ -225,9 +223,9 @@ impl JsxSelfClosingElement {
     /// ).build();
     ///
     /// let div = opening_element.find_attribute_by_name("div").unwrap().unwrap();
-    /// assert!(opening_element.has_trailing_spread_prop(div.clone()));
+    /// assert!(opening_element.has_trailing_spread_prop(&div));
     /// ```
-    pub fn has_trailing_spread_prop(&self, current_attribute: impl Into<AnyJsxAttribute>) -> bool {
+    pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         self.attributes()
             .has_trailing_spread_prop(current_attribute)
     }
@@ -297,13 +295,14 @@ impl JsxAttributeList {
         Ok(attribute)
     }
 
-    pub fn has_trailing_spread_prop(&self, current_attribute: impl Into<AnyJsxAttribute>) -> bool {
+    pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         let mut current_attribute_found = false;
-        let current_attribute = current_attribute.into();
         for attribute in self {
-            if attribute == current_attribute {
-                current_attribute_found = true;
-                continue;
+            if let Some(attribute) = attribute.as_jsx_attribute() {
+                if attribute == current_attribute {
+                    current_attribute_found = true;
+                    continue;
+                }
             }
             if current_attribute_found && attribute.as_jsx_spread_attribute().is_some() {
                 return true;
@@ -369,7 +368,7 @@ impl AnyJsxElement {
             .any(|attribute| matches!(attribute, AnyJsxAttribute::JsxSpreadAttribute(_)))
     }
 
-    pub fn has_trailing_spread_prop(&self, current_attribute: impl Into<AnyJsxAttribute>) -> bool {
+    pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         match self {
             AnyJsxElement::JsxSelfClosingElement(element) => {
                 element.has_trailing_spread_prop(current_attribute)
@@ -397,7 +396,7 @@ impl AnyJsxElement {
                 attribute
                     .as_static_value()
                     .map_or(true, |value| !(value.is_falsy() || value.text() == "false"))
-                    && !self.has_trailing_spread_prop(attribute)
+                    && !self.has_trailing_spread_prop(&attribute)
             })
     }
 }

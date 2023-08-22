@@ -331,9 +331,9 @@ impl<'token> LiteralStringNormaliser<'token> {
         &content[1..content.len() - 1]
     }
 
-    fn swap_quotes<S: Into<&'token str>>(
+    fn swap_quotes(
         &self,
-        content_to_use: S,
+        content_to_use: &'token str,
         string_information: &StringInformation,
     ) -> Cow<'token, str> {
         let original_content = self.get_token().text_trimmed();
@@ -348,7 +348,7 @@ impl<'token> LiteralStringNormaliser<'token> {
             Cow::Owned(std::format!(
                 "{}{}{}",
                 preferred_quote.as_char(),
-                content_to_use.into(),
+                content_to_use,
                 preferred_quote.as_char()
             ))
         } else {

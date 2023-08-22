@@ -33,8 +33,8 @@ impl FormatNodeRule<JsStringLiteralExpression> for FormatJsStringLiteralExpressi
 
 impl NeedsParentheses for JsStringLiteralExpression {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        if let Some(expression_statement) = JsExpressionStatement::cast(parent.clone()) {
-            expression_statement
+        if let Some(expression_statement) = JsExpressionStatement::cast_ref(parent) {
+            return expression_statement
                 .syntax()
                 .parent()
                 .map_or(false, |grand_parent| {
@@ -42,10 +42,9 @@ impl NeedsParentheses for JsStringLiteralExpression {
                         grand_parent.kind(),
                         JsSyntaxKind::JS_STATEMENT_LIST | JsSyntaxKind::JS_MODULE_ITEM_LIST
                     )
-                })
-        } else {
-            false
+                });
         }
+        false
     }
 }
 

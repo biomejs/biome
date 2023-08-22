@@ -103,7 +103,7 @@ fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
 /// The checking algorithm of [JsNewExpression] is a little different from [JsCallExpression] due to
 /// two nodes have different shapes
 fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
-    let expr = JsCallArgumentList::cast(node.clone())?
+    let expr = JsCallArgumentList::cast_ref(node)?
         .parent::<JsCallArguments>()?
         .parent::<JsNewExpression>()?;
     Some(expr.has_callee("Boolean"))
@@ -115,7 +115,7 @@ fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
 /// Boolean(x)
 /// ```
 fn is_boolean_call(node: &JsSyntaxNode) -> Option<bool> {
-    let expr = JsCallExpression::cast(node.clone())?;
+    let expr = JsCallExpression::cast_ref(node)?;
     Some(expr.has_callee("Boolean"))
 }
 
@@ -125,7 +125,7 @@ fn is_boolean_call(node: &JsSyntaxNode) -> Option<bool> {
 /// !!x
 /// ```
 fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
-    let unary_expr = JsUnaryExpression::cast(node.clone())?;
+    let unary_expr = JsUnaryExpression::cast_ref(node)?;
     if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
         Some(unary_expr)
     } else {
@@ -141,24 +141,24 @@ impl Rule for NoExtraBooleanCast {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();
-        let syntax = n.syntax().clone();
-        let parent_syntax = syntax.parent()?;
+        let parent = n.syntax().parent()?;
 
         // Check if parent `SyntaxNode` in any boolean `Type Coercion` context,
         // reference https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
-        let parent_node_in_boolean_cast_context = is_in_boolean_context(&syntax).unwrap_or(false)
-            || is_boolean_constructor_call(&parent_syntax).unwrap_or(false)
-            || is_negation(&parent_syntax).is_some()
-            || is_boolean_call(&parent_syntax).unwrap_or(false);
+        let parent_node_in_boolean_cast_context = is_in_boolean_context(n.syntax())
+            .unwrap_or(false)
+            || is_boolean_constructor_call(&parent).unwrap_or(false)
+            || is_negation(&parent).is_some()
+            || is_boolean_call(&parent).unwrap_or(false);
         // Convert `!!x` -> `x` if parent `SyntaxNode` in any boolean `Type Coercion` context
         if parent_node_in_boolean_cast_context {
-            if let Some(result) = is_double_negation_ignore_parenthesis(&syntax) {
+            if let Some(result) = is_double_negation_ignore_parenthesis(n.syntax()) {
                 return Some(result);
             };
 
             // Convert `Boolean(x)` -> `x` if parent `SyntaxNode` in any boolean `Type Coercion` context
             // Only if `Boolean` Call Expression have one `JsAnyExpression` argument
-            if let Some(expr) = JsCallExpression::cast(syntax.clone()) {
+            if let Some(expr) = JsCallExpression::cast_ref(n.syntax()) {
                 if expr.has_callee("Boolean") {
                     let arguments = expr.arguments().ok()?;
                     let len = arguments.args().len();
@@ -178,7 +178,7 @@ impl Rule for NoExtraBooleanCast {
 
             // Convert `new Boolean(x)` -> `x` if parent `SyntaxNode` in any boolean `Type Coercion` context
             // Only if `Boolean` Call Expression have one `JsAnyExpression` argument
-            return JsNewExpression::cast(syntax).and_then(|expr| {
+            return JsNewExpression::cast_ref(n.syntax()).and_then(|expr| {
                 if expr.has_callee("Boolean") {
                     let arguments = expr.arguments()?;
                     let len = arguments.args().len();
