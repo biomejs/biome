@@ -171,7 +171,7 @@ fn ci_does_not_run_formatter() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("rome.json"),
+        PathBuf::from("biome.json"),
         CONFIG_DISABLED_FORMATTER.as_bytes(),
     );
 
@@ -256,7 +256,7 @@ fn ci_does_not_run_linter() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("rome.json"),
+        PathBuf::from("biome.json"),
         CONFIG_LINTER_DISABLED.as_bytes(),
     );
 
@@ -386,7 +386,7 @@ fn ci_errors_for_all_disabled_checks() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), CI_CONFIGURATION.as_bytes());
 
     let file_path = Path::new("file.js");
@@ -462,7 +462,7 @@ fn file_too_large_config_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    fs.insert(PathBuf::from("rome.json"), CONFIG_FILE_SIZE_LIMIT);
+    fs.insert(PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
 
     let file_path = Path::new("ci.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
@@ -553,7 +553,7 @@ fn ci_runs_linter_not_formatter_issue_3495() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_DISABLED_FORMATTER.as_bytes());
 
     let file_path = Path::new("file.js");
@@ -753,7 +753,7 @@ import A from "a.js"
 something( )
     "#;
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), rome_json.as_bytes());
 
     let file_path = Path::new("file.js");
@@ -812,7 +812,7 @@ file2.js
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // configuration
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git folder

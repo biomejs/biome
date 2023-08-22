@@ -134,7 +134,7 @@ impl LSPServer {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![FileSystemWatcher {
                         glob_pattern: GlobPattern::String(format!(
-                            "{}/rome.json",
+                            "{}/biome.json",
                             base_path.display()
                         )),
                         kind: Some(WatchKind::all()),
@@ -263,7 +263,7 @@ impl LanguageServer for LSPServer {
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 
-        info!("Attempting to load the configuration from 'rome.json' file");
+        info!("Attempting to load the configuration from 'biome.json' file");
 
         futures::join!(
             self.session.load_extension_settings(),

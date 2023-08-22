@@ -2,6 +2,16 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
+## `file.js`
+
+```js
+
+function f() {
+return { something }
+}
+
+```
+
 ## `rome.json`
 
 ```json
@@ -9,15 +19,6 @@ expression: content
   "formatter": {
     "enabled": false
   }
-}
-```
-
-## `file.js`
-
-```js
-
-function f() {
-return { something }
 }
 
 ```

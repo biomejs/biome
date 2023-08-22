@@ -385,7 +385,7 @@ impl Session {
         self.initialize_params.get()?.client_information.as_ref()
     }
 
-    /// This function attempts to read the `rome.json` configuration file from
+    /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(&self) {

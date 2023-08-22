@@ -131,7 +131,7 @@ impl From<Option<ConfigurationPayload>> for LoadedConfiguration {
 }
 
 /// Load the configuration for this session of the CLI, merging the content of
-/// the `rome.json` file if it exists on disk with common command line options
+/// the `biome.json` file if it exists on disk with common command line options
 pub(crate) fn load_configuration(
     session: &mut CliSession,
     cli_options: &CliOptions,

@@ -2,7 +2,7 @@
 source: crates/rome_cli/tests/commands/rage.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {

@@ -42,7 +42,7 @@ impl AnalyzerRules {
     }
 }
 
-/// A data structured derived from the `rome.json` file
+/// A data structured derived from the `biome.json` file
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
@@ -57,7 +57,7 @@ pub struct AnalyzerConfiguration {
 /// A set of information useful to the analyzer infrastructure
 #[derive(Debug, Default)]
 pub struct AnalyzerOptions {
-    /// A data structured derived from the [`rome.json`] file
+    /// A data structured derived from the [`biome.json`] file
     pub configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed

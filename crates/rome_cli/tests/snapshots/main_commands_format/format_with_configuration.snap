@@ -2,6 +2,15 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
+## `file.js`
+
+```js
+function f() {
+      return { something };
+}
+
+```
+
 ## `rome.json`
 
 ```json
@@ -12,14 +21,6 @@ expression: content
     "indentStyle": "space",
     "indentSize": 6
   }
-}
-```
-
-## `file.js`
-
-```js
-function f() {
-      return { something };
 }
 
 ```

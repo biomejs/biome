@@ -2,18 +2,6 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
-
-```json
-{
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  }
-}
-```
-
 ## `.git`
 
 ```git
@@ -44,6 +32,18 @@ foo.call(); bar.call();
 
 ```js
 console.log('rome is cool');
+```
+
+## `rome.json`
+
+```json
+{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        }
+    }
 ```
 
 # Termination Message

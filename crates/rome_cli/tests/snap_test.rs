@@ -61,7 +61,7 @@ impl CliSnapshot {
             .print()
             .expect("printed JSON");
 
-            content.push_str("## `rome.json`\n\n");
+            content.push_str("## `biome.json`\n\n");
             content.push_str("```json");
             content.push('\n');
             content.push_str(formatted.as_code());
@@ -70,7 +70,7 @@ impl CliSnapshot {
         }
 
         for (name, file_content) in &self.files {
-            if !name.starts_with("rome.json") {
+            if !name.starts_with("biome.json") {
                 let extension = name.split('.').last().unwrap();
 
                 let _ = write!(content, "## `{}`\n\n", redact_snapshot(name));
@@ -256,7 +256,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             module_path: _,
         } = payload;
         let mut cli_snapshot = CliSnapshot::from_result(result);
-        let config_path = PathBuf::from("rome.json");
+        let config_path = PathBuf::from("biome.json");
         let configuration = fs.open(&config_path).ok();
         if let Some(mut configuration) = configuration {
             let mut buffer = String::new();

@@ -15,7 +15,7 @@ Global options applied to all commands
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional verbose advices on diagnostics
-        --config-path=PATH    Set the filesystem path to the directory of the rome.json configuration
+        --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
                               file
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
                               [default: 20]

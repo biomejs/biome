@@ -173,7 +173,7 @@ mod configuration {
     fn correct_root() {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
-        let file_path = Path::new("rome.json");
+        let file_path = Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_ALL_FIELDS.as_bytes());
 
         let result = run_cli(
@@ -198,7 +198,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("rome.json");
+        let file_path = Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_BAD_LINE_WIDTH.as_bytes());
 
         let result = run_cli(
@@ -223,7 +223,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("rome.json");
+        let file_path = Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_LINTER_WRONG_RULE.as_bytes());
 
         let result = run_cli(
@@ -248,7 +248,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("rome.json");
+        let file_path = Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_INCORRECT_GLOBALS.as_bytes());
 
         let result = run_cli(
@@ -274,7 +274,7 @@ mod configuration {
         let mut console = BufferConsole::default();
 
         fs.insert(
-            Path::new("rome.json").into(),
+            Path::new("biome.json").into(),
             CONFIG_INCORRECT_GLOBALS_V2.as_bytes(),
         );
         fs.insert(Path::new("file.js").into(), UNFORMATTED.as_bytes());

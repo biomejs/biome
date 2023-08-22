@@ -2,27 +2,29 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
-
-```json
-{
-  "linter": {
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noClassAssign": "warn"
-      }
-    }
-  }
-}
-```
-
 ## `file.js`
 
 ```js
 class A {};
 A = 0;
 
+```
+
+## `rome.json`
+
+```json
+
+{
+  "linter": {
+    "rules": {
+        "recommended": true,
+        "suspicious": {
+            "noClassAssign": "warn"
+        }
+    }
+  }
+}
+        
 ```
 
 # Emitted Messages

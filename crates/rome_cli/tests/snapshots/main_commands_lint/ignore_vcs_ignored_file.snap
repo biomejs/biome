@@ -2,18 +2,6 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
-
-```json
-{
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  }
-}
-```
-
 ## `.git`
 
 ```git
@@ -38,6 +26,18 @@ array.map(sentence => sentence.split(' ')).flat();
 
 ```js
 foo.call(); bar.call();
+```
+
+## `rome.json`
+
+```json
+{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        }
+    }
 ```
 
 # Termination Message

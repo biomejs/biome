@@ -9,13 +9,13 @@ Run various checks on a set of files.
 
 Usage: check [--apply] [--apply-unsafe] [PATH]...
 
-The configuration that is contained inside the file `rome.json`
+The configuration that is contained inside the file `biome.json`
         --vcs-client-kind=<git>  The kind of client.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
         --vcs-use-ignore-file=<true|false>  Whether Biome should use the VCS ignore file. When [true],
                               Biome will ignore the files specified in the ignore file.
         --vcs-root=PATH       The folder where Biome should check for VCS files. By default, Biome will
-                              use the same folder where `rome.json` was found.
+                              use the same folder where `biome.json` was found.
                               If Biome can't find the configuration, it will attempt to use the current
                               working directory. If no current working directory can't be found, Biome
                               won't use the VCS integration, and a diagnostic will be emitted
@@ -42,7 +42,7 @@ Global options applied to all commands
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional verbose advices on diagnostics
-        --config-path=PATH    Set the filesystem path to the directory of the rome.json configuration
+        --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
                               file
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
                               [default: 20]

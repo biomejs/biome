@@ -36,7 +36,7 @@ fn with_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("rome.json").to_path_buf(),
+        Path::new("biome.json").to_path_buf(),
         r#"{
   "formatter": {
     "enabled": false
@@ -66,7 +66,7 @@ fn with_malformed_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("rome.json").to_path_buf(),
+        Path::new("biome.json").to_path_buf(),
         r#"{
   "formatter": {
     "enabled":
@@ -104,9 +104,9 @@ fn with_server_logs() {
 ┐rome_cli::commands::daemon::Running Server{pid=195434}
 ├─2547ms INFO rome_lsp::server Starting Biome Language Server...
 ├─15333ms INFO rome_lsp::server Starting Biome Language Server...
-├─15347ms INFO rome_lsp::server Attempting to load the configuration from 'rome.json' file
-├─15347ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/rome.json"
-├─15347ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/rome.json"
+├─15347ms INFO rome_lsp::server Attempting to load the configuration from 'biome.json' file
+├─15347ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
+├─15347ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─15347ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ├─┐rome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘
@@ -121,9 +121,9 @@ INFO rome_cli::commands::daemon Received shutdown signal
 ┐rome_cli::commands::daemon::Running Server{pid=197796}
 ├─2822ms INFO rome_lsp::server Starting Biome Language Server...
 ├─7550ms INFO rome_lsp::server Starting Biome Language Server...
-├─7551ms INFO rome_lsp::server Attempting to load the configuration from 'rome.json' file
-├─7551ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/rome.json"
-├─7551ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/rome.json"
+├─7551ms INFO rome_lsp::server Attempting to load the configuration from 'biome.json' file
+├─7551ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
+├─7551ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─7551ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
 ├─┐rome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘

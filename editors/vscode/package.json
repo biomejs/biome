@@ -117,6 +117,10 @@
 			{
 				"fileMatch": "biome.json",
 				"url": "./configuration_schema.json"
+			},
+			{
+				"fileMatch": "rome.json",
+				"url": "./configuration_schema.json"
 			}
 		]
 	},

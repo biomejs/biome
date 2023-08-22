@@ -2,18 +2,6 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
-
-```json
-{
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single"
-    }
-  }
-}
-```
-
 ## `file.js`
 
 ```js
@@ -21,6 +9,18 @@ function f() {
   return 'hey';
 }
 
+```
+
+## `rome.json`
+
+```json
+{
+  "javascript": {
+    "formatter": {
+        "quoteStyle": "single"
+    }
+  }
+}
 ```
 
 # Emitted Messages

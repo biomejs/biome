@@ -12,7 +12,7 @@ pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
 
 "<Info><Emphasis>"Files created "</Emphasis></Info>{HorizontalLine::new(106)}"
 
-  "<Dim>"- "</Dim><Emphasis>"rome.json: "</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://rome.tools/configuration">"https://rome.tools/configuration"</Hyperlink>"
+  "<Dim>"- "</Dim><Emphasis>"biome.json: "</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://rome.tools/configuration">"https://rome.tools/configuration"</Hyperlink>"
 
 "<Info><Emphasis>"Next Steps "</Emphasis></Info>{HorizontalLine::new(109)}"
 

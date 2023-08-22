@@ -2,25 +2,25 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
+## `check.js`
+
+```js
+new Symbol("");
+```
+
 ## `rome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-      "recommended": false,
-      "correctness": {
-        "recommended": true
-      }
+        "recommended": false,
+        "correctness": {
+            "recommended": true
+        }
     }
   }
 }
-```
-
-## `check.js`
-
-```js
-new Symbol("");
 ```
 
 # Termination Message
