@@ -14,7 +14,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::process::{ExitCode, Termination};
 
 #[derive(Serialize, Deserialize)]
-/// Generic errors thrown during rome operations
+/// Generic errors thrown during biome operations
 pub enum WorkspaceError {
     /// Can't export the report of the CLI into a file
     ReportNotSerializable(ReportNotSerializable),

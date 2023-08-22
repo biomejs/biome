@@ -2,7 +2,7 @@
 title: Configuration
 emoji: ⚙️
 category: reference
-description: How to customize and configure Biome with rome.json.
+description: How to customize and configure Biome with biome.json.
 ---
 
 import LintGroups from "@src/components/generated/Groups.astro";
@@ -15,12 +15,12 @@ import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 The configuration file is considered **optional**, Biome has good defaults. Use the configuration
 file to change those defaults.
 
-The Biome configuration file is named `rome.json` and should be placed in the root directory of your project. The root
+The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
 directory is usually the directory containing your project's `package.json`.
 
 Here's an example:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -39,10 +39,10 @@ This configuration file enables the formatter and sets the preferred indent styl
 
 ## Configuration file resolution
 
-Biome uses auto discovery to find the nearest `rome.json` file. It starts looking for `rome.json` in the current
+Biome uses auto discovery to find the nearest `biome.json` file. It starts looking for `biome.json` in the current
 working directory, and then it starts looking in the parent directories until:
-- it finds a `rome.json` file;
-- it applies Biome's defaults if **no `rome.json` is found**;
+- it finds a `biome.json` file;
+- it applies Biome's defaults if **no `biome.json` is found**;
 
 Here's an example:
 
@@ -50,44 +50,44 @@ Here's an example:
 └── app
     ├── backend
     │   ├── package.json
-    │   └── rome.json
+    │   └── biome.json
     └── frontend
         ├── legacy
         │   └── package.json
         ├── new
         │   └── package.json
-        └── rome.json
+        └── biome.json
 
 ```
 
-- rome commands that run in `app/backend/package.json` will use the configuration file `app/backend/rome.json`;
-- rome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
-will use the configuration file `app/frontend/rome.json`;
+- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
+- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
+will use the configuration file `app/frontend/biome.json`;
 
 ## `$schema`
 
 Allows to pass a path to a JSON schema file.
 
-Since version `11.0.0`, a JSON schema file for the `rome.json` is published.
+Since version `11.0.0`, a JSON schema file for the `biome.json` is published.
 
-You can specify a relative path to the schema of the `rome` npm package if `rome` is installed in the `node_modules` folder:
+You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
-  "$schema": "./node_modules/rome/configuration_schema.json"
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
 }
 ```
 
 If you have problems with resolving the physical file, you can use the one published in this site:
 
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json"
+  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
 }
 ```
 
@@ -95,7 +95,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 A list of paths to other JSON files that will extend the current configuration file.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -135,7 +135,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 The files defined in this array:
 - must exist in the file system;
-- are resolved from the path where the `rome.json` file is defined;
+- are resolved from the path where the `biome.json` file is defined;
 - must be relative paths. Paths to libraries are not resolved;
 - must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
 - will be processed in order: from the first one to the last one;
@@ -155,7 +155,7 @@ this limit will be ignored for performance reason.
 A list of Unix shell style patterns. Biome ignores files and folders that
 match these patterns.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -169,7 +169,7 @@ match these patterns.
 
 Biome won't emit diagnostics if it encounters files that can't handle.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -204,7 +204,7 @@ specified in the ignore file.
 ### `vcs.root`
 
 The folder where Biome should check for VCS files. By default, Biome will use the same
-folder where `rome.json` was found.
+folder where `biome.json` was found.
 
 If Biome can't find the configuration, it will attempt to use the current working directory.
 If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
@@ -222,7 +222,7 @@ Enables Biome's linter
 
 An array of Unix shell style patterns.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -245,7 +245,7 @@ Enable or disable all [rules](/lint/rules) for all groups.
 
 If `recommended` and `all` are both `true`, Biome will emit a diagnostic and fallback to its defaults.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -260,7 +260,7 @@ If `recommended` and `all` are both `true`, Biome will emit a diagnostic and fal
 
 It's also possible to combine this flag to enable/disable different rule groups:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -294,7 +294,7 @@ Enables the recommended rules for a single group.
 
 Example:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -316,7 +316,7 @@ Enables all rules for a single group.
 
 Example:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -345,7 +345,7 @@ Enables Biome's formatter
 
 An array of Unix shell style patterns.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -359,7 +359,7 @@ An array of Unix shell style patterns.
 
 Allows to format a document that has syntax errors.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -405,7 +405,7 @@ Enables Biome's sort imports.
 A list of Unix shell style patterns. Biome ignores files and folders that
 match these patterns.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -425,7 +425,7 @@ These options apply only to JavaScript (and TypeScript) files.
 
 Allows to support the unsafe/experimental parameter decorators.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -484,7 +484,7 @@ Whether to add non-necessary parentheses to arrow functions:
 
 Example:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -499,7 +499,7 @@ Example:
 
 A list of global names that Biome should ignore (analyzer, linter, etc.)
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -517,7 +517,7 @@ Options applied to the JSON files.
 
 Enables the parsing of comments in JSON files.
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {

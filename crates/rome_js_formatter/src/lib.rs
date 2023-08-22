@@ -5,7 +5,7 @@
 //! Our formatter is node based. Meaning that each AST node knows how to format itself. In order to implement
 //! the formatting, a node has to implement the trait `FormatNode`.
 //!
-//! `rome` has an automatic code generation that creates automatically the files out of the grammar.
+//! `biome` has an automatic code generation that creates automatically the files out of the grammar.
 //! By default, all implementations will format verbatim,
 //! meaning that the formatter will print tokens and trivia as they are (`format_verbatim`).
 //!
@@ -82,10 +82,10 @@
 //!    }
 //!    ```
 //!
-//! 4. Use the [playground](https://play.rome.tools) to inspect the code that you want to format.
+//! 4. Use the [playground](https://biomejs.dev/playground/) to inspect the code that you want to format.
 //! It helps you to understand which nodes need to be implemented/modified
 //! in order to implement formatting. Alternatively, you can locally run the playground by following
-//! the [playground instructions](https://github.com/rome/tools/blob/main/website/playground/README.md).
+//! the [playground instructions](https://github.com/biomejs/biome/blob/main/website/playground/README.md).
 //! 5. Use the `quick_test.rs` file in `tests/` directory.
 //! function to test you snippet straight from your IDE, without running the whole test suite. The test
 //! is ignored on purpose, so you won't need to worry about the CI breaking.

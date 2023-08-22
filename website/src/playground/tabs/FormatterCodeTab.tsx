@@ -43,13 +43,13 @@ function calculateHint(a: string, b: string): string | JSX.Element {
 }
 
 export default function FormatterCodeTab({
-	rome,
+	rome: biome,
 	prettier,
 	extensions,
 }: Props) {
 	let hint;
 	if (prettier.type === "SUCCESS") {
-		hint = calculateHint(prettier.code, rome);
+		hint = calculateHint(prettier.code, biome);
 	} else {
 		hint = <span className="error">Error</span>;
 	}
@@ -58,7 +58,7 @@ export default function FormatterCodeTab({
 		<>
 			<Collapsible className="rome" heading={<RomeHeader />}>
 				<CodeMirror
-					value={rome}
+					value={biome}
 					extensions={extensions}
 					placeholder="Biome Output"
 					readOnly={true}

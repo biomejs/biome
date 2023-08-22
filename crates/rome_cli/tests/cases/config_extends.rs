@@ -11,7 +11,7 @@ fn extends_config_ok_formatter_no_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("rome.json");
+    let rome_json = Path::new("biome.json");
     fs.insert(
         rome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
@@ -49,7 +49,7 @@ fn extends_config_ok_linter_not_formatter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("rome.json");
+    let rome_json = Path::new("biome.json");
     fs.insert(
         rome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
@@ -97,7 +97,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("rome.json");
+    let rome_json = Path::new("biome.json");
     fs.insert(
         rome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
@@ -135,7 +135,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("rome.json");
+    let rome_json = Path::new("biome.json");
     fs.insert(
         rome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
@@ -180,7 +180,7 @@ fn extends_resolves_when_using_config_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Path::new("config/rome.json");
+    let rome_json = Path::new("config/biome.json");
     fs.insert(
         rome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,

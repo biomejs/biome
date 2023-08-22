@@ -2,7 +2,7 @@
 source: crates/rome_service/src/configuration/diagnostics.rs
 expression: content
 ---
-rome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Couldn't parse the *******, reason: wildcards are either regular `*` or recursive `**`
   

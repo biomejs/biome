@@ -1,20 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Distribution, Rome } from "../dist";
 
-describe("Rome WebAssembly lintContent", () => {
-	let rome: Rome;
+describe("Biome WebAssembly lintContent", () => {
+	let biome: Rome;
 	beforeEach(async () => {
-		rome = await Rome.create({
+		biome = await Rome.create({
 			distribution: Distribution.NODE,
 		});
 	});
 
 	afterEach(() => {
-		rome.shutdown();
+		biome.shutdown();
 	});
 
 	it("should lint content", () => {
-		const result = rome.lintContent("if (a == b) {}", {
+		const result = biome.lintContent("if (a == b) {}", {
 			filePath: "example.js",
 		});
 

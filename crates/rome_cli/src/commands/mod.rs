@@ -70,7 +70,7 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
-        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome check --stdin-file-path=file.js"
+        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome check --stdin-file-path=file.js"
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// Single file, single path or list of paths
@@ -90,7 +90,7 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
-        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome lint --stdin-file-path=file.js"
+        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// Single file, single path or list of paths
@@ -112,7 +112,7 @@ pub enum BiomeCommand {
         #[bpaf(external, optional, hide_usage)]
         files_configuration: Option<FilesConfiguration>,
 
-        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | rome format --stdin-file-path=file.js".
+        /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
@@ -150,7 +150,7 @@ pub enum BiomeCommand {
         paths: Vec<OsString>,
     },
 
-    /// Bootstraps a new rome project. Creates a configuration file with some defaults.
+    /// Bootstraps a new biome project. Creates a configuration file with some defaults.
     #[bpaf(command)]
     Init,
     /// Acts as a server for the Language Server Protocol over stdin/stdout

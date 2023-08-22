@@ -4,7 +4,7 @@ use rome_service::workspace::ServerInfo;
 
 use crate::{CliDiagnostic, CliSession, VERSION};
 
-/// Handle of the `version` command. Prints a more in detail version of rome.
+/// Handle of the `version` command. Prints a more in detail version of biome.
 pub(crate) fn full_version(session: CliSession) -> Result<(), CliDiagnostic> {
     session.app.console.log(markup! {
     "CLI:        "{VERSION}

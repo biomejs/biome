@@ -37,7 +37,7 @@ impl Execution {
 
 #[derive(Debug)]
 pub(crate) enum TraversalMode {
-    /// This mode is enabled when running the command `rome check`
+    /// This mode is enabled when running the command `biome check`
     Check {
         /// The type of fixes that should be applied when analyzing a file.
         ///
@@ -49,7 +49,7 @@ pub(crate) enum TraversalMode {
         /// 2. The content of the file
         stdin: Option<(PathBuf, String)>,
     },
-    /// This mode is enabled when running the command `rome lint`
+    /// This mode is enabled when running the command `biome lint`
     Lint {
         /// The type of fixes that should be applied when analyzing a file.
         ///
@@ -61,9 +61,9 @@ pub(crate) enum TraversalMode {
         /// 2. The content of the file
         stdin: Option<(PathBuf, String)>,
     },
-    /// This mode is enabled when running the command `rome ci`
+    /// This mode is enabled when running the command `biome ci`
     CI,
-    /// This mode is enabled when running the command `rome format`
+    /// This mode is enabled when running the command `biome format`
     Format {
         /// It ignores parse errors
         ignore_errors: bool,
@@ -74,7 +74,7 @@ pub(crate) enum TraversalMode {
         /// 2. The content of the file
         stdin: Option<(PathBuf, String)>,
     },
-    /// This mode is enabled when running the command `rome migrate`
+    /// This mode is enabled when running the command `biome migrate`
     Migrate {
         write: bool,
         configuration_path: PathBuf,

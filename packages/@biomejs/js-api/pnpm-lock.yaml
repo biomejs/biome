@@ -5,13 +5,13 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
-  '@rometools/wasm-bundler':
+  '@biomejs/wasm-bundler':
     specifier: ../wasm-bundler
     version: link:../wasm-bundler
-  '@rometools/wasm-nodejs':
+  '@biomejs/wasm-nodejs':
     specifier: ../wasm-nodejs
     version: link:../wasm-nodejs
-  '@rometools/wasm-web':
+  '@biomejs/wasm-web':
     specifier: ../wasm-web
     version: link:../wasm-web
   typescript:

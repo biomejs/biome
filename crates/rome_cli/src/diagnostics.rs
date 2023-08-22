@@ -16,7 +16,7 @@ fn command_name() -> String {
         .unwrap_or_else(|| String::from("biome"))
 }
 
-/// A diagnostic that is emitted when running rome via CLI.
+/// A diagnostic that is emitted when running biome via CLI.
 ///
 /// When displaying the diagnostic,
 #[derive(Debug)]
@@ -49,11 +49,11 @@ pub enum CliDiagnostic {
     IoError(IoDiagnostic),
     /// The daemon is not running
     ServerNotRunning(ServerNotRunning),
-    /// The end configuration (`rome.json` + other options) is incompatible with the command
+    /// The end configuration (`biome.json` + other options) is incompatible with the command
     IncompatibleEndConfiguration(IncompatibleEndConfiguration),
     /// No files processed during the file system traversal
     NoFilesWereProcessed(NoFilesWereProcessed),
-    /// Errors thrown when running the `rome migrate` command
+    /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
     /// When the VCS folder couldn't be found
     NoVcsFolderFound(NoVcsFolderFound),
@@ -452,7 +452,7 @@ impl CliDiagnostic {
         Self::ServerNotRunning(ServerNotRunning)
     }
 
-    /// Emitted when the end configuration (`rome.json` file + CLI arguments + LSP configuration)
+    /// Emitted when the end configuration (`biome.json` file + CLI arguments + LSP configuration)
     /// results in a combination of options that doesn't allow to run the command correctly.
     ///
     /// A reason needs to be provided

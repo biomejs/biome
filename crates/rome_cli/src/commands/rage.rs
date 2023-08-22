@@ -84,7 +84,7 @@ impl Display for WorkspaceRage<'_> {
     }
 }
 
-/// Prints information about other running rome server instances.
+/// Prints information about other running biome server instances.
 struct RunningRomeServer;
 
 impl Display for RunningRomeServer {
@@ -270,7 +270,7 @@ impl Display for RomeServerLog {
     }
 }
 
-/// Prints the server logs but only if the client is connected to a rome server.
+/// Prints the server logs but only if the client is connected to a biome server.
 struct ConnectedClientServerLog<'a>(&'a dyn Workspace);
 
 impl Display for ConnectedClientServerLog<'_> {

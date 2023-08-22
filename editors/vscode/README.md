@@ -95,7 +95,7 @@ Enables Biome to handle renames in the workspace (experimental).
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `rome.json` file.
+Disables formatting, linting, and syntax errors for projects without a `biome.json` file.
 Enabled by default.
 
 ## Versioning

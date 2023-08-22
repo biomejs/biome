@@ -25,12 +25,12 @@ function getDiagnosticMessage(diagnostic: RomeDiagnostic): string {
 	return buf;
 }
 
-function romeDiagnosticsToCodeMirror(
-	rome: RomeDiagnostic[],
+function biomeDiagnosticsToCodeMirror(
+	biome: RomeDiagnostic[],
 ): CodeMirrorDiagnostic[] {
 	const codeMirror: CodeMirrorDiagnostic[] = [];
 
-	for (const diag of rome) {
+	for (const diag of biome) {
 		const span = diag.location?.span;
 		if (span === undefined) {
 			continue;
@@ -97,7 +97,7 @@ export default forwardRef<ReactCodeMirrorRef, Props>(function CodeMirror(
 	useEffect(() => {
 		if (editor !== undefined && diagnostics !== undefined) {
 			editor.dispatch(
-				setDiagnostics(editor.state, romeDiagnosticsToCodeMirror(diagnostics)),
+				setDiagnostics(editor.state, biomeDiagnosticsToCodeMirror(diagnostics)),
 			);
 		}
 	}, [editor, diagnostics]);

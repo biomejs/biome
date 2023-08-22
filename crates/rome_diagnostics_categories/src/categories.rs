@@ -69,7 +69,7 @@ define_categories! {
     "lint/correctness/noUndeclaredVariables": "https://biomejs.dev/lint/rules/noUndeclaredVariables",
     "lint/correctness/noUnnecessaryContinue": "https://biomejs.dev/lint/rules/noUnnecessaryContinue",
     "lint/correctness/noUnreachable": "https://biomejs.dev/lint/rules/noUnreachable",
-    "lint/correctness/noUnreachableSuper": "https://rome.tools/docs/lint/rules/noUnreachableSuper",
+    "lint/correctness/noUnreachableSuper": "https://biomejs.dev/docs/lint/rules/noUnreachableSuper",
     "lint/correctness/noUnsafeFinally": "https://biomejs.dev/lint/rules/noUnsafeFinally",
     "lint/correctness/noUnsafeOptionalChaining": "https://biomejs.dev/lint/rules/noUnsafeOptionalChaining",
     "lint/correctness/noUnusedLabels": "https://biomejs.dev/lint/rules/noUnusedLabels",

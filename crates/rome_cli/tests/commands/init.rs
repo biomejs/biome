@@ -76,7 +76,7 @@ fn creates_config_file_when_rome_installed_via_package_manager() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("./node_modules/rome/configuration_schema.json");
+    let file_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
     fs.insert(file_path.into(), *b"{}");
 
     let result = run_cli(

@@ -202,7 +202,7 @@ pub(super) fn rome_log_dir() -> PathBuf {
 
 /// Tracing filter enabling:
 /// - All spans and events at level info or higher
-/// - All spans and events at level debug in crates whose name starts with `rome`
+/// - All spans and events at level debug in crates whose name starts with `biome`
 struct LoggingFilter;
 
 /// Tracing filter used for spans emitted by `rome*` crates

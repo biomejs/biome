@@ -41,16 +41,16 @@ You can now run Biome with:
 
 ## Configuration
 
-We recommend creating a `rome.json` configuration file for each project.
+We recommend creating a `biome.json` configuration file for each project.
 It eliminates  the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
 
 To create the configuration, run the `init` command in the root folder of your project:
 
 <PackageManagerRomeCommand command="init" />
 
-After running the `init` command, you'll now have a new `rome.json` file in your directory:
+After running the `init` command, you'll now have a new `biome.json` file in your directory:
 
-<CodeBlockHeader filename="rome.json" />
+<CodeBlockHeader filename="biome.json" />
 
 ```json
 {
@@ -112,9 +112,6 @@ If you are looking for editor support in a JetBrains IDE like WebStorm, then vis
 ## CI Setup
 
 If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation). This ensures that your CI pipeline uses the same version of Biome as you do inside of the editor or when running local CLI commands.
-
-
-If you are working on a project that isn't using Node.js, then the best way to integrate Biome into your CI is to use the [setup-rome](https://github.com/rome/setup-rome#usage) GitHub Action or install the [standalone executable](/standalone-executable).
 
 
 ## Next Steps

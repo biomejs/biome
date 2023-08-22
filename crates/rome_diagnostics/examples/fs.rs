@@ -52,7 +52,7 @@ pub fn main() {
         path: String::from("dist/bundle.js"),
         advices: NotFoundAdvices {
             pattern_list: vec![String::from("dist/**/*.js"), String::from("build/**/*.js")],
-            configuration_path: String::from("rome.json"),
+            configuration_path: String::from("biome.json"),
             configuration_span: TextRange::new(TextSize::from(29), TextSize::from(106)),
             configuration_source_code: String::from(
                 "{

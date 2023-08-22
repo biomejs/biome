@@ -2,7 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -43,7 +43,7 @@ foo.call(); bar.call();
 ## `file3.js`
 
 ```js
-console.log('rome is cool');
+console.log('biome is cool');
 ```
 
 # Emitted Messages

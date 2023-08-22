@@ -423,7 +423,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
     let result = run_cli(
@@ -466,7 +466,7 @@ fn no_lint_if_linter_is_disabled() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
     let result = run_cli(
@@ -502,7 +502,7 @@ fn should_disable_a_rule() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), NO_DEBUGGER_BEFORE.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_SUPPRESSED_RULE.as_bytes());
 
     let result = run_cli(
@@ -545,7 +545,7 @@ fn should_disable_a_rule_group() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(
         config_path.into(),
         CONFIG_LINTER_SUPPRESSED_GROUP.as_bytes(),
@@ -587,7 +587,7 @@ fn should_disable_a_rule_group() {
 fn downgrade_severity() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC.as_bytes(),
@@ -633,7 +633,7 @@ fn downgrade_severity() {
 fn upgrade_severity() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_LINTER_UPGRADE_DIAGNOSTIC.as_bytes(),
@@ -681,7 +681,7 @@ fn no_lint_when_file_is_ignored() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_LINTER_IGNORED_FILES.as_bytes());
 
     let file_path = Path::new("test.js");
@@ -724,7 +724,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_LINTER_AND_FILES_IGNORE.as_bytes());
 
     let file_path_test1 = Path::new("test1.js");
@@ -996,7 +996,7 @@ fn fs_error_unknown() {
 //
 // Verifies, that ignore patterns to symbolic links are allowed.
 //
-// ├── rome.json
+// ├── biome.json
 // ├── hidden_nested
 // │   └── test
 // │       └── symlink_testcase1_2 -> hidden_testcase1
@@ -1144,7 +1144,7 @@ fn file_too_large_config_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    fs.insert(PathBuf::from("rome.json"), CONFIG_FILE_SIZE_LIMIT);
+    fs.insert(PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
 
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
@@ -1474,7 +1474,7 @@ fn config_recommended_group() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_RECOMMENDED_GROUP.as_bytes());
 
     let file_path = Path::new("check.js");
@@ -1534,7 +1534,7 @@ fn all_rules() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     let result = run_cli(
@@ -1582,7 +1582,7 @@ fn top_level_all_down_level_not_all() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), code.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     let result = run_cli(
@@ -1630,7 +1630,7 @@ fn top_level_not_all_down_level_all() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), code.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     let result = run_cli(
@@ -1667,7 +1667,7 @@ fn ignore_configured_globals() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), code.as_bytes());
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     let result = run_cli(
@@ -1714,7 +1714,7 @@ file2.js
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // configuration
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git folder
@@ -1764,7 +1764,7 @@ fn ignore_vcs_os_independent_parse() {
 
     let git_ignore = "something.js\nfile2.js\r\nfile3.js";
 
-    let code3 = r#"console.log('rome is cool');"#;
+    let code3 = r#"console.log('biome is cool');"#;
     let code2 = r#"foo.call(); bar.call();"#;
     let code1 = r#"blah.call();"#;
 
@@ -1778,7 +1778,7 @@ fn ignore_vcs_os_independent_parse() {
     fs.insert(file_path3.into(), code3.as_bytes());
 
     // configuration
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git folder
@@ -1961,7 +1961,7 @@ fn should_apply_correct_file_source() {
         "type A = { a: string }; type B = Partial<A>".as_bytes(),
     );
 
-    let config_path = Path::new("rome.json");
+    let config_path = Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -2041,7 +2041,6 @@ fn should_not_enable_all_recommended_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-		"$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
 		"organizeImports": {
 		"enabled": false
 	},
@@ -2060,7 +2059,7 @@ fn should_not_enable_all_recommended_rules() {
 	}
 	}"#;
 
-    let configuration_path = Path::new("rome.json");
+    let configuration_path = Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
     let file_path = Path::new("fix.js");
@@ -2099,7 +2098,6 @@ fn should_not_disable_recommended_rules_for_a_group() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -2114,7 +2112,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
   }
 }"#;
 
-    let configuration_path = Path::new("rome.json");
+    let configuration_path = Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
     let file_path = Path::new("fix.js");
@@ -2149,7 +2147,6 @@ fn should_not_enable_nursery_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -2164,7 +2161,7 @@ fn should_not_enable_nursery_rules() {
   }
 }"#;
 
-    let configuration_path = Path::new("rome.json");
+    let configuration_path = Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
     let file_path = Path::new("fix.ts");
@@ -2267,7 +2264,7 @@ fn check_json_files() {
         r#"{ "foo": true, "foo": true }"#.as_bytes(),
     );
 
-    let configuration = Path::new("rome.json");
+    let configuration = Path::new("biome.json");
     fs.insert(
         configuration.into(),
         r#"{
@@ -2326,7 +2323,7 @@ fn should_pass_if_there_are_only_warnings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"
@@ -2375,7 +2372,7 @@ fn does_error_with_only_warnings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let file_path = Path::new("rome.json");
+    let file_path = Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"

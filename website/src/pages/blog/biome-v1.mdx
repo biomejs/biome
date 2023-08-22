@@ -35,7 +35,7 @@ Biome now supports two new, long-awaited options:
 
 ### JSX quotes style
 
-You can use this option via CLI or via `rome.json` file:
+You can use this option via CLI or via `biome.json` file:
 
 ```json
 {
@@ -63,7 +63,7 @@ const Header = () => {
 
 ### Arrow function parenthesis
 
-You can decide not to print parenthesis in arrow functions. You can customize the option via CLI or via `rome.json`:
+You can decide not to print parenthesis in arrow functions. You can customize the option via CLI or via `biome.json`:
 
 ```json
 {
@@ -110,7 +110,7 @@ By default, when Biome sees a file that can't handle, it fires a diagnostic and 
 
 With `--files-ignore-unknown` option, the CLI won't emit diagnostics and will continue processing files.
 
-You can define this behaviour in the `rome.json` too:
+You can define this behaviour in the `biome.json` too:
 
 ```json
 {
@@ -130,7 +130,7 @@ This new option allows users to use Biome with tools like `lint-staged`.
 
 In Biome, you can change the configuration of rules and allow them to emit diagnostics. This behaviour was limited, and now with `--error-on-warnings` option, you can tell Biome to exit with an error code if a **warning** is emitted.
 
-Here's an example, let's change the diagnostic level of a rule via `rome.json`:
+Here's an example, let's change the diagnostic level of a rule via `biome.json`:
 
 ```json
 {
@@ -181,7 +181,7 @@ Biome can parse comments inside JSON files. You can opt-in to this feature via t
 }
 ```
 
-> **NOTE**: the `rome.json` file **doesn't** allow comments.
+> **NOTE**: the `biome.json` file **doesn't** allow comments.
 
 > **WARNING**: when enabling this feature, comments will be permitted in **all** JSON files encountered by Biome.
 

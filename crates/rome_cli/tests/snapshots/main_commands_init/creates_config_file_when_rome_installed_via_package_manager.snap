@@ -2,28 +2,27 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `./node_modules/rome/configuration_schema.json`
-
-```json
-{}
-```
-
 ## `biome.json`
 
 ```json
 {
-	"$schema": "./node_modules/rome/configuration_schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true
-		}
-	}
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
 }
+```
 
+## `./node_modules/@biomejs/biome/configuration_schema.json`
+
+```json
+{}
 ```
 
 # Emitted Messages
@@ -34,22 +33,22 @@ Welcome to Biome! Let's get you started...
 
 Files created ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  - rome.json: Your project configuration. Documentation: https://rome.tools/configuration
+  - biome.json: Your project configuration. Documentation: https://biomejs.dev/configuration
 
 Next Steps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   1. Setup an editor extension
-     Get live errors as you type and format when you save. Learn more: https://rome.tools/editors
+     Get live errors as you type and format when you save. Learn more: https://biomejs.dev/editors
 
   2. Try a command
-     rome ci checks for lint errors and verifies formatting. Run rome --help for a full list of commands and options.
+     biome ci checks for lint errors and verifies formatting. Run biome --help for a full list of commands and options.
 
   3. Read the documentation
-     Our website serves as a comprehensive source of guides and documentation: https://docs.rome.tools
+     Our website serves as a comprehensive source of guides and documentation: https://biomejs.dev
 
   4. Get involved in the community
-     Ask questions, get support, or contribute by participating on GitHub (https://github.com/rome/tools),
-     or join our community Discord (https://discord.gg/rome)
+     Ask questions, get support, or contribute by participating on GitHub (https://github.com/biomejs/biome),
+     or join our community Discord (https://discord.gg/JXe7dnnc)
 ```
 
 

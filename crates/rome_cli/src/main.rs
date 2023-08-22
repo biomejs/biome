@@ -2,7 +2,7 @@
 //!
 //! If you're curious about how to use it, check Biome's [website]
 //!
-//! [website]: https://rome.tools
+//! [website]: https://biomejs.dev
 
 use bpaf::{Args, ParseFailure};
 use rome_cli::{

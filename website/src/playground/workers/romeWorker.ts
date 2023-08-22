@@ -226,10 +226,10 @@ self.addEventListener("message", async (e) => {
 				path,
 			});
 
-			const romeOutput: RomeOutput = {
+			const biomeOutput: RomeOutput = {
 				syntax: {
 					// Replace 4 spaced indentation with 2
-					// TODO replace this in Rome itself
+					// TODO replace this in Biome itself
 					ast: syntaxTree.ast.replace(/ {4}/g, "  "),
 					cst: syntaxTree.cst,
 				},
@@ -252,7 +252,7 @@ self.addEventListener("message", async (e) => {
 			self.postMessage({
 				type: "updated",
 				filename,
-				romeOutput,
+				romeOutput: biomeOutput,
 			});
 			break;
 		}

@@ -730,7 +730,7 @@ mod tests {
 
     impl Advices for CommandAdvice {
         fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
-            visitor.record_command("rome command --argument")
+            visitor.record_command("biome command --argument")
         }
     }
 
@@ -909,7 +909,7 @@ mod tests {
             "\n"
             <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis>"  $"</Emphasis>" rome command --argument\n"
+            <Emphasis>"  $"</Emphasis>" biome command --argument\n"
             "  \n"
         }.to_owned();
 

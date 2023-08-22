@@ -123,7 +123,7 @@ JsFunctionDeclaration =
     parameter_list: JsParameterList
     body: JsFunctionBody
 
-// Doesn't exist in Rome, rome uses the same type for block/function bodies.
+// Doesn't exist in Rome, biome uses the same type for block/function bodies.
 // Reason for splitting: Directives can only exist in function bodies (anything introducing new scope)
 JsFunctionBody =
     '{'

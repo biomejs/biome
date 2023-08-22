@@ -16,7 +16,7 @@ pub struct CliOptions {
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
-    /// Set the filesystem path to the directory of the rome.json configuration file
+    /// Set the filesystem path to the directory of the biome.json configuration file
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 

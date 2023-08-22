@@ -26,7 +26,7 @@ fn test_macro() {
 #[test]
 fn test_macro_attributes() {
     rome_markup::markup! {
-        <Hyperlink href="https://rome.tools/">"link"</Hyperlink>
+        <Hyperlink href="https://biomejs.dev/">"link"</Hyperlink>
     };
 }
 

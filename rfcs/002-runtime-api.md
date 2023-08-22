@@ -149,7 +149,7 @@ based its design **AND** end-goal.
 
 1. Biome is configuration aware, meaning that when communicating with Rust Workspace,
    all configuration defaults are automatically applied. If the APIs are run
-   inside a Biome project, the configuration is automatically picked up from the `rome.json` file.
+   inside a Biome project, the configuration is automatically picked up from the `biome.json` file.
 2. Biome's APIs should reflect the CLIs commands and arguments. What it's possible to do
    via CLI, should be done also via APIs, but not vice-versa. This constraint would allow the team
    to first design and test the feature natively, and expose it once it's stable.
@@ -165,19 +165,19 @@ based its design **AND** end-goal.
 Instance pattern
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-let rome = new Rome({});
+let biome = new Biome({});
 ```
 
 The instance pattern allows for better extensions on the long run, and allows to play better with
 all the tools we want to expose.
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
 const content = "function f() { return {} }";
-const rome = new Rome({
+const biome = new Biome({
     formatter: {
         lineWidth: 120
     },
@@ -188,14 +188,14 @@ const rome = new Rome({
         }
     }
 });
-const ast = rome.parseContent(content); // not part of this paragraph
-const new_content = rome.formatContent(content); // not part of this paragraph
-const diagnostics = rome.checkContent(content);  // not part of this paragraph
+const ast = biome.parseContent(content); // not part of this paragraph
+const new_content = biome.formatContent(content); // not part of this paragraph
+const diagnostics = biome.checkContent(content);  // not part of this paragraph
 ```
 
 The first parameter of the instance should be a personalized configuration. The configuration
 passed to the instance **will override** Biome's defaults  **_BUT_** not the options inside a possible
-`rome.json` file.
+`biome.json` file.
 
 This is an import point, because we might have cases where a user is using Biome for linting/formatting
 of the project, but this project is actually using the runtime API to do some ad-hoc work. For example
@@ -213,10 +213,10 @@ create more friction in the future when we will extend the APIs with new feature
 ### Formatting a file
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.formatFiles(["./path/to/file.js"]);
+const biome = new Biome();
+const result = biome.formatFiles(["./path/to/file.js"]);
 console.log(result.code); // formatted content
 console.log(result.errors); // possible parse errors
 ```
@@ -224,16 +224,16 @@ console.log(result.errors); // possible parse errors
 Which reflects
 
 ```shell
-rome format ./path/to/file.js
+biome format ./path/to/file.js
 ```
 
 We can also write directly the new content to a file
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.formatFile("./path/to/file.js", { write: true }); // `true` maps to the `--write` argument
+const biome = new Biome();
+const result = biome.formatFile("./path/to/file.js", { write: true }); // `true` maps to the `--write` argument
 console.log(result.code); // undefined, the new content is in the file
 console.log(result.errors); // possible parse errors
 ```
@@ -241,7 +241,7 @@ console.log(result.errors); // possible parse errors
 Which reflects
 
 ```shell
-rome format --write ./path/to/file.js
+biome format --write ./path/to/file.js
 ```
 
 ### Formatting a directory
@@ -249,10 +249,10 @@ rome format --write ./path/to/file.js
 It should be possible to format a directory
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.formatFiles(["./path"]);
+const biome = new Biome();
+const result = biome.formatFiles(["./path"]);
 for (const [file_name, result] of result) {
     console.log(file_name);
     console.log(result.code);
@@ -263,17 +263,17 @@ for (const [file_name, result] of result) {
 Which reflects
 
 ```shell
-rome format ./path
+biome format ./path
 ```
 
 We can also write directly the new content to files
 
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.formatFiles(["./path"], { write: true });
+const biome = new Biome();
+const result = biome.formatFiles(["./path"], { write: true });
 for (const [file_name, result] of result) {
     console.log(file_name);
     console.log(result.code); // undefined, it's being written
@@ -289,11 +289,11 @@ for (const [file_name, result] of result) {
 > that we plan to deliver ASAP
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
+const biome = new Biome();
 const content = "function f()  { return   {}}";
-const result = rome.formatContent(content, { filePath: "example.js" });
+const result = biome.formatContent(content, { filePath: "example.js" });
 console.log(result.code); // formatted content
 console.log(result.errors); // possible parse errors
 ```
@@ -301,7 +301,7 @@ console.log(result.errors); // possible parse errors
 Which will translate to
 
 ```shell
-echo "function f()  { return   {}}" | rome format --file-type=js
+echo "function f()  { return   {}}" | biome format --file-type=js
 ```
 
 `filePath` is required to tell Biome how it should parse the file.
@@ -309,11 +309,11 @@ echo "function f()  { return   {}}" | rome format --file-type=js
 ### Format range
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
+const biome = new Biome();
 const content = "function f()  { return   {}}";
-const result = rome.formatContent(content, { filePath: "example.js", range: [7, 10] });
+const result = biome.formatContent(content, { filePath: "example.js", range: [7, 10] });
 console.log(result.code); // formatted content
 console.log(result.errors); // possible parse errors
 ```
@@ -328,15 +328,15 @@ As you noticed each call accepts an object as second argument. This object could
 `debug` property, which allows us to return the IR emitted by Biome.
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.formatFiles(["./path/to/file.js"], { debug: true });
+const biome = new Biome();
+const result = biome.formatFiles(["./path/to/file.js"], { debug: true });
 console.log(result.code); // formatted content
 console.log(result.errors); // possible parse errors
 console.log(result.ir); // the IR emitted by Biome
 const content = "function f()  { return   {}}";
-const result2 = rome.formatContent(content, { filePath: "example.js", range: [7, 10], debug: true });
+const result2 = biome.formatContent(content, { filePath: "example.js", range: [7, 10], debug: true });
 console.log(result2.ir); // the IR emitted by the call formatContent
 ```
 
@@ -350,10 +350,10 @@ It's also possible to run the linter and retrieve possible diagnostics
 ### Lint files
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
-const result = rome.lintFiles(["./path/to/file.js"]);
+const biome = new Biome();
+const result = biome.lintFiles(["./path/to/file.js"]);
 console.log(result.errors); // diagnostics emitted while lint the files
 ```
 
@@ -361,11 +361,11 @@ console.log(result.errors); // diagnostics emitted while lint the files
 ### Lint content
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
+const biome = new Biome();
 const content = "function f()  { return   {}}";
-const result = rome.lintContent(content, { filePath: "example.js" });
+const result = biome.lintContent(content, { filePath: "example.js" });
 console.log(result.errors); // diagnostics emitted while lint the files
 ```
 
@@ -384,11 +384,11 @@ for our nodes. If we are able to generate TypeScript types for our AST, then `as
 ### Parse content
 
 ```js
-import { Rome } from "rome";
+import { Biome } from "@biomejs/biome";
 
-const rome = new Rome();
+const biome = new Biome();
 const content = "function f()  { return   {}}";
-const result = rome.parseContent(content, { filePath: "example.js" });
+const result = biome.parseContent(content, { filePath: "example.js" });
 console.log(result.ast); // AST as string
 console.log(result.cst); // CST as string
 console.log(result.errors); // possible parse errors
@@ -398,11 +398,11 @@ console.log(result.errors); // possible parse errors
 ## Errors
 
 This proposal assumes that **all** APIs are prone to errors for different reasons. Internally, in the
-Rust Workspace, we emit a `RomeError`, which might contain other variants with other errors,
+Rust Workspace, we emit a `BiomeError`, which might contain other variants with other errors,
 form example `ConfigurationError`.
 
-At the moment this `RomeError` is not serialized, so it's not very easy to come up with a clear
-proposal, but a runtime should receive at least a `code` of the error, e.g. `RomeError:ConfigurationError`,
+At the moment this `BiomeError` is not serialized, so it's not very easy to come up with a clear
+proposal, but a runtime should receive at least a `code` of the error, e.g. `BiomeError:ConfigurationError`,
 maybe a `sub_code` e.g. `ConfigurationError::ConfigAlreadyExists`,
 
 
@@ -416,7 +416,7 @@ scheme of what Biome should be.
 Of course there are exceptions, for example for a future testing framework:
 
 ```js
-import {test} from "rome";
+import {test} from "@biomejs/biome";
 
 test("test something", t => {
     t.assert(true)

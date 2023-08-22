@@ -1,4 +1,4 @@
-//! This module contains the configuration of `rome.json`
+//! This module contains the configuration of `biome.json`
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further options divided by tool.
@@ -38,7 +38,7 @@ use std::io::ErrorKind;
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
-/// The configuration that is contained inside the file `rome.json`
+/// The configuration that is contained inside the file `biome.json`
 #[derive(Debug, Deserialize, Serialize, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
@@ -289,9 +289,9 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 pub struct ConfigurationPayload {
     /// The result of the deserialization
     pub deserialized: Deserialized<Configuration>,
-    /// The path of where the `rome.json` file was found. This contains the `rome.json` name.
+    /// The path of where the `biome.json` file was found. This contains the `biome.json` name.
     pub configuration_file_path: PathBuf,
-    /// The base path of where the `rome.json` file was found.
+    /// The base path of where the `biome.json` file was found.
     /// This has to be used to resolve other configuration files.
     pub configuration_directory_path: PathBuf,
 }
@@ -318,7 +318,7 @@ impl ConfigurationBasePath {
 ///
 /// The configuration file will be read from the `file_system`. A [base path](ConfigurationBasePath) should be provided.
 ///
-/// The function will try to traverse upwards the file system until if finds a `rome.json` file, or there
+/// The function will try to traverse upwards the file system until if finds a `biome.json` file, or there
 /// aren't directories anymore.
 ///
 /// If a the configuration base path was provided by the user, the function will error. If not, Biome will use
@@ -391,16 +391,16 @@ pub fn create_config(
         }
     })?;
 
-    // we now check if rome is installed inside `node_modules` and if so, we
+    // we now check if biome is installed inside `node_modules` and if so, we
     if VERSION == "0.0.0" {
-        let schema_path = Path::new("./node_modules/rome/configuration_schema.json");
+        let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
             configuration.schema = schema_path.to_str().map(String::from);
         }
     } else {
         configuration.schema = Some(format!(
-            "https://docs.rome.tools/schemas/{}/schema.json",
+            "https://biomejs.dev/schemas/{}/schema.json",
             VERSION
         ));
     }

@@ -311,7 +311,7 @@ mod test {
     fn config_already_exists() {
         snap_diagnostic(
             "config_already_exists",
-            ConfigurationDiagnostic::new_already_exists().with_file_path("rome.json"),
+            ConfigurationDiagnostic::new_already_exists().with_file_path("biome.json"),
         )
     }
 
@@ -331,10 +331,10 @@ mod test {
                     pattern.to_string(),
                     error.msg.to_string(),
                 )
-                .with_file_path("rome.json"),
+                .with_file_path("biome.json"),
             )
         } else {
-            panic!("Tha pattern should fail")
+            panic!("The pattern should fail")
         }
     }
 

@@ -15,11 +15,11 @@ pub struct WorkspaceSettings {
     /// Enable rename capability
     pub rename: Option<bool>,
 
-    /// Only run Biome if a `rome.json` configuration file exists.
+    /// Only run Biome if a `biome.json` configuration file exists.
     pub require_configuration: Option<bool>,
 }
 
-/// The `rome.*` extension settings
+/// The `biome.*` extension settings
 #[derive(Debug)]
 pub(crate) struct ExtensionSettings {
     pub(crate) settings: WorkspaceSettings,

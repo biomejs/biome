@@ -31,7 +31,7 @@ fn main() -> Result<()> {
         let mut contributor_html = String::new();
         let escaped_login = html_escape::encode_text(&contributor.login);
         let escaped_avatar = html_escape::encode_text(&contributor.avatar_url);
-        contributor_html.push_str("<li><a href=\"https://github.com/rome/tools/commits?author=");
+        contributor_html.push_str("<li><a href=\"https://github.com/biomejs/biome/commits?author=");
 
         html_escape::encode_double_quoted_attribute_to_string(
             format!("{}", escaped_login),
@@ -65,7 +65,7 @@ struct Contributor {
 fn get_contributors(token: &str) -> Vec<Contributor> {
     let mut contributors = Vec::new();
     contributors_request(
-        "https://api.github.com/repos/rome/tools/contributors",
+        "https://api.github.com/repos/biomejs/biome/contributors",
         token,
         &mut contributors,
     );
@@ -74,7 +74,7 @@ fn get_contributors(token: &str) -> Vec<Contributor> {
 
 fn contributors_request(url: &str, token: &str, contributors: &mut Vec<Contributor>) {
     let request = ureq::get(url)
-        .set("User-Agent", "@rome")
+        .set("User-Agent", "@biomejs")
         .set("Authorization", &format!("token {token}"));
 
     match request.call() {

@@ -2,7 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -29,7 +29,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-rome.json:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Incorrect type, expected a string.
   

@@ -77,7 +77,7 @@ Shows the Biome version information and quit
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -110,7 +110,7 @@ Prints information for debugging
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -157,7 +157,7 @@ Run various checks on a set of files.
 
 **Usage**: **`biome`** **`check`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
 
-**The configuration that is contained inside the file `rome.json`**
+**The configuration that is contained inside the file `biome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
@@ -165,7 +165,7 @@ Run various checks on a set of files.
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
   Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
   If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
@@ -201,7 +201,7 @@ Run various checks on a set of files.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -244,7 +244,7 @@ Run various checks on a set of files.
 
 **Usage**: **`biome`** **`lint`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
 
-**The configuration that is contained inside the file `rome.json`**
+**The configuration that is contained inside the file `biome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
@@ -252,7 +252,7 @@ Run various checks on a set of files.
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
   Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
   If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
@@ -288,7 +288,7 @@ Run various checks on a set of files.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -359,7 +359,7 @@ Run the formatter on a set of files.
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
   Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
   If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 
@@ -381,7 +381,7 @@ Run the formatter on a set of files.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -416,7 +416,7 @@ Command to use in CI environments. Run various checks of a set of files.
 
 **Usage**: **`biome`** **`ci`** \[**`--formatter-enabled`**=_`<true|false>`_\] \[**`--linter-enabled`**=_`<true|false>`_\] \[**`--organize-imports-enabled`**=_`<true|false>`_\] \[_`PATH`_\]...
 
-**The configuration that is contained inside the file `rome.json`**
+**The configuration that is contained inside the file `biome.json`**
 - **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
   The kind of client.
 - **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
@@ -424,7 +424,7 @@ Command to use in CI environments. Run various checks of a set of files.
 - **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
   Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 - **`    --vcs-root`**=_`PATH`_ &mdash; 
-  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `rome.json` was found.
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
   If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
 - **`    --files-max-size`**=_`NUMBER`_ &mdash; 
@@ -460,7 +460,7 @@ Command to use in CI environments. Run various checks of a set of files.
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -516,7 +516,7 @@ Acts as a server for the Language Server Protocol over stdin/stdout
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
@@ -549,7 +549,7 @@ It updates the configuration when there are breaking changes
 - **`    --verbose`** &mdash; 
   Print additional verbose advices on diagnostics
 - **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the rome.json configuration file
+  Set the filesystem path to the directory of the biome.json configuration file
 - **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
   Cap the amount of diagnostics displayed.
    
