@@ -7,11 +7,19 @@ use rome_service::VERSION;
 use std::fs;
 use xtask::{project_root, Result};
 
-const FRONTMATTER: &str = r#"---
+const VSCODE_FRONTMATTER: &str = r#"---
 title: VSCode extension
 emoji: 💻
 category: reference
 description: Notes about the Biome's VSCode extension
+---
+"#;
+
+const CHANGELOG_FRONTMATTER: &str = r#"---
+title: Changelog
+emoji: 🖇️
+category: internals
+description: The changelog of Biome
 ---
 "#;
 
@@ -35,9 +43,16 @@ export function get() {
 /// Generates
 pub(crate) fn generate_files() -> Result<()> {
     let readme = fs::read_to_string(project_root().join("editors/vscode/README.md"))?;
+    let changelog = fs::read_to_string(project_root().join("CHANGELOG.md"))?;
     fs::remove_file(project_root().join("website/src/pages/vscode.mdx")).ok();
-    let page = format!("{FRONTMATTER}{readme}");
-    fs::write(project_root().join("website/src/pages/vscode.mdx"), page)?;
+    fs::remove_file(project_root().join("website/src/pages/internals/changelog.mdx")).ok();
+    let vscode = format!("{VSCODE_FRONTMATTER}{readme}");
+    let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
+    fs::write(project_root().join("website/src/pages/vscode.mdx"), vscode)?;
+    fs::write(
+        project_root().join("website/src/pages/internals/changelog.mdx"),
+        changelog,
+    )?;
 
     if VERSION != "0.0.0" {
         let parser = biome_command();
