@@ -2,25 +2,25 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `fix.js`
-
-```js
-(1 >= -0)
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-        "recommended": true,
-        "suspicious": {
-            "recommended": false
-        }
+      "recommended": true,
+      "suspicious": {
+        "recommended": false
+      }
     }
   }
 }
+```
+
+## `fix.js`
+
+```js
+(1 >= -0)
 ```
 
 # Emitted Messages

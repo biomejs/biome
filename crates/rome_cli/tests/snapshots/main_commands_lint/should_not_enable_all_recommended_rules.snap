@@ -2,6 +2,30 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
+## `biome.json`
+
+```json
+{
+  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "a11y": {},
+      "complexity": {},
+      "correctness": {},
+      "performance": {},
+      "security": {},
+      "style": {},
+      "suspicious": {}
+    }
+  }
+}
+```
+
 ## `fix.js`
 
 ```js
@@ -13,30 +37,6 @@ expression: content
     		    f(x);
     		}
 		
-```
-
-## `rome.json`
-
-```json
-	{
-		"$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
-		"organizeImports": {
-		"enabled": false
-	},
-		"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": false,
-			"a11y": {},
-			"complexity": {},
-			"correctness": {},
-			"performance": {},
-			"security": {},
-			"style": {},
-			"suspicious": {}
-		}
-	}
-	}
 ```
 
 # Emitted Messages

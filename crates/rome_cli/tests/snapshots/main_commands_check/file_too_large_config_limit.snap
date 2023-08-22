@@ -2,14 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `check.js`
-
-```js
-statement1();
-statement2();
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -17,6 +10,13 @@ statement2();
     "maxSize": 16
   }
 }
+```
+
+## `check.js`
+
+```js
+statement1();
+statement2();
 ```
 
 # Termination Message

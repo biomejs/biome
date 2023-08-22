@@ -2,14 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.js`
-
-```js
-import React from 'react';
-
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -19,6 +12,13 @@ import React from 'react';
     "lineWidth": 120
   }
 }
+```
+
+## `file.js`
+
+```js
+import React from 'react';
+
 ```
 
 # Emitted Messages

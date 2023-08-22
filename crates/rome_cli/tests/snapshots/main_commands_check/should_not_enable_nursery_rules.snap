@@ -2,22 +2,10 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `fix.ts`
-
-```ts
-const bannedType: Boolean = true;
-
-if (true) {
-	const obj = {};
-	obj["useLiteralKey"];
-}
-		
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
-	{
+{
   "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
   "organizeImports": {
     "enabled": false
@@ -32,6 +20,18 @@ if (true) {
     }
   }
 }
+```
+
+## `fix.ts`
+
+```ts
+const bannedType: Boolean = true;
+
+if (true) {
+	const obj = {};
+	obj["useLiteralKey"];
+}
+		
 ```
 
 # Termination Message

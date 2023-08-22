@@ -2,25 +2,25 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.js`
-
-```js
-if(!cond) { exprA(); } else { exprB() }
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
   "linter": {
     "rules": {
-        "recommended": true,
-        "style": {
-            "noNegationElse": "error"
-        }
+      "recommended": true,
+      "style": {
+        "noNegationElse": "error"
+      }
     }
   }
 }
+```
+
+## `file.js`
+
+```js
+if(!cond) { exprA(); } else { exprB() }
 ```
 
 # Termination Message

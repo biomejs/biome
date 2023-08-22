@@ -2,20 +2,20 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "globals": ["foo", "bar"]
+  }
+}
+```
+
 ## `fix.js`
 
 ```js
 foo.call(); bar.call();
-```
-
-## `rome.json`
-
-```json
-{
-        "javascript": {
-            "globals": ["foo", "bar"]
-        }
-    }
 ```
 
 # Emitted Messages

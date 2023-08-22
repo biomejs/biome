@@ -2,23 +2,22 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.js`
-
-```js
-
-function f() {
-return { something }
-}
-
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
   "formatter": {
     "enabled": false
   }
+}
+```
+
+## `file.js`
+
+```js
+
+function f() {
+return { something }
 }
 
 ```

@@ -2,23 +2,22 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
-	"formatter": {
-		"ignore": [
-			"test1.js",
-			"./test2.js",
-			"./test3/**/*",
-			"/test4/**/*",
-			"test5/**/*",
-			"**/test6/*.js",
-			"*.test7.js"
-		]
-	}
+  "formatter": {
+    "ignore": [
+      "test1.js",
+      "./test2.js",
+      "./test3/**/*",
+      "/test4/**/*",
+      "test5/**/*",
+      "**/test6/*.js",
+      "*.test7.js"
+    ]
+  }
 }
-
 ```
 
 ## `test.js`

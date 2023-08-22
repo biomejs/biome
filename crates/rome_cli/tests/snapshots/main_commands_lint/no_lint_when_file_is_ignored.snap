@@ -2,7 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -11,7 +11,6 @@ expression: content
     "ignore": ["test.js"]
   }
 }
-
 ```
 
 ## `test.js`

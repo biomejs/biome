@@ -2,19 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `file.js`
-
-```js
-function f() {
-        return {
-                a,
-                b,
-        };
-}
-
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -24,6 +12,17 @@ function f() {
     "indentStyle": "space",
     "indentSize": 6
   }
+}
+```
+
+## `file.js`
+
+```js
+function f() {
+        return {
+                a,
+                b,
+        };
 }
 
 ```

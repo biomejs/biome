@@ -2,18 +2,18 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `rome.json`
+## `biome.json`
 
 ```json
 {
-	"linter": {
-		"rules": {
-			"nursery": {
-				"noDuplicateJsonKeys": "error"
-			}
-		}
-	}
-	 }
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noDuplicateJsonKeys": "error"
+      }
+    }
+  }
+}
 ```
 
 ## `test.json`

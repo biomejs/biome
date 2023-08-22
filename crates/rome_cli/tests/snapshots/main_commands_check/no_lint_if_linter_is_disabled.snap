@@ -2,15 +2,7 @@
 source: crates/rome_cli/tests/snap_test.rs
 expression: content
 ---
-## `fix.js`
-
-```js
-
-(1 >= -0)
-
-```
-
-## `rome.json`
+## `biome.json`
 
 ```json
 {
@@ -18,6 +10,14 @@ expression: content
     "enabled": false
   }
 }
+```
+
+## `fix.js`
+
+```js
+
+(1 >= -0)
+
 ```
 
 # Termination Message
