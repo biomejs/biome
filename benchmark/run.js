@@ -1,12 +1,11 @@
-const fs = require("fs");
-const child_process = require("child_process");
-const path = require("path");
-const os = require("os");
-const { dir } = require("console");
+import fs from "fs";
+import child_process from "child_process";
+import path from "path";
+import os from "os";
 
 const TMP_DIRECTORY = path.resolve("./target");
 
-function buildRome() {
+function buildBiome() {
 	console.log("Build Biome...");
 
 	child_process.execSync("cargo build --bin biome --release", {
@@ -65,7 +64,7 @@ function getDirsToClone(sourceDirs) {
 	return Object.keys(sourceDirs);
 }
 
-function benchmarkFormatter(rome) {
+function benchmarkFormatter(biome) {
 	console.log("");
 	console.log("Benchmark formatter...");
 	console.log("―".repeat(80));
@@ -87,25 +86,25 @@ function benchmarkFormatter(rome) {
 			})
 			.join(" ");
 
-		const prettierCommand = `node '${resolvePrettier()}' ${prettierPaths} --write --loglevel=error`;
+		const prettierCommand = `node '${resolvePrettier()}' ${prettierPaths} --write --log-level=error`;
 		const parallelPrettierCommand = `node '${resolveParallelPrettier()}' ${prettierPaths} --write --concurrency ${os.cpus().length}`;
 
-		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${require.resolve("./dprint.json")}' ${Object.keys(configuration.sourceDirectories).map(path => `'${path}/**/*'`).join(" ")}`;
+		const dprintCommand = `${resolveDprint()} fmt --incremental=false --config '${resolveDprintConfig()}' ${Object.keys(configuration.sourceDirectories).map(path => `'${path}/**/*'`).join(" ")}`;
 
-		const romeCommand = `${rome} format --max-diagnostics=0 ${Object.keys(
+		const biomeCommand = `${biome} format --max-diagnostics=0 ${Object.keys(
 			configuration.sourceDirectories,
 		)
 			.map((path) => `'${path}'`)
 			.join(" ")} --write`;
 
-		const romeSingleCoreCommand = withEnvVariable(
+		const biomeSingleCoreCommand = withEnvVariable(
 			"RAYON_NUM_THREADS",
 			"1",
-			romeCommand,
+			biomeCommand,
 		);
 
 		// Run 2 warmups to make sure the files are formatted correctly
-		const hyperfineCommand = `hyperfine --show-output -w 2 -n Prettier "${prettierCommand}" -n "Parallel-Prettier" "${parallelPrettierCommand}" -n dprint "${dprintCommand}" -n Rome "${romeCommand}" --shell=${shellOption()} -n "Rome (1 thread)" "${romeSingleCoreCommand}"`;
+		const hyperfineCommand = `hyperfine --show-output -w 2 -n Prettier "${prettierCommand}" -n "Parallel-Prettier" "${parallelPrettierCommand}" -n dprint "${dprintCommand}" -n Biome "${biomeCommand}" --shell=${shellOption()} -n "Biome (1 thread)" "${biomeSingleCoreCommand}"`;
 		console.log(hyperfineCommand);
 
 		child_process.execSync(hyperfineCommand, {
@@ -116,7 +115,7 @@ function benchmarkFormatter(rome) {
 }
 
 function resolvePrettier() {
-	return path.resolve("node_modules/prettier/standalone.js");
+	return path.resolve("node_modules/prettier/bin/prettier.cjs");
 }
 
 function resolveParallelPrettier() {
@@ -127,7 +126,11 @@ function resolveDprint() {
 	return path.resolve("node_modules/dprint/dprint");
 }
 
-function benchmarkLinter(rome) {
+function resolveDprintConfig() {
+	return path.resolve("dprint.json");
+}
+
+function benchmarkLinter(biome) {
 	console.log("");
 	console.log("Benchmark linter...");
 	console.log("―".repeat(80));
@@ -139,14 +142,14 @@ function benchmarkLinter(rome) {
 		const projectDirectory = cloneProject(name, configuration.repository, getDirsToClone(configuration.sourceDirectories));
 
 		deleteFile(path.join(projectDirectory, ".eslintignore"));
-		deleteFile(path.join(projectDirectory, "/eslintrc.js"));
-
-		// Override eslint config
-		const eslintConfig = fs.readFileSync("./bench.eslint.js");
-		fs.writeFileSync(path.join(projectDirectory, "eslint.config.js"), eslintConfig);
-
-		const romeConfig = fs.readFileSync("./bench.rome.json");
-		fs.writeFileSync(path.join(projectDirectory, "rome.json"), romeConfig);
+		deleteFile(path.join(projectDirectory, ".eslintrc.js"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.cjs"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.json"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.yaml"));
+		deleteFile(path.join(projectDirectory, ".eslintrc.yml"));
+		deleteFile(path.join(projectDirectory, "eslint.config.js"));
+		deleteFile(path.join(projectDirectory, "rome.json"));
+		deleteFile(path.join(projectDirectory, "biome.json"));
 
 		const eslintPaths = configuration.sourceDirectories
 			.map((directory) => `'${directory}/**'`)
@@ -154,21 +157,21 @@ function benchmarkLinter(rome) {
 
 		const eslintCommand = `node '${resolveESlint()}' --no-ignore ${eslintPaths}`;
 
-		const romePaths = configuration.sourceDirectories
+		const biomePaths = configuration.sourceDirectories
 			.map((directory) => `'${directory}'`)
 			.join(" ");
 
 		// Don't compute the code frames for pulled diagnostics. ESLint doesn't do so as well.
-		const romeCommand = `${rome} check --max-diagnostics=0 ${romePaths}`;
+		const biomeCommand = `${biome} lint --max-diagnostics=0 ${biomePaths}`;
 
-		const romeSingleCoreCommand = withEnvVariable(
+		const biomeSingleCoreCommand = withEnvVariable(
 			"RAYON_NUM_THREADS",
 			"1",
-			romeCommand,
+			biomeCommand,
 		);
 
 		// Run 2 warmups to make sure the files are formatted correctly
-		const hyperfineCommand = `hyperfine -i -w 2 -n ESLint "${eslintCommand}" -n Rome "${romeCommand}" --shell=${shellOption()} -n "Rome (1 thread)" "${romeSingleCoreCommand}"`;
+		const hyperfineCommand = `hyperfine -i -w 2 -n ESLint "${eslintCommand}" -n Biome "${biomeCommand}" --shell=${shellOption()} -n "Biome (1 thread)" "${biomeSingleCoreCommand}"`;
 		console.log(hyperfineCommand);
 
 		child_process.execSync(hyperfineCommand, {
@@ -248,10 +251,10 @@ function cloneProject(name, repository, dirs = []) {
 function run() {
 	fs.mkdirSync("target", { recursive: true });
 
-	const rome = buildRome();
+	const biome = buildBiome();
 
-	benchmarkFormatter(rome);
-	benchmarkLinter(rome);
+	benchmarkFormatter(biome);
+	benchmarkLinter(biome);
 }
 
 run();
