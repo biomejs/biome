@@ -5,7 +5,7 @@ use rome_analyze::{
 };
 use rome_console::markup;
 use rome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
-use rome_rowan::{AstNode, AstNodeList, Language, SyntaxNode};
+use rome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
 declare_rule! {
     /// Require generator functions to contain `yield`.
@@ -49,7 +49,7 @@ declare_rule! {
 struct MissingYieldVisitor {
     /// Vector to hold a function node and a boolean indicating whether the function
     /// contains an `yield` expression or not.
-    stack: Vec<(AnyFunctionLike, bool)>,
+    stack: Vec<(TextSize, bool)>,
 }
 
 impl Visitor for MissingYieldVisitor {
@@ -64,7 +64,9 @@ impl Visitor for MissingYieldVisitor {
             WalkEvent::Enter(node) => {
                 // When the visitor enters a function node, push a new entry on the stack
                 if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    self.stack.push((node, false));
+                    if node.is_generator() {
+                        self.stack.push((node.range().start(), false));
+                    }
                 }
 
                 if JsYieldExpression::can_cast(node.kind()) {
@@ -78,10 +80,13 @@ impl Visitor for MissingYieldVisitor {
             WalkEvent::Leave(node) => {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(exit_node) = AnyFunctionLike::cast_ref(node) {
-                    if let Some((enter_node, has_yield)) = self.stack.pop() {
-                        if enter_node == exit_node && !has_yield {
-                            ctx.match_query(MissingYield(enter_node));
+                if let Some(node) = AnyFunctionLike::cast_ref(node) {
+                    if let Some((function_start_range, has_yield)) = self.stack.pop() {
+                        if function_start_range == node.range().start()
+                            && !has_yield
+                            && node.is_generator()
+                        {
+                            ctx.match_query(MissingYield(node));
                         }
                     }
                 }
@@ -124,12 +129,10 @@ impl Rule for UseYield {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
-
-        // Don't emit diagnostic for non-generators or generators with an empty body
-        if !query.is_generator() || query.statements()?.is_empty() {
+        // Don't emit diagnostic for generators with an empty body
+        if query.statements()?.is_empty() {
             return None;
         }
-
         Some(())
     }
 

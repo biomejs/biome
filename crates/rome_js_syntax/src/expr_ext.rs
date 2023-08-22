@@ -1045,7 +1045,7 @@ pub fn global_identifier(expr: &AnyJsExpression) -> Option<(JsReferenceIdentifie
         let name = StaticValue::String(reference.value_token().ok()?);
         return Some((reference, name));
     }
-    let Some(member_expr) = AnyJsMemberExpression::cast_ref(expr.syntax()) else { return None; };
+    let member_expr = AnyJsMemberExpression::cast_ref(expr.syntax())?;
     let name = member_expr.member_name()?;
     let mut expr = member_expr.object().ok()?.omit_parentheses();
     while let Some(member_expr) = AnyJsMemberExpression::cast_ref(expr.syntax()) {

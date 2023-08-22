@@ -78,7 +78,7 @@ impl Rule for NoBlankTarget {
         if target_attribute.as_static_value()?.text() == "_blank" {
             match rel_attribute {
                 None => {
-                    if !node.has_trailing_spread_prop(target_attribute.clone()) {
+                    if !node.has_trailing_spread_prop(&target_attribute) {
                         return Some((target_attribute, None));
                     }
                 }
@@ -89,8 +89,8 @@ impl Rule for NoBlankTarget {
                             .text()
                             .split_ascii_whitespace()
                             .any(|f| f == "noreferrer")
-                            && !node.has_trailing_spread_prop(target_attribute.clone())
-                            && !node.has_trailing_spread_prop(rel_attribute.clone()))
+                            && !node.has_trailing_spread_prop(&target_attribute)
+                            && !node.has_trailing_spread_prop(&rel_attribute))
                     {
                         return Some((target_attribute, Some(rel_attribute)));
                     }

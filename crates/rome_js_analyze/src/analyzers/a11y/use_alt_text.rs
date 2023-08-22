@@ -161,7 +161,7 @@ fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
             attribute
                 .as_static_value()
                 .map_or(true, |value| !value.is_null_or_undefined())
-                && !element.has_trailing_spread_prop(attribute)
+                && !element.has_trailing_spread_prop(&attribute)
         })
 }
 
@@ -174,6 +174,6 @@ fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
             }
             attribute.as_static_value().map_or(true, |value| {
                 !value.is_null_or_undefined() && value.is_not_string_constant("")
-            }) && !element.has_trailing_spread_prop(attribute)
+            }) && !element.has_trailing_spread_prop(&attribute)
         })
 }

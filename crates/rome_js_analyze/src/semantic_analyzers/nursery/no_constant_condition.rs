@@ -141,11 +141,11 @@ impl ConditionalStatement {
     // Checks if the self statement is in a generator function
     fn is_in_generator_function(&self) -> Option<bool> {
         self.syntax().ancestors().find_map(|node| {
-            if let Some(func_decl) = JsFunctionDeclaration::cast(node.clone()) {
-                return Some(func_decl.as_fields().star_token.is_some());
+            if let Some(func_decl) = JsFunctionDeclaration::cast_ref(&node) {
+                return Some(func_decl.star_token().is_some());
             };
             if let Some(func_expr) = JsFunctionExpression::cast(node) {
-                return Some(func_expr.as_fields().star_token.is_some());
+                return Some(func_expr.star_token().is_some());
             };
             None
         })

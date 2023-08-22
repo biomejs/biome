@@ -293,7 +293,7 @@ impl VisitNode<JsonLanguage> for HooksOptions {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         let mut hook = Hooks::default();
-        let element = AnyJsonValue::cast(element.clone())?;
+        let element = AnyJsonValue::cast_ref(element)?;
         self.map_to_object(&element, "hooks", &mut hook, diagnostics)?;
         if hook.name.is_empty() {
             diagnostics.push(

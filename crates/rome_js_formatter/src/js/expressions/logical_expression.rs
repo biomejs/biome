@@ -24,7 +24,7 @@ impl FormatNodeRule<JsLogicalExpression> for FormatJsLogicalExpression {
 
 impl NeedsParentheses for JsLogicalExpression {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        if let Some(parent) = JsLogicalExpression::cast(parent.clone()) {
+        if let Some(parent) = JsLogicalExpression::cast_ref(parent) {
             parent.operator() != self.operator()
         } else {
             needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), parent)

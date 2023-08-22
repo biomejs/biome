@@ -80,7 +80,7 @@ impl Rule for UseIframeTitle {
                 if !lang_attribute
                     .as_static_value()
                     .map_or(true, |attribute| attribute.is_not_string_constant(""))
-                    && !element.has_trailing_spread_prop(lang_attribute)
+                    && !element.has_trailing_spread_prop(&lang_attribute)
                 {
                     return Some(());
                 }

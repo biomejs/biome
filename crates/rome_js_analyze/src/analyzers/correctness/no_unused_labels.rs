@@ -80,7 +80,7 @@ impl Visitor for UnusedLabelVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyJsControlFlowRoot::cast_ref(node).is_some() {
+                if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id += 1;
                 } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
                     if let Ok(label_tok) = label_stmt.label_token() {
@@ -97,7 +97,7 @@ impl Visitor for UnusedLabelVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyJsControlFlowRoot::cast_ref(node).is_some() {
+                if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id -= 1;
                 } else if let Some(stmt_label) = JsLabeledStatement::cast_ref(node) {
                     if let Ok(label_tok) = stmt_label.label_token() {
