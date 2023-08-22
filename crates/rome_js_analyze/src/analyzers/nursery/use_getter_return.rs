@@ -7,10 +7,7 @@ use rome_rowan::{AstNode, NodeOrToken, TextRange};
 use rustc_hash::FxHashSet;
 
 declare_rule! {
-    /// Enforces the presence of non-empty `return` statements in getters.
-    ///
-    /// A _getter_ allows defining a property which is dynamically computed.
-    /// Thus, it is desirable that a _getter_ returns a value.
+    /// Enforce `get` methods to always return a value.
     ///
     /// Source: https://eslint.org/docs/latest/rules/getter-return
     ///
@@ -28,6 +25,18 @@ declare_rule! {
     /// const obj = {
     ///     get firstName() {
     ///         return;
+    ///     },
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// class Option {
+    ///     get value() {
+    ///         if (this.hasValue) {
+    ///             log();
+    ///         } else {
+    ///             return null;
+    ///         }
     ///     },
     /// }
     /// ```

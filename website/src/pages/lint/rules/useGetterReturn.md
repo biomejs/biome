@@ -5,10 +5,7 @@ parent: lint/rules/index
 
 # useGetterReturn (since v1.0.0)
 
-Enforces the presence of non-empty `return` statements in getters.
-
-A _getter_ allows defining a property which is dynamically computed.
-Thus, it is desirable that a _getter_ returns a value.
+Enforce `get` methods to always return a value.
 
 Source: https://eslint.org/docs/latest/rules/getter-return
 
@@ -52,6 +49,40 @@ const obj = {
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>    },
     <strong>5 │ </strong>}
+  
+</code></pre>
+
+```jsx
+class Option {
+    get value() {
+        if (this.hasValue) {
+            log();
+        } else {
+            return null;
+        }
+    },
+}
+```
+
+<pre class="language-text"><code class="language-text">nursery/useGetterReturn.js:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found ','</span>
+  
+     <strong>6 │ </strong>            return null;
+     <strong>7 │ </strong>        }
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    },
+    <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong>
+     <strong>9 │ </strong>}
+    <strong>10 │ </strong>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Expected an identifier, a string literal, a number literal, a private field name, or a computed name here</span>
+  
+     <strong>6 │ </strong>            return null;
+     <strong>7 │ </strong>        }
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    },
+    <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong>
+     <strong>9 │ </strong>}
+    <strong>10 │ </strong>
   
 </code></pre>
 

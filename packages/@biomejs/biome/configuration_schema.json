@@ -990,7 +990,7 @@
 					]
 				},
 				"useGetterReturn": {
-					"description": "Enforces the presence of non-empty return statements in getters.",
+					"description": "Enforce get methods to always return a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
