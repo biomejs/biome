@@ -75,17 +75,16 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     where
         T: VisitNode<JsonLanguage>,
     {
-        let value = JsonStringValue::cast_ref(value.syntax()).or_else(|| {
-            diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
-                name,
-                "string",
-                value.range(),
-            ));
-            None
-        })?;
-
-        visitor.visit_member_value(value.syntax(), diagnostics)?;
-        Some(())
+        if JsonStringValue::can_cast(value.syntax().kind()) {
+            visitor.visit_member_value(value.syntax(), diagnostics)?;
+            return Some(());
+        }
+        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
+            name,
+            "string",
+            value.range(),
+        ));
+        None
     }
 
     /// It attempts to map a [AnyJsonValue] to a [String].

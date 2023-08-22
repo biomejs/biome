@@ -4,10 +4,9 @@ use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{
-    AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsSyntaxNode, JsVariableStatement,
-    TriviaPieceKind, T,
+    AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, TriviaPieceKind, T,
 };
-use rome_rowan::{AstNode, BatchMutationExt};
+use rome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 use crate::JsRuleAction;
 
@@ -79,19 +78,9 @@ declare_rule! {
     }
 }
 
-fn declaration_cast(node: JsSyntaxNode) -> Option<AnyJsDeclaration> {
-    if JsVariableStatement::can_cast(node.kind()) {
-        Some(AnyJsDeclaration::JsVariableDeclaration(
-            JsVariableStatement::cast(node)?.declaration().ok()?,
-        ))
-    } else {
-        AnyJsDeclaration::cast(node)
-    }
-}
-
 impl Rule for NoSwitchDeclarations {
     type Query = Ast<AnyJsSwitchClause>;
-    type State = AnyJsDeclaration;
+    type State = TextRange;
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -101,15 +90,23 @@ impl Rule for NoSwitchDeclarations {
             .consequent()
             .syntax()
             .children()
-            .filter_map(declaration_cast)
+            .filter_map(|node| {
+                if JsVariableStatement::can_cast(node.kind()) {
+                    Some(JsVariableStatement::cast(node)?.declaration().ok()?.range())
+                } else if AnyJsDeclaration::can_cast(node.kind()) {
+                    Some(node.text_trimmed_range())
+                } else {
+                    None
+                }
+            })
             .collect()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, decl: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, decl_range: &Self::State) -> Option<RuleDiagnostic> {
         let switch_clause = ctx.query();
         Some(RuleDiagnostic::new(
             rule_category!(),
-            decl.range(),
+            decl_range,
             markup! {
                 "Other switch clauses can erroneously access this "<Emphasis>"declaration"</Emphasis>".\nWrap the declaration in a block to restrict its access to the switch clause."
             },

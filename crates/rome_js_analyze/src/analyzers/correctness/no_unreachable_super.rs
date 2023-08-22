@@ -89,14 +89,15 @@ impl Rule for NoUnreachableSuper {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();
-
-        // Ignore non-constructor functions
-        let constructor = JsConstructorClassMember::cast_ref(&cfg.node)?;
-
+        if !JsConstructorClassMember::can_cast(cfg.node.kind()) {
+            // Ignore non-constructor functions
+            return None;
+        }
         // Find the class this constructor belongs to
-        let class = constructor
-            .syntax()
+        let class = cfg
+            .node
             .ancestors()
+            .skip(1) // skip constructor
             .find_map(AnyJsClass::cast)?;
 
         // Do not run the rule if the class has no extends clause or is extending a literal expression

@@ -145,15 +145,15 @@ impl Rule for NoInnerDeclarations {
         ) {
             return None;
         }
-        if let Some(stmt_list) = JsStatementList::cast(parent) {
-            if matches!(
-                stmt_list.syntax().parent()?.kind(),
+        if JsStatementList::can_cast(parent.kind())
+            && matches!(
+                parent.parent()?.kind(),
                 JsSyntaxKind::JS_FUNCTION_BODY
                     | JsSyntaxKind::JS_SCRIPT
                     | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
-            ) {
-                return None;
-            }
+            )
+        {
+            return None;
         }
         Some(())
     }

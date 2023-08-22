@@ -67,8 +67,7 @@ pub(crate) fn apply_suppression_comment(payload: SuppressionCommentEmitterPayloa
                 )
                 .build();
                 if let Some(current_element) = JsxOpeningElement::cast_ref(&current_jsx_element) {
-                    let parent = current_element.parent::<JsxElement>();
-                    if let Some(parent) = parent {
+                    if let Some(parent) = current_element.parent::<JsxElement>() {
                         mutation.add_jsx_elements_before_element(
                             &parent.into(),
                             [AnyJsxChild::JsxExpressionChild(jsx_comment)],
