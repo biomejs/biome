@@ -10,7 +10,7 @@
  <strong>Files created</strong> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   <span style="opacity: 0.8;">- </span><strong><span style="text-decoration-style: dashed; text-decoration-line: underline;">biome.json</span></strong>: Your project configuration. Documentation:
-    <a href="https://rome.tools/#project-configuration">https://rome.tools/#project-configuration</a>
+    <a href="https://biomejs.dev/configuration">https://biomejs.dev/#project-configuration</a>
   <span style="opacity: 0.8;">- </span><strong><span style="text-decoration-style: dashed; text-decoration-line: underline;">.editorconfig</span></strong>: Sets editor formatting and indentation options.
     Documentation: <a href="https://editorconfig.org/">https://editorconfig.org/</a>
 
@@ -18,7 +18,7 @@
 
   <span style="opacity: 0.8;">1. </span><strong>Setup an editor extension</strong>
      Get live errors as you type and format when you save. Learn more:
-     <a href="https://rome.tools/#editor-integration">https://rome.tools/#editor-integration</a>
+     <a href="https://biomejs.dev/vscode">https://biomejs.dev/vscode</a>
 
   <span style="opacity: 0.8;">2. </span><strong>Try a command</strong>
      <i>biome ci</i> is used to validate your code, verify formatting, and

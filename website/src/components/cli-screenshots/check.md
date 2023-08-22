@@ -1,4 +1,4 @@
-<pre class="language-text homepage-example collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> rome check
+<pre class="language-text homepage-example collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> biome check
 
  <span style="text-decoration-style: dashed; text-decoration-line: underline;">src/App.jsx:12:3</span> <strong>lint/jsx-a11y/altText</strong> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

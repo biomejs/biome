@@ -221,7 +221,7 @@ mod tests {
 
     #[test]
     fn test_hyperlink() {
-        const OUTPUT: &str = "\x1b[0m\x1b]8;;https://rome.tools/\x1b\\link\x1b]8;;\x1b\\\x1b[0m";
+        const OUTPUT: &str = "\x1b[0m\x1b]8;;https://biomejs.dev/\x1b\\link\x1b]8;;\x1b\\\x1b[0m";
 
         let mut buffer = Vec::new();
         let mut writer = Termcolor(Ansi::new(&mut buffer));
@@ -229,7 +229,7 @@ mod tests {
 
         formatter
             .write_markup(markup! {
-                <Hyperlink href="https://rome.tools/">"link"</Hyperlink>
+                <Hyperlink href="https://biomejs.dev/">"link"</Hyperlink>
             })
             .unwrap();
 

@@ -19,7 +19,7 @@ pub struct WorkspaceSettings {
     pub require_configuration: Option<bool>,
 }
 
-/// The `rome.*` extension settings
+/// The `biome.*` extension settings
 #[derive(Debug)]
 pub(crate) struct ExtensionSettings {
     pub(crate) settings: WorkspaceSettings,

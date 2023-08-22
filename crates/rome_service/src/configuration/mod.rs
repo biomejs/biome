@@ -391,16 +391,16 @@ pub fn create_config(
         }
     })?;
 
-    // we now check if rome is installed inside `node_modules` and if so, we
+    // we now check if biome is installed inside `node_modules` and if so, we
     if VERSION == "0.0.0" {
-        let schema_path = Path::new("./node_modules/rome/configuration_schema.json");
+        let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
             configuration.schema = schema_path.to_str().map(String::from);
         }
     } else {
         configuration.schema = Some(format!(
-            "https://docs.rome.tools/schemas/{}/schema.json",
+            "https://biomejs.dev/schemas/{}/schema.json",
             VERSION
         ));
     }

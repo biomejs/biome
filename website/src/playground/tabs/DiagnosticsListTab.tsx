@@ -18,7 +18,7 @@ function renderDiagnosticMessage(diagnostic: Diagnostic) {
 		let text = part.content;
 
 		// Capitalize diagnostic messages...
-		// TODO normalize this inside of rome itself
+		// TODO normalize this inside of biome itself
 		if (i === 0) {
 			text = text[0]?.toUpperCase() + text.slice(1);
 		}

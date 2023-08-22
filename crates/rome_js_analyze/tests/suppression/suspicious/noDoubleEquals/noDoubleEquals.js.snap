@@ -21,7 +21,7 @@ if (/** some weird comment
 
     }
 
-let a = `Output of "rome rage":
+let a = `Output of "biome rage":
   formatter enabled: ${formatter == true}
   linter: ${linter}
 `;
@@ -173,7 +173,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
 
   ! Use === instead of ==
   
-    18 │ let a = `Output of "rome rage":
+    18 │ let a = `Output of "biome rage":
   > 19 │   formatter enabled: ${formatter == true}
        │                                  ^^
     20 │   linter: ${linter}
@@ -181,7 +181,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   
   i == is only allowed when comparing against null
   
-    18 │ let a = `Output of "rome rage":
+    18 │ let a = `Output of "biome rage":
   > 19 │   formatter enabled: ${formatter == true}
        │                                  ^^
     20 │   linter: ${linter}
@@ -192,7 +192,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
   
     17 17 │   
-    18 18 │   let a = `Output of "rome rage":
+    18 18 │   let a = `Output of "biome rage":
     19    │ - ··formatter·enabled:·${formatter·==·true}
        19 │ + ··formatter·enabled:·${//·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
        20 │ + formatter··==·true}

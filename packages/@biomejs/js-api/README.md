@@ -8,11 +8,11 @@ Official JavaScript bindings for [Biome](https://biomejs.dev/)
 ## Installation
 
 ```shell
-npm i @rometools/js-api
-npm i @rometools/wasm-<dist>
+npm i @biomejs/js-api
+npm i @biomejs/wasm-<dist>
 ```
 
-You need to install one of the `@rometools/wasm-*` package as a **peer dependency** for this package to work correctly, out of the following distributions:
+You need to install one of the `@biomejs/wasm-*` package as a **peer dependency** for this package to work correctly, out of the following distributions:
 - `@biomejs/wasm-bundler`: Install this package if you're using a bundler that supports importing `*.wasm` files directly
 - `@biomejs/wasm-nodejs`: Install this package if you're using Node.js to load the WebAssembly bundle use the `fs` API
 - `@biomejs/wasm-web`: Install this package if you are targeting the web platform to load the WASM bundle using the `fetch` API

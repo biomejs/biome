@@ -15,7 +15,7 @@ body:
     id: environment
     attributes:
       label: Environment information
-      description: Run the command `rome rage` and paste its output here. Please review it, in case there are sensitive information you don't want to share.
+      description: Run the command `biome rage` and paste its output here. Please review it, in case there are sensitive information you don't want to share.
       render: block
     validations:
       required: true
@@ -46,7 +46,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/rome/tools/blob/main/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow Biome's Code of Conduct
           required: true

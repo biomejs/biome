@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Bootstraps a new rome project. Creates a configuration file with some defaults.
+Bootstraps a new biome project. Creates a configuration file with some defaults.
 
 Usage: init 
 

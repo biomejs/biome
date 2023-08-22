@@ -1764,7 +1764,7 @@ fn ignore_vcs_os_independent_parse() {
 
     let git_ignore = "something.js\nfile2.js\r\nfile3.js";
 
-    let code3 = r#"console.log('rome is cool');"#;
+    let code3 = r#"console.log('biome is cool');"#;
     let code2 = r#"foo.call(); bar.call();"#;
     let code1 = r#"blah.call();"#;
 
@@ -2041,7 +2041,6 @@ fn should_not_enable_all_recommended_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-		"$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
 		"organizeImports": {
 		"enabled": false
 	},
@@ -2099,7 +2098,6 @@ fn should_not_disable_recommended_rules_for_a_group() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -2149,7 +2147,6 @@ fn should_not_enable_nursery_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "$schema": "https://docs.rome.tools/schemas/12.1.0/schema.json",
   "organizeImports": {
     "enabled": false
   },

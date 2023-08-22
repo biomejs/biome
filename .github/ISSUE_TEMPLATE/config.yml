@@ -1,14 +1,14 @@
 blank_issues_enabled: false
 contact_links:
   - name: 🗣️ Chat
-    url: https://discord.gg/rome
+    url: https://discord.gg/JXe7dnnc
     about: Our Discord server is active and is used for real-time discussions including contribution collaboration, questions, and more!
   - name: 🤔 Support
-    url: https://discord.gg/rome
+    url: https://discord.gg/JXe7dnnc
     about: "This issue tracker is not for support questions. Visit our community Discord and the #support channel for assistance!"
   - name: 🆘 Code of Conduct Reports
-    url: https://github.com/rome/tools/blob/main/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct
+    url: https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct
     about: Please use the contact information in Code of Conduct as issues created here are public
   - name: 💡 Feature requests
-    url: https://github.com/rome/tools/discussions/new
+    url: https://github.com/biomejs/biome/discussions/new
     about: Please use a new Github discussion to propose ideas of feature requests

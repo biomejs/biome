@@ -58,7 +58,7 @@ Available options:
         --apply               Apply safe fixes, formatting
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
-                              e.g. echo 'let a;' | rome lint --stdin-file-path=file.js"
+                              e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
     -h, --help                Prints help information
 
 ```

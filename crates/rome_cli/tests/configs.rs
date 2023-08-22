@@ -22,7 +22,7 @@ pub const CONFIG_INIT_DEFAULT: &str = r#"{
 "#;
 
 pub const CONFIG_INIT_DEFAULT_WHEN_INSTALLED: &str = r#"{
-	"$schema": "./node_modules/rome/configuration_schema.json",
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "organizeImports": {
 	 	 "enabled": true
 	},

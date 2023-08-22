@@ -16,7 +16,7 @@ fn command_name() -> String {
         .unwrap_or_else(|| String::from("biome"))
 }
 
-/// A diagnostic that is emitted when running rome via CLI.
+/// A diagnostic that is emitted when running biome via CLI.
 ///
 /// When displaying the diagnostic,
 #[derive(Debug)]
@@ -53,7 +53,7 @@ pub enum CliDiagnostic {
     IncompatibleEndConfiguration(IncompatibleEndConfiguration),
     /// No files processed during the file system traversal
     NoFilesWereProcessed(NoFilesWereProcessed),
-    /// Errors thrown when running the `rome migrate` command
+    /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
     /// When the VCS folder couldn't be found
     NoVcsFolderFound(NoVcsFolderFound),

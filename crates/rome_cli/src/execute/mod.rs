@@ -37,7 +37,7 @@ impl Execution {
 
 #[derive(Debug)]
 pub(crate) enum TraversalMode {
-    /// This mode is enabled when running the command `rome check`
+    /// This mode is enabled when running the command `biome check`
     Check {
         /// The type of fixes that should be applied when analyzing a file.
         ///

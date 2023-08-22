@@ -53,7 +53,7 @@ pub(crate) struct Session {
     /// The parameters provided by the client in the "initialize" request
     initialize_params: OnceCell<InitializeParams>,
 
-    /// The settings of the Biome extension (under the `rome` namespace)
+    /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
     pub(crate) workspace: Arc<dyn Workspace>,
@@ -302,7 +302,7 @@ impl Session {
                 max_diagnostics: u64::MAX,
             })?;
 
-            tracing::trace!("rome diagnostics: {:#?}", result.diagnostics);
+            tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
 
             let result = result
                 .diagnostics

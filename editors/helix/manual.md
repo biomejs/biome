@@ -1,6 +1,6 @@
 # Configuration
 
-Currently, rome supports the following file extensions: `js`, `jsx`, `ts`, `tsx` and `d.ts`. 
+Currently, biome supports the following file extensions: `js`, `jsx`, `ts`, `tsx`, `d.ts`, `json` and `jsonc`.
 
 Biome has a an `lsp-proxy` command that acts as a server for the Language Server Protocol over stdin/stdout.
 
@@ -13,32 +13,32 @@ Biome has a an `lsp-proxy` command that acts as a server for the Language Server
 name = "javascript"
 scope = "source.js"
 file-types = ["js"]
-language-server = { command = "rome", args = ["lsp-proxy"] }
-formatter = { command = "rome", args = ["format", "--stdin-file-path", "test.js"]}
+language-server = { command = "biome", args = ["lsp-proxy"] }
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.js"]}
 auto-format = true
 
 [[language]]
 name = "jsx"
 scope = "source.jsx"
 file-types = ["jsx"]
-language-server = { command = "rome", args = ["lsp-proxy"] }
-formatter = { command = "rome", args = ["format", "--stdin-file-path", "test.jsx"]}
+language-server = { command = "biome", args = ["lsp-proxy"] }
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.jsx"]}
 auto-format = true
 
 [[language]]
 name = "typescript"
 scope = "source.ts"
 file-types = ["ts"]
-language-server = { command = "rome", args = ["lsp-proxy"] }
-formatter = { command = "rome", args = ["format", "--stdin-file-path", "test.ts"]}
+language-server = { command = "biome", args = ["lsp-proxy"] }
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.ts"]}
 auto-format = true
 
 [[language]]
 name = "tsx"
 scope = "source.tsx"
 file-types = ["tsx"]
-language-server = { command = "rome", args = ["lsp-proxy"] }
-formatter = { command = "rome", args = ["format", "--stdin-file-path", "test.tsx"]}
+language-server = { command = "biome", args = ["lsp-proxy"] }
+formatter = { command = "biome", args = ["format", "--stdin-file-path", "test.tsx"]}
 auto-format = true
 ```
 
@@ -47,11 +47,11 @@ auto-format = true
 
 The version of Helix after 23.05 will have [support for multiple language servers](https://github.com/helix-editor/helix/issues/1396) and the language server configuration has changed a bit.
 
-Now you can use rome alongside `typescript-language-server`.
+Now you can use biome alongside `typescript-language-server`.
 
 ```toml
 [language-server]
-rome = { command = "rome", args = ["lsp-proxy"] }
+biome = { command = "biome", args = ["lsp-proxy"] }
 
 [[language]]
 name = "javascript"
@@ -60,13 +60,13 @@ comment-token = "//"
 file-types = ["js", "mjs", "cjs"]
 injection-regex = "(js|javascript)"
 language-id = "javascript"
-language-servers = ["typescript-language-server", "rome"]
+language-servers = ["typescript-language-server", "biome"]
 roots = []
 scope = "source.js"
 shebangs = ["node"]
 
 [language.formatter]
-command = "rome"
+command = "biome"
 args = ["format", "--stdin-file-path", "test.js"]
 
 [language.indent]
@@ -79,13 +79,13 @@ auto-format = true
 file-types = ["ts", "mts", "cts"]
 injection-regex = "(ts|typescript)"
 language-id = "typescript"
-language-servers = ["typescript-language-server", "rome"]
+language-servers = ["typescript-language-server", "biome"]
 roots = []
 scope = "source.ts"
 shebangs = []
 
 [language.formatter]
-command = "rome"
+command = "biome"
 args = ["format", "--stdin-file-path", "test.ts"]
 
 [language.indent]
@@ -98,12 +98,12 @@ auto-format = true
 file-types = ["tsx"]
 injection-regex = "(tsx)"
 language-id = "typescriptreact"
-language-servers = ["typescript-language-server", "rome"]
+language-servers = ["typescript-language-server", "biome"]
 roots = []
 scope = "source.tsx"
 
 [language.formatter]
-command = "rome"
+command = "biome"
 args = ["format", "--stdin-file-path", "test.tsx"]
 
 [language.indent]
@@ -118,12 +118,12 @@ file-types = ["jsx"]
 grammar = "javascript"
 injection-regex = "jsx"
 language-id = "javascriptreact"
-language-servers = ["typescript-language-server", "rome"]
+language-servers = ["typescript-language-server", "biome"]
 roots = []
 scope = "source.jsx"
 
 [language.formatter]
-command = "rome"
+command = "biome"
 args = ["format", "--stdin-file-path", "test.jsx"]
 
 [language.indent]
@@ -135,12 +135,12 @@ name = "json"
 auto-format = true
 file-types = ["json", "jsonc", "arb", "ipynb", "geojson"]
 injection-regex = "json"
-language-servers = ["rome"]
+language-servers = ["biome"]
 roots = []
 scope = "source.json"
 
 [language.formatter]
-command = "rome"
+command = "biome"
 args = ["format", "--stdin-file-path", "test.json"]
 ```
 

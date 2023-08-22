@@ -34,7 +34,7 @@ class A { foo; static foo; }
 class A { foo; #foo; }
 class A { '#foo'; #foo; }
 
-// Currently, rome doesn't handles these computed and numerical property cases.
+// Currently, biome doesn't handles these computed and numerical property cases.
 // This is because these cases needed runtime evaluation.
 class A { 10() {} 1e1() {} }
 class A { ['foo']() {} ['foo']() {} }

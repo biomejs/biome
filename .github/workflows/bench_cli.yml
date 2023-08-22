@@ -40,9 +40,9 @@ jobs:
 
       - name: Compile on PR Branch
         run: |
-          cargo build --release --bin rome
+          cargo build --release --bin biome
           mkdir -p benchmark/target
-          cp target/release/rome benchmark/target/rome_pr
+          cp target/release/biome benchmark/target/biome_pr
 
       - name: Checkout Main Branch
         uses: actions/checkout@v3
@@ -52,8 +52,8 @@ jobs:
 
       - name: Compile on Main Branch
         run: |
-          cargo build --release --bin rome
-          cp target/release/rome benchmark/target/rome_main
+          cargo build --release --bin biome
+          cp target/release/biome benchmark/target/biome_main
 
       - name: Checkout webpack
         uses: actions/checkout@v3
@@ -79,11 +79,11 @@ jobs:
           CHECK_BENCH_COMMAND: "--max-diagnostics=0 eslint/lib eslint/messages eslint/tests/lib eslint/tests/performance eslint/tools webpack/lib"
         run: |
           hyperfine -w 2 --export-markdown benchmark_format.md \
-            -n "rome format (main)" "./rome_main $FORMAT_BENCH_COMMAND" \
-            -n "rome format (pr)" "./rome_pr $FORMAT_BENCH_COMMAND"
+            -n "biome format (main)" "./biome_main $FORMAT_BENCH_COMMAND" \
+            -n "biome format (pr)" "./biome_pr $FORMAT_BENCH_COMMAND"
           hyperfine -w 2 --export-markdown benchmark_check.md \
-            -n "rome check (main)" "./rome_main check $CHECK_BENCH_COMMAND" \
-            -n "rome check (pr)" "./rome_pr check $CHECK_BENCH_COMMAND"
+            -n "biome check (main)" "./biome_main check $CHECK_BENCH_COMMAND" \
+            -n "biome check (pr)" "./biome_pr check $CHECK_BENCH_COMMAND"
           cat benchmark_format.md >> benchmark.md
           echo $'\n' >> benchmark.md
           cat benchmark_check.md >> benchmark.md

@@ -62,7 +62,7 @@ Available positional items:
 
 Available options:
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
-                              e.g. echo 'let a;' | rome format --stdin-file-path=file.js".
+                              e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
         --write               Writes formatted files to file system.
     -h, --help                Prints help information
 

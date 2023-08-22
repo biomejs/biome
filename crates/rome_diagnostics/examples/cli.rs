@@ -43,19 +43,19 @@ impl Advices for CliAdvices {
         visitor.record_command(&self.suggested_command)?;
 
         visitor.record_log(LogCategory::Info, &"To see all available commands run")?;
-        visitor.record_command("rome --help")
+        visitor.record_command("biome --help")
     }
 }
 
 pub fn main() {
     let diag = CliDiagnostic {
-        command_name: String::from("formqt"),
+        command_name: String::from("format"),
         path: Resource::Argv,
         span: TextRange::new(TextSize::from(5), TextSize::from(11)),
-        source_code: String::from("rome formqt file.js"),
+        source_code: String::from("biome format file.js"),
         advices: CliAdvices {
             suggested_name: String::from("format"),
-            suggested_command: String::from("rome format file.js"),
+            suggested_command: String::from("biome format file.js"),
         },
     };
 

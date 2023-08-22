@@ -60,8 +60,8 @@ Here's an example:
 
 ```
 
-- rome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
-- rome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
+- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
+- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
 will use the configuration file `app/frontend/biome.json`;
 
 ## `$schema`
@@ -70,13 +70,13 @@ Allows to pass a path to a JSON schema file.
 
 Since version `11.0.0`, a JSON schema file for the `biome.json` is published.
 
-You can specify a relative path to the schema of the `rome` npm package if `rome` is installed in the `node_modules` folder:
+You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
 
 <CodeBlockHeader filename="biome.json" />
 
 ```json
 {
-  "$schema": "./node_modules/rome/configuration_schema.json"
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
 }
 ```
 
@@ -87,7 +87,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json"
+  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
 }
 ```
 

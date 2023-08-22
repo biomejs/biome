@@ -61,7 +61,7 @@ Available options:
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
-                              e.g. echo 'let a;' | rome check --stdin-file-path=file.js"
+                              e.g. echo 'let a;' | biome check --stdin-file-path=file.js"
     -h, --help                Prints help information
 
 ```

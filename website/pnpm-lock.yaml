@@ -45,7 +45,7 @@ devDependencies:
   '@fontsource/inter':
     specifier: ^4.5.14
     version: 4.5.14
-  '@rometools/wasm-web':
+  '@biomejs/wasm-web':
     specifier: ../npm/wasm-web
     version: link:../npm/wasm-web
   '@types/mermaid':
@@ -1262,7 +1262,7 @@ packages:
       rollup: 3.23.0
     dev: true
 
-  /@rometools/cli-darwin-arm64@12.1.2:
+  /@biomejs/cli-darwin-arm64@12.1.2:
     resolution: {integrity: sha512-9QxtAwNyX9n7ysxo+9qWczl70I1opulmX7LFNsRJKS9qqyTNc5K++btnNK07vWAIeQsMx4QYwr7241thuBMlFw==}
     cpu: [arm64]
     os: [darwin]
@@ -1270,7 +1270,7 @@ packages:
     dev: true
     optional: true
 
-  /@rometools/cli-darwin-x64@12.1.2:
+  /@biomejs/cli-darwin-x64@12.1.2:
     resolution: {integrity: sha512-w28NkGYK/rSmQU2WkNzw1h7ec8IR5a7LzYwPHDvG2ogY5sTcygkg0TGKOF/MHUvixU6EBPrFobua2gPhpr/m5A==}
     cpu: [x64]
     os: [darwin]
@@ -1278,7 +1278,7 @@ packages:
     dev: true
     optional: true
 
-  /@rometools/cli-linux-arm64@12.1.2:
+  /@biomejs/cli-linux-arm64@12.1.2:
     resolution: {integrity: sha512-7BPGqPtnJy1O8B/ucJ5Vg+p6EUvJJ9DazrT1UEdVR/4inPqAVac9PIZDjjHXyMrt/3IngnetPyn5EXNTAqpJVw==}
     cpu: [arm64]
     os: [linux]
@@ -1286,7 +1286,7 @@ packages:
     dev: true
     optional: true
 
-  /@rometools/cli-linux-x64@12.1.2:
+  /@biomejs/cli-linux-x64@12.1.2:
     resolution: {integrity: sha512-qH2iJKPLp34D0GFK1gLolHGkTA8q2vGKh2Ae1AwoTh87g0mXyyeQf4mAtxJtf4/ydMgjEkAZdEwyaevbTX8gnQ==}
     cpu: [x64]
     os: [linux]
@@ -1294,7 +1294,7 @@ packages:
     dev: true
     optional: true
 
-  /@rometools/cli-win32-arm64@12.1.2:
+  /@biomejs/cli-win32-arm64@12.1.2:
     resolution: {integrity: sha512-iIdqss2R8bni7C7isA9OLBj1UAA3MeKfca0aHNZr+2gSRdiSxO/47j6s3Tpebso99xsJBAFdWBOruG+l/C+LQg==}
     cpu: [arm64]
     os: [win32]
@@ -1302,7 +1302,7 @@ packages:
     dev: true
     optional: true
 
-  /@rometools/cli-win32-x64@12.1.2:
+  /@biomejs/cli-win32-x64@12.1.2:
     resolution: {integrity: sha512-MKOd02sSnd/Biogh3rIKpLFZzYbDSVvRNAxbFHJOpyGLbeQHfAg7QxjKwz0PqyrHVjZaTEEPlswrf4IFii0GNg==}
     cpu: [x64]
     os: [win32]
@@ -5017,12 +5017,12 @@ packages:
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      '@rometools/cli-darwin-arm64': 12.1.2
-      '@rometools/cli-darwin-x64': 12.1.2
-      '@rometools/cli-linux-arm64': 12.1.2
-      '@rometools/cli-linux-x64': 12.1.2
-      '@rometools/cli-win32-arm64': 12.1.2
-      '@rometools/cli-win32-x64': 12.1.2
+      '@biomejs/cli-darwin-arm64': 12.1.2
+      '@biomejs/cli-darwin-x64': 12.1.2
+      '@biomejs/cli-linux-arm64': 12.1.2
+      '@biomejs/cli-linux-x64': 12.1.2
+      '@biomejs/cli-win32-arm64': 12.1.2
+      '@biomejs/cli-win32-x64': 12.1.2
     dev: true
 
   /run-parallel@1.2.0:

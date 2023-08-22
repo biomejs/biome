@@ -135,7 +135,7 @@ fn redact_snapshot(input: &str) -> Cow<'_, str> {
             .replace_range(start + PATTERN.len().., "<TIME>");
     }
 
-    // Normalize the name of the current executable to "rome"
+    // Normalize the name of the current executable to "biome"
     let current_exe = current_exe()
         .ok()
         .and_then(|path| Some(path.file_name()?.to_str()?.to_string()));

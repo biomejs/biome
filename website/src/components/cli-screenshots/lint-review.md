@@ -1,4 +1,4 @@
-<pre class="language-text homepage-example collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> rome check --review
+<pre class="language-text homepage-example collapsed collapsable"><code class="language-text"><span style="color: CornflowerBlue">$</span> biome check --review
 
 <span style="color: #000; background-color: #ddd;"><strong> Reviewing diagnostics (</strong></span><span style="color: #000; background-color: #ddd;"><strong><strong>3</strong></strong></span><span style="color: #000; background-color: #ddd;"><strong><span style="opacity: 0.8;">/</span></strong></span><span style="color: #000; background-color: #ddd;"><strong><strong>3</strong></strong></span><span style="color: #000; background-color: #ddd;"><strong>) </strong></span>
 

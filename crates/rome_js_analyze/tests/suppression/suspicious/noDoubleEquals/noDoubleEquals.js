@@ -15,7 +15,7 @@ if (/** some weird comment
 
     }
 
-let a = `Output of "rome rage":
+let a = `Output of "biome rage":
   formatter enabled: ${formatter == true}
   linter: ${linter}
 `;
