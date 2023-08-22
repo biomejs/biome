@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Distribution, Rome } from "../dist";
 
-describe("Rome WebAssembly DiagnosticPrinter", () => {
-	let rome: Rome;
+describe("Biome WebAssembly DiagnosticPrinter", () => {
+	let biome: Rome;
 	beforeEach(async () => {
-		rome = await Rome.create({
+		biome = await Rome.create({
 			distribution: Distribution.NODE,
 		});
 	});
 
 	afterEach(() => {
-		rome.shutdown();
+		biome.shutdown();
 	});
 
 	it("should format content", () => {
@@ -20,7 +20,7 @@ if(expr()) {
     statement();
 }`;
 
-		const html = rome.printDiagnostics(
+		const html = biome.printDiagnostics(
 			[
 				{
 					advices: {

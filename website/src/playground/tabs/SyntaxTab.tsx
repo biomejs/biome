@@ -9,7 +9,7 @@ interface Props {
 	cst: string;
 }
 
-const romeAstCodeMirrorExtension = [romeAst()];
+const biomeAstCodeMirrorExtension = [romeAst()];
 
 export default React.forwardRef<ReactCodeMirrorRef, Props>(function SyntaxTab(
 	{ ast, cst },
@@ -21,7 +21,7 @@ export default React.forwardRef<ReactCodeMirrorRef, Props>(function SyntaxTab(
 				<CodeMirror
 					value={ast}
 					ref={ref}
-					extensions={romeAstCodeMirrorExtension}
+					extensions={biomeAstCodeMirrorExtension}
 					readOnly={true}
 				/>
 			</Collapsible>

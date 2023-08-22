@@ -10,7 +10,7 @@ interface Props {
 	rome: string;
 }
 
-const romeFormatterIrCodeMirrorExtension = [RomeFormatterIr()];
+const formatterIrCodeMirrorExtension = [RomeFormatterIr()];
 
 export default function FormatterIrTab({ rome, prettier }: Props) {
 	return (
@@ -18,7 +18,7 @@ export default function FormatterIrTab({ rome, prettier }: Props) {
 			<Collapsible className="rome" heading={<RomeHeader />}>
 				<CodeMirror
 					value={rome}
-					extensions={romeFormatterIrCodeMirrorExtension}
+					extensions={formatterIrCodeMirrorExtension}
 					readOnly={true}
 				/>
 			</Collapsible>
@@ -28,7 +28,7 @@ export default function FormatterIrTab({ rome, prettier }: Props) {
 				) : (
 					<CodeMirror
 						value={prettier.ir}
-						extensions={romeFormatterIrCodeMirrorExtension}
+						extensions={formatterIrCodeMirrorExtension}
 						readOnly={true}
 					/>
 				)}

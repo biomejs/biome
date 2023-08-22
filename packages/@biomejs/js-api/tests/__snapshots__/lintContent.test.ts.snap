@@ -1,6 +1,6 @@
 // Vitest Snapshot v1
 
-exports[`Rome WebAssembly lintContent > should lint content > lint diagnostics 1`] = `
+exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 1`] = `
 [
   {
     "advices": {

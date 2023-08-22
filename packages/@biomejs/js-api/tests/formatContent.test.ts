@@ -1,20 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Distribution, Rome } from "../dist";
 
-describe("Rome WebAssembly formatContent", () => {
-	let rome: Rome;
+describe("Biome WebAssembly formatContent", () => {
+	let biome: Rome;
 	beforeEach(async () => {
-		rome = await Rome.create({
+		biome = await Rome.create({
 			distribution: Distribution.NODE,
 		});
 	});
 
 	afterEach(() => {
-		rome.shutdown();
+		biome.shutdown();
 	});
 
 	it("should format JavaScript content", () => {
-		const result = rome.formatContent("function f   () {  }", {
+		const result = biome.formatContent("function f   () {  }", {
 			filePath: "example.js",
 		});
 
@@ -23,7 +23,7 @@ describe("Rome WebAssembly formatContent", () => {
 	});
 
 	it("should format JSON content", () => {
-		const result = rome.formatContent(
+		const result = biome.formatContent(
 			'{ "lorem": "ipsum", "foo": false, "bar": 23, "lorem": "ipsum", "foo": false, "bar": 23 }',
 			{
 				filePath: "example.json",
@@ -38,7 +38,7 @@ describe("Rome WebAssembly formatContent", () => {
 
 	it("should not format and have diagnostics", () => {
 		const content = "function   () {  }";
-		const result = rome.formatContent(content, {
+		const result = biome.formatContent(content, {
 			filePath: "example.js",
 		});
 
@@ -51,7 +51,7 @@ describe("Rome WebAssembly formatContent", () => {
 	});
 
 	it("should format content in debug mode", () => {
-		const result = rome.formatContent("function f() {}", {
+		const result = biome.formatContent("function f() {}", {
 			filePath: "example.js",
 			debug: true,
 		});
@@ -64,7 +64,7 @@ describe("Rome WebAssembly formatContent", () => {
 	});
 
 	it("should not format content with range", () => {
-		const result = rome.formatContent("let a   ; function g () {  }", {
+		const result = biome.formatContent("let a   ; function g () {  }", {
 			filePath: "file.js",
 			range: [20, 25],
 		});
@@ -74,7 +74,7 @@ describe("Rome WebAssembly formatContent", () => {
 	});
 
 	it("should not format content with range in debug mode", () => {
-		const result = rome.formatContent("let a   ; function g () {  }", {
+		const result = biome.formatContent("let a   ; function g () {  }", {
 			filePath: "file.js",
 			range: [20, 25],
 			debug: true,
@@ -104,7 +104,7 @@ describe("Rome WebAssembly formatContent", () => {
 }
 `;
 
-		rome.applyConfiguration({
+		biome.applyConfiguration({
 			formatter: {
 				indentStyle: "space",
 				indentSize: 8,
@@ -117,7 +117,7 @@ describe("Rome WebAssembly formatContent", () => {
 			},
 		});
 
-		const result = rome.formatContent(content, {
+		const result = biome.formatContent(content, {
 			filePath: "example.js",
 		});
 
@@ -129,7 +129,7 @@ describe("Rome WebAssembly formatContent", () => {
 		const formatted = `<div bar='foo' baz={"foo"} />;
 `;
 
-		rome.applyConfiguration({
+		biome.applyConfiguration({
 			formatter: {
 				indentStyle: "space",
 				indentSize: 8,
@@ -142,7 +142,7 @@ describe("Rome WebAssembly formatContent", () => {
 			},
 		});
 
-		const result = rome.formatContent(content, {
+		const result = biome.formatContent(content, {
 			filePath: "example.js",
 		});
 

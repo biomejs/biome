@@ -41,12 +41,12 @@ function PlaygroundLoader() {
 	const [loadingState, setLoadingState] = useState(LoadingState.Loading);
 	const [state, setPlaygroundState, resetPlaygroundState] =
 		usePlaygroundState();
-	const romeWorkerRef = useRef<Worker | null>(null);
+	const workerRef = useRef<Worker | null>(null);
 	const prettierWorkerRef = useRef<Worker | null>(null);
 
 	// rome-ignore lint/nursery/useExhaustiveDependencies: dependencies mismatch
 	useEffect(() => {
-		romeWorkerRef.current = new Worker(
+		workerRef.current = new Worker(
 			new URL("./workers/romeWorker", import.meta.url),
 			{ type: "module" },
 		);
@@ -55,7 +55,7 @@ function PlaygroundLoader() {
 			{ type: "module" },
 		);
 
-		romeWorkerRef.current.addEventListener("message", (event) => {
+		workerRef.current.addEventListener("message", (event) => {
 			switch (event.data.type) {
 				case "init": {
 					const loadingState = event.data.loadingState as LoadingState;
@@ -105,12 +105,12 @@ function PlaygroundLoader() {
 			}
 		});
 
-		romeWorkerRef.current?.postMessage({
+		workerRef.current?.postMessage({
 			type: "init",
 		});
 
 		return () => {
-			romeWorkerRef.current?.terminate();
+			workerRef.current?.terminate();
 			prettierWorkerRef.current?.terminate();
 		};
 	}, []);
@@ -123,12 +123,12 @@ function PlaygroundLoader() {
 		}
 
 		return throttle(() => {
-			romeWorkerRef.current?.postMessage({
+			workerRef.current?.postMessage({
 				type: "updateSettings",
 				settings: state.settings,
 			});
 
-			romeWorkerRef.current?.postMessage({
+			workerRef.current?.postMessage({
 				type: "update",
 				cursorPosition: state.cursorPosition,
 				filename: state.currentFile,
@@ -162,7 +162,7 @@ function PlaygroundLoader() {
 				code: getCurrentCode(state),
 			});
 
-			romeWorkerRef.current?.postMessage({
+			workerRef.current?.postMessage({
 				type: "update",
 				cursorPosition: state.cursorPosition,
 				filename: state.currentFile,

@@ -45,7 +45,7 @@ export default function PlaygroundLoader({
 	>("normal");
 
 	const file = getFileState(playgroundState, playgroundState.currentFile);
-	const romeOutput = file.rome;
+	const biomeOutput = file.rome;
 	const prettierOutput = file.prettier;
 
 	const codeMirrorExtensions = useMemo(() => {
@@ -61,7 +61,7 @@ export default function PlaygroundLoader({
 		}
 	}, [playgroundState.currentFile]);
 
-	const romeAstSyntacticDataRef = useRef<RomeAstSyntacticData | null>(null);
+	const biomeAstSyntacticDataRef = useRef<RomeAstSyntacticData | null>(null);
 
 	const astPanelCodeMirrorRef = useRef<null | ReactCodeMirrorRef>(null);
 
@@ -92,10 +92,10 @@ export default function PlaygroundLoader({
 
 	// We update the syntactic data of `RomeJsAst` only AstSource(`Display` string of our original AstRepresentation) changed.
 	useEffect(() => {
-		const ast = romeOutput.syntax.ast;
+		const ast = biomeOutput.syntax.ast;
 		const tree = codeMirrorLangRomeAst.parser.parse(ast);
 		const rangeMap = new Map();
-		romeAstSyntacticDataRef.current = {
+		biomeAstSyntacticDataRef.current = {
 			ast: tree,
 			rangeMap,
 		};
@@ -126,7 +126,7 @@ export default function PlaygroundLoader({
 				}
 			},
 		});
-	}, [romeOutput.syntax.ast]);
+	}, [biomeOutput.syntax.ast]);
 
 	const onChange = useCallback(
 		(value: string) => {
@@ -154,7 +154,7 @@ export default function PlaygroundLoader({
 	const editor = (
 		<CodeMirror
 			ref={editorRef}
-			diagnostics={romeOutput.diagnostics.list}
+			diagnostics={biomeOutput.diagnostics.list}
 			value={code}
 			extensions={codeMirrorExtensions}
 			placeholder="Enter your code here"
@@ -183,7 +183,7 @@ export default function PlaygroundLoader({
 					children: (
 						<DiagnosticsListTab
 							editorRef={editorRef}
-							diagnostics={romeOutput.diagnostics.list}
+							diagnostics={biomeOutput.diagnostics.list}
 						/>
 					),
 				},
@@ -192,7 +192,7 @@ export default function PlaygroundLoader({
 					title: "Formatter",
 					children: (
 						<FormatterCodeTab
-							rome={romeOutput.formatter.code}
+							rome={biomeOutput.formatter.code}
 							prettier={prettierOutput}
 							extensions={codeMirrorExtensions}
 						/>
@@ -203,7 +203,7 @@ export default function PlaygroundLoader({
 					title: "Formatter IR",
 					children: (
 						<FormatterIrTab
-							rome={romeOutput.formatter.ir}
+							rome={biomeOutput.formatter.ir}
 							prettier={prettierOutput}
 						/>
 					),
@@ -213,8 +213,8 @@ export default function PlaygroundLoader({
 					title: "Syntax",
 					children: (
 						<SyntaxTab
-							ast={romeOutput.syntax.ast}
-							cst={romeOutput.syntax.cst}
+							ast={biomeOutput.syntax.ast}
+							cst={biomeOutput.syntax.cst}
 							ref={astPanelCodeMirrorRef}
 						/>
 					),
@@ -223,7 +223,7 @@ export default function PlaygroundLoader({
 					key: "cfg",
 					title: "Control Flow Graph",
 					children: (
-						<ControlFlowTab graph={romeOutput.analysis.controlFlowGraph} />
+						<ControlFlowTab graph={biomeOutput.analysis.controlFlowGraph} />
 					),
 				},
 				{
@@ -231,7 +231,7 @@ export default function PlaygroundLoader({
 					title: "Import Sorting",
 					children: (
 						<ImportSortingTab
-							code={romeOutput.importSorting.code}
+							code={biomeOutput.importSorting.code}
 							extensions={codeMirrorExtensions}
 						/>
 					),
@@ -241,7 +241,7 @@ export default function PlaygroundLoader({
 					title: "Console",
 					visible: hasNarrowViewport,
 					children: (
-						<DiagnosticsConsoleTab console={romeOutput.diagnostics.console} />
+						<DiagnosticsConsoleTab console={biomeOutput.diagnostics.console} />
 					),
 				},
 				{
@@ -281,8 +281,8 @@ export default function PlaygroundLoader({
 				>
 					<DiagnosticsPane
 						editorRef={editorRef}
-						console={romeOutput.diagnostics.console}
-						diagnostics={romeOutput.diagnostics.list}
+						console={biomeOutput.diagnostics.console}
+						diagnostics={biomeOutput.diagnostics.list}
 					/>
 				</Resizable>
 			</div>
@@ -296,13 +296,13 @@ export default function PlaygroundLoader({
 	function scrollAstNodeIntoView(cursorPosition: number) {
 		if (
 			astPanelCodeMirrorRef.current == null ||
-			romeAstSyntacticDataRef.current == null
+			biomeAstSyntacticDataRef.current == null
 		) {
 			return;
 		}
 
 		const view = astPanelCodeMirrorRef.current.view;
-		const rangeMap = romeAstSyntacticDataRef.current.rangeMap;
+		const rangeMap = biomeAstSyntacticDataRef.current.rangeMap;
 
 		for (const [sourceRange, displaySourceRange] of rangeMap.entries()) {
 			if (
