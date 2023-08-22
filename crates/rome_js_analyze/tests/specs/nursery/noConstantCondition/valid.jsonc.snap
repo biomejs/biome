@@ -724,4 +724,14 @@ const Boolean = () => { }; if (Boolean(1)) { }
 const undefined = 'lol'; if (undefined) { }
 ```
 
+# Input
+```js
+while (true);
+```
+
+# Input
+```js
+function foo(Boolean) { while (true); }
+```
+
 

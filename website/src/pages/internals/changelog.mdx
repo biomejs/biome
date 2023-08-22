@@ -339,6 +339,19 @@ The following rules are now recommended:
   type NonNullableMyType = MyType & {};
   ```
 
+- Improve [noConstantCondition](https://biomejs.dev/lint/rules/noConstantCondition/)
+
+  The rule now allows `while(true)`.
+  This recognizes a common pattern in the web community:
+
+  ```js
+  while (true) {
+    if (cond) {
+      break;
+    }
+  }
+  ```
+
 - Improve the diagnostic and the code action of [useDefaultParameterLast](https://biomejs.dev/lint/rules/usedefaultparameterlast/).
 
   The diagnostic now reports the last required parameter which should precede optional and default parameters.

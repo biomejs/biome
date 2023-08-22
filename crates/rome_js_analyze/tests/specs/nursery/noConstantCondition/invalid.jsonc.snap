@@ -72,7 +72,7 @@ invalid.jsonc:1:8 lint/nursery/noConstantCondition ━━━━━━━━━�
 
 # Input
 ```js
-do { } while (true)
+do { } while (1)
 ```
 
 # Diagnostics
@@ -81,8 +81,8 @@ invalid.jsonc:1:15 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ do { } while (true)
-      │               ^^^^
+  > 1 │ do { } while (1)
+      │               ^
   
 
 ```
@@ -1248,23 +1248,6 @@ invalid.jsonc:1:8 lint/nursery/noConstantCondition ━━━━━━━━━�
 
 # Input
 ```js
-while (true);
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:8 lint/nursery/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected constant condition.
-  
-  > 1 │ while (true);
-      │        ^^^^
-  
-
-```
-
-# Input
-```js
 while (1);
 ```
 
@@ -1809,7 +1792,7 @@ invalid.jsonc:1:5 lint/nursery/noConstantCondition ━━━━━━━━━�
 
 # Input
 ```js
-function* foo() { while (true) { } yield 'foo'; }
+function* foo() { while (1) { } yield 'foo'; }
 ```
 
 # Diagnostics
@@ -1818,15 +1801,15 @@ invalid.jsonc:1:26 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ function* foo() { while (true) { } yield 'foo'; }
-      │                          ^^^^
+  > 1 │ function* foo() { while (1) { } yield 'foo'; }
+      │                          ^
   
 
 ```
 
 # Input
 ```js
-function* foo() { while (true) { if (true) { yield 'foo'; } } }
+function* foo() { while (1) { if (true) { yield 'foo'; } } }
 ```
 
 # Diagnostics
@@ -1835,43 +1818,43 @@ invalid.jsonc:1:26 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ function* foo() { while (true) { if (true) { yield 'foo'; } } }
-      │                          ^^^^
+  > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+      │                          ^
   
 
 ```
 
 ```
-invalid.jsonc:1:38 lint/nursery/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/nursery/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected constant condition.
   
-  > 1 │ function* foo() { while (true) { if (true) { yield 'foo'; } } }
-      │                                      ^^^^
+  > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+      │                                   ^^^^
   
 
 ```
 
 # Input
 ```js
-function* foo() { while (true) { yield 'foo'; } while (true) { } }
+function* foo() { while (1) { yield 'foo'; } while (1) { } }
 ```
 
 # Diagnostics
 ```
-invalid.jsonc:1:56 lint/nursery/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:53 lint/nursery/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected constant condition.
   
-  > 1 │ function* foo() { while (true) { yield 'foo'; } while (true) { } }
-      │                                                        ^^^^
+  > 1 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+      │                                                     ^
   
 
 ```
 
 # Input
 ```js
-var a = function* foo() { while (true) { } yield 'foo'; }
+var a = function* foo() { while (1) { } yield 'foo'; }
 ```
 
 # Diagnostics
@@ -1880,15 +1863,15 @@ invalid.jsonc:1:34 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ var a = function* foo() { while (true) { } yield 'foo'; }
-      │                                  ^^^^
+  > 1 │ var a = function* foo() { while (1) { } yield 'foo'; }
+      │                                  ^
   
 
 ```
 
 # Input
 ```js
-while (true) { function* foo() { yield; } }
+while (1) { function* foo() { yield; } }
 ```
 
 # Diagnostics
@@ -1897,8 +1880,8 @@ invalid.jsonc:1:8 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ while (true) { function* foo() { yield; } }
-      │        ^^^^
+  > 1 │ while (1) { function* foo() { yield; } }
+      │        ^
   
 
 ```
@@ -1956,7 +1939,7 @@ invalid.jsonc:1:37 lint/nursery/noConstantCondition ━━━━━━━━━�
 
 # Input
 ```js
-function foo() { while (true) { function* bar() { while (true) { yield; } } } }
+function foo() { while (1) { function* bar() { while (1) { yield; } } } }
 ```
 
 # Diagnostics
@@ -1965,15 +1948,15 @@ invalid.jsonc:1:25 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ function foo() { while (true) { function* bar() { while (true) { yield; } } } }
-      │                         ^^^^
+  > 1 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+      │                         ^
   
 
 ```
 
 # Input
 ```js
-function foo() { while (true) { const bar = function* () { while (true) { yield; } } } }
+function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
 ```
 
 # Diagnostics
@@ -1982,8 +1965,8 @@ invalid.jsonc:1:25 lint/nursery/noConstantCondition ━━━━━━━━━�
 
   ! Unexpected constant condition.
   
-  > 1 │ function foo() { while (true) { const bar = function* () { while (true) { yield; } } } }
-      │                         ^^^^
+  > 1 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+      │                         ^
   
 
 ```

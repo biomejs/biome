@@ -6,7 +6,7 @@ use rome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement,
     AnyJsTemplateElement, JsAssignmentOperator, JsConditionalExpression, JsDoWhileStatement,
     JsForStatement, JsFunctionDeclaration, JsFunctionExpression, JsIfStatement, JsLogicalOperator,
-    JsStatementList, JsUnaryOperator, JsWhileStatement, JsYieldExpression, TextRange,
+    JsStatementList, JsSyntaxKind, JsUnaryOperator, JsWhileStatement, JsYieldExpression, TextRange,
 };
 use rome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 
@@ -71,6 +71,12 @@ declare_rule! {
     /// } while (x);
     ///
     /// var result = x !== 0 ? a : b;
+    ///
+    /// // Exception
+    /// while (true) {
+    ///     if (x) { break; }
+    ///     x = f();
+    /// }
     /// ```
     ///
     pub(crate) NoConstantCondition    {
@@ -106,6 +112,16 @@ impl Rule for NoConstantCondition {
         }
 
         let test = conditional_stmt.test()?;
+        // Ignore `while (true) { ... }`
+        if matches!(conditional_stmt, ConditionalStatement::JsWhileStatement(_))
+            && test
+                .as_any_js_literal_expression()
+                .and_then(|test| test.as_js_boolean_literal_expression())
+                .and_then(|test| Some(test.value_token().ok()?.kind() == JsSyntaxKind::TRUE_KW))
+                .unwrap_or_default()
+        {
+            return None;
+        }
         is_constant_condition(&test, true, model).map(|_| Some(test.range()))?
     }
 
@@ -263,7 +279,7 @@ fn is_constant_condition(
         }
         JsIdentifierExpression(node) => {
             if node.name().ok()?.binding(model).is_some() {
-                // This is any_js_stmt edge case. Mordern browser doesn't allow to redeclare `undefined` but ESLint handle this so we do
+                // This is any_js_stmt edge case. Modern browsers don't allow to redeclare `undefined` but ESLint handle this so we do
                 return None;
             }
             let is_named_undefined = node.name().ok()?.is_undefined();
