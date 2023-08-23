@@ -26,7 +26,7 @@
 
 </div>
 
-**Biome** formats and lints your code in a [fraction of a second][biomejs].
+**Biome** formats and lints your code in a [fraction of a second][bench].
 
 **Biome** supports JavaScript, TypeScript, JSON, and CSS.
 It aims to support [all main languages][language-support] of modern web development.
@@ -50,7 +50,7 @@ with a sophisticated parser that represents the source text in full fidelity and
 Check out our [homepage][biomejs] to learn more about Biome,
 or directly head to the [Getting Started guide][getting-started] to start using Biome.
 
-
+[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/
 [language-support]: https://biomejs.dev/internals/language_support/
