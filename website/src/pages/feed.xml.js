@@ -1,10 +1,11 @@
-import rss from "@astrojs/rss";
+import rss, { pagesGlobToRssItems } from "@astrojs/rss";
 
-export const get = () =>
-	rss({
+export async function get() {
+	return rss({
 		title: "Biome Blog",
 		description: "",
 		site: import.meta.env.SITE,
-		items: import.meta.glob("./blog/**/*.mdx"),
+		items: await pagesGlobToRssItems(import.meta.glob("./blog/**/*.mdx")),
 		customData: "<language>en-us</language>",
 	});
+}
