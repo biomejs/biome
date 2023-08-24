@@ -9,10 +9,10 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crossbeam        = "0.8.1"
+crossbeam        = "0.8.2"
 indexmap         = { workspace = true }
 parking_lot      = { version = "0.12.0", features = ["arc_lock"] }
-rayon            = "1.5.1"
+rayon            = "1.7.0"
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 schemars         = { workspace = true, optional = true }

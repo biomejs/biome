@@ -23,11 +23,11 @@ rome_rowan = { path = "../../crates/rome_rowan" }
 
 pico-args = { version = "0.5.0", features = ["eq-separator"] }
 timing = "0.2.3"
-criterion = "0.4.0"
+criterion = "0.5.1"
 regex = "1.5.5"
-ureq = "2.4.0"
+ureq = "2.7.1"
 url = "2.2.2"
-itertools = "0.10.3"
+itertools = "0.11.0"
 ansi_rgb = "0.2.0"
 
 countme = { workspace = true }

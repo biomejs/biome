@@ -3,7 +3,7 @@
 	"publisher": "biomejs",
 	"displayName": "Biome",
 	"description": "Biome LSP VS Code Extension",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"icon": "icon.png",
 	"activationEvents": [
 		"onLanguage:javascript",

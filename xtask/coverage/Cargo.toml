@@ -24,7 +24,7 @@ serde_yaml = "0.9.9"
 regex = "1.5.5"
 once_cell = "1.9.0"
 walkdir = "2.3.2"
-atty = "0.2.14"
+atty = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.11", features = ["env-filter", "std"] }
 backtrace = "0.3.65"
