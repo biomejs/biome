@@ -24,12 +24,15 @@ function generateNativePackage(platform, arch) {
 	fs.mkdirSync(packageRoot);
 
 	// Generate the package.json manifest
-	const { version, license } = rootManifest;
+	const { version, license, repository, engines ,homepage } = rootManifest;
 
 	const manifest = JSON.stringify({
 		name: packageName,
 		version,
 		license,
+		repository,
+		engines,
+		homepage,
 		os: [platform],
 		cpu: [arch],
 	});
@@ -55,7 +58,7 @@ function updateWasmPackage(target) {
 	const manifestPath = resolve(packageRoot, "package.json");
 	const manifest = JSON.parse(fs.readFileSync(manifestPath).toString("utf-8"));
 
-	const { version } = rootManifest;
+	const { version, repository } = rootManifest;
 	manifest["name"] = packageName;
 	manifest["version"] = version;
 

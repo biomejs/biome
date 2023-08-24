@@ -1,6 +1,6 @@
 {
     "name": "@biomejs/biome",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "bin": "bin/biome",
     "scripts": {
         "postinstall": "node scripts/postinstall.js"
@@ -27,7 +27,7 @@
         "format",
         "lint",
         "toolchain",
-		"JSON"
+				"JSON"
     ],
     "engines": {
         "node": ">=14.*"
