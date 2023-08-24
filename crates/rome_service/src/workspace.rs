@@ -364,7 +364,7 @@ pub struct FormatOnTypeParams {
 pub enum FixFileMode {
     /// Applies [safe](rome_diagnostics::Applicability::Always) fixes
     SafeFixes,
-    /// Applies [safe](rome_diagnostics::Applicability::Always) and suggested [safe](rome_diagnostics::Applicability::MaybeIncorrect)
+    /// Applies [safe](rome_diagnostics::Applicability::Always) and [unsafe](rome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
 }
 
