@@ -121,6 +121,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v3
 
@@ -141,12 +144,12 @@ jobs:
         run: node packages/@biomejs/js-api/scripts/update-nightly-version.mjs
 
       - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public
+        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
         if: needs.build.outputs.prerelease != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish npm package as nightly
-        run: npm publish packages/@biomejs/js-api --tag nightly --access public
+        run: npm publish packages/@biomejs/js-api --tag nightly --access public --provenance
         if: needs.build.outputs.prerelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
