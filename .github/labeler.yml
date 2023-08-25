@@ -56,6 +56,9 @@ A-Website:
 A-LSP:
   - crates/rome_lsp/**
 
+A-Changelog:
+  - CHANGELOG.md
+
 L-Javascript:
   - crates/rome_js_*/**
 
