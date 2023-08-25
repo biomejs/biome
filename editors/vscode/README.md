@@ -110,7 +110,7 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 > I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library.
 
-The library `@biomjs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
+The library `@biomejs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
 
 It's possible though, that the extension can't resolve the binary when loading the extension. This is caused - probably - by your package manager.
 
