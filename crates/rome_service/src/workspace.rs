@@ -174,12 +174,12 @@ impl SupportsFeatureResult {
 
     /// Whether the feature is supported
     pub const fn is_supported(&self) -> bool {
-        matches!(self.reason, None)
+        self.reason.is_none()
     }
 
     /// Whether the feature is not supported, regardless of the reason
     pub const fn is_not_supported(&self) -> bool {
-        matches!(self.reason, Some(_))
+        self.reason.is_some()
     }
 }
 

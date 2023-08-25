@@ -146,7 +146,7 @@ fn string() {
 
     // missing double closing quote
     assert_lex! {
-        r"he",
+        r#""he"#,
         ERROR_TOKEN:3,
         EOF:0
     }

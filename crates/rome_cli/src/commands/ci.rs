@@ -33,7 +33,7 @@ pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(
         .formatter
         .get_or_insert_with(FormatterConfiguration::default);
 
-    if !matches!(payload.formatter_enabled, None) {
+    if payload.formatter_enabled.is_some() {
         formatter.enabled = payload.formatter_enabled;
     }
 
@@ -41,7 +41,7 @@ pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(
         .linter
         .get_or_insert_with(LinterConfiguration::default);
 
-    if !matches!(payload.linter_enabled, None) {
+    if payload.linter_enabled.is_some() {
         linter.enabled = payload.linter_enabled;
     }
 
@@ -49,7 +49,7 @@ pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(
         .organize_imports
         .get_or_insert_with(OrganizeImports::default);
 
-    if !matches!(payload.organize_imports_enabled, None) {
+    if payload.organize_imports_enabled.is_some() {
         organize_imports.enabled = payload.organize_imports_enabled;
     }
 

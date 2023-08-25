@@ -570,7 +570,7 @@ mod tests {
 
     #[test]
     fn jsx_children_iterator_test() {
-        let buffer = vec![1, 2, 3, 4];
+        let buffer = [1, 2, 3, 4];
 
         let mut iter = JsxChildrenIterator::new(buffer.iter());
 

@@ -42,7 +42,7 @@ pub(crate) fn store_path_to_ignore_from_vcs(
                 .files
                 .get_or_insert_with(FilesConfiguration::default);
             let ignored_files = files.ignore.get_or_insert_with(StringSet::default);
-            ignored_files.extend(files_to_ignore.into_iter());
+            ignored_files.extend(files_to_ignore);
         }
     }
     Ok(())

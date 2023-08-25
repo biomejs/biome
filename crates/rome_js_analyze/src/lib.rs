@@ -151,6 +151,61 @@ where
     analyze_with_inspect_matcher(root, filter, |_| {}, options, source_type, emit_signal)
 }
 
+impl Error for RuleError {}
+
+/// Series of errors encountered when running rules on a file
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub enum RuleError {
+    /// The rule with the specified name replaced the root of the file with a node that is not a valid root for that language.
+    ReplacedRootWithNonRootError {
+        rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
+    },
+}
+
+impl Diagnostic for RuleError {}
+
+impl std::fmt::Display for RuleError {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            RuleError::ReplacedRootWithNonRootError {
+                rule_name: Some((group, rule)),
+            } => {
+                std::write!(
+                    fmt,
+                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                )
+            }
+            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+                std::write!(
+                    fmt,
+                    "a code action replaced the root of the file with a non-root node."
+                )
+            }
+        }
+    }
+}
+
+impl rome_console::fmt::Display for RuleError {
+    fn fmt(&self, fmt: &mut rome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            RuleError::ReplacedRootWithNonRootError {
+                rule_name: Some((group, rule)),
+            } => {
+                std::write!(
+                    fmt,
+                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                )
+            }
+            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+                std::write!(
+                    fmt,
+                    "a code action replaced the root of the file with a non-root node."
+                )
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use rome_analyze::options::RuleOptions;
@@ -394,58 +449,3 @@ mod tests {
         );
     }
 }
-
-/// Series of errors encountered when running rules on a file
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum RuleError {
-    /// The rule with the specified name replaced the root of the file with a node that is not a valid root for that language.
-    ReplacedRootWithNonRootError {
-        rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    },
-}
-
-impl Diagnostic for RuleError {}
-
-impl std::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl rome_console::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut rome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl Error for RuleError {}
