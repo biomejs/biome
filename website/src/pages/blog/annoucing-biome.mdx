@@ -76,11 +76,11 @@ All my attempts to reach out to the current owner were all void. There was only 
 We created Biome. After weeks of discussions among the members of the core team and conversations with some friends, we thought that a clean slate was the best course of action.
 
 We pondered the idea of keeping the "rome" name in the new fork, but that was proven difficult:
-- Sebastian has registered tons of stuff with the "rome" name (GitHub organizations, website domains, open collectives, npm organizations);
-- without the proper rights in the Discord server, we couldn't delegate the moderation rights;
+- Sebastian has registered tons of stuff with the "rome" name (GitHub organizations, website domains, open collectives, npm organizations). Finding the right combination wasn't easy;
+- without the proper rights in the Discord server, we couldn't delegate the moderation rights. Discord is a very important asset for community building;
 - keeping the name would have caused some attribution to Rome Tools Inc., making things still foggy when it comes to the legal aspects of the source code;
 - We don't know if the "rome" name is registered; if it turns out it is, we could have incurred some legal troubles;
-- "rome" has a lot of baggage, as explained before (Meta, failed startup);
+- "rome" has a lot of historical baggage, as explained before (Meta, failed startup);
 
 Given all the previous statements, the core team settled for a new project.
 
@@ -99,32 +99,49 @@ Still, the primary mission is alive, and Biome wants to be a 360° toolchain; we
 The `rome` package **_won't be maintained anymore_** by the core team so that you won't get any more releases.
 
 1. You should use the `@biomejs/biome` package.
- ```diff
- {
- -  "rome": "12.1.3"
- +  "@biomejs/biome": "1.0.0"
- }
-    ```
+   ```diff
+   {
+   -  "rome": "12.1.3"
+   +  "@biomejs/biome": "1.0.0"
+   }
+   ```
 
 2. And change the CLI name in your scripts:
- ```diff
- {
-   "scripts": {
- -    "format": "rome format --write ./src",
- +    "format": "biome format --write ./src"
+    ```diff
+   {
+      "scripts": {
+   -    "format": "rome format --write ./src",
+   +    "format": "biome format --write ./src"
+      }
    }
- }
     ```
 3. In your `rome.json` file, update the URL of the `$schema` field:
 
- ```diff
- {
- -  "$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
- +  "$schema": "https://biomjs.dev/schemas/1.0.0/schema.json"
- }
+    ```diff
+    {
+    -  "$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
+    +  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
+    }
     ```
 
 4. Then install the new official [VSCode](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or [open VSX](https://open-vsx.org/extension/biomejs/biome) extension. That's an important step if you use these extensions.
+
+5. After the installation of the extension, open the `settings.json`. If you have some Rome related settings there, you'll have to update them:
+
+    ```diff
+    {
+      "[javascript]": {
+    -		"editor.defaultFormatter": "rome.rome"
+    +		"editor.defaultFormatter": "biomejs.biome"
+      },
+      "editor.codeActionsOnSave": {
+    -    "quickfix.rome": true,
+    -    "source.organizeImports.rome": true
+    +    "quickfix.biome": true,
+    +    "source.organizeImports.biome": true
+      }
+    }
+    ```
 
 Biome **still accepts the `rome.json` file** as configuration, so you don't need to do anything yet. Biome also takes `biome.json` as a configuration file.
 
