@@ -67,6 +67,7 @@ rome_text_size              = { version = "0.0.1", path = "./crates/rome_text_si
 tests_macros                = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
+atty              = "0.2.14"
 bitflags          = "2.3.1"
 bpaf              = { version = "0.9.3", features = ["derive"] }
 countme           = "3.0.1"
@@ -83,7 +84,6 @@ serde             = { version = "1.0.163", features = ["derive"], default-featur
 serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
-atty = "0.2.14"
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
 tokio = { version = "~1.18.5" }
 

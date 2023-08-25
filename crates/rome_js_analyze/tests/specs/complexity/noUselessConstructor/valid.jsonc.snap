@@ -1,11 +1,15 @@
 ---
 source: crates/rome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: valid.jsonc
 ---
 # Input
 ```js
 class A { }
+```
+
+# Input
+```js
+class A { constructor(a, b = 0){ } }
 ```
 
 # Input

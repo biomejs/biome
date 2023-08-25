@@ -498,6 +498,8 @@ The following rules are now recommended:
 
   The rule no longer reports false positive diagnostics when accessing properties directly from a hook and calling a hook inside function arguments.
 
+- Fix [noUselessConstructor](https://biomejs.dev/lint/rules/noUselessConstructor/) which erroneously reported constructors with default parameters [rome#4781](https://github.com/rome/tools/issues/4781)
+
 - Fix [noUselessFragments](https://biomejs.dev/lint/rules/nouselessfragments/)'s panics when running `biome check --apply-unsafe` ([#4637](https://github.com/rome/tools/issues/4639))
 
   This rule's code action emits an invalid AST, so I fixed using JsxString instead of JsStringLiteral
