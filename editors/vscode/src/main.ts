@@ -255,7 +255,7 @@ async function getWorkspaceDependency(
 		} catch (e) {
 			console.log(e);
 			window.showWarningMessage(`The extension couldn't resolve ${manifestName} or ${binaryName}.
-			If you installed "@biomejs/biome", it's a resolving issue due to your package manager. Check the troubleshooting section of the extension for more information on how to fix the issue.`)
+			If you installed "@biomejs/biome", it's a resolving issue due to your package manager. Check the troubleshooting section of the extension for more information on how to fix the issue.`);
 		}
 	}
 
