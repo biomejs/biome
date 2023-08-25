@@ -33,7 +33,7 @@ const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
 
 let client: LanguageClient;
 
-const IN_ROME_PROJECT = "inBiomeProject";
+const IN_BIOME_PROJECT = "inBiomeProject";
 
 export async function activate(context: ExtensionContext) {
 	const outputChannel = window.createOutputChannel("Biome");
@@ -85,7 +85,7 @@ export async function activate(context: ExtensionContext) {
 		client.protocol2CodeConverter.asDocumentSelector(documentSelector);
 
 	// we are now in a biome project
-	setContextValue(IN_ROME_PROJECT, true);
+	setContextValue(IN_BIOME_PROJECT, true);
 
 	session.registerCommand(Commands.SyntaxTree, syntaxTree(session));
 	session.registerCommand(Commands.ServerStatus, () => {
@@ -251,20 +251,12 @@ async function getWorkspaceDependency(
 				continue;
 			}
 
-			// Ignore versions lower than "0.9.0" as they did not embed the language server
-			if (version.startsWith("0.")) {
-				const [minor] = version.substring(2).split(".");
-				const minorVal = parseInt(minor);
-				if (minorVal < 9) {
-					outputChannel.appendLine(
-						`Ignoring incompatible Biome version "${version}"`,
-					);
-					continue;
-				}
-			}
-
 			return binaryPath;
-		} catch {}
+		} catch (e) {
+			console.log(e);
+			window.showWarningMessage(`The extension couldn't resolve ${manifestName} or ${binaryName}.
+			If you installed "@biomejs/biome", it's a resolving issue due to your package manager. Check the troubleshooting section of the extension for more information on how to fix the issue.`);
+		}
 	}
 
 	return undefined;

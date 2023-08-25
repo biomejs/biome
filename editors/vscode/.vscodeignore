@@ -3,8 +3,7 @@
 !LICENSE
 !out/main.js
 !package.json
-!server/rome
-!server/biome.exe
+!server
 !biome_syntax_tree.tmGrammar.json
 !configuration_schema.json
 !README.md
