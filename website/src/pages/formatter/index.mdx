@@ -9,8 +9,10 @@ import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand
 
 # Formatter
 
-Biome's an opinionated formatter that has the goal to stop all ongoing debates over styles. It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html), only supporting
-few options to avoid that debates over styles turn into debates over Biome options. It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
+It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
+only supporting a few options to avoid debates over styles, turning into debates over Biome options.
+It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
 
 ## Options
 
@@ -38,10 +40,10 @@ Use the  `--help` flag to know what are the available options:
 
 Or check the [CLI reference section](/cli#biome-format).
 
-
 ## Configuration
 
-You may want to [configure Biome](/configuration/#formatter) using `biome.json`. The following defaults are applied:
+You may want to [configure Biome](/configuration/#formatter) using `biome.json`.
+The following defaults are applied:
 
 ```json
 {
@@ -58,7 +60,9 @@ You may want to [configure Biome](/configuration/#formatter) using `biome.json`.
 
 ## Ignoring Code
 
-There are times when the way we format code might not be ideal. For these cases you can use a format suppression comment:
+There are times when the formatted code isn't ideal.
+
+For these cases, you can use a format suppression comment:
 
 ```js
 // rome-ignore format: <explanation>
