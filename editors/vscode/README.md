@@ -108,7 +108,7 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ## Troubleshooting
 
-> I installed `@biomejs/biome`, but the extension shows a warning saying that it could resolve library.
+> I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library.
 
 The library `@biomjs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
 
