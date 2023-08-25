@@ -5,6 +5,8 @@ use rome_rowan::TriviaPiece;
 
 pub use crate::generated::node_factory::*;
 
+use crate::utils;
+
 /// Create a new identifier token with no attached trivia
 pub fn ident(text: &str) -> JsSyntaxToken {
     JsSyntaxToken::new_detached(JsSyntaxKind::IDENT, text, [], [])
@@ -30,6 +32,15 @@ pub fn jsx_string_literal(text: &str) -> JsSyntaxToken {
     JsSyntaxToken::new_detached(
         JsSyntaxKind::JSX_STRING_LITERAL,
         &format!("\"{text}\""),
+        [],
+        [],
+    )
+}
+
+pub fn js_template_chunk(text: &str) -> JsSyntaxToken {
+    JsSyntaxToken::new_detached(
+        JsSyntaxKind::TEMPLATE_CHUNK,
+        &utils::escape(text, &["${", "`"], '\\'),
         [],
         [],
     )

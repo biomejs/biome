@@ -1,0 +1,656 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+foo + 'baz';
+
+1 * 2 + 'foo';
+
+1 + 2 + 3 + "px" + 4 + 5;
+
+a + b + c + 'px' + d + e;
+
+1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+
+(1 + 'foo') * 2;
+
+1 * (2 + 'foo') + 'bar';
+
+'foo' + 1;
+
+'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+
+'foo' + 1 + 2;
+
+1 + '2' - 3;
+
+foo() + ' bar';
+
+foo() + '\n';
+
+1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+
+// strings including `${`
+
+'${foo.' + bar + '.baz}';
+
+'foo: ${bar.' + baz + '.bat}';
+
+'foo: `bar.' + baz + '.bat}';
+
+'${foo}: `bar.' + baz + '.bat}';
+
+'foo: ${bar.' + baz + '.bat}';
+
+'foo: `bar.' + baz + '.bat}';
+
+'foo: \\${bar.' + baz + '.bat}';
+
+'foo: \\${bar.' + baz + '.bat}';
+
+// parentheses
+
+const x = a + ("b") + c;
+
+("a") + (b) + ("c");
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+  > 1 │ foo + 'baz';
+      │ ^^^^^^^^^^^
+    2 │ 
+    3 │ 1 * 2 + 'foo';
+  
+  i Suggested fix: Use a template literal.
+  
+     1    │ - foo·+·'baz';
+        1 │ + `${foo}baz`;
+     2  2 │   
+     3  3 │   1 * 2 + 'foo';
+  
+
+```
+
+```
+invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    1 │ foo + 'baz';
+    2 │ 
+  > 3 │ 1 * 2 + 'foo';
+      │ ^^^^^^^^^^^^^
+    4 │ 
+    5 │ 1 + 2 + 3 + "px" + 4 + 5;
+  
+  i Suggested fix: Use a template literal.
+  
+     1  1 │   foo + 'baz';
+     2  2 │   
+     3    │ - 1·*·2·+·'foo';
+        3 │ + `${1·*·2}foo`;
+     4  4 │   
+     5  5 │   1 + 2 + 3 + "px" + 4 + 5;
+  
+
+```
+
+```
+invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    3 │ 1 * 2 + 'foo';
+    4 │ 
+  > 5 │ 1 + 2 + 3 + "px" + 4 + 5;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ a + b + c + 'px' + d + e;
+  
+  i Suggested fix: Use a template literal.
+  
+     3  3 │   1 * 2 + 'foo';
+     4  4 │   
+     5    │ - 1·+·2·+·3·+·"px"·+·4·+·5;
+        5 │ + `${1·+·2·+·3}px${4}${5}`;
+     6  6 │   
+     7  7 │   a + b + c + 'px' + d + e;
+  
+
+```
+
+```
+invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    5 │ 1 + 2 + 3 + "px" + 4 + 5;
+    6 │ 
+  > 7 │ a + b + c + 'px' + d + e;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+  
+  i Suggested fix: Use a template literal.
+  
+     5  5 │   1 + 2 + 3 + "px" + 4 + 5;
+     6  6 │   
+     7    │ - a·+·b·+·c·+·'px'·+·d·+·e;
+        7 │ + `${a·+·b·+·c}px${d}${e}`;
+     8  8 │   
+     9  9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+  
+
+```
+
+```
+invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+     7 │ a + b + c + 'px' + d + e;
+     8 │ 
+   > 9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ (1 + 'foo') * 2;
+  
+  i Suggested fix: Use a template literal.
+  
+     7  7 │   a + b + c + 'px' + d + e;
+     8  8 │   
+     9    │ - 1·+·'foo'·+·2·+·'bar'·+·'baz'·+·3;
+        9 │ + `${1}foo${2}barbaz${3}`;
+    10 10 │   
+    11 11 │   (1 + 'foo') * 2;
+  
+
+```
+
+```
+invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+     9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+    10 │ 
+  > 11 │ (1 + 'foo') * 2;
+       │  ^^^^^^^^^
+    12 │ 
+    13 │ 1 * (2 + 'foo') + 'bar';
+  
+  i Suggested fix: Use a template literal.
+  
+     9  9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+    10 10 │   
+    11    │ - (1·+·'foo')·*·2;
+       11 │ + (`${1}foo`)·*·2;
+    12 12 │   
+    13 13 │   1 * (2 + 'foo') + 'bar';
+  
+
+```
+
+```
+invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    11 │ (1 + 'foo') * 2;
+    12 │ 
+  > 13 │ 1 * (2 + 'foo') + 'bar';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ 'foo' + 1;
+  
+  i Suggested fix: Use a template literal.
+  
+    11 11 │   (1 + 'foo') * 2;
+    12 12 │   
+    13    │ - 1·*·(2·+·'foo')·+·'bar';
+       13 │ + `${1·*·(2·+·'foo')}bar`;
+    14 14 │   
+    15 15 │   'foo' + 1;
+  
+
+```
+
+```
+invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    11 │ (1 + 'foo') * 2;
+    12 │ 
+  > 13 │ 1 * (2 + 'foo') + 'bar';
+       │      ^^^^^^^^^
+    14 │ 
+    15 │ 'foo' + 1;
+  
+  i Suggested fix: Use a template literal.
+  
+    11 11 │   (1 + 'foo') * 2;
+    12 12 │   
+    13    │ - 1·*·(2·+·'foo')·+·'bar';
+       13 │ + 1·*·(`${2}foo`)·+·'bar';
+    14 14 │   
+    15 15 │   'foo' + 1;
+  
+
+```
+
+```
+invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    13 │ 1 * (2 + 'foo') + 'bar';
+    14 │ 
+  > 15 │ 'foo' + 1;
+       │ ^^^^^^^^^
+    16 │ 
+    17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+  
+  i Suggested fix: Use a template literal.
+  
+    13 13 │   1 * (2 + 'foo') + 'bar';
+    14 14 │   
+    15    │ - 'foo'·+·1;
+       15 │ + `foo${1}`;
+    16 16 │   
+    17 17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+  
+
+```
+
+```
+invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    15 │ 'foo' + 1;
+    16 │ 
+  > 17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ 'foo' + 1 + 2;
+  
+  i Suggested fix: Use a template literal.
+  
+    15 15 │   'foo' + 1;
+    16 16 │   
+    17    │ - 'foo'·+·`bar${`baz${'bat'·+·'bam'}`}`·+·'boo';
+       17 │ + `foobarbaz${'bat'·+·'bam'}boo`;
+    18 18 │   
+    19 19 │   'foo' + 1 + 2;
+  
+
+```
+
+```
+invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+    18 │ 
+  > 19 │ 'foo' + 1 + 2;
+       │ ^^^^^^^^^^^^^
+    20 │ 
+    21 │ 1 + '2' - 3;
+  
+  i Suggested fix: Use a template literal.
+  
+    17 17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+    18 18 │   
+    19    │ - 'foo'·+·1·+·2;
+       19 │ + `foo${1}${2}`;
+    20 20 │   
+    21 21 │   1 + '2' - 3;
+  
+
+```
+
+```
+invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    19 │ 'foo' + 1 + 2;
+    20 │ 
+  > 21 │ 1 + '2' - 3;
+       │ ^^^^^^^
+    22 │ 
+    23 │ foo() + ' bar';
+  
+  i Suggested fix: Use a template literal.
+  
+    19 19 │   'foo' + 1 + 2;
+    20 20 │   
+    21    │ - 1·+·'2'·-·3;
+       21 │ + `${1}2`·-·3;
+    22 22 │   
+    23 23 │   foo() + ' bar';
+  
+
+```
+
+```
+invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    21 │ 1 + '2' - 3;
+    22 │ 
+  > 23 │ foo() + ' bar';
+       │ ^^^^^^^^^^^^^^
+    24 │ 
+    25 │ foo() + '\n';
+  
+  i Suggested fix: Use a template literal.
+  
+    21 21 │   1 + '2' - 3;
+    22 22 │   
+    23    │ - foo()·+·'·bar';
+       23 │ + `${foo()}·bar`;
+    24 24 │   
+    25 25 │   foo() + '\n';
+  
+
+```
+
+```
+invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    23 │ foo() + ' bar';
+    24 │ 
+  > 25 │ foo() + '\n';
+       │ ^^^^^^^^^^^^
+    26 │ 
+    27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+  
+  i Suggested fix: Use a template literal.
+  
+    23 23 │   foo() + ' bar';
+    24 24 │   
+    25    │ - foo()·+·'\n';
+       25 │ + `${foo()}\n`;
+    26 26 │   
+    27 27 │   1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+  
+
+```
+
+```
+invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    25 │ foo() + '\n';
+    26 │ 
+  > 27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // strings including `${`
+  
+  i Suggested fix: Use a template literal.
+  
+    25 25 │   foo() + '\n';
+    26 26 │   
+    27    │ - 1·*·/**leading*/'foo'····/**trailing·*/···················+·'bar';
+       27 │ + `${1·*·/**leading*/'foo'····/**trailing·*/}bar`;
+    28 28 │   
+    29 29 │   // strings including `${`
+  
+
+```
+
+```
+invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    29 │ // strings including `${`
+    30 │ 
+  > 31 │ '${foo.' + bar + '.baz}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ 'foo: ${bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    29 29 │   // strings including `${`
+    30 30 │   
+    31    │ - '${foo.'·+·bar·+·'.baz}';
+       31 │ + `\${foo.${bar}.baz}`;
+    32 32 │   
+    33 33 │   'foo: ${bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:33:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    31 │ '${foo.' + bar + '.baz}';
+    32 │ 
+  > 33 │ 'foo: ${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ 'foo: `bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    31 31 │   '${foo.' + bar + '.baz}';
+    32 32 │   
+    33    │ - 'foo:·${bar.'·+·baz·+·'.bat}';
+       33 │ + `foo:·\${bar.${baz}.bat}`;
+    34 34 │   
+    35 35 │   'foo: `bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    33 │ 'foo: ${bar.' + baz + '.bat}';
+    34 │ 
+  > 35 │ 'foo: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ '${foo}: `bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    33 33 │   'foo: ${bar.' + baz + '.bat}';
+    34 34 │   
+    35    │ - 'foo:·`bar.'·+·baz·+·'.bat}';
+       35 │ + `foo:·\`bar.${baz}.bat}`;
+    36 36 │   
+    37 37 │   '${foo}: `bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    35 │ 'foo: `bar.' + baz + '.bat}';
+    36 │ 
+  > 37 │ '${foo}: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ 'foo: ${bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    35 35 │   'foo: `bar.' + baz + '.bat}';
+    36 36 │   
+    37    │ - '${foo}:·`bar.'·+·baz·+·'.bat}';
+       37 │ + `\${foo}:·\`bar.${baz}.bat}`;
+    38 38 │   
+    39 39 │   'foo: ${bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    37 │ '${foo}: `bar.' + baz + '.bat}';
+    38 │ 
+  > 39 │ 'foo: ${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ 'foo: `bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    37 37 │   '${foo}: `bar.' + baz + '.bat}';
+    38 38 │   
+    39    │ - 'foo:·${bar.'·+·baz·+·'.bat}';
+       39 │ + `foo:·\${bar.${baz}.bat}`;
+    40 40 │   
+    41 41 │   'foo: `bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    39 │ 'foo: ${bar.' + baz + '.bat}';
+    40 │ 
+  > 41 │ 'foo: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ 'foo: \\${bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    39 39 │   'foo: ${bar.' + baz + '.bat}';
+    40 40 │   
+    41    │ - 'foo:·`bar.'·+·baz·+·'.bat}';
+       41 │ + `foo:·\`bar.${baz}.bat}`;
+    42 42 │   
+    43 43 │   'foo: \\${bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    41 │ 'foo: `bar.' + baz + '.bat}';
+    42 │ 
+  > 43 │ 'foo: \\${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ 'foo: \\${bar.' + baz + '.bat}';
+  
+  i Suggested fix: Use a template literal.
+  
+    41 41 │   'foo: `bar.' + baz + '.bat}';
+    42 42 │   
+    43    │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
+       43 │ + `foo:·\\\${bar.${baz}.bat}`;
+    44 44 │   
+    45 45 │   'foo: \\${bar.' + baz + '.bat}';
+  
+
+```
+
+```
+invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    43 │ 'foo: \\${bar.' + baz + '.bat}';
+    44 │ 
+  > 45 │ 'foo: \\${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 
+    47 │ // parentheses
+  
+  i Suggested fix: Use a template literal.
+  
+    43 43 │   'foo: \\${bar.' + baz + '.bat}';
+    44 44 │   
+    45    │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
+       45 │ + `foo:·\\\${bar.${baz}.bat}`;
+    46 46 │   
+    47 47 │   // parentheses
+  
+
+```
+
+```
+invalid.js:49:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    47 │ // parentheses
+    48 │ 
+  > 49 │ const x = a + ("b") + c;
+       │           ^^^^^^^^^^^^^
+    50 │ 
+    51 │ ("a") + (b) + ("c");
+  
+  i Suggested fix: Use a template literal.
+  
+    47 47 │   // parentheses
+    48 48 │   
+    49    │ - const·x·=·a·+·("b")·+·c;
+       49 │ + const·x·=·`${a}b${c}`;
+    50 50 │   
+    51 51 │   ("a") + (b) + ("c");
+  
+
+```
+
+```
+invalid.js:51:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    49 │ const x = a + ("b") + c;
+    50 │ 
+  > 51 │ ("a") + (b) + ("c");
+       │ ^^^^^^^^^^^^^^^^^^^
+    52 │ 
+  
+  i Suggested fix: Use a template literal.
+  
+    49 49 │   const x = a + ("b") + c;
+    50 50 │   
+    51    │ - ("a")·+·(b)·+·("c");
+       51 │ + `a${b}c`;
+    52 52 │   
+  
+
+```
+
+

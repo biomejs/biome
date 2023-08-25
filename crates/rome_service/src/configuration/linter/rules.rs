@@ -2921,7 +2921,7 @@ pub struct Style {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_single_var_declarator: Option<RuleConfiguration>,
-    #[doc = "Template literals are preferred over string concatenation."]
+    #[doc = "Prefer template literals over string concatenation."]
     #[bpaf(long("use-template"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_template: Option<RuleConfiguration>,
