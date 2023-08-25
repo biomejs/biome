@@ -90,14 +90,20 @@ impl Rule for NoUselessConstructor {
         if is_not_public {
             return None;
         }
-        let has_parameter_property = constructor
+        let has_param_property_or_default_param = constructor
             .parameters()
             .ok()?
             .parameters()
             .iter()
             .filter_map(|x| x.ok())
-            .any(|x| TsPropertyParameter::can_cast(x.syntax().kind()));
-        if has_parameter_property {
+            .any(|x| {
+                TsPropertyParameter::can_cast(x.syntax().kind())
+                    || x.as_any_js_formal_parameter()
+                        .and_then(|x| x.as_js_formal_parameter())
+                        .and_then(|x| x.initializer())
+                        .is_some()
+            });
+        if has_param_property_or_default_param {
             return None;
         }
         let has_parent_class = constructor
