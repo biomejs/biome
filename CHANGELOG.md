@@ -167,6 +167,8 @@ New entries must be placed in a section entitled `Unreleased`.
 
 - The Biome LSP can now show diagnostics belonging to JSON lint rules.
 
+- The Biome LSP no longer applies unsafe quickfixes on-save when `editor.codeActionsOnSave.quifix.biome` is enabled.
+
 - Fix [#4564](https://github.com/rome/tools/issues/4564); files too large don't emit errors.
 
 - The Biome LSP sends client messages when files are ignored or too big.

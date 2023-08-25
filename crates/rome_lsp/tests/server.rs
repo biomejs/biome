@@ -776,6 +776,279 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_quick_fixes_ignore_unsafe() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let unsafe_fixable = lsp::Diagnostic {
+        range: lsp::Range {
+            start: lsp::Position {
+                line: 0,
+                character: 6,
+            },
+            end: lsp::Position {
+                line: 0,
+                character: 9,
+            },
+        },
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
+            "lint/suspicious/noDoubleEquals",
+        ))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: String::from("Use === instead of ==."),
+        related_information: None,
+        tags: None,
+        data: None,
+    };
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a == 0) {}").await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: lsp::TextDocumentIdentifier {
+                    uri: url!("document.js"),
+                },
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![unsafe_fixable.clone()],
+                    only: Some(vec![lsp::CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: lsp::WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut suppression_changes = HashMap::default();
+    suppression_changes.insert(
+        url!("document.js"),
+        vec![lsp::TextEdit {
+            range: lsp::Range {
+                start: lsp::Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: lsp::Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "// rome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
+            ),
+        }],
+    );
+
+    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.suppressRule.biome.suspicious.noDoubleEquals",
+        )),
+        diagnostics: Some(vec![unsafe_fixable]),
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(suppression_changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: None,
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_suppression_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_quick_fixes_include_unsafe() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let unsafe_fixable = lsp::Diagnostic {
+        range: lsp::Range {
+            start: lsp::Position {
+                line: 0,
+                character: 6,
+            },
+            end: lsp::Position {
+                line: 0,
+                character: 9,
+            },
+        },
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
+            "lint/suspicious/noDoubleEquals",
+        ))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: String::from("Use === instead of ==."),
+        related_information: None,
+        tags: None,
+        data: None,
+    };
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a == 0) {}").await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: lsp::TextDocumentIdentifier {
+                    uri: url!("document.js"),
+                },
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![unsafe_fixable.clone()],
+                    only: Some(vec![]),
+                    ..Default::default()
+                },
+                work_done_progress_params: lsp::WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut changes = HashMap::default();
+    changes.insert(
+        url!("document.js"),
+        vec![lsp::TextEdit {
+            range: lsp::Range {
+                start: lsp::Position {
+                    line: 0,
+                    character: 7,
+                },
+                end: lsp::Position {
+                    line: 0,
+                    character: 7,
+                },
+            },
+            new_text: "=".to_string(),
+        }],
+    );
+
+    let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Use ==="),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.biome.suspicious.noDoubleEquals",
+        )),
+        diagnostics: Some(vec![unsafe_fixable.clone()]),
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: None,
+        disabled: None,
+        data: None,
+    });
+
+    let mut suppression_changes = HashMap::default();
+    suppression_changes.insert(
+        url!("document.js"),
+        vec![lsp::TextEdit {
+            range: lsp::Range {
+                start: lsp::Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: lsp::Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "// rome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
+            ),
+        }],
+    );
+
+    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.suppressRule.biome.suspicious.noDoubleEquals",
+        )),
+        diagnostics: Some(vec![unsafe_fixable]),
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(suppression_changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: None,
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_code_action, expected_suppression_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics_for_rome_json() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();

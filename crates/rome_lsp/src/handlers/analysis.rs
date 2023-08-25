@@ -4,6 +4,7 @@ use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
 use rome_analyze::{ActionCategory, SourceActionKind};
+use rome_diagnostics::Applicability;
 use rome_fs::RomePath;
 use rome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
@@ -25,6 +26,7 @@ fn fix_all_kind() -> CodeActionKind {
         Cow::Owned(kind) => CodeActionKind::from(kind),
     }
 }
+
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
@@ -52,15 +54,17 @@ pub(crate) fn code_actions(
     }
 
     let mut has_fix_all = false;
+    let mut has_quick_fix = false;
     let mut filters = Vec::new();
-
     if let Some(filter) = &params.context.only {
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
+            } else if ActionCategory::QuickFix.matches(kind) {
+                // The action is a on-save quick-fixes
+                has_quick_fix = true;
             }
-
             filters.push(kind);
         }
     }
@@ -109,6 +113,10 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
+            // Don't apply unsafe fixes when the code action is on-save quick-fixes
+            if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
+                return None;
+            }
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_for(&FeatureName::OrganizeImports)
             {
