@@ -14,5 +14,5 @@ proc-macro = true
 
 [dependencies]
 proc-macro-error = { version = "1.0.4", default-features = false }
-proc-macro2      = "1.0.63"
-quote            = "1.0.14"
+proc-macro2      = "1.0.66"
+quote            = "1.0.32"
