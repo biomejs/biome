@@ -173,13 +173,13 @@ fn string() {
     }
 
     assert_lex! {
-        r"Escaped \n",
+        r#""Escaped \r""#,
         CSS_STRING_LITERAL:12,
         EOF:0
     }
 
     assert_lex! {
-        r"Escaped \r",
+        r#""Escaped \r""#,
         CSS_STRING_LITERAL:12,
         EOF:0
     }

@@ -88,7 +88,7 @@ jobs:
 
       - name: Update existing comment
         if: github.event_name == 'pull_request' && steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@v1.4.5
+        uses: peter-evans/create-or-update-comment@v3
         continue-on-error: true
         with:
           comment-id: ${{ steps.previous-comment.outputs.comment-id }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: Write a new comment
         if: github.event_name == 'pull_request' && !steps.previous-comment.outputs.comment-id
-        uses: peter-evans/create-or-update-comment@v1.4.5
+        uses: peter-evans/create-or-update-comment@v3
         continue-on-error: true
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}

@@ -89,7 +89,7 @@ jobs:
           cat benchmark_check.md >> benchmark.md
 
       - name: Write a new comment
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@v3
         continue-on-error: true
         with:
           issue-number: ${{ github.event.issue.number }}
