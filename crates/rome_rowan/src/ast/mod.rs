@@ -791,7 +791,7 @@ pub mod support {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use crate::raw_language::{
         LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder,
         SeparatedExpressionList,

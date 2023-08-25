@@ -1821,7 +1821,6 @@ dependencies = [
 name = "rome_console"
 version = "0.0.1"
 dependencies = [
- "atty",
  "rome_markup",
  "rome_text_size",
  "schemars",
@@ -3595,7 +3594,6 @@ name = "xtask_coverage"
 version = "0.0.0"
 dependencies = [
  "ascii_table",
- "atty",
  "backtrace",
  "colored",
  "indicatif",

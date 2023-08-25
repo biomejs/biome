@@ -1,14 +1,14 @@
 use crate::runner::{TestCaseFiles, TestRunOutcome, TestRunResult, TestSuite, TestSuiteInstance};
 use crate::{Summary, TestResults};
 use ascii_table::{Align, AsciiTable};
-use atty::Stream;
 use colored::Colorize;
 use indicatif::ProgressBar;
 use rome_diagnostics::termcolor::Buffer;
 use rome_diagnostics::{DiagnosticExt, Error};
 use serde_json::Value;
 use std::collections::HashMap;
-use std::io::Write;
+use std::io;
+use std::io::{IsTerminal, Write};
 use std::str::FromStr;
 use std::time::Instant;
 
@@ -186,7 +186,7 @@ impl Write for OutputTarget {
 
 impl SummaryReporter {
     pub fn new(detail_level: SummaryDetailLevel, output_target: OutputTarget) -> Self {
-        let buffer = if atty::is(Stream::Stdout) {
+        let buffer = if io::stdout().is_terminal() {
             Buffer::ansi()
         } else {
             // piping to a file

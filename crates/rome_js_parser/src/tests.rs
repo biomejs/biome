@@ -186,12 +186,12 @@ pub fn test_trivia_attached_to_tokens() {
     // first let leading trivia asserts
     let pieces: Vec<_> = first_let.leading_trivia().pieces().collect();
     assert!(matches!(pieces.get(0).map(|x| x.text()), Some("/**/")));
-    assert!(matches!(pieces.get(1), None));
+    assert!(pieces.get(1).is_none());
 
     // first let trailing trivia asserts
     let pieces: Vec<_> = first_let.trailing_trivia().pieces().collect();
     assert!(matches!(pieces.get(0).map(|x| x.text()), Some(" ")));
-    assert!(matches!(pieces.get(1), None));
+    assert!(pieces.get(1).is_none());
 
     // second let leading trivia asserts
     let second_let = tokens.find(is_let).unwrap();

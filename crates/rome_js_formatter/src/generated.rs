@@ -20,6 +20,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsScript {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::script::FormatJsScript::default(),
         )
     }
@@ -30,6 +31,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsScript {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::script::FormatJsScript::default(),
         )
     }
@@ -50,6 +52,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsModule {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::module::FormatJsModule::default(),
         )
     }
@@ -60,6 +63,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsModule {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::module::FormatJsModule::default(),
         )
     }
@@ -86,6 +90,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExpressionSnipped {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
         )
     }
@@ -98,6 +103,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExpressionSnipped {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
         )
     }
@@ -120,6 +126,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDirective {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::directive::FormatJsDirective::default(),
         )
     }
@@ -132,6 +139,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDirective {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::directive::FormatJsDirective::default(),
         )
     }
@@ -158,6 +166,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBlockStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::block_statement::FormatJsBlockStatement::default(),
         )
     }
@@ -170,6 +179,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBlockStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::block_statement::FormatJsBlockStatement::default(),
         )
     }
@@ -196,6 +206,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBreakStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::break_statement::FormatJsBreakStatement::default(),
         )
     }
@@ -208,6 +219,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBreakStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::break_statement::FormatJsBreakStatement::default(),
         )
     }
@@ -234,6 +246,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsClassDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::class_declaration::FormatJsClassDeclaration::default(),
         )
     }
@@ -246,6 +259,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsClassDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::class_declaration::FormatJsClassDeclaration::default(),
         )
     }
@@ -272,6 +286,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsContinueStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::continue_statement::FormatJsContinueStatement::default(),
         )
     }
@@ -284,6 +299,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsContinueStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::continue_statement::FormatJsContinueStatement::default(),
         )
     }
@@ -310,6 +326,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDebuggerStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::debugger_statement::FormatJsDebuggerStatement::default(),
         )
     }
@@ -322,6 +339,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDebuggerStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::debugger_statement::FormatJsDebuggerStatement::default(),
         )
     }
@@ -348,6 +366,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDoWhileStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::do_while_statement::FormatJsDoWhileStatement::default(),
         )
     }
@@ -360,6 +379,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDoWhileStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::do_while_statement::FormatJsDoWhileStatement::default(),
         )
     }
@@ -386,6 +406,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsEmptyStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::empty_statement::FormatJsEmptyStatement::default(),
         )
     }
@@ -398,6 +419,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsEmptyStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::empty_statement::FormatJsEmptyStatement::default(),
         )
     }
@@ -424,6 +446,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExpressionStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::expression_statement::FormatJsExpressionStatement::default(),
         )
     }
@@ -436,6 +459,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExpressionStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::expression_statement::FormatJsExpressionStatement::default(),
         )
     }
@@ -462,6 +486,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsForInStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_in_statement::FormatJsForInStatement::default(),
         )
     }
@@ -474,6 +499,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsForInStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_in_statement::FormatJsForInStatement::default(),
         )
     }
@@ -500,6 +526,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsForOfStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_of_statement::FormatJsForOfStatement::default(),
         )
     }
@@ -512,6 +539,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsForOfStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_of_statement::FormatJsForOfStatement::default(),
         )
     }
@@ -534,6 +562,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsForStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_statement::FormatJsForStatement::default(),
         )
     }
@@ -546,6 +575,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsForStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::for_statement::FormatJsForStatement::default(),
         )
     }
@@ -568,6 +598,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsIfStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::if_statement::FormatJsIfStatement::default(),
         )
     }
@@ -580,6 +611,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsIfStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::if_statement::FormatJsIfStatement::default(),
         )
     }
@@ -606,6 +638,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsLabeledStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::labeled_statement::FormatJsLabeledStatement::default(),
         )
     }
@@ -618,6 +651,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsLabeledStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::labeled_statement::FormatJsLabeledStatement::default(),
         )
     }
@@ -644,6 +678,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsReturnStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::return_statement::FormatJsReturnStatement::default(),
         )
     }
@@ -656,6 +691,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsReturnStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::return_statement::FormatJsReturnStatement::default(),
         )
     }
@@ -682,6 +718,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSwitchStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::switch_statement::FormatJsSwitchStatement::default(),
         )
     }
@@ -694,6 +731,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSwitchStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::switch_statement::FormatJsSwitchStatement::default(),
         )
     }
@@ -720,6 +758,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsThrowStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::throw_statement::FormatJsThrowStatement::default(),
         )
     }
@@ -732,6 +771,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsThrowStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::throw_statement::FormatJsThrowStatement::default(),
         )
     }
@@ -758,6 +798,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTryFinallyStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement::default(),
         )
     }
@@ -770,6 +811,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTryFinallyStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement::default(),
         )
     }
@@ -792,6 +834,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTryStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::try_statement::FormatJsTryStatement::default(),
         )
     }
@@ -804,6 +847,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTryStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::try_statement::FormatJsTryStatement::default(),
         )
     }
@@ -830,6 +874,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsVariableStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::variable_statement::FormatJsVariableStatement::default(),
         )
     }
@@ -842,6 +887,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::variable_statement::FormatJsVariableStatement::default(),
         )
     }
@@ -868,6 +914,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsWhileStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::while_statement::FormatJsWhileStatement::default(),
         )
     }
@@ -880,6 +927,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsWhileStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::while_statement::FormatJsWhileStatement::default(),
         )
     }
@@ -902,6 +950,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsWithStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::with_statement::FormatJsWithStatement::default(),
         )
     }
@@ -914,6 +963,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsWithStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::statements::with_statement::FormatJsWithStatement::default(),
         )
     }
@@ -940,6 +990,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsFunctionDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::function_declaration::FormatJsFunctionDeclaration::default(),
         )
     }
@@ -952,6 +1003,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFunctionDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::function_declaration::FormatJsFunctionDeclaration::default(),
         )
     }
@@ -978,6 +1030,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsEnumDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration::default(),
         )
     }
@@ -990,6 +1043,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsEnumDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration::default(),
         )
     }
@@ -1016,6 +1070,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeAliasDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration::default(
             ),
         )
@@ -1029,6 +1084,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAliasDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration::default(
             ),
         )
@@ -1056,6 +1112,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsInterfaceDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration::default(),
         )
     }
@@ -1068,6 +1125,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInterfaceDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration::default(),
         )
     }
@@ -1092,7 +1150,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDeclareFunctionDeclaration 
         crate::ts::declarations::declare_function_declaration::FormatTsDeclareFunctionDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: declarations :: declare_function_declaration :: FormatTsDeclareFunctionDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: declare_function_declaration :: FormatTsDeclareFunctionDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDeclareFunctionDeclaration {
@@ -1101,7 +1159,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDeclareFunctionDeclaratio
         crate::ts::declarations::declare_function_declaration::FormatTsDeclareFunctionDeclaration,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: declarations :: declare_function_declaration :: FormatTsDeclareFunctionDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: declare_function_declaration :: FormatTsDeclareFunctionDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsDeclareStatement>
@@ -1126,6 +1184,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDeclareStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::statements::declare_statement::FormatTsDeclareStatement::default(),
         )
     }
@@ -1138,6 +1197,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDeclareStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::statements::declare_statement::FormatTsDeclareStatement::default(),
         )
     }
@@ -1164,6 +1224,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsModuleDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::module_declaration::FormatTsModuleDeclaration::default(),
         )
     }
@@ -1176,6 +1237,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsModuleDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::module_declaration::FormatTsModuleDeclaration::default(),
         )
     }
@@ -1200,7 +1262,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleDeclaration {
         crate::ts::declarations::external_module_declaration::FormatTsExternalModuleDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: declarations :: external_module_declaration :: FormatTsExternalModuleDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: external_module_declaration :: FormatTsExternalModuleDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleDeclaration {
@@ -1209,7 +1271,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleDeclaration
         crate::ts::declarations::external_module_declaration::FormatTsExternalModuleDeclaration,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: declarations :: external_module_declaration :: FormatTsExternalModuleDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: external_module_declaration :: FormatTsExternalModuleDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsGlobalDeclaration>
@@ -1234,6 +1296,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsGlobalDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration::default(),
         )
     }
@@ -1246,6 +1309,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsGlobalDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration::default(),
         )
     }
@@ -1270,7 +1334,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsImportEqualsDeclaration {
         crate::ts::declarations::import_equals_declaration::FormatTsImportEqualsDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: declarations :: import_equals_declaration :: FormatTsImportEqualsDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: import_equals_declaration :: FormatTsImportEqualsDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsImportEqualsDeclaration {
@@ -1279,7 +1343,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsImportEqualsDeclaration {
         crate::ts::declarations::import_equals_declaration::FormatTsImportEqualsDeclaration,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: declarations :: import_equals_declaration :: FormatTsImportEqualsDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: import_equals_declaration :: FormatTsImportEqualsDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsElseClause>
@@ -1300,6 +1364,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsElseClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::else_clause::FormatJsElseClause::default(),
         )
     }
@@ -1312,6 +1377,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsElseClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::else_clause::FormatJsElseClause::default(),
         )
     }
@@ -1338,6 +1404,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::variable_declaration::FormatJsVariableDeclaration::default(),
         )
     }
@@ -1350,6 +1417,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::variable_declaration::FormatJsVariableDeclaration::default(),
         )
     }
@@ -1374,7 +1442,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsForVariableDeclaration {
         crate::js::declarations::for_variable_declaration::FormatJsForVariableDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: declarations :: for_variable_declaration :: FormatJsForVariableDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: for_variable_declaration :: FormatJsForVariableDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsForVariableDeclaration {
@@ -1383,7 +1451,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsForVariableDeclaration {
         crate::js::declarations::for_variable_declaration::FormatJsForVariableDeclaration,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: declarations :: for_variable_declaration :: FormatJsForVariableDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: for_variable_declaration :: FormatJsForVariableDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsVariableDeclarator>
@@ -1408,6 +1476,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclarator {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator::default(),
         )
     }
@@ -1420,6 +1489,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclarator {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator::default(),
         )
     }
@@ -1442,6 +1512,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCaseClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::case_clause::FormatJsCaseClause::default(),
         )
     }
@@ -1454,6 +1525,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCaseClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::case_clause::FormatJsCaseClause::default(),
         )
     }
@@ -1476,6 +1548,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDefaultClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::default_clause::FormatJsDefaultClause::default(),
         )
     }
@@ -1488,6 +1561,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDefaultClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::default_clause::FormatJsDefaultClause::default(),
         )
     }
@@ -1510,6 +1584,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCatchClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::catch_clause::FormatJsCatchClause::default(),
         )
     }
@@ -1522,6 +1597,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCatchClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::catch_clause::FormatJsCatchClause::default(),
         )
     }
@@ -1544,6 +1620,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsFinallyClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::finally_clause::FormatJsFinallyClause::default(),
         )
     }
@@ -1556,6 +1633,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFinallyClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::finally_clause::FormatJsFinallyClause::default(),
         )
     }
@@ -1582,6 +1660,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCatchDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::catch_declaration::FormatJsCatchDeclaration::default(),
         )
     }
@@ -1594,6 +1673,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCatchDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::declarations::catch_declaration::FormatJsCatchDeclaration::default(),
         )
     }
@@ -1620,6 +1700,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeAnnotation {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation::default(),
         )
     }
@@ -1632,6 +1713,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAnnotation {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation::default(),
         )
     }
@@ -1658,6 +1740,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportMetaExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression::default(),
         )
     }
@@ -1670,6 +1753,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportMetaExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression::default(),
         )
     }
@@ -1696,6 +1780,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::array_expression::FormatJsArrayExpression::default(),
         )
     }
@@ -1708,6 +1793,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::array_expression::FormatJsArrayExpression::default(),
         )
     }
@@ -1732,7 +1818,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrowFunctionExpression {
         crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: arrow_function_expression :: FormatJsArrowFunctionExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: arrow_function_expression :: FormatJsArrowFunctionExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrowFunctionExpression {
@@ -1741,7 +1827,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrowFunctionExpression {
         crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: arrow_function_expression :: FormatJsArrowFunctionExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: arrow_function_expression :: FormatJsArrowFunctionExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsAssignmentExpression>
@@ -1766,6 +1852,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsAssignmentExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::assignment_expression::FormatJsAssignmentExpression::default(),
         )
     }
@@ -1778,6 +1865,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsAssignmentExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::assignment_expression::FormatJsAssignmentExpression::default(),
         )
     }
@@ -1804,6 +1892,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsAwaitExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::await_expression::FormatJsAwaitExpression::default(),
         )
     }
@@ -1816,6 +1905,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsAwaitExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::await_expression::FormatJsAwaitExpression::default(),
         )
     }
@@ -1842,6 +1932,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBinaryExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::binary_expression::FormatJsBinaryExpression::default(),
         )
     }
@@ -1854,6 +1945,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBinaryExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::binary_expression::FormatJsBinaryExpression::default(),
         )
     }
@@ -1880,6 +1972,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCallExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::call_expression::FormatJsCallExpression::default(),
         )
     }
@@ -1892,6 +1985,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCallExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::call_expression::FormatJsCallExpression::default(),
         )
     }
@@ -1918,6 +2012,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsClassExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::class_expression::FormatJsClassExpression::default(),
         )
     }
@@ -1930,6 +2025,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsClassExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::class_expression::FormatJsClassExpression::default(),
         )
     }
@@ -1954,7 +2050,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberExpression {
         crate::js::expressions::computed_member_expression::FormatJsComputedMemberExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: computed_member_expression :: FormatJsComputedMemberExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: computed_member_expression :: FormatJsComputedMemberExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberExpression {
@@ -1963,7 +2059,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberExpression 
         crate::js::expressions::computed_member_expression::FormatJsComputedMemberExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: computed_member_expression :: FormatJsComputedMemberExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: computed_member_expression :: FormatJsComputedMemberExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsConditionalExpression>
@@ -1988,6 +2084,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsConditionalExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::conditional_expression::FormatJsConditionalExpression::default(
             ),
         )
@@ -2001,6 +2098,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsConditionalExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::conditional_expression::FormatJsConditionalExpression::default(
             ),
         )
@@ -2028,6 +2126,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsFunctionExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::function_expression::FormatJsFunctionExpression::default(),
         )
     }
@@ -2040,6 +2139,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFunctionExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::function_expression::FormatJsFunctionExpression::default(),
         )
     }
@@ -2066,6 +2166,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsIdentifierExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::identifier_expression::FormatJsIdentifierExpression::default(),
         )
     }
@@ -2078,6 +2179,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsIdentifierExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::identifier_expression::FormatJsIdentifierExpression::default(),
         )
     }
@@ -2104,6 +2206,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportCallExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::import_call_expression::FormatJsImportCallExpression::default(),
         )
     }
@@ -2116,6 +2219,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportCallExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::import_call_expression::FormatJsImportCallExpression::default(),
         )
     }
@@ -2138,6 +2242,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsInExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::in_expression::FormatJsInExpression::default(),
         )
     }
@@ -2150,6 +2255,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsInExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::in_expression::FormatJsInExpression::default(),
         )
     }
@@ -2176,6 +2282,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsInstanceofExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression::default(),
         )
     }
@@ -2188,6 +2295,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsInstanceofExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression::default(),
         )
     }
@@ -2214,6 +2322,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsLogicalExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::logical_expression::FormatJsLogicalExpression::default(),
         )
     }
@@ -2226,6 +2335,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsLogicalExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::logical_expression::FormatJsLogicalExpression::default(),
         )
     }
@@ -2248,6 +2358,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNewExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::new_expression::FormatJsNewExpression::default(),
         )
     }
@@ -2260,6 +2371,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNewExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::new_expression::FormatJsNewExpression::default(),
         )
     }
@@ -2286,6 +2398,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::object_expression::FormatJsObjectExpression::default(),
         )
     }
@@ -2298,6 +2411,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::object_expression::FormatJsObjectExpression::default(),
         )
     }
@@ -2322,7 +2436,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedExpression {
         crate::js::expressions::parenthesized_expression::FormatJsParenthesizedExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: parenthesized_expression :: FormatJsParenthesizedExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: parenthesized_expression :: FormatJsParenthesizedExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedExpression {
@@ -2331,7 +2445,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedExpression {
         crate::js::expressions::parenthesized_expression::FormatJsParenthesizedExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: parenthesized_expression :: FormatJsParenthesizedExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: parenthesized_expression :: FormatJsParenthesizedExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsPostUpdateExpression>
@@ -2356,6 +2470,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPostUpdateExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression::default(),
         )
     }
@@ -2368,6 +2483,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPostUpdateExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression::default(),
         )
     }
@@ -2394,6 +2510,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPreUpdateExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression::default(),
         )
     }
@@ -2406,6 +2523,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPreUpdateExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression::default(),
         )
     }
@@ -2432,6 +2550,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSequenceExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::sequence_expression::FormatJsSequenceExpression::default(),
         )
     }
@@ -2444,6 +2563,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSequenceExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::sequence_expression::FormatJsSequenceExpression::default(),
         )
     }
@@ -2468,7 +2588,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberExpression {
         crate::js::expressions::static_member_expression::FormatJsStaticMemberExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: static_member_expression :: FormatJsStaticMemberExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: static_member_expression :: FormatJsStaticMemberExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberExpression {
@@ -2477,7 +2597,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberExpression {
         crate::js::expressions::static_member_expression::FormatJsStaticMemberExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: static_member_expression :: FormatJsStaticMemberExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: static_member_expression :: FormatJsStaticMemberExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsSuperExpression>
@@ -2502,6 +2622,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSuperExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::super_expression::FormatJsSuperExpression::default(),
         )
     }
@@ -2514,6 +2635,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSuperExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::super_expression::FormatJsSuperExpression::default(),
         )
     }
@@ -2540,6 +2662,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsThisExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::this_expression::FormatJsThisExpression::default(),
         )
     }
@@ -2552,6 +2675,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsThisExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::this_expression::FormatJsThisExpression::default(),
         )
     }
@@ -2578,6 +2702,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsUnaryExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::unary_expression::FormatJsUnaryExpression::default(),
         )
     }
@@ -2590,6 +2715,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsUnaryExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::unary_expression::FormatJsUnaryExpression::default(),
         )
     }
@@ -2616,6 +2742,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsYieldExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::yield_expression::FormatJsYieldExpression::default(),
         )
     }
@@ -2628,6 +2755,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsYieldExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::yield_expression::FormatJsYieldExpression::default(),
         )
     }
@@ -2654,6 +2782,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNewTargetExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::new_target_expression::FormatJsNewTargetExpression::default(),
         )
     }
@@ -2666,6 +2795,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNewTargetExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::new_target_expression::FormatJsNewTargetExpression::default(),
         )
     }
@@ -2692,6 +2822,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTemplateExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::template_expression::FormatJsTemplateExpression::default(),
         )
     }
@@ -2704,6 +2835,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTemplateExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::template_expression::FormatJsTemplateExpression::default(),
         )
     }
@@ -2728,7 +2860,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionExpression {
         crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: expressions :: type_assertion_expression :: FormatTsTypeAssertionExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: type_assertion_expression :: FormatTsTypeAssertionExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionExpression {
@@ -2737,7 +2869,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionExpression {
         crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: expressions :: type_assertion_expression :: FormatTsTypeAssertionExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: type_assertion_expression :: FormatTsTypeAssertionExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsAsExpression>
@@ -2758,6 +2890,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAsExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::as_expression::FormatTsAsExpression::default(),
         )
     }
@@ -2770,6 +2903,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAsExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::as_expression::FormatTsAsExpression::default(),
         )
     }
@@ -2796,6 +2930,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsSatisfiesExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression::default(),
         )
     }
@@ -2808,6 +2943,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSatisfiesExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression::default(),
         )
     }
@@ -2832,7 +2968,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionExpression 
         crate::ts::expressions::non_null_assertion_expression::FormatTsNonNullAssertionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: expressions :: non_null_assertion_expression :: FormatTsNonNullAssertionExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: non_null_assertion_expression :: FormatTsNonNullAssertionExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionExpression {
@@ -2841,7 +2977,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionExpressio
         crate::ts::expressions::non_null_assertion_expression::FormatTsNonNullAssertionExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: expressions :: non_null_assertion_expression :: FormatTsNonNullAssertionExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: non_null_assertion_expression :: FormatTsNonNullAssertionExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsInstantiationExpression>
@@ -2864,7 +3000,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsInstantiationExpression {
         crate::ts::expressions::instantiation_expression::FormatTsInstantiationExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: expressions :: instantiation_expression :: FormatTsInstantiationExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: instantiation_expression :: FormatTsInstantiationExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInstantiationExpression {
@@ -2873,7 +3009,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInstantiationExpression {
         crate::ts::expressions::instantiation_expression::FormatTsInstantiationExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: expressions :: instantiation_expression :: FormatTsInstantiationExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: instantiation_expression :: FormatTsInstantiationExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsxTagExpression>
@@ -2898,6 +3034,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxTagExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::expressions::tag_expression::FormatJsxTagExpression::default(),
         )
     }
@@ -2910,6 +3047,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxTagExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::expressions::tag_expression::FormatJsxTagExpression::default(),
         )
     }
@@ -2932,6 +3070,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeArguments {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::type_arguments::FormatTsTypeArguments::default(),
         )
     }
@@ -2944,6 +3083,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeArguments {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::expressions::type_arguments::FormatTsTypeArguments::default(),
         )
     }
@@ -2970,6 +3110,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTemplateChunkElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement::default(),
         )
     }
@@ -2982,6 +3123,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTemplateChunkElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement::default(),
         )
     }
@@ -3008,6 +3150,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTemplateElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::template_element::FormatJsTemplateElement::default(),
         )
     }
@@ -3020,6 +3163,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTemplateElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::template_element::FormatJsTemplateElement::default(),
         )
     }
@@ -3042,6 +3186,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCallArguments {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::call_arguments::FormatJsCallArguments::default(),
         )
     }
@@ -3054,6 +3199,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCallArguments {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::call_arguments::FormatJsCallArguments::default(),
         )
     }
@@ -3076,6 +3222,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsYieldArgument {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::yield_argument::FormatJsYieldArgument::default(),
         )
     }
@@ -3088,6 +3235,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsYieldArgument {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::yield_argument::FormatJsYieldArgument::default(),
         )
     }
@@ -3114,6 +3262,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeParameters {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::type_parameters::FormatTsTypeParameters::default(),
         )
     }
@@ -3126,6 +3275,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameters {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::type_parameters::FormatTsTypeParameters::default(),
         )
     }
@@ -3148,6 +3298,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsParameters {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::parameters::FormatJsParameters::default(),
         )
     }
@@ -3160,6 +3311,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParameters {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::parameters::FormatJsParameters::default(),
         )
     }
@@ -3186,6 +3338,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsReturnTypeAnnotation {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation::default(),
         )
     }
@@ -3198,6 +3351,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsReturnTypeAnnotation {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation::default(),
         )
     }
@@ -3220,6 +3374,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsFunctionBody {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::function_body::FormatJsFunctionBody::default(),
         )
     }
@@ -3232,6 +3387,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFunctionBody {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::function_body::FormatJsFunctionBody::default(),
         )
     }
@@ -3252,6 +3408,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSpread {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::spread::FormatJsSpread::default(),
         )
     }
@@ -3262,6 +3419,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSpread {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::spread::FormatJsSpread::default(),
         )
     }
@@ -3284,6 +3442,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayHole {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::array_hole::FormatJsArrayHole::default(),
         )
     }
@@ -3296,6 +3455,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayHole {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::array_hole::FormatJsArrayHole::default(),
         )
     }
@@ -3322,6 +3482,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsReferenceIdentifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier::default(),
         )
     }
@@ -3334,6 +3495,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsReferenceIdentifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier::default(),
         )
     }
@@ -3356,6 +3518,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPrivateName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::private_name::FormatJsPrivateName::default(),
         )
     }
@@ -3368,6 +3531,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPrivateName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::private_name::FormatJsPrivateName::default(),
         )
     }
@@ -3394,6 +3558,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsLiteralMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::literal_member_name::FormatJsLiteralMemberName::default(),
         )
     }
@@ -3406,6 +3571,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsLiteralMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::literal_member_name::FormatJsLiteralMemberName::default(),
         )
     }
@@ -3432,6 +3598,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::computed_member_name::FormatJsComputedMemberName::default(),
         )
     }
@@ -3444,6 +3611,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::computed_member_name::FormatJsComputedMemberName::default(),
         )
     }
@@ -3470,6 +3638,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPropertyObjectMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::property_object_member::FormatJsPropertyObjectMember::default(),
         )
     }
@@ -3482,6 +3651,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPropertyObjectMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::property_object_member::FormatJsPropertyObjectMember::default(),
         )
     }
@@ -3508,6 +3678,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsMethodObjectMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::method_object_member::FormatJsMethodObjectMember::default(),
         )
     }
@@ -3520,6 +3691,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsMethodObjectMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::method_object_member::FormatJsMethodObjectMember::default(),
         )
     }
@@ -3546,6 +3718,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsGetterObjectMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::getter_object_member::FormatJsGetterObjectMember::default(),
         )
     }
@@ -3558,6 +3731,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsGetterObjectMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::getter_object_member::FormatJsGetterObjectMember::default(),
         )
     }
@@ -3584,6 +3758,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSetterObjectMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::setter_object_member::FormatJsSetterObjectMember::default(),
         )
     }
@@ -3596,6 +3771,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSetterObjectMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::setter_object_member::FormatJsSetterObjectMember::default(),
         )
     }
@@ -3620,7 +3796,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsShorthandPropertyObjectMemb
         crate::js::objects::shorthand_property_object_member::FormatJsShorthandPropertyObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: objects :: shorthand_property_object_member :: FormatJsShorthandPropertyObjectMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: objects :: shorthand_property_object_member :: FormatJsShorthandPropertyObjectMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsShorthandPropertyObjectMember {
@@ -3629,7 +3805,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsShorthandPropertyObjectMe
         crate::js::objects::shorthand_property_object_member::FormatJsShorthandPropertyObjectMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: objects :: shorthand_property_object_member :: FormatJsShorthandPropertyObjectMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: objects :: shorthand_property_object_member :: FormatJsShorthandPropertyObjectMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExtendsClause>
@@ -3650,6 +3826,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExtendsClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::extends_clause::FormatJsExtendsClause::default(),
         )
     }
@@ -3662,6 +3839,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExtendsClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::extends_clause::FormatJsExtendsClause::default(),
         )
     }
@@ -3688,6 +3866,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsImplementsClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::implements_clause::FormatTsImplementsClause::default(),
         )
     }
@@ -3700,6 +3879,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsImplementsClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::implements_clause::FormatTsImplementsClause::default(),
         )
     }
@@ -3708,13 +3888,13 @@ impl FormatRule < rome_js_syntax :: JsClassExportDefaultDeclaration > for crate 
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsClassExportDefaultDeclaration {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsClassExportDefaultDeclaration , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsClassExportDefaultDeclaration {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsClassExportDefaultDeclaration , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsPrivateClassMemberName>
@@ -3739,6 +3919,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPrivateClassMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName::default(
             ),
         )
@@ -3752,6 +3933,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPrivateClassMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName::default(
             ),
         )
@@ -3779,6 +3961,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsConstructorClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::constructor_class_member::FormatJsConstructorClassMember::default(),
         )
     }
@@ -3791,6 +3974,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsConstructorClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::constructor_class_member::FormatJsConstructorClassMember::default(),
         )
     }
@@ -3799,13 +3983,13 @@ impl FormatRule < rome_js_syntax :: JsStaticInitializationBlockClassMember > for
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsStaticInitializationBlockClassMember {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsStaticInitializationBlockClassMember , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticInitializationBlockClassMember {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsStaticInitializationBlockClassMember , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsPropertyClassMember>
@@ -3830,6 +4014,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPropertyClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::property_class_member::FormatJsPropertyClassMember::default(),
         )
     }
@@ -3842,6 +4027,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPropertyClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::property_class_member::FormatJsPropertyClassMember::default(),
         )
     }
@@ -3868,6 +4054,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsMethodClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::method_class_member::FormatJsMethodClassMember::default(),
         )
     }
@@ -3880,6 +4067,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsMethodClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::method_class_member::FormatJsMethodClassMember::default(),
         )
     }
@@ -3906,6 +4094,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsGetterClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::getter_class_member::FormatJsGetterClassMember::default(),
         )
     }
@@ -3918,6 +4107,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsGetterClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::getter_class_member::FormatJsGetterClassMember::default(),
         )
     }
@@ -3944,6 +4134,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSetterClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::setter_class_member::FormatJsSetterClassMember::default(),
         )
     }
@@ -3956,6 +4147,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSetterClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::setter_class_member::FormatJsSetterClassMember::default(),
         )
     }
@@ -3964,13 +4156,13 @@ impl FormatRule < rome_js_syntax :: TsConstructorSignatureClassMember > for crat
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsConstructorSignatureClassMember {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsConstructorSignatureClassMember , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConstructorSignatureClassMember {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsConstructorSignatureClassMember , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsPropertySignatureClassMember>
@@ -3993,7 +4185,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureClassMembe
         crate::ts::classes::property_signature_class_member::FormatTsPropertySignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: property_signature_class_member :: FormatTsPropertySignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: property_signature_class_member :: FormatTsPropertySignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureClassMember {
@@ -4002,20 +4194,20 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureClassMem
         crate::ts::classes::property_signature_class_member::FormatTsPropertySignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: property_signature_class_member :: FormatTsPropertySignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: property_signature_class_member :: FormatTsPropertySignatureClassMember :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: TsInitializedPropertySignatureClassMember > for crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: TsInitializedPropertySignatureClassMember , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: TsInitializedPropertySignatureClassMember > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsInitializedPropertySignatureClassMember {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsInitializedPropertySignatureClassMember , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInitializedPropertySignatureClassMember {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsInitializedPropertySignatureClassMember , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsMethodSignatureClassMember>
@@ -4038,7 +4230,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureClassMember 
         crate::ts::classes::method_signature_class_member::FormatTsMethodSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: method_signature_class_member :: FormatTsMethodSignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: method_signature_class_member :: FormatTsMethodSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureClassMember {
@@ -4047,7 +4239,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureClassMembe
         crate::ts::classes::method_signature_class_member::FormatTsMethodSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: method_signature_class_member :: FormatTsMethodSignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: method_signature_class_member :: FormatTsMethodSignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsGetterSignatureClassMember>
@@ -4070,7 +4262,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureClassMember 
         crate::ts::classes::getter_signature_class_member::FormatTsGetterSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: getter_signature_class_member :: FormatTsGetterSignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: getter_signature_class_member :: FormatTsGetterSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureClassMember {
@@ -4079,7 +4271,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureClassMembe
         crate::ts::classes::getter_signature_class_member::FormatTsGetterSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: getter_signature_class_member :: FormatTsGetterSignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: getter_signature_class_member :: FormatTsGetterSignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsSetterSignatureClassMember>
@@ -4102,7 +4294,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureClassMember 
         crate::ts::classes::setter_signature_class_member::FormatTsSetterSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: setter_signature_class_member :: FormatTsSetterSignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: setter_signature_class_member :: FormatTsSetterSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureClassMember {
@@ -4111,7 +4303,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureClassMembe
         crate::ts::classes::setter_signature_class_member::FormatTsSetterSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: setter_signature_class_member :: FormatTsSetterSignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: setter_signature_class_member :: FormatTsSetterSignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsIndexSignatureClassMember>
@@ -4134,7 +4326,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureClassMember {
         crate::ts::classes::index_signature_class_member::FormatTsIndexSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: classes :: index_signature_class_member :: FormatTsIndexSignatureClassMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: index_signature_class_member :: FormatTsIndexSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureClassMember {
@@ -4143,7 +4335,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureClassMember
         crate::ts::classes::index_signature_class_member::FormatTsIndexSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: classes :: index_signature_class_member :: FormatTsIndexSignatureClassMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: classes :: index_signature_class_member :: FormatTsIndexSignatureClassMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsEmptyClassMember>
@@ -4168,6 +4360,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsEmptyClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::empty_class_member::FormatJsEmptyClassMember::default(),
         )
     }
@@ -4180,6 +4373,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsEmptyClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::classes::empty_class_member::FormatJsEmptyClassMember::default(),
         )
     }
@@ -4206,6 +4400,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsStaticModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::static_modifier::FormatJsStaticModifier::default(),
         )
     }
@@ -4218,6 +4413,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::static_modifier::FormatJsStaticModifier::default(),
         )
     }
@@ -4244,6 +4440,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsAccessorModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier::default(),
         )
     }
@@ -4256,6 +4453,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsAccessorModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier::default(),
         )
     }
@@ -4282,6 +4480,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDeclareModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier::default(),
         )
     }
@@ -4294,6 +4493,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDeclareModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier::default(),
         )
     }
@@ -4320,6 +4520,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsReadonlyModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier::default(),
         )
     }
@@ -4332,6 +4533,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsReadonlyModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier::default(),
         )
     }
@@ -4358,6 +4560,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAbstractModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier::default(),
         )
     }
@@ -4370,6 +4573,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAbstractModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier::default(),
         )
     }
@@ -4396,6 +4600,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsOverrideModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier::default(),
         )
     }
@@ -4408,6 +4613,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOverrideModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier::default(),
         )
     }
@@ -4434,6 +4640,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAccessibilityModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier::default(),
         )
     }
@@ -4446,6 +4653,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAccessibilityModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier::default(),
         )
     }
@@ -4468,6 +4676,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsConstModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::const_modifier::FormatTsConstModifier::default(),
         )
     }
@@ -4480,6 +4689,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConstModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::const_modifier::FormatTsConstModifier::default(),
         )
     }
@@ -4502,6 +4712,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsInModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::in_modifier::FormatTsInModifier::default(),
         )
     }
@@ -4514,6 +4725,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::in_modifier::FormatTsInModifier::default(),
         )
     }
@@ -4536,6 +4748,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsOutModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::out_modifier::FormatTsOutModifier::default(),
         )
     }
@@ -4548,6 +4761,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOutModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::out_modifier::FormatTsOutModifier::default(),
         )
     }
@@ -4574,6 +4788,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsConstructorParameters {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::constructor_parameters::FormatJsConstructorParameters::default(),
         )
     }
@@ -4586,6 +4801,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsConstructorParameters {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::constructor_parameters::FormatJsConstructorParameters::default(),
         )
     }
@@ -4608,6 +4824,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsRestParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::rest_parameter::FormatJsRestParameter::default(),
         )
     }
@@ -4620,6 +4837,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsRestParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::rest_parameter::FormatJsRestParameter::default(),
         )
     }
@@ -4646,6 +4864,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::property_parameter::FormatTsPropertyParameter::default(),
         )
     }
@@ -4658,6 +4877,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::property_parameter::FormatTsPropertyParameter::default(),
         )
     }
@@ -4684,6 +4904,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsInitializerClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::initializer_clause::FormatJsInitializerClause::default(),
         )
     }
@@ -4696,6 +4917,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsInitializerClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::initializer_clause::FormatJsInitializerClause::default(),
         )
     }
@@ -4718,6 +4940,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDecorator {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::decorator::FormatJsDecorator::default(),
         )
     }
@@ -4730,6 +4953,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDecorator {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::auxiliary::decorator::FormatJsDecorator::default(),
         )
     }
@@ -4754,7 +4978,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsOptionalPropertyAnnotation 
         crate::ts::auxiliary::optional_property_annotation::FormatTsOptionalPropertyAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: optional_property_annotation :: FormatTsOptionalPropertyAnnotation :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: optional_property_annotation :: FormatTsOptionalPropertyAnnotation :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOptionalPropertyAnnotation {
@@ -4763,7 +4987,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOptionalPropertyAnnotatio
         crate::ts::auxiliary::optional_property_annotation::FormatTsOptionalPropertyAnnotation,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: optional_property_annotation :: FormatTsOptionalPropertyAnnotation :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: optional_property_annotation :: FormatTsOptionalPropertyAnnotation :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsDefinitePropertyAnnotation>
@@ -4786,7 +5010,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDefinitePropertyAnnotation 
         crate::ts::auxiliary::definite_property_annotation::FormatTsDefinitePropertyAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: definite_property_annotation :: FormatTsDefinitePropertyAnnotation :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: definite_property_annotation :: FormatTsDefinitePropertyAnnotation :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDefinitePropertyAnnotation {
@@ -4795,7 +5019,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDefinitePropertyAnnotatio
         crate::ts::auxiliary::definite_property_annotation::FormatTsDefinitePropertyAnnotation,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: definite_property_annotation :: FormatTsDefinitePropertyAnnotation :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: definite_property_annotation :: FormatTsDefinitePropertyAnnotation :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsIndexSignatureParameter>
@@ -4818,7 +5042,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureParameter {
         crate::ts::bindings::index_signature_parameter::FormatTsIndexSignatureParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: bindings :: index_signature_parameter :: FormatTsIndexSignatureParameter :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: bindings :: index_signature_parameter :: FormatTsIndexSignatureParameter :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureParameter {
@@ -4827,7 +5051,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureParameter {
         crate::ts::bindings::index_signature_parameter::FormatTsIndexSignatureParameter,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: bindings :: index_signature_parameter :: FormatTsIndexSignatureParameter :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: bindings :: index_signature_parameter :: FormatTsIndexSignatureParameter :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsIdentifierAssignment>
@@ -4852,6 +5076,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsIdentifierAssignment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment::default(),
         )
     }
@@ -4864,6 +5089,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsIdentifierAssignment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment::default(),
         )
     }
@@ -4888,7 +5114,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberAssignment {
         crate::js::assignments::static_member_assignment::FormatJsStaticMemberAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: static_member_assignment :: FormatJsStaticMemberAssignment :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: static_member_assignment :: FormatJsStaticMemberAssignment :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberAssignment {
@@ -4897,7 +5123,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStaticMemberAssignment {
         crate::js::assignments::static_member_assignment::FormatJsStaticMemberAssignment,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: static_member_assignment :: FormatJsStaticMemberAssignment :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: static_member_assignment :: FormatJsStaticMemberAssignment :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsComputedMemberAssignment>
@@ -4920,7 +5146,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberAssignment {
         crate::js::assignments::computed_member_assignment::FormatJsComputedMemberAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: computed_member_assignment :: FormatJsComputedMemberAssignment :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: computed_member_assignment :: FormatJsComputedMemberAssignment :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberAssignment {
@@ -4929,7 +5155,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsComputedMemberAssignment 
         crate::js::assignments::computed_member_assignment::FormatJsComputedMemberAssignment,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: computed_member_assignment :: FormatJsComputedMemberAssignment :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: computed_member_assignment :: FormatJsComputedMemberAssignment :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsParenthesizedAssignment>
@@ -4952,7 +5178,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedAssignment {
         crate::js::assignments::parenthesized_assignment::FormatJsParenthesizedAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: parenthesized_assignment :: FormatJsParenthesizedAssignment :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: parenthesized_assignment :: FormatJsParenthesizedAssignment :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedAssignment {
@@ -4961,7 +5187,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParenthesizedAssignment {
         crate::js::assignments::parenthesized_assignment::FormatJsParenthesizedAssignment,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: parenthesized_assignment :: FormatJsParenthesizedAssignment :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: parenthesized_assignment :: FormatJsParenthesizedAssignment :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsNonNullAssertionAssignment>
@@ -4984,7 +5210,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionAssignment 
         crate::ts::assignments::non_null_assertion_assignment::FormatTsNonNullAssertionAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: assignments :: non_null_assertion_assignment :: FormatTsNonNullAssertionAssignment :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: assignments :: non_null_assertion_assignment :: FormatTsNonNullAssertionAssignment :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionAssignment {
@@ -4993,7 +5219,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNonNullAssertionAssignmen
         crate::ts::assignments::non_null_assertion_assignment::FormatTsNonNullAssertionAssignment,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: assignments :: non_null_assertion_assignment :: FormatTsNonNullAssertionAssignment :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: assignments :: non_null_assertion_assignment :: FormatTsNonNullAssertionAssignment :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsAsAssignment>
@@ -5014,6 +5240,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAsAssignment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::assignments::as_assignment::FormatTsAsAssignment::default(),
         )
     }
@@ -5026,6 +5253,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAsAssignment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::assignments::as_assignment::FormatTsAsAssignment::default(),
         )
     }
@@ -5052,6 +5280,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsSatisfiesAssignment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment::default(),
         )
     }
@@ -5064,6 +5293,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSatisfiesAssignment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment::default(),
         )
     }
@@ -5088,7 +5318,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionAssignment {
         crate::ts::assignments::type_assertion_assignment::FormatTsTypeAssertionAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: assignments :: type_assertion_assignment :: FormatTsTypeAssertionAssignment :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: assignments :: type_assertion_assignment :: FormatTsTypeAssertionAssignment :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionAssignment {
@@ -5097,7 +5327,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeAssertionAssignment {
         crate::ts::assignments::type_assertion_assignment::FormatTsTypeAssertionAssignment,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: assignments :: type_assertion_assignment :: FormatTsTypeAssertionAssignment :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: assignments :: type_assertion_assignment :: FormatTsTypeAssertionAssignment :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsAssignmentWithDefault>
@@ -5122,6 +5352,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsAssignmentWithDefault {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
             ),
         )
@@ -5135,6 +5366,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsAssignmentWithDefault {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
             ),
         )
@@ -5160,7 +5392,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPattern {
         crate::js::assignments::array_assignment_pattern::FormatJsArrayAssignmentPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern :: FormatJsArrayAssignmentPattern :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: array_assignment_pattern :: FormatJsArrayAssignmentPattern :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPattern {
@@ -5169,7 +5401,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPattern {
         crate::js::assignments::array_assignment_pattern::FormatJsArrayAssignmentPattern,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern :: FormatJsArrayAssignmentPattern :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: array_assignment_pattern :: FormatJsArrayAssignmentPattern :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsObjectAssignmentPattern>
@@ -5192,7 +5424,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPattern {
         crate::js::assignments::object_assignment_pattern::FormatJsObjectAssignmentPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern :: FormatJsObjectAssignmentPattern :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern :: FormatJsObjectAssignmentPattern :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPattern {
@@ -5201,46 +5433,46 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPattern {
         crate::js::assignments::object_assignment_pattern::FormatJsObjectAssignmentPattern,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern :: FormatJsObjectAssignmentPattern :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern :: FormatJsObjectAssignmentPattern :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: JsArrayAssignmentPatternRestElement > for crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: JsArrayAssignmentPatternRestElement , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: JsArrayAssignmentPatternRestElement > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPatternRestElement {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsArrayAssignmentPatternRestElement , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPatternRestElement {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsArrayAssignmentPatternRestElement , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: JsObjectAssignmentPatternShorthandProperty > for crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: JsObjectAssignmentPatternShorthandProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: JsObjectAssignmentPatternProperty > for crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: JsObjectAssignmentPatternProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: JsObjectAssignmentPatternProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternProperty {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsObjectAssignmentPatternProperty , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternProperty {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsObjectAssignmentPatternProperty , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsObjectAssignmentPatternRest>
@@ -5263,7 +5495,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternRest
         crate::js::assignments::object_assignment_pattern_rest::FormatJsObjectAssignmentPatternRest,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_rest :: FormatJsObjectAssignmentPatternRest :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_rest :: FormatJsObjectAssignmentPatternRest :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternRest {
@@ -5272,7 +5504,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternRe
         crate::js::assignments::object_assignment_pattern_rest::FormatJsObjectAssignmentPatternRest,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_rest :: FormatJsObjectAssignmentPatternRest :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: assignments :: object_assignment_pattern_rest :: FormatJsObjectAssignmentPatternRest :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsIdentifierBinding>
@@ -5297,6 +5529,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsIdentifierBinding {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::identifier_binding::FormatJsIdentifierBinding::default(),
         )
     }
@@ -5309,6 +5542,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsIdentifierBinding {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::identifier_binding::FormatJsIdentifierBinding::default(),
         )
     }
@@ -5333,7 +5567,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBindingPatternWithDefault {
         crate::js::bindings::binding_pattern_with_default::FormatJsBindingPatternWithDefault,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBindingPatternWithDefault {
@@ -5342,7 +5576,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBindingPatternWithDefault
         crate::js::bindings::binding_pattern_with_default::FormatJsBindingPatternWithDefault,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: binding_pattern_with_default :: FormatJsBindingPatternWithDefault :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsArrayBindingPattern>
@@ -5367,6 +5601,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPattern {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern::default(),
         )
     }
@@ -5379,6 +5614,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPattern {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern::default(),
         )
     }
@@ -5405,6 +5641,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPattern {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern::default(),
         )
     }
@@ -5417,6 +5654,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPattern {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern::default(),
         )
     }
@@ -5425,13 +5663,13 @@ impl FormatRule < rome_js_syntax :: JsArrayBindingPatternRestElement > for crate
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPatternRestElement {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsArrayBindingPatternRestElement , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPatternRestElement {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsArrayBindingPatternRestElement , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsObjectBindingPatternProperty>
@@ -5454,7 +5692,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternPropert
         crate::js::bindings::object_binding_pattern_property::FormatJsObjectBindingPatternProperty,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_property :: FormatJsObjectBindingPatternProperty :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_property :: FormatJsObjectBindingPatternProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternProperty {
@@ -5463,7 +5701,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternPrope
         crate::js::bindings::object_binding_pattern_property::FormatJsObjectBindingPatternProperty,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_property :: FormatJsObjectBindingPatternProperty :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_property :: FormatJsObjectBindingPatternProperty :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsObjectBindingPatternRest>
@@ -5486,7 +5724,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternRest {
         crate::js::bindings::object_binding_pattern_rest::FormatJsObjectBindingPatternRest,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_rest :: FormatJsObjectBindingPatternRest :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_rest :: FormatJsObjectBindingPatternRest :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternRest {
@@ -5495,20 +5733,20 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternRest 
         crate::js::bindings::object_binding_pattern_rest::FormatJsObjectBindingPatternRest,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_rest :: FormatJsObjectBindingPatternRest :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_rest :: FormatJsObjectBindingPatternRest :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: JsObjectBindingPatternShorthandProperty > for crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: JsObjectBindingPatternShorthandProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: JsObjectBindingPatternShorthandProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternShorthandProperty {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsObjectBindingPatternShorthandProperty , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternShorthandProperty {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsObjectBindingPatternShorthandProperty , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsStringLiteralExpression>
@@ -5531,7 +5769,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsStringLiteralExpression {
         crate::js::expressions::string_literal_expression::FormatJsStringLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: string_literal_expression :: FormatJsStringLiteralExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: string_literal_expression :: FormatJsStringLiteralExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStringLiteralExpression {
@@ -5540,7 +5778,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStringLiteralExpression {
         crate::js::expressions::string_literal_expression::FormatJsStringLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: string_literal_expression :: FormatJsStringLiteralExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: string_literal_expression :: FormatJsStringLiteralExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsNumberLiteralExpression>
@@ -5563,7 +5801,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNumberLiteralExpression {
         crate::js::expressions::number_literal_expression::FormatJsNumberLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: number_literal_expression :: FormatJsNumberLiteralExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: number_literal_expression :: FormatJsNumberLiteralExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNumberLiteralExpression {
@@ -5572,7 +5810,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNumberLiteralExpression {
         crate::js::expressions::number_literal_expression::FormatJsNumberLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: number_literal_expression :: FormatJsNumberLiteralExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: number_literal_expression :: FormatJsNumberLiteralExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsBigintLiteralExpression>
@@ -5595,7 +5833,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBigintLiteralExpression {
         crate::js::expressions::bigint_literal_expression::FormatJsBigintLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: bigint_literal_expression :: FormatJsBigintLiteralExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: bigint_literal_expression :: FormatJsBigintLiteralExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBigintLiteralExpression {
@@ -5604,7 +5842,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBigintLiteralExpression {
         crate::js::expressions::bigint_literal_expression::FormatJsBigintLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: bigint_literal_expression :: FormatJsBigintLiteralExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: bigint_literal_expression :: FormatJsBigintLiteralExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsBooleanLiteralExpression>
@@ -5627,7 +5865,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBooleanLiteralExpression {
         crate::js::expressions::boolean_literal_expression::FormatJsBooleanLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: boolean_literal_expression :: FormatJsBooleanLiteralExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: boolean_literal_expression :: FormatJsBooleanLiteralExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBooleanLiteralExpression {
@@ -5636,7 +5874,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBooleanLiteralExpression 
         crate::js::expressions::boolean_literal_expression::FormatJsBooleanLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: boolean_literal_expression :: FormatJsBooleanLiteralExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: boolean_literal_expression :: FormatJsBooleanLiteralExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsNullLiteralExpression>
@@ -5661,6 +5899,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNullLiteralExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression::default(
             ),
         )
@@ -5674,6 +5913,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNullLiteralExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression::default(
             ),
         )
@@ -5699,7 +5939,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsRegexLiteralExpression {
         crate::js::expressions::regex_literal_expression::FormatJsRegexLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: expressions :: regex_literal_expression :: FormatJsRegexLiteralExpression :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: regex_literal_expression :: FormatJsRegexLiteralExpression :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsRegexLiteralExpression {
@@ -5708,7 +5948,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsRegexLiteralExpression {
         crate::js::expressions::regex_literal_expression::FormatJsRegexLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: expressions :: regex_literal_expression :: FormatJsRegexLiteralExpression :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: expressions :: regex_literal_expression :: FormatJsRegexLiteralExpression :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsVariableDeclarationClause>
@@ -5731,7 +5971,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclarationClause {
         crate::js::auxiliary::variable_declaration_clause::FormatJsVariableDeclarationClause,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: auxiliary :: variable_declaration_clause :: FormatJsVariableDeclarationClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: auxiliary :: variable_declaration_clause :: FormatJsVariableDeclarationClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclarationClause {
@@ -5740,7 +5980,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclarationClause
         crate::js::auxiliary::variable_declaration_clause::FormatJsVariableDeclarationClause,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: auxiliary :: variable_declaration_clause :: FormatJsVariableDeclarationClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: auxiliary :: variable_declaration_clause :: FormatJsVariableDeclarationClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsDefiniteVariableAnnotation>
@@ -5763,7 +6003,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDefiniteVariableAnnotation 
         crate::ts::auxiliary::definite_variable_annotation::FormatTsDefiniteVariableAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: definite_variable_annotation :: FormatTsDefiniteVariableAnnotation :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: definite_variable_annotation :: FormatTsDefiniteVariableAnnotation :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDefiniteVariableAnnotation {
@@ -5772,7 +6012,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDefiniteVariableAnnotatio
         crate::ts::auxiliary::definite_variable_annotation::FormatTsDefiniteVariableAnnotation,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: definite_variable_annotation :: FormatTsDefiniteVariableAnnotation :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: definite_variable_annotation :: FormatTsDefiniteVariableAnnotation :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExport> for crate::js::module::export::FormatJsExport {
@@ -5786,14 +6026,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExport {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsExport, crate::js::module::export::FormatJsExport>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::module::export::FormatJsExport::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::module::export::FormatJsExport::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExport {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsExport, crate::js::module::export::FormatJsExport>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::module::export::FormatJsExport::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::module::export::FormatJsExport::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsImport> for crate::js::module::import::FormatJsImport {
@@ -5807,14 +6055,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImport {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsImport, crate::js::module::import::FormatJsImport>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::module::import::FormatJsImport::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::module::import::FormatJsImport::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImport {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsImport, crate::js::module::import::FormatJsImport>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::module::import::FormatJsImport::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::module::import::FormatJsImport::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsImportBareClause>
@@ -5839,6 +6095,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportBareClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_bare_clause::FormatJsImportBareClause::default(),
         )
     }
@@ -5851,6 +6108,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportBareClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_bare_clause::FormatJsImportBareClause::default(),
         )
     }
@@ -5877,6 +6135,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportNamedClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_named_clause::FormatJsImportNamedClause::default(),
         )
     }
@@ -5889,6 +6148,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportNamedClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_named_clause::FormatJsImportNamedClause::default(),
         )
     }
@@ -5915,6 +6175,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportDefaultClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_default_clause::FormatJsImportDefaultClause::default(),
         )
     }
@@ -5927,6 +6188,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportDefaultClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_default_clause::FormatJsImportDefaultClause::default(),
         )
     }
@@ -5953,6 +6215,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportNamespaceClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
         )
     }
@@ -5965,6 +6228,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportNamespaceClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
         )
     }
@@ -5987,6 +6251,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsModuleSource {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::module_source::FormatJsModuleSource::default(),
         )
     }
@@ -5999,6 +6264,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsModuleSource {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::module_source::FormatJsModuleSource::default(),
         )
     }
@@ -6025,6 +6291,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportAssertion {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_assertion::FormatJsImportAssertion::default(),
         )
     }
@@ -6037,6 +6304,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportAssertion {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_assertion::FormatJsImportAssertion::default(),
         )
     }
@@ -6063,6 +6331,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDefaultImportSpecifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier::default(),
         )
     }
@@ -6075,6 +6344,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDefaultImportSpecifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier::default(),
         )
     }
@@ -6101,6 +6371,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifiers {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers::default(),
         )
     }
@@ -6113,6 +6384,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifiers {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers::default(),
         )
     }
@@ -6137,7 +6409,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNamespaceImportSpecifier {
         crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamespaceImportSpecifier {
@@ -6146,7 +6418,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamespaceImportSpecifier 
         crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsShorthandNamedImportSpecifier>
@@ -6169,7 +6441,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsShorthandNamedImportSpecifi
         crate::js::module::shorthand_named_import_specifier::FormatJsShorthandNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: shorthand_named_import_specifier :: FormatJsShorthandNamedImportSpecifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: shorthand_named_import_specifier :: FormatJsShorthandNamedImportSpecifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsShorthandNamedImportSpecifier {
@@ -6178,7 +6450,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsShorthandNamedImportSpeci
         crate::js::module::shorthand_named_import_specifier::FormatJsShorthandNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: shorthand_named_import_specifier :: FormatJsShorthandNamedImportSpecifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: shorthand_named_import_specifier :: FormatJsShorthandNamedImportSpecifier :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsNamedImportSpecifier>
@@ -6203,6 +6475,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier::default(),
         )
     }
@@ -6215,6 +6488,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier::default(),
         )
     }
@@ -6241,6 +6515,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsLiteralExportName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::literal_export_name::FormatJsLiteralExportName::default(),
         )
     }
@@ -6253,6 +6528,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsLiteralExportName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::literal_export_name::FormatJsLiteralExportName::default(),
         )
     }
@@ -6279,6 +6555,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntry {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
         )
     }
@@ -6291,6 +6568,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntry {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
         )
     }
@@ -6311,13 +6589,13 @@ impl FormatRule<rome_js_syntax::JsExportDefaultDeclarationClause>
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportDefaultDeclarationClause {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsExportDefaultDeclarationClause , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportDefaultDeclarationClause {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsExportDefaultDeclarationClause , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExportDefaultExpressionClause>
@@ -6340,7 +6618,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportDefaultExpressionClau
         crate::js::module::export_default_expression_clause::FormatJsExportDefaultExpressionClause,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: export_default_expression_clause :: FormatJsExportDefaultExpressionClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_default_expression_clause :: FormatJsExportDefaultExpressionClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportDefaultExpressionClause {
@@ -6349,7 +6627,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportDefaultExpressionCl
         crate::js::module::export_default_expression_clause::FormatJsExportDefaultExpressionClause,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: export_default_expression_clause :: FormatJsExportDefaultExpressionClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_default_expression_clause :: FormatJsExportDefaultExpressionClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExportNamedClause>
@@ -6374,6 +6652,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_clause::FormatJsExportNamedClause::default(),
         )
     }
@@ -6386,6 +6665,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_clause::FormatJsExportNamedClause::default(),
         )
     }
@@ -6412,6 +6692,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportFromClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_from_clause::FormatJsExportFromClause::default(),
         )
     }
@@ -6424,6 +6705,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportFromClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_from_clause::FormatJsExportFromClause::default(),
         )
     }
@@ -6450,6 +6732,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause::default(),
         )
     }
@@ -6462,6 +6745,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause::default(),
         )
     }
@@ -6488,6 +6772,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExportAsNamespaceClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause::default(
             ),
         )
@@ -6501,6 +6786,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExportAsNamespaceClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause::default(
             ),
         )
@@ -6528,6 +6814,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExportAssignmentClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause::default(),
         )
     }
@@ -6540,6 +6827,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExportAssignmentClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause::default(),
         )
     }
@@ -6566,6 +6854,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExportDeclareClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_declare_clause::FormatTsExportDeclareClause::default(),
         )
     }
@@ -6578,6 +6867,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExportDeclareClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::export_declare_clause::FormatTsExportDeclareClause::default(),
         )
     }
@@ -6586,26 +6876,26 @@ impl FormatRule < rome_js_syntax :: JsFunctionExportDefaultDeclaration > for cra
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsFunctionExportDefaultDeclaration {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsFunctionExportDefaultDeclaration , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFunctionExportDefaultDeclaration {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsFunctionExportDefaultDeclaration , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration > for crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDeclareFunctionExportDefaultDeclaration {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExportNamedShorthandSpecifier>
@@ -6628,7 +6918,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedShorthandSpecifi
         crate::js::module::export_named_shorthand_specifier::FormatJsExportNamedShorthandSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: export_named_shorthand_specifier :: FormatJsExportNamedShorthandSpecifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_named_shorthand_specifier :: FormatJsExportNamedShorthandSpecifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedShorthandSpecifier {
@@ -6637,7 +6927,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedShorthandSpeci
         crate::js::module::export_named_shorthand_specifier::FormatJsExportNamedShorthandSpecifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: export_named_shorthand_specifier :: FormatJsExportNamedShorthandSpecifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_named_shorthand_specifier :: FormatJsExportNamedShorthandSpecifier :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsExportNamedSpecifier>
@@ -6662,6 +6952,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier::default(),
         )
     }
@@ -6674,6 +6965,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier::default(),
         )
     }
@@ -6700,6 +6992,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportAsClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_as_clause::FormatJsExportAsClause::default(),
         )
     }
@@ -6712,6 +7005,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportAsClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::module::export_as_clause::FormatJsExportAsClause::default(),
         )
     }
@@ -6736,7 +7030,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifier {
         crate::js::module::export_named_from_specifier::FormatJsExportNamedFromSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: module :: export_named_from_specifier :: FormatJsExportNamedFromSpecifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_named_from_specifier :: FormatJsExportNamedFromSpecifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifier {
@@ -6745,7 +7039,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifier 
         crate::js::module::export_named_from_specifier::FormatJsExportNamedFromSpecifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: export_named_from_specifier :: FormatJsExportNamedFromSpecifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: module :: export_named_from_specifier :: FormatJsExportNamedFromSpecifier :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsName> for crate::js::auxiliary::name::FormatJsName {
@@ -6759,14 +7053,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsName {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsName, crate::js::auxiliary::name::FormatJsName>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::auxiliary::name::FormatJsName::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::auxiliary::name::FormatJsName::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsName {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsName, crate::js::auxiliary::name::FormatJsName>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::auxiliary::name::FormatJsName::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::auxiliary::name::FormatJsName::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsFormalParameter>
@@ -6791,6 +7093,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsFormalParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::formal_parameter::FormatJsFormalParameter::default(),
         )
     }
@@ -6803,6 +7106,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsFormalParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bindings::formal_parameter::FormatJsFormalParameter::default(),
         )
     }
@@ -6825,6 +7129,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsThisParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::this_parameter::FormatTsThisParameter::default(),
         )
     }
@@ -6837,6 +7142,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsThisParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::this_parameter::FormatTsThisParameter::default(),
         )
     }
@@ -6855,14 +7161,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAnyType {
         crate::ts::types::any_type::FormatTsAnyType,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::ts::types::any_type::FormatTsAnyType::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::types::any_type::FormatTsAnyType::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAnyType {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::TsAnyType, crate::ts::types::any_type::FormatTsAnyType>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::ts::types::any_type::FormatTsAnyType::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::types::any_type::FormatTsAnyType::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::TsUnknownType>
@@ -6883,6 +7197,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsUnknownType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::unknown_type::FormatTsUnknownType::default(),
         )
     }
@@ -6895,6 +7210,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsUnknownType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::unknown_type::FormatTsUnknownType::default(),
         )
     }
@@ -6917,6 +7233,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNumberType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::number_type::FormatTsNumberType::default(),
         )
     }
@@ -6929,6 +7246,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNumberType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::number_type::FormatTsNumberType::default(),
         )
     }
@@ -6951,6 +7269,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsBooleanType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::boolean_type::FormatTsBooleanType::default(),
         )
     }
@@ -6963,6 +7282,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsBooleanType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::boolean_type::FormatTsBooleanType::default(),
         )
     }
@@ -6985,6 +7305,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsBigintType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::bigint_type::FormatTsBigintType::default(),
         )
     }
@@ -6997,6 +7318,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsBigintType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::bigint_type::FormatTsBigintType::default(),
         )
     }
@@ -7019,6 +7341,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsStringType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::string_type::FormatTsStringType::default(),
         )
     }
@@ -7031,6 +7354,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsStringType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::string_type::FormatTsStringType::default(),
         )
     }
@@ -7053,6 +7377,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsSymbolType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::symbol_type::FormatTsSymbolType::default(),
         )
     }
@@ -7065,6 +7390,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSymbolType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::symbol_type::FormatTsSymbolType::default(),
         )
     }
@@ -7085,6 +7411,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsVoidType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::void_type::FormatTsVoidType::default(),
         )
     }
@@ -7097,6 +7424,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsVoidType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::void_type::FormatTsVoidType::default(),
         )
     }
@@ -7119,6 +7447,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsUndefinedType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::undefined_type::FormatTsUndefinedType::default(),
         )
     }
@@ -7131,6 +7460,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsUndefinedType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::undefined_type::FormatTsUndefinedType::default(),
         )
     }
@@ -7151,6 +7481,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNeverType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::never_type::FormatTsNeverType::default(),
         )
     }
@@ -7163,6 +7494,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNeverType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::never_type::FormatTsNeverType::default(),
         )
     }
@@ -7189,6 +7521,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsParenthesizedType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::parenthesized_type::FormatTsParenthesizedType::default(),
         )
     }
@@ -7201,6 +7534,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsParenthesizedType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::parenthesized_type::FormatTsParenthesizedType::default(),
         )
     }
@@ -7223,6 +7557,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsReferenceType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::reference_type::FormatTsReferenceType::default(),
         )
     }
@@ -7235,6 +7570,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsReferenceType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::reference_type::FormatTsReferenceType::default(),
         )
     }
@@ -7255,6 +7591,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsArrayType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::array_type::FormatTsArrayType::default(),
         )
     }
@@ -7267,6 +7604,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsArrayType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::array_type::FormatTsArrayType::default(),
         )
     }
@@ -7287,6 +7625,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTupleType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::tuple_type::FormatTsTupleType::default(),
         )
     }
@@ -7299,6 +7638,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTupleType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::tuple_type::FormatTsTupleType::default(),
         )
     }
@@ -7321,6 +7661,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeofType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::typeof_type::FormatTsTypeofType::default(),
         )
     }
@@ -7333,6 +7674,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeofType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::typeof_type::FormatTsTypeofType::default(),
         )
     }
@@ -7355,6 +7697,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsImportType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::import_type::FormatTsImportType::default(),
         )
     }
@@ -7367,6 +7710,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsImportType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::import_type::FormatTsImportType::default(),
         )
     }
@@ -7393,6 +7737,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeOperatorType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::type_operator_type::FormatTsTypeOperatorType::default(),
         )
     }
@@ -7405,6 +7750,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeOperatorType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::type_operator_type::FormatTsTypeOperatorType::default(),
         )
     }
@@ -7431,6 +7777,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIndexedAccessType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::indexed_access_type::FormatTsIndexedAccessType::default(),
         )
     }
@@ -7443,6 +7790,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexedAccessType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::indexed_access_type::FormatTsIndexedAccessType::default(),
         )
     }
@@ -7465,6 +7813,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsMappedType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::mapped_type::FormatTsMappedType::default(),
         )
     }
@@ -7477,6 +7826,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMappedType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::mapped_type::FormatTsMappedType::default(),
         )
     }
@@ -7499,6 +7849,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsObjectType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::object_type::FormatTsObjectType::default(),
         )
     }
@@ -7511,6 +7862,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsObjectType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::object_type::FormatTsObjectType::default(),
         )
     }
@@ -7537,6 +7889,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNonPrimitiveType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType::default(),
         )
     }
@@ -7549,6 +7902,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNonPrimitiveType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType::default(),
         )
     }
@@ -7569,6 +7923,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsThisType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::this_type::FormatTsThisType::default(),
         )
     }
@@ -7581,6 +7936,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsThisType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::this_type::FormatTsThisType::default(),
         )
     }
@@ -7607,6 +7963,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNumberLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::number_literal_type::FormatTsNumberLiteralType::default(),
         )
     }
@@ -7619,6 +7976,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNumberLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::number_literal_type::FormatTsNumberLiteralType::default(),
         )
     }
@@ -7645,6 +8003,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsBigintLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType::default(),
         )
     }
@@ -7657,6 +8016,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsBigintLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType::default(),
         )
     }
@@ -7683,6 +8043,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsStringLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::string_literal_type::FormatTsStringLiteralType::default(),
         )
     }
@@ -7695,6 +8056,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsStringLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::string_literal_type::FormatTsStringLiteralType::default(),
         )
     }
@@ -7721,6 +8083,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNullLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::null_literal_type::FormatTsNullLiteralType::default(),
         )
     }
@@ -7733,6 +8096,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNullLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::null_literal_type::FormatTsNullLiteralType::default(),
         )
     }
@@ -7759,6 +8123,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsBooleanLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType::default(),
         )
     }
@@ -7771,6 +8136,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsBooleanLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType::default(),
         )
     }
@@ -7797,6 +8163,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTemplateLiteralType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::template_literal_type::FormatTsTemplateLiteralType::default(),
         )
     }
@@ -7809,6 +8176,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTemplateLiteralType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::template_literal_type::FormatTsTemplateLiteralType::default(),
         )
     }
@@ -7829,6 +8197,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsInferType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::infer_type::FormatTsInferType::default(),
         )
     }
@@ -7841,6 +8210,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsInferType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::infer_type::FormatTsInferType::default(),
         )
     }
@@ -7867,6 +8237,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIntersectionType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::intersection_type::FormatTsIntersectionType::default(),
         )
     }
@@ -7879,6 +8250,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIntersectionType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::intersection_type::FormatTsIntersectionType::default(),
         )
     }
@@ -7899,6 +8271,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsUnionType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::union_type::FormatTsUnionType::default(),
         )
     }
@@ -7911,6 +8284,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsUnionType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::union_type::FormatTsUnionType::default(),
         )
     }
@@ -7933,6 +8307,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsFunctionType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::function_type::FormatTsFunctionType::default(),
         )
     }
@@ -7945,6 +8320,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsFunctionType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::function_type::FormatTsFunctionType::default(),
         )
     }
@@ -7971,6 +8347,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsConstructorType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::constructor_type::FormatTsConstructorType::default(),
         )
     }
@@ -7983,6 +8360,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConstructorType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::constructor_type::FormatTsConstructorType::default(),
         )
     }
@@ -8009,6 +8387,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsConditionalType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::conditional_type::FormatTsConditionalType::default(),
         )
     }
@@ -8021,6 +8400,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConditionalType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::conditional_type::FormatTsConditionalType::default(),
         )
     }
@@ -8047,6 +8427,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIdentifierBinding {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding::default(),
         )
     }
@@ -8059,6 +8440,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIdentifierBinding {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding::default(),
         )
     }
@@ -8081,6 +8463,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsEnumMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::enum_member::FormatTsEnumMember::default(),
         )
     }
@@ -8093,6 +8476,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsEnumMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::enum_member::FormatTsEnumMember::default(),
         )
     }
@@ -8117,7 +8501,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleReference {
         crate::ts::auxiliary::external_module_reference::FormatTsExternalModuleReference,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: external_module_reference :: FormatTsExternalModuleReference :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: external_module_reference :: FormatTsExternalModuleReference :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleReference {
@@ -8126,7 +8510,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExternalModuleReference {
         crate::ts::auxiliary::external_module_reference::FormatTsExternalModuleReference,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: external_module_reference :: FormatTsExternalModuleReference :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: external_module_reference :: FormatTsExternalModuleReference :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsModuleBlock>
@@ -8147,6 +8531,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsModuleBlock {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::module_block::FormatTsModuleBlock::default(),
         )
     }
@@ -8159,6 +8544,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsModuleBlock {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::module_block::FormatTsModuleBlock::default(),
         )
     }
@@ -8185,6 +8571,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsQualifiedModuleName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName::default(),
         )
     }
@@ -8197,6 +8584,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsQualifiedModuleName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName::default(),
         )
     }
@@ -8205,13 +8593,13 @@ impl FormatRule < rome_js_syntax :: TsEmptyExternalModuleDeclarationBody > for c
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsEmptyExternalModuleDeclarationBody {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsEmptyExternalModuleDeclarationBody , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsEmptyExternalModuleDeclarationBody {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsEmptyExternalModuleDeclarationBody , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsTypeParameterName>
@@ -8236,6 +8624,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName::default(),
         )
     }
@@ -8248,6 +8637,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName::default(),
         )
     }
@@ -8274,6 +8664,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeConstraintClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause::default(),
         )
     }
@@ -8286,6 +8677,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeConstraintClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause::default(),
         )
     }
@@ -8312,6 +8704,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPredicateReturnType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::predicate_return_type::FormatTsPredicateReturnType::default(),
         )
     }
@@ -8324,6 +8717,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPredicateReturnType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::predicate_return_type::FormatTsPredicateReturnType::default(),
         )
     }
@@ -8350,6 +8744,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAssertsReturnType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::asserts_return_type::FormatTsAssertsReturnType::default(),
         )
     }
@@ -8362,6 +8757,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAssertsReturnType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::types::asserts_return_type::FormatTsAssertsReturnType::default(),
         )
     }
@@ -8388,6 +8784,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsAssertsCondition {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition::default(),
         )
     }
@@ -8400,6 +8797,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsAssertsCondition {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition::default(),
         )
     }
@@ -8422,6 +8820,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::type_parameter::FormatTsTypeParameter::default(),
         )
     }
@@ -8434,6 +8833,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bindings::type_parameter::FormatTsTypeParameter::default(),
         )
     }
@@ -8460,6 +8860,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsDefaultTypeClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause::default(),
         )
     }
@@ -8472,6 +8873,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsDefaultTypeClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause::default(),
         )
     }
@@ -8494,6 +8896,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsExtendsClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::classes::extends_clause::FormatTsExtendsClause::default(),
         )
     }
@@ -8506,6 +8909,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsExtendsClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::classes::extends_clause::FormatTsExtendsClause::default(),
         )
     }
@@ -8530,7 +8934,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNameWithTypeArguments {
         crate::ts::expressions::name_with_type_arguments::FormatTsNameWithTypeArguments,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNameWithTypeArguments {
@@ -8539,7 +8943,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNameWithTypeArguments {
         crate::ts::expressions::name_with_type_arguments::FormatTsNameWithTypeArguments,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: expressions :: name_with_type_arguments :: FormatTsNameWithTypeArguments :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsCallSignatureTypeMember>
@@ -8562,7 +8966,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsCallSignatureTypeMember {
         crate::ts::auxiliary::call_signature_type_member::FormatTsCallSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: call_signature_type_member :: FormatTsCallSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: call_signature_type_member :: FormatTsCallSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsCallSignatureTypeMember {
@@ -8571,7 +8975,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsCallSignatureTypeMember {
         crate::ts::auxiliary::call_signature_type_member::FormatTsCallSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: call_signature_type_member :: FormatTsCallSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: call_signature_type_member :: FormatTsCallSignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsPropertySignatureTypeMember>
@@ -8594,7 +8998,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureTypeMember
         crate::ts::auxiliary::property_signature_type_member::FormatTsPropertySignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: property_signature_type_member :: FormatTsPropertySignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: property_signature_type_member :: FormatTsPropertySignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureTypeMember {
@@ -8603,7 +9007,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureTypeMemb
         crate::ts::auxiliary::property_signature_type_member::FormatTsPropertySignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: property_signature_type_member :: FormatTsPropertySignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: property_signature_type_member :: FormatTsPropertySignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsConstructSignatureTypeMember>
@@ -8626,7 +9030,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsConstructSignatureTypeMembe
         crate::ts::auxiliary::construct_signature_type_member::FormatTsConstructSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: construct_signature_type_member :: FormatTsConstructSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: construct_signature_type_member :: FormatTsConstructSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConstructSignatureTypeMember {
@@ -8635,7 +9039,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsConstructSignatureTypeMem
         crate::ts::auxiliary::construct_signature_type_member::FormatTsConstructSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: construct_signature_type_member :: FormatTsConstructSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: construct_signature_type_member :: FormatTsConstructSignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsMethodSignatureTypeMember>
@@ -8658,7 +9062,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureTypeMember {
         crate::ts::auxiliary::method_signature_type_member::FormatTsMethodSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: method_signature_type_member :: FormatTsMethodSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: method_signature_type_member :: FormatTsMethodSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureTypeMember {
@@ -8667,7 +9071,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureTypeMember
         crate::ts::auxiliary::method_signature_type_member::FormatTsMethodSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: method_signature_type_member :: FormatTsMethodSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: method_signature_type_member :: FormatTsMethodSignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsGetterSignatureTypeMember>
@@ -8690,7 +9094,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureTypeMember {
         crate::ts::auxiliary::getter_signature_type_member::FormatTsGetterSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: getter_signature_type_member :: FormatTsGetterSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: getter_signature_type_member :: FormatTsGetterSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureTypeMember {
@@ -8699,7 +9103,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsGetterSignatureTypeMember
         crate::ts::auxiliary::getter_signature_type_member::FormatTsGetterSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: getter_signature_type_member :: FormatTsGetterSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: getter_signature_type_member :: FormatTsGetterSignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsSetterSignatureTypeMember>
@@ -8722,7 +9126,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureTypeMember {
         crate::ts::auxiliary::setter_signature_type_member::FormatTsSetterSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: setter_signature_type_member :: FormatTsSetterSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: setter_signature_type_member :: FormatTsSetterSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureTypeMember {
@@ -8731,7 +9135,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsSetterSignatureTypeMember
         crate::ts::auxiliary::setter_signature_type_member::FormatTsSetterSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: setter_signature_type_member :: FormatTsSetterSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: setter_signature_type_member :: FormatTsSetterSignatureTypeMember :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsIndexSignatureTypeMember>
@@ -8754,7 +9158,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureTypeMember {
         crate::ts::auxiliary::index_signature_type_member::FormatTsIndexSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: index_signature_type_member :: FormatTsIndexSignatureTypeMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: index_signature_type_member :: FormatTsIndexSignatureTypeMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureTypeMember {
@@ -8763,20 +9167,20 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureTypeMember 
         crate::ts::auxiliary::index_signature_type_member::FormatTsIndexSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: index_signature_type_member :: FormatTsIndexSignatureTypeMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: index_signature_type_member :: FormatTsIndexSignatureTypeMember :: default ())
     }
 }
 impl FormatRule < rome_js_syntax :: TsMappedTypeReadonlyModifierClause > for crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & rome_js_syntax :: TsMappedTypeReadonlyModifierClause , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < rome_js_syntax :: TsMappedTypeReadonlyModifierClause > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeReadonlyModifierClause {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsMappedTypeReadonlyModifierClause , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeReadonlyModifierClause {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsMappedTypeReadonlyModifierClause , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsMappedTypeAsClause>
@@ -8801,6 +9205,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeAsClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause::default(),
         )
     }
@@ -8813,6 +9218,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeAsClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause::default(),
         )
     }
@@ -8821,13 +9227,13 @@ impl FormatRule < rome_js_syntax :: TsMappedTypeOptionalModifierClause > for cra
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeOptionalModifierClause {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: TsMappedTypeOptionalModifierClause , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMappedTypeOptionalModifierClause {
     type Format = FormatOwnedWithRule < rome_js_syntax :: TsMappedTypeOptionalModifierClause , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsImportTypeQualifier>
@@ -8852,6 +9258,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsImportTypeQualifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier::default(),
         )
     }
@@ -8864,6 +9271,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsImportTypeQualifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier::default(),
         )
     }
@@ -8890,6 +9298,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsNamedTupleTypeElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement::default(
             ),
         )
@@ -8903,6 +9312,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsNamedTupleTypeElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement::default(
             ),
         )
@@ -8930,6 +9340,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsRestTupleTypeElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement::default(),
         )
     }
@@ -8942,6 +9353,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsRestTupleTypeElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement::default(),
         )
     }
@@ -8966,7 +9378,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsOptionalTupleTypeElement {
         crate::ts::auxiliary::optional_tuple_type_element::FormatTsOptionalTupleTypeElement,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: optional_tuple_type_element :: FormatTsOptionalTupleTypeElement :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: optional_tuple_type_element :: FormatTsOptionalTupleTypeElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOptionalTupleTypeElement {
@@ -8975,7 +9387,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsOptionalTupleTypeElement 
         crate::ts::auxiliary::optional_tuple_type_element::FormatTsOptionalTupleTypeElement,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: optional_tuple_type_element :: FormatTsOptionalTupleTypeElement :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: auxiliary :: optional_tuple_type_element :: FormatTsOptionalTupleTypeElement :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsTemplateChunkElement>
@@ -9000,6 +9412,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTemplateChunkElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement::default(),
         )
     }
@@ -9012,6 +9425,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTemplateChunkElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement::default(),
         )
     }
@@ -9038,6 +9452,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTemplateElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::template_element::FormatTsTemplateElement::default(),
         )
     }
@@ -9050,6 +9465,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTemplateElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::template_element::FormatTsTemplateElement::default(),
         )
     }
@@ -9072,6 +9488,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsQualifiedName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::qualified_name::FormatTsQualifiedName::default(),
         )
     }
@@ -9084,6 +9501,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsQualifiedName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::auxiliary::qualified_name::FormatTsQualifiedName::default(),
         )
     }
@@ -9102,14 +9520,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxElement {
         crate::jsx::tag::element::FormatJsxElement,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::tag::element::FormatJsxElement::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::tag::element::FormatJsxElement::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxElement {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsxElement, crate::jsx::tag::element::FormatJsxElement>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::tag::element::FormatJsxElement::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::tag::element::FormatJsxElement::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsxSelfClosingElement>
@@ -9134,6 +9560,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxSelfClosingElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement::default(),
         )
     }
@@ -9146,6 +9573,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxSelfClosingElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement::default(),
         )
     }
@@ -9166,6 +9594,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxFragment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::fragment::FormatJsxFragment::default(),
         )
     }
@@ -9178,6 +9607,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxFragment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::fragment::FormatJsxFragment::default(),
         )
     }
@@ -9204,6 +9634,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxOpeningElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::opening_element::FormatJsxOpeningElement::default(),
         )
     }
@@ -9216,6 +9647,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxOpeningElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::opening_element::FormatJsxOpeningElement::default(),
         )
     }
@@ -9242,6 +9674,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxClosingElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::closing_element::FormatJsxClosingElement::default(),
         )
     }
@@ -9254,6 +9687,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxClosingElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::closing_element::FormatJsxClosingElement::default(),
         )
     }
@@ -9280,6 +9714,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxOpeningFragment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment::default(),
         )
     }
@@ -9292,6 +9727,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxOpeningFragment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment::default(),
         )
     }
@@ -9318,6 +9754,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxClosingFragment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::closing_fragment::FormatJsxClosingFragment::default(),
         )
     }
@@ -9330,6 +9767,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxClosingFragment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::tag::closing_fragment::FormatJsxClosingFragment::default(),
         )
     }
@@ -9345,14 +9783,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxName {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsxName, crate::jsx::auxiliary::name::FormatJsxName>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::auxiliary::name::FormatJsxName::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::auxiliary::name::FormatJsxName::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxName {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsxName, crate::jsx::auxiliary::name::FormatJsxName>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::auxiliary::name::FormatJsxName::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::auxiliary::name::FormatJsxName::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsxReferenceIdentifier>
@@ -9377,6 +9823,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxReferenceIdentifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier::default(),
         )
     }
@@ -9389,6 +9836,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxReferenceIdentifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier::default(),
         )
     }
@@ -9415,6 +9863,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxNamespaceName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName::default(),
         )
     }
@@ -9427,6 +9876,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxNamespaceName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName::default(),
         )
     }
@@ -9449,6 +9899,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::objects::member_name::FormatJsxMemberName::default(),
         )
     }
@@ -9461,6 +9912,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::objects::member_name::FormatJsxMemberName::default(),
         )
     }
@@ -9483,6 +9935,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxAttribute {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::attribute::attribute::FormatJsxAttribute::default(),
         )
     }
@@ -9495,6 +9948,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxAttribute {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::attribute::attribute::FormatJsxAttribute::default(),
         )
     }
@@ -9521,6 +9975,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxSpreadAttribute {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute::default(),
         )
     }
@@ -9533,6 +9988,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxSpreadAttribute {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute::default(),
         )
     }
@@ -9557,7 +10013,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxAttributeInitializerClause
         crate::jsx::attribute::attribute_initializer_clause::FormatJsxAttributeInitializerClause,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: jsx :: attribute :: attribute_initializer_clause :: FormatJsxAttributeInitializerClause :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: jsx :: attribute :: attribute_initializer_clause :: FormatJsxAttributeInitializerClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxAttributeInitializerClause {
@@ -9566,7 +10022,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxAttributeInitializerClau
         crate::jsx::attribute::attribute_initializer_clause::FormatJsxAttributeInitializerClause,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: jsx :: attribute :: attribute_initializer_clause :: FormatJsxAttributeInitializerClause :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: jsx :: attribute :: attribute_initializer_clause :: FormatJsxAttributeInitializerClause :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsxString> for crate::jsx::auxiliary::string::FormatJsxString {
@@ -9585,6 +10041,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxString {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::string::FormatJsxString::default(),
         )
     }
@@ -9597,6 +10054,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxString {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::string::FormatJsxString::default(),
         )
     }
@@ -9621,7 +10079,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxExpressionAttributeValue {
         crate::jsx::attribute::expression_attribute_value::FormatJsxExpressionAttributeValue,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: jsx :: attribute :: expression_attribute_value :: FormatJsxExpressionAttributeValue :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: jsx :: attribute :: expression_attribute_value :: FormatJsxExpressionAttributeValue :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxExpressionAttributeValue {
@@ -9630,7 +10088,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxExpressionAttributeValue
         crate::jsx::attribute::expression_attribute_value::FormatJsxExpressionAttributeValue,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: jsx :: attribute :: expression_attribute_value :: FormatJsxExpressionAttributeValue :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: jsx :: attribute :: expression_attribute_value :: FormatJsxExpressionAttributeValue :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsxText> for crate::jsx::auxiliary::text::FormatJsxText {
@@ -9644,14 +10102,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxText {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsxText, crate::jsx::auxiliary::text::FormatJsxText>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::auxiliary::text::FormatJsxText::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::auxiliary::text::FormatJsxText::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxText {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsxText, crate::jsx::auxiliary::text::FormatJsxText>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::auxiliary::text::FormatJsxText::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::auxiliary::text::FormatJsxText::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsxExpressionChild>
@@ -9676,6 +10142,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxExpressionChild {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild::default(),
         )
     }
@@ -9688,6 +10155,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxExpressionChild {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild::default(),
         )
     }
@@ -9710,6 +10178,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxSpreadChild {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild::default(),
         )
     }
@@ -9722,6 +10191,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxSpreadChild {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild::default(),
         )
     }
@@ -9729,25 +10199,25 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxSpreadChild {
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPatternElementList {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsArrayAssignmentPatternElementList , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayAssignmentPatternElementList {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsArrayAssignmentPatternElementList , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPatternElementList {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsArrayBindingPatternElementList , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayBindingPatternElementList {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsArrayBindingPatternElementList , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayElementList {
@@ -9759,6 +10229,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsArrayElementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::array_element_list::FormatJsArrayElementList::default(),
         )
     }
@@ -9771,6 +10242,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsArrayElementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::array_element_list::FormatJsArrayElementList::default(),
         )
     }
@@ -9784,6 +10256,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsCallArgumentList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::call_argument_list::FormatJsCallArgumentList::default(),
         )
     }
@@ -9796,6 +10269,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsCallArgumentList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::call_argument_list::FormatJsCallArgumentList::default(),
         )
     }
@@ -9809,6 +10283,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsClassMemberList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::class_member_list::FormatJsClassMemberList::default(),
         )
     }
@@ -9821,6 +10296,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsClassMemberList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::class_member_list::FormatJsClassMemberList::default(),
         )
     }
@@ -9834,6 +10310,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsConstructorModifierList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList::default(),
         )
     }
@@ -9846,6 +10323,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsConstructorModifierList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList::default(),
         )
     }
@@ -9859,6 +10337,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsConstructorParameterList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList::default(
             ),
         )
@@ -9872,6 +10351,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsConstructorParameterList 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList::default(
             ),
         )
@@ -9886,6 +10366,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDecoratorList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::decorator_list::FormatJsDecoratorList::default(),
         )
     }
@@ -9898,6 +10379,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDecoratorList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::decorator_list::FormatJsDecoratorList::default(),
         )
     }
@@ -9911,6 +10393,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsDirectiveList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::directive_list::FormatJsDirectiveList::default(),
         )
     }
@@ -9923,6 +10406,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsDirectiveList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::directive_list::FormatJsDirectiveList::default(),
         )
     }
@@ -9934,7 +10418,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifierLis
         crate::js::lists::export_named_from_specifier_list::FormatJsExportNamedFromSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: export_named_from_specifier_list :: FormatJsExportNamedFromSpecifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: export_named_from_specifier_list :: FormatJsExportNamedFromSpecifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifierList {
@@ -9943,7 +10427,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedFromSpecifierL
         crate::js::lists::export_named_from_specifier_list::FormatJsExportNamedFromSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: export_named_from_specifier_list :: FormatJsExportNamedFromSpecifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: export_named_from_specifier_list :: FormatJsExportNamedFromSpecifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifierList {
@@ -9953,7 +10437,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifierList {
         crate::js::lists::export_named_specifier_list::FormatJsExportNamedSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: export_named_specifier_list :: FormatJsExportNamedSpecifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: export_named_specifier_list :: FormatJsExportNamedSpecifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifierList {
@@ -9962,7 +10446,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsExportNamedSpecifierList 
         crate::js::lists::export_named_specifier_list::FormatJsExportNamedSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: export_named_specifier_list :: FormatJsExportNamedSpecifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: export_named_specifier_list :: FormatJsExportNamedSpecifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntryList {
@@ -9972,7 +10456,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntryList {
         crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntryList {
@@ -9981,7 +10465,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsImportAssertionEntryList 
         crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsMethodModifierList {
@@ -9993,6 +10477,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsMethodModifierList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::method_modifier_list::FormatJsMethodModifierList::default(),
         )
     }
@@ -10005,6 +10490,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsMethodModifierList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::method_modifier_list::FormatJsMethodModifierList::default(),
         )
     }
@@ -10018,6 +10504,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsModuleItemList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::module_item_list::FormatJsModuleItemList::default(),
         )
     }
@@ -10030,6 +10517,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsModuleItemList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::module_item_list::FormatJsModuleItemList::default(),
         )
     }
@@ -10041,7 +10529,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifierList {
         crate::js::lists::named_import_specifier_list::FormatJsNamedImportSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: named_import_specifier_list :: FormatJsNamedImportSpecifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: named_import_specifier_list :: FormatJsNamedImportSpecifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifierList {
@@ -10050,31 +10538,31 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsNamedImportSpecifierList 
         crate::js::lists::named_import_specifier_list::FormatJsNamedImportSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: named_import_specifier_list :: FormatJsNamedImportSpecifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: named_import_specifier_list :: FormatJsNamedImportSpecifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternPropertyList {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsObjectAssignmentPatternPropertyList , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectAssignmentPatternPropertyList {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsObjectAssignmentPatternPropertyList , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternPropertyList {
     type Format < 'a > = FormatRefWithRule < 'a , rome_js_syntax :: JsObjectBindingPatternPropertyList , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectBindingPatternPropertyList {
     type Format = FormatOwnedWithRule < rome_js_syntax :: JsObjectBindingPatternPropertyList , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectMemberList {
@@ -10086,6 +10574,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsObjectMemberList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::object_member_list::FormatJsObjectMemberList::default(),
         )
     }
@@ -10098,6 +10587,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsObjectMemberList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::object_member_list::FormatJsObjectMemberList::default(),
         )
     }
@@ -10111,6 +10601,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsParameterList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::parameter_list::FormatJsParameterList::default(),
         )
     }
@@ -10123,6 +10614,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsParameterList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::parameter_list::FormatJsParameterList::default(),
         )
     }
@@ -10136,6 +10628,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsPropertyModifierList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::property_modifier_list::FormatJsPropertyModifierList::default(),
         )
     }
@@ -10148,6 +10641,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsPropertyModifierList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::property_modifier_list::FormatJsPropertyModifierList::default(),
         )
     }
@@ -10161,6 +10655,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsStatementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::statement_list::FormatJsStatementList::default(),
         )
     }
@@ -10173,6 +10668,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsStatementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::statement_list::FormatJsStatementList::default(),
         )
     }
@@ -10186,6 +10682,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsSwitchCaseList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::switch_case_list::FormatJsSwitchCaseList::default(),
         )
     }
@@ -10198,6 +10695,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsSwitchCaseList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::switch_case_list::FormatJsSwitchCaseList::default(),
         )
     }
@@ -10211,6 +10709,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsTemplateElementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::template_element_list::FormatJsTemplateElementList::default(),
         )
     }
@@ -10223,6 +10722,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsTemplateElementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::template_element_list::FormatJsTemplateElementList::default(),
         )
     }
@@ -10236,6 +10736,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclaratorList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList::default(),
         )
     }
@@ -10248,6 +10749,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsVariableDeclaratorList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList::default(),
         )
     }
@@ -10261,6 +10763,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxAttributeList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::lists::attribute_list::FormatJsxAttributeList::default(),
         )
     }
@@ -10273,6 +10776,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxAttributeList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::lists::attribute_list::FormatJsxAttributeList::default(),
         )
     }
@@ -10286,6 +10790,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsxChildList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::lists::child_list::FormatJsxChildList::default(),
         )
     }
@@ -10298,6 +10803,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsxChildList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::lists::child_list::FormatJsxChildList::default(),
         )
     }
@@ -10311,6 +10817,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsEnumMemberList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::enum_member_list::FormatTsEnumMemberList::default(),
         )
     }
@@ -10323,6 +10830,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsEnumMemberList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::enum_member_list::FormatTsEnumMemberList::default(),
         )
     }
@@ -10334,7 +10842,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureModifierList 
         crate::ts::lists::index_signature_modifier_list::FormatTsIndexSignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: index_signature_modifier_list :: FormatTsIndexSignatureModifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: index_signature_modifier_list :: FormatTsIndexSignatureModifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureModifierList {
@@ -10343,7 +10851,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIndexSignatureModifierLis
         crate::ts::lists::index_signature_modifier_list::FormatTsIndexSignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: index_signature_modifier_list :: FormatTsIndexSignatureModifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: index_signature_modifier_list :: FormatTsIndexSignatureModifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsIntersectionTypeElementList {
@@ -10353,7 +10861,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsIntersectionTypeElementList
         crate::ts::lists::intersection_type_element_list::FormatTsIntersectionTypeElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: intersection_type_element_list :: FormatTsIntersectionTypeElementList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: intersection_type_element_list :: FormatTsIntersectionTypeElementList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIntersectionTypeElementList {
@@ -10362,7 +10870,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsIntersectionTypeElementLi
         crate::ts::lists::intersection_type_element_list::FormatTsIntersectionTypeElementList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: intersection_type_element_list :: FormatTsIntersectionTypeElementList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: intersection_type_element_list :: FormatTsIntersectionTypeElementList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureModifierList {
@@ -10372,7 +10880,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureModifierList
         crate::ts::lists::method_signature_modifier_list::FormatTsMethodSignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: method_signature_modifier_list :: FormatTsMethodSignatureModifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: method_signature_modifier_list :: FormatTsMethodSignatureModifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureModifierList {
@@ -10381,7 +10889,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsMethodSignatureModifierLi
         crate::ts::lists::method_signature_modifier_list::FormatTsMethodSignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: method_signature_modifier_list :: FormatTsMethodSignatureModifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: method_signature_modifier_list :: FormatTsMethodSignatureModifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameterModifierList {
@@ -10391,7 +10899,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameterModifierLi
         crate::ts::lists::property_parameter_modifier_list::FormatTsPropertyParameterModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: property_parameter_modifier_list :: FormatTsPropertyParameterModifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: property_parameter_modifier_list :: FormatTsPropertyParameterModifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameterModifierList {
@@ -10400,7 +10908,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertyParameterModifier
         crate::ts::lists::property_parameter_modifier_list::FormatTsPropertyParameterModifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: property_parameter_modifier_list :: FormatTsPropertyParameterModifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: property_parameter_modifier_list :: FormatTsPropertyParameterModifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureModifierList {
@@ -10410,7 +10918,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureModifierLi
         crate::ts::lists::property_signature_modifier_list::FormatTsPropertySignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: property_signature_modifier_list :: FormatTsPropertySignatureModifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: property_signature_modifier_list :: FormatTsPropertySignatureModifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureModifierList {
@@ -10419,7 +10927,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsPropertySignatureModifier
         crate::ts::lists::property_signature_modifier_list::FormatTsPropertySignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: property_signature_modifier_list :: FormatTsPropertySignatureModifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: property_signature_modifier_list :: FormatTsPropertySignatureModifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsTemplateElementList {
@@ -10431,6 +10939,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTemplateElementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::template_element_list::FormatTsTemplateElementList::default(),
         )
     }
@@ -10443,6 +10952,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTemplateElementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::template_element_list::FormatTsTemplateElementList::default(),
         )
     }
@@ -10456,6 +10966,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTupleTypeElementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList::default(),
         )
     }
@@ -10468,6 +10979,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTupleTypeElementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList::default(),
         )
     }
@@ -10481,6 +10993,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeArgumentList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_argument_list::FormatTsTypeArgumentList::default(),
         )
     }
@@ -10493,6 +11006,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeArgumentList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_argument_list::FormatTsTypeArgumentList::default(),
         )
     }
@@ -10506,6 +11020,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_list::FormatTsTypeList::default(),
         )
     }
@@ -10518,6 +11033,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_list::FormatTsTypeList::default(),
         )
     }
@@ -10531,6 +11047,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeMemberList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_member_list::FormatTsTypeMemberList::default(),
         )
     }
@@ -10543,6 +11060,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeMemberList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_member_list::FormatTsTypeMemberList::default(),
         )
     }
@@ -10556,6 +11074,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_parameter_list::FormatTsTypeParameterList::default(),
         )
     }
@@ -10568,6 +11087,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::type_parameter_list::FormatTsTypeParameterList::default(),
         )
     }
@@ -10579,7 +11099,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterModifierList {
         crate::ts::lists::type_parameter_modifier_list::FormatTsTypeParameterModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: lists :: type_parameter_modifier_list :: FormatTsTypeParameterModifierList :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: type_parameter_modifier_list :: FormatTsTypeParameterModifierList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterModifierList {
@@ -10588,7 +11108,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsTypeParameterModifierList
         crate::ts::lists::type_parameter_modifier_list::FormatTsTypeParameterModifierList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: lists :: type_parameter_modifier_list :: FormatTsTypeParameterModifierList :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: lists :: type_parameter_modifier_list :: FormatTsTypeParameterModifierList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::TsUnionTypeVariantList {
@@ -10600,6 +11120,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsUnionTypeVariantList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::union_type_variant_list::FormatTsUnionTypeVariantList::default(),
         )
     }
@@ -10612,6 +11133,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsUnionTypeVariantList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::lists::union_type_variant_list::FormatTsUnionTypeVariantList::default(),
         )
     }
@@ -10627,14 +11149,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogus {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::JsBogus, crate::js::bogus::bogus::FormatJsBogus>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::bogus::bogus::FormatJsBogus::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::bogus::bogus::FormatJsBogus::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogus {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::JsBogus, crate::js::bogus::bogus::FormatJsBogus>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::bogus::bogus::FormatJsBogus::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::bogus::bogus::FormatJsBogus::default(),
+        )
     }
 }
 impl FormatRule<rome_js_syntax::JsBogusStatement>
@@ -10659,6 +11189,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_statement::FormatJsBogusStatement::default(),
         )
     }
@@ -10671,6 +11202,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_statement::FormatJsBogusStatement::default(),
         )
     }
@@ -10697,6 +11229,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_expression::FormatJsBogusExpression::default(),
         )
     }
@@ -10709,6 +11242,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_expression::FormatJsBogusExpression::default(),
         )
     }
@@ -10731,6 +11265,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_member::FormatJsBogusMember::default(),
         )
     }
@@ -10743,6 +11278,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_member::FormatJsBogusMember::default(),
         )
     }
@@ -10765,6 +11301,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusBinding {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_binding::FormatJsBogusBinding::default(),
         )
     }
@@ -10777,6 +11314,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusBinding {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_binding::FormatJsBogusBinding::default(),
         )
     }
@@ -10803,6 +11341,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusAssignment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_assignment::FormatJsBogusAssignment::default(),
         )
     }
@@ -10815,6 +11354,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusAssignment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_assignment::FormatJsBogusAssignment::default(),
         )
     }
@@ -10841,6 +11381,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_parameter::FormatJsBogusParameter::default(),
         )
     }
@@ -10853,6 +11394,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::bogus::bogus_parameter::FormatJsBogusParameter::default(),
         )
     }
@@ -10877,7 +11419,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusImportAssertionEntry {
         crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusImportAssertionEntry {
@@ -10886,7 +11428,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusImportAssertionEntry
         crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::JsBogusNamedImportSpecifier>
@@ -10909,7 +11451,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::JsBogusNamedImportSpecifier {
         crate::js::bogus::bogus_named_import_specifier::FormatJsBogusNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: bogus :: bogus_named_import_specifier :: FormatJsBogusNamedImportSpecifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bogus :: bogus_named_import_specifier :: FormatJsBogusNamedImportSpecifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusNamedImportSpecifier {
@@ -10918,7 +11460,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::JsBogusNamedImportSpecifier
         crate::js::bogus::bogus_named_import_specifier::FormatJsBogusNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: bogus :: bogus_named_import_specifier :: FormatJsBogusNamedImportSpecifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: bogus :: bogus_named_import_specifier :: FormatJsBogusNamedImportSpecifier :: default ())
     }
 }
 impl FormatRule<rome_js_syntax::TsBogusType> for crate::ts::bogus::bogus_type::FormatTsBogusType {
@@ -10937,6 +11479,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::TsBogusType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bogus::bogus_type::FormatTsBogusType::default(),
         )
     }
@@ -10949,6 +11492,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::TsBogusType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::bogus::bogus_type::FormatTsBogusType::default(),
         )
     }
@@ -10957,14 +11501,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsRoot {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyJsRoot, crate::js::any::root::FormatAnyJsRoot>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::any::root::FormatAnyJsRoot::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::root::FormatAnyJsRoot::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsRoot {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsRoot, crate::js::any::root::FormatAnyJsRoot>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::any::root::FormatAnyJsRoot::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::root::FormatAnyJsRoot::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExpression {
@@ -10976,6 +11528,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::expression::FormatAnyJsExpression::default(),
         )
     }
@@ -10988,6 +11541,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::expression::FormatAnyJsExpression::default(),
         )
     }
@@ -11001,6 +11555,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsStatement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::statement::FormatAnyJsStatement::default(),
         )
     }
@@ -11013,6 +11568,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsStatement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::statement::FormatAnyJsStatement::default(),
         )
     }
@@ -11026,6 +11582,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsForInitializer {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::for_initializer::FormatAnyJsForInitializer::default(),
         )
     }
@@ -11038,6 +11595,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsForInitializer {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::for_initializer::FormatAnyJsForInitializer::default(),
         )
     }
@@ -11051,6 +11609,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsForInOrOfInitializer {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer::default(),
         )
     }
@@ -11063,6 +11622,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsForInOrOfInitializer {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer::default(),
         )
     }
@@ -11076,6 +11636,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsAssignmentPattern {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern::default(),
         )
     }
@@ -11088,6 +11649,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsAssignmentPattern {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern::default(),
         )
     }
@@ -11101,6 +11663,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsSwitchClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::switch_clause::FormatAnyJsSwitchClause::default(),
         )
     }
@@ -11113,6 +11676,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsSwitchClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::switch_clause::FormatAnyJsSwitchClause::default(),
         )
     }
@@ -11126,6 +11690,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsBindingPattern {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::binding_pattern::FormatAnyJsBindingPattern::default(),
         )
     }
@@ -11138,6 +11703,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsBindingPattern {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::binding_pattern::FormatAnyJsBindingPattern::default(),
         )
     }
@@ -11151,6 +11717,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsDeclarationClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::declaration_clause::FormatAnyJsDeclarationClause::default(),
         )
     }
@@ -11163,6 +11730,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsDeclarationClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::declaration_clause::FormatAnyJsDeclarationClause::default(),
         )
     }
@@ -11176,6 +11744,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsLiteralExpression {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::literal_expression::FormatAnyJsLiteralExpression::default(),
         )
     }
@@ -11188,6 +11757,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsLiteralExpression {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::literal_expression::FormatAnyJsLiteralExpression::default(),
         )
     }
@@ -11201,6 +11771,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsTemplateElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::template_element::FormatAnyJsTemplateElement::default(),
         )
     }
@@ -11213,6 +11784,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsTemplateElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::template_element::FormatAnyJsTemplateElement::default(),
         )
     }
@@ -11224,7 +11796,11 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsBinding {
         crate::js::any::binding::FormatAnyJsBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::any::binding::FormatAnyJsBinding::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::binding::FormatAnyJsBinding::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsBinding {
@@ -11233,7 +11809,11 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsBinding {
         crate::js::any::binding::FormatAnyJsBinding,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::any::binding::FormatAnyJsBinding::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::binding::FormatAnyJsBinding::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrowFunctionParameters {
@@ -11245,6 +11825,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrowFunctionParameters 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters::default(
             ),
         )
@@ -11258,6 +11839,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrowFunctionParameter
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters::default(
             ),
         )
@@ -11272,6 +11854,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsFunctionBody {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::function_body::FormatAnyJsFunctionBody::default(),
         )
     }
@@ -11284,6 +11867,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsFunctionBody {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::function_body::FormatAnyJsFunctionBody::default(),
         )
     }
@@ -11297,6 +11881,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::array_element::FormatAnyJsArrayElement::default(),
         )
     }
@@ -11309,6 +11894,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::array_element::FormatAnyJsArrayElement::default(),
         )
     }
@@ -11317,14 +11903,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsName {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyJsName, crate::js::any::name::FormatAnyJsName>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::any::name::FormatAnyJsName::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::name::FormatAnyJsName::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsName {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsName, crate::js::any::name::FormatAnyJsName>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::any::name::FormatAnyJsName::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::name::FormatAnyJsName::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsInProperty {
@@ -11336,6 +11930,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsInProperty {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::in_property::FormatAnyJsInProperty::default(),
         )
     }
@@ -11348,6 +11943,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsInProperty {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::in_property::FormatAnyJsInProperty::default(),
         )
     }
@@ -11361,6 +11957,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsAssignment {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::assignment::FormatAnyJsAssignment::default(),
         )
     }
@@ -11373,6 +11970,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsAssignment {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::assignment::FormatAnyJsAssignment::default(),
         )
     }
@@ -11386,6 +11984,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::object_member_name::FormatAnyJsObjectMemberName::default(),
         )
     }
@@ -11398,6 +11997,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::object_member_name::FormatAnyJsObjectMemberName::default(),
         )
     }
@@ -11411,6 +12011,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::object_member::FormatAnyJsObjectMember::default(),
         )
     }
@@ -11423,6 +12024,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::object_member::FormatAnyJsObjectMember::default(),
         )
     }
@@ -11436,6 +12038,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsFormalParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::formal_parameter::FormatAnyJsFormalParameter::default(),
         )
     }
@@ -11448,6 +12051,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsFormalParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::formal_parameter::FormatAnyJsFormalParameter::default(),
         )
     }
@@ -11461,6 +12065,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsClassMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::class_member::FormatAnyJsClassMember::default(),
         )
     }
@@ -11473,6 +12078,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsClassMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::class_member::FormatAnyJsClassMember::default(),
         )
     }
@@ -11481,14 +12087,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsClass {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyJsClass, crate::js::any::class::FormatAnyJsClass>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::js::any::class::FormatAnyJsClass::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::class::FormatAnyJsClass::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsClass {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsClass, crate::js::any::class::FormatAnyJsClass>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::js::any::class::FormatAnyJsClass::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::js::any::class::FormatAnyJsClass::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsClassMemberName {
@@ -11500,6 +12114,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsClassMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::class_member_name::FormatAnyJsClassMemberName::default(),
         )
     }
@@ -11512,6 +12127,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsClassMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::class_member_name::FormatAnyJsClassMemberName::default(),
         )
     }
@@ -11525,6 +12141,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsConstructorParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter::default(),
         )
     }
@@ -11537,6 +12154,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsConstructorParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter::default(),
         )
     }
@@ -11548,7 +12166,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyParameterModifie
         crate::ts::any::property_parameter_modifier::FormatAnyTsPropertyParameterModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: any :: property_parameter_modifier :: FormatAnyTsPropertyParameterModifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_parameter_modifier :: FormatAnyTsPropertyParameterModifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyParameterModifier {
@@ -11557,7 +12175,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyParameterModif
         crate::ts::any::property_parameter_modifier::FormatAnyTsPropertyParameterModifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: any :: property_parameter_modifier :: FormatAnyTsPropertyParameterModifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_parameter_modifier :: FormatAnyTsPropertyParameterModifier :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyAnnotation {
@@ -11569,6 +12187,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyAnnotation {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation::default(),
         )
     }
@@ -11581,6 +12200,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertyAnnotation {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation::default(),
         )
     }
@@ -11594,6 +12214,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsPropertyModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::property_modifier::FormatAnyJsPropertyModifier::default(),
         )
     }
@@ -11606,6 +12227,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsPropertyModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::property_modifier::FormatAnyJsPropertyModifier::default(),
         )
     }
@@ -11617,7 +12239,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureAnnotat
         crate::ts::any::property_signature_annotation::FormatAnyTsPropertySignatureAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: any :: property_signature_annotation :: FormatAnyTsPropertySignatureAnnotation :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_signature_annotation :: FormatAnyTsPropertySignatureAnnotation :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureAnnotation {
@@ -11626,7 +12248,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureAnnot
         crate::ts::any::property_signature_annotation::FormatAnyTsPropertySignatureAnnotation,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: any :: property_signature_annotation :: FormatAnyTsPropertySignatureAnnotation :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_signature_annotation :: FormatAnyTsPropertySignatureAnnotation :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureModifier {
@@ -11636,7 +12258,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureModifie
         crate::ts::any::property_signature_modifier::FormatAnyTsPropertySignatureModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: any :: property_signature_modifier :: FormatAnyTsPropertySignatureModifier :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_signature_modifier :: FormatAnyTsPropertySignatureModifier :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureModifier {
@@ -11645,7 +12267,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsPropertySignatureModif
         crate::ts::any::property_signature_modifier::FormatAnyTsPropertySignatureModifier,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: any :: property_signature_modifier :: FormatAnyTsPropertySignatureModifier :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: property_signature_modifier :: FormatAnyTsPropertySignatureModifier :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsMethodModifier {
@@ -11657,6 +12279,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsMethodModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::method_modifier::FormatAnyJsMethodModifier::default(),
         )
     }
@@ -11669,6 +12292,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsMethodModifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::method_modifier::FormatAnyJsMethodModifier::default(),
         )
     }
@@ -11682,6 +12306,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsMethodSignatureModifier 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier::default(
             ),
         )
@@ -11695,6 +12320,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsMethodSignatureModifie
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier::default(
             ),
         )
@@ -11709,6 +12335,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsIndexSignatureModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier::default(),
         )
     }
@@ -11721,6 +12348,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsIndexSignatureModifier
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier::default(),
         )
     }
@@ -11729,14 +12357,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsType {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyTsType, crate::ts::any::ts_type::FormatAnyTsType>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::ts::any::ts_type::FormatAnyTsType::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::any::ts_type::FormatAnyTsType::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsType {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyTsType, crate::ts::any::ts_type::FormatAnyTsType>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::ts::any::ts_type::FormatAnyTsType::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::any::ts_type::FormatAnyTsType::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayAssignmentPatternElement {
@@ -11746,7 +12382,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayAssignmentPatternEl
         crate::js::any::array_assignment_pattern_element::FormatAnyJsArrayAssignmentPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: any :: array_assignment_pattern_element :: FormatAnyJsArrayAssignmentPatternElement :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: array_assignment_pattern_element :: FormatAnyJsArrayAssignmentPatternElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayAssignmentPatternElement {
@@ -11755,7 +12391,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayAssignmentPattern
         crate::js::any::array_assignment_pattern_element::FormatAnyJsArrayAssignmentPatternElement,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: any :: array_assignment_pattern_element :: FormatAnyJsArrayAssignmentPatternElement :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: array_assignment_pattern_element :: FormatAnyJsArrayAssignmentPatternElement :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectAssignmentPatternMember {
@@ -11765,7 +12401,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectAssignmentPatternM
         crate::js::any::object_assignment_pattern_member::FormatAnyJsObjectAssignmentPatternMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: any :: object_assignment_pattern_member :: FormatAnyJsObjectAssignmentPatternMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: object_assignment_pattern_member :: FormatAnyJsObjectAssignmentPatternMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectAssignmentPatternMember {
@@ -11774,7 +12410,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectAssignmentPatter
         crate::js::any::object_assignment_pattern_member::FormatAnyJsObjectAssignmentPatternMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: any :: object_assignment_pattern_member :: FormatAnyJsObjectAssignmentPatternMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: object_assignment_pattern_member :: FormatAnyJsObjectAssignmentPatternMember :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayBindingPatternElement {
@@ -11784,7 +12420,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayBindingPatternEleme
         crate::js::any::array_binding_pattern_element::FormatAnyJsArrayBindingPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: any :: array_binding_pattern_element :: FormatAnyJsArrayBindingPatternElement :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: array_binding_pattern_element :: FormatAnyJsArrayBindingPatternElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayBindingPatternElement {
@@ -11793,7 +12429,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsArrayBindingPatternEle
         crate::js::any::array_binding_pattern_element::FormatAnyJsArrayBindingPatternElement,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: any :: array_binding_pattern_element :: FormatAnyJsArrayBindingPatternElement :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: array_binding_pattern_element :: FormatAnyJsArrayBindingPatternElement :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectBindingPatternMember {
@@ -11803,7 +12439,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectBindingPatternMemb
         crate::js::any::object_binding_pattern_member::FormatAnyJsObjectBindingPatternMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: any :: object_binding_pattern_member :: FormatAnyJsObjectBindingPatternMember :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: object_binding_pattern_member :: FormatAnyJsObjectBindingPatternMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectBindingPatternMember {
@@ -11812,7 +12448,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsObjectBindingPatternMe
         crate::js::any::object_binding_pattern_member::FormatAnyJsObjectBindingPatternMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: any :: object_binding_pattern_member :: FormatAnyJsObjectBindingPatternMember :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: object_binding_pattern_member :: FormatAnyJsObjectBindingPatternMember :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsDeclaration {
@@ -11824,6 +12460,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsDeclaration {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::declaration::FormatAnyJsDeclaration::default(),
         )
     }
@@ -11836,6 +12473,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsDeclaration {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::declaration::FormatAnyJsDeclaration::default(),
         )
     }
@@ -11849,6 +12487,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsReturnType {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::return_type::FormatAnyTsReturnType::default(),
         )
     }
@@ -11861,6 +12500,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsReturnType {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::return_type::FormatAnyTsReturnType::default(),
         )
     }
@@ -11874,6 +12514,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsVariableAnnotation {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation::default(),
         )
     }
@@ -11886,6 +12527,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsVariableAnnotation {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation::default(),
         )
     }
@@ -11899,6 +12541,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsModuleItem {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::module_item::FormatAnyJsModuleItem::default(),
         )
     }
@@ -11911,6 +12554,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsModuleItem {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::module_item::FormatAnyJsModuleItem::default(),
         )
     }
@@ -11924,6 +12568,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsImportClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::import_clause::FormatAnyJsImportClause::default(),
         )
     }
@@ -11936,6 +12581,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsImportClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::import_clause::FormatAnyJsImportClause::default(),
         )
     }
@@ -11949,6 +12595,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsNamedImport {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::named_import::FormatAnyJsNamedImport::default(),
         )
     }
@@ -11961,6 +12608,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsNamedImport {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::named_import::FormatAnyJsNamedImport::default(),
         )
     }
@@ -11974,6 +12622,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsNamedImportSpecifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier::default(),
         )
     }
@@ -11986,6 +12635,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsNamedImportSpecifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier::default(),
         )
     }
@@ -11999,6 +12649,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsImportAssertionEntry {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
         )
     }
@@ -12011,6 +12662,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsImportAssertionEntry {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
         )
     }
@@ -12024,6 +12676,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExportClause {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::export_clause::FormatAnyJsExportClause::default(),
         )
     }
@@ -12036,6 +12689,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsExportClause {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::export_clause::FormatAnyJsExportClause::default(),
         )
     }
@@ -12047,7 +12701,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExportDefaultDeclaration
         crate::js::any::export_default_declaration::FormatAnyJsExportDefaultDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: js :: any :: export_default_declaration :: FormatAnyJsExportDefaultDeclaration :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: export_default_declaration :: FormatAnyJsExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsExportDefaultDeclaration {
@@ -12056,7 +12710,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsExportDefaultDeclarati
         crate::js::any::export_default_declaration::FormatAnyJsExportDefaultDeclaration,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: js :: any :: export_default_declaration :: FormatAnyJsExportDefaultDeclaration :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: js :: any :: export_default_declaration :: FormatAnyJsExportDefaultDeclaration :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExportNamedSpecifier {
@@ -12068,6 +12722,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsExportNamedSpecifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier::default(),
         )
     }
@@ -12080,6 +12735,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsExportNamedSpecifier {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier::default(),
         )
     }
@@ -12093,6 +12749,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsFunction {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::function::FormatAnyJsFunction::default(),
         )
     }
@@ -12105,6 +12762,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsFunction {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::function::FormatAnyJsFunction::default(),
         )
     }
@@ -12118,6 +12776,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsParameter {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::parameter::FormatAnyJsParameter::default(),
         )
     }
@@ -12130,6 +12789,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsParameter {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::parameter::FormatAnyJsParameter::default(),
         )
     }
@@ -12143,6 +12803,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsCallArgument {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::call_argument::FormatAnyJsCallArgument::default(),
         )
     }
@@ -12155,6 +12816,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsCallArgument {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::call_argument::FormatAnyJsCallArgument::default(),
         )
     }
@@ -12168,6 +12830,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsDecorator {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::decorator::FormatAnyJsDecorator::default(),
         )
     }
@@ -12180,6 +12843,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsDecorator {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::js::any::decorator::FormatAnyJsDecorator::default(),
         )
     }
@@ -12188,14 +12852,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsName {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyTsName, crate::ts::any::name::FormatAnyTsName>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::ts::any::name::FormatAnyTsName::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::any::name::FormatAnyTsName::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsName {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyTsName, crate::ts::any::name::FormatAnyTsName>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::ts::any::name::FormatAnyTsName::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::ts::any::name::FormatAnyTsName::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsModuleReference {
@@ -12207,6 +12879,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsModuleReference {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::module_reference::FormatAnyTsModuleReference::default(),
         )
     }
@@ -12219,6 +12892,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsModuleReference {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::module_reference::FormatAnyTsModuleReference::default(),
         )
     }
@@ -12232,6 +12906,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsModuleName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::module_name::FormatAnyTsModuleName::default(),
         )
     }
@@ -12244,6 +12919,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsModuleName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::module_name::FormatAnyTsModuleName::default(),
         )
     }
@@ -12255,7 +12931,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsExternalModuleDeclaratio
         crate::ts::any::external_module_declaration_body::FormatAnyTsExternalModuleDeclarationBody,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: any :: external_module_declaration_body :: FormatAnyTsExternalModuleDeclarationBody :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: external_module_declaration_body :: FormatAnyTsExternalModuleDeclarationBody :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsExternalModuleDeclarationBody {
@@ -12264,7 +12940,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsExternalModuleDeclarat
         crate::ts::any::external_module_declaration_body::FormatAnyTsExternalModuleDeclarationBody,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: any :: external_module_declaration_body :: FormatAnyTsExternalModuleDeclarationBody :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: external_module_declaration_body :: FormatAnyTsExternalModuleDeclarationBody :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTypePredicateParameterName {
@@ -12274,7 +12950,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTypePredicateParameterNa
         crate::ts::any::type_predicate_parameter_name::FormatAnyTsTypePredicateParameterName,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: ts :: any :: type_predicate_parameter_name :: FormatAnyTsTypePredicateParameterName :: default ())
+        FormatRefWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: type_predicate_parameter_name :: FormatAnyTsTypePredicateParameterName :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTypePredicateParameterName {
@@ -12283,7 +12959,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTypePredicateParameter
         crate::ts::any::type_predicate_parameter_name::FormatAnyTsTypePredicateParameterName,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: ts :: any :: type_predicate_parameter_name :: FormatAnyTsTypePredicateParameterName :: default ())
+        FormatOwnedWithRule :: new (self , # [allow (clippy :: default_constructed_unit_structs)] crate :: ts :: any :: type_predicate_parameter_name :: FormatAnyTsTypePredicateParameterName :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTypeParameterModifier {
@@ -12295,6 +12971,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTypeParameterModifier {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier::default(),
         )
     }
@@ -12307,6 +12984,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTypeParameterModifier 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier::default(),
         )
     }
@@ -12320,6 +12998,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTypeMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::type_member::FormatAnyTsTypeMember::default(),
         )
     }
@@ -12332,6 +13011,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTypeMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::type_member::FormatAnyTsTypeMember::default(),
         )
     }
@@ -12345,6 +13025,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTupleTypeElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement::default(),
         )
     }
@@ -12357,6 +13038,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTupleTypeElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement::default(),
         )
     }
@@ -12370,6 +13052,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyTsTemplateElement {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::template_element::FormatAnyTsTemplateElement::default(),
         )
     }
@@ -12382,6 +13065,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyTsTemplateElement {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::ts::any::template_element::FormatAnyTsTemplateElement::default(),
         )
     }
@@ -12390,14 +13074,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxTag {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyJsxTag, crate::jsx::any::tag::FormatAnyJsxTag>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::tag::FormatAnyJsxTag::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxTag {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsxTag, crate::jsx::any::tag::FormatAnyJsxTag>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::tag::FormatAnyJsxTag::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxElementName {
@@ -12409,6 +13101,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxElementName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::element_name::FormatAnyJsxElementName::default(),
         )
     }
@@ -12421,6 +13114,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxElementName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::element_name::FormatAnyJsxElementName::default(),
         )
     }
@@ -12434,6 +13128,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxObjectName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::object_name::FormatAnyJsxObjectName::default(),
         )
     }
@@ -12446,6 +13141,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxObjectName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::object_name::FormatAnyJsxObjectName::default(),
         )
     }
@@ -12454,14 +13150,22 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxName {
     type Format<'a> =
         FormatRefWithRule<'a, rome_js_syntax::AnyJsxName, crate::jsx::any::name::FormatAnyJsxName>;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::any::name::FormatAnyJsxName::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::name::FormatAnyJsxName::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxName {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsxName, crate::jsx::any::name::FormatAnyJsxName>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::any::name::FormatAnyJsxName::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::name::FormatAnyJsxName::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttribute {
@@ -12473,6 +13177,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttribute {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute::FormatAnyJsxAttribute::default(),
         )
     }
@@ -12485,6 +13190,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttribute {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute::FormatAnyJsxAttribute::default(),
         )
     }
@@ -12498,6 +13204,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttributeName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute_name::FormatAnyJsxAttributeName::default(),
         )
     }
@@ -12510,6 +13217,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttributeName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute_name::FormatAnyJsxAttributeName::default(),
         )
     }
@@ -12523,6 +13231,7 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttributeValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue::default(),
         )
     }
@@ -12535,6 +13244,7 @@ impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxAttributeValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue::default(),
         )
     }
@@ -12546,13 +13256,21 @@ impl AsFormat<JsFormatContext> for rome_js_syntax::AnyJsxChild {
         crate::jsx::any::child::FormatAnyJsxChild,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::jsx::any::child::FormatAnyJsxChild::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::child::FormatAnyJsxChild::default(),
+        )
     }
 }
 impl IntoFormat<JsFormatContext> for rome_js_syntax::AnyJsxChild {
     type Format =
         FormatOwnedWithRule<rome_js_syntax::AnyJsxChild, crate::jsx::any::child::FormatAnyJsxChild>;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::jsx::any::child::FormatAnyJsxChild::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::jsx::any::child::FormatAnyJsxChild::default(),
+        )
     }
 }

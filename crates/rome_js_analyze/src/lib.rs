@@ -120,8 +120,8 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    services.insert_service(Arc::new(AriaRoles::default()));
-    services.insert_service(Arc::new(AriaProperties::default()));
+    services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(Arc::new(AriaProperties));
     services.insert_service(source_type);
     (
         analyzer.run(AnalyzerContext {

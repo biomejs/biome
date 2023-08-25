@@ -1,12 +1,12 @@
 use rome_js_syntax::{AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression};
+use std::rc::Rc;
 
 use super::*;
-use std::sync::Arc;
 
 /// Provides all information regarding to a specific reference.
 #[derive(Debug)]
 pub struct Reference {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) index: ReferenceIndex,
 }
 
@@ -124,7 +124,7 @@ impl Reference {
 /// Provides all information regarding a specific function or method call.
 #[derive(Debug)]
 pub struct FunctionCall {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) index: ReferenceIndex,
 }
 
@@ -181,7 +181,7 @@ pub struct SemanticModelUnresolvedReference {
 
 #[derive(Debug)]
 pub struct UnresolvedReference {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) id: usize,
 }
 

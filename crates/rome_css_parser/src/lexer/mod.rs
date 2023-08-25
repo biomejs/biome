@@ -435,14 +435,15 @@ impl<'src> Lexer<'src> {
                             // Consume as many hex digits as possible, but no more than 5.
                             // Note that this means 1-6 hex digits have been consumed in total.
                             for _ in 0..5 {
-                                let Some(digit) = self.current_byte()
-                                    .and_then(|c| {
-                                        if c.is_ascii_hexdigit() {
-                                            (c as char).to_digit(16)
-                                        } else {
-                                            None
-                                        }
-                                    }) else { break; };
+                                let Some(digit) = self.current_byte().and_then(|c| {
+                                    if c.is_ascii_hexdigit() {
+                                        (c as char).to_digit(16)
+                                    } else {
+                                        None
+                                    }
+                                }) else {
+                                    break;
+                                };
                                 self.advance(1);
 
                                 hex = hex * 16 + digit;

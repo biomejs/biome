@@ -24,7 +24,6 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     collections::{BTreeSet, HashSet, VecDeque},
     iter::FusedIterator,
-    sync::Arc,
 };
 
 pub use binding::*;

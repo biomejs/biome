@@ -54,8 +54,10 @@ impl AriaServices {
                 let name = attr.name().ok()?.syntax().text_trimmed().to_string();
                 // handle an attribute without values e.g. `<img aria-hidden />`
                 let Some(initializer) = attr.initializer() else {
-                    defined_attributes.entry(name).or_insert(vec!["true".to_string()]);
-                    continue
+                    defined_attributes
+                        .entry(name)
+                        .or_insert(vec!["true".to_string()]);
+                    continue;
                 };
                 let initializer = initializer.value().ok()?;
                 let static_value = initializer.as_static_value()?;

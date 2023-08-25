@@ -126,7 +126,9 @@ impl Rule for UseArrowFunction {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let AnyThisScopeMetadata { scope, .. } = ctx.query();
-        let AnyThisScope::JsFunctionExpression(function_expression) = scope else { return None };
+        let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
+            return None;
+        };
         let mut arrow_function_builder = make::js_arrow_function_expression(
             function_expression.parameters().ok()?.into(),
             make::token(T![=>]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -256,10 +258,13 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
     let body_statements = body.statements();
     // () => { ... }
     let mut result = AnyJsFunctionBody::from(body);
-    let Some(AnyJsStatement::JsReturnStatement(return_statement)) = body_statements.iter().next() else {
+    let Some(AnyJsStatement::JsReturnStatement(return_statement)) = body_statements.iter().next()
+    else {
         return result;
     };
-    let Some(return_arg) = return_statement.argument() else { return result; };
+    let Some(return_arg) = return_statement.argument() else {
+        return result;
+    };
     if body_statements.syntax().has_comments_direct()
         || return_statement.syntax().has_comments_direct()
         || return_arg.syntax().has_comments_direct()

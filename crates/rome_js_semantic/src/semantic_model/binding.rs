@@ -1,5 +1,6 @@
 use super::*;
 use rome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypeParameterName};
+use std::rc::Rc;
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
@@ -44,7 +45,7 @@ pub type AllBindingWriteReferencesIter =
 
 /// Provides access to all semantic data of a specific binding.
 pub struct Binding {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) index: BindingIndex,
 }
 

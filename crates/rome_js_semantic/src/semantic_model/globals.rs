@@ -1,6 +1,6 @@
 use super::*;
 use rome_js_syntax::{JsSyntaxNode, TextRange};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct SemanticModelGlobalBindingData {
@@ -14,7 +14,7 @@ pub struct SemanticModelGlobalReferenceData {
 }
 
 pub struct GlobalReference {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) global_id: usize,
     pub(crate) id: usize,
 }

@@ -347,7 +347,7 @@ fn invalid_escape() {
 #[test]
 fn single_quote_escape_in_single_quote_string() {
     assert_lex! {
-        r#"'A single \' escape'"#,
+        r"'A single \' escape'",
         ERROR_TOKEN:20,
         EOF:0
     }
@@ -356,25 +356,25 @@ fn single_quote_escape_in_single_quote_string() {
 #[test]
 fn identifiers() {
     assert_lex! {
-        r#"asciiIdentifier"#,
+        r"asciiIdentifier",
         IDENT:15,
         EOF:0
     }
 
     assert_lex! {
-        r#"with_underscore_here"#,
+        r"with_underscore_here",
         IDENT:20,
         EOF:0
     }
 
     assert_lex! {
-        r#"with_unicodeàçᨀ"#,
+        r"with_unicodeàçᨀ",
         IDENT:19,
         EOF:0
     }
 
     assert_lex! {
-        r#"ᨀwith_unicodeàç"#,
+        r"ᨀwith_unicodeàç",
         IDENT:19,
         EOF:0
     }

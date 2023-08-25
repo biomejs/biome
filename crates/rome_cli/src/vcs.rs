@@ -18,8 +18,8 @@ pub(crate) fn store_path_to_ignore_from_vcs(
     cli_options: &CliOptions,
 ) -> Result<(), CliDiagnostic> {
     let Some(vcs) = &configuration.vcs else {
-		return Ok(())
-	};
+        return Ok(());
+    };
     if vcs.is_enabled() {
         let vcs_base_path = match (vcs_base_path, &vcs.root) {
             (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),

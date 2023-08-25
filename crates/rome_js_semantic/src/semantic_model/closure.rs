@@ -5,7 +5,7 @@ use rome_js_syntax::{
     JsMethodClassMember, JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
 };
 use rome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
-use std::sync::Arc;
+use std::rc::Rc;
 
 /// Marker trait that groups all "AstNode" that have closure
 pub trait HasClosureAstNode {
@@ -80,7 +80,7 @@ pub enum CaptureType {
 /// Provides all information regarding a specific closure capture.
 #[derive(Clone)]
 pub struct Capture {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     ty: CaptureType,
     node: JsSyntaxNode,
     binding_id: BindingIndex,
@@ -118,7 +118,7 @@ impl Capture {
 }
 
 pub struct AllCapturesIter {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     closure_range: TextRange,
     scopes: Vec<usize>,
     references: Vec<SemanticModelScopeReference>,
@@ -167,7 +167,7 @@ impl FusedIterator for AllCapturesIter {}
 
 /// Iterate all immediate children closures of a specific closure
 pub struct ChildrenIter {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     scopes: Vec<usize>,
 }
 
@@ -196,7 +196,7 @@ impl FusedIterator for ChildrenIter {}
 
 /// Iterate all descendents closures of a specific closure
 pub struct DescendentsIter {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     scopes: Vec<usize>,
 }
 
@@ -225,16 +225,13 @@ impl FusedIterator for DescendentsIter {}
 /// Provides all information regarding a specific closure.
 #[derive(Clone)]
 pub struct Closure {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     scope_id: usize,
     closure_range: TextRange,
 }
 
 impl Closure {
-    pub(super) fn from_node(
-        data: Arc<SemanticModelData>,
-        node: &impl HasClosureAstNode,
-    ) -> Closure {
+    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(&closure_range);
 
@@ -246,7 +243,7 @@ impl Closure {
     }
 
     pub(super) fn from_scope(
-        data: Arc<SemanticModelData>,
+        data: Rc<SemanticModelData>,
         scope_id: usize,
         closure_range: &TextRange,
     ) -> Option<Closure> {

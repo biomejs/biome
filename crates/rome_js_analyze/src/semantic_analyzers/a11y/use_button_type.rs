@@ -109,12 +109,13 @@ impl Rule for UseButtonType {
                             let property_value = member.value().ok()?;
                             let Some(value) = property_value
                                 .as_any_js_literal_expression()?
-                                .as_js_string_literal_expression() else {
-                                    return Some(UseButtonTypeState {
-                                        range: property_value.range(),
-                                        missing_prop: false,
-                                    });
-                                };
+                                .as_js_string_literal_expression()
+                            else {
+                                return Some(UseButtonTypeState {
+                                    range: property_value.range(),
+                                    missing_prop: false,
+                                });
+                            };
 
                             if !ALLOWED_BUTTON_TYPES.contains(&&*value.inner_string_text().ok()?) {
                                 return Some(UseButtonTypeState {

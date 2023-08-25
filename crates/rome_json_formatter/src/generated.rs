@@ -20,6 +20,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonRoot {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::root::FormatJsonRoot::default(),
         )
     }
@@ -32,6 +33,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonRoot {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::root::FormatJsonRoot::default(),
         )
     }
@@ -58,6 +60,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonStringValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::string_value::FormatJsonStringValue::default(),
         )
     }
@@ -70,6 +73,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonStringValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::string_value::FormatJsonStringValue::default(),
         )
     }
@@ -96,6 +100,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonBooleanValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::boolean_value::FormatJsonBooleanValue::default(),
         )
     }
@@ -108,6 +113,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBooleanValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::boolean_value::FormatJsonBooleanValue::default(),
         )
     }
@@ -134,6 +140,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonNullValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::null_value::FormatJsonNullValue::default(),
         )
     }
@@ -146,6 +153,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonNullValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::null_value::FormatJsonNullValue::default(),
         )
     }
@@ -172,6 +180,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonNumberValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::number_value::FormatJsonNumberValue::default(),
         )
     }
@@ -184,6 +193,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonNumberValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::number_value::FormatJsonNumberValue::default(),
         )
     }
@@ -210,6 +220,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonArrayValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::array_value::FormatJsonArrayValue::default(),
         )
     }
@@ -222,6 +233,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonArrayValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::array_value::FormatJsonArrayValue::default(),
         )
     }
@@ -248,6 +260,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonObjectValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::object_value::FormatJsonObjectValue::default(),
         )
     }
@@ -260,6 +273,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonObjectValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::value::object_value::FormatJsonObjectValue::default(),
         )
     }
@@ -280,6 +294,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonMember {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::member::FormatJsonMember::default(),
         )
     }
@@ -292,6 +307,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMember {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::member::FormatJsonMember::default(),
         )
     }
@@ -318,6 +334,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonMemberName {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
         )
     }
@@ -330,6 +347,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMemberName {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::auxiliary::member_name::FormatJsonMemberName::default(),
         )
     }
@@ -343,6 +361,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonArrayElementList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::lists::array_element_list::FormatJsonArrayElementList::default(),
         )
     }
@@ -355,6 +374,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonArrayElementList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::lists::array_element_list::FormatJsonArrayElementList::default(),
         )
     }
@@ -368,6 +388,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonMemberList {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::lists::member_list::FormatJsonMemberList::default(),
         )
     }
@@ -380,6 +401,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMemberList {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::lists::member_list::FormatJsonMemberList::default(),
         )
     }
@@ -398,7 +420,11 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonBogus {
         crate::json::bogus::bogus::FormatJsonBogus,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::json::bogus::bogus::FormatJsonBogus::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::json::bogus::bogus::FormatJsonBogus::default(),
+        )
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBogus {
@@ -407,7 +433,11 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBogus {
         crate::json::bogus::bogus::FormatJsonBogus,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::json::bogus::bogus::FormatJsonBogus::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::json::bogus::bogus::FormatJsonBogus::default(),
+        )
     }
 }
 impl FormatRule<rome_json_syntax::JsonBogusValue>
@@ -432,6 +462,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonBogusValue {
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::bogus::bogus_value::FormatJsonBogusValue::default(),
         )
     }
@@ -444,6 +475,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBogusValue {
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
+            #[allow(clippy::default_constructed_unit_structs)]
             crate::json::bogus::bogus_value::FormatJsonBogusValue::default(),
         )
     }
@@ -455,7 +487,11 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::AnyJsonValue {
         crate::json::any::value::FormatAnyJsonValue,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, crate::json::any::value::FormatAnyJsonValue::default())
+        FormatRefWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::json::any::value::FormatAnyJsonValue::default(),
+        )
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::AnyJsonValue {
@@ -464,6 +500,10 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::AnyJsonValue {
         crate::json::any::value::FormatAnyJsonValue,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, crate::json::any::value::FormatAnyJsonValue::default())
+        FormatOwnedWithRule::new(
+            self,
+            #[allow(clippy::default_constructed_unit_structs)]
+            crate::json::any::value::FormatAnyJsonValue::default(),
+        )
     }
 }
