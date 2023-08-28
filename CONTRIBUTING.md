@@ -7,7 +7,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/bare-ts/tools/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
-Our [Discord server](https://discord.gg/) is open for help and more ad-hoc discussion.
+Our [Discord server](https://discord.gg/TQbR5fHP) is open for help and more ad-hoc discussion.
 All activity on the Discord is still moderated and will be strictly enforced under the project's [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 Remember that we are doing this project on our own time.
