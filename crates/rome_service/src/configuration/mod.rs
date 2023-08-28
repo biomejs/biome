@@ -247,7 +247,7 @@ impl MergeWith<Option<JavascriptFormatter>> for Configuration {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
     /// The maximum allowed size for source code files in bytes. Files above
-    /// this limit will be ignored for performance reason. Defaults to 1 MiB
+    /// this limit will be ignored for performance reasons. Defaults to 1 MiB
     #[bpaf(long("files-max-size"), argument("NUMBER"))]
     pub max_size: Option<NonZeroU64>,
 

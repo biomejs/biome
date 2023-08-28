@@ -20,7 +20,7 @@ The configuration that is contained inside the file `biome.json`
                               working directory. If no current working directory can't be found, Biome
                               won't use the VCS integration, and a diagnostic will be emitted
         --files-max-size=NUMBER  The maximum allowed size for source code files in bytes. Files above
-                              this limit will be ignored for performance reason. Defaults to 1 MiB
+                              this limit will be ignored for performance reasons. Defaults to 1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
         --indent-style=<tab|space>  The indent style.
