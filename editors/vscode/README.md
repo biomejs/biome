@@ -66,7 +66,18 @@ Biome respects VS Code's _Format on Save_ setting. To enable format on save, ope
 
 ### Fix on save
 
-Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add `"editor.codeActionsOnSave": { "quickfix.Biome": true }` in vscode settings.json.
+Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add
+
+
+```json
+{
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": true
+  }
+}
+```
+
+in vscode `settings.json`.
 
 ### Imports Sorting [Experimental]
 

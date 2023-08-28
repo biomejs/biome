@@ -169,9 +169,9 @@ a.tag {
 
 	img {
 		display: block;
-		width: 100%;
 		border-radius: 12px;
 		width: auto;
+		object-fit: contain;
 
 		@include mobile-only {
 			border-radius: 0;
