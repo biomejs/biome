@@ -50,14 +50,17 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 
 		<meta name="description" content={description}>
 		<meta name="theme-color" content="#FFC905">
+		<!-- OPEN GRAPH -->
 		<meta property="og:title" content={title}>
 		<meta property="og:description" content={description}>
 		<meta property="og:image" content={`${import.meta.env.SITE}/img/${socialImage}`}>
-		<meta property="twitter:image" content={`${import.meta.env.SITE}/img/${socialImage}`}>
-		<meta property="twitter:site" content="@biomejs">
-		<meta property="twitter:creator" content="@biomejs">
-		<meta property="twitter:image:alt" content="Logo of Biome project">
-		<meta property="twitter:card" content="summary_large_image">
+		<!-- TWITTER -->
+		<meta property="twitter:domain" content="biomejs.dev">
+		<meta name="twitter:image" content={`${import.meta.env.SITE}/img/${socialImage}`}>
+		<meta name="twitter:site" content="@biomejs">
+		<meta name="twitter:creator" content="@biomejs">
+		<meta name="twitter:image:alt" content="Logo of Biome project">
+		<meta name="twitter:card" content="summary_large_image">
 
 		<script is:inline>
 			(function () {
