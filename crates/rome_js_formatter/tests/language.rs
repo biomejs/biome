@@ -73,19 +73,20 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize, Default)]
 pub enum JsSerializableIndentStyle {
     /// Tab
+    #[default]
     Tab,
-    /// Space, with its quantity
-    Space(u8),
+    /// Space
+    Space,
 }
 
 impl From<JsSerializableIndentStyle> for IndentStyle {
     fn from(test: JsSerializableIndentStyle) -> Self {
         match test {
             JsSerializableIndentStyle::Tab => IndentStyle::Tab,
-            JsSerializableIndentStyle::Space(spaces) => IndentStyle::Space(spaces),
+            JsSerializableIndentStyle::Space => IndentStyle::Space,
         }
     }
 }
@@ -172,6 +173,9 @@ pub struct JsSerializableFormatOptions {
     /// The indent style.
     pub indent_style: Option<JsSerializableIndentStyle>,
 
+    /// The indent width.
+    pub indent_width: Option<u8>,
+
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,
 
@@ -197,9 +201,11 @@ pub struct JsSerializableFormatOptions {
 impl JsSerializableFormatOptions {
     fn into_format_options(self, source_type: JsFileSource) -> JsFormatOptions {
         JsFormatOptions::new(source_type)
-            .with_indent_style(
-                self.indent_style
-                    .map_or_else(|| IndentStyle::Tab, |value| value.into()),
+            .with_indent_style(self.indent_style.unwrap_or_default().into())
+            .with_indent_width(
+                self.indent_width
+                    .map(|value| value.into())
+                    .unwrap_or_default(),
             )
             .with_line_width(
                 self.line_width

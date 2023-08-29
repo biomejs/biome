@@ -1,5 +1,5 @@
 use crate::JsonCommentStyle;
-use rome_formatter::prelude::*;
+use rome_formatter::{prelude::*, IndentWidth};
 use rome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineWidth, TransformSourceMap,
 };
@@ -57,12 +57,18 @@ impl CstFormatContext for JsonFormatContext {
 #[derive(Debug, Default, Clone)]
 pub struct JsonFormatOptions {
     indent_style: IndentStyle,
+    indent_width: IndentWidth,
     line_width: LineWidth,
 }
 
 impl JsonFormatOptions {
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
         self.indent_style = indent_style;
+        self
+    }
+
+    pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
+        self.indent_width = indent_width;
         self
     }
 
@@ -77,6 +83,10 @@ impl FormatOptions for JsonFormatOptions {
         self.indent_style
     }
 
+    fn indent_width(&self) -> IndentWidth {
+        self.indent_width
+    }
+
     fn line_width(&self) -> LineWidth {
         self.line_width
     }
@@ -89,6 +99,7 @@ impl FormatOptions for JsonFormatOptions {
 impl fmt::Display for JsonFormatOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
+        writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line width: {}", self.line_width.value())
     }
 }

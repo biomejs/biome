@@ -104,11 +104,10 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
     fn try_from(conf: FormatterConfiguration) -> Result<Self, Self::Error> {
         let indent_style = match conf.indent_style {
             Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => {
-                IndentStyle::Space(conf.indent_size.unwrap_or_default())
-            }
+            Some(PlainIndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
+        let indent_size = conf.indent_size.map(Into::into).unwrap_or_default();
         let mut matcher = Matcher::new(MatchOptions {
             case_sensitive: true,
             require_literal_leading_dot: false,
@@ -129,6 +128,7 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             indent_style: Some(indent_style),
+            indent_size: Some(indent_size),
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: matcher,

@@ -6,7 +6,7 @@ use crate::printer::LineEnding;
 use crate::{format, write};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, LineWidth, PrinterOptions, TransformSourceMap,
+    IndentStyle, IndentWidth, LineWidth, PrinterOptions, TransformSourceMap,
 };
 use rome_rowan::TextSize;
 use rustc_hash::FxHashMap;
@@ -153,7 +153,11 @@ struct IrFormatOptions;
 
 impl FormatOptions for IrFormatOptions {
     fn indent_style(&self) -> IndentStyle {
-        IndentStyle::Space(2)
+        IndentStyle::Space
+    }
+
+    fn indent_width(&self) -> IndentWidth {
+        IndentWidth::default()
     }
 
     fn line_width(&self) -> LineWidth {
@@ -162,10 +166,10 @@ impl FormatOptions for IrFormatOptions {
 
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
-            tab_width: 2,
+            indent_width: self.indent_width(),
             print_width: self.line_width().into(),
             line_ending: LineEnding::LineFeed,
-            indent_style: IndentStyle::Space(2),
+            indent_style: IndentStyle::Space,
         }
     }
 }

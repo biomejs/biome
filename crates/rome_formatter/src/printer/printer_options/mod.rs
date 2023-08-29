@@ -1,10 +1,11 @@
-use crate::{FormatOptions, IndentStyle, LineWidth};
+use crate::{FormatOptions, IndentStyle, IndentWidth, LineWidth};
 
 /// Options that affect how the [crate::Printer] prints the format tokens
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PrinterOptions {
-    /// Width of a single tab character (does it equal 2, 4, ... spaces?)
-    pub tab_width: u8,
+    /// Width of an indent in characters.
+    /// if indent_style is set to IndentStyle::Tab, treat tab visualization width as this value.
+    pub indent_width: IndentWidth,
 
     /// What's the max width of a line. Defaults to 80
     pub print_width: PrintWidth,
@@ -49,7 +50,8 @@ where
 {
     fn from(options: &'a O) -> Self {
         PrinterOptions::default()
-            .with_indent(options.indent_style())
+            .with_indent_style(options.indent_style())
+            .with_indent_width(options.indent_width())
             .with_print_width(options.line_width().into())
     }
 }
@@ -60,8 +62,14 @@ impl PrinterOptions {
         self
     }
 
-    pub fn with_indent(mut self, style: IndentStyle) -> Self {
+    pub fn with_indent_style(mut self, style: IndentStyle) -> Self {
         self.indent_style = style;
+
+        self
+    }
+
+    pub fn with_indent_width(mut self, width: IndentWidth) -> Self {
+        self.indent_width = width;
 
         self
     }
@@ -71,11 +79,8 @@ impl PrinterOptions {
     }
 
     /// Width of an indent in characters.
-    pub(super) const fn indent_width(&self) -> u8 {
-        match self.indent_style {
-            IndentStyle::Tab => self.tab_width,
-            IndentStyle::Space(count) => count,
-        }
+    pub(super) const fn indent_width(&self) -> IndentWidth {
+        self.indent_width
     }
 }
 
@@ -106,7 +111,7 @@ impl LineEnding {
 impl Default for PrinterOptions {
     fn default() -> Self {
         PrinterOptions {
-            tab_width: 2,
+            indent_width: 2.into(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
             line_ending: LineEnding::LineFeed,

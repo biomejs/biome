@@ -64,15 +64,15 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
 pub enum JsonSerializableIndentStyle {
     /// Tab
     Tab,
-    /// Space, with its quantity
-    Space(u8),
+    /// Space
+    Space,
 }
 
 impl From<JsonSerializableIndentStyle> for IndentStyle {
     fn from(test: JsonSerializableIndentStyle) -> Self {
         match test {
             JsonSerializableIndentStyle::Tab => IndentStyle::Tab,
-            JsonSerializableIndentStyle::Space(spaces) => IndentStyle::Space(spaces),
+            JsonSerializableIndentStyle::Space => IndentStyle::Space,
         }
     }
 }
@@ -82,6 +82,9 @@ pub struct JsonSerializableFormatOptions {
     /// The indent style.
     pub indent_style: Option<JsonSerializableIndentStyle>,
 
+    /// The indent width.
+    pub indent_width: Option<u8>,
+
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,
 }
@@ -89,10 +92,8 @@ pub struct JsonSerializableFormatOptions {
 impl From<JsonSerializableFormatOptions> for JsonFormatOptions {
     fn from(test: JsonSerializableFormatOptions) -> Self {
         JsonFormatOptions::default()
-            .with_indent_style(
-                test.indent_style
-                    .map_or_else(|| IndentStyle::Tab, |value| value.into()),
-            )
+            .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
+            .with_indent_width(test.indent_width.map(Into::into).unwrap_or_default())
             .with_line_width(
                 test.line_width
                     .and_then(|width| LineWidth::try_from(width).ok())

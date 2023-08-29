@@ -54,7 +54,9 @@ impl CliSnapshot {
                 JsonParserOptions::default(),
             );
             let formatted = format_node(
-                JsonFormatOptions::default().with_indent_style(IndentStyle::Space(2)),
+                JsonFormatOptions::default()
+                    .with_indent_style(IndentStyle::Space)
+                    .with_indent_width(2.into()),
                 &parsed.syntax(),
             )
             .expect("formatted JSON")

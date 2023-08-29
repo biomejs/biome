@@ -282,7 +282,7 @@ impl<'a> Printer<'a> {
         if !self.state.pending_indent.is_empty() {
             let (indent_char, repeat_count) = match self.options.indent_style() {
                 IndentStyle::Tab => ('\t', 1),
-                IndentStyle::Space(count) => (' ', count),
+                IndentStyle::Space => (' ', self.options.indent_width().value()),
             };
 
             let indent = std::mem::take(&mut self.state.pending_indent);
@@ -666,7 +666,7 @@ impl<'a> Printer<'a> {
             self.state.generated_column += 1;
 
             let char_width = if char == '\t' {
-                self.options.tab_width as usize
+                self.options.indent_width().value() as usize
             } else {
                 char.width().unwrap_or(0)
             };
@@ -1139,7 +1139,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     fn fits_text(&mut self, text: &str) -> Fits {
         let indent = std::mem::take(&mut self.state.pending_indent);
-        self.state.line_width += indent.level() as usize * self.options().indent_width() as usize
+        self.state.line_width += indent.level() as usize * self.options().indent_width().value() as usize
             + indent.align() as usize;
 
         if self.state.pending_space {
@@ -1148,7 +1148,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
         for c in text.chars() {
             let char_width = match c {
-                '\t' => self.options().tab_width as usize,
+                '\t' => self.options().indent_width.value() as usize,
                 '\n' => {
                     return if self.must_be_flat {
                         Fits::No
@@ -1266,7 +1266,8 @@ mod tests {
         format_with_options(
             root,
             PrinterOptions {
-                indent_style: IndentStyle::Space(2),
+                indent_style: IndentStyle::Space,
+                indent_width: 2.into(),
                 ..PrinterOptions::default()
             },
         )
@@ -1410,7 +1411,7 @@ two lines`,
     fn it_use_the_indent_character_specified_in_the_options() {
         let options = PrinterOptions {
             indent_style: IndentStyle::Tab,
-            tab_width: 4,
+            indent_width: 4.into(),
             print_width: PrintWidth::new(19),
             ..PrinterOptions::default()
         };
