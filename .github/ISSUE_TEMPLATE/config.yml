@@ -1,10 +1,10 @@
 blank_issues_enabled: false
 contact_links:
   - name: 🗣️ Chat
-    url: https://discord.gg/JXe7dnnc
+    url: https://discord.gg/BypW39g6Yc
     about: Our Discord server is active and is used for real-time discussions including contribution collaboration, questions, and more!
   - name: 🤔 Support
-    url: https://discord.gg/JXe7dnnc
+    url: https://discord.gg/BypW39g6Yc
     about: "This issue tracker is not for support questions. Visit our community Discord and the #support channel for assistance!"
   - name: 🆘 Code of Conduct Reports
     url: https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct
