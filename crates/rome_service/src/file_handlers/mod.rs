@@ -94,10 +94,10 @@ impl Language {
 
     /// Returns the language corresponding to this language ID
     ///
-    /// See the [microsoft spec] <https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem>
+    /// See the [microsoft spec]
     /// for a list of language identifiers
     ///
-    /// [microsoft spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
+    /// [microsoft spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(s: &str) -> Self {
         match s.to_lowercase().as_str() {
             "javascript" => Language::JavaScript,
