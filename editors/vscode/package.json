@@ -3,7 +3,7 @@
 	"publisher": "biomejs",
 	"displayName": "Biome",
 	"description": "Biome LSP VS Code Extension",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"icon": "icon.png",
 	"activationEvents": [
 		"onLanguage:javascript",
@@ -11,6 +11,7 @@
 		"onLanguage:typescript",
 		"onLanguage:typescriptreact",
 		"onLanguage:json",
+		"onLanguage:jsonc",
 		"onCommand:biome.syntaxTree"
 	],
 	"main": "./out/main.js",

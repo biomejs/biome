@@ -64,6 +64,7 @@ export async function activate(context: ExtensionContext) {
 		{ language: "javascriptreact", scheme: "file" },
 		{ language: "typescriptreact", scheme: "file" },
 		{ language: "json", scheme: "file" },
+		{ language: "jsonc", scheme: "file" },
 	];
 
 	const clientOptions: LanguageClientOptions = {
