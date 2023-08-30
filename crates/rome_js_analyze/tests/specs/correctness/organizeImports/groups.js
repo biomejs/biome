@@ -1,6 +1,6 @@
 import uncle from "../uncle";
 import sibling from "./sibling";
-import express from "npm:epxress";
+import express from "npm:express";
 import imageUrl from "url:./image.png";
 import assert from "node:assert";
 import aunt from "../aunt";
