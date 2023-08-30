@@ -1,0 +1,142 @@
+---
+source: crates/rome_formatter_test/src/snapshot_builder.rs
+info: js/module/indent-width/example-2.js
+---
+
+# Input
+
+```js
+function foo() {
+	function bar() {
+		function foo() {
+			function bar() {
+				function foo() {
+					function bar() {
+						function foo() {
+							function bar() {
+								return ["long", "long", "long", "long", "long"];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+function foo() {
+	function bar() {
+		function foo() {
+			function bar() {
+				function foo() {
+					function bar() {
+						function foo() {
+							function bar() {
+								return ["long", "long", "long", "long", "long"];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 4
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+function foo() {
+	function bar() {
+		function foo() {
+			function bar() {
+				function foo() {
+					function bar() {
+						function foo() {
+							function bar() {
+								return ["long", "long", "long", "long", "long"];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+## Output 3
+
+-----
+Indent style: Tab
+Indent width: 8
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+function foo() {
+	function bar() {
+		function foo() {
+			function bar() {
+				function foo() {
+					function bar() {
+						function foo() {
+							function bar() {
+								return [
+									"long",
+									"long",
+									"long",
+									"long",
+									"long",
+								];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+

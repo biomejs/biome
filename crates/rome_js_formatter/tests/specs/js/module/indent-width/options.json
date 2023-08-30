@@ -1,0 +1,10 @@
+{
+	"cases": [
+		{
+			"indent_width": 4
+		},
+		{
+			"indent_width": 8
+		}
+	]
+}
