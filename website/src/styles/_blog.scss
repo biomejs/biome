@@ -91,11 +91,11 @@
 		}
 
 		&:first-child {
-			z-index: 2;
+			z-index: 1;
 		}
 
 		&:last-child {
-			z-index: 1;
+			z-index: 0;
 		}
 	}
 
