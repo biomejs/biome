@@ -259,13 +259,13 @@ Please use the template provided.
 
 If the PR you're about to open is a bugfix/feature around Biome, you can add a new line to the `CHANGELOG.md`, but it's not mandatory.
 
-At the top of the file you will see a `[Unreleased]` section. The headings divide the sections by "feature", make sure
+At the top of the file you will see a `Unreleased` section. The headings divide the sections by "feature", make sure
 to add a new bullet point.
 
 Here's a sample of the headings:
 
 ```markdown
-## [Unreleased]
+## Unreleased
 
 ### Analyzer
 ### CLI
