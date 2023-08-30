@@ -5,8 +5,8 @@ use rome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_formatter::printer::PrinterOptions;
 use rome_formatter::token::string::Quote;
 use rome_formatter::{
-    CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, LineWidth,
-    TransformSourceMap,
+    CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
+    LineWidth, TransformSourceMap,
 };
 use rome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use rome_json_syntax::JsonLanguage;
@@ -138,6 +138,9 @@ pub struct JsFormatOptions {
     /// The indent style.
     indent_style: IndentStyle,
 
+    /// The indent width.
+    indent_width: IndentWidth,
+
     /// What's the max width of a line. Defaults to 80.
     line_width: LineWidth,
 
@@ -168,6 +171,7 @@ impl JsFormatOptions {
         Self {
             source_type,
             indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             jsx_quote_style: QuoteStyle::default(),
@@ -185,6 +189,11 @@ impl JsFormatOptions {
 
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
         self.indent_style = indent_style;
+        self
+    }
+
+    pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
+        self.indent_width = indent_width;
         self
     }
 
@@ -247,16 +256,17 @@ impl JsFormatOptions {
     }
 
     pub fn tab_width(&self) -> TabWidth {
-        match self.indent_style {
-            IndentStyle::Tab => 2.into(),
-            IndentStyle::Space(quantities) => quantities.into(),
-        }
+        self.indent_width.value().into()
     }
 }
 
 impl FormatOptions for JsFormatOptions {
     fn indent_style(&self) -> IndentStyle {
         self.indent_style
+    }
+
+    fn indent_width(&self) -> IndentWidth {
+        self.indent_width
     }
 
     fn line_width(&self) -> LineWidth {
@@ -271,6 +281,7 @@ impl FormatOptions for JsFormatOptions {
 impl fmt::Display for JsFormatOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
+        writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;

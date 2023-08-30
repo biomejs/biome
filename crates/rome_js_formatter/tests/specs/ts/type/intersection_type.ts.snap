@@ -76,6 +76,7 @@ type SoftBreakBetweenNotObjectTypeInChain = {} & SomeLongType & {
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

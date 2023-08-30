@@ -26,6 +26,7 @@ console.log("🚀".length);("Jan 1, 2018 – Jan 1, 2019");
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

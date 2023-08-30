@@ -21,6 +21,7 @@ import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherR
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -46,7 +47,8 @@ import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName
 ## Output 2
 
 -----
-Indent style: Spaces, size: 4
+Indent style: Space
+Indent width: 4
 Line width: 120
 Quote style: Double Quotes
 JSX quote style: Double Quotes

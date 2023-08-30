@@ -22,6 +22,7 @@ info: json/object/multi_line_long.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 

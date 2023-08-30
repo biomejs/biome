@@ -21,6 +21,7 @@ info: json/array/nested.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 

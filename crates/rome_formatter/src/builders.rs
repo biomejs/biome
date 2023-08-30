@@ -862,7 +862,8 @@ where
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
-///     indent_style: IndentStyle::Space(4),
+///     indent_style: IndentStyle::Space,
+///     indent_width: 4.into(),
 ///     ..SimpleFormatOptions::default()
 /// });
 ///

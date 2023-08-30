@@ -82,8 +82,8 @@ pub enum IndentStyle {
     /// Tab
     #[default]
     Tab,
-    /// Space, with its quantity
-    Space(u8),
+    /// Space
+    Space,
 }
 
 impl IndentStyle {
@@ -96,7 +96,7 @@ impl IndentStyle {
 
     /// Returns `true` if this is an [IndentStyle::Space].
     pub const fn is_space(&self) -> bool {
-        matches!(self, IndentStyle::Space(_))
+        matches!(self, IndentStyle::Space)
     }
 }
 
@@ -106,7 +106,7 @@ impl FromStr for IndentStyle {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "tab" | "Tabs" => Ok(Self::Tab),
-            "space" | "Spaces" => Ok(Self::Space(IndentStyle::DEFAULT_SPACES)),
+            "space" | "Spaces" => Ok(Self::Space),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for IndentStyle"),
         }
@@ -117,8 +117,35 @@ impl std::fmt::Display for IndentStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             IndentStyle::Tab => std::write!(f, "Tab"),
-            IndentStyle::Space(size) => std::write!(f, "Spaces, size: {}", size),
+            IndentStyle::Space => std::write!(f, "Space"),
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct IndentWidth(u8);
+
+impl IndentWidth {
+    /// Return the numeric value for this [IndentWidth]
+    pub fn value(&self) -> u8 {
+        self.0
+    }
+}
+
+impl Default for IndentWidth {
+    fn default() -> Self {
+        Self(2)
+    }
+}
+
+impl From<u8> for IndentWidth {
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
 
@@ -234,6 +261,9 @@ pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
 
+    /// The indent width.
+    fn indent_width(&self) -> IndentWidth;
+
     /// What's the max width of a line. Defaults to 80.
     fn line_width(&self) -> LineWidth;
 
@@ -282,6 +312,7 @@ impl FormatContext for SimpleFormatContext {
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct SimpleFormatOptions {
     pub indent_style: IndentStyle,
+    pub indent_width: IndentWidth,
     pub line_width: LineWidth,
 }
 
@@ -290,13 +321,18 @@ impl FormatOptions for SimpleFormatOptions {
         self.indent_style
     }
 
+    fn indent_width(&self) -> IndentWidth {
+        self.indent_width
+    }
+
     fn line_width(&self) -> LineWidth {
         self.line_width
     }
 
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
-            .with_indent(self.indent_style)
+            .with_indent_style(self.indent_style)
+            .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
     }
 }
@@ -1322,9 +1358,10 @@ pub fn format_sub_tree<L: FormatLanguage>(
             // of indentation type detection yet. Unfortunately this
             // may not actually match the current content of the file
             let length = trivia.text().len() as u16;
+            let width = language.options().indent_width().value();
             match language.options().indent_style() {
                 IndentStyle::Tab => length,
-                IndentStyle::Space(width) => length / u16::from(width),
+                IndentStyle::Space => length / u16::from(width),
             }
         }
         // No whitespace was found between the start of the range

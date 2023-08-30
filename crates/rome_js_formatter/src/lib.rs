@@ -599,7 +599,8 @@ while(
         let tree = parse_script(input, JsParserOptions::default());
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
-                .with_indent_style(IndentStyle::Space(4)),
+                .with_indent_style(IndentStyle::Space)
+                .with_indent_width(4.into()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -632,7 +633,8 @@ function() {
         let tree = parse_script(input, JsParserOptions::default());
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
-                .with_indent_style(IndentStyle::Space(4)),
+                .with_indent_style(IndentStyle::Space)
+                .with_indent_width(4.into()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -660,7 +662,8 @@ function() {
         let tree = parse_script(input, JsParserOptions::default());
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
-                .with_indent_style(IndentStyle::Space(4)),
+                .with_indent_style(IndentStyle::Space)
+                .with_indent_width(4.into()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -689,7 +692,8 @@ function() {
         let tree = parse_script(input, JsParserOptions::default());
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
-                .with_indent_style(IndentStyle::Space(4)),
+                .with_indent_style(IndentStyle::Space)
+                .with_indent_width(4.into()),
             &tree.syntax(),
             range,
         )
@@ -721,7 +725,8 @@ function() {
         let tree = parse_script(input, JsParserOptions::default());
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
-                .with_indent_style(IndentStyle::Space(4)),
+                .with_indent_style(IndentStyle::Space)
+                .with_indent_width(4.into()),
             &tree.syntax(),
             range,
         )

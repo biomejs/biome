@@ -45,6 +45,7 @@ impl Language for JsonLanguage {
     ) -> Self::FormatOptions {
         JsonFormatOptions::default()
             .with_indent_style(global.indent_style.unwrap_or_default())
+            .with_indent_width(global.indent_size.unwrap_or_default())
             .with_line_width(global.line_width.unwrap_or_default())
     }
 }

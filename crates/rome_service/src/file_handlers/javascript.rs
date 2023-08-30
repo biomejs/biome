@@ -93,6 +93,7 @@ impl Language for JsLanguage {
     ) -> JsFormatOptions {
         JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(global.indent_style.unwrap_or_default())
+            .with_indent_width(global.indent_size.unwrap_or_default())
             .with_line_width(global.line_width.unwrap_or_default())
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())

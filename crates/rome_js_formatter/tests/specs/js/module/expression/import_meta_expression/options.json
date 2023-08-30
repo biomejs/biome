@@ -2,7 +2,8 @@
   "cases": [
     {
       "line_width": 120,
-      "indent_style": {"Space": 4}
+      "indent_style": "Space",
+      "indent_width": 4
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 source: crates/rome_formatter_test/src/snapshot_builder.rs
-info: "json\\object\\missing_value.json"
+info: json/object/missing_value.json
 ---
 
 # Input
@@ -27,6 +27,7 @@ info: "json\\object\\missing_value.json"
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 
