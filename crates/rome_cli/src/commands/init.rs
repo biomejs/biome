@@ -27,7 +27,7 @@ pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
 
   "<Dim>"4."</Dim>" "<Emphasis>"Get involved in the community"</Emphasis>"
      Ask questions, get support, or contribute by participating on GitHub ("<Hyperlink href="https://github.com/biomejs/biome">"https://github.com/biomejs/biome"</Hyperlink>"),
-     or join our community Discord ("<Hyperlink href="https://discord.gg/JXe7dnncrome">"https://discord.gg/JXe7dnnc"</Hyperlink>")"
+     or join our community Discord ("<Hyperlink href="https://discord.gg/BypW39g6Yc">"https://discord.gg/BypW39g6Yc"</Hyperlink>")"
     });
 
     Ok(())
