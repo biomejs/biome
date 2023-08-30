@@ -23,6 +23,48 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Formatter
 ### JavaScript APIs
 ### Linter
+
+### Enhancements
+
+- [useTemplate](https://biomejs.dev/lint/rules/useTemplate/) now reports all string concatenations.
+
+  Previously, the rule ignored concatenation of a value and a newline or a backquote.
+  For example, the following concatenation was not reported:
+
+  ```js
+  v + "\n";
+  "`" + v + "`";
+  ```
+
+  The rule now reports these cases and suggests the following code fixes:
+
+  ```diff
+  - v + "\n";
+  + `${v}\n`;
+  - v + "`";
+  + `\`${v}\``;
+  ```
+
+### Bug fixes
+
+- Fix [rome#4713](https://github.com/rome/tools/issues/4713).
+
+  Previously, [useTemplate](https://biomejs.dev/lint/rules/useTemplate/) made the following suggestion:
+
+  ```diff
+  - a + b + "px"
+  + `${a}${b}px`
+  ```
+
+  This breaks code where `a` and `b` are numbers.
+
+  Now, the rule makes the following suggestion:
+
+  ```diff
+  - a + b + "px"
+  + `${a + b}px`
+   ```
+
 ### Parser
 ### VSCode
 

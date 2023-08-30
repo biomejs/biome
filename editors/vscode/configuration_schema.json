@@ -1401,7 +1401,7 @@
 					]
 				},
 				"useTemplate": {
-					"description": "Template literals are preferred over string concatenation.",
+					"description": "Prefer template literals over string concatenation.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

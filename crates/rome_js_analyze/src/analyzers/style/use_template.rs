@@ -1,49 +1,48 @@
-use rome_analyze::RuleSuppressions;
 use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::AnyJsTemplateElement::{self, JsTemplateElement};
 use rome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsLanguage,
-    JsSyntaxKind, JsSyntaxToken, JsTemplateElementList, JsTemplateExpression, WalkEvent, T,
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
+    JsParenthesizedExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
+    JsTemplateElementList, JsTemplateExpression, T,
 };
-use rome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxToken};
+use rome_rowan::{AstNode, BatchMutationExt, WalkEvent};
 
-use crate::{utils::escape::escape, utils::escape_string, JsRuleAction};
+use crate::JsRuleAction;
 
 declare_rule! {
-    /// Template literals are preferred over string concatenation.
+    /// Prefer template literals over string concatenation.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// console.log(foo + "baz");
+    /// const s = foo + "baz";
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// console.log(1 * 2 + "foo");
+    /// const s = 1 + 2 + "foo" + 3;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// console.log(1 + "foo" + 2 + "bar" + "baz" + 3);
+    /// const s = 1 * 2 + "foo";
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// console.log((1 + "foo") * 2);
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// console.log("foo" + 1);
+    /// const s = 1 + "foo" + 2 + "bar" + "baz" + 3;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// console.log("foo" + "bar");
-    /// console.log(foo() + "\n");
+    /// let s = "foo" + "bar" + `baz`;
+    /// ```
+    ///
+    /// ```js
+    /// let s = `value: ${1}`;
     /// ```
     pub(crate) UseTemplate {
         version: "1.0.0",
@@ -54,52 +53,28 @@ declare_rule! {
 
 impl Rule for UseTemplate {
     type Query = Ast<JsBinaryExpression>;
-    type State = Vec<AnyJsExpression>;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let binary_expr = ctx.query();
-
-        let need_process = is_unnecessary_string_concat_expression(binary_expr)?;
-        if !need_process {
+        let node = ctx.query();
+        // Do not handle binary operations contained in a binary operation with operator `+`
+        if node
+            .syntax()
+            .ancestors()
+            .skip(1) // skip node
+            .find(|x| !JsParenthesizedExpression::can_cast(x.kind()))
+            .and_then(JsBinaryExpression::cast)
+            .is_some_and(|parent| parent.operator() == Ok(JsBinaryOperator::Plus))
+        {
             return None;
         }
-
-        let collections = collect_binary_add_expression(binary_expr)?;
-        collections
-            .iter()
-            .any(|expr| {
-                !matches!(
-                    expr,
-                    AnyJsExpression::AnyJsLiteralExpression(
-                        rome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(_)
-                    )
-                )
-            })
-            .then_some(collections)
-    }
-
-    fn suppressed_nodes(
-        ctx: &RuleContext<Self>,
-        _state: &Self::State,
-        suppressions: &mut RuleSuppressions<JsLanguage>,
-    ) {
-        let mut iter = ctx.query().syntax().preorder();
-        while let Some(node) = iter.next() {
-            if let WalkEvent::Enter(node) = node {
-                if node.kind() == JsSyntaxKind::JS_BINARY_EXPRESSION {
-                    suppressions.suppress_node(node);
-                } else {
-                    iter.skip_subtree();
-                }
-            }
-        }
+        can_be_template_literal(node)?.then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
@@ -109,74 +84,139 @@ impl Rule for UseTemplate {
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-
-        let template = convert_expressions_to_js_template(state)?;
+        let template = template_expression_from_binary_expression(node)?;
         mutation.replace_node(
             AnyJsExpression::JsBinaryExpression(node.clone()),
             AnyJsExpression::JsTemplateExpression(template),
         );
-
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use a "<Emphasis>"TemplateLiteral"</Emphasis>"." }.to_owned(),
+            message: markup! { "Use a "<Emphasis>"template literal"</Emphasis>"." }.to_owned(),
             mutation,
         })
     }
 }
 
-/// Merge `Vec<JsAnyExpression>` into a `JsTemplate`
-fn convert_expressions_to_js_template(
-    exprs: &Vec<AnyJsExpression>,
+/// Returns true if `node` can be converted to a template literal.
+///
+/// This is the case, if:
+///
+/// - the binary expression contains the `+` operator,
+/// - the binary expression contains a string-like literal and a non-string-like
+///
+/// String-like literals are string literals and untagged template literals.
+fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
+    let mut iter = node.syntax().preorder();
+    let mut has_constant_string_constituent = false;
+    let mut has_non_constant_string_constituent = false;
+    while let Some(walk) = iter.next() {
+        if let WalkEvent::Enter(node) = walk {
+            let node = AnyJsExpression::cast(node)?;
+            match node {
+                AnyJsExpression::JsParenthesizedExpression(_) => continue,
+                AnyJsExpression::JsBinaryExpression(node)
+                    if node.operator().ok()? == JsBinaryOperator::Plus =>
+                {
+                    continue
+                }
+                AnyJsExpression::JsTemplateExpression(ref template) if template.is_constant() => {
+                    has_constant_string_constituent = true;
+                }
+                AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsStringLiteralExpression(_),
+                ) => {
+                    has_constant_string_constituent = true;
+                }
+                _ => {
+                    has_non_constant_string_constituent = true;
+                }
+            }
+            if has_non_constant_string_constituent && has_constant_string_constituent {
+                return Some(true);
+            }
+            iter.skip_subtree();
+        }
+    }
+    Some(false)
+}
+
+fn template_expression_from_binary_expression(
+    node: &JsBinaryExpression,
 ) -> Option<JsTemplateExpression> {
-    let mut reduced_exprs = Vec::with_capacity(exprs.len());
-    for expr in exprs.iter() {
-        match expr {
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(string),
-            ) => {
-                let trimmed_string = string.syntax().text_trimmed().to_string();
-                let string_without_quotes = &trimmed_string[1..trimmed_string.len() - 1];
-                let chunk_element = AnyJsTemplateElement::JsTemplateChunkElement(
-                    make::js_template_chunk_element(JsSyntaxToken::new_detached(
-                        JsSyntaxKind::TEMPLATE_CHUNK,
-                        &escape(string_without_quotes, &["${", "`"], '\\'),
-                        [],
-                        [],
-                    )),
-                );
-                reduced_exprs.push(chunk_element);
+    // While `template_elements` is empty, we keep track of the last left node.
+    // Once we see the first string/template literal,
+    // we insert `last_left_node` in `template_elements` and the seen string/template literal.
+    // ANy subsequent expression is directly inserted in `template_elements`.
+    let mut template_elements = vec![];
+    let mut last_left_node = None;
+    let mut iter = node.syntax().preorder();
+    while let Some(walk) = iter.next() {
+        match walk {
+            WalkEvent::Enter(node) => {
+                let node = AnyJsExpression::cast(node)?;
+                match node {
+                    AnyJsExpression::JsParenthesizedExpression(_) => continue,
+                    AnyJsExpression::JsBinaryExpression(node)
+                        if matches!(node.operator().ok()?, JsBinaryOperator::Plus) =>
+                    {
+                        continue;
+                    }
+                    AnyJsExpression::JsTemplateExpression(ref template)
+                        if template.tag().is_none() =>
+                    {
+                        if let Some(last_node) = last_left_node.take() {
+                            template_elements.push(template_element_from(last_node)?)
+                        }
+                        flatten_template_element_list(&mut template_elements, template.elements())?;
+                    }
+                    AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
+                    ) => {
+                        if let Some(last_node) = last_left_node.take() {
+                            template_elements.push(template_element_from(last_node)?)
+                        }
+                        template_elements.push(template_chuck_from(&string_literal)?);
+                    }
+                    node if !template_elements.is_empty() => {
+                        template_elements.push(template_element_from(node)?)
+                    }
+                    _ => {}
+                }
+                iter.skip_subtree();
             }
-            AnyJsExpression::JsTemplateExpression(template) => {
-                reduced_exprs.extend(flatten_template_element_list(template.elements())?);
+            WalkEvent::Leave(node) if template_elements.is_empty() => {
+                last_left_node = AnyJsExpression::cast(node);
             }
-            _ => {
-                let template_element =
-                    AnyJsTemplateElement::JsTemplateElement(make::js_template_element(
-                        SyntaxToken::new_detached(JsSyntaxKind::DOLLAR_CURLY, "${", [], []),
-                        // Trim spaces to make the generated `JsTemplate` a little nicer,
-                        // if we don't do this the `1 * (2 + "foo") + "bar"` will become:
-                        // ```js
-                        // `${1 * (2 + "foo") }bar`
-                        // ```
-                        expr.clone().trim()?,
-                        SyntaxToken::new_detached(JsSyntaxKind::DOLLAR_CURLY, "}", [], []),
-                    ));
-                reduced_exprs.push(template_element);
-            }
+            _ => {}
         }
     }
     Some(
         make::js_template_expression(
             make::token(T!['`']),
-            make::js_template_element_list(reduced_exprs),
+            make::js_template_element_list(template_elements),
             make::token(T!['`']),
         )
         .build(),
     )
+}
+
+fn template_chuck_from(string_literal: &JsStringLiteralExpression) -> Option<AnyJsTemplateElement> {
+    let text = string_literal.inner_string_text().ok()?;
+    Some(AnyJsTemplateElement::from(make::js_template_chunk_element(
+        make::js_template_chunk(text.text()),
+    )))
+}
+
+fn template_element_from(expr: AnyJsExpression) -> Option<AnyJsTemplateElement> {
+    Some(AnyJsTemplateElement::from(make::js_template_element(
+        JsSyntaxToken::new_detached(JsSyntaxKind::DOLLAR_CURLY, "${", [], []),
+        expr.trim()?,
+        make::token(T!['}']),
+    )))
 }
 
 /// Flatten a [JsTemplateElementList] of [JsTemplate] which could possibly be recursive, into a `Vec<JsAnyTemplateElement>`
@@ -187,100 +227,25 @@ fn convert_expressions_to_js_template(
 /// ```
 /// into
 /// `[1, 2, a, "test", "bar"]`
-fn flatten_template_element_list(list: JsTemplateElementList) -> Option<Vec<AnyJsTemplateElement>> {
-    let mut ret = Vec::with_capacity(list.len());
+fn flatten_template_element_list(
+    result: &mut Vec<AnyJsTemplateElement>,
+    list: JsTemplateElementList,
+) -> Option<()> {
     for element in list {
         match element {
-            AnyJsTemplateElement::JsTemplateChunkElement(_) => ret.push(element),
+            AnyJsTemplateElement::JsTemplateChunkElement(_) => result.push(element),
             JsTemplateElement(ref ele) => {
                 let expr = ele.expression().ok()?;
                 match expr {
                     AnyJsExpression::JsTemplateExpression(template) => {
-                        ret.extend(flatten_template_element_list(template.elements())?);
+                        flatten_template_element_list(result, template.elements())?;
                     }
                     _ => {
-                        ret.push(element);
+                        result.push(element);
                     }
                 }
             }
         }
     }
-    Some(ret)
-}
-
-fn is_unnecessary_string_concat_expression(node: &JsBinaryExpression) -> Option<bool> {
-    if node.operator().ok()? != JsBinaryOperator::Plus {
-        return None;
-    }
-    match node.left().ok()? {
-        rome_js_syntax::AnyJsExpression::JsBinaryExpression(binary) => {
-            if is_unnecessary_string_concat_expression(&binary) == Some(true) {
-                return Some(true);
-            }
-        }
-        rome_js_syntax::AnyJsExpression::JsTemplateExpression(_) => return Some(true),
-        rome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
-            rome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
-        ) => {
-            if has_new_line_or_tick(string_literal).is_none() {
-                return Some(true);
-            }
-        }
-        _ => (),
-    }
-    match node.right().ok()? {
-        rome_js_syntax::AnyJsExpression::JsBinaryExpression(binary) => {
-            if is_unnecessary_string_concat_expression(&binary) == Some(true) {
-                return Some(true);
-            }
-        }
-        rome_js_syntax::AnyJsExpression::JsTemplateExpression(_) => return Some(true),
-        rome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
-            rome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
-        ) => {
-            if has_new_line_or_tick(string_literal).is_none() {
-                return Some(true);
-            }
-        }
-        _ => (),
-    }
-    None
-}
-
-/// Check if the string literal has new line or tick
-fn has_new_line_or_tick(
-    string_literal: rome_js_syntax::JsStringLiteralExpression,
-) -> Option<usize> {
-    escape_string(string_literal.value_token().ok()?.text_trimmed())
-        .ok()?
-        .find(|ch| matches!(ch, '\n' | '`'))
-}
-
-/// Convert [JsBinaryExpression] recursively only if the `operator` is `+` into Vec<[JsAnyExpression]>
-/// ## Example
-/// - from: `1 + 2 + 3 + (1 * 2)`
-/// - to: `[1, 2, 3, (1 * 2)]`
-fn collect_binary_add_expression(node: &JsBinaryExpression) -> Option<Vec<AnyJsExpression>> {
-    let mut result = vec![];
-    match node.left().ok()? {
-        AnyJsExpression::JsBinaryExpression(left)
-            if matches!(left.operator().ok()?, JsBinaryOperator::Plus) =>
-        {
-            result.append(&mut collect_binary_add_expression(&left)?);
-        }
-        left => {
-            result.push(left);
-        }
-    };
-    match node.right().ok()? {
-        AnyJsExpression::JsBinaryExpression(right)
-            if matches!(right.operator().ok()?, JsBinaryOperator::Plus) =>
-        {
-            result.append(&mut collect_binary_add_expression(&right)?);
-        }
-        right => {
-            result.push(right);
-        }
-    };
-    Some(result)
+    Some(())
 }

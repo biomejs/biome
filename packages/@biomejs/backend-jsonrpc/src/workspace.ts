@@ -839,7 +839,7 @@ export interface Style {
 	 */
 	useSingleVarDeclarator?: RuleConfiguration;
 	/**
-	 * Template literals are preferred over string concatenation.
+	 * Prefer template literals over string concatenation.
 	 */
 	useTemplate?: RuleConfiguration;
 	/**

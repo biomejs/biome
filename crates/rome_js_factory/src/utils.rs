@@ -12,20 +12,6 @@
 /// | `${` | `\${abc`  | `\${abc`   |
 /// | `${` | `\\${abc` | `\\\${abc` |
 ///
-/// # Examples
-///
-/// ```
-/// use rome_js_analyze::utils::escape::escape;
-///
-/// let escaped_str_1 = escape("${abc", &["${"], '\\');
-/// assert_eq!(escaped_str_1, r#"\${abc"#);
-///
-/// let escaped_str_2 = escape(r#"\${abc"#, &["${"], '\\');
-/// assert_eq!(escaped_str_2, r#"\${abc"#);
-///
-/// let escaped_str_3 = escape("${ `", &["${", "`"], '\\');
-/// assert_eq!(escaped_str_3, r#"\${ \`"#);
-/// ```
 pub fn escape<'a>(
     unescaped_string: &'a str,
     needs_escaping: &[&str],
