@@ -4,7 +4,7 @@ use crate::{
 };
 use indexmap::IndexSet;
 use rome_diagnostics::Category;
-use rome_formatter::{IndentStyle, LineWidth, IndentWidth};
+use rome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use rome_fs::RomePath;
 use rome_js_syntax::JsLanguage;
 use rome_json_syntax::JsonLanguage;

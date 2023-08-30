@@ -1139,7 +1139,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     fn fits_text(&mut self, text: &str) -> Fits {
         let indent = std::mem::take(&mut self.state.pending_indent);
-        self.state.line_width += indent.level() as usize * self.options().indent_width().value() as usize
+        self.state.line_width += indent.level() as usize
+            * self.options().indent_width().value() as usize
             + indent.align() as usize;
 
         if self.state.pending_space {
