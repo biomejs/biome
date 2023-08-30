@@ -66,6 +66,7 @@ export @dec1 @dec2  @dec3 @dec4 class My {}
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

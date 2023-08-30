@@ -98,6 +98,7 @@ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -205,6 +206,7 @@ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

@@ -51,6 +51,7 @@ export const queryAuditLog = async ({
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -102,6 +103,7 @@ export const queryAuditLog = async ({
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 100
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -150,6 +152,7 @@ export const queryAuditLog = async ({
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 120
 Quote style: Double Quotes
 JSX quote style: Double Quotes

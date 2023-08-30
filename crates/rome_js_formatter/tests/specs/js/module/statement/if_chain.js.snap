@@ -21,6 +21,7 @@ if(very_long_condition_1) very_long_statement_1(); else if (very_long_condition_
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

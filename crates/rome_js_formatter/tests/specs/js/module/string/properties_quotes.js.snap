@@ -61,6 +61,7 @@ const x = {
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -121,6 +122,7 @@ const x = {
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Single Quotes
 JSX quote style: Double Quotes
@@ -181,6 +183,7 @@ const x = {
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

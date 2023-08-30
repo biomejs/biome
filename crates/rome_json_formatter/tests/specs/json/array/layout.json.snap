@@ -29,6 +29,7 @@ info: json/array/layout.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 

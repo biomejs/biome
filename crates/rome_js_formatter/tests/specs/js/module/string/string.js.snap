@@ -75,6 +75,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" asse
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -159,6 +160,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" asse
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Single Quotes
 JSX quote style: Double Quotes
@@ -243,6 +245,7 @@ export * as something_bad_will_happen from 'something_bad_might_not_happen' asse
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

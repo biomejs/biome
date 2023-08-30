@@ -25,6 +25,7 @@ info: json/array/empty_line.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 

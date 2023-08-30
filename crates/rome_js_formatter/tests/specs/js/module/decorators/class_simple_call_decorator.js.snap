@@ -66,6 +66,7 @@ export @decorator.method(value) @decorator2.method(value)  @decorator3.method(va
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

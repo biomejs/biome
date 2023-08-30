@@ -19,6 +19,7 @@ info: json/object/one_line.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 

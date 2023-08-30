@@ -25,6 +25,7 @@ info: json/object/complex.json
 
 -----
 Indent style: Tab
+Indent width: 2
 Line width: 80
 -----
 
