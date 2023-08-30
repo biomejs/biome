@@ -83,8 +83,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -141,8 +139,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
@@ -210,6 +206,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Extract changelog
+        run: |
+          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
         uses: softprops/action-gh-release@v1
         env:
@@ -219,6 +218,7 @@ jobs:
           tag_name: cli/v${{ needs.build.outputs.version }}
           draft: false
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+          body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
             biome-*
           fail_on_unmatched_files: true

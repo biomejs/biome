@@ -106,8 +106,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
@@ -228,6 +226,9 @@ jobs:
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
+      - name: Extract changelog
+        run: |
+          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
         uses: softprops/action-gh-release@v1
         env:
@@ -237,6 +238,7 @@ jobs:
           tag_name: lsp/v${{ needs.build.outputs.version }}
           draft: false
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+          body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
             biome_lsp-*.vsix
           fail_on_unmatched_files: true
