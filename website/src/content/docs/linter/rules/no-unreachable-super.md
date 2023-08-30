@@ -46,7 +46,7 @@ class A extends B {
 
 <pre class="language-text"><code class="language-text">correctness/noUnreachableSuper.js:2:5 <a href="https://biomejs.dev/docs/linter/rules/no-unreachable-super">lint/correctness/noUnreachableSuper</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor has code paths accessing `</span><span style="color: Tomato;"><strong>this</strong></span><span style="color: Tomato;">` before `</span><span style="color: Tomato;"><strong>super()</strong></span><span style="color: Tomato;">` is called.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor has code paths accessing `</span><span style="color: Tomato;"><strong>this</strong></span><span style="color: Tomato;">` without calling `</span><span style="color: Tomato;"><strong>super()</strong></span><span style="color: Tomato;">` first.</span>
   
     <strong>1 │ </strong>class A extends B {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    constructor(value) {
@@ -66,15 +66,6 @@ class A extends B {
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>        super();
     <strong>5 │ </strong>    }
-  
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">`</span><span style="color: rgb(38, 148, 255);"><strong>super()</strong></span><span style="color: rgb(38, 148, 255);">` is only called here:</span>
-  
-    <strong>2 │ </strong>    constructor(value) {
-    <strong>3 │ </strong>        this.prop = value;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>        super();
-   <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>5 │ </strong>    }
-    <strong>6 │ </strong>}
   
 <strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If this is intentional, add an explicit throw statement in unsupported paths.</span>
   

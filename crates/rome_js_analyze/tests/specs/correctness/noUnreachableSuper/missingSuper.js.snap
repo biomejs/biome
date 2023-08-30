@@ -48,7 +48,6 @@ class E extends A {
         if (cond) {
             return;
         }
-
         super(true);
     }
 }
@@ -73,7 +72,6 @@ class G extends A {
         } else {
             throw new Error();
         }
-
         this.field = "value";
     }
 }
@@ -100,7 +98,14 @@ class I extends A {
             }
         }
     }
-  }
+}
+
+// invalid
+class I extends A {
+    constructor() {
+        super.method();
+    }
+}
 
 ```
 
@@ -159,12 +164,13 @@ missingSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━�
   > 41 │     constructor(cond) {
        │     ^^^^^^^^^^^^^^^^^^^
   > 42 │         if (cond) {
-        ...
-  > 46 │         super(true);
-  > 47 │     }
+  > 43 │             return;
+  > 44 │         }
+  > 45 │         super(true);
+  > 46 │     }
        │     ^
-    48 │ }
-    49 │ 
+    47 │ }
+    48 │ 
   
   i This statement returns from the constructor before `super()` has been called:
   
@@ -173,7 +179,7 @@ missingSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━�
   > 43 │             return;
        │             ^^^^^^^
     44 │         }
-    45 │ 
+    45 │         super(true);
   
   i If this is intentional, add an explicit throw statement in unsupported paths.
   
@@ -181,39 +187,59 @@ missingSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━�
 ```
 
 ```
-missingSuper.js:89:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missingSuper.js:87:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This constructor has code paths where `super()` is called more than once.
   
-    87 │ // invalid
-    88 │ class I extends A {
-  > 89 │     constructor() {
+    85 │ // invalid
+    86 │ class I extends A {
+  > 87 │     constructor() {
        │     ^^^^^^^^^^^^^^^
-  > 90 │         super();
+  > 88 │         super();
         ...
-  > 95 │         }
-  > 96 │     }
+  > 93 │         }
+  > 94 │     }
        │     ^
-    97 │   }
-    98 │ 
+    95 │ }
+    96 │ 
   
   i `super()` is first called here:
   
-    88 │ class I extends A {
-    89 │     constructor() {
-  > 90 │         super();
+    86 │ class I extends A {
+    87 │     constructor() {
+  > 88 │         super();
        │         ^^^^^
-    91 │         if (flag1) {
-    92 │             if (flag2) {
+    89 │         if (flag1) {
+    90 │             if (flag2) {
   
   i `super()` is then called again here:
   
-    91 │         if (flag1) {
-    92 │             if (flag2) {
-  > 93 │                 super();
+    89 │         if (flag1) {
+    90 │             if (flag2) {
+  > 91 │                 super();
        │                 ^^^^^
-    94 │             }
-    95 │         }
+    92 │             }
+    93 │         }
+  
+
+```
+
+```
+missingSuper.js:99:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths that return without calling `super()`.
+  
+     97 │ // invalid
+     98 │ class I extends A {
+   > 99 │     constructor() {
+        │     ^^^^^^^^^^^^^^^
+  > 100 │         super.method();
+  > 101 │     }
+        │     ^
+    102 │ }
+    103 │ 
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
   
 
 ```
