@@ -30,15 +30,6 @@ for (const list of creditsPeopleLists) {
 	}
 }
 
-//# Code expanders
-
-const collapsed = document.querySelectorAll("pre.collapsed");
-for (const elem of collapsed) {
-	elem.addEventListener("click", () => {
-		elem.classList.remove("collapsed");
-	});
-}
-
 //# Color scheme switcher
 
 function toggleColorSchemeSwitch(evt: Event) {
@@ -70,32 +61,5 @@ if (colorSchemeSwitcher != null) {
 if (matchesDark !== undefined) {
 	matchesDark.addEventListener("change", () => {
 		onColorSchemeChange();
-	});
-}
-
-//# Header scrolls to top
-const tocSidebar: HTMLElement = document.querySelector(".toc-sidebar")!;
-let topAnchors = Array.from(document.querySelectorAll("[href='#top']"));
-if (location.pathname === "/") {
-	topAnchors = [...topAnchors, ...document.querySelectorAll(".logo")];
-}
-for (const elem of topAnchors) {
-	elem.addEventListener("click", (e) => {
-		if (window.scrollY > 0) {
-			e.preventDefault();
-
-			if (tocSidebar != null) {
-				tocSidebar.scrollTop = 0;
-			}
-
-			window.scrollTo(0, 0);
-
-			// Remove the hash
-			history.pushState(
-				"",
-				document.title,
-				window.location.pathname + window.location.search,
-			);
-		}
 	});
 }

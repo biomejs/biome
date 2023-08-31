@@ -1,0 +1,90 @@
+---
+title: Formatter
+description: How to use the Biome formatter.
+---
+
+import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
+
+Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
+It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
+only supporting a few options to avoid debates over styles, turning into debates over Biome options.
+It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+
+## Options
+
+The language agnostic options supported by Biome are:
+
+- indent style (default: `tab`): Use spaces or tabs for indention
+- tab width (default: `2`): The number of spaces per indention level
+- line width (default: `80`): The column width at which Biome wraps code
+
+Other formatting options are available for specific languages as well.  See the [configuration](/configuration) options for details.
+
+## Use the formatter with the CLI
+
+By default, the formatter **checks** the code and emit diagnostics if there are changes in formatting:
+
+<PackageManagerRomeCommand command="format ./src" />
+
+If you want to **apply** the new formatting, pass the `--write` option:
+
+<PackageManagerRomeCommand command="format --write ./src" />
+
+Use the  `--help` flag to know what are the available options:
+
+<PackageManagerRomeCommand command="format --help" />
+
+Or check the [CLI reference section](/cli#biome-format).
+
+## Configuration
+
+You may want to [configure Biome](/configuration/#formatter) using `biome.json`.
+The following defaults are applied:
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "tab",
+    "indentSize": 2,
+    "lineWidth": 80,
+    "ignore": []
+  }
+}
+```
+
+## Ignoring Code
+
+There are times when the formatted code isn't ideal.
+
+For these cases, you can use a format suppression comment:
+
+```js
+// rome-ignore format: <explanation>
+```
+
+Example:
+
+```js
+const expr =
+  // rome-ignore format: the array should not be formatted
+  [
+    (2 * n) / (r - l),
+    0,
+    (r + l) / (r - l),
+    0,
+    0,
+    (2 * n) / (t - b),
+    (t + b) / (t - b),
+    0,
+    0,
+    0,
+    -(f + n) / (f - n),
+    -(2 * f * n) / (f - n),
+    0,
+    0,
+    -1,
+    0,
+  ];
+```

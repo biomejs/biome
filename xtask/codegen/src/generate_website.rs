@@ -9,17 +9,15 @@ use xtask::{project_root, Result};
 
 const VSCODE_FRONTMATTER: &str = r#"---
 title: VSCode extension
-emoji: 💻
-category: reference
 description: Notes about the Biome's VSCode extension
 ---
 "#;
 
 const CHANGELOG_FRONTMATTER: &str = r#"---
 title: Changelog
-emoji: 🖇️
-category: internals
 description: The changelog of Biome
+tableOfContents:
+    maxHeadingLevel: 2
 ---
 "#;
 
@@ -44,20 +42,24 @@ export function get() {
 pub(crate) fn generate_files() -> Result<()> {
     let readme = fs::read_to_string(project_root().join("editors/vscode/README.md"))?;
     let changelog = fs::read_to_string(project_root().join("CHANGELOG.md"))?;
-    fs::remove_file(project_root().join("website/src/pages/vscode.mdx")).ok();
-    fs::remove_file(project_root().join("website/src/pages/internals/changelog.mdx")).ok();
+    fs::remove_file(project_root().join("website/src/content/docs/reference/vscode.mdx")).ok();
+    fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.mdx")).ok();
     let vscode = format!("{VSCODE_FRONTMATTER}{readme}");
     let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
-    fs::write(project_root().join("website/src/pages/vscode.mdx"), vscode)?;
     fs::write(
-        project_root().join("website/src/pages/internals/changelog.mdx"),
+        project_root().join("website/src/content/docs/reference/vscode.mdx"),
+        vscode,
+    )?;
+    fs::write(
+        project_root().join("website/src/content/docs/internals/changelog.mdx"),
         changelog,
     )?;
 
     if VERSION != "0.0.0" {
         let parser = biome_command();
         let markdown = parser.render_markdown("biome");
-        let mut cli_content = fs::read_to_string(project_root().join("website/src/pages/cli.mdx"))?;
+        let mut cli_content =
+            fs::read_to_string(project_root().join("website/src/content/docs/reference/cli.mdx"))?;
 
         let start = "\n[//]: # (Start-codegen)\n";
         let end = "\n[//]: # (End-codegen)";
@@ -74,7 +76,7 @@ pub(crate) fn generate_files() -> Result<()> {
         cli_content.replace_range(start_index..end_index, &markdown);
 
         fs::write(
-            project_root().join("website/src/pages/cli.mdx"),
+            project_root().join("website/src/content/docs/reference/cli.mdx"),
             format!("{cli_content}"),
         )?;
         let schema_root_folder = project_root().join("website/src/pages/schemas");

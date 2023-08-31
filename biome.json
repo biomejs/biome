@@ -12,6 +12,7 @@
 	},
 	"linter": {
 		"enabled": true,
+		"ignore": ["types.d.ts"],
 		"rules": {
 			"recommended": true,
 			"style": {

@@ -18,3 +18,4 @@ rome_json_syntax = { path = "../../crates/rome_json_syntax" }
 rome_service = { path = "../../crates/rome_service" }
 rome_formatter = { path = "../../crates/rome_formatter" }
 pulldown-cmark = { version = "0.9", default-features = false }
+convert_case = "0.6.0"

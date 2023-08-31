@@ -1,10 +1,6 @@
 ---
-import "@docsearch/css/dist/style.css";
-import "@src/styles/index.scss";
-
 import ColorSchemeSwitcher from "@src/components/ColorSchemeSwitcher.astro";
 import ExternalLinks from "@src/components/ExternalLinks.astro";
-import ActiveLink from "@src/components/ActiveLink.astro";
 import InlineSVG from "@src/components/InlineSVG.astro";
 
 const {props} = Astro;
@@ -30,6 +26,10 @@ function encodeSVG(buffer: string) {
 
 const { default: favicon } = await import("/public/img/favicon.svg?raw");
 ---
+
+<script>
+	import "@src/frontend-scripts/index";
+</script>
 
 <!doctype html>
 <html lang="en" data-theme="auto">
@@ -80,14 +80,6 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 				<span class="logo-text sr-only">Biome</span>
 			</a>
 
-			<ul class="desktop-navigation">
-				<li><a href="/" class={Astro.url.pathname.startsWith("/playground") ? "" : "active"}>Docs</a></li>
-				<li class="blog"><a href="/blog">Blog</a></li>
-				<li><ActiveLink href="/playground">Playground</ActiveLink></li>
-			</ul>
-
-			<div id="docsearch-target"></div>
-
 			<ExternalLinks />
 
 			<ColorSchemeSwitcher />
@@ -100,21 +92,6 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 
 		<slot />
 
-		{import.meta.env.PROD && <script src="https://browser.sentry-cdn.com/5.29.0/bundle.tracing.min.js" crossorigin="anonymous"></script>}
-		{import.meta.env.PROD && <script is:inline>
-			if (typeof Sentry !== "undefined") {
-				Sentry.init({
-					dsn: "https://d2e6dd662d05460db434756b97bf054e@o487646.ingest.sentry.io/5546624",
-					tracesSampleRate: 1.0,
-				});
-			}
-		</script>}
 
-		<script>
-			import "@src/frontend-scripts/index.js";
-		</script>
-		<script>
-			import "@src/frontend-scripts/docsearch.js";
-		</script>
 	</body>
 </html>
