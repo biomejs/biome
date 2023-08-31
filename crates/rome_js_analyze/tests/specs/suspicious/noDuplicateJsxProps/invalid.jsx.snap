@@ -7,14 +7,11 @@ expression: invalid.jsx
 //Duplicate `name` property
 <Hello name="John" name="John" />;
 
-//Case insensitive case
-<Hello name="John" Name="John" />;
-
 //Case where property is repeated more than twice
 <Hello name="John" name="John" name="John" />;
 
 //Case with two duplicates
-<Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
+<Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
 
 <label xml:lang="en-US" xml:lang="en-US"></label>
 
@@ -30,7 +27,7 @@ invalid.jsx:2:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
   > 2 │ <Hello name="John" name="John" />;
       │        ^^^^^^^^^^^
     3 │ 
-    4 │ //Case insensitive case
+    4 │ //Case where property is repeated more than twice
   
   i This attribute is assigned again here.
   
@@ -38,7 +35,7 @@ invalid.jsx:2:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
   > 2 │ <Hello name="John" name="John" />;
       │                    ^^^^^^^^^^^
     3 │ 
-    4 │ //Case insensitive case
+    4 │ //Case where property is repeated more than twice
   
 
 ```
@@ -48,19 +45,27 @@ invalid.jsx:5:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
 
   ! This JSX property is assigned multiple times.
   
-    4 │ //Case insensitive case
-  > 5 │ <Hello name="John" Name="John" />;
+    4 │ //Case where property is repeated more than twice
+  > 5 │ <Hello name="John" name="John" name="John" />;
       │        ^^^^^^^^^^^
     6 │ 
-    7 │ //Case where property is repeated more than twice
+    7 │ //Case with two duplicates
   
   i This attribute is assigned again here.
   
-    4 │ //Case insensitive case
-  > 5 │ <Hello name="John" Name="John" />;
+    4 │ //Case where property is repeated more than twice
+  > 5 │ <Hello name="John" name="John" name="John" />;
       │                    ^^^^^^^^^^^
     6 │ 
-    7 │ //Case where property is repeated more than twice
+    7 │ //Case with two duplicates
+  
+  i This attribute is assigned again here.
+  
+    4 │ //Case where property is repeated more than twice
+  > 5 │ <Hello name="John" name="John" name="John" />;
+      │                                ^^^^^^^^^^^
+    6 │ 
+    7 │ //Case with two duplicates
   
 
 ```
@@ -70,93 +75,63 @@ invalid.jsx:8:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
 
   ! This JSX property is assigned multiple times.
   
-     7 │ //Case where property is repeated more than twice
-   > 8 │ <Hello name="John" name="John" name="John" />;
+     7 │ //Case with two duplicates
+   > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
        │        ^^^^^^^^^^^
      9 │ 
-    10 │ //Case with two duplicates
+    10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
   
   i This attribute is assigned again here.
   
-     7 │ //Case where property is repeated more than twice
-   > 8 │ <Hello name="John" name="John" name="John" />;
+     7 │ //Case with two duplicates
+   > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
        │                    ^^^^^^^^^^^
      9 │ 
-    10 │ //Case with two duplicates
-  
-  i This attribute is assigned again here.
-  
-     7 │ //Case where property is repeated more than twice
-   > 8 │ <Hello name="John" name="John" name="John" />;
-       │                                ^^^^^^^^^^^
-     9 │ 
-    10 │ //Case with two duplicates
+    10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
   
 
 ```
 
 ```
-invalid.jsx:11:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:32 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX property is assigned multiple times.
   
-    10 │ //Case with two duplicates
-  > 11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
-       │        ^^^^^^^^^^^
-    12 │ 
-    13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
-  
-  i This attribute is assigned again here.
-  
-    10 │ //Case with two duplicates
-  > 11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
-       │                    ^^^^^^^^^^^
-    12 │ 
-    13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
-  
-
-```
-
-```
-invalid.jsx:11:32 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This JSX property is assigned multiple times.
-  
-    10 │ //Case with two duplicates
-  > 11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
+     7 │ //Case with two duplicates
+   > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
        │                                ^^^^^^^^^^^^^^
-    12 │ 
-    13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
+     9 │ 
+    10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
   
   i This attribute is assigned again here.
   
-    10 │ //Case with two duplicates
-  > 11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
+     7 │ //Case with two duplicates
+   > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
        │                                               ^^^^^^^^^^^^^^
-    12 │ 
-    13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
+     9 │ 
+    10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
   
 
 ```
 
 ```
-invalid.jsx:13:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX property is assigned multiple times.
   
-    11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
-    12 │ 
-  > 13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
+     8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
+     9 │ 
+  > 10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
        │        ^^^^^^^^^^^^^^^^
-    14 │ 
+    11 │ 
   
   i This attribute is assigned again here.
   
-    11 │ <Hello name="John" Name="John" lastname="Doe" lastname="Doe" />;
-    12 │ 
-  > 13 │ <label xml:lang="en-US" xml:lang="en-US"></label>
+     8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
+     9 │ 
+  > 10 │ <label xml:lang="en-US" xml:lang="en-US"></label>
        │                         ^^^^^^^^^^^^^^^^
-    14 │ 
+    11 │ 
   
 
 ```
