@@ -46,7 +46,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   Some frameworks, such as Material UI, rely on the case-sensitivity of JSX properties.
   For example, [TextField has two properties with the same name, but distinct cases](https://mui.com/material-ui/api/text-field/#TextField-prop-inputProps):
 
-  ```html
+  ```jsx
   <TextField inputLabelProps="" InputLabelProps=""></TextField>
   ```
 
