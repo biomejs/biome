@@ -2,7 +2,9 @@
 	max-width: 100%;
 }
 
-.content, .docs-sidebar, .toc-sidebar {
+.content,
+.docs-sidebar,
+.toc-sidebar {
 	padding-top: 20px;
 }
 
@@ -63,7 +65,7 @@ footer {
 		}
 
 		&:hover {
-		  background: rgba(0, 0, 0, 0.05);
+			background: rgba(0, 0, 0, 0.05);
 		}
 	}
 
@@ -96,6 +98,14 @@ footer {
 			left: 50%;
 			margin-left: -150px;
 			width: 300px;
+
+			.DocSearch-Control-Key-Icon {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 16px;
+				padding: 1px 0 0 1px;
+			}
 		}
 	}
 
@@ -104,7 +114,7 @@ footer {
 		line-height: 64px;
 		background-color: var(--container-color);
 		padding: 0;
-		
+
 		#docsearch-target {
 			margin-left: auto;
 		}
@@ -141,7 +151,7 @@ footer {
 			height: 24px;
 		}
 	}
-	
+
 	.logo {
 		display: inline-flex;
 		align-items: flex-end;
@@ -264,14 +274,14 @@ footer {
 		flex-direction: column;
 		gap: 30px;
 		text-align: center;
-		
+
 		li {
 			a {
 				@include button;
 				text-decoration: none;
 			}
 		}
-		
+
 		@include large-screen-only {
 			display: none;
 		}
@@ -338,7 +348,7 @@ footer {
 }
 
 .toc {
-	font-size: .95rem;
+	font-size: 0.95rem;
 	padding-left: $unit;
 
 	> ol > li {
@@ -346,10 +356,10 @@ footer {
 	}
 
 	ol li ol {
-		font-size: .88rem;
+		font-size: 0.88rem;
 	}
 
-	> ol > li > a:not(:only-child)  {
+	> ol > li > a:not(:only-child) {
 		font-weight: bold;
 	}
 
@@ -383,15 +393,16 @@ footer {
 	@include button;
 	text-decoration: none;
 	padding: 20px;
-  border-radius: 12px;
+	border-radius: 12px;
 	position: relative;
 	width: 300px;
 
 	@include mobile-only {
 		width: 100%;
 	}
-	
-	.heading, .description {
+
+	.heading,
+	.description {
 		display: block;
 	}
 
@@ -434,7 +445,7 @@ footer {
 		&:first-child {
 			border-top: none;
 		}
-		
+
 		@include mobile-only() {
 			padding: $unit $unit;
 		}
@@ -447,15 +458,14 @@ footer {
 			.recommended {
 				display: inline-block;
 				border-radius: 5px;
-				padding: .2em .5em .3em;
+				padding: 0.2em 0.5em 0.3em;
 				background: var(--primary-color);
 				color: var(--label-font-color);
 				font-weight: 600;
-				margin: .25em .1em;
+				margin: 0.25em 0.1em;
 				font-size: 0.6em;
 			}
 		}
-
 	}
 }
 
@@ -485,7 +495,8 @@ footer {
 		width: 24px;
 	}
 
-	svg rect, svg path {
+	svg rect,
+	svg path {
 		fill: var(--top-border-color);
 	}
 
