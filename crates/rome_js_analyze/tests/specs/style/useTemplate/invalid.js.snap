@@ -56,6 +56,11 @@ const x = a + ("b") + c;
 
 ("a") + (b) + ("c");
 
+//a
+/*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
++ //h
+bar //i
+
 ```
 
 # Diagnostics
@@ -408,7 +413,7 @@ invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     25 25 │   foo() + '\n';
     26 26 │   
     27    │ - 1·*·/**leading*/'foo'····/**trailing·*/···················+·'bar';
-       27 │ + `${1·*·/**leading*/'foo'····/**trailing·*/}bar`;
+       27 │ + `${1·*·/**leading*/'foo'}bar`;
     28 28 │   
     29 29 │   // strings including `${`
   
@@ -641,6 +646,7 @@ invalid.js:51:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   > 51 │ ("a") + (b) + ("c");
        │ ^^^^^^^^^^^^^^^^^^^
     52 │ 
+    53 │ //a
   
   i Suggested fix: Use a template literal.
   
@@ -649,6 +655,33 @@ invalid.js:51:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     51    │ - ("a")·+·(b)·+·("c");
        51 │ + `a${b}c`;
     52 52 │   
+    53 53 │   //a
+  
+
+```
+
+```
+invalid.js:54:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    53 │ //a
+  > 54 │ /*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │ + //h
+  > 56 │ bar //i
+       │ ^^^
+    57 │ 
+  
+  i Suggested fix: Use a template literal.
+  
+    52 52 │   
+    53 53 │   //a
+    54    │ - /*b*/·foo·/*c*/·+·/*d*/·'baz'·/*e*/·+·/*f*/·1·//g
+    55    │ - +·//h
+    56    │ - bar·//i
+       54 │ + /*b*/·`${foo}baz${1}${bar}`·//i
+    57 55 │   
   
 
 ```

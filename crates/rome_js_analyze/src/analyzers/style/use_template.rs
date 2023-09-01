@@ -214,7 +214,8 @@ fn template_chuck_from(string_literal: &JsStringLiteralExpression) -> Option<Any
 fn template_element_from(expr: AnyJsExpression) -> Option<AnyJsTemplateElement> {
     Some(AnyJsTemplateElement::from(make::js_template_element(
         JsSyntaxToken::new_detached(JsSyntaxKind::DOLLAR_CURLY, "${", [], []),
-        expr.trim()?,
+        expr.with_leading_trivia_pieces([])?
+            .with_trailing_trivia_pieces([])?,
         make::token(T!['}']),
     )))
 }
