@@ -5,6 +5,14 @@ expression: content
 # Emitted Messages
 
 ```block
+rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The configuration file rome.json is deprecated. Use biome.jsonn instead.
+  
+
+```
+
+```block
 Fixed 2 file(s) in <TIME>
 ```
 

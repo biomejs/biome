@@ -265,6 +265,26 @@ pub struct NoVcsFolderFound {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
+    category = "internalError/fs",
+    severity = Warning,
+    message(
+        description = "The configuration file {path} is deprecated. Use biome.json instead.",
+        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>"n instead."),
+    )
+)]
+pub struct DeprecatedConfigurationFile {
+    #[location(resource)]
+    pub path: String,
+}
+
+impl DeprecatedConfigurationFile {
+    pub fn new(path: impl Into<String>) -> Self {
+        Self { path: path.into() }
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
 	category = "internalError/fs",
 	severity = Warning,
 	message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
