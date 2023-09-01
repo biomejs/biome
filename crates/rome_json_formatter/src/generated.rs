@@ -18,10 +18,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonRoot {
         crate::json::auxiliary::root::FormatJsonRoot,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::auxiliary::root::FormatJsonRoot,
-        )
+        FormatRefWithRule::new(self, crate::json::auxiliary::root::FormatJsonRoot)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonRoot {
@@ -30,10 +27,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonRoot {
         crate::json::auxiliary::root::FormatJsonRoot,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::auxiliary::root::FormatJsonRoot,
-        )
+        FormatOwnedWithRule::new(self, crate::json::auxiliary::root::FormatJsonRoot)
     }
 }
 impl FormatRule<rome_json_syntax::JsonStringValue>
@@ -132,10 +126,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonNullValue {
         crate::json::value::null_value::FormatJsonNullValue,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::value::null_value::FormatJsonNullValue,
-        )
+        FormatRefWithRule::new(self, crate::json::value::null_value::FormatJsonNullValue)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonNullValue {
@@ -144,10 +135,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonNullValue {
         crate::json::value::null_value::FormatJsonNullValue,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::value::null_value::FormatJsonNullValue,
-        )
+        FormatOwnedWithRule::new(self, crate::json::value::null_value::FormatJsonNullValue)
     }
 }
 impl FormatRule<rome_json_syntax::JsonNumberValue>
@@ -208,10 +196,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonArrayValue {
         crate::json::value::array_value::FormatJsonArrayValue,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::value::array_value::FormatJsonArrayValue,
-        )
+        FormatRefWithRule::new(self, crate::json::value::array_value::FormatJsonArrayValue)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonArrayValue {
@@ -220,10 +205,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonArrayValue {
         crate::json::value::array_value::FormatJsonArrayValue,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::value::array_value::FormatJsonArrayValue,
-        )
+        FormatOwnedWithRule::new(self, crate::json::value::array_value::FormatJsonArrayValue)
     }
 }
 impl FormatRule<rome_json_syntax::JsonObjectValue>
@@ -278,10 +260,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonMember {
         crate::json::auxiliary::member::FormatJsonMember,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::auxiliary::member::FormatJsonMember,
-        )
+        FormatRefWithRule::new(self, crate::json::auxiliary::member::FormatJsonMember)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMember {
@@ -290,10 +269,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMember {
         crate::json::auxiliary::member::FormatJsonMember,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::auxiliary::member::FormatJsonMember,
-        )
+        FormatOwnedWithRule::new(self, crate::json::auxiliary::member::FormatJsonMember)
     }
 }
 impl FormatRule<rome_json_syntax::JsonMemberName>
@@ -366,10 +342,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonMemberList {
         crate::json::lists::member_list::FormatJsonMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::lists::member_list::FormatJsonMemberList,
-        )
+        FormatRefWithRule::new(self, crate::json::lists::member_list::FormatJsonMemberList)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMemberList {
@@ -378,10 +351,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonMemberList {
         crate::json::lists::member_list::FormatJsonMemberList,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::lists::member_list::FormatJsonMemberList,
-        )
+        FormatOwnedWithRule::new(self, crate::json::lists::member_list::FormatJsonMemberList)
     }
 }
 impl FormatRule<rome_json_syntax::JsonBogus> for crate::json::bogus::bogus::FormatJsonBogus {
@@ -430,10 +400,7 @@ impl AsFormat<JsonFormatContext> for rome_json_syntax::JsonBogusValue {
         crate::json::bogus::bogus_value::FormatJsonBogusValue,
     >;
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::json::bogus::bogus_value::FormatJsonBogusValue,
-        )
+        FormatRefWithRule::new(self, crate::json::bogus::bogus_value::FormatJsonBogusValue)
     }
 }
 impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBogusValue {
@@ -442,10 +409,7 @@ impl IntoFormat<JsonFormatContext> for rome_json_syntax::JsonBogusValue {
         crate::json::bogus::bogus_value::FormatJsonBogusValue,
     >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::json::bogus::bogus_value::FormatJsonBogusValue,
-        )
+        FormatOwnedWithRule::new(self, crate::json::bogus::bogus_value::FormatJsonBogusValue)
     }
 }
 impl AsFormat<JsonFormatContext> for rome_json_syntax::AnyJsonValue {

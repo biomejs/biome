@@ -97,53 +97,29 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
                 match node {
                     AnyTsType::TsAnyType(ty) => FormatTsAnyType.fmt_node(ty, f),
                     AnyTsType::TsArrayType(ty) => FormatTsArrayType.fmt_node(ty, f),
-                    AnyTsType::TsBigintLiteralType(ty) => {
-                        FormatTsBigintLiteralType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsBigintLiteralType(ty) => FormatTsBigintLiteralType.fmt_node(ty, f),
                     AnyTsType::TsBigintType(ty) => FormatTsBigintType.fmt_node(ty, f),
                     AnyTsType::TsBooleanLiteralType(ty) => {
                         FormatTsBooleanLiteralType.fmt_node(ty, f)
                     }
                     AnyTsType::TsBooleanType(ty) => FormatTsBooleanType.fmt_node(ty, f),
-                    AnyTsType::TsConditionalType(ty) => {
-                        FormatTsConditionalType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsConstructorType(ty) => {
-                        FormatTsConstructorType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsFunctionType(ty) => {
-                        FormatTsFunctionType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsConditionalType(ty) => FormatTsConditionalType.fmt_node(ty, f),
+                    AnyTsType::TsConstructorType(ty) => FormatTsConstructorType.fmt_node(ty, f),
+                    AnyTsType::TsFunctionType(ty) => FormatTsFunctionType.fmt_node(ty, f),
                     AnyTsType::TsImportType(ty) => FormatTsImportType.fmt_node(ty, f),
-                    AnyTsType::TsIndexedAccessType(ty) => {
-                        FormatTsIndexedAccessType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsIndexedAccessType(ty) => FormatTsIndexedAccessType.fmt_node(ty, f),
                     AnyTsType::TsInferType(ty) => FormatTsInferType.fmt_node(ty, f),
-                    AnyTsType::TsIntersectionType(ty) => {
-                        FormatTsIntersectionType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsIntersectionType(ty) => FormatTsIntersectionType.fmt_node(ty, f),
                     AnyTsType::TsMappedType(ty) => FormatTsMappedType.fmt_node(ty, f),
                     AnyTsType::TsNeverType(ty) => FormatTsNeverType.fmt_node(ty, f),
-                    AnyTsType::TsNonPrimitiveType(ty) => {
-                        FormatTsNonPrimitiveType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsNullLiteralType(ty) => {
-                        FormatTsNullLiteralType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsNumberLiteralType(ty) => {
-                        FormatTsNumberLiteralType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsNonPrimitiveType(ty) => FormatTsNonPrimitiveType.fmt_node(ty, f),
+                    AnyTsType::TsNullLiteralType(ty) => FormatTsNullLiteralType.fmt_node(ty, f),
+                    AnyTsType::TsNumberLiteralType(ty) => FormatTsNumberLiteralType.fmt_node(ty, f),
                     AnyTsType::TsNumberType(ty) => FormatTsNumberType.fmt_node(ty, f),
                     AnyTsType::TsObjectType(ty) => FormatTsObjectType.fmt_node(ty, f),
-                    AnyTsType::TsParenthesizedType(ty) => {
-                        FormatTsParenthesizedType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsReferenceType(ty) => {
-                        FormatTsReferenceType.fmt_node(ty, f)
-                    }
-                    AnyTsType::TsStringLiteralType(ty) => {
-                        FormatTsStringLiteralType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsParenthesizedType(ty) => FormatTsParenthesizedType.fmt_node(ty, f),
+                    AnyTsType::TsReferenceType(ty) => FormatTsReferenceType.fmt_node(ty, f),
+                    AnyTsType::TsStringLiteralType(ty) => FormatTsStringLiteralType.fmt_node(ty, f),
                     AnyTsType::TsStringType(ty) => FormatTsStringType.fmt_node(ty, f),
                     AnyTsType::TsSymbolType(ty) => FormatTsSymbolType.fmt_node(ty, f),
                     AnyTsType::TsTemplateLiteralType(ty) => {
@@ -151,13 +127,9 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
                     }
                     AnyTsType::TsThisType(ty) => FormatTsThisType.fmt_node(ty, f),
                     AnyTsType::TsTupleType(ty) => FormatTsTupleType.fmt_node(ty, f),
-                    AnyTsType::TsTypeOperatorType(ty) => {
-                        FormatTsTypeOperatorType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsTypeOperatorType(ty) => FormatTsTypeOperatorType.fmt_node(ty, f),
                     AnyTsType::TsTypeofType(ty) => FormatTsTypeofType.fmt_node(ty, f),
-                    AnyTsType::TsUndefinedType(ty) => {
-                        FormatTsUndefinedType.fmt_node(ty, f)
-                    }
+                    AnyTsType::TsUndefinedType(ty) => FormatTsUndefinedType.fmt_node(ty, f),
                     AnyTsType::TsUnionType(ty) => FormatTsUnionType.fmt_node(ty, f),
                     AnyTsType::TsUnknownType(ty) => FormatTsUnknownType.fmt_node(ty, f),
                     AnyTsType::TsVoidType(ty) => FormatTsVoidType.fmt_node(ty, f),

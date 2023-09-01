@@ -85,10 +85,7 @@ mod tests {
             escape(r"abc \${a} \`bca", &["${", "`"], '\\'),
             r"abc \${a} \`bca"
         );
-        assert_eq!(
-            escape(r"abc \${bca}", &["${", "`"], '\\'),
-            r"abc \${bca}"
-        );
+        assert_eq!(escape(r"abc \${bca}", &["${", "`"], '\\'), r"abc \${bca}");
         assert_eq!(escape(r"abc \`bca", &["${", "`"], '\\'), r"abc \`bca");
     }
 }
