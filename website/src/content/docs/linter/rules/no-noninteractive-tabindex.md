@@ -19,7 +19,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
 <div tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:6 <a href="https://biomejs.dev/lint/rules/noNoninteractiveTabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:6 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The HTML element </span><span style="color: Orange;"><strong>div</strong></span><span style="color: Orange;"> is non-interactive. Do not use </span><span style="color: Orange;"><strong>tabIndex</strong></span><span style="color: Orange;">.</span>
   
@@ -35,7 +35,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
 <div role="article" tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:21 <a href="https://biomejs.dev/lint/rules/noNoninteractiveTabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:21 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The HTML element </span><span style="color: Orange;"><strong>div</strong></span><span style="color: Orange;"> is non-interactive. Do not use </span><span style="color: Orange;"><strong>tabIndex</strong></span><span style="color: Orange;">.</span>
   
@@ -51,7 +51,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
 <article tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:10 <a href="https://biomejs.dev/lint/rules/noNoninteractiveTabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noNoninteractiveTabindex.js:1:10 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/nursery/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The HTML element </span><span style="color: Orange;"><strong>article</strong></span><span style="color: Orange;"> is non-interactive. Do not use </span><span style="color: Orange;"><strong>tabIndex</strong></span><span style="color: Orange;">.</span>
   

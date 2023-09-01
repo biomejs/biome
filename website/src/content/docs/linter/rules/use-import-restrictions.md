@@ -32,7 +32,7 @@ Source: https://github.com/uhyo/eslint-plugin-import-access
 import { fooPackageVariable } from "./sub/foo.js";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/lint/rules/useImportRestrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/linter/rules/use-import-restrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Importing package private symbols is prohibited from outside the module directory.</span>
   
@@ -50,7 +50,7 @@ import { fooPackageVariable } from "./sub/foo.js";
 import { barPackageVariable } from "../aunt/bar.ts";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/lint/rules/useImportRestrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/linter/rules/use-import-restrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Importing package private symbols is prohibited from outside the module directory.</span>
   
@@ -68,7 +68,7 @@ import { barPackageVariable } from "../aunt/bar.ts";
 import { fooPackageVariable } from "./sub/foo";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/lint/rules/useImportRestrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/linter/rules/use-import-restrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Importing package private symbols is prohibited from outside the module directory.</span>
   
@@ -86,7 +86,7 @@ import { fooPackageVariable } from "./sub/foo";
 import { fooPackageVariable } from "./sub/foo/index.js";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/lint/rules/useImportRestrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useImportRestrictions.js:2:36 <a href="https://biomejs.dev/linter/rules/use-import-restrictions">lint/nursery/useImportRestrictions</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Importing package private symbols is prohibited from outside the module directory.</span>
   

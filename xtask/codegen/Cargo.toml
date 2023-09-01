@@ -16,6 +16,7 @@ ureq = "2.4.0"
 git2 = { version = "0.17.1", default-features = false }
 filetime = "0.2.15"
 case = "1.0.0"
+convert_case = "0.6.0"
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
 fs_extra = "1.3.0"
 

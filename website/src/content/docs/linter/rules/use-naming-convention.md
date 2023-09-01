@@ -47,7 +47,7 @@ Examples of incorrect names:
 let a_value = 0;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:5 <a href="https://biomejs.dev/lint/rules/useNamingConvention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:5 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>top-level let</strong></span><span style="color: Orange;"> name should be in </span><span style="color: Orange;"><strong>camelCase</strong></span><span style="color: Orange;">.</span>
   
@@ -69,7 +69,7 @@ let a_value = 0;
 function f(FirstParam) {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:12 <a href="https://biomejs.dev/lint/rules/useNamingConvention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:12 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>function parameter</strong></span><span style="color: Orange;"> name should be in </span><span style="color: Orange;"><strong>camelCase</strong></span><span style="color: Orange;">.</span>
   
@@ -178,7 +178,7 @@ Examples of an incorrect type alias:
 type person = { fullName: string };
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:6 <a href="https://biomejs.dev/lint/rules/useNamingConvention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:6 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>type alias</strong></span><span style="color: Orange;"> name should be in </span><span style="color: Orange;"><strong>PascalCase</strong></span><span style="color: Orange;">.</span>
   
@@ -214,7 +214,7 @@ const alice = {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:2:5 <a href="https://biomejs.dev/lint/rules/useNamingConvention">lint/nursery/useNamingConvention</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:2:5 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/nursery/useNamingConvention</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>object property</strong></span><span style="color: Orange;"> name should be in </span><span style="color: Orange;"><strong>camelCase</strong></span><span style="color: Orange;">.</span>
   
@@ -253,7 +253,7 @@ Examples of an incorrect name:
 import * as MyLib from "my-lib";
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:13 <a href="https://biomejs.dev/lint/rules/useNamingConvention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNamingConvention.js:1:13 <a href="https://biomejs.dev/linter/rules/use-naming-convention">lint/nursery/useNamingConvention</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>import namespace</strong></span><span style="color: Orange;"> name should be in </span><span style="color: Orange;"><strong>camelCase</strong></span><span style="color: Orange;">.</span>
   

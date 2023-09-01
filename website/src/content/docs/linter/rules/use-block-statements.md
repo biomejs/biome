@@ -14,7 +14,7 @@ JavaScript allows the omission of curly braces when a block contains only one st
  if (x) x;
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:2 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:2 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -34,7 +34,7 @@ JavaScript allows the omission of curly braces when a block contains only one st
  } else y;
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:3:4 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:3:4 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -56,7 +56,7 @@ if (x) {
 } else if (y) y;
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:3:8 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:3:8 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -76,7 +76,7 @@ if (x) {
    for (;;);
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -96,7 +96,7 @@ if (x) {
    for (p in obj);
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -116,7 +116,7 @@ if (x) {
   for (x of xs);
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:3 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:3 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -137,7 +137,7 @@ if (x) {
   while (x);
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:3 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:3 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   
@@ -160,7 +160,7 @@ if (x) {
    while (x);
 ```
 
-<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/lint/rules/useBlockStatements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useBlockStatements.js:1:4 <a href="https://biomejs.dev/linter/rules/use-block-statements">lint/style/useBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Block statements are preferred in this position.</span>
   

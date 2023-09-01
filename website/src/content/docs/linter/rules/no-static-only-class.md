@@ -28,7 +28,7 @@ class X {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:1 <a href="https://biomejs.dev/lint/rules/noStaticOnlyClass">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   
@@ -106,7 +106,7 @@ export class Utilities {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:8 <a href="https://biomejs.dev/lint/rules/noStaticOnlyClass">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:8 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   

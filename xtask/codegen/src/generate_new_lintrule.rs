@@ -1,6 +1,7 @@
 use std::{path::PathBuf, str::FromStr};
 
 use case::CaseExt;
+use convert_case::{Case, Casing};
 
 pub fn generate_new_lintrule(path: &str, rule_name: &str) {
     let rule_folder = PathBuf::from_str(path).unwrap();
@@ -95,9 +96,10 @@ impl Rule for {rule_name_upper_camel} {{
     let categories = std::fs::read_to_string(categories_path).unwrap();
 
     if !categories.contains(&rule_name_lower_camel) {
+        let kebab_case_rule = rule_name_lower_camel.to_case(Case::Kebab);
         // We sort rules to reduce conflicts between contributions made in parallel.
         let rule_line = format!(
-            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/lint/rules/{rule_name_lower_camel}","#
+            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/lint/rules/{kebab_case_rule}","#
         );
         let nursery_start = "    // nursery\n";
         let nursery_end = "\n    // nursery end";

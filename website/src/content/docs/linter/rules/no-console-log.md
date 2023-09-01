@@ -13,7 +13,7 @@ Disallow the use of `console.log`
 console.log()
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConsoleLog.js:1:1 <a href="https://biomejs.dev/lint/rules/noConsoleLog">lint/suspicious/noConsoleLog</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConsoleLog.js:1:1 <a href="https://biomejs.dev/linter/rules/no-console-log">lint/suspicious/noConsoleLog</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use </span><span style="color: Orange;"><strong>console.log</strong></span>
   

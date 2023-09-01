@@ -27,7 +27,7 @@ import { A } from "module";
 export {};
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessEmptyExport.js:2:1 <a href="https://biomejs.dev/lint/rules/noUselessEmptyExport">lint/nursery/noUselessEmptyExport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessEmptyExport.js:2:1 <a href="https://biomejs.dev/linter/rules/no-useless-empty-export">lint/nursery/noUselessEmptyExport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This empty </span><span style="color: Tomato;"><strong>export</strong></span><span style="color: Tomato;"> is useless because there's another </span><span style="color: Tomato;"><strong>export</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;">.</span>
   
@@ -56,7 +56,7 @@ export const A = 0;
 export {};
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessEmptyExport.js:2:1 <a href="https://biomejs.dev/lint/rules/noUselessEmptyExport">lint/nursery/noUselessEmptyExport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessEmptyExport.js:2:1 <a href="https://biomejs.dev/linter/rules/no-useless-empty-export">lint/nursery/noUselessEmptyExport</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This empty </span><span style="color: Tomato;"><strong>export</strong></span><span style="color: Tomato;"> is useless because there's another </span><span style="color: Tomato;"><strong>export</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>import</strong></span><span style="color: Tomato;">.</span>
   

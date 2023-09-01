@@ -13,7 +13,7 @@ Disallow implicit `true` values on JSX boolean attributes
 <input disabled />
 ```
 
-<pre class="language-text"><code class="language-text">style/noImplicitBoolean.js:1:8 <a href="https://biomejs.dev/lint/rules/noImplicitBoolean">lint/style/noImplicitBoolean</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noImplicitBoolean.js:1:8 <a href="https://biomejs.dev/linter/rules/no-implicit-boolean">lint/style/noImplicitBoolean</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use explicit boolean values for boolean JSX props.</span>
   

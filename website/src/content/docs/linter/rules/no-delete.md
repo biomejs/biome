@@ -28,7 +28,7 @@ const arr = [1, 2, 3];
 delete arr[0];
 ```
 
-<pre class="language-text"><code class="language-text">performance/noDelete.js:2:1 <a href="https://biomejs.dev/lint/rules/noDelete">lint/performance/noDelete</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noDelete.js:2:1 <a href="https://biomejs.dev/linter/rules/no-delete">lint/performance/noDelete</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the </span><span style="color: Tomato;"><strong>delete</strong></span><span style="color: Tomato;"> operator which can impact performance.</span>
   
@@ -51,7 +51,7 @@ const obj = {a: {b: {c: 123}}};
 delete obj.a.b.c;
 ```
 
-<pre class="language-text"><code class="language-text">performance/noDelete.js:2:1 <a href="https://biomejs.dev/lint/rules/noDelete">lint/performance/noDelete</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noDelete.js:2:1 <a href="https://biomejs.dev/linter/rules/no-delete">lint/performance/noDelete</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the </span><span style="color: Tomato;"><strong>delete</strong></span><span style="color: Tomato;"> operator which can impact performance.</span>
   

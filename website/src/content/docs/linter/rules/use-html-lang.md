@@ -17,7 +17,7 @@ Enforce that `html` element has `lang` attribute.
 <html></html>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/lint/rules/useHtmlLang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/linter/rules/use-html-lang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute when using the </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -33,7 +33,7 @@ Enforce that `html` element has `lang` attribute.
 <html lang={""}></html>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/lint/rules/useHtmlLang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/linter/rules/use-html-lang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute when using the </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -49,7 +49,7 @@ Enforce that `html` element has `lang` attribute.
 <html lang={null}></html>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/lint/rules/useHtmlLang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/linter/rules/use-html-lang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute when using the </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -65,7 +65,7 @@ Enforce that `html` element has `lang` attribute.
 <html lang={undefined}></html>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/lint/rules/useHtmlLang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/linter/rules/use-html-lang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute when using the </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;"> element.</span>
   
@@ -81,7 +81,7 @@ Enforce that `html` element has `lang` attribute.
 <html lang={true}></html>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/lint/rules/useHtmlLang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHtmlLang.js:1:1 <a href="https://biomejs.dev/linter/rules/use-html-lang">lint/a11y/useHtmlLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute when using the </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;"> element.</span>
   

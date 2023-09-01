@@ -19,7 +19,7 @@ foo
 </>
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/lint/rules/noUselessFragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using unnecessary </span><span style="color: Tomato;"><strong>Fragment</strong></span><span style="color: Tomato;">.</span>
   
@@ -47,7 +47,7 @@ foo
 </React.Fragment>
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/lint/rules/noUselessFragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using unnecessary </span><span style="color: Tomato;"><strong>Fragment</strong></span><span style="color: Tomato;">.</span>
   
@@ -76,7 +76,7 @@ foo
 </>
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:2:5 <a href="https://biomejs.dev/lint/rules/noUselessFragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using unnecessary </span><span style="color: Tomato;"><strong>Fragment</strong></span><span style="color: Tomato;">.</span>
   
@@ -96,7 +96,7 @@ foo
 <></>
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/lint/rules/noUselessFragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using unnecessary </span><span style="color: Tomato;"><strong>Fragment</strong></span><span style="color: Tomato;">.</span>
   

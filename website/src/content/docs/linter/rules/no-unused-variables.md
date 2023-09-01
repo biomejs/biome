@@ -25,7 +25,7 @@ For the time being this rule will ignore it, but this **might change in the futu
 const a = 4;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This variable is unused.</span>
   
@@ -47,7 +47,7 @@ const a = 4;
 let a = 4;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:5 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:5 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This variable is unused.</span>
   
@@ -70,7 +70,7 @@ function foo() {
 };
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:10 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:10 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This function is unused.</span>
   
@@ -90,7 +90,7 @@ function foo(myVar) {
 foo();
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:14 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:14 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This parameter is unused.</span>
   
@@ -115,7 +115,7 @@ const foo = () => {
 };
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This variable is unused.</span>
   
@@ -141,7 +141,7 @@ function foo() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:10 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:10 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This function is unused.</span>
   
@@ -161,7 +161,7 @@ const foo = () => {
 };
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/lint/rules/noUnusedVariables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noUnusedVariables.js:1:7 <a href="https://biomejs.dev/linter/rules/no-unused-variables">lint/correctness/noUnusedVariables</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This variable is unused.</span>
   

@@ -23,7 +23,7 @@ for (var i = 0; i < 10; i--) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/lint/rules/useValidForDirection">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/linter/rules/use-valid-for-direction">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The update clause in this loop moves the variable in the wrong direction.</span>
   
@@ -39,7 +39,7 @@ for (var i = 10; i >= 0; i++) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/lint/rules/useValidForDirection">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/linter/rules/use-valid-for-direction">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The update clause in this loop moves the variable in the wrong direction.</span>
   
@@ -55,7 +55,7 @@ for (var i = 0; i > 10; i++) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/lint/rules/useValidForDirection">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/useValidForDirection.js:1:5 <a href="https://biomejs.dev/linter/rules/use-valid-for-direction">lint/correctness/useValidForDirection</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The update clause in this loop moves the variable in the wrong direction.</span>
   

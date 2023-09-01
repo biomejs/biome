@@ -20,7 +20,7 @@ for (; x.running;) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useWhile.js:1:1 <a href="https://biomejs.dev/lint/rules/useWhile">lint/style/useWhile</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useWhile.js:1:1 <a href="https://biomejs.dev/linter/rules/use-while">lint/style/useWhile</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>while</strong></span><span style="color: Tomato;"> loops instead of </span><span style="color: Tomato;"><strong>for</strong></span><span style="color: Tomato;"> loops.</span>
   

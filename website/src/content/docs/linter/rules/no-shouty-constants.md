@@ -14,7 +14,7 @@ const FOO = "FOO";
 console.log(FOO);
 ```
 
-<pre class="language-text"><code class="language-text">style/noShoutyConstants.js:1:7 <a href="https://biomejs.dev/lint/rules/noShoutyConstants">lint/style/noShoutyConstants</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noShoutyConstants.js:1:7 <a href="https://biomejs.dev/linter/rules/no-shouty-constants">lint/style/noShoutyConstants</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Redundant constant declaration.</span>
   

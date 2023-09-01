@@ -22,7 +22,7 @@ It is much safer than relying upon logical operator chaining; which chains on an
 foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   
@@ -42,7 +42,7 @@ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz
 foo.bar && foo.bar.baz.buzz
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   
@@ -62,7 +62,7 @@ foo.bar && foo.bar.baz.buzz
 foo !== undefined && foo.bar != undefined && foo.bar.baz !== null && foo.bar.baz.buzz
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   
@@ -82,7 +82,7 @@ foo !== undefined && foo.bar != undefined && foo.bar.baz !== null && foo.bar.baz
 ((foo || {}).bar || {}).baz;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   
@@ -102,7 +102,7 @@ foo !== undefined && foo.bar != undefined && foo.bar.baz !== null && foo.bar.baz
 (await (foo1 || {}).foo2 || {}).foo3;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   
@@ -122,7 +122,7 @@ foo !== undefined && foo.bar != undefined && foo.bar.baz !== null && foo.bar.baz
 (((typeof x) as string) || {}).bar;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/lint/rules/useOptionalChain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useOptionalChain.js:1:1 <a href="https://biomejs.dev/linter/rules/use-optional-chain">lint/complexity/useOptionalChain</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Change to an optional chain.</span>
   

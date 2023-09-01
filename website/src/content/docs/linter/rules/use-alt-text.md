@@ -20,7 +20,7 @@ By default, this rule checks for alternative text on the following elements: `<i
 <img src="image.png" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAltText.js:1:1 <a href="https://biomejs.dev/lint/rules/useAltText">lint/a11y/useAltText</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAltText.js:1:1 <a href="https://biomejs.dev/linter/rules/use-alt-text">lint/a11y/useAltText</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a text alternative through the </span><span style="color: Tomato;"><strong>alt</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>aria-label</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>aria-labelledby</strong></span><span style="color: Tomato;"> attribute</span>
   
@@ -36,7 +36,7 @@ By default, this rule checks for alternative text on the following elements: `<i
 <input type="image" src="image.png" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAltText.js:1:1 <a href="https://biomejs.dev/lint/rules/useAltText">lint/a11y/useAltText</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAltText.js:1:1 <a href="https://biomejs.dev/linter/rules/use-alt-text">lint/a11y/useAltText</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a text alternative through the </span><span style="color: Tomato;"><strong>alt</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>aria-label</strong></span><span style="color: Tomato;"> or </span><span style="color: Tomato;"><strong>aria-labelledby</strong></span><span style="color: Tomato;"> attribute</span>
   

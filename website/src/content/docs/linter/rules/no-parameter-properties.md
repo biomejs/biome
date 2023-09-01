@@ -22,7 +22,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noParameterProperties.js:2:17 <a href="https://biomejs.dev/lint/rules/noParameterProperties">lint/style/noParameterProperties</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noParameterProperties.js:2:17 <a href="https://biomejs.dev/linter/rules/no-parameter-properties">lint/style/noParameterProperties</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a more explicit </span><span style="color: Orange;"><strong>class property</strong></span><span style="color: Orange;"> instead of a </span><span style="color: Orange;"><strong>parameter property</strong></span><span style="color: Orange;">.</span>
   

@@ -29,7 +29,7 @@ See also: https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.ht
 module Example {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useNamespaceKeyword.js:1:1 <a href="https://biomejs.dev/lint/rules/useNamespaceKeyword">lint/suspicious/useNamespaceKeyword</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useNamespaceKeyword.js:1:1 <a href="https://biomejs.dev/linter/rules/use-namespace-keyword">lint/suspicious/useNamespaceKeyword</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use the </span><span style="color: Tomato;"><strong>namespace</strong></span><span style="color: Tomato;"> keyword instead of the outdated </span><span style="color: Tomato;"><strong>module</strong></span><span style="color: Tomato;"> keyword.</span>
   

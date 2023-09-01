@@ -22,7 +22,7 @@ Source: https://typescript-eslint.io/rules/no-empty-interface
 interface A {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.js:1:1 <a href="https://biomejs.dev/lint/rules/noEmptyInterface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.js:1:1 <a href="https://biomejs.dev/linter/rules/no-empty-interface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">An empty interface is equivalent to '{}'.</span>
   
@@ -43,7 +43,7 @@ interface A {}
 interface A extends B {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.js:2:1 <a href="https://biomejs.dev/lint/rules/noEmptyInterface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noEmptyInterface.js:2:1 <a href="https://biomejs.dev/linter/rules/no-empty-interface">lint/suspicious/noEmptyInterface</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">An interface declaring no members is equivalent to its supertype.</span>
   

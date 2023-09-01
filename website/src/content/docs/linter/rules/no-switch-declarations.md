@@ -31,7 +31,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/lint/rules/noSwitchDeclarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/linter/rules/no-switch-declarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Other switch clauses can erroneously access this </span><span style="color: Tomato;"><strong>declaration</strong></span><span style="color: Tomato;">.
 </span><span style="color: Tomato;">  </span><span style="color: Tomato;">  </span><span style="color: Tomato;">Wrap the declaration in a block to restrict its access to the switch clause.</span>
@@ -80,7 +80,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/lint/rules/noSwitchDeclarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/linter/rules/no-switch-declarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Other switch clauses can erroneously access this </span><span style="color: Tomato;"><strong>declaration</strong></span><span style="color: Tomato;">.
 </span><span style="color: Tomato;">  </span><span style="color: Tomato;">  </span><span style="color: Tomato;">Wrap the declaration in a block to restrict its access to the switch clause.</span>
@@ -129,7 +129,7 @@ switch (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/lint/rules/noSwitchDeclarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSwitchDeclarations.js:3:9 <a href="https://biomejs.dev/linter/rules/no-switch-declarations">lint/correctness/noSwitchDeclarations</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Other switch clauses can erroneously access this </span><span style="color: Tomato;"><strong>declaration</strong></span><span style="color: Tomato;">.
 </span><span style="color: Tomato;">  </span><span style="color: Tomato;">  </span><span style="color: Tomato;">Wrap the declaration in a block to restrict its access to the switch clause.</span>

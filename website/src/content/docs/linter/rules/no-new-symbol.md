@@ -21,7 +21,7 @@ Source: https://eslint.org/docs/latest/rules/no-new-symbol
 var foo = new Symbol('foo');
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noNewSymbol.js:1:11 <a href="https://biomejs.dev/lint/rules/noNewSymbol">lint/correctness/noNewSymbol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noNewSymbol.js:1:11 <a href="https://biomejs.dev/linter/rules/no-new-symbol">lint/correctness/noNewSymbol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>Symbol</strong></span><span style="color: Tomato;"> cannot be called as a constructor.</span>
   

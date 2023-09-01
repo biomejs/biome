@@ -17,7 +17,7 @@ Ensure that the attribute passed to the `lang` attribute is a correct ISO langua
 <html lang="lorem" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/lint/rules/useValidLang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/linter/rules/use-valid-lang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute.</span>
   
@@ -49,7 +49,7 @@ Ensure that the attribute passed to the `lang` attribute is a correct ISO langua
 <html lang="en-babab" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/lint/rules/useValidLang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/linter/rules/use-valid-lang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute.</span>
   
@@ -81,7 +81,7 @@ Ensure that the attribute passed to the `lang` attribute is a correct ISO langua
 <html lang="en-GB-typo" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/lint/rules/useValidLang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidLang.js:1:12 <a href="https://biomejs.dev/linter/rules/use-valid-lang">lint/a11y/useValidLang</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Provide a valid value for the </span><span style="color: Tomato;"><strong>lang</strong></span><span style="color: Tomato;"> attribute.</span>
   

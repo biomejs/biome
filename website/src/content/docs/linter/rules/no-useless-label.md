@@ -23,7 +23,7 @@ loop: while(a) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessLabel.js:2:11 <a href="https://biomejs.dev/lint/rules/noUselessLabel">lint/complexity/noUselessLabel</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessLabel.js:2:11 <a href="https://biomejs.dev/linter/rules/no-useless-label">lint/complexity/noUselessLabel</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary </span><span style="color: Tomato;"><strong>label</strong></span><span style="color: Tomato;">.</span>
   

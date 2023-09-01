@@ -27,7 +27,7 @@ Source: https://typescript-eslint.io/rules/no-inferrable-types
 const variable: 1 = 1;
 ```
 
-<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:15 <a href="https://biomejs.dev/lint/rules/noInferrableTypes">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:15 <a href="https://biomejs.dev/linter/rules/no-inferrable-types">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This type annotation is trivially inferred from its initialization.</span>
   
@@ -45,7 +45,7 @@ const variable: 1 = 1;
 let variable: number = 1;
 ```
 
-<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:13 <a href="https://biomejs.dev/lint/rules/noInferrableTypes">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:13 <a href="https://biomejs.dev/linter/rules/no-inferrable-types">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This type annotation is trivially inferred from its initialization.</span>
   
@@ -65,7 +65,7 @@ class SomeClass {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:2:17 <a href="https://biomejs.dev/lint/rules/noInferrableTypes">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:2:17 <a href="https://biomejs.dev/linter/rules/no-inferrable-types">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This type annotation is trivially inferred from its initialization.</span>
   
@@ -87,7 +87,7 @@ class SomeClass {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:2:8 <a href="https://biomejs.dev/lint/rules/noInferrableTypes">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:2:8 <a href="https://biomejs.dev/linter/rules/no-inferrable-types">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This type annotation is trivially inferred from its initialization.</span>
   
@@ -107,7 +107,7 @@ class SomeClass {
 function f(param: number = 1): void {}
 ```
 
-<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:17 <a href="https://biomejs.dev/lint/rules/noInferrableTypes">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noInferrableTypes.js:1:17 <a href="https://biomejs.dev/linter/rules/no-inferrable-types">lint/style/noInferrableTypes</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This type annotation is trivially inferred from its initialization.</span>
   

@@ -26,7 +26,7 @@ declare const example: Example;
 const includesBaz = foo.property!.includes('baz');
 ```
 
-<pre class="language-text"><code class="language-text">style/noNonNullAssertion.js:5:21 <a href="https://biomejs.dev/lint/rules/noNonNullAssertion">lint/style/noNonNullAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noNonNullAssertion.js:5:21 <a href="https://biomejs.dev/linter/rules/no-non-null-assertion">lint/style/noNonNullAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Forbidden non-null assertion.</span>
   
@@ -50,7 +50,7 @@ const includesBaz = foo.property!.includes('baz');
 (b!! as number) = "test";
 ```
 
-<pre class="language-text"><code class="language-text">style/noNonNullAssertion.js:1:2 <a href="https://biomejs.dev/lint/rules/noNonNullAssertion">lint/style/noNonNullAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noNonNullAssertion.js:1:2 <a href="https://biomejs.dev/linter/rules/no-non-null-assertion">lint/style/noNonNullAssertion</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Forbidden non-null assertion.</span>
   

@@ -17,7 +17,7 @@ Disallows empty destructuring patterns.
 var {} = foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:5 <a href="https://biomejs.dev/lint/rules/noEmptyPattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:5 <a href="https://biomejs.dev/linter/rules/no-empty-pattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected empty object pattern.</span>
   
@@ -31,7 +31,7 @@ var {} = foo;
 var {a: {}} = foo;
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:9 <a href="https://biomejs.dev/lint/rules/noEmptyPattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:9 <a href="https://biomejs.dev/linter/rules/no-empty-pattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected empty object pattern.</span>
   
@@ -45,7 +45,7 @@ var {a: {}} = foo;
 function foo({}) {}
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:14 <a href="https://biomejs.dev/lint/rules/noEmptyPattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noEmptyPattern.js:1:14 <a href="https://biomejs.dev/linter/rules/no-empty-pattern">lint/correctness/noEmptyPattern</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected empty object pattern.</span>
   

@@ -18,7 +18,7 @@ Therefore, it is a more reliable way to test whether a number is finite.
 isFinite(false); // true
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noGlobalIsFinite.js:1:1 <a href="https://biomejs.dev/lint/rules/noGlobalIsFinite">lint/nursery/noGlobalIsFinite</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noGlobalIsFinite.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-is-finite">lint/nursery/noGlobalIsFinite</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>isFinite</strong></span><span style="color: Tomato;"> is unsafe. It attempts a type coercion. Use </span><span style="color: Tomato;"><strong>Number.isFinite</strong></span><span style="color: Tomato;"> instead.</span>
   

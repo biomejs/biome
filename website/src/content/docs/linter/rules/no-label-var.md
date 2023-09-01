@@ -18,7 +18,7 @@ const x1 = "test";
 x1: expr;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noLabelVar.js:2:1 <a href="https://biomejs.dev/lint/rules/noLabelVar">lint/suspicious/noLabelVar</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noLabelVar.js:2:1 <a href="https://biomejs.dev/linter/rules/no-label-var">lint/suspicious/noLabelVar</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not use the </span><span style="color: Tomato;"><strong>x1</strong></span><span style="color: Tomato;"> variable name as a label</span>
   

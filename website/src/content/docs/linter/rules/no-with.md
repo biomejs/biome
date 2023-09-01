@@ -24,7 +24,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noWith.js:2:3 <a href="https://biomejs.dev/lint/rules/noWith">lint/complexity/noWith</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noWith.js:2:3 <a href="https://biomejs.dev/linter/rules/no-with">lint/complexity/noWith</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected use of </span><span style="color: Tomato;"><strong>with</strong></span><span style="color: Tomato;"> statement.</span>
   

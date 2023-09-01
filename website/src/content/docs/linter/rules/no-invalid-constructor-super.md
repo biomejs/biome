@@ -22,7 +22,7 @@ class A {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInvalidConstructorSuper.js:3:9 <a href="https://biomejs.dev/lint/rules/noInvalidConstructorSuper">lint/correctness/noInvalidConstructorSuper</a> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidConstructorSuper.js:3:9 <a href="https://biomejs.dev/linter/rules/no-invalid-constructor-super">lint/correctness/noInvalidConstructorSuper</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This class should not have a </span><span style="color: Tomato;"><strong>super()</strong></span><span style="color: Tomato;"> call. You should remove it.</span>
   
@@ -43,7 +43,7 @@ class A extends undefined {
 }
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noInvalidConstructorSuper.js:3:9 <a href="https://biomejs.dev/lint/rules/noInvalidConstructorSuper">lint/correctness/noInvalidConstructorSuper</a> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noInvalidConstructorSuper.js:3:9 <a href="https://biomejs.dev/linter/rules/no-invalid-constructor-super">lint/correctness/noInvalidConstructorSuper</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This class calls </span><span style="color: Tomato;"><strong>super()</strong></span><span style="color: Tomato;">, but the class extends from a non-constructor.</span>
   

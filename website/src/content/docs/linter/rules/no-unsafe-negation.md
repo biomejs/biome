@@ -17,7 +17,7 @@ Disallow using unsafe negation.
 !1 in [1,2];
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noUnsafeNegation.js:1:1 <a href="https://biomejs.dev/lint/rules/noUnsafeNegation">lint/suspicious/noUnsafeNegation</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noUnsafeNegation.js:1:1 <a href="https://biomejs.dev/linter/rules/no-unsafe-negation">lint/suspicious/noUnsafeNegation</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The negation operator is used unsafely on the left side of this binary expression.</span>
   
@@ -35,7 +35,7 @@ Disallow using unsafe negation.
 /**test*/!/** test*/1 instanceof [1,2];
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noUnsafeNegation.js:1:10 <a href="https://biomejs.dev/lint/rules/noUnsafeNegation">lint/suspicious/noUnsafeNegation</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noUnsafeNegation.js:1:10 <a href="https://biomejs.dev/linter/rules/no-unsafe-negation">lint/suspicious/noUnsafeNegation</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The negation operator is used unsafely on the left side of this binary expression.</span>
   

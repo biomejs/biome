@@ -24,7 +24,7 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 <a href='http://external.link' target='_blank'>child</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:32 <a href="https://biomejs.dev/lint/rules/noBlankTarget">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:32 <a href="https://biomejs.dev/linter/rules/no-blank-target">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using </span><span style="color: Tomato;"><strong>target=&quot;_blank&quot;</strong></span><span style="color: Tomato;"> without </span><span style="color: Tomato;"><strong>rel=&quot;noreferrer&quot;</strong></span><span style="color: Tomato;">.</span>
   
@@ -44,7 +44,7 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 <a href='http://external.link' target='_blank' rel="noopener">child</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:32 <a href="https://biomejs.dev/lint/rules/noBlankTarget">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:32 <a href="https://biomejs.dev/linter/rules/no-blank-target">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using </span><span style="color: Tomato;"><strong>target=&quot;_blank&quot;</strong></span><span style="color: Tomato;"> without </span><span style="color: Tomato;"><strong>rel=&quot;noreferrer&quot;</strong></span><span style="color: Tomato;">.</span>
   
@@ -64,7 +64,7 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 <a {...props} href='http://external.link' target='_blank' rel="noopener">child</a>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:43 <a href="https://biomejs.dev/lint/rules/noBlankTarget">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noBlankTarget.js:1:43 <a href="https://biomejs.dev/linter/rules/no-blank-target">lint/a11y/noBlankTarget</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using </span><span style="color: Tomato;"><strong>target=&quot;_blank&quot;</strong></span><span style="color: Tomato;"> without </span><span style="color: Tomato;"><strong>rel=&quot;noreferrer&quot;</strong></span><span style="color: Tomato;">.</span>
   

@@ -23,7 +23,7 @@ Source: https://eslint.org/docs/latest/rules/no-dupe-args
 var f = function(a, b, b) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateParameters.js:1:24 <a href="https://biomejs.dev/lint/rules/noDuplicateParameters">lint/suspicious/noDuplicateParameters</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateParameters.js:1:24 <a href="https://biomejs.dev/linter/rules/no-duplicate-parameters">lint/suspicious/noDuplicateParameters</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate parameter name.</span>
   
@@ -39,7 +39,7 @@ var f = function(a, b, b) {}
 function b(a, b, b) {}
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noDuplicateParameters.js:1:18 <a href="https://biomejs.dev/lint/rules/noDuplicateParameters">lint/suspicious/noDuplicateParameters</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noDuplicateParameters.js:1:18 <a href="https://biomejs.dev/linter/rules/no-duplicate-parameters">lint/suspicious/noDuplicateParameters</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Duplicate parameter name.</span>
   

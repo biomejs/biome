@@ -3557,6 +3557,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "case",
+ "convert_case",
  "filetime",
  "fs_extra",
  "git2",

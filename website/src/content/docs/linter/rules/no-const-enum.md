@@ -26,7 +26,7 @@ const enum Status {
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noConstEnum.js:1:1 <a href="https://biomejs.dev/lint/rules/noConstEnum">lint/suspicious/noConstEnum</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noConstEnum.js:1:1 <a href="https://biomejs.dev/linter/rules/no-const-enum">lint/suspicious/noConstEnum</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The </span><span style="color: Tomato;"><strong>enum declaration</strong></span><span style="color: Tomato;"> should not be </span><span style="color: Tomato;"><strong>const</strong></span>
   

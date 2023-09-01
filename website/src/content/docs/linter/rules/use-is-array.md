@@ -23,7 +23,7 @@ const xs = [];
 if (xs instanceof Array) {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useIsArray.js:2:5 <a href="https://biomejs.dev/lint/rules/useIsArray">lint/nursery/useIsArray</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useIsArray.js:2:5 <a href="https://biomejs.dev/linter/rules/use-is-array">lint/nursery/useIsArray</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>Array.isArray()</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>instanceof Array</strong></span><span style="color: Tomato;">.</span>
   

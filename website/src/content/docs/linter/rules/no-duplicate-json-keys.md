@@ -16,7 +16,7 @@ Disallow two keys with the same name inside a JSON object.
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noDuplicateJsonKeys.js:2:3 <a href="https://biomejs.dev/lint/rules/noDuplicateJsonKeys">lint/nursery/noDuplicateJsonKeys</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noDuplicateJsonKeys.js:2:3 <a href="https://biomejs.dev/linter/rules/no-duplicate-json-keys">lint/nursery/noDuplicateJsonKeys</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The key </span><span style="color: Tomato;"><strong>title</strong></span><span style="color: Tomato;"> was already declared.</span>
   

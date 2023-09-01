@@ -27,7 +27,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern1 = /\x00/;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\x00</strong></span>
   
@@ -43,7 +43,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern2 = /\x0C/;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\x0C</strong></span>
   
@@ -59,7 +59,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern3 = /\x1F/;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\x1F</strong></span>
   
@@ -75,7 +75,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern4 = /\u000C/;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\u000C</strong></span>
   
@@ -91,7 +91,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern5 = /\u{C}/u;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\u{C}</strong></span>
   
@@ -107,7 +107,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern7 = new RegExp("\x0C");
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\x0C</strong></span>
   
@@ -123,7 +123,7 @@ Source: https://eslint.org/docs/latest/rules/no-control-regex
  var pattern7 = new RegExp("\\x0C");
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/lint/rules/noControlCharactersInRegex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noControlCharactersInRegex.js:1:17 <a href="https://biomejs.dev/linter/rules/no-control-characters-in-regex">lint/nursery/noControlCharactersInRegex</a> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unexpected control character(s) in regular expression: </span><span style="color: Tomato;"><strong>\x0C</strong></span>
   

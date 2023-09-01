@@ -14,7 +14,7 @@ Accessible means that it is not hidden using the aria-hidden prop.
 <h1 />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useHeadingContent">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/linter/rules/use-heading-content">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Provide screen reader accessible content when using </span><span style="color: Orange;"><strong>heading</strong></span><span style="color: Orange;">  elements.</span>
   
@@ -30,7 +30,7 @@ Accessible means that it is not hidden using the aria-hidden prop.
 <h1><div aria-hidden /></h1>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useHeadingContent">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/linter/rules/use-heading-content">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Provide screen reader accessible content when using </span><span style="color: Orange;"><strong>heading</strong></span><span style="color: Orange;">  elements.</span>
   
@@ -46,7 +46,7 @@ Accessible means that it is not hidden using the aria-hidden prop.
 <h1></h1>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/lint/rules/useHeadingContent">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useHeadingContent.js:1:1 <a href="https://biomejs.dev/linter/rules/use-heading-content">lint/a11y/useHeadingContent</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Provide screen reader accessible content when using </span><span style="color: Orange;"><strong>heading</strong></span><span style="color: Orange;">  elements.</span>
   

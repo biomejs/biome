@@ -17,7 +17,7 @@ Prevent extra closing tags for components without children
 <div></div>
 ```
 
-<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/lint/rules/useSelfClosingElements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/linter/rules/use-self-closing-elements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.</span>
   
@@ -37,7 +37,7 @@ Prevent extra closing tags for components without children
 <Component></Component>
 ```
 
-<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/lint/rules/useSelfClosingElements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/linter/rules/use-self-closing-elements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.</span>
   
@@ -57,7 +57,7 @@ Prevent extra closing tags for components without children
 <Foo.bar></Foo.bar>
 ```
 
-<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/lint/rules/useSelfClosingElements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useSelfClosingElements.js:1:1 <a href="https://biomejs.dev/linter/rules/use-self-closing-elements">lint/style/useSelfClosingElements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.</span>
   

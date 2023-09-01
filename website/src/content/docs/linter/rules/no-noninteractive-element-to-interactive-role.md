@@ -26,7 +26,7 @@ Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuit
 <h1 role="button">Some text</h1>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveElementToInteractiveRole.js:1:5 <a href="https://biomejs.dev/lint/rules/noNoninteractiveElementToInteractiveRole">lint/a11y/noNoninteractiveElementToInteractiveRole</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveElementToInteractiveRole.js:1:5 <a href="https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role">lint/a11y/noNoninteractiveElementToInteractiveRole</a> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>h1</strong></span><span style="color: Tomato;"> is non-interactive and should not have an interactive role.</span>
   

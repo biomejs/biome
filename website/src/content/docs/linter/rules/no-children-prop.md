@@ -20,7 +20,7 @@ When not using JSX, the children should be passed as additional arguments to `Re
 <FirstComponent children={'foo'} />
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noChildrenProp.js:1:17 <a href="https://biomejs.dev/lint/rules/noChildrenProp">lint/correctness/noChildrenProp</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noChildrenProp.js:1:17 <a href="https://biomejs.dev/linter/rules/no-children-prop">lint/correctness/noChildrenProp</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid passing </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;"> using a prop</span>
   
@@ -36,7 +36,7 @@ When not using JSX, the children should be passed as additional arguments to `Re
 React.createElement('div', { children: 'foo' });
 ```
 
-<pre class="language-text"><code class="language-text">correctness/noChildrenProp.js:1:30 <a href="https://biomejs.dev/lint/rules/noChildrenProp">lint/correctness/noChildrenProp</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noChildrenProp.js:1:30 <a href="https://biomejs.dev/linter/rules/no-children-prop">lint/correctness/noChildrenProp</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid passing </span><span style="color: Tomato;"><strong>children</strong></span><span style="color: Tomato;"> using a prop</span>
   
