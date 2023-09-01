@@ -143,9 +143,12 @@ function inlineIntegration(): AstroIntegration {
 	};
 }
 
+
+
+const site = "https://biomejs.dev"
 // https://astro.build/config
 export default defineConfig({
-	site: "https://biomejs.dev",
+	site,
 	output: "static",
 	redirects: {
 		"/blog/annoucing-biome": "/blog/announcing-biome",
@@ -222,6 +225,14 @@ export default defineConfig({
 						href: "/images/favicon-32x32.png",
 						sizes: "32x32",
 					},
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: site + '/img/og.png?v=1' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'twitter:image', content: site + '/img/og.png?v=1' },
 				},
 			],
 			customCss: [
