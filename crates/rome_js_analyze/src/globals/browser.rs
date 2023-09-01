@@ -1,3 +1,4 @@
+/// Sorted array of browser builtin
 pub const BROWSER: [&str; 706] = [
     "AbortController",
     "AbortSignal",
@@ -876,3 +877,10 @@ pub const WORKER: [&str; 71] = [
     "setInterval",
     "setTimeout",
 ];
+
+#[test]
+fn test_order() {
+    for items in BROWSER.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}

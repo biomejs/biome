@@ -1,3 +1,4 @@
+/// Sorted array of builtin
 pub const BUILTIN: [&str; 66] = [
     "AggregateError",
     "Array",
@@ -364,3 +365,10 @@ pub const ES_2021: [&str; 66] = [
     "unescape",
     "valueOf",
 ];
+
+#[test]
+fn test_order() {
+    for items in BUILTIN.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}

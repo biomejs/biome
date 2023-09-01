@@ -1,3 +1,4 @@
+/// Sorted array of Node builtin
 pub const BUILTIN: [&str; 29] = [
     "AbortController",
     "AbortSignal",
@@ -67,4 +68,15 @@ pub const NODE: [&str; 34] = [
     "structuredClone",
 ];
 
+/// Sorted array of CommonJs builtin
 pub const COMMON_JS: [&str; 4] = ["exports", "global", "module", "require"];
+
+#[test]
+fn test_order() {
+    for items in BUILTIN.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in COMMON_JS.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}
