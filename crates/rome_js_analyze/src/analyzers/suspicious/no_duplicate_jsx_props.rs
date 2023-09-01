@@ -37,16 +37,6 @@ declare_rule! {
     }
 }
 
-fn push_attribute(
-    attr: JsxAttribute,
-    attributes: &mut HashMap<String, Vec<JsxAttribute>>,
-) -> Option<()> {
-    let name = attr.name().ok()?.syntax().text_trimmed();
-    let name = name.to_string().to_lowercase();
-    attributes.entry(name).or_default().push(attr);
-    Some(())
-}
-
 impl Rule for NoDuplicateJsxProps {
     type Query = Ast<AnyJsxElement>;
     type State = (String, Vec<JsxAttribute>);
@@ -59,7 +49,12 @@ impl Rule for NoDuplicateJsxProps {
         let mut defined_attributes: HashMap<String, Vec<JsxAttribute>> = HashMap::new();
         for attribute in node.attributes() {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
-                let _ = push_attribute(attr, &mut defined_attributes);
+                if let Ok(name) = attr.name() {
+                    defined_attributes
+                        .entry(name.text())
+                        .or_default()
+                        .push(attr);
+                }
             }
         }
 

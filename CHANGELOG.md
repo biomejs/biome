@@ -41,6 +41,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Bug fixes
 
+- Fix [#80](https://github.com/biomejs/biome/issues/95), making [noDuplicateJsxProps](https://biomejs.dev/lint/rules/noDuplicateJsxProps/) case-insensitive.
+
+  Some frameworks, such as Material UI, rely on the case-sensitivity of JSX properties.
+  For example, [TextField has two properties with the same name, but distinct cases](https://mui.com/material-ui/api/text-field/#TextField-prop-inputProps):
+
+  ```jsx
+  <TextField inputLabelProps="" InputLabelProps=""></TextField>
+  ```
+
 - Fix [rome#4713](https://github.com/rome/tools/issues/4713).
 
   Previously, [useTemplate](https://biomejs.dev/lint/rules/useTemplate/) made the following suggestion:
