@@ -2,6 +2,7 @@
 import ColorSchemeSwitcher from "@src/components/ColorSchemeSwitcher.astro";
 import ExternalLinks from "@src/components/ExternalLinks.astro";
 import InlineSVG from "@src/components/InlineSVG.astro";
+import ActiveLink from "@src/components/ActiveLink.astro";
 
 const {props} = Astro;
 const {frontmatter = {}} = props;
@@ -79,6 +80,12 @@ const { default: favicon } = await import("/public/img/favicon.svg?raw");
 
 				<span class="logo-text sr-only">Biome</span>
 			</a>
+
+			<ul class="desktop-navigation">
+				<li><a href="/guides/getting-started/" class={Astro.url.pathname.startsWith("/playground") ? "" : "active"}>Docs</a></li>
+				<li class="blog"><a href="/blog">Blog</a></li>
+				<li><ActiveLink href="/playground">Playground</ActiveLink></li>
+			</ul>
 
 			<ExternalLinks />
 
