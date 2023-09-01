@@ -68,6 +68,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + `${a + b}px`
    ```
 
+- Fix [#106](https://github.com/biomejs/biome/issues/106)
+
+  [noUndeclaredVariables](https://biomejs.dev/lint/rules/noUndeclaredVariables/) now correctly recognizes some TypeScript types such as `Uppercase`.
+
 ### Parser
 ### VSCode
 

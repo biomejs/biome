@@ -1,3 +1,4 @@
+/// Sorted array of TypeScript builtin
 pub const TYPESCRIPT_BUILTIN: [&str; 140] = [
     "AggregateErrorConstructor",
     "ArrayBufferConstructor",
@@ -125,18 +126,25 @@ pub const TYPESCRIPT_BUILTIN: [&str; 140] = [
     "Thenable",
     "ThisParameterType",
     "ThisType",
-    "TypedPropertyDescriptor",
     "TypeErrorConstructor",
+    "TypedPropertyDescriptor",
+    "URIErrorConstructor",
     "Uint16ArrayConstructor",
     "Uint32ArrayConstructor",
     "Uint8ArrayConstructor",
     "Uint8ClampedArrayConstructor",
     "Uncapitalize",
     "Uppercase",
-    "URIErrorConstructor",
     "WeakKey",
     "WeakKeyTypes",
     "WeakMapConstructor",
     "WeakRefConstructor",
     "WeakSetConstructor",
 ];
+
+#[test]
+fn test_order() {
+    for items in TYPESCRIPT_BUILTIN.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+}
