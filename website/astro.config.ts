@@ -151,7 +151,7 @@ export default defineConfig({
 	site,
 	output: "static",
 	redirects: {
-		"/blog/annoucing-biome": "/blog/announcing-biome",
+		// "/blog/annoucing-biome": "/blog/announcing-biome",
 	},
 
 	compressHTML: true,
