@@ -585,7 +585,8 @@ async fn pull_diagnostics() -> Result<()> {
                         "lint/suspicious/noDoubleEquals",
                     ))),
                     code_description: Some(CodeDescription {
-                        href: Url::parse("https://biomejs.dev/lint/rules/noDoubleEquals").unwrap()
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                            .unwrap()
                     }),
                     source: Some(String::from("biome")),
                     message: String::from(
