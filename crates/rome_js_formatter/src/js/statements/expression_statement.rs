@@ -105,7 +105,9 @@ fn needs_semicolon(node: &JsExpressionStatement) -> bool {
         return false;
     }
 
-    let Ok(expression) = node.expression() else { return false };
+    let Ok(expression) = node.expression() else {
+        return false;
+    };
 
     let mut expression: Option<AnyJsExpressionLeftSide> = Some(expression.into());
 

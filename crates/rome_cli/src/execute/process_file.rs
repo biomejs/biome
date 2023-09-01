@@ -91,7 +91,7 @@ pub(crate) struct SharedTraversalOptions<'ctx, 'app> {
 impl<'ctx, 'app> SharedTraversalOptions<'ctx, 'app> {
     fn new(t: &'app TraversalOptions<'ctx, 'app>) -> Self {
         Self {
-            _p: PhantomData::default(),
+            _p: PhantomData,
             inner: t,
         }
     }

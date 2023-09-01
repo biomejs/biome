@@ -21,7 +21,9 @@ where
 }
 
 fn add_leading_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &JsSyntaxNode) {
-    let Some(token) = node.first_token() else { return };
+    let Some(token) = node.first_token() else {
+        return;
+    };
     for t in token.leading_trivia().pieces() {
         text.push_str(t.text());
         trivia.push(TriviaPiece::new(t.kind(), t.text_len()));
@@ -29,7 +31,9 @@ fn add_leading_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &J
     if !trivia.is_empty() {
         return;
     }
-    let Some(token) = token.prev_token() else { return };
+    let Some(token) = token.prev_token() else {
+        return;
+    };
     if !token.kind().is_punct() && token.trailing_trivia().pieces().next().is_none() {
         text.push(' ');
         trivia.push(TriviaPiece::new(TriviaPieceKind::Whitespace, 1));
@@ -37,7 +41,9 @@ fn add_leading_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &J
 }
 
 fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &JsSyntaxNode) {
-    let Some(token) = node.last_token() else { return };
+    let Some(token) = node.last_token() else {
+        return;
+    };
     for t in token.trailing_trivia().pieces() {
         text.push_str(t.text());
         trivia.push(TriviaPiece::new(t.kind(), t.text_len()));
@@ -45,7 +51,9 @@ fn add_trailing_trivia(trivia: &mut Vec<TriviaPiece>, text: &mut String, node: &
     if !trivia.is_empty() {
         return;
     }
-    let Some(token) = token.next_token() else { return };
+    let Some(token) = token.next_token() else {
+        return;
+    };
     if !token.kind().is_punct() && token.leading_trivia().pieces().next().is_none() {
         text.push(' ');
         trivia.push(TriviaPiece::new(TriviaPieceKind::Whitespace, 1));

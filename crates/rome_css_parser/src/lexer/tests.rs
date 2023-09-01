@@ -118,7 +118,7 @@ fn string() {
 
     // escaped quote
     assert_lex! {
-        r#"'hel\'lo\''"#,
+        r"'hel\'lo\''",
         CSS_STRING_LITERAL:11,
         EOF:0
     }
@@ -186,7 +186,7 @@ fn string() {
 
     // invalid escape sequence
     assert_lex! {
-        r#"'\0'"#,
+        r"'\0'",
         ERROR_TOKEN:4,
         EOF:0
     }
@@ -325,13 +325,13 @@ fn identifier() {
     }
 
     assert_lex! {
-        r#"cl\aass"#,
+        r"cl\aass",
         IDENT:7,
         EOF:0
     }
 
     assert_lex! {
-        r#"\ccl\aass"#,
+        r"\ccl\aass",
         IDENT:9,
         EOF:0
     }
@@ -343,13 +343,13 @@ fn identifier() {
     }
 
     assert_lex! {
-        r#"-cl\aass"#,
+        r"-cl\aass",
         IDENT:8,
         EOF:0
     }
 
     assert_lex! {
-        r#"-\acl\aass"#,
+        r"-\acl\aass",
         IDENT:10,
         EOF:0
     }
@@ -361,13 +361,13 @@ fn identifier() {
     }
 
     assert_lex! {
-        r#"--prop\eerty"#,
+        r"--prop\eerty",
         CSS_CUSTOM_PROPERTY:12,
         EOF:0
     }
 
     assert_lex! {
-        r#"--\pprop\eerty"#,
+        r"--\pprop\eerty",
         CSS_CUSTOM_PROPERTY:14,
         EOF:0
     }

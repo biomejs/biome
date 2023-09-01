@@ -73,7 +73,9 @@ impl Rule for NoUselessThisAlias {
         } else {
             false
         };
-        let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(id))) = declarator.id() else {
+        let Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(id))) =
+            declarator.id()
+        else {
             // Ignore destructuring
             return None;
         };
@@ -126,7 +128,11 @@ impl Rule for NoUselessThisAlias {
     fn action(ctx: &RuleContext<Self>, id: &Self::State) -> Option<JsRuleAction> {
         let declarator = ctx.query();
         let model = ctx.model();
-        let Some(var_decl) = declarator.syntax().ancestors().find_map(JsVariableDeclaration::cast) else {
+        let Some(var_decl) = declarator
+            .syntax()
+            .ancestors()
+            .find_map(JsVariableDeclaration::cast)
+        else {
             return None;
         };
         let mut mutation = ctx.root().begin();

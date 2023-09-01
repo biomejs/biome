@@ -44,7 +44,7 @@ pub type AllBindingWriteReferencesIter =
 
 /// Provides access to all semantic data of a specific binding.
 pub struct Binding {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) index: BindingIndex,
 }
 

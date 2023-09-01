@@ -2,7 +2,7 @@ use super::*;
 use rome_js_syntax::TextRange;
 use rome_rowan::TokenText;
 use rustc_hash::FxHashMap;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub(crate) struct SemanticModelScopeData {
@@ -28,7 +28,7 @@ pub(crate) struct SemanticModelScopeData {
 /// Allows navigation to parent and children scope and binding information.
 #[derive(Clone, Debug)]
 pub struct Scope {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
     pub(crate) id: usize,
 }
 
@@ -134,7 +134,7 @@ pub(crate) struct SemanticModelScopeReference {
 
 /// Iterate all descendents scopes of the specified scope in breadth-first order.
 pub struct ScopeDescendentsIter {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     q: VecDeque<usize>,
 }
 
@@ -161,7 +161,7 @@ impl FusedIterator for ScopeDescendentsIter {}
 /// not** Returns bindings of parent scopes.
 #[derive(Debug)]
 pub struct ScopeBindingsIter {
-    data: Arc<SemanticModelData>,
+    data: Rc<SemanticModelData>,
     scope_id: usize,
     binding_index: usize,
 }

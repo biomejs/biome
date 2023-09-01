@@ -233,7 +233,7 @@ fn convert_to_array_type(
             }
             length => {
                 let ts_union_type_builder = make::ts_union_type(make::ts_union_type_variant_list(
-                    types_array.into_iter(),
+                    types_array,
                     (0..length - 1).map(|_| {
                         make::token(T![|])
                             .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])

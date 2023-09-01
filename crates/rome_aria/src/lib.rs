@@ -44,7 +44,7 @@ mod test {
 
     #[test]
     fn property_is_required() {
-        let roles = AriaRoles::default();
+        let roles = AriaRoles;
 
         let role = roles.get_role("checkbox");
 

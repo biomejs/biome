@@ -5,7 +5,7 @@ fn main() {
     let result = Command::new("cargo")
         .args(["bench", "-p", "xtask_libs_bench"])
         .output();
-    let re = Regex::new(r#"(?P<NAME>\w*?)\s*Instructions:\s*(?P<INST>\d*).*\n\s*L1 Accesses:\s*(?P<L1>\d*).*\n\s*L2 Accesses:\s*(?P<L2>\d*).*\n\s*RAM Accesses:\s*(?P<RAM>\d*).*\n\s*Estimated Cycles:\s*(?P<CYCLES>\d*).*"#).unwrap();
+    let re = Regex::new(r"(?P<NAME>\w*?)\s*Instructions:\s*(?P<INST>\d*).*\n\s*L1 Accesses:\s*(?P<L1>\d*).*\n\s*L2 Accesses:\s*(?P<L2>\d*).*\n\s*RAM Accesses:\s*(?P<RAM>\d*).*\n\s*Estimated Cycles:\s*(?P<CYCLES>\d*).*").unwrap();
     let stdout = String::from_utf8(result.unwrap().stdout).unwrap();
     let mut tests: HashMap<&str, (isize, isize, isize, isize, isize)> = HashMap::new();
 

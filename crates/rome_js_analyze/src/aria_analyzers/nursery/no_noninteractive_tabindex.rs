@@ -118,11 +118,11 @@ impl Rule for NoNoninteractiveTabindex {
 
             let role_attribute = node.find_attribute_by_name("role");
             let Some(role_attribute) = role_attribute else {
-                    return Some(RuleState {
-                        attribute_range: tabindex_attribute.range(),
-                        element_name: element_name.text_trimmed().to_string(),
-                    })
-                };
+                return Some(RuleState {
+                    attribute_range: tabindex_attribute.range(),
+                    element_name: element_name.text_trimmed().to_string(),
+                });
+            };
 
             let role_attribute_value = role_attribute.initializer()?.value().ok()?;
             if attribute_has_interactive_role(&role_attribute_value, aria_roles)? {

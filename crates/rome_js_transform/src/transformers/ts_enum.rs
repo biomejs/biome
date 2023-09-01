@@ -69,7 +69,7 @@ impl Rule for TsEnum {
                         function,
                     )),
                 ];
-                let new_modules_list = js_module_item_list(statements.into_iter());
+                let new_modules_list = js_module_item_list(statements);
                 mutation.replace_node(module_list, new_modules_list);
             }
         }
@@ -170,7 +170,7 @@ fn make_members(ts_enum: &TsEnumMembers) -> JsStatementList {
         ));
     }
 
-    js_statement_list(list.into_iter())
+    js_statement_list(list)
 }
 
 fn make_logical_expression(node: &TsEnumMembers) -> JsLogicalExpression {

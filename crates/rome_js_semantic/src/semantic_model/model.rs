@@ -108,13 +108,13 @@ impl Eq for SemanticModelData {}
 /// See [SemanticModelData] for more information about the internals.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
-    pub(crate) data: Arc<SemanticModelData>,
+    pub(crate) data: Rc<SemanticModelData>,
 }
 
 impl SemanticModel {
     pub(crate) fn new(data: SemanticModelData) -> Self {
         Self {
-            data: Arc::new(data),
+            data: Rc::new(data),
         }
     }
 

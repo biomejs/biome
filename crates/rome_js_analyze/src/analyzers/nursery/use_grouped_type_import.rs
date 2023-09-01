@@ -92,7 +92,9 @@ impl Rule for UseGroupedTypeImport {
             .specifiers()
             .iter()
             .all(|specifier| {
-                let Ok(specifier) = specifier else { return false };
+                let Ok(specifier) = specifier else {
+                    return false;
+                };
                 match specifier {
                     AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => false,
                     AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {

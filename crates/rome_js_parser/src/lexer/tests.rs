@@ -263,7 +263,7 @@ fn empty_string() {
 #[test]
 fn simple_string() {
     assert_lex! {
-        r#"'abcdefghijklmnopqrstuvwxyz123456789\'10🦀'"#,
+        r"'abcdefghijklmnopqrstuvwxyz123456789\'10🦀'",
         JS_STRING_LITERAL:45
     }
 
@@ -281,7 +281,7 @@ fn string_unicode_escape_invalid() {
     }
 
     assert_lex! {
-        r#"'abcd\u21'"#,
+        r"'abcd\u21'",
         ERROR_TOKEN:10
     }
 }
@@ -294,7 +294,7 @@ fn string_unicode_escape_valid() {
     }
 
     assert_lex! {
-        r#"'abcd\u2000a'"#,
+        r"'abcd\u2000a'",
         JS_STRING_LITERAL:13
     }
 }
@@ -307,7 +307,7 @@ fn string_unicode_escape_valid_resolving_to_endquote() {
     }
 
     assert_lex! {
-        r#"'abcd\u0027a'"#,
+        r"'abcd\u0027a'",
         JS_STRING_LITERAL:13
     }
 }
@@ -320,7 +320,7 @@ fn string_hex_escape_invalid() {
     }
 
     assert_lex! {
-        r#"'abcd \xZ0 \xGH'"#,
+        r"'abcd \xZ0 \xGH'",
         ERROR_TOKEN:16
     }
 }
@@ -333,7 +333,7 @@ fn string_hex_escape_valid() {
     }
 
     assert_lex! {
-        r#"'abcd \x00 \xAB'"#,
+        r"'abcd \x00 \xAB'",
         JS_STRING_LITERAL:16
     }
 }
@@ -359,7 +359,7 @@ fn string_all_escapes() {
     }
 
     assert_lex! {
-        r#"'\x\u2004\u20\ux\xNN'"#,
+        r"'\x\u2004\u20\ux\xNN'",
         ERROR_TOKEN:21
     }
 }
@@ -405,27 +405,27 @@ fn unterminated_string_with_escape_len() {
     }
 
     assert_lex! {
-        r#"'abc\x"#,
+        r"'abc\x",
         ERROR_TOKEN:6
     }
 
     assert_lex! {
-        r#"'abc\x4"#,
+        r"'abc\x4",
         ERROR_TOKEN:7
     }
 
     assert_lex! {
-        r#"'abc\x45"#,
+        r"'abc\x45",
         ERROR_TOKEN:8
     }
 
     assert_lex! {
-        r#"'abc\u"#,
+        r"'abc\u",
         ERROR_TOKEN:6
     }
 
     assert_lex! {
-        r#"'abc\u20"#,
+        r"'abc\u20",
         ERROR_TOKEN:8
     }
 }
@@ -751,19 +751,19 @@ fn number_basic_err() {
     }
 
     assert_lex! {
-        r#"25\u0046abcdef"#,
+        r"25\u0046abcdef",
         ERROR_TOKEN:14
     }
 
     assert_lex! {
-        r#"25\uFEFFb"#,
+        r"25\uFEFFb",
         JS_NUMBER_LITERAL:2,
         ERROR_TOKEN:6,
         IDENT:1
     }
 
     assert_lex! {
-        r#".32\u0046abde"#,
+        r".32\u0046abde",
         ERROR_TOKEN:13
     }
 

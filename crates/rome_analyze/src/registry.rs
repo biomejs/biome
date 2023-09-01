@@ -185,7 +185,9 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .type_rules
                     .entry(TypeId::of::<SyntaxNode<L>>())
                     .or_insert_with(|| TypeRules::SyntaxRules { rules: Vec::new() })
-                    else { unreachable!("the SyntaxNode type has already been registered as a TypeRules instead of a SyntaxRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`") };
+                else {
+                    unreachable!("the SyntaxNode type has already been registered as a TypeRules instead of a SyntaxRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                };
 
                 // Iterate on all the SyntaxKind variants this node can match
                 for kind in key.iter() {
@@ -211,7 +213,9 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .type_rules
                     .entry(key)
                     .or_insert_with(|| TypeRules::TypeRules { rules: Vec::new() })
-                    else { unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally ca used by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`") };
+                else {
+                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally ca used by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                };
 
                 rules.push(rule);
             }
@@ -257,7 +261,9 @@ impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
         let phase = &mut self.phase_rules[params.phase as usize];
 
         let query_type = params.query.type_id();
-        let Some(rules) = phase.type_rules.get(&query_type) else { return };
+        let Some(rules) = phase.type_rules.get(&query_type) else {
+            return;
+        };
 
         let rules = match rules {
             TypeRules::SyntaxRules { rules } => {

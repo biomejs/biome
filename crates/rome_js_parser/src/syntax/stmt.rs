@@ -1310,7 +1310,7 @@ impl VariableDeclaratorContext {
     }
 
     fn is_var(&self) -> bool {
-        matches!(self.kind_name, None)
+        self.kind_name.is_none()
     }
 
     fn is_const(&self) -> bool {

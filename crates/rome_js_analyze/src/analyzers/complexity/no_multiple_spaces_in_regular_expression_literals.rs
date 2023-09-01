@@ -79,7 +79,6 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
                 if !continue_white_space {
                     continue_white_space = true;
                     last_white_index = i;
-                } else {
                 }
             } else if continue_white_space {
                 if i - last_white_index > 1 {

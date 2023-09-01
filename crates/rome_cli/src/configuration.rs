@@ -44,8 +44,8 @@ impl LoadedConfiguration {
         fs: &DynRef<dyn FileSystem>,
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
         let Some(extends) = &self.configuration.extends else {
-			return Ok(vec![]);
-		};
+            return Ok(vec![]);
+        };
 
         let directory_path = self
             .directory_path
