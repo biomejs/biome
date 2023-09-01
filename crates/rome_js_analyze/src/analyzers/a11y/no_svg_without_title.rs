@@ -104,12 +104,16 @@ impl Rule for NoSvgWithoutTitle {
 
         // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attrigbute
         let Some(role_attribute) = node.find_attribute_by_name("role") else {
-            return Some(())
+            return Some(());
         };
 
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(text) = role_attribute_value.as_jsx_string()?.inner_string_text().ok() else {
-            return Some(())
+        let Some(text) = role_attribute_value
+            .as_jsx_string()?
+            .inner_string_text()
+            .ok()
+        else {
+            return Some(());
         };
 
         if text.to_lowercase() == "img" {

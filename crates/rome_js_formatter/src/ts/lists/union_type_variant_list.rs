@@ -95,73 +95,73 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
                 write!(f, [format_suppressed_node(node.syntax()).skip_comments()])
             } else {
                 match node {
-                    AnyTsType::TsAnyType(ty) => FormatTsAnyType::default().fmt_node(ty, f),
-                    AnyTsType::TsArrayType(ty) => FormatTsArrayType::default().fmt_node(ty, f),
+                    AnyTsType::TsAnyType(ty) => FormatTsAnyType.fmt_node(ty, f),
+                    AnyTsType::TsArrayType(ty) => FormatTsArrayType.fmt_node(ty, f),
                     AnyTsType::TsBigintLiteralType(ty) => {
-                        FormatTsBigintLiteralType::default().fmt_node(ty, f)
+                        FormatTsBigintLiteralType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsBigintType(ty) => FormatTsBigintType::default().fmt_node(ty, f),
+                    AnyTsType::TsBigintType(ty) => FormatTsBigintType.fmt_node(ty, f),
                     AnyTsType::TsBooleanLiteralType(ty) => {
-                        FormatTsBooleanLiteralType::default().fmt_node(ty, f)
+                        FormatTsBooleanLiteralType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsBooleanType(ty) => FormatTsBooleanType::default().fmt_node(ty, f),
+                    AnyTsType::TsBooleanType(ty) => FormatTsBooleanType.fmt_node(ty, f),
                     AnyTsType::TsConditionalType(ty) => {
-                        FormatTsConditionalType::default().fmt_node(ty, f)
+                        FormatTsConditionalType.fmt_node(ty, f)
                     }
                     AnyTsType::TsConstructorType(ty) => {
-                        FormatTsConstructorType::default().fmt_node(ty, f)
+                        FormatTsConstructorType.fmt_node(ty, f)
                     }
                     AnyTsType::TsFunctionType(ty) => {
-                        FormatTsFunctionType::default().fmt_node(ty, f)
+                        FormatTsFunctionType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsImportType(ty) => FormatTsImportType::default().fmt_node(ty, f),
+                    AnyTsType::TsImportType(ty) => FormatTsImportType.fmt_node(ty, f),
                     AnyTsType::TsIndexedAccessType(ty) => {
-                        FormatTsIndexedAccessType::default().fmt_node(ty, f)
+                        FormatTsIndexedAccessType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsInferType(ty) => FormatTsInferType::default().fmt_node(ty, f),
+                    AnyTsType::TsInferType(ty) => FormatTsInferType.fmt_node(ty, f),
                     AnyTsType::TsIntersectionType(ty) => {
-                        FormatTsIntersectionType::default().fmt_node(ty, f)
+                        FormatTsIntersectionType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsMappedType(ty) => FormatTsMappedType::default().fmt_node(ty, f),
-                    AnyTsType::TsNeverType(ty) => FormatTsNeverType::default().fmt_node(ty, f),
+                    AnyTsType::TsMappedType(ty) => FormatTsMappedType.fmt_node(ty, f),
+                    AnyTsType::TsNeverType(ty) => FormatTsNeverType.fmt_node(ty, f),
                     AnyTsType::TsNonPrimitiveType(ty) => {
-                        FormatTsNonPrimitiveType::default().fmt_node(ty, f)
+                        FormatTsNonPrimitiveType.fmt_node(ty, f)
                     }
                     AnyTsType::TsNullLiteralType(ty) => {
-                        FormatTsNullLiteralType::default().fmt_node(ty, f)
+                        FormatTsNullLiteralType.fmt_node(ty, f)
                     }
                     AnyTsType::TsNumberLiteralType(ty) => {
-                        FormatTsNumberLiteralType::default().fmt_node(ty, f)
+                        FormatTsNumberLiteralType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsNumberType(ty) => FormatTsNumberType::default().fmt_node(ty, f),
-                    AnyTsType::TsObjectType(ty) => FormatTsObjectType::default().fmt_node(ty, f),
+                    AnyTsType::TsNumberType(ty) => FormatTsNumberType.fmt_node(ty, f),
+                    AnyTsType::TsObjectType(ty) => FormatTsObjectType.fmt_node(ty, f),
                     AnyTsType::TsParenthesizedType(ty) => {
-                        FormatTsParenthesizedType::default().fmt_node(ty, f)
+                        FormatTsParenthesizedType.fmt_node(ty, f)
                     }
                     AnyTsType::TsReferenceType(ty) => {
-                        FormatTsReferenceType::default().fmt_node(ty, f)
+                        FormatTsReferenceType.fmt_node(ty, f)
                     }
                     AnyTsType::TsStringLiteralType(ty) => {
-                        FormatTsStringLiteralType::default().fmt_node(ty, f)
+                        FormatTsStringLiteralType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsStringType(ty) => FormatTsStringType::default().fmt_node(ty, f),
-                    AnyTsType::TsSymbolType(ty) => FormatTsSymbolType::default().fmt_node(ty, f),
+                    AnyTsType::TsStringType(ty) => FormatTsStringType.fmt_node(ty, f),
+                    AnyTsType::TsSymbolType(ty) => FormatTsSymbolType.fmt_node(ty, f),
                     AnyTsType::TsTemplateLiteralType(ty) => {
-                        FormatTsTemplateLiteralType::default().fmt_node(ty, f)
+                        FormatTsTemplateLiteralType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsThisType(ty) => FormatTsThisType::default().fmt_node(ty, f),
-                    AnyTsType::TsTupleType(ty) => FormatTsTupleType::default().fmt_node(ty, f),
+                    AnyTsType::TsThisType(ty) => FormatTsThisType.fmt_node(ty, f),
+                    AnyTsType::TsTupleType(ty) => FormatTsTupleType.fmt_node(ty, f),
                     AnyTsType::TsTypeOperatorType(ty) => {
-                        FormatTsTypeOperatorType::default().fmt_node(ty, f)
+                        FormatTsTypeOperatorType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsTypeofType(ty) => FormatTsTypeofType::default().fmt_node(ty, f),
+                    AnyTsType::TsTypeofType(ty) => FormatTsTypeofType.fmt_node(ty, f),
                     AnyTsType::TsUndefinedType(ty) => {
-                        FormatTsUndefinedType::default().fmt_node(ty, f)
+                        FormatTsUndefinedType.fmt_node(ty, f)
                     }
-                    AnyTsType::TsUnionType(ty) => FormatTsUnionType::default().fmt_node(ty, f),
-                    AnyTsType::TsUnknownType(ty) => FormatTsUnknownType::default().fmt_node(ty, f),
-                    AnyTsType::TsVoidType(ty) => FormatTsVoidType::default().fmt_node(ty, f),
-                    AnyTsType::TsBogusType(ty) => FormatTsBogusType::default().fmt(ty, f),
+                    AnyTsType::TsUnionType(ty) => FormatTsUnionType.fmt_node(ty, f),
+                    AnyTsType::TsUnknownType(ty) => FormatTsUnknownType.fmt_node(ty, f),
+                    AnyTsType::TsVoidType(ty) => FormatTsVoidType.fmt_node(ty, f),
+                    AnyTsType::TsBogusType(ty) => FormatTsBogusType.fmt(ty, f),
                 }
             }
         });

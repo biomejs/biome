@@ -728,7 +728,9 @@ impl LogicalOrLikeChain {
 }
 
 fn trim_trailing_space(node: AnyJsExpression) -> Option<AnyJsExpression> {
-    let Some(last_token_of_left_syntax) = node.syntax().last_token() else { return Some(node) };
+    let Some(last_token_of_left_syntax) = node.syntax().last_token() else {
+        return Some(node);
+    };
     let next_token_of_left_syntax = last_token_of_left_syntax.with_trailing_trivia([]);
     node.replace_token_discard_trivia(last_token_of_left_syntax, next_token_of_left_syntax)
 }

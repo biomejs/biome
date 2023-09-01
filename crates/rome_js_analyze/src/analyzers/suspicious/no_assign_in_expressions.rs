@@ -229,7 +229,7 @@ impl TryFromAssignment<JsArrayAssignmentPattern> for JsArrayExpression {
             elements.push(element);
         }
 
-        let elements = make::js_array_element_list(elements.into_iter(), separators.into_iter());
+        let elements = make::js_array_element_list(elements, separators);
 
         let expression =
             make::js_array_expression(value.l_brack_token()?, elements, value.r_brack_token()?);
@@ -319,7 +319,7 @@ impl TryFromAssignment<JsObjectAssignmentPattern> for JsObjectExpression {
             members.push(member);
         }
 
-        let member_list = make::js_object_member_list(members.into_iter(), separators.into_iter());
+        let member_list = make::js_object_member_list(members, separators);
 
         let expression = make::js_object_expression(l_curly_token?, member_list, r_curly_token?);
 

@@ -257,14 +257,14 @@ impl DiffReport {
         .unwrap();
 
         header.push_str(
-            r#"
+            r"
 <details>
 	<summary>Definition</summary>
 
 	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-"#,
+",
         );
 
         write!(
@@ -275,7 +275,7 @@ impl DiffReport {
         .unwrap();
 
         header.push_str(
-            r#"
+            r"
 <details>
 	<summary>Definition</summary>
 
@@ -284,7 +284,7 @@ impl DiffReport {
 
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-            "#,
+            ",
         );
 
         let report = format!("{header}\n\n{report}");

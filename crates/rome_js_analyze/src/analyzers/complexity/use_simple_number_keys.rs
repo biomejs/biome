@@ -88,9 +88,10 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
         let Some(literal_member_name_syntax) = any_member
             .syntax()
             .children()
-            .find(|x| JsLiteralMemberName::can_cast(x.kind())) else {
-                return Err(NumberLiteralError)
-            };
+            .find(|x| JsLiteralMemberName::can_cast(x.kind()))
+        else {
+            return Err(NumberLiteralError);
+        };
         let literal_member_name = JsLiteralMemberName::cast(literal_member_name_syntax).unwrap();
 
         let token = literal_member_name.value().unwrap();

@@ -189,7 +189,7 @@ fn read_metadata(code: &str) -> io::Result<MetaData> {
 
     /// Regular expression to retrieve the metadata of a test.
     static META_REGEX: Lazy<Regex> = Lazy::new(|| {
-        Regex::new(r#"/\*\-{3}((?:.|\n)*)\-{3}\*/"#)
+        Regex::new(r"/\*\-{3}((?:.|\n)*)\-{3}\*/")
             .expect("could not compile metadata regular expression")
     });
 

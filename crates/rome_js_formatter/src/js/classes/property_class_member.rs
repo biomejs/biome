@@ -108,7 +108,13 @@ fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
         }
     }
 
-    let Some(next_member) = property.syntax().next_sibling().and_then(AnyJsClassMember::cast) else { return Ok(false); };
+    let Some(next_member) = property
+        .syntax()
+        .next_sibling()
+        .and_then(AnyJsClassMember::cast)
+    else {
+        return Ok(false);
+    };
 
     // a;
     // static b;

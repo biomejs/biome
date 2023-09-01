@@ -252,14 +252,12 @@ fn debug_formatter_ir(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    let Ok(file_source) = params
-        .parse
-        .file_source(params.path) else {
+    let Ok(file_source) = params.parse.file_source(params.path) else {
         return LintResults {
             errors: 0,
             diagnostics: vec![],
-            skipped_diagnostics: 0
-        }
+            skipped_diagnostics: 0,
+        };
     };
     let tree = params.parse.tree();
     let mut diagnostics = params.parse.into_diagnostics();
@@ -410,9 +408,7 @@ fn code_actions(
     trace!("Filter applied for code actions: {:?}", &filter);
     let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
     let Ok(source_type) = parse.file_source(path) else {
-        return PullActionsResult {
-            actions: vec![]
-        }
+        return PullActionsResult { actions: vec![] };
     };
 
     analyze(&tree, filter, &analyzer_options, source_type, |signal| {

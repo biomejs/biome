@@ -18,8 +18,8 @@ pub(crate) fn store_path_to_ignore_from_vcs(
     cli_options: &CliOptions,
 ) -> Result<(), CliDiagnostic> {
     let Some(vcs) = &configuration.vcs else {
-		return Ok(())
-	};
+        return Ok(());
+    };
     if vcs.is_enabled() {
         let vcs_base_path = match (vcs_base_path, &vcs.root) {
             (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
@@ -42,7 +42,7 @@ pub(crate) fn store_path_to_ignore_from_vcs(
                 .files
                 .get_or_insert_with(FilesConfiguration::default);
             let ignored_files = files.ignore.get_or_insert_with(StringSet::default);
-            ignored_files.extend(files_to_ignore.into_iter());
+            ignored_files.extend(files_to_ignore);
         }
     }
     Ok(())

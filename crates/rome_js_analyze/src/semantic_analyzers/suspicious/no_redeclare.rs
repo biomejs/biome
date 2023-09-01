@@ -167,9 +167,12 @@ fn are_index_signature_params_same_type_and_member(
 ) -> bool {
     let are_same_index_signature_type_annotations =
         are_same_index_signature_type_annotations(first, second);
-    let (Some(first), Some(second)) = (first.parent::<TsIndexSignatureTypeMember>(), second.parent::<TsIndexSignatureTypeMember>()) else {
-		return false
-	};
+    let (Some(first), Some(second)) = (
+        first.parent::<TsIndexSignatureTypeMember>(),
+        second.parent::<TsIndexSignatureTypeMember>(),
+    ) else {
+        return false;
+    };
     are_same_index_signature_type_annotations.unwrap_or(false)
         && are_same_type_members(&first, &second).unwrap_or(false)
 }

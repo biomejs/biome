@@ -62,7 +62,7 @@ pub(crate) fn check(
         .formatter
         .get_or_insert_with(FormatterConfiguration::default);
 
-    if !matches!(formatter_enabled, None) {
+    if formatter_enabled.is_some() {
         formatter.enabled = formatter_enabled;
     }
 
@@ -70,7 +70,7 @@ pub(crate) fn check(
         .linter
         .get_or_insert_with(LinterConfiguration::default);
 
-    if !matches!(linter_enabled, None) {
+    if linter_enabled.is_some() {
         linter.enabled = linter_enabled;
     }
 
@@ -78,7 +78,7 @@ pub(crate) fn check(
         .organize_imports
         .get_or_insert_with(OrganizeImports::default);
 
-    if !matches!(organize_imports_enabled, None) {
+    if organize_imports_enabled.is_some() {
         organize_imports.enabled = organize_imports_enabled;
     }
 

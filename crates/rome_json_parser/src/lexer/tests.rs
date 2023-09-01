@@ -347,7 +347,7 @@ fn invalid_escape() {
 #[test]
 fn single_quote_escape_in_single_quote_string() {
     assert_lex! {
-        r#"'A single \' escape'"#,
+        r"'A single \' escape'",
         ERROR_TOKEN:20,
         EOF:0
     }

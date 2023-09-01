@@ -201,9 +201,15 @@ fn fix_all(
 
             let diag_range = from_proto::text_range(line_index, d.range, position_encoding).ok()?;
             let has_matching_rule = fixed.actions.iter().any(|action| {
-                let Some((group_name, rule_name)) = &action.rule_name else { return false };
-                let Some(code) = code.strip_prefix(group_name.as_ref()) else { return false };
-                let Some(code) = code.strip_prefix('/') else { return false };
+                let Some((group_name, rule_name)) = &action.rule_name else {
+                    return false;
+                };
+                let Some(code) = code.strip_prefix(group_name.as_ref()) else {
+                    return false;
+                };
+                let Some(code) = code.strip_prefix('/') else {
+                    return false;
+                };
                 code == rule_name && action.range.intersect(diag_range).is_some()
             });
 

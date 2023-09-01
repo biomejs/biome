@@ -438,7 +438,7 @@ where
 }
 
 #[cfg(test)]
-pub mod tests {
+pub mod test {
     use crate::{
         raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutationExt, SyntaxNodeCast,

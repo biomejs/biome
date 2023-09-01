@@ -64,31 +64,31 @@ mod tests {
     fn ok_escape_dollar_signs_and_backticks() {
         assert_eq!(escape("abc", &["${"], '\\'), "abc");
         assert_eq!(escape("abc", &["`"], '\\'), "abc");
-        assert_eq!(escape(r#"abc\"#, &["`"], '\\'), r#"abc\"#);
+        assert_eq!(escape(r"abc\", &["`"], '\\'), r"abc\");
         assert_eq!(escape("abc $ bca", &["${"], '\\'), "abc $ bca");
-        assert_eq!(escape("abc ${a} bca", &["${"], '\\'), r#"abc \${a} bca"#);
+        assert_eq!(escape("abc ${a} bca", &["${"], '\\'), r"abc \${a} bca");
         assert_eq!(
             escape("abc ${} ${} bca", &["${"], '\\'),
-            r#"abc \${} \${} bca"#
+            r"abc \${} \${} bca"
         );
 
-        assert_eq!(escape(r#"\`"#, &["`"], '\\'), r#"\`"#);
-        assert_eq!(escape(r#"\${}"#, &["${"], '\\'), r#"\${}"#);
-        assert_eq!(escape(r#"\\`"#, &["`"], '\\'), r#"\\\`"#);
-        assert_eq!(escape(r#"\\${}"#, &["${"], '\\'), r#"\\\${}"#);
-        assert_eq!(escape(r#"\\\`"#, &["`"], '\\'), r#"\\\`"#);
-        assert_eq!(escape(r#"\\\${}"#, &["${"], '\\'), r#"\\\${}"#);
+        assert_eq!(escape(r"\`", &["`"], '\\'), r"\`");
+        assert_eq!(escape(r"\${}", &["${"], '\\'), r"\${}");
+        assert_eq!(escape(r"\\`", &["`"], '\\'), r"\\\`");
+        assert_eq!(escape(r"\\${}", &["${"], '\\'), r"\\\${}");
+        assert_eq!(escape(r"\\\`", &["`"], '\\'), r"\\\`");
+        assert_eq!(escape(r"\\\${}", &["${"], '\\'), r"\\\${}");
 
         assert_eq!(escape("abc", &["${", "`"], '\\'), "abc");
-        assert_eq!(escape("${} `", &["${", "`"], '\\'), r#"\${} \`"#);
+        assert_eq!(escape("${} `", &["${", "`"], '\\'), r"\${} \`");
         assert_eq!(
-            escape(r#"abc \${a} \`bca"#, &["${", "`"], '\\'),
-            r#"abc \${a} \`bca"#
+            escape(r"abc \${a} \`bca", &["${", "`"], '\\'),
+            r"abc \${a} \`bca"
         );
         assert_eq!(
-            escape(r#"abc \${bca}"#, &["${", "`"], '\\'),
-            r#"abc \${bca}"#
+            escape(r"abc \${bca}", &["${", "`"], '\\'),
+            r"abc \${bca}"
         );
-        assert_eq!(escape(r#"abc \`bca"#, &["${", "`"], '\\'), r#"abc \`bca"#);
+        assert_eq!(escape(r"abc \`bca", &["${", "`"], '\\'), r"abc \`bca");
     }
 }

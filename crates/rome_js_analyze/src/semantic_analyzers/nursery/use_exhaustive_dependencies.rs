@@ -527,7 +527,7 @@ impl Rule for UseExhaustiveDependencies {
 
         if let Some(result) = react_hook_with_dependency(call, &options.hooks_config, model) {
             let Some(component_function) = function_of_hook_call(call) else {
-                return vec![]
+                return vec![];
             };
             let component_function_range = component_function.text_range();
 

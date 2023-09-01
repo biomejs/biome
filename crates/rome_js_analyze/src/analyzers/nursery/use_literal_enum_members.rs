@@ -83,10 +83,12 @@ impl Rule for UseLiteralEnumMembers {
         let Ok(enum_name) = enum_declaration.id() else {
             return result;
         };
-        let Some(enum_name) = enum_name.as_js_identifier_binding()
-            .and_then(|x| x.name_token().ok()) else {
-                return result;
-            };
+        let Some(enum_name) = enum_name
+            .as_js_identifier_binding()
+            .and_then(|x| x.name_token().ok())
+        else {
+            return result;
+        };
         let enum_name = enum_name.text_trimmed();
         for enum_member in enum_declaration.members() {
             let Ok(enum_member) = enum_member else {

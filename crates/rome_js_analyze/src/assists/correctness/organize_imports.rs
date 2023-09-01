@@ -344,7 +344,8 @@ impl From<JsImport> for ImportNode {
             };
 
             let named_import = import_named_clause.named_import().ok()?;
-            let AnyJsNamedImport::JsNamedImportSpecifiers(named_import_specifiers) = named_import else {
+            let AnyJsNamedImport::JsNamedImportSpecifiers(named_import_specifiers) = named_import
+            else {
                 return None;
             };
 
