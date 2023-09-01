@@ -1,0 +1,123 @@
+---
+title: Getting Started
+description: Learn how to set up a new project with Biome.
+---
+
+import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
+
+
+## System Requirements
+
+* Windows (including WSL), macOS, or Linux
+* x86_64 or ARM64
+* Node.js v14.18 or newer (not applicable if you use the standalone executable)
+
+## Installation
+
+The fastest way to download Biome is to use `npm` or your preferred package manager. The CLI is also available as a [standalone executable](/standalone-executable) if you want to use Biome without installing Node.js.
+
+To install Biome, run the following commands in a directory containing a `package.json` file.
+
+<PackageManagerCommand
+  npm="install --save-dev --save-exact @biomejs/biome"
+  pnpm="add --save-dev --save-exact @biomejs/biome"
+  yarn="add --dev --exact @biomejs/biome"
+/>
+
+> **Note**: It is also possible to install Biome globally rather than locally.
+However, this is not recommended.
+
+It's **highly recommended** not to use range operators when installing Biome.
+Check the [versioning page](/internals/versioning/) for more information.
+
+You can now run Biome with:
+
+<PackageManagerRomeCommand command="" />
+
+## Configuration
+
+We recommend creating a `biome.json` configuration file for each project.
+It eliminates  the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
+
+To create the configuration, run the `init` command in the root folder of your project:
+
+<PackageManagerRomeCommand command="init" />
+
+After running the `init` command, you'll now have a new `biome.json` file in your directory:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+The `linter.enabled: true` enables the linter and `rules.recommended: true` enables the [recommended rules](/lint/rules/).
+
+Formatting is enabled because the configuration doesn't explicitly [disable](/configuration/#formatterenabled) formatting with `formatter.enabled: false`.
+
+## Usage
+
+You can lint any file or directory running:
+
+<PackageManagerRomeCommand command="check <files>" />
+
+or format your files and directories with:
+
+<PackageManagerRomeCommand command="format <files> --write" />
+
+{/**Make sure to update the redirect in `static/_redirects` when changing the editors title -->**/}
+
+## Editor Setup
+
+We recommend installing our editor integration to get the most out of Biome.
+The Biome editor integration allows you to:
+
+* Format files on save or when issuing the Format command.
+* Lint files and apply code fixes
+
+### VS Code
+
+Install our official [Biome VS Code extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) from the Visual Studio Marketplace.
+
+To make Biome the default formatter open a supported file (JavaScript or TypeScript) and:
+
+* open the *Command Palette* (View or <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>)
+* select  *Format Document With...*
+* select *Configure Default Formatter*
+* select *Biome*.
+
+### Other Editors
+
+We would love to support more editors, but we don't have the capacity to implement and maintain multiple editor integrations at the moment.
+Because Biome uses the language server protocol (LSP), it should be relatively easy to get Biome working with any editor with an LSP client.
+If you're interested in building an integration for Biome, please, reach out, and we would be more than happy to support you.
+
+
+## CI Setup
+
+If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation).
+This ensures that your CI pipeline uses the same version of Biome as you do inside the editor or when running local CLI commands.
+
+
+## Next Steps
+
+Success! You're now ready to use Biome. 🥳
+
+* Learn more about how to use and configure the [formatter](/formatter)
+* Learn more about how to use and configure the [linter](/linter)
+* Get familiar with the [CLI options](/cli)
+* Get familiar with the [configuration options](/configuration)
+* Join our [community on Discord](https://discord.gg/BypW39g6Yc)

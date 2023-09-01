@@ -1,9 +1,0 @@
-{
-	"titles": {
-		"guides": "Guides",
-		"tools": "Tools",
-		"reference": "Reference",
-		"internals": "Internal"
-	},
-	"order": ["guides", "tools", "reference", "internals"]
-}

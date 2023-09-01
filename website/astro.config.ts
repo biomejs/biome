@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
+import starlight from "@astrojs/starlight";
 import vercel from "@astrojs/vercel/static";
 import type { AstroIntegration } from "astro";
 import compress from "astro-compress";
@@ -143,24 +143,99 @@ function inlineIntegration(): AstroIntegration {
 	};
 }
 
-function remarkDefaultLayoutPlugin() {
-	return (tree, file) => {
-		const { frontmatter } = file.data.astro;
-		frontmatter.layout = frontmatter.layout ?? "@src/layouts/Layout.astro";
-	};
-}
-
 // https://astro.build/config
 export default defineConfig({
 	site: "https://biomejs.dev",
 	output: "static",
+	redirects: {
+		"/blog/annoucing-biome": "/blog/announcing-biome",
+	},
+
+	compressHTML: true,
 
 	integrations: [
 		react(),
 		inlineIntegration(),
-		mdx(),
 		compress({
 			path: "./build",
+			HTML: false,
+		}),
+		starlight({
+			title: "",
+			sidebar: [
+				{ label: "Home", link: "/" },
+				{ label: "Blog", link: "/blog" },
+				{
+					label: "Playground",
+					link: "/playground",
+				},
+				{
+					label: "Guides",
+					items: [
+						{ label: "Getting Started", link: "/guides/getting-started" },
+						{
+							label: "Manual installation",
+							link: "/guides/manual-installation",
+						},
+					],
+				},
+				{
+					label: "Tools",
+					items: [
+						{ label: "Analyzer", link: "/analyzer" },
+						{ label: "Formatter", link: "/formatter" },
+						{ label: "Linter", link: "/linter" },
+						{ label: "Lint rules", link: "/linter/rules" },
+					],
+				},
+
+				{
+					label: "Reference",
+					items: [
+						{ label: "CLI", link: "/reference/cli" },
+						{ label: "Configuration", link: "/reference/configuration" },
+						{ label: "VSCode extension", link: "/reference/vscode" },
+					],
+				},
+				{
+					label: "Internals",
+					items: [
+						{ label: "Philosophy", link: "/internals/philosophy" },
+						{ label: "Language support", link: "/internals/language-support" },
+						{ label: "Architecture", link: "/internals/architecture" },
+						{ label: "Credits", link: "/internals/credits" },
+						{ label: "Versioning", link: "/internals/versioning" },
+						{ label: "Changelog", link: "/internals/changelog" },
+					],
+				},
+			],
+			logo: {
+				light: "./src/assets/svg/biome-logo.svg",
+				dark: "./src/assets/svg/biome-logo.svg",
+			},
+			favicon: "/img/favicon.svg",
+			head: [
+				{
+					tag: "link",
+					attrs: {
+						rel: "icon",
+						href: "/images/favicon-32x32.png",
+						sizes: "32x32",
+					},
+				},
+			],
+			customCss: [
+				// Relative path to your custom CSS file
+				"./src/styles/index.scss",
+			],
+			social: {
+				discord: "https://discord.gg/BypW39g6Yc",
+				github: "https://github.com/biomejs/biome",
+				twitter: "https://twitter.com/biomejs",
+			},
+			editLink: {
+				baseUrl: "https://github.com/biomejs/biome/edit/main/website/",
+			},
 		}),
 	],
 
@@ -170,7 +245,7 @@ export default defineConfig({
 
 	markdown: {
 		syntaxHighlight: "prism",
-		remarkPlugins: [remarkToc, remarkDefaultLayoutPlugin],
+		remarkPlugins: [remarkToc],
 		rehypePlugins: [
 			rehypeSlug,
 			[
@@ -181,7 +256,6 @@ export default defineConfig({
 				},
 			],
 		],
-		extendDefaultPlugins: true,
 	},
 
 	adapter: vercel(),
@@ -193,14 +267,10 @@ export default defineConfig({
 			format: "es",
 		},
 
-		build: {
-			target: "es2020",
-		},
-
 		server: {
 			fs: {
 				// https://vitejs.dev/config/server-options.html#server-fs-allow
-				allow: [process.cwd(), "../npm/wasm-web"],
+				allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
 			},
 		},
 	},

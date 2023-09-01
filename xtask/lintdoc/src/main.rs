@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
 use rome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
@@ -26,7 +27,7 @@ use std::{
 use xtask::{glue::fs2, *};
 
 fn main() -> Result<()> {
-    let root = project_root().join("website/src/pages/lint/rules");
+    let root = project_root().join("website/src/content/docs/linter/rules");
     let reference_groups = project_root().join("website/src/components/generated/Groups.astro");
     let reference_number_of_rules =
         project_root().join("website/src/components/generated/NumberOfRules.astro");
@@ -49,15 +50,10 @@ fn main() -> Result<()> {
     let mut reference_buffer = Vec::new();
     writeln!(index, "---")?;
     writeln!(index, "title: Lint Rules")?;
-    writeln!(index, "parent: linter/index")?;
-    writeln!(index, "emoji: 📏")?;
     writeln!(index, "description: List of available lint rules.")?;
-    writeln!(index, "category: reference")?;
-    writeln!(index, "mainClass: rules")?;
     writeln!(index, "---")?;
     writeln!(index)?;
 
-    writeln!(index, "# Rules")?;
     writeln!(index)?;
 
     // Accumulate errors for all lint rules to print all outstanding issues on
@@ -129,7 +125,6 @@ fn main() -> Result<()> {
         reference_buffer,
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->"
     )?;
-    write!(reference_buffer, "<ul>")?;
     for (group, rules) in groups {
         generate_group(group, rules, &root, &mut index, &mut errors)?;
         generate_reference(group, &mut reference_buffer)?;
@@ -137,7 +132,6 @@ fn main() -> Result<()> {
 
     generate_group("nursery", nursery_rules, &root, &mut index, &mut errors)?;
     generate_reference("nursery", &mut reference_buffer)?;
-    write!(reference_buffer, "</ul>")?;
     if !errors.is_empty() {
         bail!(
             "failed to generate documentation pages for the following rules:\n{}",
@@ -175,30 +169,20 @@ fn generate_group(
     write_markup_to_string(index, description)?;
     writeln!(index)?;
 
-    writeln!(index, "<div class=\"category-rules\">")?;
     for (rule, meta) in rules {
         let is_recommended = !is_nursery && meta.recommended;
+        let dashed_rule = rule.to_case(Case::Kebab);
         match generate_rule(root, group, rule, meta.docs, meta.version, is_recommended) {
             Ok(summary) => {
-                writeln!(index, "<section class=\"rule\">")?;
-                writeln!(index, "<h3 data-toc-exclude id=\"{rule}\">")?;
-                writeln!(index, "	<a href=\"/lint/rules/{rule}\">{rule}</a>")?;
-
-                if is_recommended {
-                    writeln!(index, "	<span class=\"recommended\">recommended</span>")?;
-                }
-                writeln!(index, "</h3>")?;
-
+                writeln!(index, "### [{rule}](/linter/rules/{dashed_rule})")?;
                 write_html(&mut index, summary.into_iter())?;
-
-                writeln!(index, "\n</section>")?;
+                writeln!(index)?;
             }
             Err(err) => {
                 errors.push((rule, err));
             }
         }
     }
-    writeln!(index, "\n</div>")?;
 
     Ok(())
 }
@@ -210,22 +194,22 @@ fn generate_rule(
     rule: &'static str,
     docs: &'static str,
     version: &'static str,
-    recommended: bool,
+    is_recommended: bool,
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
 
     // Write the header for this lint rule
     writeln!(content, "---")?;
-    writeln!(content, "title: Lint Rule {rule}")?;
-    writeln!(content, "parent: lint/rules/index")?;
+    writeln!(content, "title: {rule} (since v{version})")?;
     writeln!(content, "---")?;
     writeln!(content)?;
 
-    writeln!(content, "# {rule} (since v{version})")?;
     writeln!(content)?;
 
-    if recommended {
-        writeln!(content, "> This rule is recommended by Biome.")?;
+    if is_recommended {
+        writeln!(content, ":::note")?;
+        writeln!(content, "This rule is recommended by Biome. A diagnostic error will appear when linting your code.")?;
+        writeln!(content, ":::")?;
         writeln!(content)?;
     }
 
@@ -236,7 +220,8 @@ fn generate_rule(
     writeln!(content, "- [Disable a rule](/linter/#disable-a-lint-rule)")?;
     writeln!(content, "- [Rule options](/linter/#rule-options)")?;
 
-    fs2::write(root.join(format!("{rule}.md")), content)?;
+    let dashed_rule = rule.to_case(Case::Kebab);
+    fs2::write(root.join(format!("{dashed_rule}.md")), content)?;
 
     Ok(summary)
 }

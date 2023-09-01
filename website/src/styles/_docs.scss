@@ -2,15 +2,6 @@
 	max-width: 100%;
 }
 
-.content, .docs-sidebar, .toc-sidebar {
-	padding-top: 20px;
-}
-
-.content {
-	max-width: 820px;
-	padding: 20px;
-}
-
 footer {
 	margin-top: 0;
 }
@@ -19,7 +10,7 @@ footer {
 	padding: 15px;
 
 	svg {
-		height: 30px;
+		height: 45px;
 
 		.cls-1 {
 			fill: var(--logo-font-color);
@@ -35,14 +26,14 @@ footer {
 .docs-header {
 	@include transition-timing;
 	transition-property: box-shadow;
-	background-color: var(--container-color);
+	background-color: var(--sl-color-bg-nav);
 	position: sticky;
 	top: 0;
 	left: 0;
 	right: 0;
 	border-bottom: 1px solid var(--hard-border-color);
 	z-index: 2;
-	height: 80px;
+	height: var(--sl-nav-height);
 	line-height: 80px;
 	padding-right: 16px;
 	padding-left: 8px;
@@ -104,7 +95,7 @@ footer {
 		line-height: 64px;
 		background-color: var(--container-color);
 		padding: 0;
-		
+
 		#docsearch-target {
 			margin-left: auto;
 		}
@@ -124,7 +115,7 @@ footer {
 
 	svg {
 		vertical-align: middle;
-		height: 30px;
+		height: 40px;
 	}
 
 	.external-link {
@@ -141,7 +132,7 @@ footer {
 			height: 24px;
 		}
 	}
-	
+
 	.logo {
 		display: inline-flex;
 		align-items: flex-end;
@@ -264,14 +255,14 @@ footer {
 		flex-direction: column;
 		gap: 30px;
 		text-align: center;
-		
+
 		li {
 			a {
 				@include button;
 				text-decoration: none;
 			}
 		}
-		
+
 		@include large-screen-only {
 			display: none;
 		}
@@ -390,7 +381,7 @@ footer {
 	@include mobile-only {
 		width: 100%;
 	}
-	
+
 	.heading, .description {
 		display: block;
 	}
@@ -434,7 +425,7 @@ footer {
 		&:first-child {
 			border-top: none;
 		}
-		
+
 		@include mobile-only() {
 			padding: $unit $unit;
 		}

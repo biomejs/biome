@@ -5,6 +5,9 @@
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
+	"files": {
+		"ignore": ["types.d.ts"]
+	},
 	"formatter": {
 		"ignore": [
 			"configuration-schema.json"

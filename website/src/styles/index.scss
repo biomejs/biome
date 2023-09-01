@@ -1,58 +1,9 @@
-@import "_reset";
+@import "_overrides";
 @import "_fonts";
 @import "_variables";
 @import "_mixins";
-@import "_global";
 @import "_prism";
-@import "_grid";
-@import "_content";
 @import "_footer";
 @import "_credits";
-@import "_buttons";
-@import "_docs";
 @import "_pre";
-@import "_blog";
-
-:root {
-	--primary-color: #{$color-4};
-	--logo-font-color: #{$gray-4};
-	--background-color: #fff;
-	--container-color: #f2f2f2;
-	--font-color: #{$gray-4};
-	--sub-text-color: #{$gray-5};
-	--top-border-color: #{$gray-4};
-	--hard-border-color: rgba(39, 39, 42, 0.15);
-	--soft-border-color: rgba(39, 39, 42, 0.15);
-	--toc-background-active: #{$gray-8};
-	--toc-link-color-hover: #{$gray-6};
-	--toc-link-color-active: #{$color-2};
-	--blockquote-color: #{$gray-7};
-	--link-hover-color: #{lighten(#27272A, 20%)};
-	--color-scheme-switcher-color: #{$gray-5};
-	--search-input-background-color: rgba(0, 0, 0, 0.07);
-	--table-even-row-color: rgba(0, 0, 0, 0.05);
-	--inline-code-background-color: rgba(0, 0, 0, 0.08);
-	--label-font-color: #{$gray-4};
-	--playground-border: rgba(39, 39, 42, 0.15);
-}
-
-@include dark-mode {
-	--logo-font-color: #{lighten(#27272A, 80%)};
-	--background-color: #{$gray-2};
-	--container-color: #{darken(#27272A, 5%)};
-	--font-color: #{lighten(#27272A, 65%)};
-	--sub-text-color: #{lighten(#27272A, 55%)};
-	--top-border-color: #{$color-4};
-	--soft-border-color: rgba(255, 255, 255, 0.05);
-	--hard-border-color: rgba(255, 255, 255, 0.05);
-	--toc-background-active: #{$gray-3};
-	--toc-link-color-hover: #{$gray-6};
-	--toc-link-color-active: var(--primary-color);
-	--blockquote-color: #{$gray-7};
-	--link-hover-color: #{lighten(#27272A, 60%)};
-	--color-scheme-switcher-color: #000;
-	--search-input-background-color: rgba(0, 0, 0, 0.09);
-	--table-even-row-color: rgba(0, 0, 0, 0.09);
-	--inline-code-background-color: rgba(68, 73, 80, 0.7);
-	--playground-border: #1a1a1c;
-}
+@import "_recommended";

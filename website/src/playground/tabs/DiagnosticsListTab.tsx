@@ -44,13 +44,13 @@ function renderDiagnosticMessage(diagnostic: Diagnostic) {
 function DiagnosticIcon({ severity }: { severity: Diagnostic["severity"] }) {
 	switch (severity) {
 		case "information":
-			return <img alt="Info" src={infoIcon} />;
+			return <img alt="Info" src={infoIcon.src} />;
 
 		case "warning":
-			return <img alt="Warning" src={warningIcon} />;
+			return <img alt="Warning" src={warningIcon.src} />;
 
 		default:
-			return <img alt="Error" src={errorIcon} />;
+			return <img alt="Error" src={errorIcon.src} />;
 	}
 }
 

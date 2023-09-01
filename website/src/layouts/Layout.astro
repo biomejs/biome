@@ -1,46 +1,19 @@
 ---
 import BaseLayout from "@src/layouts/BaseLayout.astro";
-import NavigationSidebar from "@src/components/NavigationSidebar.astro";
-import {buildGetPages, buildToc} from "@src/navigation-utils";
 
 const {props} = Astro;
 const {frontmatter = {}} = props;
 
-const getPages = buildGetPages([
-  ...(await Astro.glob("../**/*.mdx")),
-  ...(await Astro.glob("../**/*.md")),
-]);
 let sidebarEnabled = false;
 let toc = "";
 
-const allPages = getPages();
-for (const page of allPages) {
-  if (page.file === frontmatter.file) {
-    toc = buildToc(page);
-    sidebarEnabled = toc !== "";
-    break;
-  }
-}
-
 let parentPage;
-if (frontmatter.parent) {
-  for (const page of allPages) {
-    if (page.file.includes(frontmatter.parent)) {
-      parentPage = page;
-      break;
-    }
-  }
-  if (parentPage === undefined) {
-    throw new Error(`Could not find parent page ${frontmatter.parent}`);
-  }
-}
 
 const copyrightYear = new Date().getFullYear();
 ---
 
 <BaseLayout sidebarEnabled={sidebarEnabled} {...Astro.props}>
   <div class="docs-main">
-    <NavigationSidebar />
 
     <main class={`main content ${frontmatter.mainClass ?? ""}`}>
       {parentPage && <p class="parent-back"><a href={parentPage.url}>
