@@ -117,25 +117,15 @@ pub(crate) fn remove_declarator(
 pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> bool {
     let a_tree = a_node.preorder_with_tokens(Direction::Next);
     let b_tree = b_node.preorder_with_tokens(Direction::Next);
-
-    for (a_child, b_child) in iter::zip(a_tree, b_tree) {
-        let a_event = match a_child {
-            WalkEvent::Enter(event) => event,
-            WalkEvent::Leave(event) => event,
+    for (a_event, b_event) in iter::zip(a_tree, b_tree) {
+        let (WalkEvent::Enter(a_child), WalkEvent::Enter(b_child)) = (a_event, b_event) else {
+            continue;
         };
-
-        let b_event = match b_child {
-            WalkEvent::Enter(event) => event,
-            WalkEvent::Leave(event) => event,
-        };
-
-        if a_event.kind() != b_event.kind() {
+        if a_child.kind() != b_child.kind() {
             return false;
         }
-
-        let a_token = a_event.as_token();
-        let b_token = b_event.as_token();
-
+        let a_token = a_child.as_token();
+        let b_token = b_child.as_token();
         match (a_token, b_token) {
             // both are nodes
             (None, None) => continue,
@@ -150,6 +140,5 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
             }
         }
     }
-
     true
 }
