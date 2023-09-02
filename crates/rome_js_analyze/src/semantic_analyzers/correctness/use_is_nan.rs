@@ -1,13 +1,16 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use rome_console::markup;
+use rome_diagnostics::Applicability;
+use rome_js_factory::make;
 use rome_js_semantic::SemanticModel;
 use rome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression, JsCaseClause,
-    JsSwitchStatement, TextRange,
+    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression,
+    JsBinaryExpression, JsBinaryOperator, JsCaseClause, JsSwitchStatement, TextRange, T,
 };
-use rome_rowan::{declare_node_union, AstNode};
+use rome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-use crate::semantic_services::Semantic;
+use crate::{semantic_services::Semantic, JsRuleAction};
 
 declare_rule! {
     /// Require calls to `isNaN()` when checking for `NaN`.
@@ -99,6 +102,7 @@ impl Rule for UseIsNan {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+
         match node {
             UseIsNanQuery::JsBinaryExpression(bin_expr) => {
                 if bin_expr.is_comparison_operator()
@@ -142,6 +146,92 @@ impl Rule for UseIsNan {
             state.message_id.as_str(),
         ))
     }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let query = ctx.query();
+        let model = ctx.model();
+        let mut mutation = ctx.root().begin();
+
+        match query {
+            UseIsNanQuery::JsBinaryExpression(bin_expr) => {
+                if bin_expr.is_comparison_operator()
+                    && (has_nan(bin_expr.left().ok()?, model)
+                        || has_nan(bin_expr.right().ok()?, model))
+                {
+                    let literal = get_literal(bin_expr, model)?;
+                    let with_inequality = contains_inequality(bin_expr).unwrap_or(false);
+                    let is_nan_expression = create_is_nan_expression(&with_inequality);
+
+                    let arg = AnyJsCallArgument::AnyJsExpression(literal.with_leading_trivia_pieces([])?.with_trailing_trivia_pieces([])?);
+                    let args = make::js_call_arguments(
+                        make::token(T!['(']),
+                        make::js_call_argument_list([arg], []),
+                        make::token(T![')']),
+                    );
+
+                    let call = make::js_call_expression(is_nan_expression, args).build();
+
+                    mutation.replace_node(
+                        AnyJsExpression::JsBinaryExpression(bin_expr.clone()),
+                        call.into(),
+                    );
+
+                    return Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: markup! {
+                            "Use "<Emphasis>"Number.isNaN()"</Emphasis>" instead."
+                        }
+                        .to_owned(),
+                        mutation,
+                    });
+                }
+
+                return None;
+            }
+            UseIsNanQuery::JsCaseClause(_) => None,
+            UseIsNanQuery::JsSwitchStatement(_) => None,
+        }
+    }
+}
+
+fn create_is_nan_expression(with_inequality: &bool) -> AnyJsExpression {
+    let is_nan_expression = make::js_static_member_expression(
+        make::js_identifier_expression(make::js_reference_identifier(make::ident("Number"))).into(),
+        make::token(T![.]),
+        make::js_name(make::ident("isNaN")).into(),
+    );
+
+    if *with_inequality {
+        let unary = make::js_unary_expression(make::token(T![!]), is_nan_expression.into());
+        return unary.into();
+    }
+
+    is_nan_expression.into()
+}
+
+fn contains_inequality(bin_expr: &JsBinaryExpression) -> Option<bool> {
+    let binary_operator = bin_expr.operator().ok()?;
+
+    Some(matches!(binary_operator,
+        JsBinaryOperator::Inequality | JsBinaryOperator::StrictInequality))
+}
+
+fn get_literal(bin_expr: &JsBinaryExpression, model: &SemanticModel) -> Option<AnyJsExpression> {
+    let left_expression = bin_expr.left().ok();
+    let right_expression = bin_expr.right().ok();
+
+    if let (Some(left), Some(right)) = (left_expression, right_expression) {
+        let is_nan_on_left = has_nan(left.clone(), model);
+
+        return if is_nan_on_left {
+            Some(right)
+        } else {
+            Some(left)
+        };
+    }
+
+    return None;
 }
 
 /// Checks whether an expression has `NaN`, `Number.NaN`, or `Number['NaN']`.
