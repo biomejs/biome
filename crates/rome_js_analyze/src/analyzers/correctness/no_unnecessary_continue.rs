@@ -114,49 +114,43 @@ impl Rule for NoUnnecessaryContinue {
 
 fn is_continue_un_necessary(node: &JsContinueStatement) -> Option<bool> {
     use rome_js_syntax::JsSyntaxKind::*;
-    let syntax = node.clone().into_syntax();
-    let mut current = syntax.clone();
-    let mut ancestors = vec![];
-    let mut loop_stmt = None;
-    while let Some(parent) = current.parent() {
-        if !matches!(
-            parent.kind(),
-            JS_FOR_IN_STATEMENT
-                | JS_FOR_OF_STATEMENT
-                | JS_FOR_STATEMENT
-                | JS_WHILE_STATEMENT
-                | JS_DO_WHILE_STATEMENT
-        ) {
-            ancestors.push(parent.clone());
-        } else {
-            loop_stmt = Some(parent);
-            break;
-        }
-        current = parent;
-    }
-    let loop_stmt = loop_stmt?;
+    let syntax = node.syntax();
+    let ancestors: Vec<_> = syntax
+        .ancestors()
+        .skip(1)
+        .take_while(|ancestor| {
+            !matches!(
+                ancestor.kind(),
+                JS_FOR_IN_STATEMENT
+                    | JS_FOR_OF_STATEMENT
+                    | JS_FOR_STATEMENT
+                    | JS_WHILE_STATEMENT
+                    | JS_DO_WHILE_STATEMENT
+            )
+        })
+        .collect();
     if ancestors.is_empty() {
         return Some(true);
     }
+    let loop_stmt = ancestors.last()?.parent()?;
     Some(
-        is_continue_last_statement(&ancestors, syntax.clone()).unwrap_or(false)
-            && contains_parent_loop_label(syntax.clone(), loop_stmt).unwrap_or(false)
+        is_continue_last_statement(ancestors.first()?, syntax).unwrap_or(false)
+            && contains_parent_loop_label(syntax, &loop_stmt).unwrap_or(false)
             && is_continue_inside_last_ancestors(&ancestors, syntax).unwrap_or(false),
     )
 }
 
-fn is_continue_last_statement(ancestors: &[JsSyntaxNode], syntax: JsSyntaxNode) -> Option<bool> {
-    let first_node = ancestors.first()?;
-    if first_node.kind() == JsSyntaxKind::JS_STATEMENT_LIST {
-        Some(first_node.children().last()? == syntax)
+fn is_continue_last_statement(parent: &JsSyntaxNode, syntax: &JsSyntaxNode) -> Option<bool> {
+    if parent.kind() == JsSyntaxKind::JS_STATEMENT_LIST {
+        Some(&parent.children().last()? == syntax)
     } else {
         None
     }
 }
 
 /// return true if continue label is undefined or equal to its parent's looplabel
-fn contains_parent_loop_label(node: JsSyntaxNode, loop_stmt: JsSyntaxNode) -> Option<bool> {
-    let continue_stmt = JsContinueStatement::cast(node)?;
+fn contains_parent_loop_label(node: &JsSyntaxNode, loop_stmt: &JsSyntaxNode) -> Option<bool> {
+    let continue_stmt = JsContinueStatement::cast_ref(node)?;
     let continue_stmt_label = continue_stmt.label_token();
     if let Some(label) = continue_stmt_label {
         let label_stmt = JsLabeledStatement::cast(loop_stmt.parent()?)?;
@@ -168,7 +162,7 @@ fn contains_parent_loop_label(node: JsSyntaxNode, loop_stmt: JsSyntaxNode) -> Op
 
 fn is_continue_inside_last_ancestors(
     ancestors: &[JsSyntaxNode],
-    syntax: JsSyntaxNode,
+    syntax: &JsSyntaxNode,
 ) -> Option<bool> {
     let len = ancestors.len();
     for ancestor_window in ancestors.windows(2).rev() {
@@ -177,7 +171,7 @@ fn is_continue_inside_last_ancestors(
         if parent.kind() == JsSyntaxKind::JS_STATEMENT_LIST {
             let body = parent.children();
             let last_body_node = body.last()?;
-            if !((len == 1 && last_body_node == syntax) || (len > 1 && &last_body_node == child)) {
+            if !((len == 1 && &last_body_node == syntax) || (len > 1 && &last_body_node == child)) {
                 return Some(false);
             }
         }

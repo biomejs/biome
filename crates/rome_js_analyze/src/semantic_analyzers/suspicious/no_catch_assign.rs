@@ -2,8 +2,8 @@ use crate::semantic_services::Semantic;
 use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_semantic::ReferencesExtensions;
-use rome_js_syntax::{JsCatchClause, JsSyntaxNode};
-use rome_rowan::AstNode;
+use rome_js_syntax::JsCatchClause;
+use rome_rowan::{AstNode, TextRange};
 
 declare_rule! {
     /// Disallow reassigning exceptions in catch clauses.
@@ -51,7 +51,7 @@ impl Rule for NoCatchAssign {
     type Query = Semantic<JsCatchClause>;
     // The first element of `State` is the reassignment of catch parameter,
     // the second element of `State` is the declaration of catch clause.
-    type State = (JsSyntaxNode, JsSyntaxNode);
+    type State = (TextRange, TextRange);
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -71,8 +71,10 @@ impl Rule for NoCatchAssign {
                 let catch_binding_syntax = catch_binding.syntax();
                 let mut invalid_assignment = vec![];
                 for reference in identifier_binding.all_writes(model) {
-                    invalid_assignment
-                        .push((reference.syntax().clone(), catch_binding_syntax.clone()));
+                    invalid_assignment.push((
+                        reference.syntax().text_trimmed_range(),
+                        catch_binding_syntax.text_trimmed_range(),
+                    ));
                 }
 
                 Some(invalid_assignment)
@@ -85,13 +87,13 @@ impl Rule for NoCatchAssign {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                assignment.text_trimmed_range(),
+                assignment,
                 markup! {
                     "Reassigning a "<Emphasis>"catch parameter"</Emphasis>" is confusing."
                 },
             )
             .detail(
-                catch_binding_syntax.text_trimmed_range(),
+                catch_binding_syntax,
                 markup! {
                     "The "<Emphasis>"catch parameter"</Emphasis>" is declared here:"
                 },

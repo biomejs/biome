@@ -103,15 +103,15 @@ pub enum SemanticEvent {
 impl SemanticEvent {
     pub fn range(&self) -> &TextRange {
         match self {
-            SemanticEvent::DeclarationFound { range, .. } => range,
-            SemanticEvent::ScopeStarted { range, .. } => range,
-            SemanticEvent::ScopeEnded { range, .. } => range,
-            SemanticEvent::Read { range, .. } => range,
-            SemanticEvent::HoistedRead { range, .. } => range,
-            SemanticEvent::Write { range, .. } => range,
-            SemanticEvent::HoistedWrite { range, .. } => range,
-            SemanticEvent::UnresolvedReference { range, .. } => range,
-            SemanticEvent::Exported { range } => range,
+            SemanticEvent::DeclarationFound { range, .. }
+            | SemanticEvent::ScopeStarted { range, .. }
+            | SemanticEvent::ScopeEnded { range, .. }
+            | SemanticEvent::Read { range, .. }
+            | SemanticEvent::HoistedRead { range, .. }
+            | SemanticEvent::Write { range, .. }
+            | SemanticEvent::HoistedWrite { range, .. }
+            | SemanticEvent::UnresolvedReference { range, .. }
+            | SemanticEvent::Exported { range } => range,
         }
     }
 
@@ -190,10 +190,9 @@ impl Reference {
         matches!(self, Reference::Read { .. })
     }
 
-    pub fn range(&self) -> &TextRange {
+    pub fn range(&self) -> TextRange {
         match self {
-            Reference::Read { range, .. } => range,
-            Reference::Write { range } => range,
+            Reference::Read { range, .. } | Reference::Write { range } => *range,
         }
     }
 }
@@ -700,7 +699,7 @@ impl SemanticEventExtractor {
                     for reference in references {
                         self.stash.push_back(SemanticEvent::UnresolvedReference {
                             is_read: reference.is_read(),
-                            range: *reference.range(),
+                            range: reference.range(),
                         });
                     }
                 }

@@ -3,8 +3,8 @@ use crate::semantic_services::Semantic;
 use rome_analyze::context::RuleContext;
 use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_js_syntax::{JsCallExpression, JsPropertyObjectMember, JsxAttribute, JsxName};
-use rome_rowan::{declare_node_union, AstNode};
+use rome_js_syntax::{JsCallExpression, JsxAttribute};
+use rome_rowan::{declare_node_union, AstNode, TextRange};
 declare_rule! {
     /// Prevent passing of **children** as props.
     ///
@@ -34,8 +34,8 @@ declare_node_union! {
 }
 
 pub(crate) enum NoChildrenPropState {
-    JsxProp(JsxName),
-    MemberProp(JsPropertyObjectMember),
+    JsxProp(TextRange),
+    MemberProp(TextRange),
 }
 
 impl Rule for NoChildrenProp {
@@ -52,7 +52,7 @@ impl Rule for NoChildrenProp {
                 let name = attribute.name().ok()?;
                 let name = name.as_jsx_name()?;
                 if name.value_token().ok()?.text() == "children" {
-                    return Some(NoChildrenPropState::JsxProp(name.clone()));
+                    return Some(NoChildrenPropState::JsxProp(name.range()));
                 }
 
                 None
@@ -65,7 +65,9 @@ impl Rule for NoChildrenProp {
                     let children_prop = react_create_element.find_prop_by_name("children");
 
                     if let Some(children_prop) = children_prop {
-                        return Some(NoChildrenPropState::MemberProp(children_prop));
+                        return Some(NoChildrenPropState::MemberProp(
+                            children_prop.name().ok()?.range(),
+                        ));
                     }
                 }
                 None
@@ -75,16 +77,16 @@ impl Rule for NoChildrenProp {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let (range, footer_help) = match state {
-            NoChildrenPropState::JsxProp(name) => {
+            NoChildrenPropState::JsxProp(jsx_name_range) => {
                 (
-                    name.syntax().text_trimmed_range(),
+                    jsx_name_range,
                     (markup! {
                      "The canonical way to pass children in React is to use JSX elements"
                     }).to_owned()
                 )
             }
-            NoChildrenPropState::MemberProp(children_prop) => (
-                children_prop.name().ok()?.syntax().text_trimmed_range(),
+            NoChildrenPropState::MemberProp(children_prop_range) => (
+                children_prop_range,
                 (markup! {
                      "The canonical way to pass children in React is to use additional arguments to React.createElement"
                 }).to_owned()

@@ -81,8 +81,7 @@ impl Rule for NoUnsafeOptionalChaining {
         if !query_node.is_optional() {
             return None;
         }
-
-        let mut node: RuleNode = query_node.clone().into();
+        let mut node: RuleNode = RuleNode::cast_ref(query_node.syntax())?;
         let mut parent = node.parent::<RuleNode>();
         // parentheses limit the scope of short-circuiting in chains
         // (a?.b).c // here we have an error

@@ -182,12 +182,12 @@ fn is_delegating_initialization(
     super_call: &JsCallExpression,
 ) -> bool {
     let result = || {
-        let parameters = constructor.parameters().ok()?.parameters().iter();
-        let arguments = super_call.arguments().ok()?.args().iter();
-        if parameters.clone().count() != arguments.clone().count() {
+        let parameters = constructor.parameters().ok()?.parameters();
+        let arguments = super_call.arguments().ok()?.args();
+        if parameters.len() != arguments.len() {
             return None;
         }
-        let zipped = parameters.zip(arguments);
+        let zipped = parameters.iter().zip(arguments.iter());
         for (param, arg) in zipped {
             let param = param.ok()?;
             let arg = arg.ok()?;

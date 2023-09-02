@@ -5,10 +5,10 @@ use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsFormalParameter, JsIdentifierBinding, JsObjectExpression, JsObjectMemberList,
-    JsParameterList, JsParameters, JsPropertyObjectMember, JsReferenceIdentifier, JsxAttribute,
+    JsFormalParameter, JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters,
+    JsPropertyObjectMember, JsReferenceIdentifier, JsxAttribute,
 };
-use rome_rowan::{declare_node_union, AstNode};
+use rome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_rule! {
     /// Discourage the usage of Array index in keys.
@@ -94,9 +94,9 @@ impl NoArrayIndexKeyQuery {
 
 pub(crate) struct NoArrayIndexKeyState {
     /// The incorrect prop
-    incorrect_prop: JsReferenceIdentifier,
+    incorrect_prop: TextRange,
     /// Where the incorrect prop was defined
-    binding_origin: JsIdentifierBinding,
+    binding_origin: TextRange,
 }
 
 impl Rule for NoArrayIndexKey {
@@ -154,8 +154,8 @@ impl Rule for NoArrayIndexKey {
                 let binding = parameter.binding().ok()?;
                 let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
                 Some(NoArrayIndexKeyState {
-                    binding_origin: binding_origin.clone(),
-                    incorrect_prop: reference,
+                    binding_origin: binding_origin.range(),
+                    incorrect_prop: reference.range(),
                 })
             } else {
                 None
@@ -164,8 +164,8 @@ impl Rule for NoArrayIndexKey {
             let binding = parameter.binding().ok()?;
             let binding_origin = binding.as_any_js_binding()?.as_js_identifier_binding()?;
             Some(NoArrayIndexKeyState {
-                binding_origin: binding_origin.clone(),
-                incorrect_prop: reference,
+                binding_origin: binding_origin.range(),
+                incorrect_prop: reference.range(),
             })
         }
     }
@@ -177,11 +177,11 @@ impl Rule for NoArrayIndexKey {
         } = state;
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            incorrect_prop.syntax().text_trimmed_range(),
+            incorrect_prop,
             markup! {"Avoid using the index of an array as key property in an element."},
         )
         .detail(
-            incorrect_key.syntax().text_trimmed_range(),
+            incorrect_key,
             markup! {"This is the source of the key value."},
         ).note(
             markup! {"The order of the items may change, and this also affects performances and component state."}

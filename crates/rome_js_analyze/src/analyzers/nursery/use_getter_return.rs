@@ -117,8 +117,8 @@ impl Rule for UseGetterReturn {
                         }
                     }
                     InstructionKind::Return => {
-                        if let Some(NodeOrToken::Node(node)) = instruction.node.clone() {
-                            if let Some(return_stmt) = JsReturnStatement::cast(node) {
+                        if let Some(NodeOrToken::Node(ref node)) = instruction.node {
+                            if let Some(ref return_stmt) = JsReturnStatement::cast_ref(node) {
                                 if return_stmt.argument().is_none() {
                                     invalid_returns.push(InvalidGetterReturn::EmptyReturn(
                                         return_stmt.range(),
