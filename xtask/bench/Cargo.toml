@@ -1,39 +1,39 @@
 [package]
-name = "xtask_bench"
-version = "0.0.0"
 edition = "2021"
+name    = "xtask_bench"
 publish = false
+version = "0.0.0"
 
 [dependencies]
-xtask = { path = '../', version = "0.0" }
-rome_js_syntax = { path = "../../crates/rome_js_syntax" }
-rome_console = { path = "../../crates/rome_console" }
-rome_js_parser = { path = "../../crates/rome_js_parser" }
+rome_analyze        = { path = "../../crates/rome_analyze" }
+rome_console        = { path = "../../crates/rome_console" }
+rome_diagnostics    = { path = "../../crates/rome_diagnostics" }
+rome_formatter      = { path = "../../crates/rome_formatter" }
+rome_js_analyze     = { path = "../../crates/rome_js_analyze" }
+rome_js_formatter   = { path = "../../crates/rome_js_formatter" }
+rome_js_parser      = { path = "../../crates/rome_js_parser" }
+rome_js_syntax      = { path = "../../crates/rome_js_syntax" }
 rome_json_formatter = { path = "../../crates/rome_json_formatter" }
-rome_json_parser = { path = "../../crates/rome_json_parser" }
-rome_json_syntax = { path = "../../crates/rome_json_syntax" }
-rome_parser = { path = "../../crates/rome_parser" }
-rome_diagnostics = { path = "../../crates/rome_diagnostics" }
-rome_formatter = { path = "../../crates/rome_formatter" }
-rome_js_formatter = { path = "../../crates/rome_js_formatter" }
-rome_analyze = { path = "../../crates/rome_analyze" }
-rome_js_analyze = { path = "../../crates/rome_js_analyze" }
-rome_rowan = { path = "../../crates/rome_rowan" }
+rome_json_parser    = { path = "../../crates/rome_json_parser" }
+rome_json_syntax    = { path = "../../crates/rome_json_syntax" }
+rome_parser         = { path = "../../crates/rome_parser" }
+rome_rowan          = { path = "../../crates/rome_rowan" }
+xtask               = { path = '../', version = "0.0" }
 
 
-pico-args = { version = "0.5.0", features = ["eq-separator"] }
-timing = "0.2.3"
+ansi_rgb  = "0.2.0"
 criterion = "0.5.1"
-regex = "1.5.5"
-ureq = "2.7.1"
-url = "2.2.2"
 itertools = "0.11.0"
-ansi_rgb = "0.2.0"
+pico-args = { version = "0.5.0", features = ["eq-separator"] }
+regex     = "1.5.5"
+timing    = "0.2.3"
+ureq      = "2.7.1"
+url       = "2.2.2"
 
 countme = { workspace = true }
 
 # dhat-on
-dhat = { version = "0.3.0", optional = true }
+dhat      = { version = "0.3.0", optional = true }
 humansize = { version = "2.1.2", optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
@@ -43,5 +43,5 @@ mimalloc = "0.1.29"
 tikv-jemallocator = "0.5.0"
 
 [features]
+count     = ["countme/print_at_exit"]
 dhat-heap = ["dhat", "humansize"]
-count = ["countme/print_at_exit"]

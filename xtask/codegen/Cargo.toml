@@ -1,44 +1,42 @@
 [package]
-name = "xtask_codegen"
-version = "0.0.0"
 edition = "2021"
+name    = "xtask_codegen"
 publish = false
+version = "0.0.0"
 
 [dependencies]
-xtask = { path = '../', version = "0.0" }
-anyhow = "1.0.52"
-pico-args = { version = "0.5.0", features = ["eq-separator"] }
-quote = "1.0.14"
-proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
-ungrammar = "1.14.9"
-walkdir = "2.3.2"
-ureq = "2.4.0"
-git2 = { version = "0.17.1", default-features = false }
-filetime = "0.2.15"
-case = "1.0.0"
-convert_case = "0.6.0"
+anyhow         = "1.0.52"
+case           = "1.0.0"
+convert_case   = "0.6.0"
+filetime       = "0.2.15"
+fs_extra       = "1.3.0"
+git2           = { version = "0.17.1", default-features = false }
+pico-args      = { version = "0.5.0", features = ["eq-separator"] }
+proc-macro2    = { version = "1.0.63", features = ["span-locations"] }
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
-fs_extra = "1.3.0"
+quote          = "1.0.14"
+ungrammar      = "1.14.9"
+ureq           = "2.4.0"
+walkdir        = "2.3.2"
+xtask          = { path = '../', version = "0.0" }
 
-rome_js_parser = { workspace = true, optional = true }
-rome_rowan = { path = "../../crates/rome_rowan", optional = true }
-rome_cli = { workspace = true, optional = true }
-rome_analyze = { path = "../../crates/rome_analyze", optional = true }
-rome_js_analyze = { path = "../../crates/rome_js_analyze", optional = true }
-rome_json_analyze = { workspace = true, optional = true }
-rome_js_syntax = { path = "../../crates/rome_js_syntax", optional = true }
-rome_json_syntax = { workspace = true, optional = true }
-rome_js_factory = { path = "../../crates/rome_js_factory", optional = true }
-rome_js_formatter = { path = "../../crates/rome_js_formatter", optional = true }
+rome_analyze        = { path = "../../crates/rome_analyze", optional = true }
+rome_aria           = { path = "../../crates/rome_aria", optional = true }
+rome_cli            = { workspace = true, optional = true }
+rome_diagnostics    = { path = "../../crates/rome_diagnostics", optional = true }
+rome_js_analyze     = { path = "../../crates/rome_js_analyze", optional = true }
+rome_js_factory     = { path = "../../crates/rome_js_factory", optional = true }
+rome_js_formatter   = { path = "../../crates/rome_js_formatter", optional = true }
+rome_js_parser      = { workspace = true, optional = true }
+rome_js_syntax      = { path = "../../crates/rome_js_syntax", optional = true }
+rome_json_analyze   = { workspace = true, optional = true }
 rome_json_formatter = { path = "../../crates/rome_json_formatter", optional = true }
-rome_json_parser = { path = "../../crates/rome_json_parser", optional = true }
-rome_diagnostics = { path = "../../crates/rome_diagnostics", optional = true }
-rome_aria = { path = "../../crates/rome_aria", optional = true }
-rome_service = { path = "../../crates/rome_service", features = [
-	"schema",
-], optional = true }
-schemars = { version = "0.8.10", optional = true }
-serde_json = { version = "1.0.74", optional = true }
+rome_json_parser    = { path = "../../crates/rome_json_parser", optional = true }
+rome_json_syntax    = { workspace = true, optional = true }
+rome_rowan          = { path = "../../crates/rome_rowan", optional = true }
+rome_service        = { path = "../../crates/rome_service", features = ["schema"], optional = true }
+schemars            = { version = "0.8.10", optional = true }
+serde_json          = { version = "1.0.74", optional = true }
 
 [features]
 configuration = [
@@ -49,7 +47,6 @@ configuration = [
   "rome_json_syntax",
   "pulldown-cmark",
 ]
-website = ["rome_service", "rome_cli/docgen", "rome_js_parser", "rome_js_formatter", "rome_js_syntax"]
 schema = [
   "schemars",
   "serde_json",
@@ -62,3 +59,4 @@ schema = [
   "rome_json_parser",
   "rome_diagnostics",
 ]
+website = ["rome_service", "rome_cli/docgen", "rome_js_parser", "rome_js_formatter", "rome_js_syntax"]

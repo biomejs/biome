@@ -1,21 +1,21 @@
 [package]
-name = "xtask_lintdoc"
-version = "0.0.0"
 edition = "2021"
+name    = "xtask_lintdoc"
 publish = false
+version = "0.0.0"
 
 [dependencies]
-xtask = { path = '../', version = "0.0" }
-rome_analyze = { path = "../../crates/rome_analyze" }
-rome_console = { path = "../../crates/rome_console" }
-rome_diagnostics = { path = "../../crates/rome_diagnostics" }
-rome_js_analyze = { path = "../../crates/rome_js_analyze" }
+convert_case      = "0.6.0"
+pulldown-cmark    = { version = "0.9", default-features = false }
+rome_analyze      = { path = "../../crates/rome_analyze" }
+rome_console      = { path = "../../crates/rome_console" }
+rome_diagnostics  = { path = "../../crates/rome_diagnostics" }
+rome_formatter    = { path = "../../crates/rome_formatter" }
+rome_js_analyze   = { path = "../../crates/rome_js_analyze" }
+rome_js_parser    = { path = "../../crates/rome_js_parser" }
+rome_js_syntax    = { path = "../../crates/rome_js_syntax" }
 rome_json_analyze = { path = "../../crates/rome_json_analyze" }
-rome_js_parser = { path = "../../crates/rome_js_parser" }
-rome_js_syntax = { path = "../../crates/rome_js_syntax" }
-rome_json_parser = { path = "../../crates/rome_json_parser" }
-rome_json_syntax = { path = "../../crates/rome_json_syntax" }
-rome_service = { path = "../../crates/rome_service" }
-rome_formatter = { path = "../../crates/rome_formatter" }
-pulldown-cmark = { version = "0.9", default-features = false }
-convert_case = "0.6.0"
+rome_json_parser  = { path = "../../crates/rome_json_parser" }
+rome_json_syntax  = { path = "../../crates/rome_json_syntax" }
+rome_service      = { path = "../../crates/rome_service" }
+xtask             = { path = '../', version = "0.0" }
