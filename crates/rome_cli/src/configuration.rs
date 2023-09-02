@@ -1,4 +1,5 @@
 use crate::cli_options::CliOptions;
+use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::{CliDiagnostic, CliSession};
 use rome_console::{markup, Console, ConsoleExt};
 use rome_deserialize::json::deserialize_from_json_str;
@@ -103,6 +104,20 @@ impl LoadedConfiguration {
                     "Biome exited because the configuration resulted in errors. Please fix them.",
                 )),
             ));
+        }
+
+        if let Some(file_path) = self
+            .file_path
+            .as_ref()
+            .and_then(|f| f.file_name())
+            .and_then(|f| f.to_str())
+        {
+            if file_path == "rome.json" {
+                let diagnostic = DeprecatedConfigurationFile::new(file_path);
+                console.error(markup! {
+					{if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            	})
+            }
         }
 
         Ok(self)

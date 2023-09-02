@@ -1,6 +1,5 @@
 ---
 source: crates/rome_cli/tests/snap_test.rs
-assertion_line: 335
 expression: content
 ---
 ## `/test/rome.json`
@@ -27,6 +26,14 @@ function f() {
 ```
 
 # Emitted Messages
+
+```block
+rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The configuration file rome.json is deprecated. Use biome.jsonn instead.
+  
+
+```
 
 ```block
 Formatted 1 file(s) in <TIME>
