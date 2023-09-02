@@ -12,6 +12,8 @@ env:
 
 jobs:
   bench:
+    permissions:
+      pull-requests: write
     name: Bench
     if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_formatter')
     runs-on: ubuntu-latest
@@ -67,6 +69,8 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Write a new comment
+        # Check if the event is not triggered by a fork
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/create-or-update-comment@v3
         continue-on-error: true
         with:

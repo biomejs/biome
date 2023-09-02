@@ -17,6 +17,8 @@ env:
 
 jobs:
   coverage:
+    permissions:
+      pull-requests: write
     name: Parser conformance
     runs-on: ${{ matrix.os }}
 
