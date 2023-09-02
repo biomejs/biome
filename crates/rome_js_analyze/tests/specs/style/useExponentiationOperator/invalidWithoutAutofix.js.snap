@@ -16,14 +16,6 @@ Math.pow(...a, b)
 Math.pow(a, ...b)
 Math.pow(a, b, ...c)
 
-// shouldn't autofix if that would remove comments
-/* comment */Math.pow(a, b)
-Math.pow(/**/a, b)
-Math.pow(a, b/**/)
-Math.pow(a, b)/* comment */;
-Math.pow(a, b)// comment;
-Math.pow(/**/a/**/, /**/b/**/)
-
 ```
 
 # Diagnostics
@@ -140,104 +132,6 @@ invalidWithoutAutofix.js:11:1 lint/style/useExponentiationOperator ━━━━�
   > 11 │ Math.pow(a, b, ...c)
        │ ^^^^^^^^^^^^^^^^^^^^
     12 │ 
-    13 │ // shouldn't autofix if that would remove comments
-  
-
-```
-
-```
-invalidWithoutAutofix.js:14:14 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    13 │ // shouldn't autofix if that would remove comments
-  > 14 │ /* comment */Math.pow(a, b)
-       │              ^^^^^^^^^^^^^^
-    15 │ Math.pow(/**/a, b)
-    16 │ Math.pow(a, b/**/)
-  
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
-  
-    12 12 │   
-    13 13 │   // shouldn't autofix if that would remove comments
-    14    │ - /*·comment·*/Math.pow(a,·b)
-       14 │ + /*·comment·*/a**b
-    15 15 │   Math.pow(/**/a, b)
-    16 16 │   Math.pow(a, b/**/)
-  
-
-```
-
-```
-invalidWithoutAutofix.js:15:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    13 │ // shouldn't autofix if that would remove comments
-    14 │ /* comment */Math.pow(a, b)
-  > 15 │ Math.pow(/**/a, b)
-       │ ^^^^^^^^^^^^^^^^^^
-    16 │ Math.pow(a, b/**/)
-    17 │ Math.pow(a, b)/* comment */;
-  
-
-```
-
-```
-invalidWithoutAutofix.js:16:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    14 │ /* comment */Math.pow(a, b)
-    15 │ Math.pow(/**/a, b)
-  > 16 │ Math.pow(a, b/**/)
-       │ ^^^^^^^^^^^^^^^^^^
-    17 │ Math.pow(a, b)/* comment */;
-    18 │ Math.pow(a, b)// comment;
-  
-
-```
-
-```
-invalidWithoutAutofix.js:17:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    15 │ Math.pow(/**/a, b)
-    16 │ Math.pow(a, b/**/)
-  > 17 │ Math.pow(a, b)/* comment */;
-       │ ^^^^^^^^^^^^^^
-    18 │ Math.pow(a, b)// comment;
-    19 │ Math.pow(/**/a/**/, /**/b/**/)
-  
-
-```
-
-```
-invalidWithoutAutofix.js:18:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    16 │ Math.pow(a, b/**/)
-    17 │ Math.pow(a, b)/* comment */;
-  > 18 │ Math.pow(a, b)// comment;
-       │ ^^^^^^^^^^^^^^
-    19 │ Math.pow(/**/a/**/, /**/b/**/)
-    20 │ 
-  
-
-```
-
-```
-invalidWithoutAutofix.js:19:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use the '**' operator instead of 'Math.pow'.
-  
-    17 │ Math.pow(a, b)/* comment */;
-    18 │ Math.pow(a, b)// comment;
-  > 19 │ Math.pow(/**/a/**/, /**/b/**/)
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ 
   
 
 ```

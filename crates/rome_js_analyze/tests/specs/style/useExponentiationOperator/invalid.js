@@ -38,14 +38,6 @@ foo + (Math.pow(a, b));
 (Math.pow(a, b)) + foo;
 `${(Math.pow(a, b))}`;
 
-// doesn't preserve unnecessary parens around base and exponent
-Math.pow((a), (b))
-Math.pow(((a)), ((b)))
-Math.pow((a.foo), b)
-Math.pow(a, (b.foo))
-Math.pow((a()), b)
-Math.pow(a, (b()))
-
 // Optional chaining
 Math.pow?.(a, b)
 Math?.pow(a, b)

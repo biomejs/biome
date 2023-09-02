@@ -35,7 +35,7 @@ invalidBaseExpoentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  F
   
      1  1 │   // base and exponent with a lower precedence
      2    │ - Math.pow(a·*·b,·c)
-        2 │ + (a·*·b)**c
+        2 │ + (a·*·b)·**·c
      3  3 │   Math.pow(a, b * c)
      4  4 │   Math.pow(a / b, c)
   
@@ -59,7 +59,7 @@ invalidBaseExpoentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  F
      1  1 │   // base and exponent with a lower precedence
      2  2 │   Math.pow(a * b, c)
      3    │ - Math.pow(a,·b·*·c)
-        3 │ + a**(b·*·c)
+        3 │ + a·**·(b·*·c)
      4  4 │   Math.pow(a / b, c)
      5  5 │   Math.pow(a, b / c)
   
@@ -83,7 +83,7 @@ invalidBaseExpoentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  F
      2  2 │   Math.pow(a * b, c)
      3  3 │   Math.pow(a, b * c)
      4    │ - Math.pow(a·/·b,·c)
-        4 │ + (a·/·b)**c
+        4 │ + (a·/·b)·**·c
      5  5 │   Math.pow(a, b / c)
      6  6 │   Math.pow(a + b, 3)
   
@@ -107,7 +107,7 @@ invalidBaseExpoentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  F
      3  3 │   Math.pow(a, b * c)
      4  4 │   Math.pow(a / b, c)
      5    │ - Math.pow(a,·b·/·c)
-        5 │ + a**(b·/·c)
+        5 │ + a·**·(b·/·c)
      6  6 │   Math.pow(a + b, 3)
      7  7 │   Math.pow(2, a - b)
   
@@ -131,7 +131,7 @@ invalidBaseExpoentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  F
      4  4 │   Math.pow(a / b, c)
      5  5 │   Math.pow(a, b / c)
      6    │ - Math.pow(a·+·b,·3)
-        6 │ + (a·+·b)**3
+        6 │ + (a·+·b)·**·3
      7  7 │   Math.pow(2, a - b)
      8  8 │   Math.pow(a + b, c + d)
   
@@ -155,7 +155,7 @@ invalidBaseExpoentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  F
      5  5 │   Math.pow(a, b / c)
      6  6 │   Math.pow(a + b, 3)
      7    │ - Math.pow(2,·a·-·b)
-        7 │ + 2**(a·-·b)
+        7 │ + 2·**·(a·-·b)
      8  8 │   Math.pow(a + b, c + d)
      9  9 │   Math.pow(a = b, c = d)
   
@@ -179,7 +179,7 @@ invalidBaseExpoentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  F
      6  6 │   Math.pow(a + b, 3)
      7  7 │   Math.pow(2, a - b)
      8    │ - Math.pow(a·+·b,·c·+·d)
-        8 │ + (a·+·b)**(c·+·d)
+        8 │ + (a·+·b)·**·(c·+·d)
      9  9 │   Math.pow(a = b, c = d)
     10 10 │   Math.pow(a += b, c -= d)
   
@@ -203,7 +203,7 @@ invalidBaseExpoentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  F
      7  7 │   Math.pow(2, a - b)
      8  8 │   Math.pow(a + b, c + d)
      9    │ - Math.pow(a·=·b,·c·=·d)
-        9 │ + (a·=·b)**(c·=·d)
+        9 │ + (a·=·b)·**·(c·=·d)
     10 10 │   Math.pow(a += b, c -= d)
     11 11 │   Math.pow((a, b), (c, d))
   
@@ -227,7 +227,7 @@ invalidBaseExpoentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  
      8  8 │   Math.pow(a + b, c + d)
      9  9 │   Math.pow(a = b, c = d)
     10    │ - Math.pow(a·+=·b,·c·-=·d)
-       10 │ + (a·+=·b)**(c·-=·d)
+       10 │ + (a·+=·b)·**·(c·-=·d)
     11 11 │   Math.pow((a, b), (c, d))
     12 12 │   function *f() { Math.pow(yield, yield) }
   
@@ -251,7 +251,7 @@ invalidBaseExpoentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  
      9  9 │   Math.pow(a = b, c = d)
     10 10 │   Math.pow(a += b, c -= d)
     11    │ - Math.pow((a,·b),·(c,·d))
-       11 │ + (a,·b)**(c,·d)
+       11 │ + (a,·b)·**·(c,·d)
     12 12 │   function *f() { Math.pow(yield, yield) }
     13 13 │   
   
@@ -274,7 +274,7 @@ invalidBaseExpoentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator 
     10 10 │   Math.pow(a += b, c -= d)
     11 11 │   Math.pow((a, b), (c, d))
     12    │ - function·*f()·{·Math.pow(yield,·yield)·}
-       12 │ + function·*f()·{·(yield)**(yield)·}
+       12 │ + function·*f()·{·(yield)·**·(yield)·}
     13 13 │   
   
 

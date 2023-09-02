@@ -205,12 +205,7 @@ impl Rule for UseOptionalChain {
                     let need_parenthesis =
                         left.precedence().ok()? < OperatorPrecedence::LeftHandSide;
                     if need_parenthesis {
-                        left = make::js_parenthesized_expression(
-                            make::token(T!['(']),
-                            left,
-                            make::token(T![')']),
-                        )
-                        .into();
+                        left = make::parenthesized(left).into();
                     }
                     let next_member = match member.clone() {
                         AnyJsMemberExpression::JsStaticMemberExpression(expression) => {

@@ -42,7 +42,7 @@ invalidParentsWithHigherPrecedence.js:1:3 lint/style/useExponentiationOperator  
   i Suggested fix: Use the '**' operator instead of 'Math.pow'.
   
      1    │ - +·Math.pow(a,·b);
-        1 │ + +·(a**b);
+        1 │ + +·(a·**·b);
      2  2 │   - Math.pow(a, b);
      3  3 │   ! Math.pow(a, b);
   
@@ -64,7 +64,7 @@ invalidParentsWithHigherPrecedence.js:2:3 lint/style/useExponentiationOperator  
   
      1  1 │   + Math.pow(a, b);
      2    │ - -·Math.pow(a,·b);
-        2 │ + -·(a**b);
+        2 │ + -·(a·**·b);
      3  3 │   ! Math.pow(a, b);
      4  4 │   typeof Math.pow(a, b);
   
@@ -88,7 +88,7 @@ invalidParentsWithHigherPrecedence.js:3:3 lint/style/useExponentiationOperator  
      1  1 │   + Math.pow(a, b);
      2  2 │   - Math.pow(a, b);
      3    │ - !·Math.pow(a,·b);
-        3 │ + !·(a**b);
+        3 │ + !·(a·**·b);
      4  4 │   typeof Math.pow(a, b);
      5  5 │   void Math.pow(a, b);
   
@@ -112,7 +112,7 @@ invalidParentsWithHigherPrecedence.js:4:8 lint/style/useExponentiationOperator  
      2  2 │   - Math.pow(a, b);
      3  3 │   ! Math.pow(a, b);
      4    │ - typeof·Math.pow(a,·b);
-        4 │ + typeof·(a**b);
+        4 │ + typeof·(a·**·b);
      5  5 │   void Math.pow(a, b);
      6  6 │   Math.pow(a, b) .toString();
   
@@ -136,7 +136,7 @@ invalidParentsWithHigherPrecedence.js:5:6 lint/style/useExponentiationOperator  
      3  3 │   ! Math.pow(a, b);
      4  4 │   typeof Math.pow(a, b);
      5    │ - void·Math.pow(a,·b);
-        5 │ + void·(a**b);
+        5 │ + void·(a·**·b);
      6  6 │   Math.pow(a, b) .toString();
      7  7 │   Math.pow(a, b) ();
   
@@ -160,7 +160,7 @@ invalidParentsWithHigherPrecedence.js:6:1 lint/style/useExponentiationOperator  
      4  4 │   typeof Math.pow(a, b);
      5  5 │   void Math.pow(a, b);
      6    │ - Math.pow(a,·b)·.toString();
-        6 │ + (a**b)·.toString();
+        6 │ + (a·**·b)·.toString();
      7  7 │   Math.pow(a, b) ();
      8  8 │   Math.pow(a, b) ``;
   
@@ -184,7 +184,7 @@ invalidParentsWithHigherPrecedence.js:7:1 lint/style/useExponentiationOperator  
      5  5 │   void Math.pow(a, b);
      6  6 │   Math.pow(a, b) .toString();
      7    │ - Math.pow(a,·b)·();
-        7 │ + (a**b)·();
+        7 │ + (a·**·b)·();
      8  8 │   Math.pow(a, b) ``;
      9  9 │   (class extends Math.pow(a, b) {})
   
@@ -208,7 +208,7 @@ invalidParentsWithHigherPrecedence.js:8:1 lint/style/useExponentiationOperator  
      6  6 │   Math.pow(a, b) .toString();
      7  7 │   Math.pow(a, b) ();
      8    │ - Math.pow(a,·b)·``;
-        8 │ + (a**b)·``;
+        8 │ + (a·**·b)·``;
      9  9 │   (class extends Math.pow(a, b) {})
     10 10 │   
   
@@ -232,7 +232,7 @@ invalidParentsWithHigherPrecedence.js:9:16 lint/style/useExponentiationOperator 
      7  7 │   Math.pow(a, b) ();
      8  8 │   Math.pow(a, b) ``;
      9    │ - (class·extends·Math.pow(a,·b)·{})
-        9 │ + (class·extends·(a**b)·{})
+        9 │ + (class·extends·(a·**·b)·{})
     10 10 │   
     11 11 │   // parents with a higher precedence, but the expression's role doesn't require parens
   
@@ -255,7 +255,7 @@ invalidParentsWithHigherPrecedence.js:12:3 lint/style/useExponentiationOperator 
     10 10 │   
     11 11 │   // parents with a higher precedence, but the expression's role doesn't require parens
     12    │ - f(Math.pow(a,·b))
-       12 │ + f(a**b)
+       12 │ + f(a·**·b)
     13 13 │   f(foo, Math.pow(a, b))
     14 14 │   f(Math.pow(a, b), foo)
   
@@ -279,7 +279,7 @@ invalidParentsWithHigherPrecedence.js:13:8 lint/style/useExponentiationOperator 
     11 11 │   // parents with a higher precedence, but the expression's role doesn't require parens
     12 12 │   f(Math.pow(a, b))
     13    │ - f(foo,·Math.pow(a,·b))
-       13 │ + f(foo,·a**b)
+       13 │ + f(foo,·a·**·b)
     14 14 │   f(Math.pow(a, b), foo)
     15 15 │   f(foo, Math.pow(a, b), bar)
   
@@ -303,7 +303,7 @@ invalidParentsWithHigherPrecedence.js:14:3 lint/style/useExponentiationOperator 
     12 12 │   f(Math.pow(a, b))
     13 13 │   f(foo, Math.pow(a, b))
     14    │ - f(Math.pow(a,·b),·foo)
-       14 │ + f(a**b,·foo)
+       14 │ + f(a·**·b,·foo)
     15 15 │   f(foo, Math.pow(a, b), bar)
     16 16 │   new F(Math.pow(a, b))
   
@@ -327,7 +327,7 @@ invalidParentsWithHigherPrecedence.js:15:8 lint/style/useExponentiationOperator 
     13 13 │   f(foo, Math.pow(a, b))
     14 14 │   f(Math.pow(a, b), foo)
     15    │ - f(foo,·Math.pow(a,·b),·bar)
-       15 │ + f(foo,·a**b,·bar)
+       15 │ + f(foo,·a·**·b,·bar)
     16 16 │   new F(Math.pow(a, b))
     17 17 │   new F(foo, Math.pow(a, b))
   
@@ -351,7 +351,7 @@ invalidParentsWithHigherPrecedence.js:16:7 lint/style/useExponentiationOperator 
     14 14 │   f(Math.pow(a, b), foo)
     15 15 │   f(foo, Math.pow(a, b), bar)
     16    │ - new·F(Math.pow(a,·b))
-       16 │ + new·F(a**b)
+       16 │ + new·F(a·**·b)
     17 17 │   new F(foo, Math.pow(a, b))
     18 18 │   new F(Math.pow(a, b), foo)
   
@@ -375,7 +375,7 @@ invalidParentsWithHigherPrecedence.js:17:12 lint/style/useExponentiationOperator
     15 15 │   f(foo, Math.pow(a, b), bar)
     16 16 │   new F(Math.pow(a, b))
     17    │ - new·F(foo,·Math.pow(a,·b))
-       17 │ + new·F(foo,·a**b)
+       17 │ + new·F(foo,·a·**·b)
     18 18 │   new F(Math.pow(a, b), foo)
     19 19 │   new F(foo, Math.pow(a, b), bar)
   
@@ -399,7 +399,7 @@ invalidParentsWithHigherPrecedence.js:18:7 lint/style/useExponentiationOperator 
     16 16 │   new F(Math.pow(a, b))
     17 17 │   new F(foo, Math.pow(a, b))
     18    │ - new·F(Math.pow(a,·b),·foo)
-       18 │ + new·F(a**b,·foo)
+       18 │ + new·F(a·**·b,·foo)
     19 19 │   new F(foo, Math.pow(a, b), bar)
     20 20 │   obj[Math.pow(a, b)]
   
@@ -423,7 +423,7 @@ invalidParentsWithHigherPrecedence.js:19:12 lint/style/useExponentiationOperator
     17 17 │   new F(foo, Math.pow(a, b))
     18 18 │   new F(Math.pow(a, b), foo)
     19    │ - new·F(foo,·Math.pow(a,·b),·bar)
-       19 │ + new·F(foo,·a**b,·bar)
+       19 │ + new·F(foo,·a·**·b,·bar)
     20 20 │   obj[Math.pow(a, b)]
     21 21 │   [foo, Math.pow(a, b), bar]
   
@@ -447,7 +447,7 @@ invalidParentsWithHigherPrecedence.js:20:5 lint/style/useExponentiationOperator 
     18 18 │   new F(Math.pow(a, b), foo)
     19 19 │   new F(foo, Math.pow(a, b), bar)
     20    │ - obj[Math.pow(a,·b)]
-       20 │ + obj[a**b]
+       20 │ + obj[a·**·b]
     21 21 │   [foo, Math.pow(a, b), bar]
     22 22 │   
   
@@ -470,7 +470,7 @@ invalidParentsWithHigherPrecedence.js:21:7 lint/style/useExponentiationOperator 
     19 19 │   new F(foo, Math.pow(a, b), bar)
     20 20 │   obj[Math.pow(a, b)]
     21    │ - [foo,·Math.pow(a,·b),·bar]
-       21 │ + [foo,·a**b,·bar]
+       21 │ + [foo,·a·**·b,·bar]
     22 22 │   
   
 
