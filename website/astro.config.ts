@@ -143,9 +143,7 @@ function inlineIntegration(): AstroIntegration {
 	};
 }
 
-
-
-const site = "https://biomejs.dev"
+const site = "https://biomejs.dev";
 // https://astro.build/config
 export default defineConfig({
 	site,
@@ -227,12 +225,15 @@ export default defineConfig({
 					},
 				},
 				{
-					tag: 'meta',
-					attrs: { property: 'og:image', content: site + '/img/og.png?v=1' },
+					tag: "meta",
+					attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
 				},
 				{
-					tag: 'meta',
-					attrs: { property: 'twitter:image', content: site + '/img/og.png?v=1' },
+					tag: "meta",
+					attrs: {
+						property: "twitter:image",
+						content: `${site}/img/og.png?v=1`,
+					},
 				},
 			],
 			customCss: [

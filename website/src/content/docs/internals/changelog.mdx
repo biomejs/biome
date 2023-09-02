@@ -74,6 +74,27 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + `${a + b}px`
    ```
 
+- Fix [rome#4109](https://github.com/rome/tools/issues/4109)
+
+  Previously, [useTemplate](https://biomejs.dev/lint/rules/useTemplate/) suggested an invalid code fix when a leading or trailing single-line comment was present:
+
+  ```diff
+    // leading comment
+  - 1 /* inner comment */ + "+" + 2 // trailing comment
+  + `${// leading comment
+  + 1 /* inner comment */}+${2 //trailing comment}` // trailing comment
+  ```
+
+  Now, the rule correctly handle this case:
+
+  ```diff
+    // leading comment
+  - 1 + "+" + 2 // trailing comment
+  + `${1}+${2}` // trailing comment
+  ```
+
+  As a sideeffect, the rule also suggests the removal of any inner comments.
+
 - Fix [#106](https://github.com/biomejs/biome/issues/106)
 
   [noUndeclaredVariables](https://biomejs.dev/lint/rules/noUndeclaredVariables/) now correctly recognizes some TypeScript types such as `Uppercase`.
