@@ -78,7 +78,7 @@ fn generate_category(
         generate_group(name, file_name, base_path.clone())?;
 
         let module_name = format_ident!("{}", file_name);
-        let group_name = format_ident!("{}", to_camel_case(file_name)?);
+        let group_name = format_ident!("{}", to_pascal_case(file_name)?);
 
         groups.insert(
             file_name.to_string(),
@@ -96,7 +96,7 @@ fn generate_category(
     let key = name;
     let module_name = format_ident!("{name}");
 
-    let category_name = to_camel_case(name).unwrap();
+    let category_name = to_pascal_case(name).unwrap();
     let category_name = format_ident!("{category_name}");
 
     let kind = match name {
@@ -162,7 +162,7 @@ fn generate_group(category: &'static str, group: &str, base_path: PathBuf) -> Re
         );
     }
 
-    let group_name = format_ident!("{}", to_camel_case(group)?);
+    let group_name = format_ident!("{}", to_pascal_case(group)?);
 
     let (rule_imports, rule_names): (Vec<_>, Vec<_>) = rules.into_values().unzip();
 
@@ -189,7 +189,7 @@ fn generate_group(category: &'static str, group: &str, base_path: PathBuf) -> Re
     Ok(())
 }
 
-fn to_camel_case(input: &str) -> Result<String> {
+fn to_pascal_case(input: &str) -> Result<String> {
     let mut result = String::new();
     let mut chars = input.char_indices();
 

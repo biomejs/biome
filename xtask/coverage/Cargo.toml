@@ -1,30 +1,30 @@
 [package]
-name = "xtask_coverage"
-version = "0.0.0"
 edition = "2021"
+name    = "xtask_coverage"
 publish = false
+version = "0.0.0"
 
 [dependencies]
-xtask = { path = '../', version = "0.0" }
-rome_rowan = { path = "../../crates/rome_rowan" }
-rome_console = { path = "../../crates/rome_console" }
-rome_js_syntax = { path = "../../crates/rome_js_syntax" }
-rome_js_parser = { path = "../../crates/rome_js_parser" }
-rome_js_semantic = { path = "../../crates/rome_js_semantic" }
-rome_diagnostics = { path = "../../crates/rome_diagnostics" }
-rome_parser = { path = "../../crates/rome_parser" }
-pico-args = { version = "0.5.0", features = ["eq-separator"] }
-ascii_table = "4.0.2"
-colored = "2.0.0"
-yastl = "0.1.2"
-indicatif = { version = "0.17.0", features = ["improved_unicode"] }
-serde = { version = "1.0.133", features = ["derive"] }
-serde_json = "1.0.74"
-serde_yaml = "0.9.9"
-regex = "1.5.5"
-once_cell = "1.9.0"
-walkdir = "2.3.2"
-atty = { workspace = true }
-tracing = { workspace = true }
+ascii_table        = "4.0.2"
+atty               = { workspace = true }
+backtrace          = "0.3.65"
+colored            = "2.0.0"
+indicatif          = { version = "0.17.0", features = ["improved_unicode"] }
+once_cell          = "1.9.0"
+pico-args          = { version = "0.5.0", features = ["eq-separator"] }
+regex              = "1.5.5"
+rome_console       = { path = "../../crates/rome_console" }
+rome_diagnostics   = { path = "../../crates/rome_diagnostics" }
+rome_js_parser     = { path = "../../crates/rome_js_parser" }
+rome_js_semantic   = { path = "../../crates/rome_js_semantic" }
+rome_js_syntax     = { path = "../../crates/rome_js_syntax" }
+rome_parser        = { path = "../../crates/rome_parser" }
+rome_rowan         = { path = "../../crates/rome_rowan" }
+serde              = { version = "1.0.133", features = ["derive"] }
+serde_json         = "1.0.74"
+serde_yaml         = "0.9.9"
+tracing            = { workspace = true }
 tracing-subscriber = { version = "0.3.11", features = ["env-filter", "std"] }
-backtrace = "0.3.65"
+walkdir            = "2.3.2"
+xtask              = { path = '../', version = "0.0" }
+yastl              = "0.1.2"
