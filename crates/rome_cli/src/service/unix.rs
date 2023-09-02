@@ -21,7 +21,7 @@ use tracing::{debug, info, Instrument};
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon
 fn get_socket_name() -> PathBuf {
-    env::temp_dir().join(format!("rome-socket-{}", rome_service::VERSION))
+    env::temp_dir().join(format!("biome-socket-{}", rome_service::VERSION))
 }
 
 pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
@@ -31,7 +31,7 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
             let file_name = entry.file_name()?;
             let file_name = file_name.to_str()?;
 
-            let version = file_name.strip_prefix("rome-socket")?;
+            let version = file_name.strip_prefix("biome-socket")?;
             if version.is_empty() {
                 Some(String::new())
             } else {
