@@ -162,7 +162,11 @@ impl Rule for UseIsNan {
                     let with_inequality = contains_inequality(bin_expr).unwrap_or(false);
                     let is_nan_expression = create_is_nan_expression(&with_inequality);
 
-                    let arg = AnyJsCallArgument::AnyJsExpression(literal.with_leading_trivia_pieces([])?.with_trailing_trivia_pieces([])?);
+                    let arg = AnyJsCallArgument::AnyJsExpression(
+                        literal
+                            .with_leading_trivia_pieces([])?
+                            .with_trailing_trivia_pieces([])?,
+                    );
                     let args = make::js_call_arguments(
                         make::token(T!['(']),
                         make::js_call_argument_list([arg], []),
@@ -187,7 +191,7 @@ impl Rule for UseIsNan {
                     });
                 }
 
-                return None;
+                None
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,
@@ -213,8 +217,10 @@ fn create_is_nan_expression(with_inequality: &bool) -> AnyJsExpression {
 fn contains_inequality(bin_expr: &JsBinaryExpression) -> Option<bool> {
     let binary_operator = bin_expr.operator().ok()?;
 
-    Some(matches!(binary_operator,
-        JsBinaryOperator::Inequality | JsBinaryOperator::StrictInequality))
+    Some(matches!(
+        binary_operator,
+        JsBinaryOperator::Inequality | JsBinaryOperator::StrictInequality
+    ))
 }
 
 fn get_literal(bin_expr: &JsBinaryExpression, model: &SemanticModel) -> Option<AnyJsExpression> {
@@ -231,7 +237,7 @@ fn get_literal(bin_expr: &JsBinaryExpression, model: &SemanticModel) -> Option<A
         };
     }
 
-    return None;
+    None
 }
 
 /// Checks whether an expression has `NaN`, `Number.NaN`, or `Number['NaN']`.
