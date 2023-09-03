@@ -209,64 +209,64 @@ We **deleted** two rules:
 
 ### New Rules
 
-- [`noDuplicateJsonKeys`](/lint/rules/noDuplicateJsonKeys/)
+- [`noDuplicateJsonKeys`](/linter/rules/no-duplicate-json-keys/)
 
 	This rule disallows duplicate keys in a JSON object.
 
-- [`noExcessiveComplexity`](/lint/rules/noExcessiveComplexity/)
+- [`noExcessiveComplexity`](/linter/rules/no-excessive-complexity/)
 
 	This rule computes a complexity score and reports code with a score above a configurable threshold.
 
-- [`noFallthroughSwitchClause`](/lint/rules/noFallthroughSwitchClause/)
+- [`noFallthroughSwitchClause`](/linter/rules/no-fallthrough-switch-clause/)
 
 	This rule disallows `switch` cases that fall through to the next `case`.
 
-- [`noGlobalIsFinite`](/lint/rules/noglobalisfinite/)
+- [`noGlobalIsFinite`](/linter/rules/no-global-is-finite/)
 
 	This rule recommends using `Number.isFinite` instead of the global and unsafe `isFinite` that attempts a type of coercion.
 
-- [`noGlobalIsNan`](/lint/rules/noglobalisnan/)
+- [`noGlobalIsNan`](/linter/rules/no-global-is-nan/)
 
 	This rule recommends using `Number.isNaN` instead of the global and unsafe `isNaN` that attempts a type of coercion.
 
-- [`noNonoctalDecimalEscape`](/lint/rules/nononoctaldecimalescape/)
+- [`noNonoctalDecimalEscape`](/linter/rules/no-nonoctal-decimal-escape/)
 
 	This rule disallows `\8` and `\9` escape sequences in string literals.
 
-- [`noUnsafeDeclarationMerging`](/lint/rules/noUnsafeDeclarationMerging/)
+- [`noUnsafeDeclarationMerging`](/linter/rules/no-unsafe-declaration-merging/)
 
 	This rule disallows declaration merging between an interface and a class.
 
-- [`noUselessEmptyExport`](/lint/rules/noUselessEmptyExport/)
+- [`noUselessEmptyExport`](/linter/rules/no-useless-empty-export/)
 
 	This rule disallows useless `export {}`.
 
-- [noUselessThisAlias](/lint/rules/noUselessThisAlias/)
+- [noUselessThisAlias](/linter/rules/no-useless-this-alias/)
 
   This rule disallows useless aliasing of `this` in arrow functions.
 
-- [`noVoid`](/lint/rules/novoid/)
+- [`noVoid`](/linter/rules/no-void/)
 
 	This rule disallows the use of `void`.
 
-- [`useArrowFunction`](/lint/rules/usearrowfunction/)
+- [`useArrowFunction`](/linter/rules/use-arrow-function/)
 
 	This rule proposes turning function expressions into arrow functions.
 	Function expressions that use `this` are ignored.
 
-- [`useGetterReturn`](/lint/rules/useGetterReturn/)
+- [`useGetterReturn`](/linter/rules/use-getter-return/)
 
   This rule enforces `get` methods to always return a value.
 
-- [`useImportRestrictions`](/lint/rules/useImportRestrictions/)
+- [`useImportRestrictions`](/linter/rules/use-import-restrictions/)
 
 	Enables restrictions on how local imports should be imported.
 
-- [`useIsArray`](/lint/rules/useIsArray/)
+- [`useIsArray`](/linter/rules/use-is-array/)
 
 	This rule proposes using `Array.isArray()` instead of `instanceof Array`.
 
-- [`useNamingConvention`](/lint/rules/useNamingConvention/)
+- [`useNamingConvention`](/linter/rules/use-naming-convention/)
 
 	The rule enforces wide-spread naming conventions of Javascript and TypeScript across a codebase.
 
@@ -274,19 +274,19 @@ We **deleted** two rules:
 
 New rules are promoted, please check [#4750](https://github.com/rome/tools/discussions/4750) for more details:
 
-- [`suspicious/noDuplicateJsxProps`](/lint/rules/noDuplicateJsxProps/)
-- [`suspicious/noConsoleLog`](/lint/rules/noConsoleLog/)
-- [`correctness/useIsNan`](/lint/rules/useIsNan/)
-- [`complexity/useSimpleNumberKeys`](/lint/rules/useSimpleNumberKeys/)
-- [`complexity/useLiteralKeys`](/lint/rules/useLiteralKeys/)
-- [`complexity/noForEach`](/lint/rules/noForEach/)
-- [`a11y/useHeadingContent`](/lint/rules/useHeadingContent/)
+- [`suspicious/noDuplicateJsxProps`](/linter/rules/no-duplicate-jsx-props/)
+- [`suspicious/noConsoleLog`](/linter/rules/no-console-log/)
+- [`correctness/useIsNan`](/linter/rules/use-is-nan/)
+- [`complexity/useSimpleNumberKeys`](/linter/rules/use-simple-number-keys/)
+- [`complexity/useLiteralKeys`](/linter/rules/use-literal-keys/)
+- [`complexity/noForEach`](/linter/rules/no-for-each/)
+- [`a11y/useHeadingContent`](/linter/rules/use-heading-content/)
 
 The following rules are now recommended:
 
-- [`useExponentiationOperator`](/lint/rules/useExponentiationOperator/)
-- [`noUselessFragments`](/lint/rules/noUselessFragments/)
-- [`noRedundantUseStrict`](/lint/rules/noRedundantUseStrict/)
+- [`useExponentiationOperator`](/linter/rules/use-exponentiation-operator/)
+- [`noUselessFragments`](/linter/rules/no-useless-fragments/)
+- [`noRedundantUseStrict`](/linter/rules/no-redundant-use-strict/)
 
 ## Support for function class parameter decorators
 
