@@ -148,7 +148,7 @@ impl Rule for NoNonoctalDecimalEscape {
                         diagnostics_text_range: decimal_escape_range,
                         replace_from: decimal_escape.to_string(),
                         replace_to: decimal_char_unicode_escaped,
-                        replace_string_range: replace_string_range.clone(),
+                        replace_string_range,
                     });
                 } else {
                     // \8 -> 8
@@ -157,7 +157,7 @@ impl Rule for NoNonoctalDecimalEscape {
                         diagnostics_text_range: decimal_escape_range,
                         replace_from: decimal_escape.to_string(),
                         replace_to: decimal_char.to_string(),
-                        replace_string_range: replace_string_range.clone(),
+                        replace_string_range,
                     })
                 }
             }

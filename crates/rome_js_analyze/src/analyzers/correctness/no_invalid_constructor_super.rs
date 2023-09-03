@@ -62,10 +62,10 @@ pub(crate) enum NoInvalidConstructorSuperState {
 }
 
 impl NoInvalidConstructorSuperState {
-    fn range(&self) -> &TextRange {
+    fn range(&self) -> TextRange {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(range) => range,
-            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => super_range,
+            NoInvalidConstructorSuperState::UnexpectedSuper(range) => *range,
+            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => *super_range,
         }
     }
 
@@ -101,16 +101,18 @@ impl Rule for NoInvalidConstructorSuper {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         // we check first if `super()` is part of a constructor class member
-        let super_expression = node.body().ok()?.statements().iter().find_map(|statement| {
-            statement
-                .as_js_expression_statement()?
-                .expression()
-                .ok()?
-                .as_js_call_expression()?
-                .callee()
-                .ok()?
-                .as_js_super_expression()
-                .cloned()
+        let super_range = node.body().ok()?.statements().iter().find_map(|statement| {
+            Some(
+                statement
+                    .as_js_expression_statement()?
+                    .expression()
+                    .ok()?
+                    .as_js_call_expression()?
+                    .callee()
+                    .ok()?
+                    .as_js_super_expression()?
+                    .range(),
+            )
         });
 
         let extends_clause = node
@@ -118,25 +120,23 @@ impl Rule for NoInvalidConstructorSuper {
             .ancestors()
             .find_map(|node| AnyJsClass::cast(node)?.extends_clause());
 
-        match (super_expression, extends_clause) {
-            (Some(super_expression), Some(extends_clause)) => {
+        match (super_range, extends_clause) {
+            (Some(super_range), Some(extends_clause)) => {
                 let super_class = extends_clause.super_class().ok()?;
-                if let Some(is_valid) = is_valid_constructor(super_class.clone()) {
+                let extends_range = super_class.range();
+                if let Some(is_valid) = is_valid_constructor(super_class) {
                     if !is_valid {
                         return Some(NoInvalidConstructorSuperState::BadExtends {
-                            super_range: super_expression.syntax().text_trimmed_range(),
-                            extends_range: super_class.syntax().text_trimmed_range(),
+                            super_range,
+                            extends_range,
                         });
-                    } else {
-                        None
                     }
-                } else {
-                    None
                 }
+                None
             }
-            (Some(super_expression), None) => Some(
-                NoInvalidConstructorSuperState::UnexpectedSuper(super_expression.range()),
-            ),
+            (Some(super_range), None) => {
+                Some(NoInvalidConstructorSuperState::UnexpectedSuper(super_range))
+            }
             _ => None,
         }
     }

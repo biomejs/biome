@@ -1,6 +1,8 @@
 use rome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_js_syntax::{AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields};
+use rome_js_syntax::{
+    AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
+};
 use rome_rowan::{AstNode, AstSeparatedList};
 
 declare_rule! {
@@ -66,8 +68,7 @@ impl Rule for NoAsyncPromiseExecutor {
 
         // get first argument of the `Promise` constructor
         let first_arg = arguments?.args().iter().next()?.ok()?;
-
-        if let Some(expr) = first_arg.as_any_js_expression() {
+        if let AnyJsCallArgument::AnyJsExpression(expr) = first_arg {
             get_async_function_expression_like(expr)
         } else {
             None
@@ -89,14 +90,14 @@ impl Rule for NoAsyncPromiseExecutor {
 ///  ```js
 /// ((((((async function () {}))))))
 /// ```
-fn get_async_function_expression_like(expr: &AnyJsExpression) -> Option<AnyJsFunction> {
-    match expr.clone().omit_parentheses() {
+fn get_async_function_expression_like(expr: AnyJsExpression) -> Option<AnyJsFunction> {
+    match expr.omit_parentheses() {
         AnyJsExpression::JsFunctionExpression(func) => func
             .async_token()
-            .map(|_| AnyJsFunction::JsFunctionExpression(func.clone())),
+            .map(|_| AnyJsFunction::JsFunctionExpression(func)),
         AnyJsExpression::JsArrowFunctionExpression(func) => func
             .async_token()
-            .map(|_| AnyJsFunction::JsArrowFunctionExpression(func.clone())),
+            .map(|_| AnyJsFunction::JsArrowFunctionExpression(func)),
         _ => None,
     }
 }

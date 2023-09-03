@@ -41,19 +41,12 @@ impl Rule for NoSelfCompare {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
         if !node.is_comparison_operator() {
             return None;
         }
-
         let left = node.left().ok()?;
         let right = node.right().ok()?;
-
-        if is_node_equal(left.syntax(), right.syntax()) {
-            return Some(());
-        }
-
-        None
+        is_node_equal(left.syntax(), right.syntax()).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

@@ -120,11 +120,11 @@ impl UseValidAnchorState {
         }
     }
 
-    fn range(&self) -> &TextRange {
+    fn range(&self) -> TextRange {
         match self {
             UseValidAnchorState::MissingHrefAttribute(range)
             | UseValidAnchorState::CantBeAnchor(range)
-            | UseValidAnchorState::IncorrectHref(range) => range,
+            | UseValidAnchorState::IncorrectHref(range) => *range,
         }
     }
 }
@@ -144,16 +144,10 @@ impl Rule for UseValidAnchor {
             let on_click_attribute = node.find_attribute_by_name("onClick");
 
             match (anchor_attribute, on_click_attribute) {
-                (Some(_), Some(_)) => {
-                    return Some(UseValidAnchorState::CantBeAnchor(
-                        node.syntax().text_trimmed_range(),
-                    ))
-                }
+                (Some(_), Some(_)) => return Some(UseValidAnchorState::CantBeAnchor(node.range())),
                 (Some(anchor_attribute), _) => {
                     if anchor_attribute.initializer().is_none() {
-                        return Some(UseValidAnchorState::IncorrectHref(
-                            anchor_attribute.syntax().text_trimmed_range(),
-                        ));
+                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
@@ -162,21 +156,17 @@ impl Rule for UseValidAnchor {
                             || const_str == "#"
                             || const_str.contains("javascript:")
                     }) {
-                        return Some(UseValidAnchorState::IncorrectHref(
-                            anchor_attribute.syntax().text_trimmed_range(),
-                        ));
+                        return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
                 }
                 (None, Some(on_click_attribute)) => {
                     return Some(UseValidAnchorState::CantBeAnchor(
-                        on_click_attribute.syntax().text_trimmed_range(),
+                        on_click_attribute.range(),
                     ))
                 }
                 (None, None) => {
                     if !node.has_spread_prop() {
-                        return Some(UseValidAnchorState::MissingHrefAttribute(
-                            node.syntax().text_trimmed_range(),
-                        ));
+                        return Some(UseValidAnchorState::MissingHrefAttribute(node.range()));
                     }
                 }
             };

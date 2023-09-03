@@ -132,16 +132,16 @@ impl AnyClassMemberDefinition {
     fn modifiers_list(&self) -> JsSyntaxList {
         match self {
             AnyClassMemberDefinition::JsGetterClassMember(node) => {
-                node.modifiers().syntax_list().clone()
+                node.modifiers().into_syntax_list()
             }
             AnyClassMemberDefinition::JsMethodClassMember(node) => {
-                node.modifiers().syntax_list().clone()
+                node.modifiers().into_syntax_list()
             }
             AnyClassMemberDefinition::JsPropertyClassMember(node) => {
-                node.modifiers().syntax_list().clone()
+                node.modifiers().into_syntax_list()
             }
             AnyClassMemberDefinition::JsSetterClassMember(node) => {
-                node.modifiers().syntax_list().clone()
+                node.modifiers().into_syntax_list()
             }
         }
     }

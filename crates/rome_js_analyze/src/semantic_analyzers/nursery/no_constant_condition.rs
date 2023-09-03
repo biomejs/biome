@@ -122,7 +122,8 @@ impl Rule for NoConstantCondition {
         {
             return None;
         }
-        is_constant_condition(&test, true, model).map(|_| Some(test.range()))?
+        let test_range = test.range();
+        is_constant_condition(test, true, model).map(|_| test_range)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -226,13 +227,13 @@ fn has_valid_yield_expression(stmt: &AnyJsStatement) -> Option<bool> {
 }
 
 fn is_constant_condition(
-    test: &AnyJsExpression,
+    test: AnyJsExpression,
     in_boolean_position: bool,
     model: &SemanticModel,
 ) -> Option<()> {
     use AnyJsExpression::*;
 
-    match test.clone().omit_parentheses() {
+    match test.omit_parentheses() {
         AnyJsLiteralExpression(_)
         | JsObjectExpression(_)
         | JsFunctionExpression(_)
@@ -246,20 +247,20 @@ fn is_constant_condition(
                 return Some(());
             }
             if op == LogicalNot {
-                return is_constant_condition(&node.argument().ok()?, true, model);
+                return is_constant_condition(node.argument().ok()?, true, model);
             }
-            is_constant_condition(&node.argument().ok()?, false, model)
+            is_constant_condition(node.argument().ok()?, false, model)
         }
-        JsBinaryExpression(node) => is_constant_condition(&node.left().ok()?, false, model)
-            .and_then(|_| is_constant_condition(&node.right().ok()?, false, model)),
+        JsBinaryExpression(node) => is_constant_condition(node.left().ok()?, false, model)
+            .and_then(|_| is_constant_condition(node.right().ok()?, false, model)),
         JsLogicalExpression(node) => {
             let left = node.left().ok()?;
             let right = node.right().ok()?;
             let op = node.operator().ok()?;
             let is_left_constant =
-                is_constant_condition(&left, in_boolean_position, model).is_some();
+                is_constant_condition(left.clone(), in_boolean_position, model).is_some();
             let is_right_constant =
-                is_constant_condition(&right, in_boolean_position, model).is_some();
+                is_constant_condition(right.clone(), in_boolean_position, model).is_some();
 
             let is_left_short_circuit = is_left_constant && is_logical_identity(left, op);
             let is_right_short_circuit =
@@ -275,7 +276,7 @@ fn is_constant_condition(
             }
         }
         JsSequenceExpression(node) => {
-            is_constant_condition(&node.right().ok()?, in_boolean_position, model)
+            is_constant_condition(node.right().ok()?, in_boolean_position, model)
         }
         JsIdentifierExpression(node) => {
             if node.name().ok()?.binding(model).is_some() {
@@ -295,7 +296,7 @@ fn is_constant_condition(
                                 AnyJsArrayElement::JsArrayHole(_) => true,
                                 AnyJsArrayElement::JsSpread(node) => {
                                     if let Ok(argument) = node.argument() {
-                                        is_constant_condition(&argument, in_boolean_position, model)
+                                        is_constant_condition(argument, in_boolean_position, model)
                                             .is_some()
                                     } else {
                                         false
@@ -303,7 +304,9 @@ fn is_constant_condition(
                                 }
                                 _ => element
                                     .as_any_js_expression()
-                                    .and_then(|node| is_constant_condition(node, false, model))
+                                    .and_then(|node| {
+                                        is_constant_condition(node.clone(), false, model)
+                                    })
                                     .is_some(),
                             }
                         } else {
@@ -330,7 +333,7 @@ fn is_constant_condition(
                     return Some(());
                 }
                 return is_constant_condition(
-                    args.first()?.ok()?.as_any_js_expression()?,
+                    args.first()?.ok()?.as_any_js_expression()?.clone(),
                     true,
                     model,
                 );
@@ -343,7 +346,7 @@ fn is_constant_condition(
 
             let operator = node.operator().ok()?;
             if operator == Assign {
-                return is_constant_condition(&node.right().ok()?, in_boolean_position, model);
+                return is_constant_condition(node.right().ok()?, in_boolean_position, model);
             }
 
             if matches!(operator, LogicalOrAssign | LogicalAndAssign) && in_boolean_position {
@@ -381,7 +384,7 @@ fn is_constant_condition(
                     AnyJsTemplateElement::JsTemplateChunkElement(_) => !is_tag,
                     AnyJsTemplateElement::JsTemplateElement(element) => {
                         if let Ok(expr) = element.expression() {
-                            is_constant_condition(&expr, false, model).is_some()
+                            is_constant_condition(expr, false, model).is_some()
                         } else {
                             false
                         }

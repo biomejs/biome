@@ -3,8 +3,8 @@ use crate::semantic_services::Semantic;
 use rome_analyze::context::RuleContext;
 use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsLiteralMemberName, JsxAttribute};
-use rome_rowan::{declare_node_union, AstNode};
+use rome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
+use rome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_rule! {
     /// Prevent the usage of dangerous JSX props
@@ -37,8 +37,16 @@ declare_node_union! {
 }
 
 pub(crate) enum NoDangerState {
-    Attribute(JsxAttribute),
-    Property(JsLiteralMemberName),
+    Attribute(TextRange),
+    Property(TextRange),
+}
+
+impl NoDangerState {
+    fn range(&self) -> TextRange {
+        match self {
+            NoDangerState::Attribute(range) | NoDangerState::Property(range) => *range,
+        }
+    }
 }
 
 impl Rule for NoDangerouslySetInnerHtml {
@@ -56,7 +64,9 @@ impl Rule for NoDangerouslySetInnerHtml {
                 match name {
                     AnyJsxAttributeName::JsxName(jsx_name) => {
                         if jsx_name.syntax().text_trimmed() == "dangerouslySetInnerHTML" {
-                            return Some(NoDangerState::Attribute(jsx_attribute.clone()));
+                            return Some(NoDangerState::Attribute(
+                                jsx_attribute.name().ok()?.range(),
+                            ));
                         }
                     }
                     AnyJsxAttributeName::JsxNamespaceName(_) => return None,
@@ -79,7 +89,7 @@ impl Rule for NoDangerouslySetInnerHtml {
                             let name = property_member.as_js_literal_member_name()?;
 
                             if name.syntax().text_trimmed() == "dangerouslySetInnerHTML" {
-                                return Some(NoDangerState::Property(name.clone()));
+                                return Some(NoDangerState::Property(name.range()));
                             }
                         }
                     }
@@ -91,22 +101,13 @@ impl Rule for NoDangerouslySetInnerHtml {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let text_range = match state {
-            NoDangerState::Attribute(jsx_attribute) => {
-                let name = jsx_attribute.name().ok()?;
-                name.syntax().text_trimmed_range()
-            }
-            NoDangerState::Property(property) => property.syntax().text_trimmed_range(),
-        };
-
         let diagnostic = RuleDiagnostic::new(rule_category!(),
-            text_range,
+            state.range(),
             markup! {
                 "Avoid passing content using the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
             }
                 .to_owned(),
         ).warning(
-
             "Setting content using code can expose users to cross-site scripting (XSS) attacks",
         );
         Some(diagnostic)
