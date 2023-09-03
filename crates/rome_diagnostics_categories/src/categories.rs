@@ -110,6 +110,7 @@ define_categories! {
     "lint/nursery/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/nursery/useLiteralEnumMembers": "https://biomejs.dev/linter/rules/use-literal-enum-members",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
+    // nursery end
 
     // performance
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
