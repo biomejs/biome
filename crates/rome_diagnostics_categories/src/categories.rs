@@ -102,6 +102,7 @@ define_categories! {
     "lint/nursery/noVoid": "https://biomejs.dev/linter/rules/no-void",
     "lint/nursery/useAriaPropTypes": "https://biomejs.dev/linter/rules/use-aria-prop-types",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
+    "lint/nursery/useCollapsedElseIf": "https://biomejs.dev/lint/rules/use-collapsed-else-if",
     "lint/nursery/useExhaustiveDependencies": "https://biomejs.dev/linter/rules/use-exhaustive-dependencies",
     "lint/nursery/useGetterReturn": "https://biomejs.dev/linter/rules/use-getter-return",
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",

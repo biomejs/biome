@@ -660,6 +660,10 @@ export interface Nursery {
 	 */
 	useArrowFunction?: RuleConfiguration;
 	/**
+	 * Enforce using else if instead of else { if ... }.
+	 */
+	useCollapsedElseIf?: RuleConfiguration;
+	/**
 	 * Enforce all dependencies are correctly specified.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration;
@@ -1232,6 +1236,7 @@ export type Category =
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useAriaPropTypes"
 	| "lint/nursery/useArrowFunction"
+	| "lint/nursery/useCollapsedElseIf"
 	| "lint/nursery/useExhaustiveDependencies"
 	| "lint/nursery/useGetterReturn"
 	| "lint/nursery/useGroupedTypeImport"
