@@ -2,29 +2,39 @@ use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use rome_console::{markup, ConsoleExt};
 use rome_diagnostics::{category, PrintDiagnostic};
-use rome_fs::OpenOptions;
+use rome_fs::{FileSystemExt, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::JsonRoot;
 use rome_migrate::{migrate_configuration, ControlFlow};
 use rome_rowan::AstNode;
 use rome_service::workspace::FixAction;
 use std::borrow::Cow;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 
 pub(crate) fn run(
     session: CliSession,
     write: bool,
-    configuration_path: PathBuf,
+    configuration_file_path: PathBuf,
+    configuration_directory_path: PathBuf,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let fs = &*session.app.fs;
+    let has_deprecated_configuration =
+        configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
+
     let open_options = if write {
-        OpenOptions::default().write(true)
+        if has_deprecated_configuration {
+            OpenOptions::default().read(true).write(true)
+        } else {
+            OpenOptions::default().read(true).write(true)
+        }
     } else {
         OpenOptions::default().read(true)
     };
+
     let mut configuration_file =
-        fs.open_with_options(configuration_path.as_path(), open_options)?;
+        fs.open_with_options(configuration_file_path.as_path(), open_options)?;
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
     let parsed = rome_json_parser::parse_json(&configuration_content, JsonParserOptions::default());
@@ -34,10 +44,9 @@ pub(crate) fn run(
     loop {
         let (action, _) = migrate_configuration(
             &tree.value().unwrap(),
-            configuration_path.as_path(),
+            configuration_file_path.as_path(),
             |signal| {
                 let current_diagnostic = signal.diagnostic();
-
                 if current_diagnostic.is_some() {
                     errors += 1;
                 }
@@ -73,24 +82,43 @@ pub(crate) fn run(
     let console = &mut *session.app.console;
     let new_configuration_content = tree.to_string();
 
-    if configuration_content != new_configuration_content {
+    if configuration_content != new_configuration_content || has_deprecated_configuration {
         if write {
+            let mut configuration_file = if has_deprecated_configuration {
+                let biome_file_path = configuration_directory_path.join(fs.config_name());
+                fs.create_new(biome_file_path.as_path())?
+            } else {
+                configuration_file
+            };
             configuration_file.set_content(tree.to_string().as_bytes())?;
             console.log(markup!{
-					<Info>"The configuration "<Emphasis>{{configuration_path.display().to_string()}}</Emphasis>" has been successfully migrated"</Info>
-				})
+                <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
+            })
         } else {
-            let file_name = configuration_path.display().to_string();
-            let diagnostic = MigrateDiffDiagnostic {
-                file_name,
-                diff: ContentDiffAdvice {
-                    old: configuration_content,
-                    new: new_configuration_content,
-                },
+            let file_name = configuration_file_path.display().to_string();
+            let diagnostic = if has_deprecated_configuration {
+                MigrateDiffDiagnostic {
+                    file_name,
+                    diff: ContentDiffAdvice {
+                        old: "rome.json".to_string(),
+                        new: "biome.json".to_string(),
+                    },
+                }
+            } else {
+                MigrateDiffDiagnostic {
+                    file_name,
+                    diff: ContentDiffAdvice {
+                        old: configuration_content,
+                        new: new_configuration_content,
+                    },
+                }
             };
             console.error(markup! {
-					{if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-				});
+                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+            console.log(markup! {
+                "Run the command "<Emphasis>"biome migrate --write"</Emphasis>" to apply the changes."
+            })
         }
     } else {
         console.log(markup! {

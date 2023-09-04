@@ -13,15 +13,15 @@ pub(crate) fn migrate(
     let LoadedConfiguration {
         configuration: _,
         diagnostics: _,
-        directory_path: path,
-        ..
+        directory_path,
+        file_path,
     } = load_configuration(&mut session, &cli_options)?;
-    let config_name = session.app.fs.config_name();
-    if let Some(path) = path {
+    if let (Some(path), Some(directory_path)) = (file_path, directory_path) {
         execute_mode(
             Execution::new(TraversalMode::Migrate {
                 write,
-                configuration_path: path.join(config_name),
+                configuration_file_path: path,
+                configuration_directory_path: directory_path,
             }),
             session,
             &cli_options,

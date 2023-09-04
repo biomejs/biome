@@ -85,3 +85,57 @@ fn missing_configuration_file() {
         result,
     ));
 }
+
+#[test]
+fn emit_diagnostic_for_rome_json() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+
+    let configuration_path = Path::new("rome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "emit_diagnostic_for_rome_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_create_biome_json_file() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+
+    let configuration_path = Path::new("rome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_create_biome_json_file",
+        fs,
+        console,
+        result,
+    ));
+}
