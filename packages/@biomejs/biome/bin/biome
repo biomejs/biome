@@ -29,7 +29,7 @@ if (binPath) {
 				...env,
 				JS_RUNTIME_VERSION: version,
 				JS_RUNTIME_NAME: release.name,
-				...(packageManager === null
+				...(packageManager != null
 					? { NODE_PACKAGE_MANAGER: packageManager }
 					: {}),
 			},
