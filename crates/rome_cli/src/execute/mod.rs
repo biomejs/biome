@@ -77,7 +77,8 @@ pub(crate) enum TraversalMode {
     /// This mode is enabled when running the command `biome migrate`
     Migrate {
         write: bool,
-        configuration_path: PathBuf,
+        configuration_file_path: PathBuf,
+        configuration_directory_path: PathBuf,
     },
 }
 
@@ -235,10 +236,17 @@ pub(crate) fn execute_mode(
         std_in::run(session, &mode, rome_path, content.as_str())
     } else if let TraversalMode::Migrate {
         write,
-        configuration_path,
+        configuration_file_path,
+        configuration_directory_path,
     } = mode.traversal_mode
     {
-        migrate::run(session, write, configuration_path, cli_options.verbose)
+        migrate::run(
+            session,
+            write,
+            configuration_file_path,
+            configuration_directory_path,
+            cli_options.verbose,
+        )
     } else {
         traverse(mode, session, cli_options, paths)
     }

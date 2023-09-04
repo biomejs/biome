@@ -16,6 +16,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Enhancements
 
 - Biome now reports a diagnostics when a `rome.json` file is found.
+- `rome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file.
+
+#### Bug fixes
+
+- Biome uses `biome.json` first, then it attempts to use `rome.json`.
 
 ### Configuration
 ### Editors
