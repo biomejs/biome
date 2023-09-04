@@ -214,7 +214,8 @@ const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
 
 impl LoggingFilter {
     fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        let filter = if meta.target().starts_with("biome") {
+        // TODO: keep "rome" until all internal crates are moved to "biome_"
+        let filter = if meta.target().starts_with("rome") {
             SELF_FILTER
         } else {
             LevelFilter::INFO

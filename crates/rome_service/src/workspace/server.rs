@@ -236,28 +236,42 @@ impl Workspace for WorkspaceServer {
 
         Ok(match params.feature {
             FeatureName::Format => {
-                settings
+                let section_ignored = settings
                     .as_ref()
                     .formatter
                     .ignored_files
-                    .matches_path(params.rome_path.as_path())
-                    || is_ignored_by_file_config
+                    .matches_path(params.rome_path.as_path());
+                if section_ignored {
+                    section_ignored
+                } else {
+                    is_ignored_by_file_config
+                }
             }
             FeatureName::Lint => {
-                settings
+                let section_ignored = settings
                     .as_ref()
                     .linter
                     .ignored_files
-                    .matches_path(params.rome_path.as_path())
-                    || is_ignored_by_file_config
+                    .matches_path(params.rome_path.as_path());
+
+                if section_ignored {
+                    section_ignored
+                } else {
+                    is_ignored_by_file_config
+                }
             }
             FeatureName::OrganizeImports => {
-                settings
+                let section_ignored = settings
                     .as_ref()
                     .organize_imports
                     .ignored_files
-                    .matches_path(params.rome_path.as_path())
-                    || is_ignored_by_file_config
+                    .matches_path(params.rome_path.as_path());
+
+                if section_ignored {
+                    section_ignored
+                } else {
+                    is_ignored_by_file_config
+                }
             }
         })
     }

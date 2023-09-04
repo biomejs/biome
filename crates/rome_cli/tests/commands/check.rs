@@ -2015,6 +2015,86 @@ file2.js
 }
 
 #[test]
+fn ignores_file_inside_directory() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let git_ignore = r#"
+ignored/
+"#;
+
+    let code1 = r#"array.map(sentence => sentence.split('    ')).flat();"#;
+    let code2 = r#"foo.call(); bar.call();"#;
+
+    // ignored files
+    let file_path1 = Path::new("ignored/file1.js");
+    fs.insert(file_path1.into(), code1.as_bytes());
+    let file_path2 = Path::new("ignored/file2.js");
+    fs.insert(file_path2.into(), code2.as_bytes());
+
+    // git folder
+    let git_folder = Path::new("./.git");
+    fs.insert(git_folder.into(), "".as_bytes());
+
+    // git ignore file
+    let ignore_file = Path::new("./.gitignore");
+    fs.insert(ignore_file.into(), git_ignore.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                ("--vcs-enabled=true"),
+                ("--vcs-client-kind=git"),
+                ("--vcs-use-ignore-file=true"),
+                ("--vcs-root=."),
+                ("--apply-unsafe"),
+                file_path1.as_os_str().to_str().unwrap(),
+                file_path2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    let mut file = fs
+        .open(file_path1)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, code1);
+    drop(file);
+
+    let mut file = fs
+        .open(file_path2)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, code2);
+
+    drop(file);
+
+    content.clear();
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ignores_file_inside_directory",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn ignore_vcs_os_independent_parse() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

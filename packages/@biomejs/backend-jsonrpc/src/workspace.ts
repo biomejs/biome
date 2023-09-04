@@ -1582,55 +1582,55 @@ export interface Workspace {
 export function createWorkspace(transport: Transport): Workspace {
 	return {
 		fileFeatures(params) {
-			return transport.request("rome/file_features", params);
+			return transport.request("biome/file_features", params);
 		},
 		updateSettings(params) {
-			return transport.request("rome/update_settings", params);
+			return transport.request("biome/update_settings", params);
 		},
 		openFile(params) {
-			return transport.request("rome/open_file", params);
+			return transport.request("biome/open_file", params);
 		},
 		changeFile(params) {
-			return transport.request("rome/change_file", params);
+			return transport.request("biome/change_file", params);
 		},
 		closeFile(params) {
-			return transport.request("rome/close_file", params);
+			return transport.request("biome/close_file", params);
 		},
 		getSyntaxTree(params) {
-			return transport.request("rome/get_syntax_tree", params);
+			return transport.request("biome/get_syntax_tree", params);
 		},
 		organizeImports(params) {
-			return transport.request("rome/organize_imports", params);
+			return transport.request("biome/organize_imports", params);
 		},
 		getFileContent(params) {
-			return transport.request("rome/get_file_content", params);
+			return transport.request("biome/get_file_content", params);
 		},
 		getControlFlowGraph(params) {
-			return transport.request("rome/get_control_flow_graph", params);
+			return transport.request("biome/get_control_flow_graph", params);
 		},
 		getFormatterIr(params) {
-			return transport.request("rome/get_formatter_ir", params);
+			return transport.request("biome/get_formatter_ir", params);
 		},
 		pullDiagnostics(params) {
-			return transport.request("rome/pull_diagnostics", params);
+			return transport.request("biome/pull_diagnostics", params);
 		},
 		pullActions(params) {
-			return transport.request("rome/pull_actions", params);
+			return transport.request("biome/pull_actions", params);
 		},
 		formatFile(params) {
-			return transport.request("rome/format_file", params);
+			return transport.request("biome/format_file", params);
 		},
 		formatRange(params) {
-			return transport.request("rome/format_range", params);
+			return transport.request("biome/format_range", params);
 		},
 		formatOnType(params) {
-			return transport.request("rome/format_on_type", params);
+			return transport.request("biome/format_on_type", params);
 		},
 		fixFile(params) {
-			return transport.request("rome/fix_file", params);
+			return transport.request("biome/fix_file", params);
 		},
 		rename(params) {
-			return transport.request("rome/rename", params);
+			return transport.request("biome/rename", params);
 		},
 		destroy() {
 			transport.destroy();

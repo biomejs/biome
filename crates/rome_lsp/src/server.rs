@@ -66,7 +66,7 @@ impl LSPServer {
         requests::syntax_tree::syntax_tree(&self.session, &url).map_err(into_lsp_error)
     }
 
-    #[tracing::instrument(skip(self), name = "rome/rage", level = "debug")]
+    #[tracing::instrument(skip(self), name = "biome/rage", level = "debug")]
     async fn rage(&self, params: RageParams) -> LspResult<RageResult> {
         let mut entries = vec![
             RageEntry::section("Server"),
@@ -118,7 +118,7 @@ impl LSPServer {
         let mut capabilities = CapabilitySet::default();
 
         capabilities.add_capability(
-            "rome_did_change_extension_settings",
+            "biome_did_change_extension_settings",
             "workspace/didChangeConfiguration",
             if self.session.can_register_did_change_configuration() {
                 CapabilityStatus::Enable(None)
@@ -128,17 +128,27 @@ impl LSPServer {
         );
 
         capabilities.add_capability(
-            "rome_did_change_workspace_settings",
+            "biome_did_change_workspace_settings",
             "workspace/didChangeWatchedFiles",
             if let Some(base_path) = self.session.base_path() {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
-                    watchers: vec![FileSystemWatcher {
-                        glob_pattern: GlobPattern::String(format!(
-                            "{}/biome.json",
-                            base_path.display()
-                        )),
-                        kind: Some(WatchKind::all()),
-                    }],
+                    watchers: vec![
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String(format!(
+                                "{}/biome.json",
+                                base_path.display()
+                            )),
+                            kind: Some(WatchKind::all()),
+                        },
+                        // TODO: Biome 2.0 remove it
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String(format!(
+                                "{}/rome.json",
+                                base_path.display()
+                            )),
+                            kind: Some(WatchKind::all()),
+                        }
+                    ],
                 })))
             } else {
                 CapabilityStatus::Disable
@@ -146,7 +156,7 @@ impl LSPServer {
         );
 
         capabilities.add_capability(
-            "rome_formatting",
+            "biome_formatting",
             "textDocument/formatting",
             if self.session.is_linting_and_formatting_disabled() {
                 CapabilityStatus::Disable
@@ -155,7 +165,7 @@ impl LSPServer {
             },
         );
         capabilities.add_capability(
-            "rome_range_formatting",
+            "biome_range_formatting",
             "textDocument/rangeFormatting",
             if self.session.is_linting_and_formatting_disabled() {
                 CapabilityStatus::Disable
@@ -164,7 +174,7 @@ impl LSPServer {
             },
         );
         capabilities.add_capability(
-            "rome_on_type_formatting",
+            "biome_on_type_formatting",
             "textDocument/onTypeFormatting",
             if self.session.is_linting_and_formatting_disabled() {
                 CapabilityStatus::Disable
@@ -183,7 +193,7 @@ impl LSPServer {
         };
 
         capabilities.add_capability(
-            "rome_rename",
+            "biome_rename",
             "textDocument/rename",
             if rename {
                 CapabilityStatus::Enable(None)
@@ -431,9 +441,9 @@ type Sessions = Arc<Mutex<HashMap<SessionKey, SessionHandle>>>;
 macro_rules! workspace_method {
     ( $builder:ident, $method:ident ) => {
         $builder = $builder.custom_method(
-            concat!("rome/", stringify!($method)),
+            concat!("biome/", stringify!($method)),
             |server: &LSPServer, params| {
-                let span = tracing::trace_span!(concat!("rome/", stringify!($method)), params = ?params).or_current();
+                let span = tracing::trace_span!(concat!("biome/", stringify!($method)), params = ?params).or_current();
 
                 let workspace = server.session.workspace.clone();
                 let result = spawn_blocking(move || {
@@ -526,13 +536,13 @@ impl ServerFactory {
         builder = builder.custom_method(SYNTAX_TREE_REQUEST, LSPServer::syntax_tree_request);
 
         // "shutdown" is not part of the Workspace API
-        builder = builder.custom_method("rome/shutdown", |server: &LSPServer, (): ()| {
+        builder = builder.custom_method("biome/shutdown", |server: &LSPServer, (): ()| {
             info!("Sending shutdown signal");
             server.session.broadcast_shutdown();
             ready(Ok(Some(())))
         });
 
-        builder = builder.custom_method("rome/rage", LSPServer::rage);
+        builder = builder.custom_method("biome/rage", LSPServer::rage);
 
         workspace_method!(builder, file_features);
         workspace_method!(builder, is_path_ignored);
