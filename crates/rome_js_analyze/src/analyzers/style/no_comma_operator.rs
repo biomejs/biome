@@ -53,6 +53,10 @@ impl Rule for NoCommaOperator {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let seq = ctx.query();
+        // Ignore nested sequences
+        if seq.parent::<JsSequenceExpression>().is_some() {
+            return None;
+        }
         if let Some(for_stmt) = seq.parent::<JsForStatement>() {
             // Allow comma operator in initializer and update parts of a `for`
             if for_stmt.test().map(AstNode::into_syntax).as_ref() != Some(seq.syntax()) {

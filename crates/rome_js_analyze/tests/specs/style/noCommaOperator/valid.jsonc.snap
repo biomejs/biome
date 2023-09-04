@@ -1,6 +1,5 @@
 ---
 source: crates/rome_js_analyze/tests/spec_tests.rs
-assertion_line: 92
 expression: valid.jsonc
 ---
 # Input
@@ -31,6 +30,11 @@ for (i = 0, j = 0; test; );
 # Input
 ```js
 for (; test; i++, j++);
+```
+
+# Input
+```js
+for (let i = 0, j = 1, k = 2; i < 100; i++, j++, k++) {}
 ```
 
 
