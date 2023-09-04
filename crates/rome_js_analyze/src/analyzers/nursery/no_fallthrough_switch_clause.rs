@@ -1,11 +1,15 @@
 use std::collections::VecDeque;
 
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use roaring::RoaringBitmap;
 use rome_console::markup;
-use rome_control_flow::{ExceptionHandlerKind, InstructionKind};
+use rome_control_flow::{
+    builder::{BlockId, ROOT_BLOCK_ID},
+    ExceptionHandlerKind, InstructionKind,
+};
 use rome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use rome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 
 use crate::{control_flow::AnyJsControlFlowRoot, ControlFlowGraph};
 
@@ -72,17 +76,14 @@ impl Rule for NoFallthroughSwitchClause {
             return fallthrough;
         }
         // block to process.
-        let mut block_stack = Vec::new();
-        let mut visited_blocks = FxHashSet::default();
-        block_stack.push(0u32);
-        visited_blocks.insert(0u32);
+        let mut block_stack = vec![ROOT_BLOCK_ID];
+        let mut visited_blocks = RoaringBitmap::new();
+        visited_blocks.insert(ROOT_BLOCK_ID.index());
+        let mut switch_clauses = VecDeque::new();
+        let mut block_to_switch_clause_range = FxHashMap::default();
         // Traverse the control flow graph and search for switch statements.
-        while let Some(block_index) = block_stack.pop() {
-            // SAFETY: this is a safe conversion because it is already an index for `cfg.blocks`.
-            let block_index = block_index as usize;
-            let Some(block) = cfg.blocks.get(block_index) else {
-                continue;
-            };
+        while let Some(block_id) = block_stack.pop() {
+            let block = cfg.get(block_id);
             // Register exception handlers as blocks to process
             // Ignore finally handler: they are already in the Control Flow Graph.
             for exception_handler in block
@@ -90,8 +91,9 @@ impl Rule for NoFallthroughSwitchClause {
                 .iter()
                 .filter(|x| matches!(x.kind, ExceptionHandlerKind::Catch))
             {
-                // Avoid cycles and redundant checks.
-                if visited_blocks.insert(exception_handler.target) {
+                // If the block was already visited, skip it.
+                // This avoid cycles and checking twice the same block.
+                if visited_blocks.insert(exception_handler.target.index()) {
                     block_stack.push(exception_handler.target);
                 }
             }
@@ -99,10 +101,7 @@ impl Rule for NoFallthroughSwitchClause {
             // A switch statements is followed by conditional jumps (the cases),
             // and a last unconditional jump (maybe the default clause)
             let mut is_switch = false;
-            let mut switch_clauses = VecDeque::new();
             let mut has_default_clause = false;
-            let mut switch_clause_blocks = FxHashSet::default();
-            let mut block_to_switch_clause_range = FxHashMap::default();
             for instruction in block.instructions.iter() {
                 match instruction.kind {
                     InstructionKind::Statement => {
@@ -110,13 +109,15 @@ impl Rule for NoFallthroughSwitchClause {
                             if let Some(switch_stmt) =
                                 node.parent().and_then(JsSwitchStatement::cast)
                             {
-                                if is_switch {
-                                    unreachable!("A block cannot contain two switch statements.")
-                                }
+                                // We assume that a block has a single switch.
+                                // If this assertion fails, then it is likely a change in the
+                                // implementation of the Control Flow Graph
+                                debug_assert!(!is_switch);
                                 is_switch = true;
                                 let switch_clause_nodes = switch_stmt.cases();
                                 let mut default_clause = None;
-                                switch_clauses = VecDeque::with_capacity(switch_clause_nodes.len());
+                                switch_clauses.reserve_exact(switch_clause_nodes.len());
+                                block_to_switch_clause_range.reserve(switch_clause_nodes.len());
                                 // Register in-order the switch cases, but the default clause which
                                 // is inserted at the end.
                                 // This mimics the order of the jumps in a blocks.
@@ -136,24 +137,25 @@ impl Rule for NoFallthroughSwitchClause {
                         }
                     }
                     InstructionKind::Jump {
-                        conditional, block, ..
+                        conditional,
+                        block: jump_block_id,
+                        ..
                     } => {
-                        let jump_block_index = block.index();
-                        // Avoid cycles and redundant checks.
-                        if visited_blocks.insert(jump_block_index) {
-                            block_stack.push(jump_block_index);
+                        // If the block was already visited, skip it.
+                        // This avoid cycles and checking twice the same block.
+                        if visited_blocks.insert(jump_block_id.index()) {
+                            block_stack.push(jump_block_id);
                         }
                         // If we are in a block of a switch statements,
                         // then any conditional jump is a case and an unconditional jump
                         // is a default clause if the switch has a default clause.
                         if is_switch && (conditional || has_default_clause) {
                             // Take the unconditional jump into account only if a default clause is present.
-                            switch_clause_blocks.insert(jump_block_index);
                             let Some(switch_clause) = switch_clauses.pop_front() else {
                                 unreachable!("Missing switch clause.")
                             };
                             block_to_switch_clause_range.insert(
-                                jump_block_index,
+                                jump_block_id,
                                 if switch_clause.consequent().is_empty() {
                                     // Ignore empty switch clauses
                                     None
@@ -173,7 +175,7 @@ impl Rule for NoFallthroughSwitchClause {
                     }
                 }
             }
-            if !switch_clause_blocks.is_empty() {
+            if !block_to_switch_clause_range.is_empty() {
                 // Analyze the found switch clauses to detect any fallthrough.
                 register_fallthrough_switch_clauses(
                     &block_to_switch_clause_range,
@@ -181,7 +183,9 @@ impl Rule for NoFallthroughSwitchClause {
                     cfg,
                     &mut fallthrough,
                 );
+                block_to_switch_clause_range.clear();
             }
+            switch_clauses.clear();
         }
         fallthrough
     }
@@ -220,25 +224,21 @@ fn has_switch_statement(control_flow_root: &JsSyntaxNode) -> bool {
 }
 
 fn register_fallthrough_switch_clauses(
-    block_to_switch_clause_range: &FxHashMap<u32, Option<TextRange>>,
-    visited_blocks: &FxHashSet<u32>,
+    block_to_switch_clause_range: &FxHashMap<BlockId, Option<TextRange>>,
+    visited_blocks: &RoaringBitmap,
     cfg: &rome_control_flow::ControlFlowGraph<JsLanguage>,
     fallthrough: &mut Vec<TextRange>,
 ) {
     let mut current_switch_clause = None;
     // Register all switch clauses as block to process.
-    let mut block_stack: Vec<u32> = block_to_switch_clause_range.keys().copied().collect();
+    let mut block_stack: Vec<_> = block_to_switch_clause_range.keys().copied().collect();
     let mut visited_blocks = visited_blocks.clone();
-    // Traverse the control flow graph
-    while let Some(block_index) = block_stack.pop() {
+    // Traverse the control flow graph and detect fallthrough
+    while let Some(block_id) = block_stack.pop() {
         current_switch_clause = block_to_switch_clause_range
-            .get(&block_index)
+            .get(&block_id)
             .or(current_switch_clause);
-        // SAFETY: this is a safe conversion because it is already an index for `cfg.blocks`.
-        let block_index = block_index as usize;
-        let Some(block) = cfg.blocks.get(block_index) else {
-            continue;
-        };
+        let block = cfg.get(block_id);
         // Register exception handlers as blocks to process
         // Ignore finally handler: they are already in the Control Flow Graph.
         for exception_handler in block
@@ -246,8 +246,9 @@ fn register_fallthrough_switch_clauses(
             .iter()
             .filter(|x| matches!(x.kind, ExceptionHandlerKind::Catch))
         {
-            // Avoid cycles and redundant checks.
-            if visited_blocks.insert(exception_handler.target) {
+            // If the block was already visited, skip it.
+            // This avoid cycles and checking twice the same block.
+            if visited_blocks.insert(exception_handler.target.index()) {
                 block_stack.push(exception_handler.target);
             }
         }
@@ -255,15 +256,17 @@ fn register_fallthrough_switch_clauses(
             match instruction.kind {
                 InstructionKind::Statement => {}
                 InstructionKind::Jump {
-                    conditional, block, ..
+                    conditional,
+                    block: jump_block_id,
+                    ..
                 } => {
-                    let jump_block_index = block.index();
-                    // Avoid cycles and redundant checks.
-                    if visited_blocks.insert(jump_block_index) {
-                        block_stack.push(jump_block_index);
+                    // If the block was already visited, skip it.
+                    // This avoid cycles and checking twice the same block.
+                    if visited_blocks.insert(jump_block_id.index()) {
+                        block_stack.push(jump_block_id);
                     }
                     if !conditional {
-                        if block_to_switch_clause_range.contains_key(&jump_block_index) {
+                        if block_to_switch_clause_range.contains_key(&jump_block_id) {
                             let Some(switch_clause_range) = current_switch_clause else {
                                 unreachable!("The current switch clause should be known.");
                             };
