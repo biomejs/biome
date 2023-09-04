@@ -7,5 +7,6 @@
 
 	// Allowed comma operators
 	"for (i = 0, j = 0; test; );",
-	"for (; test; i++, j++);"
+	"for (; test; i++, j++);",
+	"for (let i = 0, j = 1, k = 2; i < 100; i++, j++, k++) {}"
 ]

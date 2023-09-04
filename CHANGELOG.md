@@ -72,6 +72,19 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   <TextField inputLabelProps="" InputLabelProps=""></TextField>
   ```
 
+- Fix [#138](https://github.com/biomejs/biome/issues/138)
+
+  [noCommaOperator](https://biomejs.dev/linter/rules/no-comma-operator/) now correctly ignores all use of comma operators inside the update part of a `for` loop.
+  The following code is now correctly ignored:
+
+  ```js
+  for (
+    let i = 0, j = 1, k = 2;
+    i < 100;
+    i++, j++, k++
+  ) {}
+  ```
+
 - Fix [rome#4713](https://github.com/rome/tools/issues/4713).
 
   Previously, [useTemplate](https://biomejs.dev/linter/rules/use-template/) made the following suggestion:
