@@ -9,11 +9,3 @@ Math.pow(...a)
 Math.pow(...a, b)
 Math.pow(a, ...b)
 Math.pow(a, b, ...c)
-
-// shouldn't autofix if that would remove comments
-/* comment */Math.pow(a, b)
-Math.pow(/**/a, b)
-Math.pow(a, b/**/)
-Math.pow(a, b)/* comment */;
-Math.pow(a, b)// comment;
-Math.pow(/**/a/**/, /**/b/**/)

@@ -231,10 +231,8 @@ fn simplify_de_morgan(node: &JsLogicalExpression) -> Option<JsUnaryExpression> {
             next_logic_expression = next_logic_expression.with_right(right.argument().ok()?);
             Some(make::js_unary_expression(
                 make::token(T![!]),
-                AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
-                    make::token(T!['(']),
+                AnyJsExpression::JsParenthesizedExpression(make::parenthesized(
                     AnyJsExpression::JsLogicalExpression(next_logic_expression),
-                    make::token(T![')']),
                 )),
             ))
         }

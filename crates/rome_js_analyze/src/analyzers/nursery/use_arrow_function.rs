@@ -279,14 +279,7 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
     };
     if first_token.kind() == T!['{'] {
         // () => ({ ... })
-        result = AnyJsFunctionBody::AnyJsExpression(
-            make::js_parenthesized_expression(
-                make::token(T!['(']),
-                return_arg,
-                make::token(T![')']),
-            )
-            .into(),
-        );
+        result = AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
     }
     result
 }

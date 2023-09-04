@@ -1,6 +1,8 @@
 use std::fmt::Display;
 
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TriviaPieceKind};
+use rome_js_syntax::{
+    AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind,
+};
 use rome_rowan::TriviaPiece;
 
 pub use crate::generated::node_factory::*;
@@ -78,6 +80,16 @@ pub fn token_decorated_with_space(kind: JsSyntaxKind) -> JsSyntaxToken {
     }
 }
 
+/// EOF token
 pub fn eof() -> JsSyntaxToken {
     JsSyntaxToken::new_detached(JsSyntaxKind::EOF, "", [], [])
+}
+
+/// Wrap `expr` in a new parenthesized expression
+pub fn parenthesized(expr: impl Into<AnyJsExpression>) -> JsParenthesizedExpression {
+    js_parenthesized_expression(
+        token(JsSyntaxKind::L_PAREN),
+        expr.into(),
+        token(JsSyntaxKind::R_PAREN),
+    )
 }

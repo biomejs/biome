@@ -17,7 +17,6 @@ use rome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxResult,
     TextRange, TokenText,
 };
-use std::collections::HashSet;
 
 const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
@@ -1099,7 +1098,7 @@ impl JsCallExpression {
     /// Each index inside "indices" should be unique.
     /// "indices" must be sorted.
     ///
-    /// Supports maximum of 16 indices to avoid stack overflow. Eeach argument will consume:
+    /// Supports maximum of 16 indices to avoid stack overflow. Each argument will consume:
     ///
     /// - 8 bytes for the `Option<AnyJsCallArgument>` result;
     /// - 8 bytes for the [usize] argument.
@@ -1107,21 +1106,13 @@ impl JsCallExpression {
         &self,
         indices: [usize; N],
     ) -> [Option<AnyJsCallArgument>; N] {
-        // assert there are no duplicates
-        debug_assert!(HashSet::<_>::from_iter(indices).len() == N);
-        debug_assert!({
-            // is_sorted is unstable
-            let mut sorted = indices;
-            sorted.sort();
-            indices == sorted
-        });
         debug_assert!(N <= 16);
+        // assert there are no duplicates and they are in-order
+        debug_assert!(indices.windows(2).all(|vs| vs[0] < vs[1]));
 
         const INIT: Option<AnyJsCallArgument> = None;
         let mut results = [INIT; N];
-
         let mut next = 0;
-
         for (i, arg) in self
             .arguments()
             .ok()
@@ -1133,9 +1124,11 @@ impl JsCallExpression {
             if i == indices[next] {
                 results[next] = arg.ok();
                 next += 1;
+                if next == N {
+                    break;
+                }
             }
         }
-
         results
     }
 

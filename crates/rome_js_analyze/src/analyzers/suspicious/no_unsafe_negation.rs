@@ -3,7 +3,7 @@ use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make;
-use rome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression, T};
+use rome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression};
 use rome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
 
 declare_rule! {
@@ -100,10 +100,8 @@ impl Rule for NoUnsafeNegation {
                 let next_expr = expr
                     .clone()
                     .replace_node_discard_trivia(left.clone(), argument)?;
-                let next_parenthesis_expression = make::js_parenthesized_expression(
-                    make::token(T!['(']),
+                let next_parenthesis_expression = make::parenthesized(
                     rome_js_syntax::AnyJsExpression::JsInstanceofExpression(next_expr),
-                    make::token(T![')']),
                 );
                 let next_unary_expression = make::js_unary_expression(
                     unary_expression.operator_token().ok()?,
@@ -122,11 +120,8 @@ impl Rule for NoUnsafeNegation {
                     left.clone(),
                     rome_js_syntax::AnyJsInProperty::AnyJsExpression(argument),
                 )?;
-                let next_parenthesis_expression = make::js_parenthesized_expression(
-                    make::token(T!['(']),
-                    rome_js_syntax::AnyJsExpression::JsInExpression(next_expr),
-                    make::token(T![')']),
-                );
+                let next_parenthesis_expression =
+                    make::parenthesized(rome_js_syntax::AnyJsExpression::JsInExpression(next_expr));
                 let next_unary_expression = make::js_unary_expression(
                     unary_expression.operator_token().ok()?,
                     AnyJsExpression::JsParenthesizedExpression(next_parenthesis_expression),

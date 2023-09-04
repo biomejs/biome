@@ -42,7 +42,7 @@ invalidAdjacentTokens.js:2:3 lint/style/useExponentiationOperator  FIXABLE  ━�
   
      1  1 │   // tokens that cannot be adjacent
      2    │ - a+Math.pow(++b,·c);
-        2 │ + a+++b**c;
+        2 │ + a+(++b)·**·c;
      3  3 │   (a)+(Math).pow((++b), c);
      4  4 │   Math.pow(a, b)in c
   
@@ -66,7 +66,7 @@ invalidAdjacentTokens.js:3:5 lint/style/useExponentiationOperator  FIXABLE  ━�
      1  1 │   // tokens that cannot be adjacent
      2  2 │   a+Math.pow(++b, c);
      3    │ - (a)+(Math).pow((++b),·c);
-        3 │ + (a)+++b**c;
+        3 │ + (a)+(++b)·**·c;
      4  4 │   Math.pow(a, b)in c
      5  5 │   Math.pow(a, (b))in (c)
   
@@ -90,7 +90,7 @@ invalidAdjacentTokens.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━�
      2  2 │   a+Math.pow(++b, c);
      3  3 │   (a)+(Math).pow((++b), c);
      4    │ - Math.pow(a,·b)in·c
-        4 │ + (a**b)in·c
+        4 │ + (a·**·b)in·c
      5  5 │   Math.pow(a, (b))in (c)
      6  6 │   a+Math.pow(++b, c)in d
   
@@ -114,7 +114,7 @@ invalidAdjacentTokens.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━�
      3  3 │   (a)+(Math).pow((++b), c);
      4  4 │   Math.pow(a, b)in c
      5    │ - Math.pow(a,·(b))in·(c)
-        5 │ + (a**b)in·(c)
+        5 │ + (a·**·(b))in·(c)
      6  6 │   a+Math.pow(++b, c)in d
      7  7 │   a+Math.pow( ++b, c )in d
   
@@ -138,7 +138,7 @@ invalidAdjacentTokens.js:6:3 lint/style/useExponentiationOperator  FIXABLE  ━�
      4  4 │   Math.pow(a, b)in c
      5  5 │   Math.pow(a, (b))in (c)
      6    │ - a+Math.pow(++b,·c)in·d
-        6 │ + a+(++b**c)in·d
+        6 │ + a+((++b)·**·c)in·d
      7  7 │   a+Math.pow( ++b, c )in d
      8  8 │   
   
@@ -162,7 +162,7 @@ invalidAdjacentTokens.js:7:3 lint/style/useExponentiationOperator  FIXABLE  ━�
      5  5 │   Math.pow(a, (b))in (c)
      6  6 │   a+Math.pow(++b, c)in d
      7    │ - a+Math.pow(·++b,·c·)in·d
-        7 │ + a+(++b**c·)in·d
+        7 │ + a+(·(++b)·**·c·)in·d
      8  8 │   
      9  9 │   // tokens that cannot be adjacent, but there is already space or something else between
   
@@ -185,7 +185,7 @@ invalidAdjacentTokens.js:10:4 lint/style/useExponentiationOperator  FIXABLE  ━
      8  8 │   
      9  9 │   // tokens that cannot be adjacent, but there is already space or something else between
     10    │ - a+·Math.pow(++b,·c)·in·d
-       10 │ + a+·(++b**c)·in·d
+       10 │ + a+·((++b)·**·c)·in·d
     11 11 │   // a+/**/Math.pow(++b, c)/**/in d // ignored because of comments
     12 12 │   a+(Math.pow(++b, c))in d
   
@@ -209,7 +209,7 @@ invalidAdjacentTokens.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━
     10 10 │   a+ Math.pow(++b, c) in d
     11 11 │   // a+/**/Math.pow(++b, c)/**/in d // ignored because of comments
     12    │ - a+(Math.pow(++b,·c))in·d
-       12 │ + a+(++b**c)in·d
+       12 │ + a+((++b)·**·c)in·d
     13 13 │   
     14 14 │   // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
   
@@ -232,7 +232,7 @@ invalidAdjacentTokens.js:15:2 lint/style/useExponentiationOperator  FIXABLE  ━
     13 13 │   
     14 14 │   // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
     15    │ - +Math.pow(++a,·b)
-       15 │ + +(++a**b)
+       15 │ + +((++a)·**·b)
     16 16 │   Math.pow(a, b + c)in d
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
   
@@ -256,7 +256,7 @@ invalidAdjacentTokens.js:16:1 lint/style/useExponentiationOperator  FIXABLE  ━
     14 14 │   // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
     15 15 │   +Math.pow(++a, b)
     16    │ - Math.pow(a,·b·+·c)in·d
-       16 │ + (a**(b·+·c))in·d
+       16 │ + (a·**·(b·+·c))in·d
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18 18 │   Math.pow(Math.pow(a, b), Math.pow(c, d))
   
@@ -280,7 +280,7 @@ invalidAdjacentTokens.js:17:1 lint/style/useExponentiationOperator  FIXABLE  ━
     15 15 │   +Math.pow(++a, b)
     16 16 │   Math.pow(a, b + c)in d
     17    │ - Math.pow(a,·b)·+·Math.pow(c,·d)
-       17 │ + a**b·+·Math.pow(c,·d)
+       17 │ + a·**·b·+·Math.pow(c,·d)
     18 18 │   Math.pow(Math.pow(a, b), Math.pow(c, d))
     19 19 │   Math.pow(a, b)**Math.pow(c, d)
   
@@ -304,7 +304,7 @@ invalidAdjacentTokens.js:17:18 lint/style/useExponentiationOperator  FIXABLE  �
     15 15 │   +Math.pow(++a, b)
     16 16 │   Math.pow(a, b + c)in d
     17    │ - Math.pow(a,·b)·+·Math.pow(c,·d)
-       17 │ + Math.pow(a,·b)·+·c**d
+       17 │ + Math.pow(a,·b)·+·c·**·d
     18 18 │   Math.pow(Math.pow(a, b), Math.pow(c, d))
     19 19 │   Math.pow(a, b)**Math.pow(c, d)
   
@@ -328,7 +328,7 @@ invalidAdjacentTokens.js:18:1 lint/style/useExponentiationOperator  FIXABLE  ━
     16 16 │   Math.pow(a, b + c)in d
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18    │ - Math.pow(Math.pow(a,·b),·Math.pow(c,·d))
-       18 │ + Math.pow(a,·b)**Math.pow(c,·d)
+       18 │ + Math.pow(a,·b)·**·Math.pow(c,·d)
     19 19 │   Math.pow(a, b)**Math.pow(c, d)
     20 20 │   
   
@@ -352,7 +352,7 @@ invalidAdjacentTokens.js:18:10 lint/style/useExponentiationOperator  FIXABLE  �
     16 16 │   Math.pow(a, b + c)in d
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18    │ - Math.pow(Math.pow(a,·b),·Math.pow(c,·d))
-       18 │ + Math.pow(a**b,·Math.pow(c,·d))
+       18 │ + Math.pow(a·**·b,·Math.pow(c,·d))
     19 19 │   Math.pow(a, b)**Math.pow(c, d)
     20 20 │   
   
@@ -376,7 +376,7 @@ invalidAdjacentTokens.js:18:26 lint/style/useExponentiationOperator  FIXABLE  �
     16 16 │   Math.pow(a, b + c)in d
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18    │ - Math.pow(Math.pow(a,·b),·Math.pow(c,·d))
-       18 │ + Math.pow(Math.pow(a,·b),·c**d)
+       18 │ + Math.pow(Math.pow(a,·b),·c·**·d)
     19 19 │   Math.pow(a, b)**Math.pow(c, d)
     20 20 │   
   
@@ -399,7 +399,7 @@ invalidAdjacentTokens.js:19:1 lint/style/useExponentiationOperator  FIXABLE  ━
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18 18 │   Math.pow(Math.pow(a, b), Math.pow(c, d))
     19    │ - Math.pow(a,·b)**Math.pow(c,·d)
-       19 │ + (a**b)**Math.pow(c,·d)
+       19 │ + (a·**·b)**Math.pow(c,·d)
     20 20 │   
   
 
@@ -421,7 +421,7 @@ invalidAdjacentTokens.js:19:17 lint/style/useExponentiationOperator  FIXABLE  �
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
     18 18 │   Math.pow(Math.pow(a, b), Math.pow(c, d))
     19    │ - Math.pow(a,·b)**Math.pow(c,·d)
-       19 │ + Math.pow(a,·b)**c**d
+       19 │ + Math.pow(a,·b)**c·**·d
     20 20 │   
   
 

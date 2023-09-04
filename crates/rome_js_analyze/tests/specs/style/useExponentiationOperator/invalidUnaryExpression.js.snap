@@ -32,7 +32,7 @@ invalidUnaryExpression.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━
   
      1  1 │   // unary expressions are exception by the language - parens are required for the base to disambiguate operator precedence
      2    │ - Math.pow(+a,·b)
-        2 │ + (+a)**b
+        2 │ + (+a)·**·b
      3  3 │   Math.pow(a, +b)
      4  4 │   Math.pow(-a, b)
   
@@ -56,7 +56,7 @@ invalidUnaryExpression.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━
      1  1 │   // unary expressions are exception by the language - parens are required for the base to disambiguate operator precedence
      2  2 │   Math.pow(+a, b)
      3    │ - Math.pow(a,·+b)
-        3 │ + a**+b
+        3 │ + a·**·+b
      4  4 │   Math.pow(-a, b)
      5  5 │   Math.pow(a, -b)
   
@@ -80,7 +80,7 @@ invalidUnaryExpression.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━
      2  2 │   Math.pow(+a, b)
      3  3 │   Math.pow(a, +b)
      4    │ - Math.pow(-a,·b)
-        4 │ + (-a)**b
+        4 │ + (-a)·**·b
      5  5 │   Math.pow(a, -b)
      6  6 │   Math.pow(-2, 3)
   
@@ -104,7 +104,7 @@ invalidUnaryExpression.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━
      3  3 │   Math.pow(a, +b)
      4  4 │   Math.pow(-a, b)
      5    │ - Math.pow(a,·-b)
-        5 │ + a**-b
+        5 │ + a·**·-b
      6  6 │   Math.pow(-2, 3)
      7  7 │   Math.pow(2, -3)
   
@@ -128,7 +128,7 @@ invalidUnaryExpression.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━
      4  4 │   Math.pow(-a, b)
      5  5 │   Math.pow(a, -b)
      6    │ - Math.pow(-2,·3)
-        6 │ + (-2)**3
+        6 │ + (-2)·**·3
      7  7 │   Math.pow(2, -3)
      8  8 │   async () => Math.pow(await a, b)
   
@@ -152,7 +152,7 @@ invalidUnaryExpression.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━
      5  5 │   Math.pow(a, -b)
      6  6 │   Math.pow(-2, 3)
      7    │ - Math.pow(2,·-3)
-        7 │ + 2**-3
+        7 │ + 2·**·-3
      8  8 │   async () => Math.pow(await a, b)
      9  9 │   async () => Math.pow(a, await b)
   
@@ -176,7 +176,7 @@ invalidUnaryExpression.js:8:13 lint/style/useExponentiationOperator  FIXABLE  �
      6  6 │   Math.pow(-2, 3)
      7  7 │   Math.pow(2, -3)
      8    │ - async·()·=>·Math.pow(await·a,·b)
-        8 │ + async·()·=>·(await·a)**b
+        8 │ + async·()·=>·(await·a)·**·b
      9  9 │   async () => Math.pow(a, await b)
     10 10 │   
   
@@ -199,7 +199,7 @@ invalidUnaryExpression.js:9:13 lint/style/useExponentiationOperator  FIXABLE  �
      7  7 │   Math.pow(2, -3)
      8  8 │   async () => Math.pow(await a, b)
      9    │ - async·()·=>·Math.pow(a,·await·b)
-        9 │ + async·()·=>·a**await·b
+        9 │ + async·()·=>·a·**·await·b
     10 10 │   
   
 

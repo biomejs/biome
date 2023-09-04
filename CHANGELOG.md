@@ -49,6 +49,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + `\`${v}\``;
   ```
 
+- [useExponentiationOperator](https://biomejs.dev/linter/rules/use_exponentiation_operator/) suggests better code fixes.
+
+  The rule now preserves any comment preceding the exponent,
+  and it preserves any parenthesis around the base or the exponent.
+  It also adds spaces around the exponentiation operator `**`,
+  and always adds parentheses for pre- and post-updates.
+
+  ```diff
+  - Math.pow(a++, /**/ (2))
+  + (a++) ** /**/ (2)
+  ```
+
 #### Bug fixes
 
 - Fix [#80](https://github.com/biomejs/biome/issues/95), making [noDuplicateJsxProps](https://biomejs.dev/linter/rules/noDuplicateJsxProps/) case-insensitive.
@@ -98,6 +110,22 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
 
   As a sideeffect, the rule also suggests the removal of any inner comments.
+
+- Fix [rome#3850](https://github.com/rome/tools/issues/3850)
+
+  Previously [useExponentiationOperator](https://biomejs.dev/linter/rules/use_exponentiation_operator/) suggested invalid code in a specific edge case:
+
+  ```diff
+  - 1 +Math.pow(++a, 2)
+  + 1 +++a**2
+  ```
+
+  Now, the rule properly adds parentheses:
+
+  ```diff
+  - 1 +Math.pow(++a, 2)
+  + 1 +(++a) ** 2
+  ```
 
 - Fix [#106](https://github.com/biomejs/biome/issues/106)
 
