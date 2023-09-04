@@ -7,7 +7,7 @@ expression: content
 ```block
 rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The configuration file rome.json is deprecated. Use biome.jsonn instead.
+  ! The configuration file rome.json is deprecated. Use biome.json instead.
   
 
 ```
