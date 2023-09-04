@@ -14,7 +14,6 @@ class C extends A {
         } else {
             super(false);
         }
-
         this.field = "value";
     }
 }
@@ -31,7 +30,6 @@ class D extends A {
 class E extends A {
     constructor(cond) {
         this.field = "value";
-
         if (cond) {
             super(true);
         } else {
@@ -46,7 +44,28 @@ class F extends A {
         if (cond) {
             super(true);
         }
-
         this.field = "value";
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super();
+        } catch {
+            this.prop = 0;
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            this.prop = 0;
+        } catch {
+            super();
+        }
     }
 }

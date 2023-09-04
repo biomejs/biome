@@ -23,7 +23,6 @@ class D extends A {
         if (cond) {
             super(true);
         }
-
         super();
     }
 }
@@ -56,6 +55,28 @@ class G extends A {
             if (condB) {
                 super();
             }
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super()
+        } catch {
+            super()
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super()
+        } finally {
+            super()
         }
     }
 }

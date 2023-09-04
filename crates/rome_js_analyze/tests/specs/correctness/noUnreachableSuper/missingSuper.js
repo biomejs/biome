@@ -42,7 +42,6 @@ class E extends A {
         if (cond) {
             return;
         }
-
         super(true);
     }
 }
@@ -67,7 +66,6 @@ class G extends A {
         } else {
             throw new Error();
         }
-
         this.field = "value";
     }
 }
@@ -94,4 +92,11 @@ class I extends A {
             }
         }
     }
-  }
+}
+
+// invalid
+class I extends A {
+    constructor() {
+        super.method();
+    }
+}

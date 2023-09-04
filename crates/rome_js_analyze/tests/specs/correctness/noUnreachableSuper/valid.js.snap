@@ -1,0 +1,29 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+class B extends A {
+    constructor() {
+        super();
+        if (foo) {
+            if (bar) {
+                return;
+            } else {
+                return;
+            }
+        }
+    }
+}
+
+class B extends A {
+    constructor() {
+        super();
+        this.prop = 0;
+        super.method();
+    }
+}
+```
+
+

@@ -5,7 +5,6 @@ use rome_js_syntax::JsLanguage;
 use rome_js_syntax::TextRange;
 
 pub type JsControlFlowGraph = rome_control_flow::ControlFlowGraph<JsLanguage>;
-pub(crate) type BasicBlock = rome_control_flow::BasicBlock<JsLanguage>;
 pub(crate) type FunctionBuilder = rome_control_flow::builder::FunctionBuilder<JsLanguage>;
 
 mod nodes;
