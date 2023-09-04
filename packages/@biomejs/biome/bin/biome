@@ -18,6 +18,7 @@ const PLATFORMS = {
 
 const binPath = env.ROME_BINARY || PLATFORMS?.[platform]?.[arch];
 if (binPath) {
+	const packageManager = detectPackageManager();
 	const result = require("child_process").spawnSync(
 		require.resolve(binPath),
 		process.argv.slice(2),
@@ -28,7 +29,9 @@ if (binPath) {
 				...env,
 				JS_RUNTIME_VERSION: version,
 				JS_RUNTIME_NAME: release.name,
-				NODE_PACKAGE_MANAGER: detectPackageManager(),
+				...(packageManager === null
+					? { NODE_PACKAGE_MANAGER: packageManager }
+					: {}),
 			},
 		},
 	);
