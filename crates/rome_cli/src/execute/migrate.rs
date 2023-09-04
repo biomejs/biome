@@ -24,11 +24,7 @@ pub(crate) fn run(
         configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
 
     let open_options = if write {
-        if has_deprecated_configuration {
-            OpenOptions::default().read(true).write(true)
-        } else {
-            OpenOptions::default().read(true).write(true)
-        }
+        OpenOptions::default().read(true).write(true)
     } else {
         OpenOptions::default().read(true)
     };

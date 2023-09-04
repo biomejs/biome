@@ -22,6 +22,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Enhancements
 
 - Biome now reports a diagnostics when a `rome.json` file is found.
+- `rome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file.
+
+#### Bug fixes
+
+- Biome uses `biome.json` first, then it attempts to use `rome.json`.
 
 ### Configuration
 ### Editors
@@ -303,32 +308,32 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add [noExcessiveComplexity](https://biomejs.dev/linter/rules/noExcessiveComplexity/)
 
-- Add [useImportRestrictions](https://biomejs.dev/linter/rules/useImportRestrictions/)
+- Add [useImportRestrictions](https://biomejs.dev/linter/rules/use-import-restrictions/)
 
-- Add [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/noFallthroughSwitchClause/)
+- Add [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause/)
 
-- Add [noGlobalIsFinite](https://biomejs.dev/linter/rules/noglobalisfinite/)
+- Add [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/)
 
   This rule recommends using `Number.isFinite` instead of the global and unsafe `isFinite` that attempts a type coercion.
 
-- Add [noGlobalIsNan](https://biomejs.dev/linter/rules/noglobalisnan/)
+- Add [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/)
 
   This rule recommends using `Number.isNaN` instead of the global and unsafe `isNaN` that attempts a type coercion.
 
-- Add [noUnsafeDeclarationMerging](https://biomejs.dev/linter/rules/noUnsafeDeclarationMerging/)
+- Add [noUnsafeDeclarationMerging](https://biomejs.dev/linter/rules/no-unsafe-declaration-merging/)
 
   This rule disallows declaration merging between an interface and a class.
 
-- Add [noUselessThisAlias](https://biomejs.dev/linter/rules/noUselessThisAlias/)
+- Add [noUselessThisAlias](https://biomejs.dev/linter/rules/no-useless-this-alias/)
 
   This rule disallows useless aliasing of `this` in arrow functions.
 
-- Add [useArrowFunction](https://biomejs.dev/linter/rules/usearrowfunction/)
+- Add [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/)
 
   This rule proposes turning function expressions into arrow functions.
   Function expressions that use `this` are ignored.
 
-- Add [noDuplicateJsonKeys](https://biomejs.dev/linter/rules/noDuplicateJsonKeys/)
+- Add [noDuplicateJsonKeys](https://biomejs.dev/linter/rules/no-duplicate-json-keys/)
 
   This rule disallow duplicate keys in a JSON object.
 
