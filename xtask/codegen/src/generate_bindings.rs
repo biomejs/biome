@@ -125,7 +125,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
                                             [
                                                 AnyJsCallArgument::AnyJsExpression(
                                                     AnyJsExpression::AnyJsLiteralExpression(
-                                                        AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(make::js_string_literal(&format!("rome/{}", method.name)))),
+                                                        AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(make::js_string_literal(&format!("biome/{}", method.name)))),
                                                     ),
                                                 ),
                                                 AnyJsCallArgument::AnyJsExpression(

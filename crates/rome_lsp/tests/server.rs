@@ -257,9 +257,9 @@ impl Server {
 
     /// Basic implementation of the `rome/shutdown` request for tests
     async fn rome_shutdown(&mut self) -> Result<()> {
-        self.request::<_, ()>("rome/shutdown", "_rome_shutdown", ())
+        self.request::<_, ()>("biome/shutdown", "_rome_shutdown", ())
             .await?
-            .context("rome/shutdown returned None")?;
+            .context("biome/shutdown returned None")?;
         Ok(())
     }
 }
@@ -408,7 +408,7 @@ async fn document_lifecycle() -> Result<()> {
 
     let res: GetSyntaxTreeResult = server
         .request(
-            "rome/get_syntax_tree",
+            "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
                 path: RomePath::new("document.js"),
@@ -1459,7 +1459,7 @@ isSpreadAssignment;
 
     let actual: String = server
         .request(
-            "rome/get_file_content",
+            "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
                 path: RomePath::new("document.js"),

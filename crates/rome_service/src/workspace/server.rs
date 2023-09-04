@@ -241,7 +241,7 @@ impl Workspace for WorkspaceServer {
                     .formatter
                     .ignored_files
                     .matches_path(params.rome_path.as_path());
-                if section_ignored == true {
+                if section_ignored {
                     section_ignored
                 } else {
                     is_ignored_by_file_config
@@ -254,7 +254,7 @@ impl Workspace for WorkspaceServer {
                     .ignored_files
                     .matches_path(params.rome_path.as_path());
 
-                if section_ignored == true {
+                if section_ignored {
                     section_ignored
                 } else {
                     is_ignored_by_file_config
@@ -267,7 +267,7 @@ impl Workspace for WorkspaceServer {
                     .ignored_files
                     .matches_path(params.rome_path.as_path());
 
-                if section_ignored == true {
+                if section_ignored {
                     section_ignored
                 } else {
                     is_ignored_by_file_config

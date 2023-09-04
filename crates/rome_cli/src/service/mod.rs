@@ -194,7 +194,7 @@ impl WorkspaceTransport for SocketTransport {
 
         self.pending_requests.insert(request.id, send);
 
-        let is_shutdown = request.method == "rome/shutdown";
+        let is_shutdown = request.method == "biome/shutdown";
 
         let request = JsonRpcRequest {
             jsonrpc: Cow::Borrowed("2.0"),
