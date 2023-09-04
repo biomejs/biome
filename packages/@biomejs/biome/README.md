@@ -52,6 +52,6 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 
 [bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
-[biome-philosophy]: https://biomejs.dev/
-[language-support]: https://biomejs.dev/internals/language_support/
+[biome-philosophy]: https://biomejs.dev/internals/philosophy/
+[language-support]: https://biomejs.dev/internals/language-support/
 [getting-started]: https://biomejs.dev/guides/getting-started/
