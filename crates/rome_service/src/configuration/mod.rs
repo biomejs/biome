@@ -327,7 +327,8 @@ pub fn load_config(
     file_system: &DynRef<dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
-    let config_names = file_system.config_names();
+    let config_name = file_system.config_name();
+    let deprecated_config_name = file_system.deprecated_config_name();
     let working_directory = file_system.working_directory();
     let configuration_directory = match base_path {
         ConfigurationBasePath::Lsp(ref path) | ConfigurationBasePath::FromUser(ref path) => {
@@ -340,14 +341,25 @@ pub fn load_config(
     };
     let should_error = base_path.is_from_user();
 
-    let mut auto_search_result = None;
-    for config_name in config_names {
-        let result =
-            file_system.auto_search(configuration_directory.clone(), config_name, should_error)?;
-        if result.is_some() {
+    let auto_search_result;
+    let result =
+        file_system.auto_search(configuration_directory.clone(), config_name, should_error);
+    if let Ok(result) = result {
+        if result.is_none() {
+            auto_search_result = file_system.auto_search(
+                configuration_directory.clone(),
+                deprecated_config_name,
+                should_error,
+            )?;
+        } else {
             auto_search_result = result;
-            break;
         }
+    } else {
+        auto_search_result = file_system.auto_search(
+            configuration_directory.clone(),
+            deprecated_config_name,
+            should_error,
+        )?;
     }
 
     if let Some(auto_search_result) = auto_search_result {

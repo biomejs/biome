@@ -13,8 +13,6 @@ use tracing::{error, info};
 mod memory;
 mod os;
 
-pub const CONFIG_NAMES: [&str; 2] = [ROME_JSON, BIOME_JSON];
-
 pub const ROME_JSON: &str = "rome.json";
 pub const BIOME_JSON: &str = "biome.json";
 
@@ -28,9 +26,10 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// efficiently batch many filesystem read operations
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
 
+    // TODO: remove once we remove `rome.json` support [2.0]
     /// Returns the temporary configuration files that are supported
-    fn config_names(&self) -> [&str; 2] {
-        CONFIG_NAMES
+    fn deprecated_config_name(&self) -> &str {
+        ROME_JSON
     }
 
     /// Returns the name of the main configuration file

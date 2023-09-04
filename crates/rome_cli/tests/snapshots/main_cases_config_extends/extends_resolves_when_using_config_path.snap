@@ -29,14 +29,62 @@ debugger; console.log("string");
 # Termination Message
 
 ```block
-config/rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't read the file
-  
-  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: config/rome.json
+  × Some errors were emitted while running checks.
   
 
 
+```
+
+# Emitted Messages
+
+```block
+test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger; console.log("string");·
+      │ ^^^^^^^^^
+  
+  i Suggested fix: Remove debugger statement
+  
+    1 │ debugger;·console.log("string");·
+      │ ----------                       
+
+```
+
+```block
+test.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Formatter would have printed the following content:
+  
+    1   │ - debugger;·console.log("string");·
+      1 │ + debugger;
+      2 │ + console.log('string');
+      3 │ + 
+  
+
+```
+
+```block
+test.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+Checked 1 file(s) in <TIME>
 ```
 
 

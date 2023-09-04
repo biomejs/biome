@@ -269,7 +269,7 @@ pub struct NoVcsFolderFound {
     severity = Warning,
     message(
         description = "The configuration file {path} is deprecated. Use biome.json instead.",
-        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>"n instead."),
+        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>" instead."),
     )
 )]
 pub struct DeprecatedConfigurationFile {
