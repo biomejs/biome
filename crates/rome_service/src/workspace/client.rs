@@ -92,7 +92,7 @@ where
     }
 
     pub fn shutdown(self) -> Result<(), WorkspaceError> {
-        self.request("rome/shutdown", ())
+        self.request("biome/shutdown", ())
     }
 }
 
@@ -104,84 +104,84 @@ where
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        self.request("rome/file_features", params)
+        self.request("biome/file_features", params)
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        self.request("rome/is_path_ignored", params)
+        self.request("biome/is_path_ignored", params)
     }
 
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        self.request("rome/update_settings", params)
+        self.request("biome/update_settings", params)
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.request("rome/open_file", params)
+        self.request("biome/open_file", params)
     }
 
     fn get_syntax_tree(
         &self,
         params: GetSyntaxTreeParams,
     ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
-        self.request("rome/get_syntax_tree", params)
+        self.request("biome/get_syntax_tree", params)
     }
 
     fn get_control_flow_graph(
         &self,
         params: GetControlFlowGraphParams,
     ) -> Result<String, WorkspaceError> {
-        self.request("rome/get_control_flow_graph", params)
+        self.request("biome/get_control_flow_graph", params)
     }
 
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
-        self.request("rome/get_formatter_ir", params)
+        self.request("biome/get_formatter_ir", params)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
-        self.request("rome/get_file_content", params)
+        self.request("biome/get_file_content", params)
     }
 
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
-        self.request("rome/change_file", params)
+        self.request("biome/change_file", params)
     }
 
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        self.request("rome/close_file", params)
+        self.request("biome/close_file", params)
     }
 
     fn pull_diagnostics(
         &self,
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
-        self.request("rome/pull_diagnostics", params)
+        self.request("biome/pull_diagnostics", params)
     }
 
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
-        self.request("rome/pull_actions", params)
+        self.request("biome/pull_actions", params)
     }
 
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
-        self.request("rome/format_file", params)
+        self.request("biome/format_file", params)
     }
 
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
-        self.request("rome/format_range", params)
+        self.request("biome/format_range", params)
     }
 
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
-        self.request("rome/format_on_type", params)
+        self.request("biome/format_on_type", params)
     }
 
     fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
-        self.request("rome/fix_file", params)
+        self.request("biome/fix_file", params)
     }
 
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
-        self.request("rome/rename", params)
+        self.request("biome/rename", params)
     }
 
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
-        self.request("rome/rage", params)
+        self.request("biome/rage", params)
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {
@@ -192,6 +192,6 @@ where
         &self,
         params: OrganizeImportsParams,
     ) -> Result<OrganizeImportsResult, WorkspaceError> {
-        self.request("rome/organize_imports", params)
+        self.request("biome/organize_imports", params)
     }
 }

@@ -21,6 +21,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Biome uses `biome.json` first, then it attempts to use `rome.json`.
+- Fix a case where Biome couldn't compute correctly the ignored files when the VSC integration is enabled.
 
 ### Configuration
 ### Editors
