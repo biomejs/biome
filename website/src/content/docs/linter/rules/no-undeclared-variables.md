@@ -5,7 +5,7 @@ title: noUndeclaredVariables (since v1.0.0)
 
 Prevents the usage of variables that haven't been declared inside the document.
 
-If you need to allow-list some global bindings, you can use the [`javascript.globals`](/configuration/#javascriptglobals) configuration.
+If you need to allow-list some global bindings, you can use the [`javascript.globals`](/reference/configuration/#javascriptglobals) configuration.
 
 ## Examples
 
