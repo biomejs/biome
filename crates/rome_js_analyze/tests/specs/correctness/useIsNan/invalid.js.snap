@@ -849,7 +849,7 @@ invalid.js:33:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     31 31 │   Number.NaN >= "abc";
     32 32 │   "abc" >= Number.NaN;
     33    │ - x·===·Number?.NaN;
-       33 │ + Number.isNaN(x);
+       33 │ + Number?.isNaN(x);
     34 34 │   x === Number['NaN'];
     35 35 │   
   
@@ -897,7 +897,7 @@ invalid.js:36:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     34 34 │   x === Number['NaN'];
     35 35 │   
     36    │ - 123·==·globalThis.NaN;
-       36 │ + Number.isNaN(123);
+       36 │ + globalThis.Number.isNaN(123);
     37 37 │   123 == window.NaN;
     38 38 │   123 == globalThis.Number.NaN;
   
@@ -920,7 +920,7 @@ invalid.js:37:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     35 35 │   
     36 36 │   123 == globalThis.NaN;
     37    │ - 123·==·window.NaN;
-       37 │ + Number.isNaN(123);
+       37 │ + window.Number.isNaN(123);
     38 38 │   123 == globalThis.Number.NaN;
     39 39 │   
   
@@ -944,7 +944,7 @@ invalid.js:38:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     36 36 │   123 == globalThis.NaN;
     37 37 │   123 == window.NaN;
     38    │ - 123·==·globalThis.Number.NaN;
-       38 │ + Number.isNaN(123);
+       38 │ + globalThis.Number.isNaN(123);
     39 39 │   
     40 40 │   // switch-case
   

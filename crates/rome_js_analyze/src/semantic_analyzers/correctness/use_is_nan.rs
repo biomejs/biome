@@ -153,45 +153,43 @@ impl Rule for UseIsNan {
         let mut mutation = ctx.root().begin();
 
         match query {
-            UseIsNanQuery::JsBinaryExpression(bin_expr) => {
-                if bin_expr.is_comparison_operator()
-                    && (has_nan(bin_expr.left().ok()?, model)
-                        || has_nan(bin_expr.right().ok()?, model))
-                {
-                    let literal = get_literal(bin_expr, model)?;
-                    let with_inequality = contains_inequality(bin_expr).unwrap_or(false);
-                    let is_nan_expression = create_is_nan_expression(&with_inequality);
+            UseIsNanQuery::JsBinaryExpression(binary_expression) => {
+                let has_nan = binary_expression.is_comparison_operator()
+                    && (has_nan(binary_expression.left().ok()?, model)
+                        || has_nan(binary_expression.right().ok()?, model));
 
-                    let arg = AnyJsCallArgument::AnyJsExpression(
-                        literal
-                            .with_leading_trivia_pieces([])?
-                            .with_trailing_trivia_pieces([])?,
-                    );
-                    let args = make::js_call_arguments(
-                        make::token(T!['(']),
-                        make::js_call_argument_list([arg], []),
-                        make::token(T![')']),
-                    );
-
-                    let call = make::js_call_expression(is_nan_expression, args).build();
-
-                    mutation.replace_node(
-                        AnyJsExpression::JsBinaryExpression(bin_expr.clone()),
-                        call.into(),
-                    );
-
-                    return Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::MaybeIncorrect,
-                        message: markup! {
-                            "Use "<Emphasis>"Number.isNaN()"</Emphasis>" instead."
-                        }
-                        .to_owned(),
-                        mutation,
-                    });
+                if !has_nan {
+                    return None;
                 }
 
-                None
+                let (literal, nan) = get_literal(binary_expression, model)?;
+                let with_inequality = contains_inequality(binary_expression).unwrap_or(false);
+                let is_nan_expression: AnyJsExpression = create_is_nan_expression(nan)
+                    .and_then(|result| create_unary_expression(with_inequality, result))?;
+
+                let arg = AnyJsCallArgument::AnyJsExpression(literal);
+                let args = make::js_call_arguments(
+                    make::token(T!['(']),
+                    make::js_call_argument_list([arg], []),
+                    make::token(T![')']),
+                );
+
+                let call = make::js_call_expression(is_nan_expression, args).build();
+
+                mutation.replace_node(
+                    AnyJsExpression::JsBinaryExpression(binary_expression.clone()),
+                    call.into(),
+                );
+
+                return Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::MaybeIncorrect,
+                    message: markup! {
+                        "Use "<Emphasis>"Number.isNaN()"</Emphasis>" instead."
+                    }
+                    .to_owned(),
+                    mutation,
+                });
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,
@@ -199,45 +197,93 @@ impl Rule for UseIsNan {
     }
 }
 
-fn create_is_nan_expression(with_inequality: &bool) -> AnyJsExpression {
-    let is_nan_expression = make::js_static_member_expression(
-        make::js_identifier_expression(make::js_reference_identifier(make::ident("Number"))).into(),
-        make::token(T![.]),
-        make::js_name(make::ident("isNaN")).into(),
-    );
-
-    if *with_inequality {
-        let unary = make::js_unary_expression(make::token(T![!]), is_nan_expression.into());
-        return unary.into();
+fn create_unary_expression(
+    with_inequality: bool,
+    nan_expression: AnyJsExpression,
+) -> Option<AnyJsExpression> {
+    if with_inequality {
+        let unary = make::js_unary_expression(make::token(T![!]), nan_expression.into());
+        return Some(unary.into());
     }
 
-    is_nan_expression.into()
+    Some(nan_expression)
+}
+
+fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
+    match nan {
+        AnyJsExpression::JsIdentifierExpression(_)
+        | AnyJsExpression::JsComputedMemberExpression(_) => {
+            let is_nan_expression = make::js_static_member_expression(
+                make::js_identifier_expression(make::js_reference_identifier(make::ident(
+                    "Number",
+                )))
+                .into(),
+                make::token(T![.]),
+                make::js_name(make::ident("isNaN")).into(),
+            );
+
+            return Some(is_nan_expression.into());
+        }
+        AnyJsExpression::JsStaticMemberExpression(member_expression) => {
+            let is_nan_expression =
+                member_expression.with_member(make::js_name(make::ident("isNaN")).into());
+            let member_object = is_nan_expression.object().ok()?.omit_parentheses();
+            let (reference, _) = global_identifier(&member_object)?;
+            let number_identifier_exists = is_nan_expression
+                .object()
+                .ok()?
+                .as_js_static_member_expression()
+                .is_some_and(|y| y.member().is_ok_and(|z| z.text() == "Number"));
+
+            if !reference.is_global_this() && !reference.has_name("window")
+                || number_identifier_exists
+            {
+                return Some(is_nan_expression.into());
+            }
+
+            let member_expression = make::js_static_member_expression(
+                is_nan_expression.object().ok()?,
+                make::token(T![.]),
+                make::js_name(make::ident("Number")).into(),
+            );
+
+            return Some(
+                is_nan_expression
+                    .with_object(member_expression.into())
+                    .into(),
+            );
+        }
+        _ => None,
+    }
 }
 
 fn contains_inequality(bin_expr: &JsBinaryExpression) -> Option<bool> {
-    let binary_operator = bin_expr.operator().ok()?;
-
     Some(matches!(
-        binary_operator,
+        bin_expr.operator().ok()?,
         JsBinaryOperator::Inequality | JsBinaryOperator::StrictInequality
     ))
 }
 
-fn get_literal(bin_expr: &JsBinaryExpression, model: &SemanticModel) -> Option<AnyJsExpression> {
-    let left_expression = bin_expr.left().ok();
-    let right_expression = bin_expr.right().ok();
+fn get_literal(
+    bin_expr: &JsBinaryExpression,
+    model: &SemanticModel,
+) -> Option<(AnyJsExpression, AnyJsExpression)> {
+    let left_expression = bin_expr.left().ok()?;
+    let right_expression = bin_expr.right().ok()?;
+    let is_nan_on_left = has_nan(left_expression.clone(), model);
 
-    if let (Some(left), Some(right)) = (left_expression, right_expression) {
-        let is_nan_on_left = has_nan(left.clone(), model);
+    let left = left_expression
+        .with_leading_trivia_pieces([])?
+        .with_trailing_trivia_pieces([])?;
+    let right = right_expression
+        .with_leading_trivia_pieces([])?
+        .with_trailing_trivia_pieces([])?;
 
-        return if is_nan_on_left {
-            Some(right)
-        } else {
-            Some(left)
-        };
+    if !is_nan_on_left {
+        return Some((left, right));
     }
 
-    None
+    return Some((right, left));
 }
 
 /// Checks whether an expression has `NaN`, `Number.NaN`, or `Number['NaN']`.
