@@ -1875,7 +1875,7 @@ fn check_stdin_apply_successfully() {
 
     console
         .in_buffer
-        .push("function f() {return{}} class Foo { constructor() {} }".to_string());
+        .push("import {a as a} from 'mod'; function f() {return{a}} class Foo {}".to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1894,7 +1894,10 @@ fn check_stdin_apply_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {return{}} class Foo { }");
+    assert_eq!(
+        content,
+        "import {a} from 'mod'; function f() {return{a}} class Foo {}"
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1912,7 +1915,7 @@ fn check_stdin_apply_unsafe_successfully() {
 
     console
         .in_buffer
-        .push("function f() {return{}} class Foo { constructor() {} }".to_string());
+        .push("function f() {var x=1; return{x}} class Foo {}".to_string());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1939,7 +1942,7 @@ fn check_stdin_apply_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {return{}} class Foo { }");
+    assert_eq!(content, "function f() {const x=1; return{x}} class Foo {}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

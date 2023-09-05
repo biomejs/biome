@@ -35,13 +35,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### JavaScript APIs
 ### Linter
 
-#### Rule status
-
-- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) is no longer recommended
-
-  The rule conflicts with frameworks that use dependency injection.
-  We plan to improve the rule to reduce false positives.
-
 #### Enhancements
 
 - [useTemplate](https://biomejs.dev/linter/rules/use-template/) now reports all string concatenations.
@@ -74,6 +67,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - Math.pow(a++, /**/ (2))
   + (a++) ** /**/ (2)
   ```
+
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters.
+  The rule now gives suggestions instead of safe fixes when parameters are annotated with types.
 
 #### Bug fixes
 

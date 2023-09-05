@@ -1,7 +1,7 @@
 use crate::{
     AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsFormalParameter, AnyJsParameter,
     JsConstructorParameterList, JsConstructorParameters, JsDecoratorList, JsLanguage,
-    JsParameterList, JsParameters,
+    JsParameterList, JsParameters, TsTypeAnnotation,
 };
 use rome_rowan::{
     declare_node_union, AstNodeList, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxResult,
@@ -181,7 +181,7 @@ impl AnyJsParameterList {
     ///
     /// # Returns
     ///
-    /// Returns true if the parameter list contains no parameters, false otherwise.
+    /// Returns `true` if the parameter list contains no parameters, false otherwise.
     pub fn is_empty(&self) -> bool {
         match self {
             AnyJsParameterList::JsParameterList(parameters) => parameters.is_empty(),
@@ -410,10 +410,8 @@ impl AnyJsParameterList {
     pub fn has_any_decorated_parameter(&self) -> bool {
         self.iter().any(|parameter| {
             parameter.map_or(false, |parameter| match parameter {
-                AnyParameter::AnyJsConstructorParameter(parameter) => {
-                    parameter.has_any_decorated_parameter()
-                }
-                AnyParameter::AnyJsParameter(parameter) => parameter.has_any_decorated_parameter(),
+                AnyParameter::AnyJsConstructorParameter(parameter) => parameter.has_any_decorator(),
+                AnyParameter::AnyJsParameter(parameter) => parameter.has_any_decorator(),
             })
         })
     }
@@ -487,7 +485,7 @@ declare_node_union! {
 }
 
 impl AnyJsConstructorParameter {
-    /// This method returns a list of decorators for a parameter if it exists.
+    /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
             AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
@@ -498,15 +496,28 @@ impl AnyJsConstructorParameter {
         }
     }
 
-    /// This method checks if any parameters in the given list are decorated.
-    pub fn has_any_decorated_parameter(&self) -> bool {
+    /// Returns `true` if any parameter in the given list is decorated.
+    pub fn has_any_decorator(&self) -> bool {
         self.decorators()
             .map_or(false, |decorators| !decorators.is_empty())
+    }
+
+    /// Returns the type annotation of the parameter if any.
+    pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
+        match self {
+            AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => {
+                parameter.type_annotation()
+            }
+            AnyJsConstructorParameter::JsRestParameter(parameter) => parameter.type_annotation(),
+            AnyJsConstructorParameter::TsPropertyParameter(parameter) => {
+                parameter.formal_parameter().ok()?.type_annotation()
+            }
+        }
     }
 }
 
 impl AnyJsParameter {
-    /// This method returns a list of decorators for a parameter if it exists.
+    /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
             AnyJsParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
@@ -515,19 +526,27 @@ impl AnyJsParameter {
         }
     }
 
-    /// This method checks if any parameters in the given list are decorated.
-    pub fn has_any_decorated_parameter(&self) -> bool {
+    /// Returns `true` if any parameter in the given list is decorated.
+    pub fn has_any_decorator(&self) -> bool {
         self.decorators()
             .map_or(false, |decorators| !decorators.is_empty())
     }
 }
 
 impl AnyJsFormalParameter {
-    /// This method returns a list of decorators for a parameter if it exists.
+    /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
             AnyJsFormalParameter::JsBogusParameter(_) => None,
             AnyJsFormalParameter::JsFormalParameter(parameter) => Some(parameter.decorators()),
+        }
+    }
+
+    /// Returns the type annotation of the parameter if any.
+    pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
+        match self {
+            AnyJsFormalParameter::JsBogusParameter(_) => None,
+            AnyJsFormalParameter::JsFormalParameter(parameter) => parameter.type_annotation(),
         }
     }
 }

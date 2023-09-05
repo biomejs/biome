@@ -5,13 +5,13 @@ expression: content
 # Input messages
 
 ```block
-import 'zod'; import 'lodash'; function f() {return{}} class Foo { constructor() {} }
+import 'zod'; import 'lodash'; function f() {return{}} class Foo {}
 ```
 
 # Emitted Messages
 
 ```block
-import 'lodash'; import 'zod'; function f() {return{}} class Foo { constructor() {} }
+import 'lodash'; import 'zod'; function f() {return{}} class Foo {}
 ```
 
 

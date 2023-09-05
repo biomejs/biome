@@ -3,6 +3,10 @@ title: noUselessConstructor (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Disallow unnecessary constructors.
 
 _ES2015_ provides a default class constructor if one is not specified.
@@ -22,7 +26,7 @@ class A {
 
 <pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This constructor is unnecessary.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
     <strong>1 │ </strong>class A {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    constructor (a) {}
@@ -39,7 +43,7 @@ class A {
   
 </code></pre>
 
-```jsx
+```ts
 class B extends A {
     constructor (a) {
         super(a);
@@ -49,7 +53,7 @@ class B extends A {
 
 <pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This constructor is unnecessary.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
     <strong>1 │ </strong>class B extends A {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    constructor (a) {
@@ -82,7 +86,7 @@ class C {
 
 <pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:5:5 <a href="https://biomejs.dev/linter/rules/no-useless-constructor">lint/complexity/noUselessConstructor</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This constructor is unnecessary.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This constructor is unnecessary.</span>
   
     <strong>3 │ </strong>     * Documented constructor.
     <strong>4 │ </strong>     */
@@ -125,6 +129,13 @@ class B extends A {
 class C {
     // Empty constructor with parameter properties are allowed.
     constructor (private prop: number) {}
+}
+```
+
+```ts
+@Decorator
+class C {
+    constructor (prop: number) {}
 }
 ```
 
