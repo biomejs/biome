@@ -484,7 +484,7 @@ impl BoilerplateImpls {
                 type Format<'a> = FormatRefWithRule<'a, #syntax_crate_ident::#node_id, #format_id>;
 
                 fn format(&self) -> Self::Format<'_> {
-                    FormatRefWithRule::new(self, #format_id::default())
+                    FormatRefWithRule::new(self, #format_id)
                 }
             }
 
@@ -492,7 +492,7 @@ impl BoilerplateImpls {
                 type Format = FormatOwnedWithRule<#syntax_crate_ident::#node_id, #format_id>;
 
                 fn into_format(self) -> Self::Format {
-                    FormatOwnedWithRule::new(self, #format_id::default())
+                    FormatOwnedWithRule::new(self, #format_id)
                 }
             }
         });
