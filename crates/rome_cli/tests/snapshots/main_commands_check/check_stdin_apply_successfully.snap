@@ -5,14 +5,15 @@ expression: content
 # Input messages
 
 ```block
-function f() {return{}} class Foo { constructor() {} }
+import {a as a} from 'mod'; function f() {return{a}} class Foo {}
 ```
 
 # Emitted Messages
 
 ```block
+import { a } from "mod";
 function f() {
-	return {};
+	return { a };
 }
 class Foo {}
 

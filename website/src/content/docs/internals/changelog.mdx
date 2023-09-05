@@ -68,6 +68,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + (a++) ** /**/ (2)
   ```
 
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters.
+  The rule now gives suggestions instead of safe fixes when parameters are annotated with types.
+
 #### Bug fixes
 
 - Fix [#80](https://github.com/biomejs/biome/issues/95), making [noDuplicateJsxProps](https://biomejs.dev/linter/rules/no-duplicate-jsx-props/) case-insensitive.

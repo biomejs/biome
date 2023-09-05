@@ -5,13 +5,13 @@ expression: content
 # Input messages
 
 ```block
-function f() {return{}} class Foo { constructor() {} }
+function f() {var x=1; return{x}} class Foo {}
 ```
 
 # Emitted Messages
 
 ```block
-function f() {return{}} class Foo { }
+function f() {const x=1; return{x}} class Foo {}
 ```
 
 
