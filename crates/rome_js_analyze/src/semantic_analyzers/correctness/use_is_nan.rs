@@ -280,10 +280,10 @@ fn get_literal(
         .with_trailing_trivia_pieces([])?;
 
     if !is_nan_on_left {
-        return Some((left, right));
+        Some((left, right))
+    } else {
+        Some((right, left))
     }
-
-    Some((right, left))
 }
 
 /// Checks whether an expression has `NaN`, `Number.NaN`, or `Number['NaN']`.
