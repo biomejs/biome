@@ -202,7 +202,7 @@ fn create_unary_expression(
     nan_expression: AnyJsExpression,
 ) -> Option<AnyJsExpression> {
     if with_inequality {
-        let unary = make::js_unary_expression(make::token(T![!]), nan_expression.into());
+        let unary = make::js_unary_expression(make::token(T![!]), nan_expression);
         return Some(unary.into());
     }
 
@@ -222,7 +222,7 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
                 make::js_name(make::ident("isNaN")).into(),
             );
 
-            return Some(is_nan_expression.into());
+            Some(is_nan_expression.into())
         }
         AnyJsExpression::JsStaticMemberExpression(member_expression) => {
             let is_nan_expression =
@@ -247,11 +247,11 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
                 make::js_name(make::ident("Number")).into(),
             );
 
-            return Some(
+            Some(
                 is_nan_expression
                     .with_object(member_expression.into())
                     .into(),
-            );
+            )
         }
         _ => None,
     }
@@ -283,7 +283,7 @@ fn get_literal(
         return Some((left, right));
     }
 
-    return Some((right, left));
+    Some((right, left))
 }
 
 /// Checks whether an expression has `NaN`, `Number.NaN`, or `Number['NaN']`.
