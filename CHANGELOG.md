@@ -29,6 +29,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### JavaScript APIs
 ### Linter
 
+#### Rule status
+
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) is no longer recommended
+
+  The rule conflicts with frameworks that use dependency injection.
+  We plan to improve the rule to reduce false positives.
+
 #### Enhancements
 
 - [useTemplate](https://biomejs.dev/linter/rules/use-template/) now reports all string concatenations.

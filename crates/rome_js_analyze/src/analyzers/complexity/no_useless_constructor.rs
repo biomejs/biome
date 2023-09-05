@@ -71,7 +71,7 @@ declare_rule! {
     pub(crate) NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
-        recommended: true,
+        recommended: false,
     }
 }
 
