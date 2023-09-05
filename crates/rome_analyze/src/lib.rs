@@ -454,10 +454,23 @@ where
                 }
             };
 
+            if matches!(kind, SuppressionKind::Deprecated) {
+                let signal = DiagnosticSignal::new(move || {
+                    SuppressionDiagnostic::new(
+                        category!("suppressions/deprecatedSuppressionComment"),
+                        range,
+                        "// rome-ignore is deprecated, use // biome-ignore instead",
+                    )
+                    .with_tags(DiagnosticTags::DEPRECATED_CODE)
+                });
+                (self.emit_signal)(&signal)?;
+            }
+
             let rule = match kind {
                 SuppressionKind::Everything => None,
                 SuppressionKind::Rule(rule) => Some(rule),
                 SuppressionKind::MaybeLegacy(rule) => Some(rule),
+                SuppressionKind::Deprecated => None,
             };
 
             if let Some(rule) = rule {
@@ -507,7 +520,7 @@ where
         if has_legacy && range_match(self.range, range) {
             let signal = DiagnosticSignal::new(move || {
                 SuppressionDiagnostic::new(
-                    category!("suppressions/deprecatedSyntax"),
+                    category!("suppressions/deprecatedSuppressionComment"),
                     range,
                     "Suppression is using a deprecated syntax",
                 )
@@ -617,6 +630,8 @@ pub enum SuppressionKind<'a> {
     Rule(&'a str),
     /// A suppression using the legacy syntax to disable a specific rule eg. `// rome-ignore lint(style/useWhile)`
     MaybeLegacy(&'a str),
+    /// `rome-ignore` is legacy
+    Deprecated,
 }
 
 fn update_suppression<L: Language>(
