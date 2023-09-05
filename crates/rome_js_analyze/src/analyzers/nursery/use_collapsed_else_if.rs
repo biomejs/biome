@@ -79,7 +79,6 @@ declare_rule! {
 pub(crate) struct RuleState {
     block_statement: JsBlockStatement,
     if_statement: JsIfStatement,
-    provide_fix: bool,
 }
 
 impl Rule for UseCollapsedElseIf {
@@ -91,20 +90,15 @@ impl Rule for UseCollapsedElseIf {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let else_clause = ctx.query();
         let alternate = else_clause.alternate().ok()?;
-        let block = alternate.as_js_block_statement()?;
-        let block_statements = block.statements();
-        if block_statements.len() != 1 {
+        let block_statement = alternate.as_js_block_statement()?;
+        let statements = block_statement.statements();
+        if statements.len() != 1 {
             return None;
         }
-        if let AnyJsStatement::JsIfStatement(if_statement) = block_statements.first()? {
-            let has_comments = if_statement.syntax().has_leading_comments()
-                || block
-                    .r_curly_token()
-                    .is_ok_and(|token| token.has_leading_comments());
+        if let AnyJsStatement::JsIfStatement(if_statement) = statements.first()? {
             Some(RuleState {
-                block_statement: block.to_owned(),
+                block_statement: block_statement.to_owned(),
                 if_statement,
-                provide_fix: !has_comments,
             })
         } else {
             None
@@ -122,9 +116,24 @@ impl Rule for UseCollapsedElseIf {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if !state.provide_fix {
-            return None;
-        }
+        let RuleState {
+            block_statement,
+            if_statement,
+        } = state;
+
+        let has_comments = block_statement
+            .l_curly_token()
+            .ok()?
+            .has_trailing_comments()
+            || if_statement.syntax().has_leading_comments()
+            || if_statement.syntax().has_trailing_comments()
+            || block_statement.r_curly_token().ok()?.has_leading_comments();
+
+        let applicability = if has_comments {
+            Applicability::MaybeIncorrect
+        } else {
+            Applicability::Always
+        };
 
         let mut mutation = ctx.root().begin();
         mutation.replace_element(
@@ -134,7 +143,7 @@ impl Rule for UseCollapsedElseIf {
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
+            applicability,
             message: markup! { "Use collapsed "<Emphasis>"else if"</Emphasis>" instead." }
                 .to_owned(),
             mutation,

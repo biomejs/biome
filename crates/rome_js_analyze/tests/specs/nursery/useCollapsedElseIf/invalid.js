@@ -1,3 +1,7 @@
+/**
+ * Safe fixes:
+ */
+
 if (condition) {
 	// ...
 } else {
@@ -17,8 +21,16 @@ if (condition) {
 }
 
 /**
- * NOTE: For the following cases: Show diagnostic but don't suggest a fix.
+ * Suggested fixes:
  */
+
+if (condition) {
+	// ...
+} else { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+}
 
 if (condition) {
 	// ...
@@ -34,8 +46,26 @@ if (condition) {
 } else {
 	if (anotherCondition) {
 		// ...
+	} // Comment
+}
+
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
 	}
 	// Comment
+}
+
+if (condition) {
+	// ...
+} else { // Comment
+	if (anotherCondition) {
+		// ...
+	} else {
+		// ...
+	}
 }
 
 if (condition) {
@@ -47,6 +77,16 @@ if (condition) {
 	} else {
 		// ...
 	}
+}
+
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
+	} else {
+		// ...
+	} // Comment
 }
 
 if (condition) {

@@ -4,6 +4,10 @@ expression: invalid.js
 ---
 # Input
 ```js
+/**
+ * Safe fixes:
+ */
+
 if (condition) {
 	// ...
 } else {
@@ -23,8 +27,16 @@ if (condition) {
 }
 
 /**
- * NOTE: For the following cases: Show diagnostic but don't suggest a fix.
+ * Suggested fixes:
  */
+
+if (condition) {
+	// ...
+} else { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+}
 
 if (condition) {
 	// ...
@@ -40,8 +52,26 @@ if (condition) {
 } else {
 	if (anotherCondition) {
 		// ...
+	} // Comment
+}
+
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
 	}
 	// Comment
+}
+
+if (condition) {
+	// ...
+} else { // Comment
+	if (anotherCondition) {
+		// ...
+	} else {
+		// ...
+	}
 }
 
 if (condition) {
@@ -53,6 +83,16 @@ if (condition) {
 	} else {
 		// ...
 	}
+}
+
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
+	} else {
+		// ...
+	} // Comment
 }
 
 if (condition) {
@@ -70,136 +110,178 @@ if (condition) {
 
 # Diagnostics
 ```
-invalid.js:3:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
-    1 │ if (condition) {
-    2 │ 	// ...
-  > 3 │ } else {
-      │         
-  > 4 │ 	if (anotherCondition) {
-  > 5 │ 		// ...
-  > 6 │ 	}
-      │ 	^
-    7 │ }
-    8 │ 
+     5 │ if (condition) {
+     6 │ 	// ...
+   > 7 │ } else {
+       │         
+   > 8 │ 	if (anotherCondition) {
+   > 9 │ 		// ...
+  > 10 │ 	}
+       │ 	^
+    11 │ }
+    12 │ 
   
   i Safe fix: Use collapsed else if instead.
   
-     1  1 │   if (condition) {
-     2  2 │   	// ...
-     3    │ - }·else·{
-     4    │ - → if·(anotherCondition)·{
-        3 │ + }·else·if·(anotherCondition)·{
-     5  4 │   		// ...
-     6    │ - → }
-     7    │ - }
-        5 │ + → }
-     8  6 │   
-     9  7 │   if (condition) {
+      5   5 │   if (condition) {
+      6   6 │   	// ...
+      7     │ - }·else·{
+      8     │ - → if·(anotherCondition)·{
+          7 │ + }·else·if·(anotherCondition)·{
+      9   8 │   		// ...
+     10     │ - → }
+     11     │ - }
+          9 │ + → }
+     12  10 │   
+     13  11 │   if (condition) {
   
 
 ```
 
 ```
-invalid.js:11:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
-     9 │ if (condition) {
-    10 │ 	// ...
-  > 11 │ } else {
+    13 │ if (condition) {
+    14 │ 	// ...
+  > 15 │ } else {
        │         
-  > 12 │ 	if (anotherCondition) {
-  > 13 │ 		// ...
-  > 14 │ 	} else {
-  > 15 │ 		// ...
-  > 16 │ 	}
+  > 16 │ 	if (anotherCondition) {
+  > 17 │ 		// ...
+  > 18 │ 	} else {
+  > 19 │ 		// ...
+  > 20 │ 	}
        │ 	^
-    17 │ }
-    18 │ 
+    21 │ }
+    22 │ 
   
   i Safe fix: Use collapsed else if instead.
   
-     9  9 │   if (condition) {
-    10 10 │   	// ...
-    11    │ - }·else·{
-    12    │ - → if·(anotherCondition)·{
-       11 │ + }·else·if·(anotherCondition)·{
-    13 12 │   		// ...
-    14 13 │   	} else {
-    15 14 │   		// ...
-    16    │ - → }
-    17    │ - }
-       15 │ + → }
-    18 16 │   
-    19 17 │   /**
+     13  13 │   if (condition) {
+     14  14 │   	// ...
+     15     │ - }·else·{
+     16     │ - → if·(anotherCondition)·{
+         15 │ + }·else·if·(anotherCondition)·{
+     17  16 │   		// ...
+     18  17 │   	} else {
+     19  18 │   		// ...
+     20     │ - → }
+     21     │ - }
+         19 │ + → }
+     22  20 │   
+     23  21 │   /**
   
 
 ```
 
 ```
-invalid.js:25:9 lint/nursery/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:20 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
-    23 │ if (condition) {
-    24 │ 	// ...
-  > 25 │ } else {
-       │         
-  > 26 │ 	// Comment
-  > 27 │ 	if (anotherCondition) {
-  > 28 │ 		// ...
-  > 29 │ 	}
+    27 │ if (condition) {
+    28 │ 	// ...
+  > 29 │ } else { // Comment
+       │                    
+  > 30 │ 	if (anotherCondition) {
+  > 31 │ 		// ...
+  > 32 │ 	}
        │ 	^
-    30 │ }
-    31 │ 
+    33 │ }
+    34 │ 
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     27  27 │   if (condition) {
+     28  28 │   	// ...
+     29     │ - }·else·{·//·Comment
+     30     │ - → if·(anotherCondition)·{
+         29 │ + }·else·if·(anotherCondition)·{
+     31  30 │   		// ...
+     32     │ - → }
+     33     │ - }
+         31 │ + → }
+     34  32 │   
+     35  33 │   if (condition) {
   
 
 ```
 
 ```
-invalid.js:34:9 lint/nursery/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
-    32 │ if (condition) {
-    33 │ 	// ...
-  > 34 │ } else {
+    35 │ if (condition) {
+    36 │ 	// ...
+  > 37 │ } else {
        │         
-  > 35 │ 	if (anotherCondition) {
-  > 36 │ 		// ...
-  > 37 │ 	}
+  > 38 │ 	// Comment
+  > 39 │ 	if (anotherCondition) {
+  > 40 │ 		// ...
+  > 41 │ 	}
        │ 	^
-    38 │ 	// Comment
-    39 │ }
+    42 │ }
+    43 │ 
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     35 35 │   if (condition) {
+     36 36 │   	// ...
+     37    │ - }·else·{
+     38    │ - → //·Comment
+     39    │ - → if·(anotherCondition)·{
+        37 │ + }·else·if·(anotherCondition)·{
+     40 38 │   		// ...
+     41    │ - → }
+     42    │ - }
+        39 │ + → }
+     43 40 │   
+     44 41 │   if (condition) {
   
 
 ```
 
 ```
-invalid.js:43:9 lint/nursery/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
-    41 │ if (condition) {
-    42 │ 	// ...
-  > 43 │ } else {
+    44 │ if (condition) {
+    45 │ 	// ...
+  > 46 │ } else {
        │         
-  > 44 │ 	// Comment
-        ...
+  > 47 │ 	if (anotherCondition) {
   > 48 │ 		// ...
-  > 49 │ 	}
-       │ 	^
+  > 49 │ 	} // Comment
+       │ 	^^^^^^^^^^^^
     50 │ }
     51 │ 
   
+  i Suggested fix: Use collapsed else if instead.
+  
+     44  44 │   if (condition) {
+     45  45 │   	// ...
+     46     │ - }·else·{
+     47     │ - → if·(anotherCondition)·{
+         46 │ + }·else·if·(anotherCondition)·{
+     48  47 │   		// ...
+     49     │ - → }·//·Comment
+     50     │ - }
+         48 │ + → }
+     51  49 │   
+     52  50 │   if (condition) {
+  
 
 ```
 
 ```
-invalid.js:54:9 lint/nursery/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into an else if statement.
   
@@ -209,12 +291,173 @@ invalid.js:54:9 lint/nursery/useCollapsedElseIf ━━━━━━━━━━�
        │         
   > 55 │ 	if (anotherCondition) {
   > 56 │ 		// ...
-  > 57 │ 	} else {
-  > 58 │ 		// ...
-  > 59 │ 	}
+  > 57 │ 	}
        │ 	^
-    60 │ 	// Comment
-    61 │ }
+    58 │ 	// Comment
+    59 │ }
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     52 52 │   if (condition) {
+     53 53 │   	// ...
+     54    │ - }·else·{
+     55    │ - → if·(anotherCondition)·{
+        54 │ + }·else·if·(anotherCondition)·{
+     56 55 │   		// ...
+     57    │ - → }
+     58    │ - → //·Comment
+     59    │ - }
+        56 │ + → }
+     60 57 │   
+     61 58 │   if (condition) {
+  
+
+```
+
+```
+invalid.js:63:20 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into an else if statement.
+  
+    61 │ if (condition) {
+    62 │ 	// ...
+  > 63 │ } else { // Comment
+       │                    
+  > 64 │ 	if (anotherCondition) {
+  > 65 │ 		// ...
+  > 66 │ 	} else {
+  > 67 │ 		// ...
+  > 68 │ 	}
+       │ 	^
+    69 │ }
+    70 │ 
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     61  61 │   if (condition) {
+     62  62 │   	// ...
+     63     │ - }·else·{·//·Comment
+     64     │ - → if·(anotherCondition)·{
+         63 │ + }·else·if·(anotherCondition)·{
+     65  64 │   		// ...
+     66  65 │   	} else {
+     67  66 │   		// ...
+     68     │ - → }
+     69     │ - }
+         67 │ + → }
+     70  68 │   
+     71  69 │   if (condition) {
+  
+
+```
+
+```
+invalid.js:73:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into an else if statement.
+  
+    71 │ if (condition) {
+    72 │ 	// ...
+  > 73 │ } else {
+       │         
+  > 74 │ 	// Comment
+        ...
+  > 78 │ 		// ...
+  > 79 │ 	}
+       │ 	^
+    80 │ }
+    81 │ 
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     71 71 │   if (condition) {
+     72 72 │   	// ...
+     73    │ - }·else·{
+     74    │ - → //·Comment
+     75    │ - → if·(anotherCondition)·{
+        73 │ + }·else·if·(anotherCondition)·{
+     76 74 │   		// ...
+     77 75 │   	} else {
+     78 76 │   		// ...
+     79    │ - → }
+     80    │ - }
+        77 │ + → }
+     81 78 │   
+     82 79 │   if (condition) {
+  
+
+```
+
+```
+invalid.js:84:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into an else if statement.
+  
+    82 │ if (condition) {
+    83 │ 	// ...
+  > 84 │ } else {
+       │         
+  > 85 │ 	if (anotherCondition) {
+  > 86 │ 		// ...
+  > 87 │ 	} else {
+  > 88 │ 		// ...
+  > 89 │ 	} // Comment
+       │ 	^^^^^^^^^^^^
+    90 │ }
+    91 │ 
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     82  82 │   if (condition) {
+     83  83 │   	// ...
+     84     │ - }·else·{
+     85     │ - → if·(anotherCondition)·{
+         84 │ + }·else·if·(anotherCondition)·{
+     86  85 │   		// ...
+     87  86 │   	} else {
+     88  87 │   		// ...
+     89     │ - → }·//·Comment
+     90     │ - }
+         88 │ + → }
+     91  89 │   
+     92  90 │   if (condition) {
+  
+
+```
+
+```
+invalid.js:94:9 lint/nursery/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into an else if statement.
+  
+     92 │ if (condition) {
+     93 │ 	// ...
+   > 94 │ } else {
+        │         
+   > 95 │ 	if (anotherCondition) {
+   > 96 │ 		// ...
+   > 97 │ 	} else {
+   > 98 │ 		// ...
+   > 99 │ 	}
+        │ 	^
+    100 │ 	// Comment
+    101 │ }
+  
+  i Suggested fix: Use collapsed else if instead.
+  
+     92 92 │   if (condition) {
+     93 93 │   	// ...
+     94    │ - }·else·{
+     95    │ - → if·(anotherCondition)·{
+        94 │ + }·else·if·(anotherCondition)·{
+     96 95 │   		// ...
+     97 96 │   	} else {
+     98 97 │   		// ...
+     99    │ - → }
+    100    │ - → //·Comment
+    101    │ - }
+        98 │ + → }
+    102 99 │   
   
 
 ```
