@@ -61,7 +61,7 @@ rome_parser                 = { version = "0.2.0", path = "./crates/rome_parser"
 rome_rowan                  = { version = "0.2.0", path = "./crates/rome_rowan" }
 rome_service                = { path = "./crates/rome_service" }
 rome_suppression            = { version = "0.2.0", path = "./crates/rome_suppression" }
-rome_test_utils             = { path = "./crates/rome_test_utils" }
+biome_test_utils             = { path = "./crates/biome_test_utils" }
 rome_text_edit              = { version = "0.0.1", path = "./crates/rome_text_edit" }
 rome_text_size              = { version = "0.0.1", path = "./crates/rome_text_size" }
 tests_macros                = { path = "./crates/tests_macros" }

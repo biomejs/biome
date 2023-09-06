@@ -1,14 +1,14 @@
+use biome_test_utils::{
+    assert_errors_are_absent, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
+    write_transformation_snapshot,
+};
 use rome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
 use rome_js_parser::{parse, JsParserOptions};
 use rome_js_syntax::{JsFileSource, JsLanguage};
 use rome_rowan::AstNode;
-use rome_test_utils::{
-    assert_errors_are_absent, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
-    write_transformation_snapshot,
-};
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}

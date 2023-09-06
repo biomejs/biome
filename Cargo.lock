@@ -139,6 +139,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_test_utils"
+version = "0.1.0"
+dependencies = [
+ "countme",
+ "json_comments",
+ "rome_analyze",
+ "rome_console",
+ "rome_deserialize",
+ "rome_diagnostics",
+ "rome_js_parser",
+ "rome_js_syntax",
+ "rome_json_parser",
+ "rome_json_syntax",
+ "rome_rowan",
+ "rome_service",
+ "serde",
+ "serde_json",
+ "similar",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2007,6 +2028,7 @@ dependencies = [
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "bpaf",
  "countme",
  "insta",
@@ -2027,7 +2049,6 @@ dependencies = [
  "rome_json_factory",
  "rome_json_syntax",
  "rome_rowan",
- "rome_test_utils",
  "rome_text_edit",
  "rustc-hash",
  "schemars",
@@ -2133,6 +2154,7 @@ dependencies = [
 name = "rome_js_transform"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_analyze",
@@ -2143,7 +2165,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_syntax",
  "rome_rowan",
- "rome_test_utils",
  "tests_macros",
 ]
 
@@ -2155,6 +2176,7 @@ version = "0.0.1"
 name = "rome_json_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_analyze",
@@ -2165,7 +2187,6 @@ dependencies = [
  "rome_json_syntax",
  "rome_rowan",
  "rome_service",
- "rome_test_utils",
  "tests_macros",
 ]
 
@@ -2331,27 +2352,6 @@ dependencies = [
  "rome_console",
  "rome_diagnostics",
  "rome_rowan",
-]
-
-[[package]]
-name = "rome_test_utils"
-version = "0.1.0"
-dependencies = [
- "countme",
- "json_comments",
- "rome_analyze",
- "rome_console",
- "rome_deserialize",
- "rome_diagnostics",
- "rome_js_parser",
- "rome_js_syntax",
- "rome_json_parser",
- "rome_json_syntax",
- "rome_rowan",
- "rome_service",
- "serde",
- "serde_json",
- "similar",
 ]
 
 [[package]]

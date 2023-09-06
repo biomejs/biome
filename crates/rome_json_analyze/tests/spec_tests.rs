@@ -1,14 +1,14 @@
+use biome_test_utils::{
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    write_analyzer_snapshot,
+};
 use rome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use rome_diagnostics::advice::CodeSuggestionAdvice;
 use rome_diagnostics::{DiagnosticExt, Severity};
 use rome_json_parser::{parse_json, JsonParserOptions};
 use rome_json_syntax::JsonLanguage;
 use rome_rowan::AstNode;
-use rome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
-    write_analyzer_snapshot,
-};
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json}", crate::run_test, "module"}
