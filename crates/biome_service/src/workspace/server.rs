@@ -203,10 +203,11 @@ impl Workspace for WorkspaceServer {
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let capabilities = self.get_capabilities(&params.path);
+        let language = Language::from_path(&params.path);
         let settings = self.settings.read().unwrap();
         let mut file_features = FileFeaturesResult::new()
             .with_capabilities(&capabilities)
-            .with_settings(&settings);
+            .with_settings_and_language(&settings, &language);
 
         if settings.files.ignore_unknown {
             let language = self.get_language(&params.path);

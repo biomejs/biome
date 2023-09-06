@@ -18,7 +18,7 @@ use biome_analyze::{
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::{FormatError, Printed};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
@@ -53,6 +53,10 @@ pub struct JsFormatterSettings {
     pub trailing_comma: Option<TrailingComma>,
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
+    pub line_width: Option<LineWidth>,
+    pub indent_width: Option<IndentWidth>,
+    pub indent_style: Option<IndentStyle>,
+    pub enabled: Option<bool>
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -93,10 +97,34 @@ impl Language for JsLanguage {
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
+        let indent_style = {
+            let indent_style = language.indent_style.unwrap_or_default();
+            if indent_style != IndentStyle::default() {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            }
+        };
+        let line_width = {
+            let line_width = language.line_width.unwrap_or_default();
+            if line_width != LineWidth::default() {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            }
+        };
+        let indent_width = {
+            let indent_width = language.indent_width.unwrap_or_default();
+            if indent_width != IndentWidth::default() {
+                indent_width
+            } else {
+                global.indent_size.unwrap_or_default()
+            }
+        };
         JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(global.indent_style.unwrap_or_default())
-            .with_indent_width(global.indent_size.unwrap_or_default())
-            .with_line_width(global.line_width.unwrap_or_default())
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
             .with_quote_properties(language.quote_properties.unwrap_or_default())

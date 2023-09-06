@@ -3,6 +3,7 @@ use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::execute::ReportMode;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
 use biome_service::workspace::UpdateSettingsParams;
@@ -12,6 +13,7 @@ use std::path::PathBuf;
 
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<JavascriptFormatter>,
+    pub(crate) json_formatter: Option<JsonFormatter>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -35,6 +37,7 @@ pub(crate) fn format(
         stdin_file_path,
         files_configuration,
         write,
+        json_formatter,
     } = payload;
     let LoadedConfiguration {
         mut configuration,
@@ -44,6 +47,7 @@ pub(crate) fn format(
         .or_diagnostic(session.app.console, cli_options.verbose)?;
 
     configuration.merge_with(javascript_formatter);
+    configuration.merge_with(json_formatter);
     configuration.merge_with(formatter_configuration);
     configuration.merge_with(vcs_configuration);
     configuration.merge_with(files_configuration);

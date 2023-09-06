@@ -16,7 +16,7 @@ use crate::{Configuration, Rules, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::{FormatError, Printed};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
 use biome_fs::{RomePath, BIOME_JSON, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::JsonFormatOptions;
@@ -28,8 +28,17 @@ use biome_rowan::{AstNode, FileSource, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::path::{Path, PathBuf};
 
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonFormatterSettings {
+    pub line_width: Option<LineWidth>,
+    pub indent_width: Option<IndentWidth>,
+    pub indent_style: Option<IndentStyle>,
+    pub enabled: Option<bool>,
+}
+
 impl Language for JsonLanguage {
-    type FormatterSettings = ();
+    type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
@@ -40,13 +49,37 @@ impl Language for JsonLanguage {
 
     fn resolve_format_options(
         global: &FormatSettings,
-        _language: &Self::FormatterSettings,
+        language: &Self::FormatterSettings,
         _path: &RomePath,
     ) -> Self::FormatOptions {
+        let indent_style = {
+            let indent_style = language.indent_style.unwrap_or_default();
+            if indent_style != IndentStyle::default() {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            }
+        };
+        let line_width = {
+            let line_width = language.line_width.unwrap_or_default();
+            if line_width != LineWidth::default() {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            }
+        };
+        let indent_width = {
+            let indent_width = language.indent_width.unwrap_or_default();
+            if indent_width != IndentWidth::default() {
+                indent_width
+            } else {
+                global.indent_size.unwrap_or_default()
+            }
+        };
         JsonFormatOptions::default()
-            .with_indent_style(global.indent_style.unwrap_or_default())
-            .with_indent_width(global.indent_size.unwrap_or_default())
-            .with_line_width(global.line_width.unwrap_or_default())
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
     }
 }
 

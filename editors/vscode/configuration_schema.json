@@ -716,9 +716,39 @@
 						{ "type": "null" }
 					]
 				},
+				"enabled": { "default": true, "type": ["boolean", "null"] },
+				"formatWithErrors": {
+					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"default": false,
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"indentSize": {
+					"description": "The size of the indentation, 2 by default",
+					"default": 2,
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style.",
+					"default": "tab",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
 				"jsxQuoteStyle": {
 					"description": "The type of quotes used in JSX. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line. Defaults to 80.",
+					"default": 80,
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
@@ -764,9 +794,53 @@
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonFormatter" },
+						{ "type": "null" }
+					]
+				},
 				"parser": {
 					"description": "Parsing options",
 					"anyOf": [{ "$ref": "#/definitions/JsonParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonFormatter": {
+			"description": "Generic options applied to all files",
+			"type": "object",
+			"properties": {
+				"enabled": { "default": true, "type": ["boolean", "null"] },
+				"formatWithErrors": {
+					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"default": false,
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"indentSize": {
+					"description": "The size of the indentation, 2 by default",
+					"default": 2,
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style.",
+					"default": "tab",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line. Defaults to 80.",
+					"default": 80,
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

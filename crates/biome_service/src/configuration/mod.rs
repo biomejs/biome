@@ -15,6 +15,7 @@ pub mod vcs;
 
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 use crate::configuration::generated::push_to_analyzer_rules;
+use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
@@ -28,7 +29,10 @@ use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
-pub use formatter::{formatter_configuration, FormatterConfiguration, PlainIndentStyle};
+pub use formatter::{
+    deserialize_line_width, formatter_configuration, serialize_line_width, FormatterConfiguration,
+    PlainIndentStyle,
+};
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
 pub use json::{json_configuration, JsonConfiguration};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
@@ -237,6 +241,13 @@ impl MergeWith<Option<JavascriptFormatter>> for Configuration {
         let javascript_configuration = self
             .javascript
             .get_or_insert_with(JavascriptConfiguration::default);
+        javascript_configuration.merge_with(other);
+    }
+}
+
+impl MergeWith<Option<JsonFormatter>> for Configuration {
+    fn merge_with(&mut self, other: Option<JsonFormatter>) {
+        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
         javascript_configuration.merge_with(other);
     }
 }

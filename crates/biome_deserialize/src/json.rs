@@ -425,7 +425,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     }
 
     fn map_to_array<V>(
-        &mut self,
+        &self,
         value: &AnyJsonValue,
         name: &str,
         visitor: &mut V,

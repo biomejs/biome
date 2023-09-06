@@ -55,7 +55,7 @@ impl Format<JsFormatContext> for FormatTrailingComma {
 }
 
 /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
-#[derive(Default, Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Default, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

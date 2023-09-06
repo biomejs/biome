@@ -34,6 +34,18 @@ impl WorkspaceSettings {
         &self.formatter
     }
 
+    /// Whether the formatter is disabled for JavaScript files
+    pub fn javascript_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.javascript.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the formatter is disabled for JSON files
+    pub fn json_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.json.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
     /// Retrieves the settings of the linter
     pub fn linter(&self) -> &LinterSettings {
         &self.linter
@@ -81,6 +93,12 @@ impl WorkspaceSettings {
                 self.languages.javascript.formatter.trailing_comma = formatter.trailing_comma;
                 self.languages.javascript.formatter.semicolons = formatter.semicolons;
                 self.languages.javascript.formatter.arrow_parentheses = formatter.arrow_parentheses;
+                self.languages.javascript.formatter.enabled = formatter.enabled;
+                self.languages.javascript.formatter.line_width = formatter.line_width;
+                self.languages.javascript.formatter.indent_width =
+                    formatter.indent_size.map(Into::into);
+                self.languages.javascript.formatter.indent_style =
+                    formatter.indent_style.map(Into::into);
             }
 
             if let Some(parser) = javascript.parser {
@@ -102,6 +120,12 @@ impl WorkspaceSettings {
             if let Some(parser) = json.parser {
                 self.languages.json.parser.allow_comments =
                     parser.allow_comments.unwrap_or_default();
+            }
+            if let Some(formatter) = json.formatter {
+                self.languages.json.formatter.enabled = formatter.enabled;
+                self.languages.json.formatter.line_width = formatter.line_width;
+                self.languages.json.formatter.indent_width = formatter.indent_size.map(Into::into);
+                self.languages.json.formatter.indent_style = formatter.indent_style.map(Into::into);
             }
         }
 
