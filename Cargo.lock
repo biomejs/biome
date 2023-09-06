@@ -218,6 +218,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_aria_metadata"
+version = "0.0.0"
+dependencies = [
+ "case",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "biome_flags"
 version = "0.0.0"
 
@@ -1865,16 +1874,7 @@ dependencies = [
 name = "rome_aria"
 version = "0.0.0"
 dependencies = [
- "rome_aria_metadata",
-]
-
-[[package]]
-name = "rome_aria_metadata"
-version = "0.0.0"
-dependencies = [
- "case",
- "proc-macro2",
- "quote",
+ "biome_aria_metadata",
 ]
 
 [[package]]

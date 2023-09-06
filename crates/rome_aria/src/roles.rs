@@ -1,5 +1,5 @@
 use crate::{define_role, is_aria_property_valid};
-use rome_aria_metadata::AriaPropertiesEnum;
+use biome_aria_metadata::AriaPropertiesEnum;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::slice::Iter;

@@ -34,7 +34,7 @@ biome_test_utils            = { path = "./crates/biome_test_utils" }
 biome_flags                 = { path = "./crates/biome_flags" }
 rome_analyze                = { path = "./crates/rome_analyze" }
 rome_aria                   = { path = "./crates/rome_aria" }
-rome_aria_metadata          = { path = "./crates/rome_aria_metadata" }
+biome_aria_metadata         = { path = "./crates/biome_aria_metadata" }
 rome_cli                    = { path = "./crates/rome_cli" }
 rome_console                = { version = "0.0.1", path = "./crates/rome_console" }
 rome_control_flow           = { path = "./crates/rome_control_flow" }

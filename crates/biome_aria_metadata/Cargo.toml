@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_aria_metadata"
+name                 = "biome_aria_metadata"
 repository.workspace = true
 version              = "0.0.0"
 

@@ -1,5 +1,5 @@
 use crate::define_property;
-use rome_aria_metadata::AriaPropertyTypeEnum;
+use biome_aria_metadata::AriaPropertyTypeEnum;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::str::FromStr;

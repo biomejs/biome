@@ -5,10 +5,10 @@ mod macros;
 pub mod properties;
 pub mod roles;
 
+pub use biome_aria_metadata::{AriaPropertiesEnum, AriaPropertyTypeEnum};
 pub use properties::AriaProperties;
 pub(crate) use roles::AriaRoleDefinition;
 pub use roles::AriaRoles;
-pub use rome_aria_metadata::{AriaPropertiesEnum, AriaPropertyTypeEnum};
 
 /// It checks if an ARIA property is valid
 ///
