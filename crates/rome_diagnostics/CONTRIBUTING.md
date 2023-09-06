@@ -66,7 +66,7 @@ diagnostic may print a verbose advice instructing the user to run
 - A `location` describing where the error happened. It can be a path to a file
 on the file system, a command line argument, or an arbitrary memory buffer. It may
 optionally specify a specific range within the text content of this resource,
-as well as embed said text content to faciliate it's retrieval when displaying
+as well as embed said text content to facilitate it's retrieval when displaying
 code frames in the diagnostic. Conceptually the `location` points to a
 "resource" this error originated from.
 - `tags` conveying additional informations about the diagnostic: if the
