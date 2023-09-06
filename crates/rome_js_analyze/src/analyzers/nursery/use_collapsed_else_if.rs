@@ -90,14 +90,16 @@ impl Rule for UseCollapsedElseIf {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let else_clause = ctx.query();
         let alternate = else_clause.alternate().ok()?;
-        let block_statement = alternate.as_js_block_statement()?;
+        let AnyJsStatement::JsBlockStatement(block_statement) = alternate else {
+            return None;
+        };
         let statements = block_statement.statements();
         if statements.len() != 1 {
             return None;
         }
         if let AnyJsStatement::JsIfStatement(if_statement) = statements.first()? {
             Some(RuleState {
-                block_statement: block_statement.to_owned(),
+                block_statement,
                 if_statement,
             })
         } else {
@@ -136,9 +138,9 @@ impl Rule for UseCollapsedElseIf {
         };
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_element(
-            state.block_statement.clone().into_syntax().into(),
-            state.if_statement.clone().into_syntax().into(),
+        mutation.replace_node(
+            AnyJsStatement::from(block_statement.clone()),
+            if_statement.clone().into(),
         );
 
         Some(JsRuleAction {
