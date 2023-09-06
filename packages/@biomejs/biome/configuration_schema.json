@@ -989,6 +989,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCollapsedElseIf": {
+					"description": "Enforce using else if instead of nested if in else clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified.",
 					"anyOf": [

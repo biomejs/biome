@@ -1,0 +1,31 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+if (condition) {
+	// ...
+} else if (anotherCondition) {
+	// ...
+}
+
+if (condition) {
+	// ...
+} else if (anotherCondition) {
+	// ...
+} else {
+	// ...
+}
+
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
+	}
+	doSomething();
+}
+```
+
+

@@ -1786,6 +1786,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noVoid",
                 "useAriaPropTypes",
                 "useArrowFunction",
+                "useCollapsedElseIf",
                 "useExhaustiveDependencies",
                 "useGetterReturn",
                 "useGroupedTypeImport",
@@ -2311,6 +2312,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.use_arrow_function = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "useCollapsedElseIf" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.use_collapsed_else_if = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "useCollapsedElseIf",
+                        diagnostics,
+                    )?;
+                    self.use_collapsed_else_if = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
