@@ -19,7 +19,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Parser
 ### VSCode
 
-## 1.1.0 (2023-09-05)
+## 1.1.0 (2023-09-06)
 
 ### Analyzer
 
