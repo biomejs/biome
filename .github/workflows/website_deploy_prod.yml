@@ -7,9 +7,10 @@ on:
     branches:
       - main
 jobs:
-  Deploy-Preview:
+  prod-deploy:
     runs-on: ubuntu-latest
     environment: Website deployment
+    if: ${{ github.repository_owner == 'biomejs' }}
     steps:
       - uses: actions/checkout@v3
 
