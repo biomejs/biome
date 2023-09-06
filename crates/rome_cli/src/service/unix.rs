@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use rome_lsp::{ServerConnection, ServerFactory};
+use biome_lsp::{ServerConnection, ServerFactory};
 use tokio::{
     io::Interest,
     net::{

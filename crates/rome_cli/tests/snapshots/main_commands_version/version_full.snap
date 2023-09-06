@@ -10,7 +10,7 @@ CLI:        0.0.0
 
 ```block
 Server:
-  Name:     rome_lsp
+  Name:     biome_lsp
   Version:  0.0.0
 ```
 

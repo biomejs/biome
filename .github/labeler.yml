@@ -54,7 +54,7 @@ A-Website:
   - website/**
 
 A-LSP:
-  - crates/rome_lsp/**
+  - crates/biome_lsp/**
 
 A-Changelog:
   - CHANGELOG.md

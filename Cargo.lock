@@ -130,6 +130,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_lsp"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "indexmap",
+ "proptest",
+ "rome_analyze",
+ "rome_console",
+ "rome_diagnostics",
+ "rome_formatter",
+ "rome_fs",
+ "rome_js_formatter",
+ "rome_rowan",
+ "rome_service",
+ "rome_text_edit",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower",
+ "tower-lsp",
+ "tracing",
+]
+
+[[package]]
 name = "biome_markup"
 version = "0.0.1"
 dependencies = [
@@ -1820,6 +1845,7 @@ name = "rome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_lsp",
  "bpaf",
  "crossbeam",
  "dashmap",
@@ -1840,7 +1866,6 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_lsp",
  "rome_migrate",
  "rome_rowan",
  "rome_service",
@@ -2242,31 +2267,6 @@ name = "rome_json_syntax"
 version = "0.2.0"
 dependencies = [
  "rome_rowan",
-]
-
-[[package]]
-name = "rome_lsp"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "futures",
- "indexmap",
- "proptest",
- "rome_analyze",
- "rome_console",
- "rome_diagnostics",
- "rome_formatter",
- "rome_fs",
- "rome_js_formatter",
- "rome_rowan",
- "rome_service",
- "rome_text_edit",
- "serde",
- "serde_json",
- "tokio",
- "tower",
- "tower-lsp",
- "tracing",
 ]
 
 [[package]]
