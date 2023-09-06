@@ -410,7 +410,7 @@ pub trait AriaPropertyDefinition: Debug {
     /// ## Examples
     ///
     /// ```
-    /// use rome_aria::AriaProperties;
+    /// use biome_aria::AriaProperties;
     ///
     /// let aria_properties = AriaProperties::default();
     ///

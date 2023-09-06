@@ -1,10 +1,10 @@
 use crate::suppression_action::apply_suppression_comment;
+use biome_aria::{AriaProperties, AriaRoles};
 use rome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     SuppressionKind,
 };
-use rome_aria::{AriaProperties, AriaRoles};
 use rome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use rome_js_syntax::suppression::SuppressionDiagnostic;
 use rome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};

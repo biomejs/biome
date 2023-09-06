@@ -218,6 +218,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_aria"
+version = "0.0.0"
+dependencies = [
+ "biome_aria_metadata",
+]
+
+[[package]]
 name = "biome_aria_metadata"
 version = "0.0.0"
 dependencies = [
@@ -1871,13 +1878,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_aria"
-version = "0.0.0"
-dependencies = [
- "biome_aria_metadata",
-]
-
-[[package]]
 name = "rome_cli"
 version = "0.0.0"
 dependencies = [
@@ -2054,6 +2054,7 @@ name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
  "biome_test_utils",
+ "biome_aria",
  "bpaf",
  "countme",
  "insta",
@@ -2061,7 +2062,6 @@ dependencies = [
  "natord",
  "roaring",
  "rome_analyze",
- "rome_aria",
  "rome_console",
  "rome_control_flow",
  "rome_deserialize",
@@ -3556,6 +3556,7 @@ name = "xtask_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_aria",
  "case",
  "convert_case",
  "filetime",
@@ -3566,7 +3567,6 @@ dependencies = [
  "pulldown-cmark",
  "quote",
  "rome_analyze",
- "rome_aria",
  "rome_cli",
  "rome_diagnostics",
  "rome_js_analyze",

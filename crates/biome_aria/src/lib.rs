@@ -15,7 +15,7 @@ pub use roles::AriaRoles;
 /// ## Examples
 ///
 /// ```
-/// use rome_aria::is_aria_property_valid;
+/// use biome_aria::is_aria_property_valid;
 ///
 /// assert!(!is_aria_property_valid("aria-blabla"));
 /// assert!(is_aria_property_valid("aria-checked"));
@@ -29,7 +29,7 @@ pub fn is_aria_property_valid(property: &str) -> bool {
 /// ## Examples
 ///
 /// ```
-/// use rome_aria::is_aria_property_type_valid;
+/// use biome_aria::is_aria_property_type_valid;
 ///
 /// assert!(is_aria_property_type_valid("string"));
 /// assert!(!is_aria_property_type_valid("bogus"));

@@ -11,7 +11,7 @@ pub trait AriaRoleDefinition: Debug {
     /// ## Examples
     ///
     /// ```
-    /// use rome_aria::AriaRoles;
+    /// use biome_aria::AriaRoles;
     /// let roles = AriaRoles::default();
     ///
     /// let checkbox_role = roles.get_role("checkbox").unwrap();
@@ -33,7 +33,7 @@ pub trait AriaRoleDefinition: Debug {
     ///
     /// ```
     ///
-    /// use rome_aria::AriaRoles;
+    /// use biome_aria::AriaRoles;
     /// let roles = AriaRoles::default();
     ///
     /// let checkbox_role = roles.get_role("checkbox").unwrap();
@@ -812,7 +812,7 @@ impl<'a> AriaRoles {
     /// ## Examples
     ///
     /// ```
-    /// use rome_aria::AriaRoles;
+    /// use biome_aria::AriaRoles;
     /// let roles = AriaRoles::default();
     ///
     ///
@@ -1165,13 +1165,16 @@ mod test {
         let implicit_role = aria_roles
             .get_implicit_role("button", &HashMap::new())
             .unwrap();
-        assert_eq!(implicit_role.type_name(), "rome_aria::roles::ButtonRole");
+        assert_eq!(implicit_role.type_name(), "biome_aria::roles::ButtonRole");
 
         // <input type="search">
         let mut attributes = HashMap::new();
         attributes.insert("type".to_string(), vec!["search".to_string()]);
         let implicit_role = aria_roles.get_implicit_role("input", &attributes).unwrap();
-        assert_eq!(implicit_role.type_name(), "rome_aria::roles::SearchboxRole");
+        assert_eq!(
+            implicit_role.type_name(),
+            "biome_aria::roles::SearchboxRole"
+        );
 
         // <select name="animals" multiple size="4">
         let mut attributes = HashMap::new();
@@ -1179,6 +1182,6 @@ mod test {
         attributes.insert("multiple".to_string(), vec!["".to_string()]);
         attributes.insert("size".to_string(), vec!["4".to_string()]);
         let implicit_role = aria_roles.get_implicit_role("select", &attributes).unwrap();
-        assert_eq!(implicit_role.type_name(), "rome_aria::roles::ListBoxRole");
+        assert_eq!(implicit_role.type_name(), "biome_aria::roles::ListBoxRole");
     }
 }
