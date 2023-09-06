@@ -11,7 +11,7 @@ version              = "0.0.1"
 
 [dependencies]
 atty           = { workspace = true }
-rome_markup    = { workspace = true }
+biome_markup    = { workspace = true }
 rome_text_size = { workspace = true }
 schemars       = { workspace = true, optional = true }
 serde          = { workspace = true, optional = true, features = ["derive"] }

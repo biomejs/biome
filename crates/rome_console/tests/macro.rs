@@ -7,7 +7,7 @@ fn test_macro() {
     match
     // Due to how MarkupNode is implemented, the result of the markup macro
     // cannot be stored in a binding and must be matched upon immediately
-    rome_markup::markup! {
+    biome_markup::markup! {
         <Info><Emphasis>{category}</Emphasis>" Commands"</Info>
     }
     {
@@ -25,7 +25,7 @@ fn test_macro() {
 
 #[test]
 fn test_macro_attributes() {
-    rome_markup::markup! {
+    biome_markup::markup! {
         <Hyperlink href="https://biomejs.dev/">"link"</Hyperlink>
     };
 }

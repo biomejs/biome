@@ -29,7 +29,7 @@ rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-rome_lsp            = { workspace = true }
+biome_lsp            = { workspace = true }
 rome_migrate        = { workspace = true }
 rome_rowan          = { workspace = true }
 rome_service        = { workspace = true }

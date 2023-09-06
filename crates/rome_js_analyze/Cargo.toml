@@ -34,7 +34,7 @@ smallvec              = { workspace = true }
 countme         = { workspace = true, features = ["enable"] }
 insta           = { workspace = true, features = ["glob"] }
 rome_js_parser  = { workspace = true, features = ["tests"] }
-rome_test_utils = { workspace = true }
+biome_test_utils = { workspace = true }
 rome_text_edit  = { workspace = true }
 tests_macros    = { workspace = true }
 

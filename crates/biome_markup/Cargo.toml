@@ -1,10 +1,10 @@
 [package]
 authors.workspace    = true
 description          = "Macro to write text using a HTML-like syntax"
-documentation        = "https://docs.rs/rome_markup"
+documentation        = "https://docs.rs/biome_markup"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_markup"
+name                 = "biome_markup"
 repository.workspace = true
 version              = "0.0.1"
 

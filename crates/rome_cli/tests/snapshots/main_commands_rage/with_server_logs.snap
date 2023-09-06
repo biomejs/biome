@@ -26,7 +26,7 @@ Biome Configuration:
 
 Server:
   Version:                      0.0.0
-  Name:                         rome_lsp
+  Name:                         biome_lsp
   CPU Architecture:             **PLACEHOLDER**
   OS:                           **PLACEHOLDER**
 
@@ -41,9 +41,9 @@ Biome Server Log:
 
 
 ┐rome_cli::commands::daemon::Running Server{pid=195434}
-├─2547ms INFO rome_lsp::server Starting Biome Language Server...
-├─15333ms INFO rome_lsp::server Starting Biome Language Server...
-├─15347ms INFO rome_lsp::server Attempting to load the configuration from 'biome.json' file
+├─2547ms INFO biome_lsp::server Starting Biome Language Server...
+├─15333ms INFO biome_lsp::server Starting Biome Language Server...
+├─15347ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
 ├─15347ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
 ├─15347ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─15347ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
@@ -51,16 +51,16 @@ Biome Server Log:
 ├─┘
 ├─┐rome_js_parser::parse::parse{file_id=FileId(1)}
 ├─┘
-├─16108ms INFO rome_lsp::server Starting Biome Language Server...
-├─41801ms INFO rome_lsp::server Starting Biome Language Server...
-├─41802ms INFO rome_lsp::server Sending shutdown signal
+├─16108ms INFO biome_lsp::server Starting Biome Language Server...
+├─41801ms INFO biome_lsp::server Starting Biome Language Server...
+├─41802ms INFO biome_lsp::server Sending shutdown signal
 INFO rome_cli::commands::daemon Received shutdown signal
 ├─41802ms ERROR tower_lsp::transport failed to encode message: failed to encode response: Broken pipe (os error 32)
 ┘
 ┐rome_cli::commands::daemon::Running Server{pid=197796}
-├─2822ms INFO rome_lsp::server Starting Biome Language Server...
-├─7550ms INFO rome_lsp::server Starting Biome Language Server...
-├─7551ms INFO rome_lsp::server Attempting to load the configuration from 'biome.json' file
+├─2822ms INFO biome_lsp::server Starting Biome Language Server...
+├─7550ms INFO biome_lsp::server Starting Biome Language Server...
+├─7551ms INFO biome_lsp::server Attempting to load the configuration from 'biome.json' file
 ├─7551ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
 ├─7551ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─7551ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
@@ -68,7 +68,7 @@ INFO rome_cli::commands::daemon Received shutdown signal
 ├─┘
 ├─┐rome_js_parser::parse::parse{file_id=FileId(1)}
 ├─┘
-├─7897ms INFO rome_lsp::server Starting Biome Language Server...
+├─7897ms INFO biome_lsp::server Starting Biome Language Server...
 ```
 
 

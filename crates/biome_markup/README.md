@@ -1,4 +1,4 @@
-# `rome_markup`
+# `biome_markup`
 
 The crate contains procedural macros to build `rome_console` markup object with a JSX-like syntax
 
@@ -8,5 +8,5 @@ The macro cannot be used alone as it generates code that requires supporting typ
 ## Local installation
 
 ```toml
-rome_markup = { version = "0.0.0", path = "../rome_markup" }
+biome_markup = { version = "0.0.0", path = "../biome_markup" }
 ```

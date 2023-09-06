@@ -13,10 +13,10 @@ A-Core:
   - crates/rome_text_size/**
   - crates/rome_suppression/**
   - crates/rome_suppression/**
-  - crates/rome_markup/**
+  - crates/biome_markup/**
 
 A-Project:
-- crates/rome_service/**
+  - crates/rome_service/**
 
 A-Linter:
   - crates/rome_analyze/**
@@ -54,7 +54,7 @@ A-Website:
   - website/**
 
 A-LSP:
-  - crates/rome_lsp/**
+  - crates/biome_lsp/**
 
 A-Changelog:
   - CHANGELOG.md

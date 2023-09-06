@@ -3,8 +3,8 @@ use crate::{
     service::{self, ensure_daemon, open_socket, run_daemon},
     CliDiagnostic, CliSession,
 };
+use biome_lsp::ServerFactory;
 use rome_console::{markup, ConsoleExt};
-use rome_lsp::ServerFactory;
 use rome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
 use std::{env, fs, path::PathBuf};
 use tokio::io;

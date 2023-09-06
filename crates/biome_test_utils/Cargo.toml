@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name    = "rome_test_utils"
+name    = "biome_test_utils"
 publish = false
 version = "0.1.0"
 

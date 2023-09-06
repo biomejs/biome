@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_lsp"
+name                 = "biome_lsp"
 repository.workspace = true
 version              = "0.0.0"
 

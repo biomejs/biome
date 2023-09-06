@@ -1,7 +1,7 @@
 # `rome_cli`
 
 The main binary distribution, exposes the command line interface defined in this crate,
-and the language server interface defined in `rome_lsp` and used by the `biome` VSCode extension
+and the language server interface defined in `biome_lsp` and used by the `biome` VSCode extension
 
 # Logs
 

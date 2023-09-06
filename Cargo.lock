@@ -130,6 +130,61 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_lsp"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "indexmap",
+ "proptest",
+ "rome_analyze",
+ "rome_console",
+ "rome_diagnostics",
+ "rome_formatter",
+ "rome_fs",
+ "rome_js_formatter",
+ "rome_rowan",
+ "rome_service",
+ "rome_text_edit",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower",
+ "tower-lsp",
+ "tracing",
+]
+
+[[package]]
+name = "biome_markup"
+version = "0.0.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "biome_test_utils"
+version = "0.1.0"
+dependencies = [
+ "countme",
+ "json_comments",
+ "rome_analyze",
+ "rome_console",
+ "rome_deserialize",
+ "rome_diagnostics",
+ "rome_js_parser",
+ "rome_js_syntax",
+ "rome_json_parser",
+ "rome_json_syntax",
+ "rome_rowan",
+ "rome_service",
+ "serde",
+ "serde_json",
+ "similar",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1790,6 +1845,7 @@ name = "rome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_lsp",
  "bpaf",
  "crossbeam",
  "dashmap",
@@ -1810,7 +1866,6 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_lsp",
  "rome_migrate",
  "rome_rowan",
  "rome_service",
@@ -1831,7 +1886,7 @@ name = "rome_console"
 version = "0.0.1"
 dependencies = [
  "atty",
- "rome_markup",
+ "biome_markup",
  "rome_text_size",
  "schemars",
  "serde",
@@ -1998,6 +2053,7 @@ dependencies = [
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "bpaf",
  "countme",
  "insta",
@@ -2018,7 +2074,6 @@ dependencies = [
  "rome_json_factory",
  "rome_json_syntax",
  "rome_rowan",
- "rome_test_utils",
  "rome_text_edit",
  "rustc-hash",
  "schemars",
@@ -2098,11 +2153,11 @@ dependencies = [
 name = "rome_js_semantic"
 version = "0.2.0"
 dependencies = [
+ "biome_markup",
  "rome_console",
  "rome_diagnostics",
  "rome_js_parser",
  "rome_js_syntax",
- "rome_markup",
  "rome_rowan",
  "rust-lapper",
  "rustc-hash",
@@ -2124,6 +2179,7 @@ dependencies = [
 name = "rome_js_transform"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_analyze",
@@ -2134,7 +2190,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_syntax",
  "rome_rowan",
- "rome_test_utils",
  "tests_macros",
 ]
 
@@ -2146,6 +2201,7 @@ version = "0.0.1"
 name = "rome_json_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_analyze",
@@ -2156,7 +2212,6 @@ dependencies = [
  "rome_json_syntax",
  "rome_rowan",
  "rome_service",
- "rome_test_utils",
  "tests_macros",
 ]
 
@@ -2212,40 +2267,6 @@ name = "rome_json_syntax"
 version = "0.2.0"
 dependencies = [
  "rome_rowan",
-]
-
-[[package]]
-name = "rome_lsp"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "futures",
- "indexmap",
- "proptest",
- "rome_analyze",
- "rome_console",
- "rome_diagnostics",
- "rome_formatter",
- "rome_fs",
- "rome_js_formatter",
- "rome_rowan",
- "rome_service",
- "rome_text_edit",
- "serde",
- "serde_json",
- "tokio",
- "tower",
- "tower-lsp",
- "tracing",
-]
-
-[[package]]
-name = "rome_markup"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
@@ -2331,27 +2352,6 @@ dependencies = [
  "rome_console",
  "rome_diagnostics",
  "rome_rowan",
-]
-
-[[package]]
-name = "rome_test_utils"
-version = "0.1.0"
-dependencies = [
- "countme",
- "json_comments",
- "rome_analyze",
- "rome_console",
- "rome_deserialize",
- "rome_diagnostics",
- "rome_js_parser",
- "rome_js_syntax",
- "rome_json_parser",
- "rome_json_syntax",
- "rome_rowan",
- "rome_service",
- "serde",
- "serde_json",
- "similar",
 ]
 
 [[package]]
