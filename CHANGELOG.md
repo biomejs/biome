@@ -25,7 +25,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Enhancements
 
-- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `rome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action.
+- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `biome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action.
 
 
 ### CLI
@@ -33,7 +33,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Enhancements
 
 - Biome now reports a diagnostics when a `rome.json` file is found.
-- `rome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file.
+- `biome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file.
 
 #### Bug fixes
 
@@ -45,7 +45,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- The LSP now uses its own socket and won't rely on Rome's socket. This fixes some cases where users were seeing
+- The LSP now uses its own socket and won't rely on Biome's socket. This fixes some cases where users were seeing
 multiple servers in the `rage` output.
 
 ### Formatter
