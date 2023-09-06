@@ -18,57 +18,9 @@ import * as Unknown_Style from ""
 
 # Diagnostics
 ```
-invalidImportNamespace.js:1:13 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import namespace name should be in camelCase.
-  
-  > 1 │ import * as X from ""
-      │             ^
-    2 │ 
-    3 │ import * as PascalCase from ""
-  
-  i The name could be renamed to `x`.
-  
-  i Safe fix: Rename this symbol in camelCase.
-  
-     1    │ - import·*·as·X·from·""
-        1 │ + import·*·as·x·from·""
-     2  2 │   
-     3  3 │   import * as PascalCase from ""
-  
-
-```
-
-```
-invalidImportNamespace.js:3:13 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import namespace name should be in camelCase.
-  
-    1 │ import * as X from ""
-    2 │ 
-  > 3 │ import * as PascalCase from ""
-      │             ^^^^^^^^^^
-    4 │ 
-    5 │ import * as CONSTANT_CASE from ""
-  
-  i The name could be renamed to `pascalCase`.
-  
-  i Safe fix: Rename this symbol in camelCase.
-  
-     1  1 │   import * as X from ""
-     2  2 │   
-     3    │ - import·*·as·PascalCase·from·""
-        3 │ + import·*·as·pascalCase·from·""
-     4  4 │   
-     5  5 │   import * as CONSTANT_CASE from ""
-  
-
-```
-
-```
 invalidImportNamespace.js:5:13 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase.
+  ! This import namespace name should be in camelCase or PascalCase.
   
     3 │ import * as PascalCase from ""
     4 │ 
@@ -94,7 +46,7 @@ invalidImportNamespace.js:5:13 lint/nursery/useNamingConvention  FIXABLE  ━━
 ```
 invalidImportNamespace.js:7:13 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase.
+  ! This import namespace name should be in camelCase or PascalCase.
   
     5 │ import * as CONSTANT_CASE from ""
     6 │ 
@@ -120,7 +72,7 @@ invalidImportNamespace.js:7:13 lint/nursery/useNamingConvention  FIXABLE  ━━
 ```
 invalidImportNamespace.js:9:13 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase.
+  ! This import namespace name should be in camelCase or PascalCase.
   
      7 │ import * as snake_case from ""
      8 │ 

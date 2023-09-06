@@ -16,6 +16,26 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Formatter
 ### JavaScript APIs
 ### Linter
+
+#### Enhancements
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts import namespaces in _PascalCase_ and rejects export namespaces in _CONSTANT\_CASE_.
+
+  The following code is now valid:
+
+  ```js
+  import * as React from "react";
+  ```
+
+  And the following code is now invalid:
+
+  ```js
+  export * as MY_NAMESPACE from "./lib.js";
+  ```
+
+#### Bug fixes
+
+
 ### Parser
 ### VSCode
 
