@@ -6,7 +6,7 @@ use rome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStateme
 use rome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_rule! {
-    /// Enforce using `else if` instead of `else { if ... }`.
+    /// Enforce using `else if` instead of nested `if` in `else` clauses.
     ///
     /// If an `if` statement is the only statement in the `else` block, it is often clearer to use an `else if` form.
     ///

@@ -990,7 +990,7 @@
 					]
 				},
 				"useCollapsedElseIf": {
-					"description": "Enforce using else if instead of else { if ... }.",
+					"description": "Enforce using else if instead of nested if in else clauses.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

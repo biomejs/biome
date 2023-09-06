@@ -2021,7 +2021,7 @@ pub struct Nursery {
     #[bpaf(long("use-arrow-function"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_arrow_function: Option<RuleConfiguration>,
-    #[doc = "Enforce using else if instead of else { if ... }."]
+    #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[bpaf(long("use-collapsed-else-if"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_collapsed_else_if: Option<RuleConfiguration>,

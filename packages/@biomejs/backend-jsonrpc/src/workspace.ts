@@ -660,7 +660,7 @@ export interface Nursery {
 	 */
 	useArrowFunction?: RuleConfiguration;
 	/**
-	 * Enforce using else if instead of else { if ... }.
+	 * Enforce using else if instead of nested if in else clauses.
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
 	/**
