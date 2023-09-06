@@ -9,6 +9,7 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_flags         = { workspace = true }
 bpaf                = { workspace = true }
 dashmap             = { workspace = true }
 indexmap            = { workspace = true, features = ["serde"] }
@@ -16,7 +17,6 @@ rome_analyze        = { workspace = true, features = ["serde"] }
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
 rome_diagnostics    = { workspace = true }
-rome_flags          = { workspace = true }
 rome_formatter      = { workspace = true, features = ["serde"] }
 rome_fs             = { workspace = true, features = ["serde"] }
 rome_js_analyze     = { workspace = true }

@@ -218,6 +218,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_flags"
+version = "0.0.0"
+
+[[package]]
 name = "bit-set"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1879,6 +1883,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_lsp",
+ "biome_flags",
  "bpaf",
  "crossbeam",
  "dashmap",
@@ -1892,7 +1897,6 @@ dependencies = [
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
- "rome_flags",
  "rome_formatter",
  "rome_fs",
  "rome_js_formatter",
@@ -1990,10 +1994,6 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "rome_flags"
-version = "0.0.0"
 
 [[package]]
 name = "rome_formatter"
@@ -2314,6 +2314,7 @@ dependencies = [
 name = "rome_service"
 version = "0.0.0"
 dependencies = [
+ "biome_flags",
  "bpaf",
  "dashmap",
  "indexmap",
@@ -2322,7 +2323,6 @@ dependencies = [
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
- "rome_flags",
  "rome_formatter",
  "rome_fs",
  "rome_js_analyze",
