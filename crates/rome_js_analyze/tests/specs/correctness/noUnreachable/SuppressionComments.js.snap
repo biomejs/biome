@@ -22,7 +22,7 @@ function SuppressionComments2() {
 
 # Diagnostics
 ```
-SuppressionComments.js:1:1 suppressions/deprecatedSuppressionComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SuppressionComments.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! // rome-ignore is deprecated, use // biome-ignore instead
   
@@ -30,6 +30,25 @@ SuppressionComments.js:1:1 suppressions/deprecatedSuppressionComment ━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ function SuppressionComments1() {
     3 │     beforeReturn();
+  
+  i Suggested fix: Use // biome-ignore instead
+  
+    1    │ - //·rome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
+       1 │ + //·biome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
+    2  2 │   function SuppressionComments1() {
+    3  3 │       beforeReturn();
+    4  4 │       return;
+    5  5 │       afterReturn();
+    6    │ - }
+       6 │ + }
+       7 │ + 
+       8 │ + function·SuppressionComments2()·{
+       9 │ + ····beforeReturn();
+      10 │ + ····return;
+      11 │ + ····//·rome-ignore·lint/correctness/noUnreachable:·supress·warning
+      12 │ + ····afterReturn();
+      13 │ + }
+      14 │ + 
   
 
 ```
@@ -59,7 +78,7 @@ SuppressionComments.js:5:5 lint/correctness/noUnreachable ━━━━━━━�
 ```
 
 ```
-SuppressionComments.js:11:5 suppressions/deprecatedSuppressionComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SuppressionComments.js:11:5 suppressions/deprecatedSuppressionComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   ! // rome-ignore is deprecated, use // biome-ignore instead
   
@@ -69,6 +88,26 @@ SuppressionComments.js:11:5 suppressions/deprecatedSuppressionComment ━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │     afterReturn();
     13 │ }
+  
+  i Suggested fix: Use // biome-ignore instead
+  
+    1    │ - 
+    2    │ - ····//·rome-ignore·lint/correctness/noUnreachable:·supress·warning
+    3    │ - ····afterReturn
+       1 │ + //·rome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
+       2 │ + function·SuppressionComments1()·{
+       3 │ + ····beforeReturn();
+       4 │ + ····return;
+       5 │ + ····afterReturn();
+       6 │ + }
+       7 │ + 
+       8 │ + function·SuppressionComments2()·{
+       9 │ + ····beforeReturn();
+      10 │ + ····return;
+      11 │ + ····//·biome-ignore·lint/correctness/noUnreachable:·supress·warning
+      12 │ + ····afterReturn();
+      13 │ + }
+      14 │ + 
   
 
 ```

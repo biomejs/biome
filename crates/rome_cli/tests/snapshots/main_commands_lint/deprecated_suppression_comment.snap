@@ -12,13 +12,20 @@ a == b;
 # Emitted Messages
 
 ```block
-file.js:1:1 suppressions/deprecatedSuppressionComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! // rome-ignore is deprecated, use // biome-ignore instead
   
   > 1 │ // rome-ignore lint(suspicious/noDoubleEquals): test
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
+  
+  i Suggested fix: Use // biome-ignore instead
+  
+    1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
+    2   │ - a·
+      1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+      2 │ + a·==·b;
   
 
 ```
