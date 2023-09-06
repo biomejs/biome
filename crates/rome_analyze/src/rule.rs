@@ -350,7 +350,7 @@ pub trait Rule: RuleMeta + Sized {
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
-            let suppression_text = format!("rome-ignore {}", rule_category);
+            let suppression_text = format!("biome-ignore {}", rule_category);
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();

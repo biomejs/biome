@@ -72,7 +72,12 @@ where
 
         for comment in parse_suppression_comment(text) {
             let categories = match comment {
-                Ok(comment) => comment.categories,
+                Ok(comment) => {
+                    if comment.is_legacy {
+                        result.push(Ok(SuppressionKind::Deprecated));
+                    }
+                    comment.categories
+                }
                 Err(err) => {
                     result.push(Err(err));
                     continue;
@@ -234,7 +239,10 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"a[f].c = a[f].c;"#;
+        const SOURCE: &str = r#"// rome-ignore lint: test
+    let a = 1;
+
+        "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -245,7 +253,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("nursery", "noSelfAssign");
+        let rule_filter = RuleFilter::Rule("nursery", "useBiomeSuppressionComment");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),
@@ -264,7 +272,7 @@ mod tests {
                     error_ranges.push(diag.location().span.unwrap());
                     let error = diag
                         .with_severity(Severity::Warning)
-                        .with_file_path("ahahah")
+                        .with_file_path("dummyFile")
                         .with_file_source_code(SOURCE);
                     let text = markup_to_string(markup! {
                         {PrintDiagnostic::verbose(&error)}
@@ -274,6 +282,7 @@ mod tests {
 
                 for action in signal.actions() {
                     let new_code = action.mutation.commit();
+                    eprintln!("new code!!!");
                     eprintln!("{new_code}");
                 }
 
@@ -289,11 +298,30 @@ mod tests {
         const SOURCE: &str = "
             function checkSuppressions1(a, b) {
                 a == b;
-                // rome-ignore lint/suspicious:whole group
+                // biome-ignore lint/suspicious:whole group
+                a == b;
+                // biome-ignore lint/suspicious/noDoubleEquals: single rule
+                a == b;
+                /* biome-ignore lint/style/useWhile: multiple block comments */ /* biome-ignore lint/suspicious/noDoubleEquals: multiple block comments */
+                a == b;
+                // biome-ignore lint/style/useWhile: multiple line comments
+                // biome-ignore lint/suspicious/noDoubleEquals: multiple line comments
+                a == b;
+                a == b;
+            }
+
+            // biome-ignore lint/suspicious/noDoubleEquals: do not suppress warning for the whole function
+            function checkSuppressions2(a, b) {
+                a == b;
+            }
+
+            function checkSuppressions3(a, b) {
+                a == b;
+                // rome-ignore lint/suspicious: whole group
                 a == b;
                 // rome-ignore lint/suspicious/noDoubleEquals: single rule
                 a == b;
-                /* rome-ignore lint/style/useWhile: multiple block comments */ /* rome-ignore lint/suspicious/noDoubleEquals: multiple block comments */
+                /* rome-ignore lint/style/useWhile: multiple block comments */ /* rome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
                 a == b;
                 // rome-ignore lint/style/useWhile: multiple line comments
                 // rome-ignore lint/suspicious/noDoubleEquals: multiple line comments
@@ -301,35 +329,16 @@ mod tests {
                 a == b;
             }
 
-            // rome-ignore lint/suspicious/noDoubleEquals: do not suppress warning for the whole function
-            function checkSuppressions2(a, b) {
-                a == b;
-            }
-
-            function checkSuppressions3(a, b) {
-                a == b;
-                // rome-ignore lint(suspicious): whole group
-                a == b;
-                // rome-ignore lint(suspicious/noDoubleEquals): single rule
-                a == b;
-                /* rome-ignore lint(style/useWhile): multiple block comments */ /* rome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
-                a == b;
-                // rome-ignore lint(style/useWhile): multiple line comments
-                // rome-ignore lint(suspicious/noDoubleEquals): multiple line comments
-                a == b;
-                a == b;
-            }
-
-            // rome-ignore lint(suspicious/noDoubleEquals): do not suppress warning for the whole function
+            // biome-ignore lint(suspicious/noDoubleEquals): do not suppress warning for the whole function
             function checkSuppressions4(a, b) {
                 a == b;
             }
 
             function checkSuppressions5() {
-                // rome-ignore format explanation
-                // rome-ignore format(:
-                // rome-ignore (value): explanation
-                // rome-ignore unknown: explanation
+                // biome-ignore format explanation
+                // biome-ignore format(:
+                // biome-ignore (value): explanation
+                // biome-ignore unknown: explanation
             }
         ";
 
@@ -366,8 +375,7 @@ mod tests {
                         parse_ranges.push(span.unwrap());
                     }
 
-                    if code == category!("suppressions/deprecatedSyntax") {
-                        assert!(signal.actions().len() > 0);
+                    if code == category!("suppressions/deprecatedSuppressionComment") {
                         warn_ranges.push(span.unwrap());
                     }
                 }
@@ -375,39 +383,38 @@ mod tests {
                 ControlFlow::<Never>::Continue(())
             },
         );
-
         assert_eq!(
             lint_ranges.as_slice(),
             &[
                 TextRange::new(TextSize::from(67), TextSize::from(69)),
-                TextRange::new(TextSize::from(635), TextSize::from(637)),
-                TextRange::new(TextSize::from(828), TextSize::from(830)),
-                TextRange::new(TextSize::from(915), TextSize::from(917)),
-                TextRange::new(TextSize::from(1490), TextSize::from(1492)),
-                TextRange::new(TextSize::from(1684), TextSize::from(1686)),
+                TextRange::new(TextSize::from(641), TextSize::from(643)),
+                TextRange::new(TextSize::from(835), TextSize::from(837)),
+                TextRange::new(TextSize::from(922), TextSize::from(924)),
+                TextRange::new(TextSize::from(1492), TextSize::from(1494)),
+                TextRange::new(TextSize::from(1687), TextSize::from(1689)),
             ]
         );
 
         assert_eq!(
             parse_ranges.as_slice(),
             &[
-                TextRange::new(TextSize::from(1787), TextSize::from(1798)),
-                TextRange::new(TextSize::from(1837), TextSize::from(1838)),
-                TextRange::new(TextSize::from(1870), TextSize::from(1871)),
-                TextRange::new(TextSize::from(1922), TextSize::from(1929)),
+                TextRange::new(TextSize::from(1791), TextSize::from(1802)),
+                TextRange::new(TextSize::from(1842), TextSize::from(1843)),
+                TextRange::new(TextSize::from(1876), TextSize::from(1877)),
+                TextRange::new(TextSize::from(1929), TextSize::from(1936)),
             ]
         );
 
         assert_eq!(
             warn_ranges.as_slice(),
             &[
-                TextRange::new(TextSize::from(937), TextSize::from(981)),
-                TextRange::new(TextSize::from(1022), TextSize::from(1081)),
-                TextRange::new(TextSize::from(1122), TextSize::from(1185)),
-                TextRange::new(TextSize::from(1186), TextSize::from(1260)),
-                TextRange::new(TextSize::from(1301), TextSize::from(1360)),
-                TextRange::new(TextSize::from(1377), TextSize::from(1447)),
-                TextRange::new(TextSize::from(1523), TextSize::from(1617)),
+                TextRange::new(TextSize::from(944), TextSize::from(987)),
+                TextRange::new(TextSize::from(1028), TextSize::from(1086)),
+                TextRange::new(TextSize::from(1127), TextSize::from(1189)),
+                TextRange::new(TextSize::from(1190), TextSize::from(1264)),
+                TextRange::new(TextSize::from(1305), TextSize::from(1363)),
+                TextRange::new(TextSize::from(1380), TextSize::from(1449)),
+                TextRange::new(TextSize::from(1525), TextSize::from(1620)),
             ]
         );
     }
@@ -415,7 +422,7 @@ mod tests {
     #[test]
     fn suppression_syntax() {
         const SOURCE: &str = "
-            // rome-ignore lint/suspicious/noDoubleEquals: single rule
+            // biome-ignore lint/suspicious/noDoubleEquals: single rule
             a == b;
         ";
 

@@ -56,7 +56,7 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      1  1 │   const foo = `
      2  2 │   text
      3    │ - ${a·==·b}
-        3 │ + ${//·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+        3 │ + ${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
         4 │ + a··==·b}
      4  5 │   `;
      5  6 │   
@@ -90,7 +90,7 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      5  5 │   
      6  6 │   // existing comment
      7    │ - a·==·b;
-        7 │ + //·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+        7 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
         8 │ + a··==·b;
      8  9 │   
      9 10 │   if (a == b) {
@@ -126,7 +126,7 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      7  7 │   a == b;
      8  8 │   
      9    │ - if·(a·==·b)·{
-        9 │ + //·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+        9 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
        10 │ + if··(a·==·b)·{
     10 11 │       false;
     11 12 │   }
@@ -160,7 +160,7 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     12 12 │   
     13 13 │   if (/** some weird comment
     14    │ - ····**/·a·==·b)·{
-       14 │ + ····**/·//·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       14 │ + ····**/·//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
        15 │ + a·==·b)·{
     15 16 │   
     16 17 │       }
@@ -194,7 +194,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     17 17 │   
     18 18 │   let a = `Output of "biome rage":
     19    │ - ··formatter·enabled:·${formatter·==·true}
-       19 │ + ··formatter·enabled:·${//·rome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       19 │ + ··formatter·enabled:·${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
        20 │ + formatter··==·true}
     20 21 │     linter: ${linter}
     21 22 │   `;

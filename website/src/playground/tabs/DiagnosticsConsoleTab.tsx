@@ -11,7 +11,7 @@ export default function DiagnosticsConsoleTab({ console }: Props) {
 		<>
 			<pre className="language-shellsession diagnostics-console">
 				<code
-					// rome-ignore lint/security/noDangerouslySetInnerHtml: the HTML is sanitized by our diagnostic printer
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: the HTML is sanitized by our diagnostic printer
 					dangerouslySetInnerHTML={{ __html: console }}
 				/>
 			</pre>
