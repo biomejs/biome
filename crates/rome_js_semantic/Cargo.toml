@@ -18,4 +18,4 @@ rustc-hash     = { workspace = true }
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_js_parser   = { workspace = true }
-rome_markup      = { workspace = true }
+biome_markup      = { workspace = true }

@@ -11,7 +11,7 @@ mod write;
 
 pub use self::markup::{Markup, MarkupBuf, MarkupElement, MarkupNode};
 use crate::fmt::Formatter;
-pub use rome_markup::markup;
+pub use biome_markup::markup;
 
 /// Determines the "output stream" a message should get printed to
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

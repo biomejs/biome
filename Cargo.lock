@@ -130,6 +130,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_markup"
+version = "0.0.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1831,7 +1840,7 @@ name = "rome_console"
 version = "0.0.1"
 dependencies = [
  "atty",
- "rome_markup",
+ "biome_markup",
  "rome_text_size",
  "schemars",
  "serde",
@@ -2098,11 +2107,11 @@ dependencies = [
 name = "rome_js_semantic"
 version = "0.2.0"
 dependencies = [
+ "biome_markup",
  "rome_console",
  "rome_diagnostics",
  "rome_js_parser",
  "rome_js_syntax",
- "rome_markup",
  "rome_rowan",
  "rust-lapper",
  "rustc-hash",
@@ -2237,15 +2246,6 @@ dependencies = [
  "tower",
  "tower-lsp",
  "tracing",
-]
-
-[[package]]
-name = "rome_markup"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
 ]
 
 [[package]]

@@ -186,7 +186,7 @@ fn unicode_to_ascii(c: char) -> char {
 mod tests {
     use std::{fmt::Write, str::from_utf8};
 
-    use rome_markup::markup;
+    use biome_markup::markup;
     use termcolor::Ansi;
 
     use crate as rome_console;
