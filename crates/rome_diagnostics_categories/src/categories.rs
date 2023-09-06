@@ -102,6 +102,7 @@ define_categories! {
     "lint/nursery/noVoid": "https://biomejs.dev/linter/rules/no-void",
     "lint/nursery/useAriaPropTypes": "https://biomejs.dev/linter/rules/use-aria-prop-types",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
+    "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/lint/rules/use-biome-suppression-comment",
     "lint/nursery/useCollapsedElseIf": "https://biomejs.dev/lint/rules/use-collapsed-else-if",
     "lint/nursery/useExhaustiveDependencies": "https://biomejs.dev/linter/rules/use-exhaustive-dependencies",
     "lint/nursery/useGetterReturn": "https://biomejs.dev/linter/rules/use-getter-return",
@@ -218,7 +219,7 @@ define_categories! {
     "suppressions/unknownGroup",
     "suppressions/unknownRule",
     "suppressions/unused",
-    "suppressions/deprecatedSyntax",
+    "suppressions/deprecatedSuppressionComment",
 
     // Used in tests and examples
     "args/fileNotFound",

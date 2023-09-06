@@ -1236,6 +1236,7 @@ export type Category =
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useAriaPropTypes"
 	| "lint/nursery/useArrowFunction"
+	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useCollapsedElseIf"
 	| "lint/nursery/useExhaustiveDependencies"
 	| "lint/nursery/useGetterReturn"
@@ -1334,7 +1335,7 @@ export type Category =
 	| "suppressions/unknownGroup"
 	| "suppressions/unknownRule"
 	| "suppressions/unused"
-	| "suppressions/deprecatedSyntax"
+	| "suppressions/deprecatedSuppressionComment"
 	| "args/fileNotFound"
 	| "flags/invalid"
 	| "semanticTests";

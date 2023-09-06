@@ -744,7 +744,7 @@ async fn pull_quick_fixes() -> Result<()> {
                 },
             },
             new_text: String::from(
-                "// rome-ignore lint/suspicious/noCompareNegZero: <explanation>\n",
+                "// biome-ignore lint/suspicious/noCompareNegZero: <explanation>\n",
             ),
         }],
     );
@@ -863,7 +863,7 @@ async fn pull_quick_fixes_ignore_unsafe() -> Result<()> {
                 },
             },
             new_text: String::from(
-                "// rome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
+                "// biome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
             ),
         }],
     );
@@ -1017,7 +1017,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
                 },
             },
             new_text: String::from(
-                "// rome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
+                "// biome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
             ),
         }],
     );

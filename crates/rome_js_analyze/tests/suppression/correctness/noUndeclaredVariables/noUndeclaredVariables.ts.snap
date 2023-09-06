@@ -26,7 +26,7 @@ noUndeclaredVariables.ts:1:50 lint/correctness/noUndeclaredVariables  FIXABLE  �
   i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables
   
     1   │ - export·type·Invalid<S·extends·number>·=·`Hello·${T}`
-      1 │ + export·type·Invalid<S·extends·number>·=·`Hello·${//·rome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
+      1 │ + export·type·Invalid<S·extends·number>·=·`Hello·${//·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
       2 │ + T}`
     2 3 │   
     3 4 │   export type Invalid<S extends number> = `
@@ -50,7 +50,7 @@ noUndeclaredVariables.ts:5:7 lint/correctness/noUndeclaredVariables  FIXABLE  �
     3 3 │   export type Invalid<S extends number> = `
     4 4 │       Hello
     5   │ - ····${T}
-      5 │ + ····${//·rome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
+      5 │ + ····${//·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
       6 │ + T}
     6 7 │   `
   

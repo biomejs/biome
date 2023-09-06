@@ -45,7 +45,7 @@ export default function Tabs({
 								"react-tabs__tab",
 								isSelected && "react-tabs__tab--selected",
 							)}
-							// rome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: false positive?
+							// biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: false positive?
 							role="tab"
 							aria-selected={isSelected}
 							aria-disabled={isSelected}

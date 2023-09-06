@@ -12,6 +12,22 @@ class A { }
 class A { constructor(a, b = 0){ } }
 ```
 
+# Diagnostics
+```
+valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor is unnecessary.
+  
+  > 1 │ class A { constructor(a, b = 0){ } }
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Safe fix: Remove the unnecessary constructor.
+  
+    1 │ class·A·{·constructor(a,·b·=·0){·}·}
+      │           ------------------------- 
+
+```
+
 # Input
 ```js
 class A { constructor(){ doSomething(); } }

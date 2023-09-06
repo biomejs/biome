@@ -99,7 +99,7 @@ export default function DiagnosticsListTab({ editorRef, diagnostics }: Props) {
 		<ul className="diagnostics-list">
 			{diagnostics.map((diag, i) => {
 				return (
-					// rome-ignore lint/suspicious/noArrayIndexKey: Diagnostic has no stable id.
+					// biome-ignore lint/suspicious/noArrayIndexKey: Diagnostic has no stable id.
 					<DiagnosticListItem key={i} editorRef={editorRef} diagnostic={diag} />
 				);
 			})}

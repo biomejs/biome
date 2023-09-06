@@ -2,8 +2,8 @@ use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_syntax::{
-    AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, JsCallExpression,
-    JsConstructorClassMember, TsPropertyParameter,
+    AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, AnyJsFormalParameter,
+    JsCallExpression, JsConstructorClassMember,
 };
 use rome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 
@@ -27,7 +27,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// class B extends A {
     ///     constructor (a) {
     ///         super(a);
@@ -68,6 +68,13 @@ declare_rule! {
     ///     constructor (private prop: number) {}
     /// }
     /// ```
+    ///
+    /// ```ts
+    /// @Decorator
+    /// class C {
+    ///     constructor (prop: number) {}
+    /// }
+    /// ```
     pub(crate) NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
@@ -90,30 +97,35 @@ impl Rule for NoUselessConstructor {
         if is_not_public {
             return None;
         }
-        let has_param_property_or_default_param = constructor
-            .parameters()
-            .ok()?
-            .parameters()
-            .iter()
-            .filter_map(|x| x.ok())
-            .any(|x| {
-                TsPropertyParameter::can_cast(x.syntax().kind())
-                    || x.as_any_js_formal_parameter()
-                        .and_then(|x| x.as_js_formal_parameter())
-                        .and_then(|x| x.initializer())
-                        .is_some()
-            });
-        if has_param_property_or_default_param {
-            return None;
+        for parameter in constructor.parameters().ok()?.parameters() {
+            let decorators = match parameter.ok()? {
+                AnyJsConstructorParameter::AnyJsFormalParameter(
+                    AnyJsFormalParameter::JsBogusParameter(_),
+                )
+                | AnyJsConstructorParameter::TsPropertyParameter(_) => {
+                    // Ignore constructors with Bogus parameters or parameter properties
+                    return None;
+                }
+                AnyJsConstructorParameter::AnyJsFormalParameter(
+                    AnyJsFormalParameter::JsFormalParameter(parameter),
+                ) => parameter.decorators(),
+                AnyJsConstructorParameter::JsRestParameter(parameter) => parameter.decorators(),
+            };
+            if !decorators.is_empty() {
+                // Ignore constructors with decorated parameters
+                return None;
+            }
         }
-        let has_parent_class = constructor
-            .syntax()
-            .ancestors()
-            .find_map(AnyJsClass::cast)
-            .filter(|x| x.extends_clause().is_some())
-            .is_some();
+        let class = constructor.syntax().ancestors().find_map(AnyJsClass::cast);
+        if let Some(class) = &class {
+            if !class.decorators().is_empty() {
+                // Ignore decorated classes
+                return None;
+            }
+        }
         let mut body_statements = constructor.body().ok()?.statements().iter();
         let Some(first) = body_statements.next() else {
+            let has_parent_class = class.and_then(|x| x.extends_clause()).is_some();
             if has_parent_class {
                 // A `super` call is missing.
                 // Do not report as useless constructor.
@@ -160,11 +172,19 @@ impl Rule for NoUselessConstructor {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(constructor.clone());
         // Safely remove the constructor whether there is no comments.
-        let applicability = if constructor.syntax().has_comments_descendants() {
-            Applicability::MaybeIncorrect
-        } else {
-            Applicability::Always
-        };
+        let has_typed_parameters = constructor
+            .parameters()
+            .ok()?
+            .parameters()
+            .iter()
+            .find_map(|x| x.ok()?.type_annotation())
+            .is_some();
+        let applicability =
+            if has_typed_parameters || constructor.syntax().has_comments_descendants() {
+                Applicability::MaybeIncorrect
+            } else {
+                Applicability::Always
+            };
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability,

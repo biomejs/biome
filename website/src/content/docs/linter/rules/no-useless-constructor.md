@@ -43,7 +43,7 @@ class A {
   
 </code></pre>
 
-```jsx
+```ts
 class B extends A {
     constructor (a) {
         super(a);
@@ -129,6 +129,13 @@ class B extends A {
 class C {
     // Empty constructor with parameter properties are allowed.
     constructor (private prop: number) {}
+}
+```
+
+```ts
+@Decorator
+class C {
+    constructor (prop: number) {}
 }
 ```
 

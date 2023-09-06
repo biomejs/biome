@@ -29,7 +29,7 @@ invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━�
   
     1 1 │   <>
     2   │ - ····<div·onClick={()·=>·{}}·/>
-      2 │ + ····{/*·rome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
+      2 │ + ····{/*·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>·*/}
       3 │ + ····<div·onClick={()·=>·{}}·/>
     3 4 │       <div  {...spread} onClick={() => {}} />
     4 5 │       <div  {...spread} onClick={() => {}}>foo</div>

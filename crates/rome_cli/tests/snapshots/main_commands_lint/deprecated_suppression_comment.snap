@@ -12,19 +12,13 @@ a == b;
 # Emitted Messages
 
 ```block
-file.js:1:1 suppressions/deprecatedSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:1:1 suppressions/deprecatedSuppressionComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Suppression is using a deprecated syntax
+  ! // rome-ignore is deprecated, use // biome-ignore instead
   
   > 1 │ // rome-ignore lint(suspicious/noDoubleEquals): test
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-  
-  i Safe fix: Rewrite suppression to use the newer syntax
-  
-    1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-      1 │ + //·rome-ignore·lint/suspicious/noDoubleEquals:·test
-    2 2 │   a == b;
   
 
 ```

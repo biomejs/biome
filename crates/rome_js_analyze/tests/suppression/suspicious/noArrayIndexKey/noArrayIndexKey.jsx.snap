@@ -147,7 +147,7 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
       2   2 │   
       3   3 │   something.forEach((Element, index) => {
       4     │ - → <Component·key={index}>foo</Component>;
-          4 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+          4 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
           5 │ + <Component·key={index}>foo</Component>;
       5   6 │   });
       6   7 │   something.forEach((element, index, array) => {
@@ -185,7 +185,7 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
       5   5 │   });
       6   6 │   something.forEach((element, index, array) => {
       7     │ - → <Component·key={index}>foo</Component>;
-          7 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+          7 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
           8 │ + <Component·key={index}>foo</Component>;
       8   9 │   });
       9  10 │   things.filter((thing, index) => {
@@ -223,7 +223,7 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
       8   8 │   });
       9   9 │   things.filter((thing, index) => {
      10     │ - → otherThings.push(<Hello·key={index}>foo</Hello>);
-         10 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         10 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          11 │ + otherThings.push(<Hello·key={index}>foo</Hello>);
      11  12 │   });
      12  13 │   
@@ -260,7 +260,7 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      12  12 │   
      13  13 │   something.forEach((Element, index) => {
      14     │ - → <Component·key={index}·/>;
-         14 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         14 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          15 │ + <Component·key={index}·/>;
      15  16 │   });
      16  17 │   something.forEach((element, index, array) => {
@@ -298,7 +298,7 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      15  15 │   });
      16  16 │   something.forEach((element, index, array) => {
      17     │ - → <Component·key={index}·/>;
-         17 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         17 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          18 │ + <Component·key={index}·/>;
      18  19 │   });
      19  20 │   things.filter((thing, index) => {
@@ -336,7 +336,7 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      18  18 │   });
      19  19 │   things.filter((thing, index) => {
      20     │ - → otherThings.push(<Hello·key={index}·/>);
-         20 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         20 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          21 │ + otherThings.push(<Hello·key={index}·/>);
      21  22 │   });
      22  23 │   things.reduce(
@@ -374,7 +374,7 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      21  21 │   });
      22  22 │   things.reduce(
      23     │ - → (collection,·thing,·index)·=>·collection.concat(<Hello·key={index}·/>),
-         23 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         23 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          24 │ + (collection,·thing,·index)·=>·collection.concat(<Hello·key={index}·/>),
      24  25 │   	[]
      25  26 │   );
@@ -411,7 +411,7 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      26  26 │   
      27  27 │   React.Children.map(this.props.children, (child, index) =>
      28     │ - → React.cloneElement(child,·{·key:·index·})
-         28 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         28 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          29 │ + React.cloneElement(child,·{·key:·index·})
      29  30 │   );
      30  31 │   
@@ -448,7 +448,7 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      30  30 │   
      31  31 │   React.Children.forEach(this.props.children, function (child, index) {
      32     │ - → return·React.cloneElement(child,·{·key:·index·});
-         32 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         32 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          33 │ + return··React.cloneElement(child,·{·key:·index·});
      33  34 │   });
      34  35 │   
@@ -485,7 +485,7 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      34  34 │   
      35  35 │   Children.map(this.props.children, (child, index) =>
      36     │ - → cloneElement(child,·{·key:·index·})
-         36 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         36 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          37 │ + cloneElement(child,·{·key:·index·})
      37  38 │   );
      38  39 │   
@@ -522,7 +522,7 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      38  38 │   
      39  39 │   Children.forEach(this.props.children, function (child, index) {
      40     │ - → return·cloneElement(child,·{·key:·index·});
-         40 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         40 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          41 │ + return··cloneElement(child,·{·key:·index·});
      41  42 │   });
      42  43 │   
@@ -559,7 +559,7 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      42  42 │   
      43  43 │   Children.forEach(this.props.children, function (child, index) {
      44     │ - → const·foo·=·cloneElement(child,·{·key:·index·});
-         44 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         44 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          45 │ + const··foo·=·cloneElement(child,·{·key:·index·});
      45  46 │   	return foo;
      46  47 │   });
@@ -596,7 +596,7 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      48  48 │   function Test(props) {
      49  49 │   	return Children.map(props.children, function (child, index) {
      50     │ - → → return·cloneElement(child,·{·key:·index·});
-         50 │ + → → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         50 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          51 │ + return··cloneElement(child,·{·key:·index·});
      51  52 │   	});
      52  53 │   }
@@ -633,7 +633,7 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
      52  52 │   }
      53  53 │   
-         54 │ + //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         54 │ + //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
      54  55 │   things.map((thing, index) => React.cloneElement(thing, { key: index }));
      55  56 │   
   
@@ -669,7 +669,7 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      55  55 │   
      56  56 │   things.flatMap((thing, index) => {
      57     │ - → return·<Component·key={index}·/>;
-         57 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         57 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          58 │ + return··<Component·key={index}·/>;
      58  59 │   });
      59  60 │   
@@ -706,7 +706,7 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      59  59 │   
      60  60 │   Array.from(things, (thing, index) => {
      61     │ - → return·<Component·key={index}·/>;
-         61 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         61 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          62 │ + return··<Component·key={index}·/>;
      62  63 │   });
      63  64 │   
@@ -742,7 +742,7 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      63  63 │   
      64  64 │   const mapping = {
      65     │ - → foo:·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
-         65 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         65 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          66 │ + foo:·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
      66  67 │   };
      67  68 │   
@@ -778,7 +778,7 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      67  67 │   
      68  68 │   class A extends React.Component {
      69     │ - → renderThings·=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
-         69 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         69 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          70 │ + renderThings··=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
      70  71 │   }
      71  72 │   
@@ -816,7 +816,7 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      70  70 │   }
      71  71 │   
      72     │ - const·Component1·=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
-         72 │ + //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         72 │ + //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          73 │ + const··Component1·=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
      73  74 │   
      74  75 │   const Component2 = () => things.map((_, index) => <Component key={index} />);
@@ -854,7 +854,7 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      72  72 │   const Component1 = () => things.map((_, index) => <Component key={index} />);
      73  73 │   
      74     │ - const·Component2·=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
-         74 │ + //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         74 │ + //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          75 │ + const··Component2·=·()·=>·things.map((_,·index)·=>·<Component·key={index}·/>);
      75  76 │   
      76  77 │   function Component3() {
@@ -890,7 +890,7 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      75  75 │   
      76  76 │   function Component3() {
      77     │ - → return·things.map((_,·index)·=>·<Component·key={index}·/>);
-         77 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         77 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          78 │ + return··things.map((_,·index)·=>·<Component·key={index}·/>);
      78  79 │   }
      79  80 │   
@@ -926,7 +926,7 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      79  79 │   
      80  80 │   function Component4() {
      81     │ - → let·elements·=·things.map((_,·index)·=>·<Component·key={index}·/>);
-         81 │ + → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         81 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          82 │ + let··elements·=·things.map((_,·index)·=>·<Component·key={index}·/>);
      82  83 │   	if (condition) {
      83  84 │   		elements = others.map((_, index) => <Component key={index} />);
@@ -964,7 +964,7 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      81  81 │   	let elements = things.map((_, index) => <Component key={index} />);
      82  82 │   	if (condition) {
      83     │ - → → elements·=·others.map((_,·index)·=>·<Component·key={index}·/>);
-         83 │ + → → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         83 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          84 │ + elements··=·others.map((_,·index)·=>·<Component·key={index}·/>);
      84  85 │   	}
      85  86 │   	return elements;
@@ -1002,7 +1002,7 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      88  88 │   function Component5({ things }) {
      89  89 │   	const elements = useMemo(
      90     │ - → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
-         90 │ + → → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         90 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          91 │ + ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
      91  92 │   		[things]
      92  93 │   	);
@@ -1040,7 +1040,7 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      96  96 │   function Component6({ things }) {
      97  97 │   	const elements = useMemo(
      98     │ - → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
-         98 │ + → → //·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         98 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          99 │ + ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
      99 100 │   		[things]
     100 101 │   	);
@@ -1078,7 +1078,7 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
     105 105 │   	return (
     106 106 │   		<HoC>
     107     │ - → → → {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
-        107 │ + → → → {/*·rome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
+        107 │ + → → → {/*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
         108 │ + {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
     108 109 │   		</HoC>
     109 110 │   	);

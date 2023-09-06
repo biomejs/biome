@@ -5,7 +5,7 @@ expression: content
 # Input messages
 
 ```block
-import 'zod'; import 'lodash'; function f() {return{}} class Foo { constructor() {} }
+import 'zod'; import 'lodash'; function f() {var x = 1; return{x}} class Foo {}
 ```
 
 # Emitted Messages
@@ -14,7 +14,8 @@ import 'zod'; import 'lodash'; function f() {return{}} class Foo { constructor()
 import "lodash";
 import "zod";
 function f() {
-	return {};
+	const x = 1;
+	return { x };
 }
 class Foo {}
 
