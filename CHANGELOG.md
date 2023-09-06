@@ -10,12 +10,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ## Unreleased
 
-### Analyzer
-
-#### Enhancements
-
-- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `rome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action.
-
 ### CLI
 ### Configuration
 ### Editors
@@ -26,6 +20,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### VSCode
 
 ## 1.1.0 (2023-09-05)
+
+### Analyzer
+
+#### Enhancements
+
+- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `rome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action.
+
 
 ### CLI
 

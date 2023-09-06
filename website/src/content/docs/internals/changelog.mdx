@@ -16,11 +16,23 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ## Unreleased
 
+### CLI
+### Configuration
+### Editors
+### Formatter
+### JavaScript APIs
+### Linter
+### Parser
+### VSCode
+
+## 1.1.0 (2023-09-05)
+
 ### Analyzer
 
 #### Enhancements
 
 - Add a code action to replace `rome-ignore` with `biome-ignore`. Use `rome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action.
+
 
 ### CLI
 
@@ -36,6 +48,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 ### Editors
+
+#### Bug fixes
+
+- The LSP now uses its own socket and won't rely on Rome's socket. This fixes some cases where users were seeing
+multiple servers in the `rage` output.
+
 ### Formatter
 
 #### Enhancements
@@ -171,11 +189,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [rome#4616](https://github.com/rome/tools/issues/4616)
 
   Previously [noUnreachableSuper](https://biomejs.dev/linter/rules/no-unreacheable-super/) reported valid codes with complex nesting of control flow structures.
-
-
-### Parser
-### VSCode
-
 
 ## 1.0.0 (2023-08-28)
 
