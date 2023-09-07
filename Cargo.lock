@@ -130,6 +130,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_css_factory"
+version = "0.2.0"
+dependencies = [
+ "biome_css_syntax",
+ "rome_rowan",
+]
+
+[[package]]
 name = "biome_css_syntax"
 version = "0.2.0"
 dependencies = [
@@ -1910,23 +1918,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_css_factory"
-version = "0.2.0"
-dependencies = [
- "biome_css_syntax",
- "rome_rowan",
-]
-
-[[package]]
 name = "rome_css_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_css_factory",
  "biome_css_syntax",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
- "rome_css_factory",
  "rome_diagnostics",
  "rome_js_unicode_table",
  "rome_parser",

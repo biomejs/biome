@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_css_factory"
+name                 = "biome_css_factory"
 repository.workspace = true
 version              = "0.2.0"
 

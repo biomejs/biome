@@ -152,7 +152,7 @@ impl LanguageKind {
     pub fn factory_crate_name(&self) -> &'static str {
         match self {
             LanguageKind::Js => "rome_js_factory",
-            LanguageKind::Css => "rome_css_factory",
+            LanguageKind::Css => "biome_css_factory",
             LanguageKind::Json => "rome_json_factory",
         }
     }

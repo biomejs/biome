@@ -3,9 +3,9 @@
 use crate::parser::CssParser;
 
 use crate::syntax::parse_root;
+use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use parser::CssParserOptions;
-use rome_css_factory::CssSyntaxFactory;
 pub use rome_parser::prelude::*;
 use rome_parser::tree_sink::LosslessTreeSink;
 use rome_rowan::{AstNode, NodeCache};
