@@ -11,4 +11,4 @@ version              = "0.2.0"
 
 [dependencies]
 biome_css_syntax = { workspace = true }
-rome_rowan      = { workspace = true }
+rome_rowan       = { workspace = true }
