@@ -2,7 +2,7 @@
 
 #![allow(clippy::redundant_closure)]
 #![allow(clippy::too_many_arguments)]
-use rome_css_syntax::{
+use biome_css_syntax::{
     CssSyntaxElement as SyntaxElement, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken,
     *,
 };

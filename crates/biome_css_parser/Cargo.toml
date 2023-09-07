@@ -2,18 +2,18 @@
 authors.workspace    = true
 categories           = ["parser-implementations", "development-tools"]
 description          = "An extremely fast CSS parser"
-documentation        = "https://docs.rs/rome_css_parser"
+documentation        = "https://docs.rs/biome_css_parser"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
-name                 = "rome_css_parser"
+name                 = "biome_css_parser"
 repository.workspace = true
 version              = "0.1.0"
 
 [dependencies]
+biome_css_factory     = { workspace = true }
+biome_css_syntax      = { workspace = true }
 rome_console          = { workspace = true }
-rome_css_factory      = { workspace = true }
-rome_css_syntax       = { workspace = true }
 rome_diagnostics      = { workspace = true }
 rome_js_unicode_table = { workspace = true }
 rome_parser           = { workspace = true }

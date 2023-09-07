@@ -1,14 +1,14 @@
 [package]
 authors.workspace    = true
+description          = "SyntaxKind and common rowan definitions for biome_css_parser"
+documentation        = "https://docs.rs/biome_css_parser"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_css_factory"
+name                 = "biome_css_syntax"
 repository.workspace = true
 version              = "0.2.0"
-
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rome_css_syntax = { workspace = true }
-rome_rowan      = { workspace = true }
+rome_rowan = { workspace = true }

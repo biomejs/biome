@@ -1,7 +1,7 @@
 use crate::lexer::{Lexer, Token};
 use crate::CssParserOptions;
-use rome_css_syntax::CssSyntaxKind::{EOF, TOMBSTONE};
-use rome_css_syntax::{CssSyntaxKind, TextRange};
+use biome_css_syntax::CssSyntaxKind::{EOF, TOMBSTONE};
+use biome_css_syntax::{CssSyntaxKind, TextRange};
 use rome_parser::diagnostic::ParseDiagnostic;
 use rome_parser::prelude::TokenSource;
 use rome_parser::token_source::Trivia;

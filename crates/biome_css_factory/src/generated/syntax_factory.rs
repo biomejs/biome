@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use rome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, *};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, *};
 use rome_rowan::{AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind};
 #[derive(Debug)]
 pub struct CssSyntaxFactory;

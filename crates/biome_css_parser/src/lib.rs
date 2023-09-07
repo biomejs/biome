@@ -3,9 +3,9 @@
 use crate::parser::CssParser;
 
 use crate::syntax::parse_root;
+use biome_css_factory::CssSyntaxFactory;
+use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use parser::CssParserOptions;
-use rome_css_factory::CssSyntaxFactory;
-use rome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use rome_parser::prelude::*;
 use rome_parser::tree_sink::LosslessTreeSink;
 use rome_rowan::{AstNode, NodeCache};
@@ -60,13 +60,13 @@ impl CssParse {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// # use rome_css_parser::parse_css;
-    /// # use rome_css_syntax::CssSyntaxKind;
+    /// # use biome_css_parser::parse_css;
+    /// # use biome_css_syntax::CssSyntaxKind;
     /// # use rome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
-    /// use rome_css_syntax::CssSyntaxKind;
-    /// use rome_css_parser::CssParserOptions;
+    /// use biome_css_syntax::CssSyntaxKind;
+    /// use biome_css_parser::CssParserOptions;
     /// let parse = parse_css(r#""#, CssParserOptions::default());
     ///
     /// let root_value = parse.tree().rules();

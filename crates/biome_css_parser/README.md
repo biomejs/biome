@@ -12,12 +12,11 @@
 [discord-url]: https://discord.gg/BypW39g6Yc
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[cargo-badge]: https://badgen.net/crates/v/rome_css_parser?&color=green
-[cargo-url]: https://crates.io/crates/rome_css_parser/
+[cargo-badge]: https://badgen.net/crates/v/biome_css_parser?&color=green
+[cargo-url]: https://crates.io/crates/biome_css_parser/
 
 </div>
 
-# `rome_css_parser`
+# `biome_css_parser`
 
-Biome's CSS parser implementation. Follow the [documentation](https://docs.rs/rome_css_parser/latest).
-
+Biome's CSS parser implementation. Follow the [documentation](https://docs.rs/biome_css_parser/latest).
