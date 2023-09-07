@@ -4,7 +4,7 @@ description          = "SyntaxKind and common rowan definitions for rome_css_par
 documentation        = "https://docs.rs/rome_css_parser"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_css_syntax"
+name                 = "biome_css_syntax"
 repository.workspace = true
 version              = "0.2.0"
 

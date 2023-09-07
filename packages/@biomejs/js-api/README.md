@@ -46,7 +46,7 @@ console.log('Lint diagnostics: ', html);
 
 ## Philosophy
 
-The project philosophy can be found on our [website](https://docs.rome.tools/internals/philosophy/).
+The project philosophy can be found on our [website](https://biomejs.dev/internals/philosophy/).
 
 ## Community
 

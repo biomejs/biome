@@ -21,7 +21,7 @@ macro_rules! assert_lex {
         $(
             assert_eq!(
                 tokens[idx].kind,
-                rome_css_syntax::CssSyntaxKind::$kind,
+                biome_css_syntax::CssSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
                 tokens[idx].kind,

@@ -144,7 +144,7 @@ impl LanguageKind {
     pub fn syntax_crate_name(&self) -> &'static str {
         match self {
             LanguageKind::Js => "rome_js_syntax",
-            LanguageKind::Css => "rome_css_syntax",
+            LanguageKind::Css => "biome_css_syntax",
             LanguageKind::Json => "rome_json_syntax",
         }
     }

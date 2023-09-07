@@ -13,7 +13,7 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
             quote! { JsSyntaxFactory },
         ),
         LanguageKind::Css => (
-            quote! { rome_css_syntax },
+            quote! { biome_css_syntax },
             quote! { CssSyntaxKind },
             quote! { CssSyntaxFactory },
         ),

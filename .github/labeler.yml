@@ -30,7 +30,7 @@ A-Parser:
   - crates/rome_json_parser/**
   - crates/rome_json_syntax/**
   - crates/rome_css_parser/**
-  - crates/rome_css_syntax/**
+  - crates/biome_css_syntax/**
 
 A-Formatter:
   - crates/rome_formatter/**

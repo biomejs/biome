@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use rome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::CssSyntaxKind::*;
 use rome_parser::Parser;
 
 pub(crate) fn parse_root(p: &mut CssParser) {

@@ -1,5 +1,5 @@
 use crate::token_source::CssTokenSource;
-use rome_css_syntax::CssSyntaxKind;
+use biome_css_syntax::CssSyntaxKind;
 use rome_parser::diagnostic::merge_diagnostics;
 use rome_parser::event::Event;
 use rome_parser::prelude::*;

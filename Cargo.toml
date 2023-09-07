@@ -36,7 +36,7 @@ rome_console                = { version = "0.0.1", path = "./crates/rome_console
 rome_control_flow           = { path = "./crates/rome_control_flow" }
 rome_css_factory            = { path = "./crates/rome_css_factory" }
 rome_css_parser             = { path = "./crates/rome_css_parser" }
-rome_css_syntax             = { path = "./crates/rome_css_syntax" }
+biome_css_syntax             = { path = "./crates/biome_css_syntax" }
 rome_deserialize            = { version = "0.2.0", path = "./crates/rome_deserialize" }
 rome_diagnostics            = { version = "0.2.0", path = "./crates/rome_diagnostics" }
 rome_diagnostics_categories = { version = "0.2.0", path = "./crates/rome_diagnostics_categories" }
