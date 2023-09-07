@@ -163,6 +163,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_aria"
+version = "0.0.0"
+dependencies = [
+ "biome_aria_metadata",
+]
+
+[[package]]
+name = "biome_aria_metadata"
+version = "0.0.0"
+dependencies = [
+ "case",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "biome_flags"
+version = "0.0.0"
+
+[[package]]
 name = "biome_lsp"
 version = "0.0.0"
 dependencies = [
@@ -216,26 +236,6 @@ dependencies = [
  "serde_json",
  "similar",
 ]
-
-[[package]]
-name = "biome_aria"
-version = "0.0.0"
-dependencies = [
- "biome_aria_metadata",
-]
-
-[[package]]
-name = "biome_aria_metadata"
-version = "0.0.0"
-dependencies = [
- "case",
- "proc-macro2",
- "quote",
-]
-
-[[package]]
-name = "biome_flags"
-version = "0.0.0"
 
 [[package]]
 name = "bit-set"
@@ -1882,8 +1882,8 @@ name = "rome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "biome_lsp",
  "biome_flags",
+ "biome_lsp",
  "bpaf",
  "crossbeam",
  "dashmap",
@@ -2053,8 +2053,8 @@ dependencies = [
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
- "biome_test_utils",
  "biome_aria",
+ "biome_test_utils",
  "bpaf",
  "countme",
  "insta",
