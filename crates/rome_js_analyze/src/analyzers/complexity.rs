@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_confusing_void_type;
 pub(crate) mod no_extra_boolean_cast;
 pub(crate) mod no_for_each;
 pub(crate) mod no_multiple_spaces_in_regular_expression_literals;
@@ -22,6 +23,7 @@ declare_group! {
     pub (crate) Complexity {
         name : "complexity" ,
         rules : [
+            self :: no_confusing_void_type :: NoConfusingVoidType ,
             self :: no_extra_boolean_cast :: NoExtraBooleanCast ,
             self :: no_for_each :: NoForEach ,
             self :: no_multiple_spaces_in_regular_expression_literals :: NoMultipleSpacesInRegularExpressionLiterals ,

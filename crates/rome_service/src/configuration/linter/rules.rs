@@ -971,10 +971,19 @@ pub struct Complexity {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_simplified_logic_expression: Option<RuleConfiguration>,
+    #[doc = "Disallow void type outside of generic or return types."]
+    #[bpaf(
+        long("no-confusing-void-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_confusing_void_type: Option<RuleConfiguration>
 }
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
-    pub(crate) const GROUP_RULES: [&'static str; 16] = [
+    pub(crate) const GROUP_RULES: [&'static str; 17] = [
         "noExtraBooleanCast",
         "noForEach",
         "noMultipleSpacesInRegularExpressionLiterals",
@@ -991,6 +1000,7 @@ impl Complexity {
         "useOptionalChain",
         "useSimpleNumberKeys",
         "useSimplifiedLogicExpression",
+        "noConfusingVoidType",
     ];
     const RECOMMENDED_RULES: [&'static str; 13] = [
         "noExtraBooleanCast",
@@ -1138,6 +1148,12 @@ impl Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
+        if let Some(rule) = self.no_confusing_void_type.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            }
+        }
+
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -1279,6 +1295,7 @@ impl Complexity {
             "useOptionalChain" => self.use_optional_chain.as_ref(),
             "useSimpleNumberKeys" => self.use_simple_number_keys.as_ref(),
             "useSimplifiedLogicExpression" => self.use_simplified_logic_expression.as_ref(),
+            "noConfusingVoidType" => self.no_confusing_void_type.as_ref(),
             _ => None,
         }
     }

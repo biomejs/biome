@@ -238,6 +238,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noConfusingVoidType": {
+					"description": "Disallow void type outside of generic or return types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
@@ -823,6 +830,21 @@
 			},
 			"additionalProperties": false
 		},
+		"ConfusingVoidTypeOptions": {
+			"type": "object",
+			"properties": {
+				"allowInGenericTypeArguments": {
+					"type": "boolean",
+					"default": true,
+					"description": "This option lets you control if void can be used as a valid value for generic type parameters."
+				},
+				"allowAsThisParameter": {
+					"type": "boolean",
+					"default": false,
+					"description": "This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument."
+				}
+			}
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1113,6 +1135,10 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
+				},
+				{
+					"description": "Options for `noConfusingVoidType` rule",
+					"allOf": [{ "$ref": "#/definitions/ConfusingVoidTypeOptions" }]
 				},
 				{ "description": "No options available", "type": "null" }
 			]

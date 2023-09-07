@@ -34,6 +34,7 @@ define_categories! {
     "lint/a11y/useValidLang": "https://biomejs.dev/linter/rules/use-valid-lang",
 
     // complexity
+    "lint/complexity/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
     "lint/complexity/noMultipleSpacesInRegularExpressionLiterals": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals",
