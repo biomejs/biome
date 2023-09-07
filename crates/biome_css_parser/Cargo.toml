@@ -2,11 +2,11 @@
 authors.workspace    = true
 categories           = ["parser-implementations", "development-tools"]
 description          = "An extremely fast CSS parser"
-documentation        = "https://docs.rs/rome_css_parser"
+documentation        = "https://docs.rs/biome_css_parser"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
-name                 = "rome_css_parser"
+name                 = "biome_css_parser"
 repository.workspace = true
 version              = "0.1.0"
 

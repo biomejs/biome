@@ -60,13 +60,13 @@ impl CssParse {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// # use rome_css_parser::parse_css;
+    /// # use biome_css_parser::parse_css;
     /// # use biome_css_syntax::CssSyntaxKind;
     /// # use rome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use biome_css_syntax::CssSyntaxKind;
-    /// use rome_css_parser::CssParserOptions;
+    /// use biome_css_parser::CssParserOptions;
     /// let parse = parse_css(r#""#, CssParserOptions::default());
     ///
     /// let root_value = parse.tree().rules();

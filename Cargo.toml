@@ -35,7 +35,7 @@ rome_cli                    = { path = "./crates/rome_cli" }
 rome_console                = { version = "0.0.1", path = "./crates/rome_console" }
 rome_control_flow           = { path = "./crates/rome_control_flow" }
 biome_css_factory            = { path = "./crates/biome_css_factory" }
-rome_css_parser             = { path = "./crates/rome_css_parser" }
+biome_css_parser             = { path = "./crates/biome_css_parser" }
 biome_css_syntax             = { path = "./crates/biome_css_syntax" }
 rome_deserialize            = { version = "0.2.0", path = "./crates/rome_deserialize" }
 rome_diagnostics            = { version = "0.2.0", path = "./crates/rome_diagnostics" }

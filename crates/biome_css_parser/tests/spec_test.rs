@@ -1,6 +1,6 @@
+use biome_css_parser::{parse_css, CssParserOptions};
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_css_parser::{parse_css, CssParserOptions};
 use rome_diagnostics::display::PrintDiagnostic;
 use rome_diagnostics::termcolor;
 use rome_diagnostics::DiagnosticExt;

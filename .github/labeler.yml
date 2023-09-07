@@ -29,7 +29,7 @@ A-Parser:
   - crates/rome_js_syntax/**
   - crates/rome_json_parser/**
   - crates/rome_json_syntax/**
-  - crates/rome_css_parser/**
+  - crates/biome_css_parser/**
   - crates/biome_css_syntax/**
 
 A-Formatter:

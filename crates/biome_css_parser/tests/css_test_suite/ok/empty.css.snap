@@ -1,5 +1,5 @@
 ---
-source: crates/rome_css_parser/tests/spec_test.rs
+source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
 
@@ -27,5 +27,3 @@ CssRoot {
   1: EOF@0..0 "" [] []
 
 ```
-
-
