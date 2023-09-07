@@ -25,11 +25,11 @@ inherits = "release"
 
 [workspace.dependencies]
 # Internal crates
+biome_aria                  = { path = "./crates/biome_aria" }
+biome_aria_metadata         = { path = "./crates/biome_aria_metadata" }
 biome_css_factory           = { path = "./crates/biome_css_factory" }
 biome_css_parser            = { path = "./crates/biome_css_parser" }
 biome_css_syntax            = { path = "./crates/biome_css_syntax" }
-biome_aria                  = { path = "./crates/biome_aria" }
-biome_aria_metadata         = { path = "./crates/biome_aria_metadata" }
 biome_flags                 = { path = "./crates/biome_flags" }
 biome_lsp                   = { path = "./crates/biome_lsp" }
 biome_markup                = { version = "0.0.1", path = "./crates/biome_markup" }
