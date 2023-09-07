@@ -25,6 +25,9 @@ inherits = "release"
 
 [workspace.dependencies]
 # Internal crates
+biome_lsp                   = { path = "./crates/biome_lsp" }
+biome_markup                = { version = "0.0.1", path = "./crates/biome_markup" }
+biome_test_utils            = { path = "./crates/biome_test_utils" }
 rome_analyze                = { path = "./crates/rome_analyze" }
 rome_aria                   = { path = "./crates/rome_aria" }
 rome_aria_metadata          = { path = "./crates/rome_aria_metadata" }
@@ -54,14 +57,11 @@ rome_json_factory           = { version = "0.2.0", path = "./crates/rome_json_fa
 rome_json_formatter         = { path = "./crates/rome_json_formatter" }
 rome_json_parser            = { path = "./crates/rome_json_parser" }
 rome_json_syntax            = { version = "0.2.0", path = "./crates/rome_json_syntax" }
-biome_lsp                    = { path = "./crates/biome_lsp" }
-biome_markup                 = { version = "0.0.1", path = "./crates/biome_markup" }
 rome_migrate                = { path = "./crates/rome_migrate" }
 rome_parser                 = { version = "0.2.0", path = "./crates/rome_parser" }
 rome_rowan                  = { version = "0.2.0", path = "./crates/rome_rowan" }
 rome_service                = { path = "./crates/rome_service" }
 rome_suppression            = { version = "0.2.0", path = "./crates/rome_suppression" }
-biome_test_utils             = { path = "./crates/biome_test_utils" }
 rome_text_edit              = { version = "0.0.1", path = "./crates/rome_text_edit" }
 rome_text_size              = { version = "0.0.1", path = "./crates/rome_text_size" }
 tests_macros                = { path = "./crates/tests_macros" }

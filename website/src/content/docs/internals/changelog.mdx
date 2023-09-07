@@ -16,6 +16,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ## Unreleased
 
+### Analyzer
 ### CLI
 ### Configuration
 ### Editors
@@ -24,6 +25,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Linter
 ### Parser
 ### VSCode
+
+## 1.1.1 (2023-09-07)
+
+### Analyzer
+
+#### Bug fixes
+
+- The diagnostic for `// rome-ignore` suppression comment should not be a warning. A warning could block the CI, marking a gradual migration difficult. The code action that changes `// rome-ignore` to `// biome-ignore` is disabled as consequence.
 
 ## 1.1.0 (2023-09-06)
 
