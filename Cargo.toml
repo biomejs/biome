@@ -28,13 +28,13 @@ inherits = "release"
 biome_css_factory           = { path = "./crates/biome_css_factory" }
 biome_css_parser            = { path = "./crates/biome_css_parser" }
 biome_css_syntax            = { path = "./crates/biome_css_syntax" }
+biome_aria                  = { path = "./crates/biome_aria" }
+biome_aria_metadata         = { path = "./crates/biome_aria_metadata" }
+biome_flags                 = { path = "./crates/biome_flags" }
 biome_lsp                   = { path = "./crates/biome_lsp" }
 biome_markup                = { version = "0.0.1", path = "./crates/biome_markup" }
 biome_test_utils            = { path = "./crates/biome_test_utils" }
-biome_flags                 = { path = "./crates/biome_flags" }
 rome_analyze                = { path = "./crates/rome_analyze" }
-biome_aria                  = { path = "./crates/biome_aria" }
-biome_aria_metadata         = { path = "./crates/biome_aria_metadata" }
 rome_cli                    = { path = "./crates/rome_cli" }
 rome_console                = { version = "0.0.1", path = "./crates/rome_console" }
 rome_control_flow           = { path = "./crates/rome_control_flow" }

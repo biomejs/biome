@@ -13,8 +13,8 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow              = "1.0.52"
-biome_lsp           = { workspace = true }
 biome_flags         = { workspace = true }
+biome_lsp           = { workspace = true }
 bpaf                = { workspace = true }
 crossbeam           = "0.8.1"
 dashmap             = { workspace = true }
