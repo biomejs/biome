@@ -18,8 +18,13 @@ import InlineSVG from "@src/components/InlineSVG.astro";
     <InlineSVG src="pnpm" />
     <span>pnpm</span>
   </li>
+  <li data-name="bun">
+    <InlineSVG src="bun" />
+    <span>bun</span>
+  </li>
 </ul>
 
 <pre data-name="npm" class="package-manager-command language-shellsession active"><code>{Astro.props.npx ? "npx" : "npm"} {Astro.props.npx ?? Astro.props.npm ?? Astro.props.command}</code></pre>
 <pre data-name="yarn" class="package-manager-command language-shellsession"><code>yarn {Astro.props.yarn ?? Astro.props.command}</code></pre>
 <pre data-name="pnpm" class="package-manager-command language-shellsession"><code>pnpm {Astro.props.pnpm ?? Astro.props.command}</code></pre>
+<pre data-name="bun" class="package-manager-command language-shellsession"><code>bun{Astro.props.bun ? "" : "x"} {Astro.props.bunx ?? Astro.props.bun ?? Astro.props.command}</code></pre>
