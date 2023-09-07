@@ -32,7 +32,7 @@ jobs:
       - name: Run format
         run: |
           cargo fmt --all --check
-          taplo fmt -- --locked
+          taplo format --check
 
   lint:
     name: Lint Rust Files

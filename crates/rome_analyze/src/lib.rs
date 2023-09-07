@@ -46,7 +46,9 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 
 use rome_console::markup;
-use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags};
+use rome_diagnostics::{
+    category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags, Severity,
+};
 use rome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextLen, TextRange,
     TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,
@@ -462,6 +464,7 @@ where
                         "// rome-ignore is deprecated, use // biome-ignore instead",
                     )
                     .with_tags(DiagnosticTags::DEPRECATED_CODE)
+                    .with_severity(Severity::Information)
                 })
                 .with_action(move || create_suppression_comment_action(token));
 

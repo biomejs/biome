@@ -13,6 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow              = "1.0.52"
+biome_lsp           = { workspace = true }
 bpaf                = { workspace = true }
 crossbeam           = "0.8.1"
 dashmap             = { workspace = true }
@@ -29,7 +30,6 @@ rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-biome_lsp            = { workspace = true }
 rome_migrate        = { workspace = true }
 rome_rowan          = { workspace = true }
 rome_service        = { workspace = true }
