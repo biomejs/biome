@@ -130,6 +130,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_aria"
+version = "0.0.0"
+dependencies = [
+ "biome_aria_metadata",
+]
+
+[[package]]
+name = "biome_aria_metadata"
+version = "0.0.0"
+dependencies = [
+ "case",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "biome_css_factory"
 version = "0.2.0"
 dependencies = [
@@ -160,22 +176,6 @@ name = "biome_css_syntax"
 version = "0.2.0"
 dependencies = [
  "rome_rowan",
-]
-
-[[package]]
-name = "biome_aria"
-version = "0.0.0"
-dependencies = [
- "biome_aria_metadata",
-]
-
-[[package]]
-name = "biome_aria_metadata"
-version = "0.0.0"
-dependencies = [
- "case",
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
