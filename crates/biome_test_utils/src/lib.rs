@@ -1,5 +1,5 @@
-use json_comments::StripComments;
 use biome_analyze::{AnalyzerAction, AnalyzerOptions};
+use json_comments::StripComments;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
 use rome_diagnostics::termcolor::Buffer;

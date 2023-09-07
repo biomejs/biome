@@ -1,10 +1,10 @@
+use biome_analyze::{
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+};
 use case::CaseExt;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
-use biome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
-};
 use rome_js_syntax::JsLanguage;
 use rome_json_syntax::JsonLanguage;
 use std::collections::BTreeMap;

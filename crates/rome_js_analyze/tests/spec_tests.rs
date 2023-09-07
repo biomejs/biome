@@ -1,9 +1,9 @@
+use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot, CheckActionType,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use rome_diagnostics::advice::CodeSuggestionAdvice;
 use rome_diagnostics::{DiagnosticExt, Severity};
 use rome_js_parser::{parse, JsParserOptions};

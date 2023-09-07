@@ -1,11 +1,11 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
+use biome_migrate::{migrate_configuration, ControlFlow};
 use rome_console::{markup, ConsoleExt};
 use rome_diagnostics::{category, PrintDiagnostic};
 use rome_fs::{FileSystemExt, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::JsonRoot;
-use biome_migrate::{migrate_configuration, ControlFlow};
 use rome_rowan::AstNode;
 use rome_service::workspace::FixAction;
 use std::borrow::Cow;

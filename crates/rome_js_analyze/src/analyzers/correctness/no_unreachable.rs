@@ -1,7 +1,7 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
-use roaring::bitmap::RoaringBitmap;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use roaring::bitmap::RoaringBitmap;
 use rome_control_flow::{
     builder::BlockId, ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
 };

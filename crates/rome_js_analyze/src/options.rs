@@ -10,9 +10,9 @@ use crate::semantic_analyzers::nursery::use_naming_convention::{
 use crate::semantic_analyzers::style::no_restricted_globals::{
     restricted_globals_options, RestrictedGlobalsOptions,
 };
-use bpaf::Bpaf;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
+use bpaf::Bpaf;
 use rome_deserialize::json::VisitJsonNode;
 use rome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};

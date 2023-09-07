@@ -13,11 +13,11 @@ use crate::{
     },
     Rules, WorkspaceError,
 };
-use indexmap::IndexSet;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use indexmap::IndexSet;
 use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
 use rome_fs::RomePath;
