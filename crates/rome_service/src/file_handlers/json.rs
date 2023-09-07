@@ -247,54 +247,54 @@ fn lint(params: LintParams) -> LintResults {
         let has_lint = params.filter.categories.contains(RuleCategories::LINT);
         let analyzer_options =
             compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
-
-        let (_, analyze_diagnostics) = analyze(
-            &root.value().unwrap(),
-            params.filter,
-            &analyzer_options,
-            |signal| {
-                if let Some(mut diagnostic) = signal.diagnostic() {
-                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
-                    {
-                        return ControlFlow::<Never>::Continue(());
-                    }
-
-                    diagnostic_count += 1;
-
-                    // We do now check if the severity of the diagnostics should be changed.
-                    // The configuration allows to change the severity of the diagnostics emitted by rules.
-                    let severity = diagnostic
-                        .category()
-                        .filter(|category| category.name().starts_with("lint/"))
-                        .map(|category| {
-                            params
-                                .rules
-                                .and_then(|rules| rules.get_severity_from_code(category))
-                                .unwrap_or(Severity::Warning)
-                        })
-                        .unwrap_or_else(|| diagnostic.severity());
-
-                    if severity <= Severity::Error {
-                        errors += 1;
-                    }
-
-                    if diagnostic_count <= params.max_diagnostics {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diagnostic = diagnostic.add_code_suggestion(action.into());
-                            }
-                        }
-
-                        let error = diagnostic.with_severity(severity);
-
-                        diagnostics.push(rome_diagnostics::serde::Diagnostic::new(error));
-                    }
+        let Ok(value) = &root.value() else {
+            return LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
+            };
+        };
+        let (_, analyze_diagnostics) = analyze(value, params.filter, &analyzer_options, |signal| {
+            if let Some(mut diagnostic) = signal.diagnostic() {
+                // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                if !has_lint && diagnostic.category() == Some(category!("suppressions/unused")) {
+                    return ControlFlow::<Never>::Continue(());
                 }
 
-                ControlFlow::<Never>::Continue(())
-            },
-        );
+                diagnostic_count += 1;
+
+                // We do now check if the severity of the diagnostics should be changed.
+                // The configuration allows to change the severity of the diagnostics emitted by rules.
+                let severity = diagnostic
+                    .category()
+                    .filter(|category| category.name().starts_with("lint/"))
+                    .map(|category| {
+                        params
+                            .rules
+                            .and_then(|rules| rules.get_severity_from_code(category))
+                            .unwrap_or(Severity::Warning)
+                    })
+                    .unwrap_or_else(|| diagnostic.severity());
+
+                if severity <= Severity::Error {
+                    errors += 1;
+                }
+
+                if diagnostic_count <= params.max_diagnostics {
+                    for action in signal.actions() {
+                        if !action.is_suppression() {
+                            diagnostic = diagnostic.add_code_suggestion(action.into());
+                        }
+                    }
+
+                    let error = diagnostic.with_severity(severity);
+
+                    diagnostics.push(rome_diagnostics::serde::Diagnostic::new(error));
+                }
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
 
         diagnostics.extend(
             analyze_diagnostics
