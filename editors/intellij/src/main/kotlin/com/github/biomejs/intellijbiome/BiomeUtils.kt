@@ -1,0 +1,71 @@
+package com.github.biomejs.intellijbiome
+
+import com.github.biomejs.intellijbiome.settings.BiomeSettings
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.util.ExecUtil
+import com.intellij.javascript.nodejs.library.node_modules.NodeModulesDirectoryManager
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.project.Project
+import com.intellij.util.SmartList
+import java.io.File
+
+
+object BiomeUtils {
+    fun isSupportedFileType(fileType: FileType): Boolean = when (fileType.defaultExtension) {
+        "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx" -> true
+        else -> false
+    }
+
+    fun getBiomeVersion(project: Project, binaryPath: String): String? {
+        if(binaryPath.isEmpty()){
+            return null
+        }
+
+        val versionRegex = Regex("\\d{1,2}\\.\\d{1,2}\\.\\d{1,3}")
+        val commandLine = createVersionCommandLine(project, binaryPath)
+
+        val output = ExecUtil.execAndGetOutput(commandLine)
+
+        val matchResult = versionRegex.find(output.stdout)
+
+        return matchResult?.value
+    }
+
+    fun getBiomeExecutablePath(project: Project): String? {
+        val directoryManager = NodeModulesDirectoryManager.getInstance(project)
+        val executablePath = BiomeSettings.getInstance(project).executablePath
+        val biomeBinFile = directoryManager.nodeModulesDirs
+                .asSequence()
+                .mapNotNull { it.findFileByRelativePath(".bin/biome") }
+                .filter { it.isValid }
+                .firstOrNull()
+
+        if (executablePath.isEmpty()) {
+            return biomeBinFile?.path
+        }
+
+        return executablePath
+    }
+
+    fun attachConfigPath(params: SmartList<String>, project: Project, logger: Logger) {
+        project.basePath?.let {
+            try {
+                val file = File(it)
+                if (file.exists()) {
+                    params.add("--config-path")
+                    params.add(project.basePath)
+                }
+            } catch (error: Exception) {
+                logger.error(error.message)
+            }
+        }
+    }
+
+    private  fun createVersionCommandLine(project: Project, binaryPath: String): GeneralCommandLine {
+        return GeneralCommandLine()
+            .withWorkDirectory(project.basePath)
+            .withExePath(binaryPath)
+            .withParameters("--version")
+    }
+}

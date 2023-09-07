@@ -1,0 +1,40 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.github.biomejs.intellijbiome</id>
+    <name>Biome LSP</name>
+    <vendor>biomejs</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.ultimate</depends>
+    <depends>JavaScript</depends>
+
+    <resource-bundle>messages.BiomeBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="Biome" displayType="BALLOON"/>
+        <statusBarWidgetFactory implementation="com.github.biomejs.intellijbiome.widgets.BiomeStatusBarWidgetFactory" />
+        <platform.lsp.serverSupportProvider implementation="com.github.biomejs.intellijbiome.lsp.BiomeLspServerSupportProvider"/>
+        <projectConfigurable id="Settings.Biome"
+                             bundle="messages.BiomeBundle"
+                             groupId="language"
+                             nonDefaultProject="false"
+                             key="biome.settings.name"
+                             instance="com.github.biomejs.intellijbiome.settings.BiomeSettingsConfigurable"/>
+        <formattingService implementation="com.github.biomejs.intellijbiome.formatter.BiomeFormatterProvider"/>
+    </extensions>
+    <actions>
+        <group
+                id="com.github.biomejs.intellijbiome.actions-group"
+                text="Biome"
+                icon="/icons/pluginIcon.svg"
+                popup="true"
+        >
+            <add-to-group group-id="ToolsMenu"/>
+            <action
+                    id="com.github.biomejs.intellijbiome.restart-lsp-action"
+                    class="com.github.biomejs.intellijbiome.actions.RestartBiomeServerAction"
+                    text="Restart LSP Server"
+            />
+        </group>
+    </actions>
+</idea-plugin>
