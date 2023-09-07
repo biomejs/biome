@@ -13,7 +13,7 @@ use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::{Configuration, Rules, WorkspaceError};
-use rome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use rome_deserialize::json::deserialize_from_json_ast;
 use rome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};

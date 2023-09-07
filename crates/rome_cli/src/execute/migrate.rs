@@ -5,7 +5,7 @@ use rome_diagnostics::{category, PrintDiagnostic};
 use rome_fs::{FileSystemExt, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::JsonRoot;
-use rome_migrate::{migrate_configuration, ControlFlow};
+use biome_migrate::{migrate_configuration, ControlFlow};
 use rome_rowan::AstNode;
 use rome_service::workspace::FixAction;
 use std::borrow::Cow;

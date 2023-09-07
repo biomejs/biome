@@ -11,8 +11,8 @@ use crate::semantic_analyzers::style::no_restricted_globals::{
     restricted_globals_options, RestrictedGlobalsOptions,
 };
 use bpaf::Bpaf;
-use rome_analyze::options::RuleOptions;
-use rome_analyze::RuleKey;
+use biome_analyze::options::RuleOptions;
+use biome_analyze::RuleKey;
 use rome_deserialize::json::VisitJsonNode;
 use rome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};

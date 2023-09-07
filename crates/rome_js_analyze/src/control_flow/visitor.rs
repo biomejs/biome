@@ -1,6 +1,6 @@
 use std::any::TypeId;
 
-use rome_analyze::{merge_node_visitors, Visitor, VisitorContext};
+use biome_analyze::{merge_node_visitors, Visitor, VisitorContext};
 use rome_js_syntax::{
     AnyJsFunction, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
@@ -171,7 +171,7 @@ declare_node_union! {
         | JsStaticInitializationBlockClassMember
 }
 
-impl rome_analyze::NodeVisitor<ControlFlowVisitor> for FunctionVisitor {
+impl biome_analyze::NodeVisitor<ControlFlowVisitor> for FunctionVisitor {
     type Node = AnyJsControlFlowRoot;
 
     fn enter(
@@ -193,7 +193,7 @@ impl rome_analyze::NodeVisitor<ControlFlowVisitor> for FunctionVisitor {
     }
 }
 
-/// Wrapper trait for [rome_analyze::NodeVisitor] adding control flow specific
+/// Wrapper trait for [biome_analyze::NodeVisitor] adding control flow specific
 /// utilities (error handling and automatic [FunctionBuilder] injection)
 pub(super) trait NodeVisitor: Sized {
     type Node: AstNode<Language = JsLanguage>;
@@ -209,11 +209,11 @@ pub(super) trait NodeVisitor: Sized {
     }
 }
 
-/// Wrapper type implementing [rome_analyze::NodeVisitor] for types
+/// Wrapper type implementing [biome_analyze::NodeVisitor] for types
 /// implementing the control-flow specific [NodeVisitor] trait
 pub(super) struct VisitorAdapter<V>(SyntaxResult<V>);
 
-impl<V> rome_analyze::NodeVisitor<ControlFlowVisitor> for VisitorAdapter<V>
+impl<V> biome_analyze::NodeVisitor<ControlFlowVisitor> for VisitorAdapter<V>
 where
     V: NodeVisitor,
 {

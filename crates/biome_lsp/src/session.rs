@@ -6,7 +6,7 @@ use crate::utils;
 use anyhow::Result;
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
-use rome_analyze::RuleCategories;
+use biome_analyze::RuleCategories;
 use rome_console::markup;
 use rome_fs::{FileSystem, OsFileSystem, RomePath};
 use rome_service::workspace::{

@@ -3,7 +3,7 @@ use crate::converters::line_index::LineIndex;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use rome_analyze::{ActionCategory, SourceActionKind};
+use biome_analyze::{ActionCategory, SourceActionKind};
 use rome_diagnostics::Applicability;
 use rome_fs::RomePath;
 use rome_service::workspace::{

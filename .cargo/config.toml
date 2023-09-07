@@ -15,7 +15,7 @@ documentation = """
     doc \
     -p rome_*formatter \
     -p rome_control_flow \
-    -p rome_analyze \
+    -p biome_analyze \
     -p rome_*analyze \
     -p rome_*_syntax \
     -p rome_*_factory \

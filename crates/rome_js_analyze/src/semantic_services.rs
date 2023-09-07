@@ -1,4 +1,4 @@
-use rome_analyze::{
+use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
 };

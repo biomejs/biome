@@ -1,5 +1,5 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make;

@@ -3,7 +3,7 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
     write_transformation_snapshot,
 };
-use rome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
+use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
 use rome_js_parser::{parse, JsParserOptions};

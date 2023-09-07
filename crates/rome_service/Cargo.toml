@@ -12,7 +12,7 @@ version              = "0.0.0"
 bpaf                = { workspace = true }
 dashmap             = { workspace = true }
 indexmap            = { workspace = true, features = ["serde"] }
-rome_analyze        = { workspace = true, features = ["serde"] }
+biome_analyze        = { workspace = true, features = ["serde"] }
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
 rome_diagnostics    = { workspace = true }

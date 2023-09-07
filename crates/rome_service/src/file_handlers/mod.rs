@@ -6,7 +6,7 @@ use crate::{
     Rules, WorkspaceError,
 };
 pub use javascript::JsFormatterSettings;
-use rome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use rome_console::fmt::Formatter;
 use rome_console::markup;
 use rome_diagnostics::{Diagnostic, Severity};

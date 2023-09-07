@@ -11,7 +11,7 @@ bpaf.workspace        = true
 lazy_static           = { workspace = true }
 natord                = "1.0.9"
 roaring               = "0.10.1"
-rome_analyze          = { workspace = true }
+biome_analyze          = { workspace = true }
 rome_aria             = { workspace = true }
 rome_console          = { workspace = true }
 rome_control_flow     = { workspace = true }

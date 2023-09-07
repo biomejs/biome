@@ -1,7 +1,7 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::{JsCallExpression, JsxAttribute};
 use rome_rowan::{declare_node_union, AstNode, TextRange};

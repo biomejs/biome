@@ -7,7 +7,7 @@ version = "0.0.0"
 [dependencies]
 convert_case      = "0.6.0"
 pulldown-cmark    = { version = "0.9", default-features = false }
-rome_analyze      = { path = "../../crates/rome_analyze" }
+biome_analyze      = { path = "../../crates/biome_analyze" }
 rome_console      = { path = "../../crates/rome_console" }
 rome_diagnostics  = { path = "../../crates/rome_diagnostics" }
 rome_formatter    = { path = "../../crates/rome_formatter" }

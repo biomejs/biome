@@ -8,7 +8,7 @@ use crate::{
     JsRuleAction,
 };
 use bpaf::Bpaf;
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},

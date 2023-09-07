@@ -1,4 +1,4 @@
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, RefactorKind, Rule};
+use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, RefactorKind, Rule};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_semantic::{Reference, ReferencesExtensions};

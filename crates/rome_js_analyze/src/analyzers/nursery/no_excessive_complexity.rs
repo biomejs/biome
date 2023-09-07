@@ -1,5 +1,5 @@
 use bpaf::Bpaf;
-use rome_analyze::{
+use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };

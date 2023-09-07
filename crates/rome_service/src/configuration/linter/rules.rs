@@ -3,7 +3,7 @@
 use crate::RuleConfiguration;
 use bpaf::Bpaf;
 use indexmap::IndexSet;
-use rome_analyze::RuleFilter;
+use biome_analyze::RuleFilter;
 use rome_diagnostics::{Category, Severity};
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;

@@ -60,8 +60,8 @@ where
     /// ## Examples
     ///
     /// ```rust,ignore
-    /// use rome_analyze::{declare_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
-    /// use rome_analyze::context::RuleContext;
+    /// use biome_analyze::{declare_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
+    /// use biome_analyze::context::RuleContext;
     /// use serde::Deserialize;
     /// declare_rule! {
     ///     /// Some doc

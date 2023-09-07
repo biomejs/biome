@@ -1,7 +1,7 @@
 use crate::semantic_services::SemanticServices;
 use bpaf::Bpaf;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use rome_deserialize::{DeserializationDiagnostic, VisitNode};

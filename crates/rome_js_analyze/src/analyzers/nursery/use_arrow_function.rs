@@ -1,5 +1,5 @@
 use crate::JsRuleAction;
-use rome_analyze::{
+use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, AddVisitor, Phases, QueryMatch, Queryable,
     Rule, RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };

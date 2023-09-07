@@ -157,20 +157,19 @@ These files should contain an array of strings where each string is a code snipp
 For instance, for the rule `noVar`, the file `invalidScript.jsonc` contains:
 
 ```jsonc
-[
-	"var x = 1; foo(x);",
-	"for (var x of [1,2,3]) { foo(x); }",
-]
+["var x = 1; foo(x);", "for (var x of [1,2,3]) { foo(x); }"]
 ```
 
 Note that code in a file ending with the extension `.jsonc` are in a _script environment_.
 This means that you cannot use syntax that belongs to _ECMAScript modules_ such as `import` and `export`.
 
 Run the command
+
 ```shell
 just test-lintrule myRuleName
 ```
- and if you've done everything correctly,
+
+and if you've done everything correctly,
 you should see some snapshots emitted with diagnostics and code actions.
 
 Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#snapshot-tests)
@@ -203,8 +202,8 @@ the _Biome_ toolchain (JavaScript, JSX, TypeScript, ...) similar to how
 blocks in Rust doc-comments are assumed to be written in Rust by default
 the language of the test must be explicitly specified, for instance:
 
-```rust,ignore
-use rome_analyze::declare_rule;
+````rust,ignore
+use biome_analyze::declare_rule;
 declare_rule! {
     /// Disallow the use of `var`.
     ///
@@ -234,13 +233,13 @@ declare_rule! {
         recommended: false,
     }
 }
-```
+````
 
 Additionally, it's possible to declare that a test should emit a diagnostic
 by adding `expect_diagnostic` to the language metadata:
 
-```rust,ignore
-use rome_analyze::declare_rule;
+````rust,ignore
+use biome_analyze::declare_rule;
  declare_rule! {
     ///  Disallow the use of `var`.
     ///
@@ -257,7 +256,7 @@ use rome_analyze::declare_rule;
         recommended: false,
     }
  }
- ```
+````
 
 This will cause the documentation generator to ensure the rule does emit
 exactly one diagnostic for this code, and to include a snapshot for the
@@ -276,7 +275,7 @@ This command runs several sub-commands:
 - `cargo codegen-configuration`, **this command must be run first** and, it will update the configuration;
 
 - `cargo lintdoc`, it will update the website with the documentation of the rules, check [`declare_rule`](#declare_rule)
-for more information about it;
+  for more information about it;
 
 - `cargo codegen-bindings`, it will update the TypeScript types released inside the JS APIs;
 
@@ -325,21 +324,19 @@ This allows the rule to be configured inside `biome.json` file like:
 
 ```json
 {
-    "linter": {
-        "rules": {
-            "recommended": true,
-            "nursery": {
-                "useExhaustiveDependencies": {
-                    "level": "error",
-                    "options": {
-                        "hooks": [
-                            ["useMyEffect", 0, 1]
-                        ]
-                    }
-                }
-            }
-        },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "useExhaustiveDependencies": {
+          "level": "error",
+          "options": {
+            "hooks": [["useMyEffect", 0, 1]]
+          }
+        }
+      }
     }
+  }
 }
 ```
 
@@ -352,12 +349,12 @@ let options = ctx.options();
 ### Deprecate a rule
 
 There are occasions when a rule must be deprecated, to avoid breaking changes. The reason
- of deprecation can be multiple.
+of deprecation can be multiple.
 
 In order to do, the macro allows adding additional field to add the reason for deprecation
 
-```rust,ignore
-use rome_analyze::declare_rule;
+````rust,ignore
+use biome_analyze::declare_rule;
 
 declare_rule! {
     /// Disallow the use of `var`.
@@ -376,7 +373,7 @@ declare_rule! {
         recommended: false,
     }
 }
-```
+````
 
 ### Custom Visitors
 
@@ -487,7 +484,7 @@ This macro is used to declare an analyzer rule type, and implement the [RuleMeta
 The macro itself expect the following syntax:
 
 ```rust,ignore
-use rome_analyze::declare_rule;
+use biome_analyze::declare_rule;
 
 declare_rule! {
     /// Documentation

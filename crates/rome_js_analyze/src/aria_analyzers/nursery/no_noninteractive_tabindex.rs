@@ -1,5 +1,5 @@
 use crate::aria_services::Aria;
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_aria::AriaRoles;
 use rome_console::markup;
 use rome_js_syntax::{

@@ -3,7 +3,7 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot, CheckActionType,
 };
-use rome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use rome_diagnostics::advice::CodeSuggestionAdvice;
 use rome_diagnostics::{DiagnosticExt, Severity};
 use rome_js_parser::{parse, JsParserOptions};

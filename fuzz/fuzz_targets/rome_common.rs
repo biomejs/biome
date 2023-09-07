@@ -4,7 +4,7 @@
 #![allow(dead_code)]
 
 use libfuzzer_sys::Corpus;
-use rome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
 use rome_diagnostics::Diagnostic;
 use rome_formatter::format_node;
 use rome_js_analyze::analyze;

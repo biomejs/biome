@@ -52,7 +52,7 @@ use rome_rowan::{
     TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,
 };
 
-/// The analyzer is the main entry point into the `rome_analyze` infrastructure.
+/// The analyzer is the main entry point into the `biome_analyze` infrastructure.
 /// Its role is to run a collection of [Visitor]s over a syntax tree, with each
 /// visitor implementing various analysis over this syntax tree to generate
 /// auxiliary data structures as well as emit "query match" events to be

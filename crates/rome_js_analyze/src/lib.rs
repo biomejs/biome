@@ -1,5 +1,5 @@
 use crate::suppression_action::apply_suppression_comment;
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     SuppressionKind,
@@ -213,8 +213,8 @@ impl Error for RuleError {}
 
 #[cfg(test)]
 mod tests {
-    use rome_analyze::options::RuleOptions;
-    use rome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_analyze::options::RuleOptions;
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
     use rome_console::fmt::{Formatter, Termcolor};
     use rome_console::{markup, Markup};
     use rome_diagnostics::category;

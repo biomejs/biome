@@ -19,7 +19,7 @@ pub fn generate_new_lintrule(path: &str, rule_name: &str) {
     // Generate rule code
     let code = format!(
         r#"use crate::semantic_services::Semantic;
-use rome_analyze::{{
+use biome_analyze::{{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic,
 }};
 use rome_console::markup;
