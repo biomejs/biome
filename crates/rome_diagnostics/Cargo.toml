@@ -26,14 +26,14 @@ test = true
 
 [dependencies]
 backtrace                   = "0.3.66"
+biome_text_edit             = { workspace = true }
+biome_text_size             = { workspace = true }
 bitflags                    = { workspace = true }
 bpaf                        = { workspace = true }
 rome_console                = { workspace = true, features = ["serde_markup"] }
 rome_diagnostics_categories = { workspace = true, features = ["serde"] }
 rome_diagnostics_macros     = { workspace = true }
 rome_rowan                  = { workspace = true }
-biome_text_edit              = { workspace = true }
-biome_text_size              = { workspace = true }
 schemars                    = { workspace = true, optional = true }
 serde                       = { workspace = true, features = ["derive"] }
 termcolor                   = "1.1.2"

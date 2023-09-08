@@ -10,9 +10,9 @@ version              = "0.0.1"
 
 [dependencies]
 biome_text_size = { workspace = true, features = ["serde"] }
-schemars       = { workspace = true, optional = true }
-serde          = { workspace = true, features = ["derive"] }
-similar        = { version = "2.1.0", features = ["unicode"] }
+schemars        = { workspace = true, optional = true }
+serde           = { workspace = true, features = ["derive"] }
+similar         = { version = "2.1.0", features = ["unicode"] }
 
 [features]
 schemars = ["dep:schemars", "biome_text_size/schemars"]

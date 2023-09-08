@@ -15,6 +15,8 @@ path = "src/main.rs"
 anyhow              = "1.0.52"
 biome_flags         = { workspace = true }
 biome_lsp           = { workspace = true }
+biome_text_edit     = { workspace = true }
+biome_text_size     = { workspace = true }
 bpaf                = { workspace = true }
 crossbeam           = "0.8.1"
 dashmap             = { workspace = true }
@@ -33,8 +35,6 @@ rome_json_syntax    = { workspace = true }
 rome_migrate        = { workspace = true }
 rome_rowan          = { workspace = true }
 rome_service        = { workspace = true }
-biome_text_edit      = { workspace = true }
-biome_text_size      = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 tokio               = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }

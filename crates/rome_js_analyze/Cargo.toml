@@ -32,10 +32,10 @@ smallvec              = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils = { workspace = true }
+biome_text_edit  = { workspace = true }
 countme          = { workspace = true, features = ["enable"] }
 insta            = { workspace = true, features = ["glob"] }
 rome_js_parser   = { workspace = true, features = ["tests"] }
-biome_text_edit   = { workspace = true }
 tests_macros     = { workspace = true }
 
 [features]
