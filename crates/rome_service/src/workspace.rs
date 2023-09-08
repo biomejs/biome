@@ -55,12 +55,12 @@ use crate::file_handlers::Capabilities;
 use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
+use biome_text_edit::TextEdit;
 use rome_console::{markup, Markup, MarkupBuf};
 use rome_diagnostics::CodeSuggestion;
 use rome_formatter::Printed;
 use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
-use rome_text_edit::TextEdit;
 use std::collections::HashMap;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 

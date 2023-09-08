@@ -40,7 +40,7 @@ impl TextSize {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let char_size = TextSize::of('🦀');
     /// assert_eq!(char_size, TextSize::from(4));
     ///

@@ -2,6 +2,7 @@ use crate::converters::line_index::LineIndex;
 use crate::converters::{from_proto, to_proto, PositionEncoding};
 use anyhow::{ensure, Context, Result};
 use biome_analyze::ActionCategory;
+use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use rome_console::fmt::Termcolor;
 use rome_console::fmt::{self, Formatter};
 use rome_console::MarkupBuf;
@@ -11,7 +12,6 @@ use rome_diagnostics::{
 };
 use rome_rowan::TextSize;
 use rome_service::workspace::CodeAction;
-use rome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
@@ -378,7 +378,7 @@ mod tests {
     use super::apply_document_changes;
     use crate::converters::line_index::LineIndex;
     use crate::converters::{PositionEncoding, WideEncoding};
-    use rome_text_edit::TextEdit;
+    use biome_text_edit::TextEdit;
     use tower_lsp::lsp_types as lsp;
     use tower_lsp::lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 

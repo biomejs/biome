@@ -117,7 +117,7 @@ impl<L: Language> IntoIterator for SyntaxList<L> {
 
 #[cfg(test)]
 mod tests {
-    use rome_text_size::TextRange;
+    use biome_text_size::TextRange;
 
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::syntax::TriviaPiece;

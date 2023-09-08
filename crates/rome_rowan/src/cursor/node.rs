@@ -4,7 +4,7 @@ use crate::{
     Direction, GreenNode, GreenNodeData, NodeOrToken, RawSyntaxKind, SyntaxNodeText, TokenAtOffset,
     WalkEvent,
 };
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::ops;

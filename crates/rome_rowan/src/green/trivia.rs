@@ -1,7 +1,7 @@
 use crate::arc::{Arc, HeaderSlice, ThinArc};
 use crate::TriviaPiece;
+use biome_text_size::TextSize;
 use countme::Count;
-use rome_text_size::TextSize;
 use std::fmt::Formatter;
 use std::mem::ManuallyDrop;
 use std::{fmt, mem, ptr};
@@ -147,7 +147,7 @@ mod tests {
     use crate::green::trivia::{GreenTrivia, GreenTriviaHead};
     use crate::syntax::TriviaPieceKind;
     use crate::TriviaPiece;
-    use rome_text_size::TextSize;
+    use biome_text_size::TextSize;
 
     impl GreenTrivia {
         /// Creates a trivia with a single whitespace piece

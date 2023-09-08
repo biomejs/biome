@@ -6,7 +6,7 @@ use crate::{
     chain_trivia_pieces, cursor, Direction, Language, NodeOrToken, SyntaxElement, SyntaxKind,
     SyntaxNode, SyntaxTriviaPiece, TriviaPiece, TriviaPieceKind,
 };
-use rome_text_size::{TextLen, TextRange, TextSize};
+use biome_text_size::{TextLen, TextRange, TextSize};
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -321,7 +321,7 @@ impl<L: Language> SyntaxToken<L> {
     /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
-    ///     RawLanguageKind::LET_TOKEN,  
+    ///     RawLanguageKind::LET_TOKEN,
     ///     "/*c*/ let \t",
     ///     [TriviaPiece::multi_line_comment(5), TriviaPiece::whitespace(1)],
     ///     [TriviaPiece::whitespace(2)]
@@ -354,7 +354,7 @@ impl<L: Language> SyntaxToken<L> {
     /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
-    ///     RawLanguageKind::LET_TOKEN,  
+    ///     RawLanguageKind::LET_TOKEN,
     ///     "\t let /*c*/",
     ///     [TriviaPiece::whitespace(2)],
     ///     [TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(5)],
@@ -387,7 +387,7 @@ impl<L: Language> SyntaxToken<L> {
     /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
-    ///     RawLanguageKind::LET_TOKEN,  
+    ///     RawLanguageKind::LET_TOKEN,
     ///     "\n\t /*c*/ let \t",
     ///     [TriviaPiece::newline(1), TriviaPiece::whitespace(2), TriviaPiece::multi_line_comment(5), TriviaPiece::whitespace(1)],
     ///     [TriviaPiece::whitespace(2)]
@@ -413,7 +413,7 @@ impl<L: Language> SyntaxToken<L> {
     /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
-    ///     RawLanguageKind::LET_TOKEN,  
+    ///     RawLanguageKind::LET_TOKEN,
     ///     "\n let /*c*/\t ",
     ///     [TriviaPiece::newline(1), TriviaPiece::whitespace(1)],
     ///     [TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(5), TriviaPiece::whitespace(2)]

@@ -1,11 +1,11 @@
 use std::io;
 
+use biome_text_edit::TextEdit;
 use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_diagnostics::{
     Advices, Diagnostic, Location, LogCategory, PrintDiagnostic, Resource, SourceCode, Visit,
 };
 use rome_rowan::{TextRange, TextSize};
-use rome_text_edit::TextEdit;
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(

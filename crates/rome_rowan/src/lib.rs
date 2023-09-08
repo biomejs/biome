@@ -33,7 +33,7 @@ mod syntax_factory;
 mod token_text;
 mod tree_builder;
 
-pub use rome_text_size::{TextLen, TextRange, TextSize};
+pub use biome_text_size::{TextLen, TextRange, TextSize};
 
 pub use crate::{
     ast::*,

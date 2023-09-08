@@ -20,7 +20,7 @@ rome_js_factory             = { workspace = true }
 rome_js_syntax              = { workspace = true }
 rome_json_syntax            = { workspace = true }
 rome_rowan                  = { workspace = true }
-rome_text_size              = { workspace = true }
+biome_text_size              = { workspace = true }
 schemars                    = { workspace = true, optional = true }
 serde                       = { workspace = true, features = ["derive"], optional = true }
 tracing                     = { workspace = true }

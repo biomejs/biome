@@ -36,7 +36,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let start = TextSize::from(5);
     /// let end = TextSize::from(10);
     /// let range = TextRange::new(start, end);
@@ -56,7 +56,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let text = "0123456789";
     ///
     /// let offset = TextSize::from(2);
@@ -76,7 +76,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let point: TextSize;
     /// # point = TextSize::from(3);
     /// let range = TextRange::empty(point);
@@ -96,7 +96,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let point: TextSize;
     /// # point = TextSize::from(12);
     /// let range = TextRange::up_to(point);
@@ -154,7 +154,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let (start, end): (TextSize, TextSize);
     /// # start = 10.into(); end = 20.into();
     /// let range = TextRange::new(start, end);
@@ -173,7 +173,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let (start, end): (TextSize, TextSize);
     /// # start = 10.into(); end = 20.into();
     /// let range = TextRange::new(start, end);
@@ -190,7 +190,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// let larger = TextRange::new(0.into(), 20.into());
     /// let smaller = TextRange::new(5.into(), 15.into());
     /// assert!(larger.contains_range(smaller));
@@ -211,7 +211,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// assert_eq!(
     ///     TextRange::intersect(
     ///         TextRange::new(0.into(), 10.into()),
@@ -235,7 +235,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// assert_eq!(
     ///     TextRange::cover(
     ///         TextRange::new(0.into(), 5.into()),
@@ -256,7 +256,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```rust
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// assert_eq!(
     ///     TextRange::empty(0.into()).cover_offset(20.into()),
     ///     TextRange::new(0.into(), 20.into()),
@@ -309,7 +309,7 @@ impl TextRange {
     /// # Examples
     ///
     /// ```
-    /// # use rome_text_size::*;
+    /// # use biome_text_size::*;
     /// # use std::cmp::Ordering;
     ///
     /// let a = TextRange::new(0.into(), 3.into());
@@ -352,7 +352,7 @@ impl TextRange {
     /// ## Examples
     ///
     /// ```
-    /// use rome_text_size::{TextRange, TextSize};
+    /// use biome_text_size::{TextRange, TextSize};
     ///
     /// let range = TextRange::new(TextSize::from(5), TextSize::from(10));
     /// assert_eq!(range.sub_start(TextSize::from(2)), TextRange::new(TextSize::from(3), TextSize::from(10)));
@@ -370,7 +370,7 @@ impl TextRange {
     /// ## Examples
     ///
     /// ```
-    /// use rome_text_size::{TextRange, TextSize};
+    /// use biome_text_size::{TextRange, TextSize};
     ///
     /// let range = TextRange::new(TextSize::from(5), TextSize::from(10));
     /// assert_eq!(range.add_start(TextSize::from(3)), TextRange::new(TextSize::from(8), TextSize::from(10)));
@@ -389,7 +389,7 @@ impl TextRange {
     /// ## Examples
     ///
     /// ```
-    /// use rome_text_size::{TextRange, TextSize};
+    /// use biome_text_size::{TextRange, TextSize};
     ///
     /// let range = TextRange::new(TextSize::from(5), TextSize::from(10));
     /// assert_eq!(range.sub_end(TextSize::from(2)), TextRange::new(TextSize::from(5), TextSize::from(8)));
@@ -408,7 +408,7 @@ impl TextRange {
     /// ## Examples
     ///
     /// ```
-    /// use rome_text_size::{TextRange, TextSize};
+    /// use biome_text_size::{TextRange, TextSize};
     ///
     /// let range = TextRange::new(TextSize::from(5), TextSize::from(10));
     /// assert_eq!(range.add_end(TextSize::from(2)), TextRange::new(TextSize::from(5), TextSize::from(12)));

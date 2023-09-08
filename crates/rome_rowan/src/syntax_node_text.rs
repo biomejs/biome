@@ -2,7 +2,7 @@ use crate::{
     cursor::{SyntaxNode, SyntaxToken},
     TextRange, TextSize, TokenAtOffset,
 };
-use rome_text_size::TextLen;
+use biome_text_size::TextLen;
 use std::fmt;
 use std::iter::FusedIterator;
 

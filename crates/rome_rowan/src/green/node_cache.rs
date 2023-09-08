@@ -1,5 +1,5 @@
+use biome_text_size::TextSize;
 use hashbrown::hash_map::{RawEntryMut, RawOccupiedEntryMut, RawVacantEntryMut};
-use rome_text_size::TextSize;
 use rustc_hash::FxHasher;
 use std::fmt::{self, Debug, Formatter};
 use std::hash::{BuildHasherDefault, Hash, Hasher};
@@ -515,7 +515,7 @@ mod tests {
     use crate::green::node_cache::{token_hash, CachedNode, CachedToken, CachedTrivia};
     use crate::green::trivia::GreenTrivia;
     use crate::{GreenToken, RawSyntaxKind};
-    use rome_text_size::TextSize;
+    use biome_text_size::TextSize;
 
     #[test]
     fn green_token_hash() {

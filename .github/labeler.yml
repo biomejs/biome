@@ -9,8 +9,8 @@ A-Core:
   - crates/rome_deserializer/**
   - crates/rome_fs/**
   - crates/rome_rowan/**
-  - crates/rome_text_edit/**
-  - crates/rome_text_size/**
+  - crates/biome_text_edit/**
+  - crates/biome_text_size/**
   - crates/rome_suppression/**
   - crates/rome_suppression/**
   - crates/biome_markup/**

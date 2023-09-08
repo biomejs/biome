@@ -12,8 +12,8 @@ version              = "0.2.0"
 countme        = { workspace = true }
 hashbrown      = { version = "0.12.3", features = ["inline-more"], default-features = false }
 memoffset      = "0.8.0"
-rome_text_edit = { workspace = true }
-rome_text_size = { workspace = true }
+biome_text_edit = { workspace = true }
+biome_text_size = { workspace = true }
 rustc-hash     = { workspace = true }
 schemars       = { workspace = true, optional = true }
 serde          = { workspace = true, optional = true, default-features = false }
@@ -26,7 +26,7 @@ quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 
 [features]
-serde = ["dep:serde", "schemars", "rome_text_size/serde"]
+serde = ["dep:serde", "schemars", "biome_text_size/serde"]
 
 [[bench]]
 harness = false

@@ -1,5 +1,5 @@
 use crate::{cursor, Language, SyntaxToken};
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::fmt;
 use std::fmt::Formatter;
 use std::iter::FusedIterator;

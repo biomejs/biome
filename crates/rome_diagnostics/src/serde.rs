@@ -1,8 +1,8 @@
 use std::io;
 
+use biome_text_edit::TextEdit;
+use biome_text_size::TextRange;
 use rome_console::{fmt, markup, MarkupBuf};
-use rome_text_edit::TextEdit;
-use rome_text_size::TextRange;
 use serde::{
     de::{self, SeqAccess},
     Deserialize, Deserializer, Serialize, Serializer,
@@ -360,7 +360,7 @@ impl schemars::JsonSchema for DiagnosticTags {
 mod tests {
     use std::io;
 
-    use rome_text_size::{TextRange, TextSize};
+    use biome_text_size::{TextRange, TextSize};
     use serde_json::{from_value, json, to_value, Value};
 
     use crate::{

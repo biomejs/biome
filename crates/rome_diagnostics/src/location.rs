@@ -1,4 +1,4 @@
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::ops::Range;
@@ -344,7 +344,7 @@ impl AsSourceCode for String {
 
 #[cfg(test)]
 mod tests {
-    use rome_text_size::TextSize;
+    use biome_text_size::TextSize;
 
     use super::LineIndexBuf;
 

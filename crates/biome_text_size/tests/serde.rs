@@ -1,4 +1,4 @@
-use {rome_text_size::*, serde_test::*, std::ops};
+use {biome_text_size::*, serde_test::*, std::ops};
 
 fn size(x: u32) -> TextSize {
     TextSize::from(x)
