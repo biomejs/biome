@@ -1,4 +1,4 @@
-use rome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::{
     AnyTsType, TsDefaultTypeClause, TsIntersectionTypeElementList, TsParenthesizedType,
@@ -9,11 +9,12 @@ use rome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
 
 declare_rule! {
     ///
-    /// Disallow void type outside of generic or return types.
+    /// Disallow `void` type outside of generic or return types.
     ///
-    /// void in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
+    /// `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
     ///
-    /// > The void type means cannot be mixed with any other types, other than never, which accepts all types. If you think you need this then you probably want the undefined type instead.
+    /// > The `void` type means cannot be mixed with any other types, other than `never`, which accepts all types.
+    /// > If you think you need this then you probably want the undefined type instead.
     ///
     /// ## Examples
     /// ### Invalid
@@ -43,6 +44,11 @@ declare_rule! {
     ///
     /// ```ts
     /// function foo(): void {};
+    /// function doSomething(this: void) {}
+    /// function printArg<T = void>(arg: T) {}
+    /// logAndReturn<void>(undefined);
+    /// let voidPromise: Promise<void> = new Promise<void>(() => { });
+    /// let voidMap: Map<string, void> = new Map<string, void>();
     /// ```
     ///
     pub(crate) NoConfusingVoidType {
@@ -62,14 +68,11 @@ pub enum VoidTypeIn {
 
 impl Rule for NoConfusingVoidType {
     type Query = Ast<AnyTsType>;
-
     type State = VoidTypeIn;
-
     type Signals = Option<Self::State>;
-
     type Options = ();
 
-    fn run(ctx: &rome_analyze::context::RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
         if let AnyTsType::TsVoidType(node) = node {
@@ -79,10 +82,7 @@ impl Rule for NoConfusingVoidType {
 
         None
     }
-    fn diagnostic(
-        ctx: &rome_analyze::context::RuleContext<Self>,
-        state: &Self::State,
-    ) -> Option<rome_analyze::RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         return Some(RuleDiagnostic::new(
             rule_category!(),
@@ -96,29 +96,29 @@ fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
     let parent = node.parent()?;
 
     // (string | void)
-    if let Some(n) = parent.cast_ref::<TsParenthesizedType>() {
-        return node_in(n.syntax());
+    if TsParenthesizedType::can_cast(parent.kind()) {
+        return node_in(&parent);
     }
 
     // string | void
-    if let Some(n) = parent.cast_ref::<TsUnionTypeVariantList>() {
-        return node_in(n.syntax());
+    if TsUnionTypeVariantList::can_cast(parent.kind()) {
+        return node_in(&parent);
     }
 
     // string & void
-    if let Some(n) = parent.cast_ref::<TsIntersectionTypeElementList>() {
-        return node_in(n.syntax());
+    if TsIntersectionTypeElementList::can_cast(parent.kind()) {
+        return node_in(&parent);
     }
 
     // arg: void
-    if let Some(n) = parent.cast_ref::<TsTypeAnnotation>() {
-        return node_in(n.syntax());
+    if TsTypeAnnotation::can_cast(parent.kind()) {
+        return node_in(&parent);
     }
 
     // fn<T = void>() {}
     // T = void
-    if let Some(n) = parent.cast_ref::<TsDefaultTypeClause>() {
-        return node_in(n.syntax());
+    if TsDefaultTypeClause::can_cast(parent.kind()) {
+        return node_in(&parent);
     }
 
     // string | void or string & void
@@ -131,19 +131,17 @@ fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
     }
 
     // function fn(this: void) {}
-    if parent.cast_ref::<TsThisParameter>().is_some() {
+    if TsThisParameter::can_cast(parent.kind()) {
         return None;
     }
 
     // fn(): void;
-    if parent.cast_ref::<TsReturnTypeAnnotation>().is_some() {
+    if TsReturnTypeAnnotation::can_cast(parent.kind()) {
         return None;
     }
 
     // fn<T = void>() {} or Promise<void>
-    if parent.cast_ref::<TsTypeParameter>().is_some()
-        || parent.cast_ref::<TsTypeArgumentList>().is_some()
-    {
+    if TsTypeParameter::can_cast(parent.kind()) || TsTypeArgumentList::can_cast(parent.kind()) {
         return None;
     }
 

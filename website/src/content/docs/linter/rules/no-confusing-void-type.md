@@ -3,11 +3,12 @@ title: noConfusingVoidType (since v1.0.0)
 ---
 
 
-Disallow void type outside of generic or return types.
+Disallow `void` type outside of generic or return types.
 
-void in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
+`void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
 
->The void type means cannot be mixed with any other types, other than never, which accepts all types. If you think you need this then you probably want the undefined type instead.
+>The `void` type means cannot be mixed with any other types, other than `never`, which accepts all types.
+If you think you need this then you probably want the undefined type instead.
 
 
 ## Examples
@@ -102,6 +103,11 @@ nursery/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules/no
 
 ```ts
 function foo(): void {};
+function doSomething(this: void) {}
+function printArg<T = void>(arg: T) {}
+logAndReturn<void>(undefined);
+let voidPromise: Promise<void> = new Promise<void>(() => { });
+let voidMap: Map<string, void> = new Map<string, void>();
 ```
 
 ## Related links
