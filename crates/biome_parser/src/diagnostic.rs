@@ -103,7 +103,7 @@ impl ParseDiagnostic {
     /// # use rome_console::fmt::{Termcolor};
     /// # use rome_console::markup;
     /// # use rome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
-    /// # use rome_parser::diagnostic::ParseDiagnostic;
+    /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
     ///
@@ -145,7 +145,7 @@ impl ParseDiagnostic {
     /// # use rome_console::fmt::{Termcolor};
     /// # use rome_console::markup;
     /// # use rome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
-    /// # use rome_parser::diagnostic::ParseDiagnostic;
+    /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
     ///

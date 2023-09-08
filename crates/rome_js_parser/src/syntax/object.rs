@@ -23,9 +23,9 @@ use crate::syntax::typescript::{
 };
 use crate::JsSyntaxFeature::TypeScript;
 use crate::{JsParser, ParseRecovery};
+use biome_parser::parse_lists::ParseSeparatedList;
 use rome_js_syntax::JsSyntaxKind::*;
 use rome_js_syntax::{JsSyntaxKind, T};
-use rome_parser::parse_lists::ParseSeparatedList;
 
 // test js object_expr
 // let a = {};

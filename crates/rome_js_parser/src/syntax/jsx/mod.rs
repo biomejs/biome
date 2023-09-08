@@ -1,9 +1,9 @@
 use crate::prelude::*;
 pub mod jsx_parse_errors;
 
+use biome_parser::diagnostic::expected_token;
+use biome_parser::parse_lists::ParseNodeList;
 use rome_js_syntax::JsSyntaxKind::*;
-use rome_parser::diagnostic::expected_token;
-use rome_parser::parse_lists::ParseNodeList;
 use rome_rowan::TextRange;
 
 use crate::lexer::{JsSyntaxKind, LexContext, ReLexContext, T};

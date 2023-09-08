@@ -173,13 +173,13 @@ version = "0.1.0"
 dependencies = [
  "biome_css_factory",
  "biome_css_syntax",
+ "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
  "rome_diagnostics",
  "rome_js_unicode_table",
- "rome_parser",
  "rome_rowan",
  "tests_macros",
  "tracing",
@@ -239,6 +239,16 @@ dependencies = [
  "rome_diagnostics",
  "rome_json_parser",
  "rome_json_syntax",
+ "rome_rowan",
+]
+
+[[package]]
+name = "biome_parser"
+version = "0.2.0"
+dependencies = [
+ "drop_bomb",
+ "rome_console",
+ "rome_diagnostics",
  "rome_rowan",
 ]
 
@@ -2081,12 +2091,12 @@ dependencies = [
 name = "rome_formatter_test"
 version = "0.2.0"
 dependencies = [
+ "biome_parser",
  "insta",
  "rome_console",
  "rome_diagnostics",
  "rome_formatter",
  "rome_fs",
- "rome_parser",
  "rome_rowan",
  "rome_service",
  "serde",
@@ -2156,6 +2166,7 @@ dependencies = [
 name = "rome_js_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_parser",
  "biome_text_size",
  "cfg-if",
  "countme",
@@ -2173,7 +2184,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_syntax",
  "rome_json_syntax",
- "rome_parser",
  "rome_rowan",
  "schemars",
  "serde",
@@ -2187,6 +2197,7 @@ dependencies = [
 name = "rome_js_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_parser",
  "bitflags 2.3.3",
  "cfg-if",
  "drop_bomb",
@@ -2200,7 +2211,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_syntax",
  "rome_js_unicode_table",
- "rome_parser",
  "rome_rowan",
  "schemars",
  "serde",
@@ -2288,6 +2298,7 @@ dependencies = [
 name = "rome_json_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_parser",
  "biome_suppression",
  "countme",
  "insta",
@@ -2298,7 +2309,6 @@ dependencies = [
  "rome_json_factory",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_parser",
  "rome_rowan",
  "serde",
  "serde_json",
@@ -2309,6 +2319,7 @@ dependencies = [
 name = "rome_json_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
@@ -2317,7 +2328,6 @@ dependencies = [
  "rome_js_unicode_table",
  "rome_json_factory",
  "rome_json_syntax",
- "rome_parser",
  "rome_rowan",
  "tests_macros",
  "tracing",
@@ -2327,16 +2337,6 @@ dependencies = [
 name = "rome_json_syntax"
 version = "0.2.0"
 dependencies = [
- "rome_rowan",
-]
-
-[[package]]
-name = "rome_parser"
-version = "0.2.0"
-dependencies = [
- "drop_bomb",
- "rome_console",
- "rome_diagnostics",
  "rome_rowan",
 ]
 
@@ -2365,6 +2365,7 @@ version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_flags",
+ "biome_parser",
  "biome_text_edit",
  "bpaf",
  "dashmap",
@@ -2385,7 +2386,6 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_parser",
  "rome_rowan",
  "schemars",
  "serde",
@@ -3524,6 +3524,7 @@ version = "0.0.0"
 dependencies = [
  "ansi_rgb",
  "biome_analyze",
+ "biome_parser",
  "countme",
  "criterion 0.5.1",
  "dhat",
@@ -3542,7 +3543,6 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_parser",
  "rome_rowan",
  "tikv-jemallocator",
  "timing",
@@ -3607,6 +3607,7 @@ dependencies = [
  "ascii_table",
  "atty",
  "backtrace",
+ "biome_parser",
  "colored",
  "indicatif",
  "once_cell",
@@ -3617,7 +3618,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_semantic",
  "rome_js_syntax",
- "rome_parser",
  "rome_rowan",
  "serde",
  "serde_json",

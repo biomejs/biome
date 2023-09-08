@@ -36,14 +36,14 @@ use crate::syntax::typescript::{
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, StrictMode};
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::ParserProgress;
 use bitflags::bitflags;
 use drop_bomb::DebugDropBomb;
 use rome_js_syntax::JsSyntaxKind::*;
 use rome_js_syntax::TextSize;
 use rome_js_syntax::{JsSyntaxKind, T};
-use rome_parser::parse_lists::ParseNodeList;
-use rome_parser::parse_recovery::ParseRecovery;
-use rome_parser::ParserProgress;
 use rome_rowan::{SyntaxKind, TextRange};
 use smallvec::SmallVec;
 use std::fmt::Debug;

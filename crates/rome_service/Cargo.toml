@@ -30,7 +30,7 @@ rome_json_analyze   = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-rome_parser         = { workspace = true }
+biome_parser         = { workspace = true }
 rome_rowan          = { workspace = true, features = ["serde"] }
 schemars            = { workspace = true, features = ["indexmap1"], optional = true }
 serde               = { workspace = true, features = ["derive"] }

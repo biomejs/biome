@@ -26,7 +26,7 @@ rome_formatter_test = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_factory   = { workspace = true }
 rome_json_parser    = { workspace = true }
-rome_parser         = { workspace = true }
+biome_parser         = { workspace = true }
 serde               = { version = "1", features = ["derive"] }
 serde_json          = { workspace = true }
 tests_macros        = { workspace = true }

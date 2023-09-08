@@ -14,7 +14,7 @@ rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_formatter   = { workspace = true }
 rome_fs          = { workspace = true }
-rome_parser      = { workspace = true }
+biome_parser      = { workspace = true }
 rome_rowan       = { workspace = true }
 rome_service     = { workspace = true }
 serde            = { version = "1", features = ["derive"] }

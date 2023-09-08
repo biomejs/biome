@@ -61,7 +61,7 @@ rome_json_factory           = { version = "0.2.0", path = "./crates/rome_json_fa
 rome_json_formatter         = { path = "./crates/rome_json_formatter" }
 rome_json_parser            = { path = "./crates/rome_json_parser" }
 rome_json_syntax            = { version = "0.2.0", path = "./crates/rome_json_syntax" }
-rome_parser                 = { version = "0.2.0", path = "./crates/rome_parser" }
+biome_parser                 = { version = "0.2.0", path = "./crates/biome_parser" }
 rome_rowan                  = { version = "0.2.0", path = "./crates/rome_rowan" }
 rome_service                = { path = "./crates/rome_service" }
 tests_macros                = { path = "./crates/tests_macros" }

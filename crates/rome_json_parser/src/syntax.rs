@@ -1,11 +1,11 @@
 use crate::prelude::*;
+use biome_parser::diagnostic::{expected_any, expected_node};
+use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parsed_syntax::ParsedSyntax::Absent;
+use biome_parser::prelude::ParsedSyntax::Present;
+use biome_parser::ParserProgress;
 use rome_json_syntax::JsonSyntaxKind;
 use rome_json_syntax::JsonSyntaxKind::*;
-use rome_parser::diagnostic::{expected_any, expected_node};
-use rome_parser::parse_recovery::ParseRecovery;
-use rome_parser::parsed_syntax::ParsedSyntax::Absent;
-use rome_parser::prelude::ParsedSyntax::Present;
-use rome_parser::ParserProgress;
 use rome_rowan::TextRange;
 
 const VALUE_START: TokenSet<JsonSyntaxKind> = token_set![

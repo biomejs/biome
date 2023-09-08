@@ -1,6 +1,6 @@
 use super::{LexContext, Lexer, LexerCheckpoint, ReLexContext, TextRange, TokenFlags};
+use biome_parser::diagnostic::ParseDiagnostic;
 use rome_js_syntax::{JsSyntaxKind, JsSyntaxKind::EOF};
-use rome_parser::diagnostic::ParseDiagnostic;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 

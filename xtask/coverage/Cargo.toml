@@ -18,7 +18,7 @@ rome_diagnostics   = { path = "../../crates/rome_diagnostics" }
 rome_js_parser     = { path = "../../crates/rome_js_parser" }
 rome_js_semantic   = { path = "../../crates/rome_js_semantic" }
 rome_js_syntax     = { path = "../../crates/rome_js_syntax" }
-rome_parser        = { path = "../../crates/rome_parser" }
+biome_parser        = { path = "../../crates/biome_parser" }
 rome_rowan         = { path = "../../crates/rome_rowan" }
 serde              = { version = "1.0.133", features = ["derive"] }
 serde_json         = "1.0.74"

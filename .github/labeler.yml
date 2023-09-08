@@ -24,7 +24,7 @@ A-Linter:
   - crates/rome_json_analyze/**
 
 A-Parser:
-  - crates/rome_parser/**
+  - crates/biome_parser/**
   - crates/rome_js_parser/**
   - crates/rome_js_syntax/**
   - crates/rome_json_parser/**

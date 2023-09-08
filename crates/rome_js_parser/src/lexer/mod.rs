@@ -27,6 +27,7 @@ use bitflags::bitflags;
 #[cfg(feature = "highlight")]
 pub use highlight::*;
 
+use biome_parser::diagnostic::ParseDiagnostic;
 pub(crate) use buffered_lexer::BufferedLexer;
 use rome_js_syntax::JsSyntaxKind::*;
 pub use rome_js_syntax::*;
@@ -34,7 +35,6 @@ use rome_js_unicode_table::{
     is_id_continue, is_id_start, lookup_byte,
     Dispatch::{self, *},
 };
-use rome_parser::diagnostic::ParseDiagnostic;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 

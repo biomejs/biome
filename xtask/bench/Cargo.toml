@@ -16,7 +16,7 @@ rome_js_syntax      = { path = "../../crates/rome_js_syntax" }
 rome_json_formatter = { path = "../../crates/rome_json_formatter" }
 rome_json_parser    = { path = "../../crates/rome_json_parser" }
 rome_json_syntax    = { path = "../../crates/rome_json_syntax" }
-rome_parser         = { path = "../../crates/rome_parser" }
+biome_parser         = { path = "../../crates/biome_parser" }
 rome_rowan          = { path = "../../crates/rome_rowan" }
 xtask               = { path = '../', version = "0.0" }
 

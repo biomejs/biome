@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::JsParser;
+use biome_parser::diagnostic::{expected_any, expected_node};
 use rome_js_syntax::TextRange;
-use rome_parser::diagnostic::{expected_any, expected_node};
 
 pub(crate) fn jsx_expected_attribute(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("JSX attribute", range).into_diagnostic(p)
