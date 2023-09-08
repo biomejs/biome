@@ -1,7 +1,7 @@
 use crate::cursor::{SyntaxNode, SyntaxToken};
 use crate::green::{GreenElement, GreenElementRef};
 use crate::{NodeOrToken, RawSyntaxKind, TokenAtOffset};
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::iter;
 
 pub(crate) type SyntaxElement = NodeOrToken<SyntaxNode, SyntaxToken>;

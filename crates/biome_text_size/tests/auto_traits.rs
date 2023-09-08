@@ -1,5 +1,5 @@
 use {
-    rome_text_size::*,
+    biome_text_size::*,
     static_assertions::*,
     std::{
         fmt::Debug,

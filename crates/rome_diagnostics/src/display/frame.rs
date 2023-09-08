@@ -6,8 +6,8 @@ use std::{
     ops::{Bound, RangeBounds},
 };
 
+use biome_text_size::{TextLen, TextRange, TextSize};
 use rome_console::{fmt, markup};
-use rome_text_size::{TextLen, TextRange, TextSize};
 use unicode_width::UnicodeWidthChar;
 
 use crate::{

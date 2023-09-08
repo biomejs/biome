@@ -1,11 +1,11 @@
 [package]
 edition = "2018"
-name    = "rome_text_size"
+name    = "biome_text_size"
 version = "0.0.1"
 
 authors              = ["Aleksey Kladov <aleksey.kladov@gmail.com>", "Christopher Durham (CAD97) <cad97@cad97.com>"]
 description          = "Fork of the crate text_size"
-documentation        = "https://docs.rs/rome_text_size"
+documentation        = "https://docs.rs/biome_text_size"
 license              = "MIT OR Apache-2.0"
 repository.workspace = true
 

@@ -1,7 +1,7 @@
 use ::serde::{Deserialize, Serialize};
+use biome_text_edit::TextEdit;
 use rome_console::MarkupBuf;
 use rome_rowan::TextRange;
-use rome_text_edit::TextEdit;
 
 /// Indicates how a tool should manage this suggestion.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]

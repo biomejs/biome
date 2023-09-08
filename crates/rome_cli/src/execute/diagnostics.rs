@@ -1,6 +1,6 @@
+use biome_text_edit::TextEdit;
 use rome_diagnostics::adapters::{IoError, StdError};
 use rome_diagnostics::{Advices, Category, Diagnostic, DiagnosticExt, Error, Severity, Visit};
-use rome_text_edit::TextEdit;
 use std::io;
 
 #[derive(Debug, Diagnostic)]

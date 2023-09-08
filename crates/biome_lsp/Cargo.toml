@@ -11,6 +11,7 @@ version              = "0.0.0"
 [dependencies]
 anyhow            = "1.0.52"
 biome_analyze     = { workspace = true }
+biome_text_edit   = { workspace = true }
 futures           = "0.3"
 indexmap          = { workspace = true }
 rome_console      = { workspace = true }
@@ -20,7 +21,6 @@ rome_fs           = { workspace = true }
 rome_js_formatter = { workspace = true }
 rome_rowan        = { workspace = true }
 rome_service      = { workspace = true }
-rome_text_edit    = { workspace = true }
 serde             = { workspace = true, features = ["derive"] }
 serde_json        = { workspace = true }
 tokio             = { workspace = true, features = ["rt", "io-std"] }

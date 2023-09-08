@@ -11,6 +11,7 @@ version              = "0.0.0"
 [dependencies]
 biome_analyze       = { workspace = true, features = ["serde"] }
 biome_flags         = { workspace = true }
+biome_text_edit     = { workspace = true }
 bpaf                = { workspace = true }
 dashmap             = { workspace = true }
 indexmap            = { workspace = true, features = ["serde"] }
@@ -31,7 +32,6 @@ rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
 rome_parser         = { workspace = true }
 rome_rowan          = { workspace = true, features = ["serde"] }
-rome_text_edit      = { workspace = true }
 schemars            = { workspace = true, features = ["indexmap1"], optional = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true, features = ["raw_value"] }
@@ -43,7 +43,7 @@ schema = [
   "rome_js_analyze/schema",
   "rome_formatter/serde",
   "rome_js_factory",
-  "rome_text_edit/schemars",
+  "biome_text_edit/schemars",
 ]
 
 [dev-dependencies]

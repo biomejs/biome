@@ -10,7 +10,7 @@
 
 use std::{cmp::Ordering, num::NonZeroU32};
 
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use serde::{Deserialize, Serialize};
 pub use similar::ChangeTag;
 use similar::{utils::TextDiffRemapper, TextDiff};

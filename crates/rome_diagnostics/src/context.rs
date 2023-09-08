@@ -249,9 +249,9 @@ mod internal {
 
     use std::{fmt::Debug, io};
 
+    use biome_text_edit::TextEdit;
     use rome_console::{fmt, markup};
     use rome_rowan::TextRange;
-    use rome_text_edit::TextEdit;
 
     use crate::{
         diagnostic::internal::AsDiagnostic, Advices, Backtrace, Category, Diagnostic,

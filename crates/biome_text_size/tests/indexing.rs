@@ -1,4 +1,4 @@
-use rome_text_size::*;
+use biome_text_size::*;
 
 #[test]
 fn main() {

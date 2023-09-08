@@ -1,4 +1,4 @@
-use rome_text_size::TextSize;
+use biome_text_size::TextSize;
 
 #[derive(Copy, Clone)]
 struct BadRope<'a>(&'a [&'a str]);

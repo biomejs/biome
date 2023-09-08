@@ -1,5 +1,5 @@
 use crate::GreenToken;
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::ops::Deref;
 use std::{borrow::Borrow, fmt::Formatter};
 

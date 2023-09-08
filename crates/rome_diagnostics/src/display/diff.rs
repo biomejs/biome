@@ -3,8 +3,8 @@ use std::{
     io, slice,
 };
 
+use biome_text_edit::{ChangeTag, CompressedOp, TextEdit};
 use rome_console::{fmt, markup, MarkupElement};
-use rome_text_edit::{ChangeTag, CompressedOp, TextEdit};
 
 use super::frame::{
     calculate_print_width, print_invisibles, text_width, IntoIter, OneIndexed,
@@ -669,8 +669,8 @@ impl<W: fmt::Write + ?Sized> fmt::Write for ElementWrapper<'_, W> {
 #[cfg(test)]
 mod tests {
     use super::print_diff;
+    use biome_text_edit::TextEdit;
     use rome_console::{fmt, markup, MarkupBuf};
-    use rome_text_edit::TextEdit;
     use termcolor::Buffer;
 
     fn assert_eq_markup(actual: &MarkupBuf, expected: &MarkupBuf) {

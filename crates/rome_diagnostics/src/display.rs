@@ -1,7 +1,7 @@
 use std::{io, iter};
 
+use biome_text_edit::TextEdit;
 use rome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
-use rome_text_edit::TextEdit;
 use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
@@ -558,11 +558,11 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
 mod tests {
     use std::io;
 
+    use biome_text_edit::TextEdit;
+    use biome_text_size::{TextRange, TextSize};
     use rome_console::{fmt, markup};
     use rome_diagnostics::{DiagnosticTags, Severity};
     use rome_diagnostics_categories::{category, Category};
-    use rome_text_edit::TextEdit;
-    use rome_text_size::{TextRange, TextSize};
     use serde_json::{from_value, json};
 
     use crate::{self as rome_diagnostics};
