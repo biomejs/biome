@@ -1,4 +1,4 @@
-use rome_aria_metadata::{IsoCountries, IsoLanguages, ISO_COUNTRIES, ISO_LANGUAGES};
+use biome_aria_metadata::{IsoCountries, IsoLanguages, ISO_COUNTRIES, ISO_LANGUAGES};
 use std::str::FromStr;
 
 /// Returns a list of valid ISO countries

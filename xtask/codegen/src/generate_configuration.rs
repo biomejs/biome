@@ -97,7 +97,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         });
 
         let global_recommended = if group == "nursery" {
-            quote! { self.is_recommended() && rome_flags::is_unstable() }
+            quote! { self.is_recommended() && biome_flags::is_unstable() }
         } else {
             quote! { self.is_recommended() }
         };

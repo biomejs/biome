@@ -2,11 +2,11 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_aria"
+name                 = "biome_aria"
 repository.workspace = true
 version              = "0.0.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rome_aria_metadata = { workspace = true }
+biome_aria_metadata = { workspace = true }

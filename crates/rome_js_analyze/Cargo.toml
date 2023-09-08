@@ -7,12 +7,12 @@ repository.workspace = true
 version              = "0.2.0"
 
 [dependencies]
+biome_aria            = { workspace = true }
 bpaf.workspace        = true
 lazy_static           = { workspace = true }
 natord                = "1.0.9"
 roaring               = "0.10.1"
 rome_analyze          = { workspace = true }
-rome_aria             = { workspace = true }
 rome_console          = { workspace = true }
 rome_control_flow     = { workspace = true }
 rome_deserialize      = { workspace = true }

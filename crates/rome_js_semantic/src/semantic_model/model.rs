@@ -295,7 +295,7 @@ impl SemanticModel {
     ///
     /// When a binding is specified this method returns a bool.
     ///
-    /// When a reference is specified this method returns Option<bool>,
+    /// When a reference is specified this method returns `Option<bool>`,
     /// because there is no guarantee that the corresponding declaration exists.
     pub fn is_exported<T>(&self, node: &T) -> T::Result
     where
@@ -309,7 +309,7 @@ impl SemanticModel {
     ///
     /// When a binding is specified this method returns a bool.
     ///
-    /// When a reference is specified this method returns Option<bool>,
+    /// When a reference is specified this method returns `Option<bool>`,
     /// because there is no guarantee that the corresponding declaration exists.
     pub fn is_imported<T>(&self, node: &T) -> T::Result
     where

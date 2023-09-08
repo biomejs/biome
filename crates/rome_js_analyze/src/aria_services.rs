@@ -1,9 +1,9 @@
+use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
+use biome_aria::{AriaProperties, AriaRoles};
 use rome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, Queryable,
     RuleKey, ServiceBag, SyntaxVisitor,
 };
-use rome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
-use rome_aria::{AriaProperties, AriaRoles};
 use rome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use rome_rowan::AstNode;
 use std::collections::HashMap;
@@ -74,7 +74,7 @@ impl AriaServices {
 #[cfg(test)]
 mod tests {
     use crate::aria_services::AriaServices;
-    use rome_aria::{AriaProperties, AriaRoles};
+    use biome_aria::{AriaProperties, AriaRoles};
     use rome_js_factory::make::{
         ident, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_name,
         jsx_string, jsx_string_literal, token,

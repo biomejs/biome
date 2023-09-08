@@ -13,6 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow              = "1.0.52"
+biome_flags         = { workspace = true }
 biome_lsp           = { workspace = true }
 bpaf                = { workspace = true }
 crossbeam           = "0.8.1"
@@ -24,7 +25,6 @@ rayon               = "1.5.1"
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
 rome_diagnostics    = { workspace = true }
-rome_flags          = { workspace = true }
 rome_formatter      = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }
