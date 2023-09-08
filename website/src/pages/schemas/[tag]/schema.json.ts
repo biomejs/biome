@@ -7,12 +7,14 @@ async function enumVersions(): Promise<string[]> {
 	console.log("fetching version list", apiUrl);
 	const response = await fetch(apiUrl, {
 		headers: {
-			"Accept": "application/vnd.npm.install-v1+json" // abbreviated version of the payload to reduce network impact
-		}
+			Accept: "application/vnd.npm.install-v1+json", // abbreviated version of the payload to reduce network impact
+		},
 	});
 
 	if (!response.ok) {
-		throw new Error(`Failed to retrieve all versions of @biomejs/biome: ${response.status} ${response.statusText}`);
+		throw new Error(
+			`Failed to retrieve all versions of @biomejs/biome: ${response.status} ${response.statusText}`,
+		);
 	}
 
 	type PackageInfoREST = {
@@ -31,8 +33,10 @@ type PackageFile = {
 	version: string;
 };
 
-async function enumPackageFiles(packageName: string, version: string): Promise<Record<string, PackageFile>> {
-
+async function enumPackageFiles(
+	packageName: string,
+	version: string,
+): Promise<Record<string, PackageFile>> {
 	// ex: https://www.npmjs.com/package/@biomejs/biome/v/1.1.2/index
 	const fileList = `https://www.npmjs.com/package/${packageName}/v/${version}/index`;
 
@@ -40,11 +44,13 @@ async function enumPackageFiles(packageName: string, version: string): Promise<R
 	const response = await fetch(fileList);
 
 	if (!response.ok) {
-		throw new Error(`Failed to retrieve file list for ${packageName}: ${response.status} ${response.statusText}`);
+		throw new Error(
+			`Failed to retrieve file list for ${packageName}: ${response.status} ${response.statusText}`,
+		);
 	}
 
 	type FileListREST = {
-		files: Record<string, { hex: string; }>; // only relevant fields
+		files: Record<string, { hex: string }>; // only relevant fields
 	};
 
 	const data: FileListREST = await response.json();
@@ -54,13 +60,14 @@ async function enumPackageFiles(packageName: string, version: string): Promise<R
 			filePath,
 			hex,
 			packageName,
-			version
+			version,
 		};
 		return acc;
 	}, {} as Record<string, PackageFile>);
 }
 
-async function downloadSingleFile(file: PackageFile): Promise<string> { // Only support text files
+async function downloadSingleFile(file: PackageFile): Promise<string> {
+	// Only support text files
 	const { hex, packageName } = file;
 	const fileContentUrl = `https://www.npmjs.com/package/${packageName}/file/${hex}`;
 
@@ -68,14 +75,17 @@ async function downloadSingleFile(file: PackageFile): Promise<string> { // Only 
 	const response = await fetch(fileContentUrl);
 
 	if (!response.ok) {
-		throw new Error(`Failed to retrieve file content for ${JSON.stringify(file)}: ${response.status} ${response.statusText}`);
+		throw new Error(
+			`Failed to retrieve file content for ${JSON.stringify(file)}: ${
+				response.status
+			} ${response.statusText}`,
+		);
 	}
 
 	return response.text();
 }
 
 export async function getStaticPaths() {
-
 	const publishedVersions = await enumVersions();
 
 	console.log(publishedVersions);
@@ -88,9 +98,7 @@ export async function getStaticPaths() {
 type Params = InferGetStaticParamsType<typeof getStaticPaths>;
 // type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-
-
-export async function get({ params }: { params: Params; }) {
+export async function get({ params }: { params: Params }) {
 	console.log(params);
 
 	const files = await enumPackageFiles("@biomejs/biome", params.tag);
