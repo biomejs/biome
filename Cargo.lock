@@ -1925,7 +1925,7 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "rome_migrate",
+ "biome_migrate",
  "rome_rowan",
  "rome_service",
  "serde",
@@ -2290,7 +2290,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_migrate"
+name = "biome_migrate"
 version = "0.2.0"
 dependencies = [
  "biome_analyze",
