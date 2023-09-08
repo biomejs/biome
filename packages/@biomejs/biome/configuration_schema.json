@@ -830,20 +830,21 @@
 			},
 			"additionalProperties": false
 		},
-		"ConfusingVoidTypeOptions": {
+		"NoConfusingVoidTypeOptions": {
+			"description": "rule options for `noConfusingVoidType`",
 			"type": "object",
+			"required": ["allowAsThisParameter", "allowInGenericTypeArguments"],
 			"properties": {
-				"allowInGenericTypeArguments": {
-					"type": "boolean",
-					"default": true,
-					"description": "This option lets you control if void can be used as a valid value for generic type parameters."
-				},
 				"allowAsThisParameter": {
-					"type": "boolean",
-					"default": false,
-					"description": "This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument."
+					"description": "This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument.",
+					"type": "boolean"
+				},
+				"allowInGenericTypeArguments": {
+					"description": "This option lets you control if void can be used as a valid value for generic type parameters.",
+					"type": "boolean"
 				}
-			}
+			},
+			"additionalProperties": false
 		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
@@ -1138,7 +1139,7 @@
 				},
 				{
 					"description": "Options for `noConfusingVoidType` rule",
-					"allOf": [{ "$ref": "#/definitions/ConfusingVoidTypeOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoConfusingVoidTypeOptions" }]
 				},
 				{ "description": "No options available", "type": "null" }
 			]

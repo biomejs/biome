@@ -115,7 +115,7 @@ export interface JavascriptConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics.
+If defined here, they should not emit diagnostics. 
 	 */
 	globals?: StringSet;
 	organize_imports?: JavascriptOrganizeImports;
@@ -172,7 +172,7 @@ export interface VcsConfiguration {
 	/**
 	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
 	 */
 	root?: string;
 	/**
@@ -184,7 +184,7 @@ export type PlainIndentStyle = "tab" | "space";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320
+The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
 /**
@@ -224,7 +224,7 @@ export interface JavascriptParser {
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change.
+These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
@@ -374,6 +374,10 @@ export interface Complexity {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow void type outside of generic or return types.
+	 */
+	noConfusingVoidType?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration;
@@ -441,11 +445,6 @@ export interface Complexity {
 	 * Discard redundant terms from logical expressions.
 	 */
 	useSimplifiedLogicExpression?: RuleConfiguration;
-
-	/**
-	 * Disallow void type outside of generic or return types.
-	 */
-	noConfusingVoidType?: RuleConfiguration
 }
 /**
  * A list of rules that belong to this group
@@ -1012,7 +1011,7 @@ export type PossibleOptions =
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| UseConfusingVoidType
+	| NoConfusingVoidTypeOptions
 	| null;
 /**
  * Options for the rule `noNestedModuleImports`.
@@ -1022,16 +1021,6 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
-}
-
-/**
- * Options for the rule `useConfusingVoidType`
- */
-export interface UseConfusingVoidType {
-	/// This option lets you control if void can be used as a valid value for generic type parameters.
-	allowInGenericTypeArguments: boolean,
-	/// This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument.
-	allowAsThisParameter: boolean,
 }
 /**
  * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
@@ -1064,11 +1053,24 @@ export interface RestrictedGlobalsOptions {
 	 */
 	deniedGlobals?: string[];
 }
+/**
+ * rule options for `noConfusingVoidType`
+ */
+export interface NoConfusingVoidTypeOptions {
+	/**
+	 * This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument.
+	 */
+	allowAsThisParameter: boolean;
+	/**
+	 * This option lets you control if void can be used as a valid value for generic type parameters.
+	 */
+	allowInGenericTypeArguments: boolean;
+}
 export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-### Example
+### Example 
 	 */
 	closureIndex?: number;
 	/**
@@ -1188,6 +1190,7 @@ export type Category =
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
 	| "lint/a11y/useValidLang"
+	| "lint/complexity/noConfusingVoidType"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
@@ -1204,7 +1207,6 @@ export type Category =
 	| "lint/complexity/useOptionalChain"
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
-	| "lint/complexity/noConfusingVoidType"
 	| "lint/correctness/noChildrenProp"
 	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstructorReturn"
@@ -1370,7 +1372,7 @@ export type DiagnosticTags = DiagnosticTag[];
 /**
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
-See the [Visitor] trait for additional documentation on all the supported advice types.
+See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
 	| { Log: [LogCategory, MarkupBuf] }
@@ -1458,7 +1460,7 @@ export interface CodeAction {
 /**
 	* The category of a code action, this type maps directly to the [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
 	| "QuickFix"
