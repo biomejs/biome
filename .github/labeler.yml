@@ -19,7 +19,7 @@ A-Project:
   - crates/rome_service/**
 
 A-Linter:
-  - crates/rome_analyze/**
+  - crates/biome_analyze/**
   - crates/rome_js_analyze/**
   - crates/rome_json_analyze/**
 

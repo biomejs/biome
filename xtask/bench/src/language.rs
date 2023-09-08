@@ -1,6 +1,6 @@
 use crate::test_case::TestCase;
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use criterion::black_box;
-use rome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use rome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::{JsFormatContext, JsFormatOptions};

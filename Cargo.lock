@@ -130,6 +130,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_analyze"
+version = "0.2.0"
+dependencies = [
+ "bitflags 2.3.3",
+ "rome_console",
+ "rome_diagnostics",
+ "rome_rowan",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "tracing",
+]
+
+[[package]]
 name = "biome_aria"
 version = "0.0.0"
 dependencies = [
@@ -187,10 +201,10 @@ name = "biome_lsp"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_analyze",
  "futures",
  "indexmap",
  "proptest",
- "rome_analyze",
  "rome_console",
  "rome_diagnostics",
  "rome_formatter",
@@ -220,9 +234,9 @@ dependencies = [
 name = "biome_test_utils"
 version = "0.1.0"
 dependencies = [
+ "biome_analyze",
  "countme",
  "json_comments",
- "rome_analyze",
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
@@ -1864,20 +1878,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_analyze"
-version = "0.2.0"
-dependencies = [
- "bitflags 2.3.3",
- "rome_console",
- "rome_diagnostics",
- "rome_rowan",
- "rustc-hash",
- "schemars",
- "serde",
- "tracing",
-]
-
-[[package]]
 name = "rome_cli"
 version = "0.0.0"
 dependencies = [
@@ -2053,6 +2053,7 @@ dependencies = [
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_analyze",
  "biome_aria",
  "biome_test_utils",
  "bpaf",
@@ -2061,7 +2062,6 @@ dependencies = [
  "lazy_static",
  "natord",
  "roaring",
- "rome_analyze",
  "rome_console",
  "rome_control_flow",
  "rome_deserialize",
@@ -2179,10 +2179,10 @@ dependencies = [
 name = "rome_js_transform"
 version = "0.2.0"
 dependencies = [
+ "biome_analyze",
  "biome_test_utils",
  "insta",
  "lazy_static",
- "rome_analyze",
  "rome_console",
  "rome_diagnostics",
  "rome_js_factory",
@@ -2201,10 +2201,10 @@ version = "0.0.1"
 name = "rome_json_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_analyze",
  "biome_test_utils",
  "insta",
  "lazy_static",
- "rome_analyze",
  "rome_console",
  "rome_diagnostics",
  "rome_json_factory",
@@ -2273,8 +2273,8 @@ dependencies = [
 name = "rome_migrate"
 version = "0.2.0"
 dependencies = [
+ "biome_analyze",
  "lazy_static",
- "rome_analyze",
  "rome_diagnostics",
  "rome_json_parser",
  "rome_json_syntax",
@@ -2314,12 +2314,12 @@ dependencies = [
 name = "rome_service"
 version = "0.0.0"
 dependencies = [
+ "biome_analyze",
  "biome_flags",
  "bpaf",
  "dashmap",
  "indexmap",
  "insta",
- "rome_analyze",
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
@@ -3523,6 +3523,7 @@ name = "xtask_bench"
 version = "0.0.0"
 dependencies = [
  "ansi_rgb",
+ "biome_analyze",
  "countme",
  "criterion 0.5.1",
  "dhat",
@@ -3531,7 +3532,6 @@ dependencies = [
  "mimalloc",
  "pico-args",
  "regex",
- "rome_analyze",
  "rome_console",
  "rome_diagnostics",
  "rome_formatter",
@@ -3556,6 +3556,7 @@ name = "xtask_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_analyze",
  "biome_aria",
  "case",
  "convert_case",
@@ -3566,7 +3567,6 @@ dependencies = [
  "proc-macro2",
  "pulldown-cmark",
  "quote",
- "rome_analyze",
  "rome_cli",
  "rome_diagnostics",
  "rome_js_analyze",
@@ -3648,9 +3648,9 @@ dependencies = [
 name = "xtask_lintdoc"
 version = "0.0.0"
 dependencies = [
+ "biome_analyze",
  "convert_case",
  "pulldown-cmark",
- "rome_analyze",
  "rome_console",
  "rome_diagnostics",
  "rome_formatter",

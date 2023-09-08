@@ -149,13 +149,13 @@ The `"biome.lspBin"` VS Code setting will still need to be set as described abov
 When the extension is running, it will connect to a daemon server - or it will bootstrap one.
 
 When you apply changes to the binary, you need to do two things:
+
 - compile the binary
 - kill the daemon process, so you can spawn a new server session
-with the new changes
+  with the new changes
 
 When the daemon is running, it's possible to inspect its logs in the folder `biome-logs`, placed
 in the temporary folder of the operative system.
-
 
 ### User files
 
@@ -166,15 +166,17 @@ You can find more information on this process [here](https://help.github.com/en/
 ## Node.js development
 
 The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
+
 - `wasm-nodejs` (WebAssembly)
 - `backend-jsonrpc` (Connection to the daemon)
 
 For testing and developing, you need to build these packages, following the steps:
+
 1. install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) globally;
 2. run the `build` command inside the package `backend-jsonrpc`;
 3. run the `build` and `build:wasm-node-dev` commands inside the package `js-api` (folder `npm/js-api`);
 4. run `pnpm i` inside the package `js-api` (folder `npm/js-api`), this will link the WebAssembly bindings and the
-JSON-RPC bindings;
+   JSON-RPC bindings;
 
 The tests are run against the compiled files, which means that you need to run the
 `build` command after you implemented features/bug fixes.
@@ -202,7 +204,6 @@ The source is generated from the [`ungram` files](https://github.com/biomejs/bio
 
 #### `cargo codegen test`
 
-
 This command will create new tests for your parser. We currently have a neat infrastructure
 where tests for parser are generated com inline comments found inside
 the source code. Please read [the proper chapter for more information](#write-tests-for-a-parser)
@@ -211,7 +212,7 @@ It's strongly advised to **run this command before committing new changes**.
 
 #### `cargo codegen analyzer`
 
-This command will detect linter rules declared in the `analyzers` and `assists` directories in `rome_analyze`, regenerate the index modules `analyzers.rs` and `assists.rs` to import these files, and update the registry builder function in `registry.rs` to include all these rules.
+This command will detect linter rules declared in the `analyzers` and `assists` directories in `biome_analyze`, regenerate the index modules `analyzers.rs` and `assists.rs` to import these files, and update the registry builder function in `registry.rs` to include all these rules.
 It will also regenerate the configuration of the rules.
 
 #### `cargo coverage`
@@ -221,6 +222,7 @@ We currently target the [Official ECMAScript Conformance Test Suite](https://git
 the [Typescript Test Suite](https://github.com/microsoft/TypeScript/tree/main/tests)
 
 The test suites are included as git submodules and can be pulled using:
+
 ```bash
 git submodule update --init --recursive
 ```
@@ -268,31 +270,39 @@ Here's a sample of the headings:
 ## Unreleased
 
 ### Analyzer
+
 ### CLI
+
 ### Configuration
+
 ### Editors
+
 ### Formatter
+
 ### JavaScript APIs
+
 ### Linter
+
 ### Parser
+
 ### VSCode
 ```
 
 When you edit a blank section:
 
 - If your PR adds a **breaking change**, create a new heading called `#### BREAKING CHANGES` and add
-bullet point that explains the breaking changes; provide a migration path if possible.
+  bullet point that explains the breaking changes; provide a migration path if possible.
 - If your PR adds a new feature of a fix, create a new heading called `#### Other changes` and
-add a bullet point that explains the fix or the new feature. Make sure that this new heading
-appears after the `#### BREAKING CHANGES` heading.
+  add a bullet point that explains the fix or the new feature. Make sure that this new heading
+  appears after the `#### BREAKING CHANGES` heading.
 
 ##### Writing a changelog line
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
 - Whenever applicable, add a code block to show your new changes. For example, for a new
-rule you might want to show an invalid case, for the formatter you might want to show
-how the new formatting changes, and so on.
+  rule you might want to show an invalid case, for the formatter you might want to show
+  how the new formatting changes, and so on.
 
 #### Documentation
 
@@ -308,7 +318,7 @@ When adding new features, the documentation should be part of a new PR, which wi
 ### Analyzers and lint rules
 
 To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_analyze/index.html)
+documentation page](https://rustdocs.rome.tools/biome_analyze/index.html)
 
 ### JavaScript Parser
 
