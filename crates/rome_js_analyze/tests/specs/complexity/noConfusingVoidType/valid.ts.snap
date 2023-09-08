@@ -1,0 +1,12 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+assertion_line: 80
+expression: valid.ts
+---
+# Input
+```js
+function Foo(): void {}
+
+```
+
+
