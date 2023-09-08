@@ -32,6 +32,31 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) now only provides safe code fixes. Contributed by [@Conaclos](https://github.com/Conaclos)
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) now reports more cases.
+
+  The rule is now able to ignore self-writes.
+  For example, the rule reports the following unused variable:
+
+  ```js
+  let a = 0;
+  a++;
+  a += 1;
+  ```
+
+  The rule is also capable of detecting an unused declaration that uses itself.
+  For example, the rule reports the following unused interface:
+
+  ```ts
+  interface I {
+    instance(): I
+  }
+  ```
+
+  Finally, the rule now ignores all _TypeScript_ declaration files,
+  including [global declaration files](https://www.typescriptlang.org/docs/handbook/declaration-files/templates/global-d-ts.html).
+
+  Contributed by [@Conaclos](https://github.com/Conaclos)
+
 #### Bug fixes
 
 - Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining. Contributed by [@denbezrukov](https://github.com/denbezrukov)
@@ -53,6 +78,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#258](https://github.com/biomejs/biome/issues/258), fix [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) the case where the rule removing an assignment. Contributed by [@denbezrukov](https://github.com/denbezrukov)
 
+
+- Fix [#105](https://github.com/biomejs/biome/issues/105), removing false positives reported by [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/).
+
+  The rule no longer reports the following used variable:
+
+  ```js
+  const a = f(() => a);
+  ```
+
+  Contributed by [@Conaclos](https://github.com/Conaclos)
 
 ### Parser
 ### VSCode
@@ -82,6 +117,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```js
   export * as MY_NAMESPACE from "./lib.js";
   ```
+
+  Contributed by [@Conaclos](https://github.com/Conaclos)
 
 - [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters. The rule now gives suggestions instead of safe fixes when parameters are annotated with types. Contributed by [@Conaclos](https://github.com/Conaclos)
 

@@ -26,22 +26,4 @@ declare module Module {
  }
 ```
 
-# Diagnostics
-```
-definitionfile.d.ts:13:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type alias is unused.
-  
-    11 │ declare function unused_overloaded(s?: string);
-    12 │ 
-  > 13 │ type Command = (...args: any[]) => unknown;
-       │      ^^^^^^^
-    14 │ 
-    15 │ declare module Module {·
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-
-```
-
 

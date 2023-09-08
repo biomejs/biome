@@ -14,3 +14,5 @@ function add(a: any, b: any): any {
 	return a + b;
 }
 add(1, 1);
+
+function id(a = id(null)) { return a }

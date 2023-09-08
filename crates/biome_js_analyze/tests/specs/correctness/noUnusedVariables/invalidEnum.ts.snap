@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEnum.ts
+---
+# Input
+```js
+enum Status {
+    Open = 0,
+    Close = 1,
+}
+
+enum Flags {
+    One = 1,
+    Two = Flags.One << 1,
+}
+
+export {}
+
+```
+
+# Diagnostics
+```
+invalidEnum.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ enum Status {
+      │      ^^^^^^
+    2 │     Open = 0,
+    3 │     Close = 1,
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+
