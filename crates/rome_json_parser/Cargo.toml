@@ -13,7 +13,7 @@ version              = "0.1.0"
 [dependencies]
 rome_console          = { workspace = true }
 rome_diagnostics      = { workspace = true }
-rome_js_unicode_table = { workspace = true }
+biome_js_unicode_table = { workspace = true }
 rome_json_factory     = { workspace = true }
 rome_json_syntax      = { workspace = true }
 rome_parser           = { workspace = true }

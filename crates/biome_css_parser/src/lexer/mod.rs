@@ -4,7 +4,7 @@ mod tests;
 
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use rome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
 use rome_parser::diagnostic::ParseDiagnostic;
 use std::char::REPLACEMENT_CHARACTER;
 use std::iter::FusedIterator;

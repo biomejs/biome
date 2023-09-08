@@ -20,7 +20,7 @@ rome_diagnostics      = { workspace = true }
 rome_js_factory       = { workspace = true }
 rome_js_semantic      = { workspace = true }
 rome_js_syntax        = { workspace = true }
-rome_js_unicode_table = { workspace = true }
+biome_js_unicode_table = { workspace = true }
 rome_json_factory     = { workspace = true }
 rome_json_syntax      = { workspace = true }
 rome_rowan            = { workspace = true }
