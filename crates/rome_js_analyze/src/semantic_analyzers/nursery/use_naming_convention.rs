@@ -8,6 +8,7 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_js_unicode_table::is_js_ident;
 use bpaf::Bpaf;
 use rome_console::markup;
 use rome_deserialize::{
@@ -22,7 +23,6 @@ use rome_js_syntax::{
     JsLiteralMemberName, JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken,
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
-use rome_js_unicode_table::is_js_ident;
 use rome_json_syntax::JsonLanguage;
 use rome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,

@@ -69,10 +69,14 @@ action => {};
 (action = 1) => {};
 "#;
 
+// Without this, Test (windows-latest) fails with: `warning: constant `DEFAULT_CONFIGURATION_BEFORE` is never used`
+#[allow(dead_code)]
 const DEFAULT_CONFIGURATION_BEFORE: &str = r#"function f() {
     return { a, b }
   }"#;
 
+// Without this, Test (windows-latest) fails with: `warning: constant `DEFAULT_CONFIGURATION_AFTER` is never used`
+#[allow(dead_code)]
 const DEFAULT_CONFIGURATION_AFTER: &str = "function f() {
       return { a, b };
 }
