@@ -8,7 +8,7 @@ use crate::{
 /// Identifier for a block in a [ControlFlowGraph]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct BlockId {
-    index: u32,
+    pub(crate) index: u32,
 }
 
 impl BlockId {
@@ -17,6 +17,9 @@ impl BlockId {
         self.index
     }
 }
+
+/// Id of the first block of every Control Flow Graph
+pub const ROOT_BLOCK_ID: BlockId = BlockId { index: 0 };
 
 /// Helper struct for building an instance of [ControlFlowGraph], the builder
 /// keeps track of an "insertion cursor" within the graph where [Instruction]
@@ -96,10 +99,8 @@ impl<L: Language> FunctionBuilder<L> {
     /// with this builder will automatically declare an exception edge towards
     /// the topmost entry in this stack
     pub fn push_exception_target(&mut self, kind: ExceptionHandlerKind, target: BlockId) {
-        self.exception_target.push(ExceptionHandler {
-            kind,
-            target: target.index(),
-        });
+        self.exception_target
+            .push(ExceptionHandler { kind, target });
     }
 
     /// Remove the topmost entry from the exception stack

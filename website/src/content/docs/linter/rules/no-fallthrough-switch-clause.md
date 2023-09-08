@@ -15,11 +15,11 @@ Source: https://eslint.org/docs/latest/rules/no-fallthrough
 ### Invalid
 
 ```jsx
-switch(bar) {
+switch (bar) {
 	case 0:
 		a();
 	case 1:
-		b()
+		b();
 }
 ```
 
@@ -27,13 +27,13 @@ switch(bar) {
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This case is falling through to the next case.</span>
   
-    <strong>1 │ </strong>switch(bar) {
+    <strong>1 │ </strong>switch (bar) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>	case 0:
    <strong>   │ </strong>	<strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>		a();
    <strong>   │ </strong>		<strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>	case 1:
-    <strong>5 │ </strong>		b()
+    <strong>5 │ </strong>		b();
   
 <strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Add a `break` or `return` statement to the end of this case to prevent fallthrough.</span>
   
@@ -42,11 +42,19 @@ switch(bar) {
 ## Valid
 
 ```jsx
-switch(foo) {
+switch (foo) {
 	case 1:
+    case 2:
 		doSomething();
 		break;
-	case 2:
+    case 3: {
+        if (cond) {
+            break;
+        } else {
+            break;
+        }
+    }
+	case 4:
 		doSomething();
 }
 ```
