@@ -1,16 +1,7 @@
----
-source: crates/rome_js_analyze/tests/spec_tests.rs
-assertion_line: 80
-expression: validAllowInGenericTypeArguments.ts
----
-# Input
-```js
+function Foo(): void {}
+function doSomething(this: void) {}
 function printArg<T = void>(arg: T) {}
 logAndReturn<void>(undefined);
 
 let voidPromise: Promise<void> = new Promise<void>(() => { });
 let voidMap: Map<string, void> = new Map<string, void>();
-
-```
-
-

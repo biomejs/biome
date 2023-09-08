@@ -374,10 +374,6 @@ export interface Complexity {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow void type outside of generic or return types.
-	 */
-	noConfusingVoidType?: RuleConfiguration;
-	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration;
@@ -587,6 +583,10 @@ export interface Nursery {
 	 * Disallow arrow functions where they could be confused with comparisons.
 	 */
 	noConfusingArrow?: RuleConfiguration;
+	/**
+	 * Disallow void type outside of generic or return types.
+	 */
+	noConfusingVoidType?: RuleConfiguration;
 	/**
 	 * Disallow constant expressions in conditions
 	 */
@@ -1011,7 +1011,6 @@ export type PossibleOptions =
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| NoConfusingVoidTypeOptions
 	| null;
 /**
  * Options for the rule `noNestedModuleImports`.
@@ -1052,19 +1051,6 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals?: string[];
-}
-/**
- * rule options for `noConfusingVoidType`
- */
-export interface NoConfusingVoidTypeOptions {
-	/**
-	 * This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument.
-	 */
-	allowAsThisParameter: boolean;
-	/**
-	 * This option lets you control if void can be used as a valid value for generic type parameters.
-	 */
-	allowInGenericTypeArguments: boolean;
 }
 export interface Hooks {
 	/**
@@ -1190,7 +1176,6 @@ export type Category =
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
 	| "lint/a11y/useValidLang"
-	| "lint/complexity/noConfusingVoidType"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
@@ -1233,6 +1218,7 @@ export type Category =
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noAriaUnsupportedElements"
 	| "lint/nursery/noBannedTypes"

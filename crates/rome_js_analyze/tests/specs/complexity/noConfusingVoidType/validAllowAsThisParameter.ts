@@ -1,1 +1,0 @@
-function doSomething(this: void) {}

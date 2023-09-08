@@ -1,1 +1,0 @@
-function Foo(): void {}

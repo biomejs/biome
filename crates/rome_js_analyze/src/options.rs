@@ -1,8 +1,5 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::complexity::no_confusing_void_type::{
-    no_confusing_void_type_options, NoConfusingVoidTypeOptions,
-};
 use crate::analyzers::nursery::no_excessive_complexity::{complexity_options, ComplexityOptions};
 use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
@@ -37,10 +34,6 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
-    /// Options for `noConfusingVoidType` rule
-    NoConfusingVoidType(
-        #[bpaf(external(no_confusing_void_type_options), hide)] NoConfusingVoidTypeOptions,
-    ),
     /// No options available
     #[default]
     NoOptions,
@@ -75,13 +68,6 @@ impl PossibleOptions {
                 let options = match self {
                     PossibleOptions::NamingConvention(options) => options.clone(),
                     _ => NamingConventionOptions::default(),
-                };
-                RuleOptions::new(options)
-            }
-            "noConfusingVoidType" => {
-                let options = match self {
-                    PossibleOptions::NoConfusingVoidType(options) => options.clone(),
-                    _ => NoConfusingVoidTypeOptions::default(),
                 };
                 RuleOptions::new(options)
             }
@@ -130,17 +116,6 @@ impl PossibleOptions {
                     let mut options = ComplexityOptions::default();
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
                     *self = PossibleOptions::Complexity(options);
-                }
-                "allowInGenericTypeArguments" | "allowAsThisParameter" => {
-                    if !matches!(self, PossibleOptions::NoConfusingVoidType(_)) {
-                        *self = PossibleOptions::NoConfusingVoidType(
-                            NoConfusingVoidTypeOptions::default(),
-                        );
-                    }
-                    let PossibleOptions::NoConfusingVoidType(options) = self else {
-                        break;
-                    };
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
                 }
                 "strictCase" | "enumMemberCase" => {
                     let mut options = match self {

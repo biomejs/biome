@@ -238,13 +238,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noConfusingVoidType": {
-					"description": "Disallow void type outside of generic or return types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
@@ -830,22 +823,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoConfusingVoidTypeOptions": {
-			"description": "rule options for `noConfusingVoidType`",
-			"type": "object",
-			"required": ["allowAsThisParameter", "allowInGenericTypeArguments"],
-			"properties": {
-				"allowAsThisParameter": {
-					"description": "This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument.",
-					"type": "boolean"
-				},
-				"allowInGenericTypeArguments": {
-					"description": "This option lets you control if void can be used as a valid value for generic type parameters.",
-					"type": "boolean"
-				}
-			},
-			"additionalProperties": false
-		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -877,6 +854,13 @@
 				},
 				"noConfusingArrow": {
 					"description": "Disallow arrow functions where they could be confused with comparisons.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConfusingVoidType": {
+					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1136,10 +1120,6 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
-				},
-				{
-					"description": "Options for `noConfusingVoidType` rule",
-					"allOf": [{ "$ref": "#/definitions/NoConfusingVoidTypeOptions" }]
 				},
 				{ "description": "No options available", "type": "null" }
 			]

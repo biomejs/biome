@@ -34,7 +34,6 @@ define_categories! {
     "lint/a11y/useValidLang": "https://biomejs.dev/linter/rules/use-valid-lang",
 
     // complexity
-    "lint/complexity/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
     "lint/complexity/noMultipleSpacesInRegularExpressionLiterals": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals",
@@ -81,6 +80,7 @@ define_categories! {
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
 
     // nursery
+    "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/nursery/noAriaUnsupportedElements": "https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
     "lint/nursery/noBannedTypes": "https://biomejs.dev/linter/rules/no-banned-types",

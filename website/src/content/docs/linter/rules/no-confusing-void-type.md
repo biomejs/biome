@@ -19,7 +19,7 @@ type PossibleValues = number | void;
 type MorePossibleValues = string | ((number & any) | (string | void));
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noConfusingVoidType.js:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is not valid as a constituent in a union type</span>
   
@@ -28,7 +28,7 @@ type MorePossibleValues = string | ((number & any) | (string | void));
     <strong>2 │ </strong>type MorePossibleValues = string | ((number &amp; any) | (string | void));
     <strong>3 │ </strong>
   
-complexity/noConfusingVoidType.js:2:64 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+nursery/noConfusingVoidType.js:2:64 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is not valid as a constituent in a union type</span>
   
@@ -43,7 +43,7 @@ complexity/noConfusingVoidType.js:2:64 <a href="https://biomejs.dev/linter/rules
 function logSomething(thing: void) {}
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noConfusingVoidType.js:1:30 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:30 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -59,7 +59,7 @@ interface Interface {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noConfusingVoidType.js:2:11 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:2:11 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -77,7 +77,7 @@ let bar = 1 as unknown as void;
 let baz = 1 as unknown as void | string;
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noConfusingVoidType.js:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -86,7 +86,7 @@ let baz = 1 as unknown as void | string;
     <strong>2 │ </strong>let bar = 1 as unknown as void;
     <strong>3 │ </strong>let baz = 1 as unknown as void | string;
   
-complexity/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+nursery/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
   
@@ -104,47 +104,6 @@ complexity/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules
 function foo(): void {};
 ```
 
-## Options
-
-### allowInGenericTypeArguments
-
-This option lets you control if void can be used as a valid value for generic type parameters.
-
-This option is `true` by default.
-
-The following patterns are considered warnings with `{ allowInGenericTypeArguments: false }`:
-
-```ts
-logAndReturn<void>(undefined);
-
-let voidPromise: Promise<void> = new Promise<void>(() => {});
-let voidMap: Map<string, void> = new Map<string, void>();
-```
-
-### allowAsThisParameter
-
-This option allows specifying a this parameter of a function to be void when set to true. This pattern can be useful to explicitly label function types that do not use a this argument. See the TypeScript docs for more information.
-This option is `false` by default.
-
-The following patterns are considered warnings with `{ allowAsThisParameter: false }` but valid with `{ allowAsThisParameter: true }`:
-
-```ts
-function doThing(this: void) {}
-class Example {
-    static helper(this: void) {}
-    callback(this: void) {}
-}
-```
-
-complexity/noConfusingVoidType.js:1:24 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/complexity/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
-  
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function doThing(this: void) {}
-   <strong>   │ </strong>                       <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>class Example {
-    <strong>3 │ </strong>    static helper(this: void) {}
-  
 ## Related links
 
 - [Disable a rule](/linter/#disable-a-lint-rule)

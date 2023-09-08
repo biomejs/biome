@@ -31,7 +31,7 @@ let baz = 1 as unknown as void | string;
 
 # Diagnostics
 ```
-invalid.ts:1:41 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:41 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
@@ -44,7 +44,7 @@ invalid.ts:1:41 lint/complexity/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:2:64 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:64 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
@@ -58,7 +58,7 @@ invalid.ts:2:64 lint/complexity/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:4:30 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:4:30 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
@@ -73,7 +73,7 @@ invalid.ts:4:30 lint/complexity/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:12:8 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:8 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
@@ -87,7 +87,7 @@ invalid.ts:12:8 lint/complexity/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:16:29 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:16:29 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
@@ -101,7 +101,7 @@ invalid.ts:16:29 lint/complexity/noConfusingVoidType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:19:10 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:19:10 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
@@ -116,7 +116,7 @@ invalid.ts:19:10 lint/complexity/noConfusingVoidType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:20:27 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:20:27 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
@@ -130,7 +130,7 @@ invalid.ts:20:27 lint/complexity/noConfusingVoidType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:21:27 lint/complexity/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:21:27 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
