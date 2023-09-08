@@ -6,8 +6,8 @@ version = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_analyze    = { workspace = true }
 lazy_static      = { workspace = true }
-biome_analyze     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_json_syntax = { workspace = true }
 rome_rowan       = { workspace = true }

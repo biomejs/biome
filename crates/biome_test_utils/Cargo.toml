@@ -7,9 +7,9 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_analyze    = { workspace = true }
 countme          = { workspace = true, features = ["enable"] }
 json_comments    = "0.2.1"
-biome_analyze     = { workspace = true }
 rome_console     = { workspace = true }
 rome_deserialize = { workspace = true }
 rome_diagnostics = { workspace = true }
