@@ -231,6 +231,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_migrate"
+version = "0.2.0"
+dependencies = [
+ "biome_analyze",
+ "lazy_static",
+ "rome_diagnostics",
+ "rome_json_parser",
+ "rome_json_syntax",
+ "rome_rowan",
+]
+
+[[package]]
 name = "biome_test_utils"
 version = "0.1.0"
 dependencies = [
@@ -269,6 +281,26 @@ dependencies = [
  "serde",
  "serde_test",
  "static_assertions",
+]
+
+[[package]]
+name = "biome_wasm"
+version = "0.2.0"
+dependencies = [
+ "console_error_panic_hook",
+ "js-sys",
+ "quote",
+ "rome_console",
+ "rome_diagnostics",
+ "rome_js_factory",
+ "rome_js_formatter",
+ "rome_rowan",
+ "rome_service",
+ "schemars",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1904,6 +1936,7 @@ dependencies = [
  "anyhow",
  "biome_flags",
  "biome_lsp",
+ "biome_migrate",
  "biome_text_edit",
  "biome_text_size",
  "bpaf",
@@ -1925,7 +1958,6 @@ dependencies = [
  "rome_json_formatter",
  "rome_json_parser",
  "rome_json_syntax",
- "biome_migrate",
  "rome_rowan",
  "rome_service",
  "serde",
@@ -2290,18 +2322,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_migrate"
-version = "0.2.0"
-dependencies = [
- "biome_analyze",
- "lazy_static",
- "rome_diagnostics",
- "rome_json_parser",
- "rome_json_syntax",
- "rome_rowan",
-]
-
-[[package]]
 name = "rome_parser"
 version = "0.2.0"
 dependencies = [
@@ -2372,26 +2392,6 @@ dependencies = [
  "rome_console",
  "rome_diagnostics",
  "rome_rowan",
-]
-
-[[package]]
-name = "rome_wasm"
-version = "0.2.0"
-dependencies = [
- "console_error_panic_hook",
- "js-sys",
- "quote",
- "rome_console",
- "rome_diagnostics",
- "rome_js_factory",
- "rome_js_formatter",
- "rome_rowan",
- "rome_service",
- "schemars",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "wasm-bindgen",
 ]
 
 [[package]]

@@ -144,11 +144,11 @@ jobs:
         uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Build WASM module for bundlers
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev crates/biome_wasm
       - name: Build WASM module for node.js
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomedev crates/biome_wasm
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev crates/biome_wasm
 
       - name: Upload WASM artifact
         uses: actions/upload-artifact@v3

@@ -10,8 +10,8 @@
 				"start:playground": "pnpm build:wasm-dev && pnpm start",
 				"build": "pnpm build:wasm && pnpm build:js",
 				"build:js": "astro build",
-				"build:wasm": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev ../crates/rome_wasm",
-				"build:wasm-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev ../crates/rome_wasm",
+				"build:wasm": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev ../crates/biome_wasm",
+				"build:wasm-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev ../crates/biome_wasm",
 				"preview": "astro preview"
 		},
 		"devDependencies": {

@@ -88,14 +88,14 @@ tracing           = { version = "0.1.37", default-features = false, features = [
 tokio = { version = "~1.18.5" }
 
 
-[profile.dev.package.rome_wasm]
+[profile.dev.package.biome_wasm]
 debug     = true
 opt-level = "s"
 
-[profile.test.package.rome_wasm]
+[profile.test.package.biome_wasm]
 debug     = true
 opt-level = "s"
 
-[profile.release.package.rome_wasm]
+[profile.release.package.biome_wasm]
 debug     = false
 opt-level = 3
