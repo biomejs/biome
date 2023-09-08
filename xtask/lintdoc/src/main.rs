@@ -144,7 +144,7 @@ fn main() -> Result<()> {
 
     let number_of_rules_buffer = format!(
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->\n \
-    <p>Biome's linter has a total of <strong><a href='/lint/rules'>{} rules</a></strong><p>",
+    <p>Biome's linter has a total of <strong><a href='/linter/rules'>{} rules</a></strong><p>",
         number_or_rules
     );
     fs2::write(root.join("index.mdx"), index)?;
