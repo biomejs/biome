@@ -35,6 +35,7 @@ biome_flags                 = { path = "./crates/biome_flags" }
 biome_lsp                   = { path = "./crates/biome_lsp" }
 biome_markup                = { version = "0.0.1", path = "./crates/biome_markup" }
 biome_migrate               = { path = "./crates/biome_migrate" }
+biome_parser                = { version = "0.2.0", path = "./crates/biome_parser" }
 biome_suppression           = { version = "0.2.0", path = "./crates/biome_suppression" }
 biome_test_utils            = { path = "./crates/biome_test_utils" }
 biome_text_edit             = { version = "0.0.1", path = "./crates/biome_text_edit" }
@@ -61,7 +62,6 @@ rome_json_factory           = { version = "0.2.0", path = "./crates/rome_json_fa
 rome_json_formatter         = { path = "./crates/rome_json_formatter" }
 rome_json_parser            = { path = "./crates/rome_json_parser" }
 rome_json_syntax            = { version = "0.2.0", path = "./crates/rome_json_syntax" }
-biome_parser                 = { version = "0.2.0", path = "./crates/biome_parser" }
 rome_rowan                  = { version = "0.2.0", path = "./crates/rome_rowan" }
 rome_service                = { path = "./crates/rome_service" }
 tests_macros                = { path = "./crates/tests_macros" }
