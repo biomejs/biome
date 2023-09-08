@@ -243,6 +243,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_suppression"
+version = "0.2.0"
+dependencies = [
+ "rome_console",
+ "rome_diagnostics",
+ "rome_rowan",
+]
+
+[[package]]
 name = "biome_test_utils"
 version = "0.1.0"
 dependencies = [
@@ -2279,6 +2288,7 @@ dependencies = [
 name = "rome_json_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_suppression",
  "countme",
  "insta",
  "rome_diagnostics",
@@ -2290,7 +2300,6 @@ dependencies = [
  "rome_json_syntax",
  "rome_parser",
  "rome_rowan",
- "rome_suppression",
  "serde",
  "serde_json",
  "tests_macros",
@@ -2383,15 +2392,6 @@ dependencies = [
  "serde_json",
  "tests_macros",
  "tracing",
-]
-
-[[package]]
-name = "rome_suppression"
-version = "0.2.0"
-dependencies = [
- "rome_console",
- "rome_diagnostics",
- "rome_rowan",
 ]
 
 [[package]]

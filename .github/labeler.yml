@@ -11,8 +11,8 @@ A-Core:
   - crates/rome_rowan/**
   - crates/biome_text_edit/**
   - crates/biome_text_size/**
-  - crates/rome_suppression/**
-  - crates/rome_suppression/**
+  - crates/biome_suppression/**
+  - crates/biome_suppression/**
   - crates/biome_markup/**
 
 A-Project:

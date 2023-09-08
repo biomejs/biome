@@ -17,7 +17,7 @@ rome_diagnostics = { workspace = true }
 rome_formatter   = { workspace = true }
 rome_json_syntax = { workspace = true }
 rome_rowan       = { workspace = true }
-rome_suppression = { workspace = true }
+biome_suppression = { workspace = true }
 
 [dev-dependencies]
 countme             = { workspace = true, features = ["enable"] }

@@ -63,7 +63,7 @@ biome_migrate                = { path = "./crates/biome_migrate" }
 rome_parser                 = { version = "0.2.0", path = "./crates/rome_parser" }
 rome_rowan                  = { version = "0.2.0", path = "./crates/rome_rowan" }
 rome_service                = { path = "./crates/rome_service" }
-rome_suppression            = { version = "0.2.0", path = "./crates/rome_suppression" }
+biome_suppression            = { version = "0.2.0", path = "./crates/biome_suppression" }
 tests_macros                = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
