@@ -1,8 +1,8 @@
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make::{

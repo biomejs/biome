@@ -2,7 +2,7 @@
 
 use crate::configuration::linter::*;
 use crate::{RuleConfiguration, Rules};
-use rome_analyze::{AnalyzerRules, MetadataRegistry};
+use biome_analyze::{AnalyzerRules, MetadataRegistry};
 pub(crate) fn push_to_analyzer_rules(
     rules: &Rules,
     metadata: &MetadataRegistry,

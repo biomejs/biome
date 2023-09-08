@@ -116,7 +116,7 @@ fn generate_category(
     let (modules, paths): (Vec<_>, Vec<_>) = groups.into_values().unzip();
     let tokens = xtask::reformat(quote! {
         #( #modules )*
-        ::rome_analyze::declare_category! {
+        ::biome_analyze::declare_category! {
             pub(crate) #category_name {
                 kind: #kind,
                 groups: [
@@ -170,7 +170,7 @@ fn generate_group(category: &'static str, group: &str, base_path: PathBuf) -> Re
     let sp = Punct::new(' ', Spacing::Joint);
     let sp4 = quote! { #sp #sp #sp #sp };
     let tokens = xtask::reformat(quote! {
-        use rome_analyze::declare_group;
+        use biome_analyze::declare_group;
         #nl #nl
         #( #rule_imports )*
         #nl #nl
@@ -227,7 +227,7 @@ fn update_js_registry_builder(
         .map(|(_, tokens)| tokens);
 
     let tokens = xtask::reformat(quote! {
-        use rome_analyze::RegistryVisitor;
+        use biome_analyze::RegistryVisitor;
         use rome_js_syntax::JsLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<JsLanguage>>(registry: &mut V) {
@@ -246,7 +246,7 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
     let categories = analyzers.into_values();
 
     let tokens = xtask::reformat(quote! {
-        use rome_analyze::RegistryVisitor;
+        use biome_analyze::RegistryVisitor;
         use rome_json_syntax::JsonLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<JsonLanguage>>(registry: &mut V) {

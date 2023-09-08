@@ -13,11 +13,11 @@ use crate::{
     },
     Rules, WorkspaceError,
 };
-use indexmap::IndexSet;
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use indexmap::IndexSet;
 use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
 use rome_fs::RomePath;
@@ -353,9 +353,9 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
 
     fn record_rule<R>(&mut self)
     where
-        R: rome_analyze::Rule + 'static,
-        R::Query: rome_analyze::Queryable<Language = JsLanguage>,
-        <R::Query as rome_analyze::Queryable>::Output: Clone,
+        R: biome_analyze::Rule + 'static,
+        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
+        <R::Query as biome_analyze::Queryable>::Output: Clone,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,

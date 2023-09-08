@@ -5,8 +5,8 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     Rules, WorkspaceError,
 };
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 pub use javascript::JsFormatterSettings;
-use rome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use rome_console::fmt::Formatter;
 use rome_console::markup;
 use rome_diagnostics::{Diagnostic, Severity};

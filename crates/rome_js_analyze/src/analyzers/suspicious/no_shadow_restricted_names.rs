@@ -1,5 +1,5 @@
 use crate::globals::runtime::BUILTIN;
-use rome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::JsIdentifierBinding;
 use rome_rowan::AstNode;

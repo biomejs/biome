@@ -53,8 +53,8 @@
 
 use crate::file_handlers::Capabilities;
 use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
-use rome_analyze::ActionCategory;
-pub use rome_analyze::RuleCategories;
+use biome_analyze::ActionCategory;
+pub use biome_analyze::RuleCategories;
 use rome_console::{markup, Markup, MarkupBuf};
 use rome_diagnostics::CodeSuggestion;
 use rome_formatter::Printed;

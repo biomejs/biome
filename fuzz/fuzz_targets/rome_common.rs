@@ -3,8 +3,8 @@
 
 #![allow(dead_code)]
 
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
 use libfuzzer_sys::Corpus;
-use rome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
 use rome_diagnostics::Diagnostic;
 use rome_formatter::format_node;
 use rome_js_analyze::analyze;
@@ -20,7 +20,9 @@ use similar::TextDiff;
 use std::fmt::{Display, Formatter};
 
 pub fn fuzz_js_parser_with_source_type(data: &[u8], source: JsFileSource) -> Corpus {
-    let Ok(code1) = std::str::from_utf8(data) else { return Corpus::Reject; };
+    let Ok(code1) = std::str::from_utf8(data) else {
+        return Corpus::Reject;
+    };
 
     let parse1 = parse(code1, source);
     if !parse1.has_errors() {
@@ -56,7 +58,9 @@ where
 }
 
 pub fn fuzz_js_formatter_with_source_type(data: &[u8], source: JsFileSource) -> Corpus {
-    let Ok(code1) = std::str::from_utf8(data) else { return Corpus::Reject; };
+    let Ok(code1) = std::str::from_utf8(data) else {
+        return Corpus::Reject;
+    };
 
     // TODO: replace with OnceLock when upgrading to 1.70
     let rule_filters = if let Some(rules) = unsafe { ANALYSIS_RULE_FILTERS.as_ref() } {
@@ -160,7 +164,9 @@ pub fn fuzz_js_formatter_with_source_type(data: &[u8], source: JsFileSource) -> 
 }
 
 pub fn fuzz_json_parser(data: &[u8]) -> Corpus {
-    let Ok(code1) = std::str::from_utf8(data) else { return Corpus::Reject; };
+    let Ok(code1) = std::str::from_utf8(data) else {
+        return Corpus::Reject;
+    };
 
     let parse1 = parse_json(code1);
     if !parse1.has_errors() {
@@ -173,7 +179,9 @@ pub fn fuzz_json_parser(data: &[u8]) -> Corpus {
 }
 
 pub fn fuzz_json_formatter(data: &[u8]) -> Corpus {
-    let Ok(code1) = std::str::from_utf8(data) else { return Corpus::Reject; };
+    let Ok(code1) = std::str::from_utf8(data) else {
+        return Corpus::Reject;
+    };
 
     let parse1 = parse_json(code1);
     if !parse1.has_errors() {

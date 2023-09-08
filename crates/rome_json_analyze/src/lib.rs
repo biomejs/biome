@@ -4,7 +4,7 @@ mod registry;
 
 use crate::diagnostics::SuppressionDiagnostic;
 pub use crate::registry::visit_registry;
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
     MetadataRegistry, RuleRegistry, SuppressionKind,
 };
@@ -73,9 +73,9 @@ where
         return (None, diagnostics);
     }
 
-    let mut analyzer = rome_analyze::Analyzer::new(
+    let mut analyzer = biome_analyze::Analyzer::new(
         metadata(),
-        rome_analyze::InspectMatcher::new(registry, inspect_matcher),
+        biome_analyze::InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
         |_| {},
         &mut emit_signal,
@@ -86,7 +86,7 @@ where
     }
 
     (
-        analyzer.run(rome_analyze::AnalyzerContext {
+        analyzer.run(biome_analyze::AnalyzerContext {
             root: root.clone(),
             range: filter.range,
             services,
@@ -98,7 +98,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use rome_analyze::{AnalyzerOptions, Never, RuleFilter};
+    use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
     use rome_console::fmt::{Formatter, Termcolor};
     use rome_console::{markup, Markup};
     use rome_diagnostics::termcolor::NoColor;

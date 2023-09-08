@@ -1,5 +1,5 @@
 use crate::analyzers::rule_set::RuleSet;
-use rome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
+use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use rome_json_syntax::JsonLanguage;
 
 mod rule_set;

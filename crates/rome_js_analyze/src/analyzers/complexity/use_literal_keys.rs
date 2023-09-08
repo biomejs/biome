@@ -1,5 +1,7 @@
 use crate::JsRuleAction;
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_factory::make::{

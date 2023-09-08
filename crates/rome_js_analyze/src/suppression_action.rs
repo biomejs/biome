@@ -1,5 +1,5 @@
 use crate::utils::batch::JsBatchMutation;
-use rome_analyze::SuppressionCommentEmitterPayload;
+use biome_analyze::SuppressionCommentEmitterPayload;
 use rome_js_factory::make::{jsx_expression_child, jsx_ident, jsx_text, token};
 use rome_js_syntax::jsx_ext::AnyJsxElement;
 use rome_js_syntax::{

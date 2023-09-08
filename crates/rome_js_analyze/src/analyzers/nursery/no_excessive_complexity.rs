@@ -1,8 +1,8 @@
-use bpaf::Bpaf;
-use rome_analyze::{
+use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
+use bpaf::Bpaf;
 use rome_console::markup;
 use rome_deserialize::{
     json::{has_only_known_keys, VisitJsonNode},

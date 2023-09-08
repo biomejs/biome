@@ -1,5 +1,5 @@
 use crate::transformers::ts_enum::TsEnum;
-use rome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
+use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use rome_js_syntax::JsLanguage;
 
 pub(crate) struct TransformationGroup;

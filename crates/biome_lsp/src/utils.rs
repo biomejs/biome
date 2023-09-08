@@ -1,7 +1,7 @@
 use crate::converters::line_index::LineIndex;
 use crate::converters::{from_proto, to_proto, PositionEncoding};
 use anyhow::{ensure, Context, Result};
-use rome_analyze::ActionCategory;
+use biome_analyze::ActionCategory;
 use rome_console::fmt::Termcolor;
 use rome_console::fmt::{self, Formatter};
 use rome_console::MarkupBuf;

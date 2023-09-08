@@ -1,5 +1,5 @@
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_js_semantic::SemanticModel;
 use rome_js_syntax::{
     global_identifier, AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression, JsCaseClause,

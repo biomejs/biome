@@ -1,10 +1,10 @@
+use biome_analyze::{
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+};
 use case::CaseExt;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
-use rome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
-};
 use rome_js_syntax::JsLanguage;
 use rome_json_syntax::JsonLanguage;
 use std::collections::BTreeMap;
@@ -154,7 +154,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
         use crate::RuleConfiguration;
-        use rome_analyze::RuleFilter;
+        use biome_analyze::RuleFilter;
         use indexmap::IndexSet;
         use bpaf::Bpaf;
         use rome_diagnostics::{Category, Severity};
@@ -315,7 +315,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let push_rules = quote! {
         use crate::configuration::linter::*;
         use crate::{RuleConfiguration, Rules};
-        use rome_analyze::{AnalyzerRules, MetadataRegistry};
+        use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
         pub(crate) fn push_to_analyzer_rules(
             rules: &Rules,

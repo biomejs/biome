@@ -9,7 +9,7 @@ version = "0.1.0"
 [dependencies]
 countme          = { workspace = true, features = ["enable"] }
 json_comments    = "0.2.1"
-rome_analyze     = { workspace = true }
+biome_analyze     = { workspace = true }
 rome_console     = { workspace = true }
 rome_deserialize = { workspace = true }
 rome_diagnostics = { workspace = true }

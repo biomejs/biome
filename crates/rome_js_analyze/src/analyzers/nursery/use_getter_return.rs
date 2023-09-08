@@ -1,5 +1,5 @@
 use crate::ControlFlowGraph;
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_control_flow::{ExceptionHandlerKind, InstructionKind};
 use rome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};

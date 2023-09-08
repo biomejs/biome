@@ -58,7 +58,7 @@ impl ActionCategory {
     /// ## Examples
     ///
     /// ```
-    /// use rome_analyze::{ActionCategory, RefactorKind};
+    /// use biome_analyze::{ActionCategory, RefactorKind};
     ///
     /// assert!(ActionCategory::QuickFix.matches("quickfix"));
     /// assert!(!ActionCategory::QuickFix.matches("refactor"));

@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use rome_analyze::declare_group;
+use biome_analyze::declare_group;
 
 pub(crate) mod no_dangerously_set_inner_html;
 pub(crate) mod no_dangerously_set_inner_html_with_children;

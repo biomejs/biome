@@ -15,9 +15,9 @@ use crate::{
     settings::{SettingsHandle, WorkspaceSettings},
     Rules, Workspace, WorkspaceError,
 };
+use biome_analyze::{AnalysisFilter, RuleFilter};
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
-use rome_analyze::{AnalysisFilter, RuleFilter};
 use rome_diagnostics::{serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::Printed;
 use rome_fs::RomePath;

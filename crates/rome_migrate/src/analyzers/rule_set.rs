@@ -1,6 +1,6 @@
 use crate::declare_migration;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{Ast, Rule};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{Ast, Rule};
 use rome_json_syntax::JsonObjectValue;
 
 declare_migration! {

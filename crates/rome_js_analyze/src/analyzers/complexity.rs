@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use rome_analyze::declare_group;
+use biome_analyze::declare_group;
 
 pub(crate) mod no_extra_boolean_cast;
 pub(crate) mod no_for_each;

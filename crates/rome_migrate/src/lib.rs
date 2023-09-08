@@ -3,8 +3,8 @@ mod macros;
 mod registry;
 
 use crate::registry::visit_migration_registry;
-pub use rome_analyze::ControlFlow;
-use rome_analyze::{
+pub use biome_analyze::ControlFlow;
+use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, InspectMatcher,
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
@@ -96,7 +96,7 @@ where
 #[cfg(test)]
 mod test {
     use crate::migrate_configuration;
-    use rome_analyze::{ControlFlow, Never};
+    use biome_analyze::{ControlFlow, Never};
     use rome_json_parser::{parse_json, JsonParserOptions};
     use std::path::Path;
 

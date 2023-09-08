@@ -1,10 +1,10 @@
 use crate::suppression_action::apply_suppression_comment;
-use biome_aria::{AriaProperties, AriaRoles};
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     SuppressionKind,
 };
+use biome_aria::{AriaProperties, AriaRoles};
 use rome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use rome_js_syntax::suppression::SuppressionDiagnostic;
 use rome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
@@ -213,8 +213,8 @@ impl Error for RuleError {}
 
 #[cfg(test)]
 mod tests {
-    use rome_analyze::options::RuleOptions;
-    use rome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_analyze::options::RuleOptions;
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
     use rome_console::fmt::{Formatter, Termcolor};
     use rome_console::{markup, Markup};
     use rome_diagnostics::category;

@@ -1,6 +1,6 @@
 use crate::{declare_transformation, JsBatchMutation};
-use rome_analyze::context::RuleContext;
-use rome_analyze::{Ast, Rule};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{Ast, Rule};
 use rome_js_factory::make::{
     ident, js_assignment_expression, js_call_argument_list, js_call_arguments, js_call_expression,
     js_computed_member_assignment, js_decorator_list, js_directive_list, js_expression_statement,

@@ -1,9 +1,9 @@
-use convert_case::{Case, Casing};
-use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
+use convert_case::{Case, Casing};
+use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
 use rome_console::fmt::Termcolor;
 use rome_console::{
     fmt::{Formatter, HTML},
