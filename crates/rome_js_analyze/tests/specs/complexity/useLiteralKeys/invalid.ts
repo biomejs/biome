@@ -14,6 +14,8 @@ export interface I {
 	["m1"](): void
 
 	"m2"(): void
+
+	[""]: number
 }
 
 export type T = {
@@ -32,4 +34,6 @@ export type T = {
 	["m1"](): void
 
 	"m2"(): void
+
+	[""]: number
 }

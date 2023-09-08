@@ -39,6 +39,10 @@ a = {
 a = {
 	[`1+1`]: 2
 }
+a = {
+	[""]: 2
+}
+
 ```
 
 # Diagnostics
@@ -610,6 +614,7 @@ invalid.js:34:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
   > 34 │ 	[`1+1`]: 2
        │ 	 ^^^^^
     35 │ }
+    36 │ a = {
   
   i Suggested fix: Use a literal key instead.
   
@@ -618,7 +623,27 @@ invalid.js:34:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     34    │ - → [`1+1`]:·2
        34 │ + → "1+1":·2
     35 35 │   }
+    36 36 │   a = {
   
+
+```
+
+```
+invalid.js:37:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    35 │ }
+    36 │ a = {
+  > 37 │ 	[""]: 2
+       │ 	 ^^
+    38 │ }
+    39 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    37 │ → [""]:·2
+       │   -  -   
 
 ```
 
