@@ -1,11 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_js_syntax::{
-    AnyTsType, TsDefaultTypeClause, TsIntersectionTypeElementList, TsParenthesizedType,
-    TsReturnTypeAnnotation, TsThisParameter, TsTypeAnnotation, TsTypeArgumentList, TsTypeParameter,
-    TsUnionTypeVariantList,
-};
-use rome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
+use rome_js_syntax::{AnyTsType, JsSyntaxKind};
+use rome_rowan::{AstNode, SyntaxNode};
 
 declare_rule! {
     ///
@@ -93,56 +89,38 @@ impl Rule for NoConfusingVoidType {
 }
 
 fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
-    let parent = node.parent()?;
+    for parent in node.parent()?.ancestors() {
+        match parent.kind() {
+            // (string | void)
+            // string | void
+            // string & void
+            // arg: void
+            // fn<T = void>() {}
+            JsSyntaxKind::TS_PARENTHESIZED_TYPE
+            | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST
+            | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
+            | JsSyntaxKind::TS_TYPE_ANNOTATION
+            | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {
+                continue;
+            }
 
-    // (string | void)
-    if TsParenthesizedType::can_cast(parent.kind()) {
-        return node_in(&parent);
-    }
+            JsSyntaxKind::TS_UNION_TYPE => {
+                return Some(VoidTypeIn::Union);
+            }
 
-    // string | void
-    if TsUnionTypeVariantList::can_cast(parent.kind()) {
-        return node_in(&parent);
-    }
+            // function fn(this: void) {}
+            // fn(): void;
+            // fn<T = void>() {}
+            // Promise<void>
+            JsSyntaxKind::TS_THIS_PARAMETER
+            | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
+            | JsSyntaxKind::TS_TYPE_PARAMETER
+            | JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
+                return None;
+            }
 
-    // string & void
-    if TsIntersectionTypeElementList::can_cast(parent.kind()) {
-        return node_in(&parent);
-    }
-
-    // arg: void
-    if TsTypeAnnotation::can_cast(parent.kind()) {
-        return node_in(&parent);
-    }
-
-    // fn<T = void>() {}
-    // T = void
-    if TsDefaultTypeClause::can_cast(parent.kind()) {
-        return node_in(&parent);
-    }
-
-    // string | void or string & void
-    if let Some(n) = parent.cast_ref::<AnyTsType>() {
-        return match n {
-            AnyTsType::TsUnionType(_) => Some(VoidTypeIn::Union),
-            AnyTsType::TsIntersectionType(_) => Some(VoidTypeIn::Unknown),
-            _ => None,
-        };
-    }
-
-    // function fn(this: void) {}
-    if TsThisParameter::can_cast(parent.kind()) {
-        return None;
-    }
-
-    // fn(): void;
-    if TsReturnTypeAnnotation::can_cast(parent.kind()) {
-        return None;
-    }
-
-    // fn<T = void>() {} or Promise<void>
-    if TsTypeParameter::can_cast(parent.kind()) || TsTypeArgumentList::can_cast(parent.kind()) {
-        return None;
+            _ => return Some(VoidTypeIn::Unknown),
+        }
     }
 
     Some(VoidTypeIn::Unknown)

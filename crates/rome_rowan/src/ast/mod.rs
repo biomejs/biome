@@ -318,17 +318,11 @@ pub trait SyntaxNodeCast<L: Language> {
     ///
     /// [None] if the current node is of a different kind. [Some] otherwise.
     fn cast<T: AstNode<Language = L>>(self) -> Option<T>;
-
-    fn cast_ref<T: AstNode<Language = L>>(&self) -> Option<T>;
 }
 
 impl<L: Language> SyntaxNodeCast<L> for SyntaxNode<L> {
     fn cast<T: AstNode<Language = L>>(self) -> Option<T> {
         T::cast(self)
-    }
-
-    fn cast_ref<T: AstNode<Language = L>>(&self) -> Option<T> {
-        T::cast_ref(self)
     }
 }
 
