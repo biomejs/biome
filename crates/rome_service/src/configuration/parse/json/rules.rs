@@ -683,6 +683,7 @@ impl VisitNode<JsonLanguage> for Complexity {
             &[
                 "recommended",
                 "all",
+                "noConfusingVoidType",
                 "noExtraBooleanCast",
                 "noForEach",
                 "noMultipleSpacesInRegularExpressionLiterals",
@@ -699,7 +700,6 @@ impl VisitNode<JsonLanguage> for Complexity {
                 "useOptionalChain",
                 "useSimpleNumberKeys",
                 "useSimplifiedLogicExpression",
-                "noConfusingVoidType",
             ],
             diagnostics,
         )
@@ -719,6 +719,29 @@ impl VisitNode<JsonLanguage> for Complexity {
             "all" => {
                 self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
             }
+            "noConfusingVoidType" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_confusing_void_type = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noConfusingVoidType",
+                        diagnostics,
+                    )?;
+                    self.no_confusing_void_type = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
             "noExtraBooleanCast" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
@@ -1080,29 +1103,6 @@ impl VisitNode<JsonLanguage> for Complexity {
                         diagnostics,
                     )?;
                     self.use_simplified_logic_expression = Some(rule_configuration);
-                }
-                _ => {
-                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-                        "object or string",
-                        value.range(),
-                    ));
-                }
-            },
-            "noConfusingVoidType" => match value {
-                AnyJsonValue::JsonStringValue(_) => {
-                    let mut configuration = RuleConfiguration::default();
-                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.no_confusing_void_type = Some(configuration);
-                }
-                AnyJsonValue::JsonObjectValue(_) => {
-                    let mut rule_configuration = RuleConfiguration::default();
-                    rule_configuration.map_rule_configuration(
-                        &value,
-                        name_text,
-                        "noConfusingVoidType",
-                        diagnostics,
-                    )?;
-                    self.no_confusing_void_type = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

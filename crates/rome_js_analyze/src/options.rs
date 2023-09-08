@@ -133,7 +133,9 @@ impl PossibleOptions {
                 }
                 "allowInGenericTypeArguments" | "allowAsThisParameter" => {
                     if !matches!(self, PossibleOptions::NoConfusingVoidType(_)) {
-                        *self = PossibleOptions::NoConfusingVoidType(NoConfusingVoidTypeOptions::default());
+                        *self = PossibleOptions::NoConfusingVoidType(
+                            NoConfusingVoidTypeOptions::default(),
+                        );
                     }
                     let PossibleOptions::NoConfusingVoidType(options) = self else {
                         break;

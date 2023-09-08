@@ -17,7 +17,7 @@ use schemars::JsonSchema;
 
 declare_rule! {
     ///
-    /// Disallow void type outside of generic or return types. like [no-invalid-void-type](https://typescript-eslint.io/rules/no-invalid-void-type/)
+    /// Disallow void type outside of generic or return types.
     ///
     /// void in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
     ///
@@ -141,7 +141,7 @@ impl Rule for NoConfusingVoidType {
         let node = ctx.query();
 
         if let AnyTsType::TsVoidType(node) = node {
-            let result = node_in(node.syntax(), &ctx.options());
+            let result = node_in(node.syntax(), ctx.options());
             return result;
         }
 
@@ -251,7 +251,7 @@ impl VisitNode<JsonLanguage> for NoConfusingVoidTypeOptions {
         node: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        has_only_known_keys(node, &Self::KNOWN_KEYS, diagnostics)
+        has_only_known_keys(node, Self::KNOWN_KEYS, diagnostics)
     }
 
     fn visit_map(
