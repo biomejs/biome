@@ -12,7 +12,6 @@ A-Core:
   - crates/biome_text_edit/**
   - crates/biome_text_size/**
   - crates/biome_suppression/**
-  - crates/biome_suppression/**
   - crates/biome_markup/**
 
 A-Project:
