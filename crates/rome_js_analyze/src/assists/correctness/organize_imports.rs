@@ -6,7 +6,7 @@ use std::{
     mem::take,
 };
 
-use rome_analyze::{
+use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, Rule, SourceActionKind,
 };
 use rome_console::markup;

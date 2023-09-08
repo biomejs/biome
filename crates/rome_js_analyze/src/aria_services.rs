@@ -1,9 +1,9 @@
-use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
-use biome_aria::{AriaProperties, AriaRoles};
-use rome_analyze::{
+use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, Queryable,
     RuleKey, ServiceBag, SyntaxVisitor,
 };
+use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
+use biome_aria::{AriaProperties, AriaRoles};
 use rome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use rome_rowan::AstNode;
 use std::collections::HashMap;

@@ -1,5 +1,5 @@
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_js_syntax::{JsForStatement, JsSequenceExpression};
 use rome_rowan::AstNode;
 

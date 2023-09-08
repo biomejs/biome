@@ -10,7 +10,7 @@ version              = "0.2.0"
 
 [dependencies]
 lazy_static      = { workspace = true }
-rome_analyze     = { workspace = true }
+biome_analyze     = { workspace = true }
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_js_factory  = { workspace = true }
@@ -21,7 +21,7 @@ rome_rowan       = { workspace = true }
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
 insta             = { workspace = true }
-rome_analyze      = { workspace = true }
+biome_analyze      = { workspace = true }
 rome_js_formatter = { workspace = true }
 rome_js_parser    = { workspace = true }
 tests_macros      = { workspace = true }

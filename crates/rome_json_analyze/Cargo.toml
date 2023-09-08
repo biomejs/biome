@@ -10,7 +10,7 @@ version              = "0.2.0"
 
 [dependencies]
 lazy_static      = { workspace = true }
-rome_analyze     = { workspace = true }
+biome_analyze     = { workspace = true }
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_json_syntax = { workspace = true }

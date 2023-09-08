@@ -1,8 +1,8 @@
 use std::num::IntErrorKind;
 use std::ops::RangeInclusive;
 
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 
 use rome_js_syntax::numbers::split_into_radix_and_number;

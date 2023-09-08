@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use rome_rowan::{declare_node_union, SyntaxResult, TextRange};

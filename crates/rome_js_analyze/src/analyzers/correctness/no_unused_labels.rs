@@ -1,5 +1,5 @@
-use rome_analyze::context::RuleContext;
-use rome_analyze::{
+use biome_analyze::context::RuleContext;
+use biome_analyze::{
     declare_rule, ActionCategory, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
     ServiceBag, Visitor, VisitorContext,
 };

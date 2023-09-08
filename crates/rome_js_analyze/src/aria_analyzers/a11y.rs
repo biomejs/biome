@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use rome_analyze::declare_group;
+use biome_analyze::declare_group;
 
 pub(crate) mod no_noninteractive_element_to_interactive_role;
 pub(crate) mod use_aria_props_for_role;

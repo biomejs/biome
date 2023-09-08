@@ -2,4 +2,4 @@
 
 pub(crate) mod a11y;
 pub(crate) mod nursery;
-::rome_analyze::declare_category! { pub (crate) AriaAnalyzers { kind : Lint , groups : [self :: a11y :: A11y , self :: nursery :: Nursery ,] } }
+::biome_analyze::declare_category! { pub (crate) AriaAnalyzers { kind : Lint , groups : [self :: a11y :: A11y , self :: nursery :: Nursery ,] } }
