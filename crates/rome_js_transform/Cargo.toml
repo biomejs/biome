@@ -9,8 +9,8 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_analyze    = { workspace = true }
 lazy_static      = { workspace = true }
-biome_analyze     = { workspace = true }
 rome_console     = { workspace = true }
 rome_diagnostics = { workspace = true }
 rome_js_factory  = { workspace = true }
@@ -19,9 +19,9 @@ rome_rowan       = { workspace = true }
 
 
 [dev-dependencies]
+biome_analyze     = { workspace = true }
 biome_test_utils  = { workspace = true }
 insta             = { workspace = true }
-biome_analyze      = { workspace = true }
 rome_js_formatter = { workspace = true }
 rome_js_parser    = { workspace = true }
 tests_macros      = { workspace = true }

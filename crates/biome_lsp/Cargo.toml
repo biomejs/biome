@@ -10,9 +10,9 @@ version              = "0.0.0"
 
 [dependencies]
 anyhow            = "1.0.52"
+biome_analyze     = { workspace = true }
 futures           = "0.3"
 indexmap          = { workspace = true }
-biome_analyze      = { workspace = true }
 rome_console      = { workspace = true }
 rome_diagnostics  = { workspace = true }
 rome_formatter    = { workspace = true }
