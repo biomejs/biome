@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
+use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
-use rome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use rome_console::markup;
 use rome_diagnostics::Applicability;
 use rome_js_syntax::{

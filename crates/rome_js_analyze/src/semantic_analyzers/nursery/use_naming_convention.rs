@@ -185,12 +185,14 @@ declare_rule! {
     ///
     /// ### Imported and exported module aliases
     ///
-    /// Imported and exported module aliases are in [`camelCase`].
+    /// Imported and exported module aliases are in [`camelCase`] or [`PascalCase`].
     ///
     /// ```js
     /// import * as myLib from "my-lib";
+    /// import * as Framework from "framework";
     ///
     /// export * as myLib from "my-lib";
+    /// export * as Framework from "framework";
     /// ```
     ///
     /// `import` and `export` aliases are in [`camelCase`], [`PascalCase`], or [`CONSTANT_CASE`]:
@@ -205,7 +207,7 @@ declare_rule! {
     /// Examples of an incorrect name:
     ///
     /// ```ts,expect_diagnostic
-    /// import * as MyLib from "my-lib";
+    /// import * as MY_LIB from "my-lib";
     /// ```
     ///
     /// ### TypeScript type parameter names
@@ -596,6 +598,7 @@ enum Named {
     Enum,
     EnumMember,
     ExportAlias,
+    ExportNamespace,
     ExportSource,
     Function,
     FunctionParameter,
@@ -652,11 +655,17 @@ impl Named {
                 Named::from_class_member(&member_name.parent::<AnyJsClassMember>()?)
             }
             AnyIdentifierBindingLike::JsLiteralExportName(export_name) => {
-                match export_name.syntax().parent()?.kind() {
+                let parent = export_name.syntax().parent()?;
+                match parent.kind() {
                     JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => Some(Named::ImportSource),
                     JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => Some(Named::ExportSource),
-                    JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER | JsSyntaxKind::JS_EXPORT_AS_CLAUSE => {
-                        Some(Named::ExportAlias)
+                    JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER => Some(Named::ExportAlias),
+                    JsSyntaxKind::JS_EXPORT_AS_CLAUSE => {
+                        if parent.parent()?.kind() == JsSyntaxKind::JS_EXPORT_FROM_CLAUSE {
+                            Some(Named::ExportNamespace)
+                        } else {
+                            Some(Named::ExportAlias)
+                        }
                     }
                     _ => None,
                 }
@@ -879,7 +888,6 @@ impl Named {
             | Named::ClassStaticMethod
             | Named::ClassStaticSetter
             | Named::FunctionParameter
-            | Named::ImportNamespace
             | Named::IndexParameter
             | Named::LocalConst
             | Named::LocalLet
@@ -908,9 +916,10 @@ impl Named {
                 SmallVec::from_slice(&[Case::Camel, Case::Pascal, Case::Constant])
             }
             Named::ExportSource | Named::ImportSource => SmallVec::new(),
-            Named::Function | Named::Namespace => {
-                SmallVec::from_slice(&[Case::Camel, Case::Pascal])
-            }
+            Named::ExportNamespace
+            | Named::Function
+            | Named::ImportNamespace
+            | Named::Namespace => SmallVec::from_slice(&[Case::Camel, Case::Pascal]),
         }
     }
 }
@@ -931,6 +940,7 @@ impl std::fmt::Display for Named {
             Named::Enum => "enum",
             Named::EnumMember => "enum member",
             Named::ExportAlias => "export alias",
+            Named::ExportNamespace => "export namespace",
             Named::ExportSource => "export source",
             Named::Function => "function",
             Named::FunctionParameter => "function parameter",

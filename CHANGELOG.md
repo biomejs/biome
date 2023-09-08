@@ -10,6 +10,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ## Unreleased
 
+### Analyzer
 ### CLI
 ### Configuration
 ### Editors
@@ -18,6 +19,40 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Linter
 ### Parser
 ### VSCode
+
+## 1.1.2 (2023-09-07)
+
+### Editors
+
+#### Bug fixes
+
+- Fixed a case where an empty JSON file would cause the LSP server to crash.
+
+### Linter
+
+#### Enhancements
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts import namespaces in _PascalCase_ and rejects export namespaces in _CONSTANT\_CASE_.
+
+  The following code is now valid:
+
+  ```js
+  import * as React from "react";
+  ```
+
+  And the following code is now invalid:
+
+  ```js
+  export * as MY_NAMESPACE from "./lib.js";
+  ```
+
+## 1.1.1 (2023-09-07)
+
+### Analyzer
+
+#### Bug fixes
+
+- The diagnostic for `// rome-ignore` suppression comment should not be a warning. A warning could block the CI, marking a gradual migration difficult. The code action that changes `// rome-ignore` to `// biome-ignore` is disabled as consequence.
 
 ## 1.1.0 (2023-09-06)
 

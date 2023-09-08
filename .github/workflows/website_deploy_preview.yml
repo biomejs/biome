@@ -10,7 +10,8 @@ jobs:
   preview-deploy:
     runs-on: ubuntu-latest
     environment: Website deployment
-    if: ${{ github.repository_owner == 'biomejs' }}
+    # Check if the event is not triggered by a fork
+    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v3
 

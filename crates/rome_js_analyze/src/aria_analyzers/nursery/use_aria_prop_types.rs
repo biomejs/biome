@@ -1,7 +1,7 @@
 use crate::aria_services::Aria;
+use biome_aria::AriaPropertyTypeEnum;
 use rome_analyze::context::RuleContext;
 use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
-use rome_aria::AriaPropertyTypeEnum;
 use rome_console::markup;
 use rome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
 use rome_rowan::AstNode;

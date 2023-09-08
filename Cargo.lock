@@ -130,6 +130,59 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_aria"
+version = "0.0.0"
+dependencies = [
+ "biome_aria_metadata",
+]
+
+[[package]]
+name = "biome_aria_metadata"
+version = "0.0.0"
+dependencies = [
+ "case",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "biome_css_factory"
+version = "0.2.0"
+dependencies = [
+ "biome_css_syntax",
+ "rome_rowan",
+]
+
+[[package]]
+name = "biome_css_parser"
+version = "0.1.0"
+dependencies = [
+ "biome_css_factory",
+ "biome_css_syntax",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "rome_console",
+ "rome_diagnostics",
+ "rome_js_unicode_table",
+ "rome_parser",
+ "rome_rowan",
+ "tests_macros",
+ "tracing",
+]
+
+[[package]]
+name = "biome_css_syntax"
+version = "0.2.0"
+dependencies = [
+ "rome_rowan",
+]
+
+[[package]]
+name = "biome_flags"
+version = "0.0.0"
+
+[[package]]
 name = "biome_lsp"
 version = "0.0.0"
 dependencies = [
@@ -1825,26 +1878,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_aria"
-version = "0.0.0"
-dependencies = [
- "rome_aria_metadata",
-]
-
-[[package]]
-name = "rome_aria_metadata"
-version = "0.0.0"
-dependencies = [
- "case",
- "proc-macro2",
- "quote",
-]
-
-[[package]]
 name = "rome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_flags",
  "biome_lsp",
  "bpaf",
  "crossbeam",
@@ -1859,7 +1897,6 @@ dependencies = [
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
- "rome_flags",
  "rome_formatter",
  "rome_fs",
  "rome_js_formatter",
@@ -1897,39 +1934,6 @@ dependencies = [
 
 [[package]]
 name = "rome_control_flow"
-version = "0.2.0"
-dependencies = [
- "rome_rowan",
-]
-
-[[package]]
-name = "rome_css_factory"
-version = "0.2.0"
-dependencies = [
- "rome_css_syntax",
- "rome_rowan",
-]
-
-[[package]]
-name = "rome_css_parser"
-version = "0.1.0"
-dependencies = [
- "insta",
- "quickcheck",
- "quickcheck_macros",
- "rome_console",
- "rome_css_factory",
- "rome_css_syntax",
- "rome_diagnostics",
- "rome_js_unicode_table",
- "rome_parser",
- "rome_rowan",
- "tests_macros",
- "tracing",
-]
-
-[[package]]
-name = "rome_css_syntax"
 version = "0.2.0"
 dependencies = [
  "rome_rowan",
@@ -1992,10 +1996,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_flags"
-version = "0.0.0"
-
-[[package]]
 name = "rome_formatter"
 version = "0.1.0"
 dependencies = [
@@ -2053,6 +2053,7 @@ dependencies = [
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_aria",
  "biome_test_utils",
  "bpaf",
  "countme",
@@ -2061,7 +2062,6 @@ dependencies = [
  "natord",
  "roaring",
  "rome_analyze",
- "rome_aria",
  "rome_console",
  "rome_control_flow",
  "rome_deserialize",
@@ -2314,6 +2314,7 @@ dependencies = [
 name = "rome_service"
 version = "0.0.0"
 dependencies = [
+ "biome_flags",
  "bpaf",
  "dashmap",
  "indexmap",
@@ -2322,7 +2323,6 @@ dependencies = [
  "rome_console",
  "rome_deserialize",
  "rome_diagnostics",
- "rome_flags",
  "rome_formatter",
  "rome_fs",
  "rome_js_analyze",
@@ -3556,6 +3556,7 @@ name = "xtask_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_aria",
  "case",
  "convert_case",
  "filetime",
@@ -3566,7 +3567,6 @@ dependencies = [
  "pulldown-cmark",
  "quote",
  "rome_analyze",
- "rome_aria",
  "rome_cli",
  "rome_diagnostics",
  "rome_js_analyze",

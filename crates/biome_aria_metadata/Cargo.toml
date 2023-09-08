@@ -1,0 +1,17 @@
+[package]
+authors.workspace    = true
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_aria_metadata"
+repository.workspace = true
+version              = "0.0.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+
+[build-dependencies]
+case        = "1.0.0"
+proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
+quote       = { workspace = true }

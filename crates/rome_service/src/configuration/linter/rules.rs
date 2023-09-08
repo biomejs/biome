@@ -268,7 +268,7 @@ impl Rules {
             enabled_rules.extend(Nursery::all_rules_as_filters());
         } else if self.is_not_all() {
             disabled_rules.extend(Nursery::all_rules_as_filters());
-        } else if self.is_recommended() && rome_flags::is_unstable() {
+        } else if self.is_recommended() && biome_flags::is_unstable() {
             enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
