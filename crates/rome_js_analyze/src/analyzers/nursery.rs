@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub(crate) mod no_confusing_arrow;
+pub(crate) mod no_confusing_void_type;
 pub(crate) mod no_control_characters_in_regex;
 pub(crate) mod no_excessive_complexity;
 pub(crate) mod no_fallthrough_switch_clause;
@@ -23,6 +24,7 @@ declare_group! {
         name : "nursery" ,
         rules : [
             self :: no_confusing_arrow :: NoConfusingArrow ,
+            self :: no_confusing_void_type :: NoConfusingVoidType ,
             self :: no_control_characters_in_regex :: NoControlCharactersInRegex ,
             self :: no_excessive_complexity :: NoExcessiveComplexity ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,

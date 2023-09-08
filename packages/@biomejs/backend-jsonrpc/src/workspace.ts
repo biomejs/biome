@@ -584,6 +584,10 @@ export interface Nursery {
 	 */
 	noConfusingArrow?: RuleConfiguration;
 	/**
+	 * Disallow void type outside of generic or return types.
+	 */
+	noConfusingVoidType?: RuleConfiguration;
+	/**
 	 * Disallow constant expressions in conditions
 	 */
 	noConstantCondition?: RuleConfiguration;
@@ -1214,6 +1218,7 @@ export type Category =
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noAriaUnsupportedElements"
 	| "lint/nursery/noBannedTypes"

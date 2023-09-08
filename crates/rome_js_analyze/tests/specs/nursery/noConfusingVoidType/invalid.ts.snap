@@ -1,0 +1,146 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+assertion_line: 80
+expression: invalid.ts
+---
+# Input
+```js
+type PossibleValues = string | number | void;
+type MorePossibleValues = string | ((number & any) | (string | void));
+
+function logSomething(thing: void) {}
+function printArg<T = void>(arg: T) {}
+logAndReturn<void>(undefined);
+
+let voidPromise: Promise<void> = new Promise<void>(() => { });
+let voidMap: Map<string, void> = new Map<string, void>();
+
+interface Interface {
+	prop: void;
+}
+
+class MyClass {
+	private readonly propName: void;
+}
+
+let foo: void;
+let bar = 1 as unknown as void;
+let baz = 1 as unknown as void | string;
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:41 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is not valid as a constituent in a union type
+  
+  > 1 │ type PossibleValues = string | number | void;
+      │                                         ^^^^
+    2 │ type MorePossibleValues = string | ((number & any) | (string | void));
+    3 │ 
+  
+
+```
+
+```
+invalid.ts:2:64 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is not valid as a constituent in a union type
+  
+    1 │ type PossibleValues = string | number | void;
+  > 2 │ type MorePossibleValues = string | ((number & any) | (string | void));
+      │                                                                ^^^^
+    3 │ 
+    4 │ function logSomething(thing: void) {}
+  
+
+```
+
+```
+invalid.ts:4:30 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    2 │ type MorePossibleValues = string | ((number & any) | (string | void));
+    3 │ 
+  > 4 │ function logSomething(thing: void) {}
+      │                              ^^^^
+    5 │ function printArg<T = void>(arg: T) {}
+    6 │ logAndReturn<void>(undefined);
+  
+
+```
+
+```
+invalid.ts:12:8 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    11 │ interface Interface {
+  > 12 │ 	prop: void;
+       │ 	      ^^^^
+    13 │ }
+    14 │ 
+  
+
+```
+
+```
+invalid.ts:16:29 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    15 │ class MyClass {
+  > 16 │ 	private readonly propName: void;
+       │ 	                           ^^^^
+    17 │ }
+    18 │ 
+  
+
+```
+
+```
+invalid.ts:19:10 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    17 │ }
+    18 │ 
+  > 19 │ let foo: void;
+       │          ^^^^
+    20 │ let bar = 1 as unknown as void;
+    21 │ let baz = 1 as unknown as void | string;
+  
+
+```
+
+```
+invalid.ts:20:27 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    19 │ let foo: void;
+  > 20 │ let bar = 1 as unknown as void;
+       │                           ^^^^
+    21 │ let baz = 1 as unknown as void | string;
+    22 │ 
+  
+
+```
+
+```
+invalid.ts:21:27 lint/nursery/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is not valid as a constituent in a union type
+  
+    19 │ let foo: void;
+    20 │ let bar = 1 as unknown as void;
+  > 21 │ let baz = 1 as unknown as void | string;
+       │                           ^^^^
+    22 │ 
+  
+
+```
+
+

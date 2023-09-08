@@ -1768,6 +1768,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noAriaUnsupportedElements",
                 "noBannedTypes",
                 "noConfusingArrow",
+                "noConfusingVoidType",
                 "noConstantCondition",
                 "noControlCharactersInRegex",
                 "noDuplicateJsonKeys",
@@ -1898,6 +1899,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_confusing_arrow = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noConfusingVoidType" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_confusing_void_type = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noConfusingVoidType",
+                        diagnostics,
+                    )?;
+                    self.no_confusing_void_type = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
