@@ -21,7 +21,7 @@ valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━�
   > 1 │ class A { constructor(a, b = 0){ } }
       │           ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·{·constructor(a,·b·=·0){·}·}
       │           ------------------------- 

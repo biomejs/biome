@@ -1,6 +1,5 @@
 ---
 source: crates/rome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsonc
 ---
 # Input
@@ -17,7 +16,7 @@ invalid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A { constructor(){} }
       │           ^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·{·constructor(){}·}
       │           ---------------- 
@@ -38,7 +37,7 @@ invalid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A { 'constructor'(){} }
       │           ^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·{·'constructor'(){}·}
       │           ------------------ 
@@ -59,7 +58,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A extends B { constructor() { super(); } }
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·extends·B·{·constructor()·{·super();·}·}
       │                     --------------------------- 
@@ -80,7 +79,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A extends B { constructor(foo){ super(foo); } }
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·extends·B·{·constructor(foo){·super(foo);·}·}
       │                     -------------------------------- 
@@ -101,7 +100,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A extends B { constructor(foo, bar){ super(foo, bar); } }
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·extends·B·{·constructor(foo,·bar){·super(foo,·bar);·}·}
       │                     ------------------------------------------ 
@@ -122,7 +121,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A extends B { constructor(...args){ super(...args); } }
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·extends·B·{·constructor(...args){·super(...args);·}·}
       │                     ---------------------------------------- 
@@ -143,7 +142,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
   > 1 │ class A extends B { constructor(a, b, ...c) { super(a, b, ...c); } }
       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Remove the unnecessary constructor.
+  i Suggested fix: Remove the unnecessary constructor.
   
     1 │ class·A·extends·B·{·constructor(a,·b,·...c)·{·super(a,·b,·...c);·}·}
       │                     ----------------------------------------------- 

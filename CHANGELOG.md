@@ -23,6 +23,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   The rule now relies on control flow analysis and thus reports more complex case fallthrough.
 
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) no longer emits safe code fixes.
+
+  All code fixes are now emitted as unsafe code fixes.
+  Removing a constructor can change the behavior of a program.
+
 #### Bug fixes
 
 - Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining.

@@ -173,23 +173,9 @@ impl Rule for NoUselessConstructor {
         let constructor = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(constructor.clone());
-        // Safely remove the constructor whether there is no comments.
-        let has_typed_parameters = constructor
-            .parameters()
-            .ok()?
-            .parameters()
-            .iter()
-            .find_map(|x| x.ok()?.type_annotation())
-            .is_some();
-        let applicability =
-            if has_typed_parameters || constructor.syntax().has_comments_descendants() {
-                Applicability::MaybeIncorrect
-            } else {
-                Applicability::Always
-            };
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability,
+            applicability: Applicability::MaybeIncorrect,
             message: markup! { "Remove the unnecessary constructor." }.to_owned(),
             mutation,
         })
