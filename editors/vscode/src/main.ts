@@ -28,7 +28,7 @@ import resolveImpl = require("resolve/async");
 import type * as resolve from "resolve";
 
 const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
-	resolveImpl,
+	resolveImpl
 );
 
 let client: LanguageClient;
@@ -47,7 +47,8 @@ export async function activate(context: ExtensionContext) {
 	// locate it. If a config file cannot be found, we do not go any further.
 	if (requiresConfiguration) {
 		outputChannel.appendLine("Configuration file required, looking for one.");
-		const configFiles = await workspace.findFiles("**/biome.json");
+		// TODO: Stop looking for rome.json when we reach biome v2.0
+		const configFiles = await workspace.findFiles("**/{biome,rome}.json");
 		if (configFiles.length === 0) {
 			outputChannel.appendLine(
 				"No config file found, disabling Biome extension"
@@ -65,7 +66,7 @@ export async function activate(context: ExtensionContext) {
 		await window.showErrorMessage(
 			"The Biome extensions doesn't ship with prebuilt binaries for your platform yet. " +
 				"You can still use it by cloning the biomejs/biome repo from GitHub to build the LSP " +
-				"yourself and use it with this extension with the biome.lspBin setting",
+				"yourself and use it with this extension with the biome.lspBin setting"
 		);
 		return;
 	}
@@ -75,7 +76,7 @@ export async function activate(context: ExtensionContext) {
 	const serverOptions: ServerOptions = createMessageTransports.bind(
 		undefined,
 		outputChannel,
-		command,
+		command
 	);
 
 	const documentSelector: DocumentFilter[] = [
@@ -97,7 +98,7 @@ export async function activate(context: ExtensionContext) {
 		"biome_lsp",
 		"Biome",
 		serverOptions,
-		clientOptions,
+		clientOptions
 	);
 
 	const session = new Session(context, client);
@@ -127,7 +128,7 @@ export async function activate(context: ExtensionContext) {
 	context.subscriptions.push(
 		client.onDidChangeState((evt) => {
 			statusBar.setServerState(client, evt.newState);
-		}),
+		})
 	);
 
 	const handleActiveTextEditorChanged = (textEditor?: TextEditor) => {
@@ -141,7 +142,7 @@ export async function activate(context: ExtensionContext) {
 	};
 
 	context.subscriptions.push(
-		window.onDidChangeActiveTextEditor(handleActiveTextEditorChanged),
+		window.onDidChangeActiveTextEditor(handleActiveTextEditorChanged)
 	);
 
 	handleActiveTextEditorChanged(window.activeTextEditor);
@@ -194,7 +195,7 @@ const PLATFORMS: PlatformTriplets = {
 
 async function getServerPath(
 	context: ExtensionContext,
-	outputChannel: OutputChannel,
+	outputChannel: OutputChannel
 ): Promise<string | undefined> {
 	// Only allow the bundled Biome binary in untrusted workspaces
 	if (!workspace.isTrusted) {
@@ -203,7 +204,7 @@ async function getServerPath(
 
 	if (process.env.DEBUG_SERVER_PATH) {
 		outputChannel.appendLine(
-			`Biome DEBUG_SERVER_PATH detected: ${process.env.DEBUG_SERVER_PATH}`,
+			`Biome DEBUG_SERVER_PATH detected: ${process.env.DEBUG_SERVER_PATH}`
 		);
 		return process.env.DEBUG_SERVER_PATH;
 	}
@@ -238,7 +239,7 @@ async function getWorkspaceRelativePath(path: string) {
 
 // Tries to resolve a path to `@biomejs/cli-*` binary package from the root of the workspace
 async function getWorkspaceDependency(
-	outputChannel: OutputChannel,
+	outputChannel: OutputChannel
 ): Promise<string | undefined> {
 	const packageName = PLATFORMS[process.platform]?.[process.arch]?.package;
 
@@ -286,12 +287,12 @@ async function getWorkspaceDependency(
 // Returns the path of the binary distribution of Biome included in the bundle of the extension
 async function getBundledBinary(
 	context: ExtensionContext,
-	outputChannel: OutputChannel,
+	outputChannel: OutputChannel
 ) {
 	const triplet = PLATFORMS[process.platform]?.[process.arch]?.triplet;
 	if (!triplet) {
 		outputChannel.appendLine(
-			`Unsupported platform ${process.platform} ${process.arch}`,
+			`Unsupported platform ${process.platform} ${process.arch}`
 		);
 		return undefined;
 	}
@@ -303,7 +304,7 @@ async function getBundledBinary(
 	const bundleExists = await fileExists(bundlePath);
 	if (!bundleExists) {
 		outputChannel.appendLine(
-			"Extension bundle does not include the prebuilt binary",
+			"Extension bundle does not include the prebuilt binary"
 		);
 		return undefined;
 	}
@@ -332,7 +333,7 @@ function collectStream(
 	outputChannel: OutputChannel,
 	process: ChildProcess,
 	key: "stdout" | "stderr",
-	buffer: MutableBuffer,
+	buffer: MutableBuffer
 ) {
 	return new Promise<void>((resolve, reject) => {
 		const stream = process[key];
@@ -371,7 +372,7 @@ function withTimeout(promise: Promise<void>, duration: number) {
 
 async function getSocket(
 	outputChannel: OutputChannel,
-	command: string,
+	command: string
 ): Promise<string> {
 	const process = spawn(command, ["__print_socket"], {
 		stdio: [null, "pipe", "pipe"],
@@ -418,15 +419,15 @@ async function getSocket(
 function wrapConnectionError(err: Error, path: string): Error {
 	return Object.assign(
 		new Error(
-			`Could not connect to the Biome server at "${path}": ${err.message}`,
+			`Could not connect to the Biome server at "${path}": ${err.message}`
 		),
-		{ name: err.name, stack: err.stack },
+		{ name: err.name, stack: err.stack }
 	);
 }
 
 async function createMessageTransports(
 	outputChannel: OutputChannel,
-	command: string,
+	command: string
 ): Promise<StreamInfo> {
 	const path = await getSocket(outputChannel, command);
 
