@@ -28,11 +28,15 @@ pub fn is_id_continue(c: char) -> bool {
 /// assert!(is_js_ident("$id$"));
 /// assert!(is_js_ident("_id_"));
 ///
+/// assert!(!is_js_ident(""));
 /// assert!(!is_js_ident("@"));
 /// assert!(!is_js_ident("custom-id"));
 /// assert!(!is_js_ident("0"));
 /// ```
 pub fn is_js_ident(s: &str) -> bool {
+    if s.is_empty() {
+        return false;
+    }
     s.chars().enumerate().all(|(index, c)| {
         if index == 0 {
             is_id_start(c)
