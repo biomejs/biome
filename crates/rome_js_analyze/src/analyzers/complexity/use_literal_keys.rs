@@ -117,8 +117,9 @@ impl Rule for UseLiteralKeys {
             AnyJsMember::AnyJsComputedMember(node) => {
                 let object = node.object().ok()?;
                 let member = js_name(ident(identifier));
+                let token = node.optional_chain_token().unwrap_or_else(|| token(T![.]));
                 let static_expression =
-                    js_static_member_expression(object, token(T![.]), AnyJsName::JsName(member));
+                    js_static_member_expression(object, token, AnyJsName::JsName(member));
                 mutation.replace_element(
                     node.clone().into_syntax().into(),
                     static_expression.into_syntax().into(),

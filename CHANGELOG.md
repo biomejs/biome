@@ -23,6 +23,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   The rule now relies on control flow analysis and thus reports more complex case fallthrough.
 
+#### Bug fixes
+
+- Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining.
+
 ### Parser
 ### VSCode
 
