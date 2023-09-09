@@ -39,6 +39,27 @@ export async function activate(context: ExtensionContext) {
 	const outputChannel = window.createOutputChannel("Biome");
 	const traceOutputChannel = window.createOutputChannel("Biome Trace");
 
+	const requiresConfiguration = workspace
+		.getConfiguration("biome")
+		.get<boolean>("requireConfiguration");
+
+	// If the extension requires a configuration file to be present, we attempt to
+	// locate it. If a config file cannot be found, we do not go any further.
+	if (requiresConfiguration) {
+		outputChannel.appendLine("Configuration file required, looking for one.");
+		// TODO: Stop looking for rome.json when we reach biome v2.0
+		const configFiles = await workspace.findFiles("**/{biome,rome}.json");
+		if (configFiles.length === 0) {
+			outputChannel.appendLine(
+				"No config file found, disabling Biome extension",
+			);
+			return;
+		}
+		outputChannel.appendLine(
+			`Config file found at ${configFiles[0].fsPath}, enabling Biome extension`,
+		);
+	}
+
 	const command = await getServerPath(context, outputChannel);
 
 	if (!command) {
