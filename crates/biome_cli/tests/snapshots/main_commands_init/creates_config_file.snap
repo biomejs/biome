@@ -31,7 +31,7 @@ Files created ━━━━━━━━━━━━━━━━━━━━━━
 Next Steps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   1. Setup an editor extension
-     Get live errors as you type and format when you save. Learn more: https://biomejs.dev/editors
+     Get live errors as you type and format when you save. Learn more: https://biomejs.dev/guides/getting-started#editor-setup
 
   2. Try a command
      biome ci checks for lint errors and verifies formatting. Run biome --help for a full list of commands and options.

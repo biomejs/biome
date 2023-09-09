@@ -17,7 +17,7 @@ pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
 "<Info><Emphasis>"Next Steps "</Emphasis></Info>{HorizontalLine::new(109)}"
 
   "<Dim>"1."</Dim>" "<Emphasis>"Setup an editor extension"</Emphasis>"
-     Get live errors as you type and format when you save. Learn more: "<Hyperlink href="https://biomejs.dev/editors">"https://biomejs.dev/editors"</Hyperlink>"
+     Get live errors as you type and format when you save. Learn more: "<Hyperlink href="https://biomejs.dev/guides/getting-started#editor-setup">"https://biomejs.dev/guides/getting-started#editor-setup"</Hyperlink>"
 
   "<Dim>"2."</Dim>" "<Emphasis>"Try a command"</Emphasis>"
      "<Italic>"biome ci"</Italic>" checks for lint errors and verifies formatting. Run " <Italic>"biome --help"</Italic>" for a full list of commands and options.
