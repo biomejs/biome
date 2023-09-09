@@ -53,7 +53,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         let new_group_path = analyzers_path.join(new_group);
         let new_rule_path = new_group_path.join(format!("{}.rs", rule_name_snake));
 
-        let categories_path = "crates/rome_diagnostics_categories/src/categories.rs";
+        let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
         let categories = std::fs::read_to_string(categories_path).unwrap();
 
         let categories = categories.replace(

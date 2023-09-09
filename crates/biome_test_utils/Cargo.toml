@@ -7,18 +7,18 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_analyze    = { workspace = true }
-countme          = { workspace = true, features = ["enable"] }
-json_comments    = "0.2.1"
-rome_console     = { workspace = true }
-rome_deserialize = { workspace = true }
+biome_analyze     = { workspace = true }
 biome_diagnostics = { workspace = true }
-rome_js_parser   = { workspace = true }
-rome_js_syntax   = { workspace = true }
-rome_json_parser = { workspace = true }
-rome_json_syntax = { workspace = true }
-rome_rowan       = { workspace = true }
-rome_service     = { workspace = true }
-serde            = { workspace = true }
-serde_json       = { workspace = true }
-similar          = { version = "2.2.1" }
+countme           = { workspace = true, features = ["enable"] }
+json_comments     = "0.2.1"
+rome_console      = { workspace = true }
+rome_deserialize  = { workspace = true }
+rome_js_parser    = { workspace = true }
+rome_js_syntax    = { workspace = true }
+rome_json_parser  = { workspace = true }
+rome_json_syntax  = { workspace = true }
+rome_rowan        = { workspace = true }
+rome_service      = { workspace = true }
+serde             = { workspace = true }
+serde_json        = { workspace = true }
+similar           = { version = "2.2.1" }

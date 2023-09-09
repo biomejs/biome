@@ -6,9 +6,9 @@ version = "0.0.0"
 
 [dependencies]
 biome_analyze       = { path = "../../crates/biome_analyze" }
+biome_diagnostics   = { path = "../../crates/biome_diagnostics" }
 biome_parser        = { path = "../../crates/biome_parser" }
 rome_console        = { path = "../../crates/rome_console" }
-biome_diagnostics    = { path = "../../crates/biome_diagnostics" }
 rome_formatter      = { path = "../../crates/rome_formatter" }
 rome_js_analyze     = { path = "../../crates/rome_js_analyze" }
 rome_js_formatter   = { path = "../../crates/rome_js_formatter" }

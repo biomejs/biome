@@ -9,15 +9,15 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crossbeam        = "0.8.2"
-indexmap         = { workspace = true }
-parking_lot      = { version = "0.12.0", features = ["arc_lock"] }
-rayon            = "1.7.0"
-rome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
-schemars         = { workspace = true, optional = true }
-serde            = { workspace = true, features = ["derive"], optional = true }
-tracing          = { workspace = true }
+crossbeam         = "0.8.2"
+indexmap          = { workspace = true }
+parking_lot       = { version = "0.12.0", features = ["arc_lock"] }
+rayon             = "1.7.0"
+rome_console      = { workspace = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"], optional = true }
+tracing           = { workspace = true }
 
 [features]
 serde = ["dep:serde", "schemars", "biome_diagnostics/schema"]

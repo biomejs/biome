@@ -92,7 +92,7 @@ impl Rule for {rule_name_upper_camel} {{
     let file_name = format!("{path}/{rule_name_snake}.rs");
     std::fs::write(file_name, code).unwrap();
 
-    let categories_path = "crates/rome_diagnostics_categories/src/categories.rs";
+    let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
     let categories = std::fs::read_to_string(categories_path).unwrap();
 
     if !categories.contains(&rule_name_lower_camel) {

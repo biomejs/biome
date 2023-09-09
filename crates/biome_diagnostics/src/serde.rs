@@ -366,7 +366,7 @@ mod tests {
     use crate::{
         self as biome_diagnostics, {Advices, LogCategory, Visit},
     };
-    use rome_diagnostics_macros::Diagnostic;
+    use biome_diagnostics_macros::Diagnostic;
 
     #[derive(Debug, Diagnostic)]
     #[diagnostic(

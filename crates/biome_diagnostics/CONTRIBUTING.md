@@ -134,4 +134,4 @@ allocates).
 
 The category may also require some special care if you're declaring a new one,
 since all diagnostic categories have to be statically registered you'll need to
-add it to `crates/rome_diagnostics_categories/src/categories.rs`
+add it to `crates/biome_diagnostics_categories/src/categories.rs`

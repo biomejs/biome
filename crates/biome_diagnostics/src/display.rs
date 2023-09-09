@@ -559,10 +559,10 @@ mod tests {
     use std::io;
 
     use biome_diagnostics::{DiagnosticTags, Severity};
+    use biome_diagnostics_categories::{category, Category};
     use biome_text_edit::TextEdit;
     use biome_text_size::{TextRange, TextSize};
     use rome_console::{fmt, markup};
-    use rome_diagnostics_categories::{category, Category};
     use serde_json::{from_value, json};
 
     use crate::{self as biome_diagnostics};

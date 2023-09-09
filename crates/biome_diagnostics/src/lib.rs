@@ -22,8 +22,8 @@ pub use termcolor;
 pub use rome_console as console;
 
 // Re-export macros from utility crates
-pub use rome_diagnostics_categories::{category, category_concat, Category};
-pub use rome_diagnostics_macros::Diagnostic;
+pub use biome_diagnostics_categories::{category, category_concat, Category};
+pub use biome_diagnostics_macros::Diagnostic;
 
 pub use crate::advice::{
     Advices, CodeFrameAdvice, CommandAdvice, DiffAdvice, LogAdvice, LogCategory, Visit,

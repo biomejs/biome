@@ -43,8 +43,8 @@ A-Editors:
 
 A-Diagnostic:
   - crates/biome_diagnostics/**
-  - crates/rome_diagnostics_categories/**
-  - crates/rome_diagnostics_macros/**
+  - crates/biome_diagnostics_categories/**
+  - crates/biome_diagnostics_macros/**
 
 A-Tooling:
   - xtask/**

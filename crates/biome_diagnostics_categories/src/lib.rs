@@ -5,7 +5,7 @@ use std::{
 
 /// Metadata for a diagnostic category
 ///
-/// This type cannot be instantiated outside of the `rome_diagnostics_categories`
+/// This type cannot be instantiated outside of the `biome_diagnostics_categories`
 /// crate, which serves as a registry for all known diagnostic categories
 /// (currently this registry is fully static and generated at compile time)
 #[derive(Debug)]

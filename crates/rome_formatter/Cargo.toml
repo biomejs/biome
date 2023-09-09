@@ -12,18 +12,18 @@ version              = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cfg-if           = "1.0.0"
-countme          = { workspace = true }
-drop_bomb        = "0.1.5"
-indexmap         = { workspace = true }
-rome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
-rome_rowan       = { workspace = true }
-rustc-hash       = { workspace = true }
-schemars         = { workspace = true, optional = true }
-serde            = { workspace = true, features = ["derive"], optional = true }
-tracing          = { workspace = true }
-unicode-width    = "0.1.9"
+cfg-if            = "1.0.0"
+countme           = { workspace = true }
+drop_bomb         = "0.1.5"
+indexmap          = { workspace = true }
+rome_console      = { workspace = true }
+rome_rowan        = { workspace = true }
+rustc-hash        = { workspace = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"], optional = true }
+tracing           = { workspace = true }
+unicode-width     = "0.1.9"
 
 [dev-dependencies]
 insta          = { workspace = true }

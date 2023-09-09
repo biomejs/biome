@@ -85,7 +85,7 @@ pub fn main() -> io::Result<()> {
         /// # Example
         ///
         /// ```
-        /// # use rome_diagnostics_categories::{Category, category};
+        /// # use biome_diagnostics_categories::{Category, category};
         /// let category: &'static Category = category!("internalError/io");
         /// assert_eq!(category.name(), "internalError/io");
         /// assert_eq!(category.link(), None);
@@ -95,7 +95,7 @@ pub fn main() -> io::Result<()> {
             #( #macro_arms )*
 
             ( $name:literal ) => {
-                compile_error!(concat!("Unregistered diagnostic category \"", $name, "\", please add it to \"crates/rome_diagnostics_categories/src/categories.rs\""))
+                compile_error!(concat!("Unregistered diagnostic category \"", $name, "\", please add it to \"crates/biome_diagnostics_categories/src/categories.rs\""))
             };
             ( $( $parts:tt )* ) => {
                 compile_error!(concat!("Invalid diagnostic category `", stringify!($( $parts )*), "`, expected a single string literal"))
@@ -110,7 +110,7 @@ pub fn main() -> io::Result<()> {
             #( #concat_macro_arms )*
 
             ( @compile_error $( $parts:tt )* ) => {
-                compile_error!(concat!("Unregistered diagnostic category \"", $( $parts, )* "\", please add it to \"crates/rome_diagnostics_categories/src/categories.rs\""))
+                compile_error!(concat!("Unregistered diagnostic category \"", $( $parts, )* "\", please add it to \"crates/biome_diagnostics_categories/src/categories.rs\""))
             };
             ( $( $parts:tt ),* ) => {
                 $crate::category_concat!( @compile_error $( $parts )"/"* )

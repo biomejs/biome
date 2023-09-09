@@ -4,7 +4,7 @@ description          = "Diagnostic categories for biome_diagnostics. It exposes 
 documentation        = "https://docs.rs/biome_diagnostics"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_diagnostics_categories"
+name                 = "biome_diagnostics_categories"
 repository.workspace = true
 version              = "0.2.0"
 

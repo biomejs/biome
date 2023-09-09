@@ -197,13 +197,13 @@ name = "biome_diagnostics"
 version = "0.2.0"
 dependencies = [
  "backtrace",
+ "biome_diagnostics_categories",
+ "biome_diagnostics_macros",
  "biome_text_edit",
  "biome_text_size",
  "bitflags 2.3.3",
  "bpaf",
  "rome_console",
- "rome_diagnostics_categories",
- "rome_diagnostics_macros",
  "rome_rowan",
  "schemars",
  "serde",
@@ -211,6 +211,25 @@ dependencies = [
  "termcolor",
  "trybuild",
  "unicode-width",
+]
+
+[[package]]
+name = "biome_diagnostics_categories"
+version = "0.2.0"
+dependencies = [
+ "quote",
+ "schemars",
+ "serde",
+]
+
+[[package]]
+name = "biome_diagnostics_macros"
+version = "0.0.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -2052,25 +2071,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_diagnostics_categories"
-version = "0.2.0"
-dependencies = [
- "quote",
- "schemars",
- "serde",
-]
-
-[[package]]
-name = "rome_diagnostics_macros"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "rome_formatter"
 version = "0.1.0"
 dependencies = [
@@ -2171,6 +2171,7 @@ name = "rome_js_formatter"
 version = "0.1.0"
 dependencies = [
  "biome_diagnostics",
+ "biome_diagnostics_categories",
  "biome_parser",
  "biome_text_size",
  "cfg-if",
@@ -2180,7 +2181,6 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rome_deserialize",
- "rome_diagnostics_categories",
  "rome_formatter",
  "rome_formatter_test",
  "rome_fs",

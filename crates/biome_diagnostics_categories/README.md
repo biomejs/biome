@@ -1,4 +1,4 @@
-# `rome_diagnostics_categories`
+# `biome_diagnostics_categories`
 
 This crate contains a static registry of all the diagnostic categories used
 throughout the Biome codebase
