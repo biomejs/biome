@@ -1,6 +1,6 @@
+use biome_cli::CliDiagnostic;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{print_diagnostic_to_string, Error};
-use biome_cli::CliDiagnostic;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::{markup, BufferConsole, Markup};
 use rome_formatter::IndentStyle;

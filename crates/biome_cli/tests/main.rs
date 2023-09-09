@@ -398,8 +398,8 @@ pub(crate) fn run_cli<'app>(
     console: &'app mut dyn Console,
     args: bpaf::Args,
 ) -> Result<(), CliDiagnostic> {
-    use biome_lsp::ServerFactory;
     use biome_cli::SocketTransport;
+    use biome_lsp::ServerFactory;
     use rome_service::{workspace, WorkspaceRef};
     use tokio::{
         io::{duplex, split},
