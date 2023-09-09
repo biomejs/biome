@@ -135,10 +135,10 @@ pub use crate::{
     options::JsParserOptions,
     parse::*,
 };
+use biome_parser::tree_sink::LosslessTreeSink;
 pub(crate) use parser::{JsParser, ParseRecovery};
 use rome_js_factory::JsSyntaxFactory;
 use rome_js_syntax::{JsLanguage, JsSyntaxKind, LanguageVariant};
-use rome_parser::tree_sink::LosslessTreeSink;
 pub(crate) use state::{ParserState, StrictMode};
 use std::fmt::Debug;
 

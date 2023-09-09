@@ -1,11 +1,11 @@
 //! Utilities for high level parsing of js code.
 
 use crate::*;
+use biome_parser::event::Event;
+use biome_parser::token_source::Trivia;
 use rome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
-use rome_parser::event::Event;
-use rome_parser::token_source::Trivia;
 use rome_rowan::{AstNode, NodeCache};
 use std::marker::PhantomData;
 
@@ -266,7 +266,7 @@ pub fn parse_js_with_cache(
     tracing::debug_span!("parse").in_scope(move || {
         let (events, errors, tokens) = parse_common(text, source_type, options);
         let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
-        rome_parser::event::process(&mut tree_sink, events, errors);
+        biome_parser::event::process(&mut tree_sink, events, errors);
         let (green, parse_errors) = tree_sink.finish();
         Parse::new(green, parse_errors)
     })

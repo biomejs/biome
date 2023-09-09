@@ -17,6 +17,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use biome_parser::AnyParse;
 use indexmap::IndexSet;
 use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
@@ -34,7 +35,6 @@ use rome_js_semantic::{semantic_model, SemanticModelOptions};
 use rome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
 };
-use rome_parser::AnyParse;
 use rome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use std::borrow::Cow;
 use std::ffi::OsStr;

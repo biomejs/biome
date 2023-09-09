@@ -25,8 +25,8 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_const_modifier_cannot_appear_on_a_type_parameter,
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use bitflags::bitflags;
-use rome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use smallvec::SmallVec;
 
 use crate::lexer::{LexContext, ReLexContext};

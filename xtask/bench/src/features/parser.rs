@@ -3,13 +3,13 @@ use crate::features::print_stats;
 use crate::language::Parse;
 use crate::test_case::TestCase;
 use crate::BenchmarkSummary;
+use biome_parser::diagnostic::ParseDiagnostic;
 use itertools::Itertools;
 use rome_diagnostics::console::fmt::Termcolor;
 use rome_diagnostics::console::markup;
 use rome_diagnostics::termcolor::Buffer;
 use rome_diagnostics::DiagnosticExt;
 use rome_diagnostics::PrintDiagnostic;
-use rome_parser::diagnostic::ParseDiagnostic;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
 

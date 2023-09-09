@@ -16,12 +16,12 @@ use crate::{
     Rules, Workspace, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, RuleFilter};
+use biome_parser::AnyParse;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use rome_diagnostics::{serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::Printed;
 use rome_fs::RomePath;
-use rome_parser::AnyParse;
 use rome_rowan::NodeCache;
 use std::ffi::OsStr;
 use std::{panic::RefUnwindSafe, sync::RwLock};

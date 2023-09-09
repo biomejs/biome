@@ -1,8 +1,8 @@
+use biome_parser::AnyParse;
 use rome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOptions, FormatResult, Formatted,
     Printed,
 };
-use rome_parser::AnyParse;
 use rome_rowan::{Language, SyntaxNode, TextRange};
 
 pub mod check_reformat;

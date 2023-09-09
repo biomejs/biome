@@ -15,6 +15,7 @@ path = "src/main.rs"
 anyhow              = "1.0.52"
 biome_flags         = { workspace = true }
 biome_lsp           = { workspace = true }
+biome_migrate       = { workspace = true }
 biome_text_edit     = { workspace = true }
 biome_text_size     = { workspace = true }
 bpaf                = { workspace = true }
@@ -32,7 +33,6 @@ rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-rome_migrate        = { workspace = true }
 rome_rowan          = { workspace = true }
 rome_service        = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }

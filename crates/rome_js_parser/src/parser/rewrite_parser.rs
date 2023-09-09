@@ -2,14 +2,14 @@ use crate::parser::JsParser;
 use crate::token_source::TokenSourceCheckpoint;
 
 use crate::prelude::*;
-use rome_console::fmt::Display;
-use rome_diagnostics::location::AsSpan;
-use rome_js_syntax::{JsSyntaxKind, TextRange};
-use rome_parser::{
+use biome_parser::{
     diagnostic::{ParseDiagnostic, ToDiagnostic},
     event::Event,
     CompletedMarker, Marker,
 };
+use rome_console::fmt::Display;
+use rome_diagnostics::location::AsSpan;
+use rome_js_syntax::{JsSyntaxKind, TextRange};
 use rome_rowan::TextSize;
 
 /// Simplified parser API for when rewriting the AST structure with `rewrite_events`.

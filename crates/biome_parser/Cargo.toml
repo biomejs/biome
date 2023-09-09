@@ -1,10 +1,10 @@
 [package]
 authors.workspace    = true
 description          = "Shared infrastructure for Rome's parser"
-documentation        = "https://docs.rs/rome_parser"
+documentation        = "https://docs.rs/biome_parser"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_parser"
+name                 = "biome_parser"
 repository.workspace = true
 version              = "0.2.0"
 

@@ -14,9 +14,9 @@ version              = "0.1.0"
 biome_css_factory      = { workspace = true }
 biome_css_syntax       = { workspace = true }
 biome_js_unicode_table = { workspace = true }
+biome_parser           = { workspace = true }
 rome_console           = { workspace = true }
 rome_diagnostics       = { workspace = true }
-rome_parser            = { workspace = true }
 rome_rowan             = { workspace = true }
 tracing                = { workspace = true }
 

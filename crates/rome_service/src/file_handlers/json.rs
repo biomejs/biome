@@ -14,6 +14,7 @@ use crate::workspace::{
 };
 use crate::{Configuration, Rules, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_parser::AnyParse;
 use rome_deserialize::json::deserialize_from_json_ast;
 use rome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
@@ -23,7 +24,6 @@ use rome_json_formatter::context::JsonFormatOptions;
 use rome_json_formatter::format_node;
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
-use rome_parser::AnyParse;
 use rome_rowan::{AstNode, FileSource, NodeCache};
 use rome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::path::{Path, PathBuf};

@@ -24,9 +24,9 @@ use crate::syntax::typescript::{
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, JsSyntaxFeature, ParseRecovery};
+use biome_parser::ParserProgress;
 use rome_js_syntax::JsSyntaxKind::*;
 use rome_js_syntax::{JsSyntaxKind, TextRange, T};
-use rome_parser::ParserProgress;
 use rome_rowan::SyntaxKind;
 
 /// A function declaration, this could be async and or a generator. This takes a marker

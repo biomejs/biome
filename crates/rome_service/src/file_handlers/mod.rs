@@ -6,6 +6,7 @@ use crate::{
     Rules, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_parser::AnyParse;
 pub use javascript::JsFormatterSettings;
 use rome_console::fmt::Formatter;
 use rome_console::markup;
@@ -13,7 +14,6 @@ use rome_diagnostics::{Diagnostic, Severity};
 use rome_formatter::Printed;
 use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
-use rome_parser::AnyParse;
 use rome_rowan::NodeCache;
 use std::ffi::OsStr;
 use std::path::Path;

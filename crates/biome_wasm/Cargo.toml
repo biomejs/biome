@@ -3,7 +3,7 @@ authors     = ["Rome Tools Developers and Contributors"]
 description = "WebAssembly bindings to the Rome Workspace API"
 edition     = "2021"
 license     = "MIT"
-name        = "rome_wasm"
+name        = "biome_wasm"
 repository  = "https://github.com/biomejs/biome"
 version     = "0.2.0"
 

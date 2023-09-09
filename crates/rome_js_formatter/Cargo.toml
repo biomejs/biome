@@ -27,6 +27,7 @@ tracing                     = { workspace = true }
 unicode-width               = "0.1.9"
 
 [dev-dependencies]
+biome_parser        = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
 iai                 = "0.1.1"
 insta               = { workspace = true, features = ["glob"] }
@@ -37,7 +38,6 @@ rome_formatter_test = { workspace = true }
 rome_fs             = { workspace = true }
 rome_js_factory     = { workspace = true }
 rome_js_parser      = { workspace = true }
-rome_parser         = { workspace = true }
 serde               = { version = "1", features = ["derive"] }
 serde_json          = { workspace = true }
 tests_macros        = { workspace = true }
