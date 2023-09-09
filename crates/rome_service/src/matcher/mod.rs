@@ -1,8 +1,8 @@
 pub mod pattern;
 
+use biome_console::markup;
 use biome_diagnostics::Diagnostic;
 pub use pattern::{MatchOptions, Pattern, PatternError};
-use rome_console::markup;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::RwLock;
@@ -96,7 +96,7 @@ impl Diagnostic for PatternError {
         write!(fmt, "{}", self.msg)
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup!({ self.msg }))
     }
 }

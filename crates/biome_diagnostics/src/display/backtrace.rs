@@ -1,7 +1,7 @@
 use std::{borrow::Cow, path::PathBuf};
 use std::{cell::Cell, fmt::Write as _, io, os::raw::c_void, path::Path, slice};
 
-use rome_console::{fmt, markup};
+use biome_console::{fmt, markup};
 use serde::{Deserialize, Serialize};
 
 use super::IndentWriter;

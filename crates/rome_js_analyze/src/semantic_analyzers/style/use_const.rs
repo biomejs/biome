@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 
 use biome_diagnostics::Applicability;
 use rome_js_factory::make;

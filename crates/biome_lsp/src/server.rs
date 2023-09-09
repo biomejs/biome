@@ -6,10 +6,10 @@ use crate::session::{
 };
 use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
+use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use futures::future::ready;
 use futures::FutureExt;
-use rome_console::markup;
 use rome_fs::{BIOME_JSON, ROME_JSON};
 use rome_service::workspace::{RageEntry, RageParams, RageResult};
 use rome_service::{workspace, Workspace};

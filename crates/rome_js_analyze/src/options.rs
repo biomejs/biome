@@ -12,9 +12,9 @@ use crate::semantic_analyzers::style::no_restricted_globals::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
+use biome_deserialize::json::VisitJsonNode;
+use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use bpaf::Bpaf;
-use rome_deserialize::json::VisitJsonNode;
-use rome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};
 use rome_rowan::AstNode;
 #[cfg(feature = "schemars")]

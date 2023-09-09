@@ -1,7 +1,7 @@
 use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptParser};
 use crate::configuration::{JavascriptConfiguration, JavascriptFormatter};
-use rome_deserialize::json::{has_only_known_keys, VisitJsonNode};
-use rome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use rome_js_formatter::context::trailing_comma::TrailingComma;
 use rome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};

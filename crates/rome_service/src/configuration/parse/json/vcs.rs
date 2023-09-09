@@ -1,7 +1,7 @@
 use crate::configuration::vcs::{VcsClientKind, VcsConfiguration};
-use rome_console::markup;
-use rome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
-use rome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_console::markup;
+use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
+use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_json_syntax::{AnyJsonValue, JsonLanguage};
 use rome_rowan::{AstNode, SyntaxNode};
 

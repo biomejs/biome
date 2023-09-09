@@ -4,7 +4,7 @@
 
 use std::io;
 
-use rome_console::{fmt, markup};
+use biome_console::{fmt, markup};
 
 use crate::{category, Category, Diagnostic, DiagnosticTags};
 

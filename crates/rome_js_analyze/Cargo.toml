@@ -9,15 +9,15 @@ version              = "0.2.0"
 [dependencies]
 biome_analyze          = { workspace = true }
 biome_aria             = { workspace = true }
+biome_console          = { workspace = true }
+biome_control_flow     = { workspace = true }
+biome_deserialize      = { workspace = true }
 biome_diagnostics      = { workspace = true }
 biome_js_unicode_table = { workspace = true }
 bpaf.workspace         = true
 lazy_static            = { workspace = true }
 natord                 = "1.0.9"
 roaring                = "0.10.1"
-rome_console           = { workspace = true }
-rome_control_flow      = { workspace = true }
-rome_deserialize       = { workspace = true }
 rome_js_factory        = { workspace = true }
 rome_js_semantic       = { workspace = true }
 rome_js_syntax         = { workspace = true }
@@ -39,4 +39,4 @@ rome_js_parser   = { workspace = true, features = ["tests"] }
 tests_macros     = { workspace = true }
 
 [features]
-schema = ["schemars", "rome_deserialize/schema"]
+schema = ["schemars", "biome_deserialize/schema"]

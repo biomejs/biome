@@ -12,8 +12,8 @@ mod rules;
 mod vcs;
 
 use crate::Configuration;
-use rome_deserialize::json::{JsonDeserialize, VisitJsonNode};
-use rome_deserialize::DeserializationDiagnostic;
+use biome_deserialize::json::{JsonDeserialize, VisitJsonNode};
+use biome_deserialize::DeserializationDiagnostic;
 use rome_json_syntax::{AnyJsonValue, JsonRoot};
 use rome_rowan::AstNode;
 

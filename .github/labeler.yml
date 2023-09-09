@@ -3,7 +3,7 @@
 A-Cli:
   - crates/biome_cli/**
   - crates/rome_fs/**
-  - crates/rome_console/**
+  - crates/biome_console/**
 
 A-Core:
   - crates/rome_deserializer/**

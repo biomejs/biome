@@ -1,10 +1,10 @@
 use crate::test_utils::has_bogus_nodes_or_empty_slots;
 use crate::{parse, parse_module, test_utils::assert_errors_are_absent, JsParserOptions, Parse};
+use biome_console::fmt::{Formatter, Termcolor};
+use biome_console::markup;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::PrintDiagnostic;
 use expect_test::expect_file;
-use rome_console::fmt::{Formatter, Termcolor};
-use rome_console::markup;
 use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxKind};
 use rome_js_syntax::{JsCallArguments, JsLogicalExpression, JsSyntaxToken};
 use rome_rowan::{AstNode, Direction, TextSize};

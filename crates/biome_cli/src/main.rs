@@ -8,9 +8,9 @@ use biome_cli::{
     biome_command, open_transport, setup_panic_handler, to_color_mode, BiomeCommand, CliDiagnostic,
     CliSession,
 };
+use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{set_bottom_frame, PrintDiagnostic};
 use bpaf::{Args, ParseFailure};
-use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_service::workspace;
 use std::process::{ExitCode, Termination};
 use tokio::runtime::Runtime;

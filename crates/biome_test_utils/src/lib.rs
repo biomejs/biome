@@ -1,9 +1,9 @@
 use biome_analyze::{AnalyzerAction, AnalyzerOptions};
+use biome_console::fmt::{Formatter, Termcolor};
+use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use json_comments::StripComments;
-use rome_console::fmt::{Formatter, Termcolor};
-use rome_console::markup;
 use rome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use rome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use rome_service::configuration::to_analyzer_configuration;
@@ -35,7 +35,7 @@ pub fn create_analyzer_options(
     // that configures that specific rule.
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = rome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
             json.as_str(),
             JsonParserOptions::default(),
         );
@@ -76,17 +76,17 @@ pub fn create_analyzer_options(
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
-    let text = markup_to_string(rome_console::markup! {
+    let text = markup_to_string(biome_console::markup! {
         {PrintDiagnostic::verbose(&error)}
     });
 
     text
 }
 
-fn markup_to_string(markup: rome_console::Markup) -> String {
+fn markup_to_string(markup: biome_console::Markup) -> String {
     let mut buffer = Vec::new();
     let mut write =
-        rome_console::fmt::Termcolor(biome_diagnostics::termcolor::NoColor::new(&mut buffer));
+        biome_console::fmt::Termcolor(biome_diagnostics::termcolor::NoColor::new(&mut buffer));
     let mut fmt = Formatter::new(&mut write);
     fmt.write_markup(markup).unwrap();
 

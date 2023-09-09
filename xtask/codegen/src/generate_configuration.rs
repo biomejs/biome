@@ -265,8 +265,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let visitors = quote! {
         use crate::configuration::linter::*;
         use crate::Rules;
-        use rome_deserialize::json::{has_only_known_keys, VisitJsonNode};
-        use rome_deserialize::{DeserializationDiagnostic, VisitNode};
+        use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+        use biome_deserialize::{DeserializationDiagnostic, VisitNode};
         use rome_json_syntax::{AnyJsonValue, JsonLanguage};
         use rome_rowan::{AstNode, SyntaxNode};
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;

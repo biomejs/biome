@@ -8,11 +8,11 @@ version = "0.1.0"
 
 [dependencies]
 biome_analyze     = { workspace = true }
+biome_console     = { workspace = true }
+biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
 countme           = { workspace = true, features = ["enable"] }
 json_comments     = "0.2.1"
-rome_console      = { workspace = true }
-rome_deserialize  = { workspace = true }
 rome_js_parser    = { workspace = true }
 rome_js_syntax    = { workspace = true }
 rome_json_parser  = { workspace = true }

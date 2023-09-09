@@ -14,7 +14,7 @@ use std::{
     io,
 };
 
-use rome_console::fmt;
+use biome_console::fmt;
 
 use crate::{
     diagnostic::internal::AsDiagnostic, Category, Diagnostic, DiagnosticTags, Location, Severity,

@@ -100,8 +100,8 @@ impl ParseDiagnostic {
     /// ## Examples
     ///
     /// ```
-    /// # use rome_console::fmt::{Termcolor};
-    /// # use rome_console::markup;
+    /// # use biome_console::fmt::{Termcolor};
+    /// # use biome_console::markup;
     /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};
@@ -142,8 +142,8 @@ impl ParseDiagnostic {
     /// ## Examples
     ///
     /// ```
-    /// # use rome_console::fmt::{Termcolor};
-    /// # use rome_console::markup;
+    /// # use biome_console::fmt::{Termcolor};
+    /// # use biome_console::markup;
     /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};

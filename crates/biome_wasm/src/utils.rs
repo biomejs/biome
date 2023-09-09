@@ -3,10 +3,10 @@ use std::fmt::Display;
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
+use biome_console::fmt::HTML;
+use biome_console::{fmt::Formatter, markup};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{DiagnosticExt, LineIndexBuf, PrintDiagnostic, SourceCode};
-use rome_console::fmt::HTML;
-use rome_console::{fmt::Formatter, markup};
 
 use super::IDiagnostic;
 

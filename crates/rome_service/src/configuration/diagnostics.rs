@@ -1,11 +1,11 @@
 use crate::WorkspaceError;
+use biome_console::fmt::Display;
+use biome_console::{markup, MarkupBuf};
+use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Severity, Visit,
 };
-use rome_console::fmt::Display;
-use rome_console::{markup, MarkupBuf};
-use rome_deserialize::DeserializationDiagnostic;
 use rome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
@@ -146,7 +146,7 @@ impl Diagnostic for ConfigurationDiagnostic {
         }
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match self {
             ConfigurationDiagnostic::SerializationError(error) => error.message(fmt),
             ConfigurationDiagnostic::ConfigAlreadyExists(error) => error.message(fmt),
@@ -287,8 +287,8 @@ pub struct InvalidConfiguration {
 mod test {
     use crate::configuration::diagnostics::ConfigurationDiagnostic;
     use crate::{Configuration, MatchOptions, Matcher};
+    use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
-    use rome_deserialize::json::deserialize_from_json_str;
     use rome_json_parser::JsonParserOptions;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

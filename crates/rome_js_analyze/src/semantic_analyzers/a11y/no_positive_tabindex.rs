@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_semantic::SemanticModel;
 use rome_js_syntax::jsx_ext::AnyJsxElement;
 use rome_js_syntax::{

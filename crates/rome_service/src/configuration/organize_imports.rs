@@ -1,8 +1,8 @@
 use crate::configuration::merge::MergeWith;
 use crate::settings::OrganizeImportsSettings;
 use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use biome_deserialize::StringSet;
 use bpaf::Bpaf;
-use rome_deserialize::StringSet;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]

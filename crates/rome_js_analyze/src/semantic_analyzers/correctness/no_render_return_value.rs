@@ -2,7 +2,7 @@ use crate::react::{is_react_call_api, ReactLibrary};
 use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{JsCallExpression, JsExpressionStatement};
 use rome_rowan::AstNode;
 

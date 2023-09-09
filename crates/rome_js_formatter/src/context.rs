@@ -1,7 +1,7 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
-use rome_deserialize::json::with_only_known_variants;
-use rome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::json::with_only_known_variants;
+use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_formatter::printer::PrinterOptions;
 use rome_formatter::token::string::Quote;
 use rome_formatter::{

@@ -1,8 +1,8 @@
 use crate::ControlFlowGraph;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_console::markup;
+use biome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
 use roaring::RoaringBitmap;
-use rome_console::markup;
-use rome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
 use rome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use rome_rowan::{AstNode, NodeOrToken, TextRange};
 

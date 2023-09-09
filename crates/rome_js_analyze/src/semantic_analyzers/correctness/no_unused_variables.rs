@@ -1,8 +1,8 @@
 use crate::JsRuleAction;
 use crate::{semantic_services::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_console::markup;
 use rome_js_semantic::{ReferencesExtensions, SemanticScopeExtensions};
 use rome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction},

@@ -1,8 +1,8 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
 };
+use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_console::markup;
 use rome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
 use rome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 

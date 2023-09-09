@@ -1,6 +1,6 @@
 use crate::configuration::merge::MergeWith;
+use biome_deserialize::StringSet;
 use bpaf::Bpaf;
-use rome_deserialize::StringSet;
 use rome_js_formatter::context::{
     trailing_comma::TrailingComma, ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons,
 };

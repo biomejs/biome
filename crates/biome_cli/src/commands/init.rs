@@ -1,5 +1,5 @@
 use crate::{CliDiagnostic, CliSession};
-use rome_console::{markup, ConsoleExt, HorizontalLine};
+use biome_console::{markup, ConsoleExt, HorizontalLine};
 use rome_service::configuration::Configuration;
 use rome_service::create_config;
 

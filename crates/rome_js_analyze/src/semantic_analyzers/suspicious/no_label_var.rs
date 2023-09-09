@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
 use rome_rowan::AstNode;
 

@@ -22,7 +22,7 @@ pub fn generate_new_lintrule(path: &str, rule_name: &str) {
 use biome_analyze::{{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic,
 }};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_semantic::{{Reference, ReferencesExtensions}};
 use rome_js_syntax::JsIdentifierBinding;
 

@@ -1,7 +1,7 @@
 use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{
     AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
 };

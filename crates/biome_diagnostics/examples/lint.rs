@@ -1,10 +1,10 @@
 use std::io;
 
+use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{
     Advices, Diagnostic, Location, LogCategory, PrintDiagnostic, Resource, SourceCode, Visit,
 };
 use biome_text_edit::TextEdit;
-use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_rowan::{TextRange, TextSize};
 
 #[derive(Debug, Diagnostic)]

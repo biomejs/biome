@@ -1,12 +1,12 @@
 use std::collections::VecDeque;
 
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use roaring::RoaringBitmap;
-use rome_console::markup;
-use rome_control_flow::{
+use biome_console::markup;
+use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use roaring::RoaringBitmap;
 use rome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use rome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -226,7 +226,7 @@ fn has_switch_statement(control_flow_root: &JsSyntaxNode) -> bool {
 fn register_fallthrough_switch_clauses(
     block_to_switch_clause_range: &FxHashMap<BlockId, Option<TextRange>>,
     visited_blocks: &RoaringBitmap,
-    cfg: &rome_control_flow::ControlFlowGraph<JsLanguage>,
+    cfg: &biome_control_flow::ControlFlowGraph<JsLanguage>,
     fallthrough: &mut Vec<TextRange>,
 ) {
     let mut current_switch_clause = None;

@@ -1,11 +1,11 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use roaring::bitmap::RoaringBitmap;
-use rome_control_flow::{
+use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
 };
+use roaring::bitmap::RoaringBitmap;
 use rome_js_syntax::{
     JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
     JsForOfStatement, JsForStatement, JsFunctionBody, JsIfStatement, JsLabeledStatement,

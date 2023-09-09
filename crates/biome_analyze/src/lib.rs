@@ -45,10 +45,10 @@ pub use crate::signals::{
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 
+use biome_console::markup;
 use biome_diagnostics::{
     category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags, Severity,
 };
-use rome_console::markup;
 use rome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextLen, TextRange,
     TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,

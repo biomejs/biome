@@ -1,5 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use rome_rowan::{AstNode, AstSeparatedList};
 use std::collections::HashMap;

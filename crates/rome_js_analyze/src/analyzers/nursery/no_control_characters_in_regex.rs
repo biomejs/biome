@@ -1,6 +1,6 @@
 use crate::utils::escape_string;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
     JsStringLiteralExpression,

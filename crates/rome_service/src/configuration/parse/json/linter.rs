@@ -1,9 +1,9 @@
 use crate::configuration::linter::{RulePlainConfiguration, RuleWithOptions};
 use crate::configuration::LinterConfiguration;
 use crate::{RuleConfiguration, Rules};
-use rome_console::markup;
-use rome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
-use rome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_console::markup;
+use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
+use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use rome_js_analyze::options::PossibleOptions;
 use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue, JsonSyntaxNode};
 use rome_rowan::{AstNode, AstSeparatedList, SyntaxNode};

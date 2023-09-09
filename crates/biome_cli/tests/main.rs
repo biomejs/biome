@@ -11,7 +11,7 @@ use bpaf::ParseFailure;
 use std::path::Path;
 
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
-use rome_console::{markup, BufferConsole, Console, ConsoleExt};
+use biome_console::{markup, BufferConsole, Console, ConsoleExt};
 use rome_fs::{FileSystem, MemoryFileSystem};
 use rome_service::{App, DynRef};
 
@@ -163,8 +163,8 @@ mod configuration {
         CONFIG_INCORRECT_GLOBALS_V2, CONFIG_LINTER_WRONG_RULE,
     };
     use crate::snap_test::SnapshotPayload;
+    use biome_console::BufferConsole;
     use bpaf::Args;
-    use rome_console::BufferConsole;
     use rome_fs::MemoryFileSystem;
     use rome_service::DynRef;
     use std::path::Path;

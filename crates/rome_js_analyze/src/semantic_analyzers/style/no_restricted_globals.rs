@@ -1,10 +1,10 @@
 use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_console::markup;
+use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use bpaf::Bpaf;
-use rome_console::markup;
-use rome_deserialize::json::{has_only_known_keys, VisitJsonNode};
-use rome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_js_semantic::{Binding, BindingExtensions};
 use rome_js_syntax::{
     JsIdentifierAssignment, JsReferenceIdentifier, JsxReferenceIdentifier, TextRange,

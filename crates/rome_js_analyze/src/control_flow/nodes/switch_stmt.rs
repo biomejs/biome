@@ -1,4 +1,4 @@
-use rome_control_flow::builder::BlockId;
+use biome_control_flow::builder::BlockId;
 use rome_js_syntax::{AnyJsSwitchClause, JsLabeledStatement, JsSwitchStatement, JsSyntaxToken};
 use rome_rowan::{AstNode, SyntaxResult};
 

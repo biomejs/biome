@@ -4,9 +4,9 @@ use crate::{
     location::{AsResource, AsSourceCode, AsSpan},
     Location,
 };
+use biome_console::fmt::{self, Display};
+use biome_console::markup;
 use biome_text_edit::TextEdit;
-use rome_console::fmt::{self, Display};
-use rome_console::markup;
 use serde::{Deserialize, Serialize};
 use std::io;
 

@@ -148,8 +148,8 @@ impl std::fmt::Display for SuppressionDiagnosticKind {
     }
 }
 
-impl rome_console::fmt::Display for SuppressionDiagnosticKind {
-    fn fmt(&self, fmt: &mut rome_console::fmt::Formatter) -> std::io::Result<()> {
+impl biome_console::fmt::Display for SuppressionDiagnosticKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
             SuppressionDiagnosticKind::MissingColon => write!(
                 fmt,

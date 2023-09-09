@@ -1,5 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::{fmt::Display, fmt::Formatter, markup};
+use biome_console::{fmt::Display, fmt::Formatter, markup};
 use rome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
 use rome_rowan::AstNode;
 

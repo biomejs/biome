@@ -1,6 +1,6 @@
+use biome_console::fmt::Formatter;
+use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
-use rome_console::fmt::Formatter;
-use rome_console::markup;
 use rome_js_semantic::{ReferencesExtensions, SemanticModel};
 use rome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,

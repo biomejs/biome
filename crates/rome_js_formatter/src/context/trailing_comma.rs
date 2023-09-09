@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
-use rome_deserialize::json::with_only_known_variants;
-use rome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::json::with_only_known_variants;
+use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use rome_formatter::formatter::Formatter;
 use rome_formatter::prelude::{if_group_breaks, text};
 use rome_formatter::write;

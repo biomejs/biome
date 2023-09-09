@@ -1,6 +1,6 @@
 use ::serde::{Deserialize, Serialize};
+use biome_console::MarkupBuf;
 use biome_text_edit::TextEdit;
-use rome_console::MarkupBuf;
 use rome_rowan::TextRange;
 
 /// Indicates how a tool should manage this suggestion.

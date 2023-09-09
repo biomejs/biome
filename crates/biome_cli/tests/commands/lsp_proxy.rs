@@ -1,7 +1,7 @@
 use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use biome_console::BufferConsole;
 use bpaf::Args;
-use rome_console::BufferConsole;
 use rome_fs::MemoryFileSystem;
 use rome_service::DynRef;
 

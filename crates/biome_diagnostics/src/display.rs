@@ -1,7 +1,7 @@
 use std::{io, iter};
 
+use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
 use biome_text_edit::TextEdit;
-use rome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
 use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
@@ -32,7 +32,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> std::fmt::Display for PrintDescription<'fmt
 }
 
 /// Helper struct for printing a diagnostic as markup into any formatter
-/// implementing [rome_console::fmt::Write].
+/// implementing [biome_console::fmt::Write].
 pub struct PrintDiagnostic<'fmt, D: ?Sized> {
     diag: &'fmt D,
     verbose: bool,
@@ -558,11 +558,11 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
 mod tests {
     use std::io;
 
+    use biome_console::{fmt, markup};
     use biome_diagnostics::{DiagnosticTags, Severity};
     use biome_diagnostics_categories::{category, Category};
     use biome_text_edit::TextEdit;
     use biome_text_size::{TextRange, TextSize};
-    use rome_console::{fmt, markup};
     use serde_json::{from_value, json};
 
     use crate::{self as biome_diagnostics};

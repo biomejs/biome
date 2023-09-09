@@ -3,7 +3,7 @@ use biome_analyze::{
     declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, ServiceBag,
     Visitor, VisitorContext,
 };
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use rome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
