@@ -43,6 +43,9 @@ a = {
 	[""]: 2
 }
 
+// optional chain
+a?.["b"]?.['c']?.d?.e?.["f"]
+
 ```
 
 # Diagnostics
@@ -644,6 +647,57 @@ invalid.js:37:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
   
     37 │ → [""]:·2
        │   -  -   
+
+```
+
+```
+invalid.js:41:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │     ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │    -- --                    
+
+```
+
+```
+invalid.js:41:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │            ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │           -- --             
+
+```
+
+```
+invalid.js:41:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │                         ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │                        -- --
 
 ```
 
