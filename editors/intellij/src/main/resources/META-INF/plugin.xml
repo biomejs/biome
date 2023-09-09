@@ -22,6 +22,10 @@
                              instance="com.github.biomejs.intellijbiome.settings.BiomeSettingsConfigurable"/>
         <formattingService implementation="com.github.biomejs.intellijbiome.formatter.BiomeFormatterProvider"/>
     </extensions>
+	<projectListeners>
+		<listener class="com.github.biomejs.intellijbiome.listeners.BiomeConfigListener"
+							topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+	</projectListeners>
     <actions>
         <group
                 id="com.github.biomejs.intellijbiome.actions-group"

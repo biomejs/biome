@@ -29,7 +29,7 @@ class BiomeLspServerSupportProvider : LspServerSupportProvider {
 private class BiomeLspServerDescriptor(project: Project, val executable: String) : ProjectWideLspServerDescriptor(project, "Biome") {
     override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file.fileType)
     override fun createCommandLine(): GeneralCommandLine {
-        val params = SmartList("lsp-proxy", "--use-server")
+        val params = SmartList("lsp-proxy")
         BiomeUtils.attachConfigPath(params, project, thisLogger())
 
         if(executable.isEmpty()) {
