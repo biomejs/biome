@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "json": {
+    "parser": { "allowComments": true }
+  }
+}
+```
+
+## `tsconfig.json`
+
+```json
+
+/*test*/ [1, 2, 3]
+	
+```
+
+# Emitted Messages
+
+```block
+tsconfig.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Formatter would have printed the following content:
+  
+    1   │ - 
+    2 1 │   /*test*/ [1, 2, 3]
+    3   │ - → 
+      2 │ + 
+  
+
+```
+
+```block
+Compared 1 file(s) in <TIME>
+```
+
+

@@ -76,7 +76,7 @@ _touch file:
 test:
 	cargo nextest run --no-fail-fast
 
-# Run tests for the crate passed as argument e.g. just test-create rome_cli
+# Run tests for the crate passed as argument e.g. just test-create biome_cli
 test-crate name:
 	cargo nextest run -E 'package({{name}})' --no-fail-fast
 

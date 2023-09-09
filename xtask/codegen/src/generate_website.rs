@@ -1,4 +1,4 @@
-use rome_cli::biome_command;
+use biome_cli::biome_command;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
 use rome_js_parser::{parse_module, JsParserOptions};

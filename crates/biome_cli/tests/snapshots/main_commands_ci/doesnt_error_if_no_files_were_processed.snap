@@ -1,0 +1,11 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Emitted Messages
+
+```block
+Checked 0 file(s) in <TIME>
+```
+
+

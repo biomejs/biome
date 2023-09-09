@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "extends": ["formatTYPO.json", "linter.json"] }
+```
+
+## `format.json`
+
+```json
+{ "javascript": { "formatter": { "quoteStyle": "single" } } }
+```
+
+## `linter.json`
+
+```json
+{ "linter": { "enabled": false } }
+```
+
+## `test.js`
+
+```js
+debugger; console.log("string"); 
+```
+
+# Termination Message
+
+```block
+formatTYPO.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × path "formatTYPO.json" does not exists in memory filesystem
+  
+  Verbose advice
+  
+    i Biome tried to load the configuration file  using formatTYPO.json as base path.
+    
+
+
+```
+
+

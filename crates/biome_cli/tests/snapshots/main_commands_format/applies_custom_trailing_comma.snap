@@ -1,0 +1,22 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.js`
+
+```js
+const a = [
+	longlonglonglongItem1longlonglonglongItem1,
+	longlonglonglongItem1longlonglonglongItem2,
+	longlonglonglongItem1longlonglonglongItem3
+];
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file(s) in <TIME>
+```
+
+

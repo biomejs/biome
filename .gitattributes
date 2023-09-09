@@ -21,7 +21,7 @@ crates/rome_js_formatter/tests/**/*.ts.prettier-snap linguist-language=TypeScrip
 crates/rome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
 crates/rome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
 crates/rome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
-crates/rome_cli/tests/**/*.snap linguist-language=Markdown
+crates/biome_cli/tests/**/*.snap linguist-language=Markdown
 crates/rome_js_analyze/tests/specs/**/*.snap linguist-language=Markdown
 
 

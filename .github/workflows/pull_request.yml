@@ -112,7 +112,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
       - name: Build main binary
-        run: cargo build -p rome_cli --release
+        run: cargo build -p biome_cli --release
 
       - name: Install Node.js
         uses: actions/setup-node@v3

@@ -104,7 +104,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p rome_cli --release --target ${{ matrix.target }}
+        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
           # Strip all debug symbols from the resulting binaries

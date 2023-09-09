@@ -1,0 +1,17 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+# Emitted Messages
+
+```block
+Your configuration file is up to date.
+```
+
+
