@@ -71,7 +71,7 @@ switch(Number.NaN) { case Number.NaN: break; }
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -80,11 +80,18 @@ invalid.js:1:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     2 │ 123 === NaN;
     3 │ NaN === "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1    │ - 123·==·NaN;
+        1 │ + Number.isNaN(123);
+     2  2 │   123 === NaN;
+     3  3 │   NaN === "abc";
+  
 
 ```
 
 ```
-invalid.js:2:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -94,11 +101,19 @@ invalid.js:2:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     3 │ NaN === "abc";
     4 │ NaN == "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1  1 │   123 == NaN;
+     2    │ - 123·===·NaN;
+        2 │ + Number.isNaN(123);
+     3  3 │   NaN === "abc";
+     4  4 │   NaN == "abc";
+  
 
 ```
 
 ```
-invalid.js:3:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -109,11 +124,20 @@ invalid.js:3:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     4 │ NaN == "abc";
     5 │ 123 != NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1  1 │   123 == NaN;
+     2  2 │   123 === NaN;
+     3    │ - NaN·===·"abc";
+        3 │ + Number.isNaN("abc");
+     4  4 │   NaN == "abc";
+     5  5 │   123 != NaN;
+  
 
 ```
 
 ```
-invalid.js:4:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -124,11 +148,20 @@ invalid.js:4:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     5 │ 123 != NaN;
     6 │ 123 !== NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     2  2 │   123 === NaN;
+     3  3 │   NaN === "abc";
+     4    │ - NaN·==·"abc";
+        4 │ + Number.isNaN("abc");
+     5  5 │   123 != NaN;
+     6  6 │   123 !== NaN;
+  
 
 ```
 
 ```
-invalid.js:5:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -139,11 +172,20 @@ invalid.js:5:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     6 │ 123 !== NaN;
     7 │ NaN !== "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     3  3 │   NaN === "abc";
+     4  4 │   NaN == "abc";
+     5    │ - 123·!=·NaN;
+        5 │ + !Number.isNaN(123);
+     6  6 │   123 !== NaN;
+     7  7 │   NaN !== "abc";
+  
 
 ```
 
 ```
-invalid.js:6:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -154,11 +196,20 @@ invalid.js:6:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     7 │ NaN !== "abc";
     8 │ NaN != "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     4  4 │   NaN == "abc";
+     5  5 │   123 != NaN;
+     6    │ - 123·!==·NaN;
+        6 │ + !Number.isNaN(123);
+     7  7 │   NaN !== "abc";
+     8  8 │   NaN != "abc";
+  
 
 ```
 
 ```
-invalid.js:7:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -169,11 +220,20 @@ invalid.js:7:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     8 │ NaN != "abc";
     9 │ NaN < "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     5  5 │   123 != NaN;
+     6  6 │   123 !== NaN;
+     7    │ - NaN·!==·"abc";
+        7 │ + !Number.isNaN("abc");
+     8  8 │   NaN != "abc";
+     9  9 │   NaN < "abc";
+  
 
 ```
 
 ```
-invalid.js:8:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -184,11 +244,20 @@ invalid.js:8:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
      9 │ NaN < "abc";
     10 │ "abc" < NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     6  6 │   123 !== NaN;
+     7  7 │   NaN !== "abc";
+     8    │ - NaN·!=·"abc";
+        8 │ + !Number.isNaN("abc");
+     9  9 │   NaN < "abc";
+    10 10 │   "abc" < NaN;
+  
 
 ```
 
 ```
-invalid.js:9:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -199,11 +268,20 @@ invalid.js:9:1 lint/correctness/useIsNan ━━━━━━━━━━━━━
     10 │ "abc" < NaN;
     11 │ NaN > "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     7  7 │   NaN !== "abc";
+     8  8 │   NaN != "abc";
+     9    │ - NaN·<·"abc";
+        9 │ + Number.isNaN("abc");
+    10 10 │   "abc" < NaN;
+    11 11 │   NaN > "abc";
+  
 
 ```
 
 ```
-invalid.js:10:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -214,11 +292,20 @@ invalid.js:10:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     11 │ NaN > "abc";
     12 │ "abc" > NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     8  8 │   NaN != "abc";
+     9  9 │   NaN < "abc";
+    10    │ - "abc"·<·NaN;
+       10 │ + Number.isNaN("abc");
+    11 11 │   NaN > "abc";
+    12 12 │   "abc" > NaN;
+  
 
 ```
 
 ```
-invalid.js:11:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -229,11 +316,20 @@ invalid.js:11:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     12 │ "abc" > NaN;
     13 │ NaN <= "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     9  9 │   NaN < "abc";
+    10 10 │   "abc" < NaN;
+    11    │ - NaN·>·"abc";
+       11 │ + Number.isNaN("abc");
+    12 12 │   "abc" > NaN;
+    13 13 │   NaN <= "abc";
+  
 
 ```
 
 ```
-invalid.js:12:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -244,11 +340,20 @@ invalid.js:12:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     13 │ NaN <= "abc";
     14 │ "abc" <= NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    10 10 │   "abc" < NaN;
+    11 11 │   NaN > "abc";
+    12    │ - "abc"·>·NaN;
+       12 │ + Number.isNaN("abc");
+    13 13 │   NaN <= "abc";
+    14 14 │   "abc" <= NaN;
+  
 
 ```
 
 ```
-invalid.js:13:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -259,11 +364,20 @@ invalid.js:13:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     14 │ "abc" <= NaN;
     15 │ NaN >= "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    11 11 │   NaN > "abc";
+    12 12 │   "abc" > NaN;
+    13    │ - NaN·<=·"abc";
+       13 │ + Number.isNaN("abc");
+    14 14 │   "abc" <= NaN;
+    15 15 │   NaN >= "abc";
+  
 
 ```
 
 ```
-invalid.js:14:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -274,11 +388,20 @@ invalid.js:14:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     15 │ NaN >= "abc";
     16 │ "abc" >= NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    12 12 │   "abc" > NaN;
+    13 13 │   NaN <= "abc";
+    14    │ - "abc"·<=·NaN;
+       14 │ + Number.isNaN("abc");
+    15 15 │   NaN >= "abc";
+    16 16 │   "abc" >= NaN;
+  
 
 ```
 
 ```
-invalid.js:15:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -289,11 +412,20 @@ invalid.js:15:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     16 │ "abc" >= NaN;
     17 │ 123 == Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    13 13 │   NaN <= "abc";
+    14 14 │   "abc" <= NaN;
+    15    │ - NaN·>=·"abc";
+       15 │ + Number.isNaN("abc");
+    16 16 │   "abc" >= NaN;
+    17 17 │   123 == Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:16:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -304,11 +436,20 @@ invalid.js:16:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     17 │ 123 == Number.NaN;
     18 │ 123 === Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    14 14 │   "abc" <= NaN;
+    15 15 │   NaN >= "abc";
+    16    │ - "abc"·>=·NaN;
+       16 │ + Number.isNaN("abc");
+    17 17 │   123 == Number.NaN;
+    18 18 │   123 === Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:17:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -319,11 +460,20 @@ invalid.js:17:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     18 │ 123 === Number.NaN;
     19 │ Number.NaN === "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    15 15 │   NaN >= "abc";
+    16 16 │   "abc" >= NaN;
+    17    │ - 123·==·Number.NaN;
+       17 │ + Number.isNaN(123);
+    18 18 │   123 === Number.NaN;
+    19 19 │   Number.NaN === "abc";
+  
 
 ```
 
 ```
-invalid.js:18:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -334,11 +484,20 @@ invalid.js:18:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     19 │ Number.NaN === "abc";
     20 │ Number.NaN == "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    16 16 │   "abc" >= NaN;
+    17 17 │   123 == Number.NaN;
+    18    │ - 123·===·Number.NaN;
+       18 │ + Number.isNaN(123);
+    19 19 │   Number.NaN === "abc";
+    20 20 │   Number.NaN == "abc";
+  
 
 ```
 
 ```
-invalid.js:19:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -349,11 +508,20 @@ invalid.js:19:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     20 │ Number.NaN == "abc";
     21 │ 123 != Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    17 17 │   123 == Number.NaN;
+    18 18 │   123 === Number.NaN;
+    19    │ - Number.NaN·===·"abc";
+       19 │ + Number.isNaN("abc");
+    20 20 │   Number.NaN == "abc";
+    21 21 │   123 != Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:20:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -364,11 +532,20 @@ invalid.js:20:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     21 │ 123 != Number.NaN;
     22 │ 123 !== Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    18 18 │   123 === Number.NaN;
+    19 19 │   Number.NaN === "abc";
+    20    │ - Number.NaN·==·"abc";
+       20 │ + Number.isNaN("abc");
+    21 21 │   123 != Number.NaN;
+    22 22 │   123 !== Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:21:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -379,11 +556,20 @@ invalid.js:21:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     22 │ 123 !== Number.NaN;
     23 │ Number.NaN !== "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    19 19 │   Number.NaN === "abc";
+    20 20 │   Number.NaN == "abc";
+    21    │ - 123·!=·Number.NaN;
+       21 │ + !Number.isNaN(123);
+    22 22 │   123 !== Number.NaN;
+    23 23 │   Number.NaN !== "abc";
+  
 
 ```
 
 ```
-invalid.js:22:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -394,11 +580,20 @@ invalid.js:22:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     23 │ Number.NaN !== "abc";
     24 │ Number.NaN != "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    20 20 │   Number.NaN == "abc";
+    21 21 │   123 != Number.NaN;
+    22    │ - 123·!==·Number.NaN;
+       22 │ + !Number.isNaN(123);
+    23 23 │   Number.NaN !== "abc";
+    24 24 │   Number.NaN != "abc";
+  
 
 ```
 
 ```
-invalid.js:23:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -409,11 +604,20 @@ invalid.js:23:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     24 │ Number.NaN != "abc";
     25 │ Number.NaN < "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    21 21 │   123 != Number.NaN;
+    22 22 │   123 !== Number.NaN;
+    23    │ - Number.NaN·!==·"abc";
+       23 │ + !Number.isNaN("abc");
+    24 24 │   Number.NaN != "abc";
+    25 25 │   Number.NaN < "abc";
+  
 
 ```
 
 ```
-invalid.js:24:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -424,11 +628,20 @@ invalid.js:24:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     25 │ Number.NaN < "abc";
     26 │ "abc" < Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    22 22 │   123 !== Number.NaN;
+    23 23 │   Number.NaN !== "abc";
+    24    │ - Number.NaN·!=·"abc";
+       24 │ + !Number.isNaN("abc");
+    25 25 │   Number.NaN < "abc";
+    26 26 │   "abc" < Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:25:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -439,11 +652,20 @@ invalid.js:25:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     26 │ "abc" < Number.NaN;
     27 │ Number.NaN > "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    23 23 │   Number.NaN !== "abc";
+    24 24 │   Number.NaN != "abc";
+    25    │ - Number.NaN·<·"abc";
+       25 │ + Number.isNaN("abc");
+    26 26 │   "abc" < Number.NaN;
+    27 27 │   Number.NaN > "abc";
+  
 
 ```
 
 ```
-invalid.js:26:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -454,11 +676,20 @@ invalid.js:26:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     27 │ Number.NaN > "abc";
     28 │ "abc" > Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    24 24 │   Number.NaN != "abc";
+    25 25 │   Number.NaN < "abc";
+    26    │ - "abc"·<·Number.NaN;
+       26 │ + Number.isNaN("abc");
+    27 27 │   Number.NaN > "abc";
+    28 28 │   "abc" > Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:27:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -469,11 +700,20 @@ invalid.js:27:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     28 │ "abc" > Number.NaN;
     29 │ Number.NaN <= "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    25 25 │   Number.NaN < "abc";
+    26 26 │   "abc" < Number.NaN;
+    27    │ - Number.NaN·>·"abc";
+       27 │ + Number.isNaN("abc");
+    28 28 │   "abc" > Number.NaN;
+    29 29 │   Number.NaN <= "abc";
+  
 
 ```
 
 ```
-invalid.js:28:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -484,11 +724,20 @@ invalid.js:28:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     29 │ Number.NaN <= "abc";
     30 │ "abc" <= Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    26 26 │   "abc" < Number.NaN;
+    27 27 │   Number.NaN > "abc";
+    28    │ - "abc"·>·Number.NaN;
+       28 │ + Number.isNaN("abc");
+    29 29 │   Number.NaN <= "abc";
+    30 30 │   "abc" <= Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:29:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -499,11 +748,20 @@ invalid.js:29:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     30 │ "abc" <= Number.NaN;
     31 │ Number.NaN >= "abc";
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    27 27 │   Number.NaN > "abc";
+    28 28 │   "abc" > Number.NaN;
+    29    │ - Number.NaN·<=·"abc";
+       29 │ + Number.isNaN("abc");
+    30 30 │   "abc" <= Number.NaN;
+    31 31 │   Number.NaN >= "abc";
+  
 
 ```
 
 ```
-invalid.js:30:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -514,11 +772,20 @@ invalid.js:30:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     31 │ Number.NaN >= "abc";
     32 │ "abc" >= Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    28 28 │   "abc" > Number.NaN;
+    29 29 │   Number.NaN <= "abc";
+    30    │ - "abc"·<=·Number.NaN;
+       30 │ + Number.isNaN("abc");
+    31 31 │   Number.NaN >= "abc";
+    32 32 │   "abc" >= Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:31:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -529,11 +796,20 @@ invalid.js:31:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     32 │ "abc" >= Number.NaN;
     33 │ x === Number?.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    29 29 │   Number.NaN <= "abc";
+    30 30 │   "abc" <= Number.NaN;
+    31    │ - Number.NaN·>=·"abc";
+       31 │ + Number.isNaN("abc");
+    32 32 │   "abc" >= Number.NaN;
+    33 33 │   x === Number?.NaN;
+  
 
 ```
 
 ```
-invalid.js:32:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -544,11 +820,20 @@ invalid.js:32:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     33 │ x === Number?.NaN;
     34 │ x === Number['NaN'];
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    30 30 │   "abc" <= Number.NaN;
+    31 31 │   Number.NaN >= "abc";
+    32    │ - "abc"·>=·Number.NaN;
+       32 │ + Number.isNaN("abc");
+    33 33 │   x === Number?.NaN;
+    34 34 │   x === Number['NaN'];
+  
 
 ```
 
 ```
-invalid.js:33:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -559,11 +844,20 @@ invalid.js:33:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     34 │ x === Number['NaN'];
     35 │ 
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    31 31 │   Number.NaN >= "abc";
+    32 32 │   "abc" >= Number.NaN;
+    33    │ - x·===·Number?.NaN;
+       33 │ + Number?.isNaN(x);
+    34 34 │   x === Number['NaN'];
+    35 35 │   
+  
 
 ```
 
 ```
-invalid.js:34:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -574,11 +868,20 @@ invalid.js:34:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     35 │ 
     36 │ 123 == globalThis.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    32 32 │   "abc" >= Number.NaN;
+    33 33 │   x === Number?.NaN;
+    34    │ - x·===·Number['NaN'];
+       34 │ + Number.isNaN(x);
+    35 35 │   
+    36 36 │   123 == globalThis.NaN;
+  
 
 ```
 
 ```
-invalid.js:36:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -589,11 +892,20 @@ invalid.js:36:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     37 │ 123 == window.NaN;
     38 │ 123 == globalThis.Number.NaN;
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    34 34 │   x === Number['NaN'];
+    35 35 │   
+    36    │ - 123·==·globalThis.NaN;
+       36 │ + globalThis.Number.isNaN(123);
+    37 37 │   123 == window.NaN;
+    38 38 │   123 == globalThis.Number.NaN;
+  
 
 ```
 
 ```
-invalid.js:37:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -603,11 +915,20 @@ invalid.js:37:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
     38 │ 123 == globalThis.Number.NaN;
     39 │ 
   
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    35 35 │   
+    36 36 │   123 == globalThis.NaN;
+    37    │ - 123·==·window.NaN;
+       37 │ + window.Number.isNaN(123);
+    38 38 │   123 == globalThis.Number.NaN;
+    39 39 │   
+  
 
 ```
 
 ```
-invalid.js:38:1 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the Number.isNaN function to compare with NaN.
   
@@ -617,6 +938,15 @@ invalid.js:38:1 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     39 │ 
     40 │ // switch-case
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    36 36 │   123 == globalThis.NaN;
+    37 37 │   123 == window.NaN;
+    38    │ - 123·==·globalThis.Number.NaN;
+       38 │ + globalThis.Number.isNaN(123);
+    39 39 │   
+    40 40 │   // switch-case
   
 
 ```
