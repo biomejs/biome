@@ -22,8 +22,8 @@ xtask          = { path = '../', version = "0.0" }
 
 biome_analyze       = { path = "../../crates/biome_analyze", optional = true }
 biome_aria          = { path = "../../crates/biome_aria", optional = true }
+biome_cli           = { workspace = true, optional = true }
 biome_diagnostics   = { path = "../../crates/biome_diagnostics", optional = true }
-biome_cli            = { workspace = true, optional = true }
 rome_js_analyze     = { path = "../../crates/rome_js_analyze", optional = true }
 rome_js_factory     = { path = "../../crates/rome_js_factory", optional = true }
 rome_js_formatter   = { path = "../../crates/rome_js_formatter", optional = true }
