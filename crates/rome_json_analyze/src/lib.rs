@@ -8,7 +8,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
     MetadataRegistry, RuleRegistry, SuppressionKind,
 };
-use rome_diagnostics::Error;
+use biome_diagnostics::Error;
 use rome_json_syntax::JsonLanguage;
 
 /// Return the static [MetadataRegistry] for the JSON analyzer rules
@@ -99,10 +99,10 @@ where
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
+    use biome_diagnostics::termcolor::NoColor;
+    use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use rome_console::fmt::{Formatter, Termcolor};
     use rome_console::{markup, Markup};
-    use rome_diagnostics::termcolor::NoColor;
-    use rome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use rome_json_parser::{parse_json, JsonParserOptions};
     use rome_json_syntax::TextRange;
     use std::slice;

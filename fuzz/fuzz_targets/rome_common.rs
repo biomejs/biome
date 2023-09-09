@@ -4,8 +4,8 @@
 #![allow(dead_code)]
 
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
+use biome_diagnostics::Diagnostic;
 use libfuzzer_sys::Corpus;
-use rome_diagnostics::Diagnostic;
 use rome_formatter::format_node;
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::JsFormatOptions;

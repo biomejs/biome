@@ -17,7 +17,7 @@ default = ["console_error_panic_hook"]
 [dependencies]
 js-sys             = "0.3.59"
 rome_console       = { workspace = true }
-rome_diagnostics   = { path = "../../crates/rome_diagnostics" }
+biome_diagnostics   = { path = "../../crates/biome_diagnostics" }
 rome_service       = { path = "../../crates/rome_service" }
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.4.5"

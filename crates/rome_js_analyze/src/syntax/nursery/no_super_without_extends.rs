@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_diagnostics::category;
 use rome_console::markup;
-use rome_diagnostics::category;
 use rome_js_syntax::{JsClassDeclaration, JsSuperExpression};
 use rome_rowan::AstNode;
 

@@ -2,7 +2,7 @@ use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use rome_console::markup;
 
-use rome_diagnostics::Applicability;
+use biome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use rome_js_syntax::*;

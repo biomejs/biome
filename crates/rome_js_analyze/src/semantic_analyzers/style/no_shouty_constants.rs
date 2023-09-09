@@ -1,7 +1,7 @@
 use crate::{semantic_services::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make::{js_literal_member_name, js_property_object_member};
 use rome_js_semantic::{Reference, ReferencesExtensions};
 use rome_js_syntax::{

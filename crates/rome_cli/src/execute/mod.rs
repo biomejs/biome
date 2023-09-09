@@ -7,7 +7,7 @@ mod traverse;
 use crate::cli_options::CliOptions;
 use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
-use rome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
+use biome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
 use rome_fs::RomePath;
 use rome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;

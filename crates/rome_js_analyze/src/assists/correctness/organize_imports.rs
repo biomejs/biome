@@ -9,8 +9,8 @@ use std::{
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, Rule, SourceActionKind,
 };
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImport,

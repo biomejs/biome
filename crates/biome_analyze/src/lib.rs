@@ -20,7 +20,7 @@ mod syntax;
 mod visitor;
 
 // Re-exported for use in the `declare_group` macro
-pub use rome_diagnostics::category_concat;
+pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
     ActionCategory, RefactorKind, RuleCategories, RuleCategory, SourceActionKind,
@@ -45,10 +45,10 @@ pub use crate::signals::{
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 
-use rome_console::markup;
-use rome_diagnostics::{
+use biome_diagnostics::{
     category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags, Severity,
 };
+use rome_console::markup;
 use rome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextLen, TextRange,
     TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,

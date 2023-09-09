@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use std::str;
 use std::sync::Arc;
 
+use biome_diagnostics::{Error, Severity};
 use parking_lot::{lock_api::ArcMutexGuard, Mutex, RawMutex, RwLock};
-use rome_diagnostics::{Error, Severity};
 
 use crate::fs::OpenOptions;
 use crate::{FileSystem, RomePath, TraversalContext, TraversalScope};
@@ -275,8 +275,8 @@ mod tests {
         path::{Path, PathBuf},
     };
 
+    use biome_diagnostics::Error;
     use parking_lot::Mutex;
-    use rome_diagnostics::Error;
 
     use crate::{fs::FileSystemExt, OpenOptions};
     use crate::{FileSystem, MemoryFileSystem, PathInterner, RomePath, TraversalContext};

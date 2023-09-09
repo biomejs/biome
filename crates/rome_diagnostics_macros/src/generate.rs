@@ -28,7 +28,7 @@ pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
     let generics = input.generics;
 
     quote! {
-        impl #generic_params rome_diagnostics::Diagnostic for #ident #generics {
+        impl #generic_params biome_diagnostics::Diagnostic for #ident #generics {
             #category
             #severity
             #description
@@ -45,7 +45,7 @@ pub(crate) fn generate_diagnostic(input: DeriveInput) -> TokenStream {
 fn generate_category(input: &DeriveInput) -> TokenStream {
     let category = match &input.category {
         Some(StaticOrDynamic::Static(value)) => quote! {
-            rome_diagnostics::category!(#value)
+            biome_diagnostics::category!(#value)
         },
         Some(StaticOrDynamic::Dynamic(value)) => quote! {
             self.#value
@@ -54,7 +54,7 @@ fn generate_category(input: &DeriveInput) -> TokenStream {
     };
 
     quote! {
-        fn category(&self) -> Option<&'static rome_diagnostics::Category> {
+        fn category(&self) -> Option<&'static biome_diagnostics::Category> {
             Some(#category)
         }
     }
@@ -63,7 +63,7 @@ fn generate_category(input: &DeriveInput) -> TokenStream {
 fn generate_severity(input: &DeriveInput) -> TokenStream {
     let severity = match &input.severity {
         Some(StaticOrDynamic::Static(value)) => quote! {
-            rome_diagnostics::Severity::#value
+            biome_diagnostics::Severity::#value
         },
         Some(StaticOrDynamic::Dynamic(value)) => quote! {
             self.#value
@@ -72,7 +72,7 @@ fn generate_severity(input: &DeriveInput) -> TokenStream {
     };
 
     quote! {
-        fn severity(&self) -> rome_diagnostics::Severity {
+        fn severity(&self) -> biome_diagnostics::Severity {
             #severity
         }
     }
@@ -128,12 +128,12 @@ fn generate_description(input: &DeriveInput) -> TokenStream {
         Some(StaticOrDynamic::Static(StringOrMarkup::Markup(markup))) => quote! {
             let mut buffer = Vec::new();
 
-            let write = rome_diagnostics::termcolor::NoColor::new(&mut buffer);
-            let mut write = rome_diagnostics::console::fmt::Termcolor(write);
-            let mut write = rome_diagnostics::console::fmt::Formatter::new(&mut write);
+            let write = biome_diagnostics::termcolor::NoColor::new(&mut buffer);
+            let mut write = biome_diagnostics::console::fmt::Termcolor(write);
+            let mut write = biome_diagnostics::console::fmt::Formatter::new(&mut write);
 
-            use rome_diagnostics::console as rome_console;
-            write.write_markup(&rome_diagnostics::console::markup!{ #markup })
+            use biome_diagnostics::console as rome_console;
+            write.write_markup(&biome_diagnostics::console::markup!{ #markup })
                 .map_err(|_| ::std::fmt::Error)?;
 
             fmt.write_str(::std::str::from_utf8(&buffer).map_err(|_| ::std::fmt::Error)?)
@@ -157,17 +157,17 @@ fn generate_message(input: &DeriveInput) -> TokenStream {
             fmt.write_str(#value)
         },
         Some(StaticOrDynamic::Static(StringOrMarkup::Markup(markup))) => quote! {
-            use rome_diagnostics::console as rome_console;
-            fmt.write_markup(rome_diagnostics::console::markup!{ #markup })
+            use biome_diagnostics::console as rome_console;
+            fmt.write_markup(biome_diagnostics::console::markup!{ #markup })
         },
         Some(StaticOrDynamic::Dynamic(value)) => quote! {
-            rome_diagnostics::console::fmt::Display::fmt(&self.#value, fmt)
+            biome_diagnostics::console::fmt::Display::fmt(&self.#value, fmt)
         },
         None => return quote!(),
     };
 
     quote! {
-        fn message(&self, fmt: &mut rome_diagnostics::console::fmt::Formatter<'_>) -> ::std::io::Result<()> {
+        fn message(&self, fmt: &mut biome_diagnostics::console::fmt::Formatter<'_>) -> ::std::io::Result<()> {
             #message
         }
     }
@@ -181,8 +181,8 @@ fn generate_advices(input: &DeriveInput) -> TokenStream {
     let advices = input.advices.iter();
 
     quote! {
-        fn advices(&self, visitor: &mut dyn rome_diagnostics::Visit) -> ::std::io::Result<()> {
-            #( rome_diagnostics::Advices::record(&self.#advices, visitor)?; )*
+        fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> ::std::io::Result<()> {
+            #( biome_diagnostics::Advices::record(&self.#advices, visitor)?; )*
             Ok(())
         }
     }
@@ -196,8 +196,8 @@ fn generate_verbose_advices(input: &DeriveInput) -> TokenStream {
     let verbose_advices = input.verbose_advices.iter();
 
     quote! {
-        fn verbose_advices(&self, visitor: &mut dyn rome_diagnostics::Visit) -> ::std::io::Result<()> {
-            #( rome_diagnostics::Advices::record(&self.#verbose_advices, visitor)?; )*
+        fn verbose_advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> ::std::io::Result<()> {
+            #( biome_diagnostics::Advices::record(&self.#verbose_advices, visitor)?; )*
             Ok(())
         }
     }
@@ -212,8 +212,8 @@ fn generate_location(input: &DeriveInput) -> TokenStream {
     let method = input.location.iter().map(|(_, method)| method);
 
     quote! {
-        fn location(&self) -> rome_diagnostics::Location<'_> {
-            rome_diagnostics::Location::builder()
+        fn location(&self) -> biome_diagnostics::Location<'_> {
+            biome_diagnostics::Location::builder()
                 #( .#method(&self.#field) )*
                 .build()
         }
@@ -225,7 +225,7 @@ fn generate_tags(input: &DeriveInput) -> TokenStream {
         Some(StaticOrDynamic::Static(value)) => {
             let values = value.iter();
             quote! {
-                #( rome_diagnostics::DiagnosticTags::#values )|*
+                #( biome_diagnostics::DiagnosticTags::#values )|*
             }
         }
         Some(StaticOrDynamic::Dynamic(value)) => quote! {
@@ -235,7 +235,7 @@ fn generate_tags(input: &DeriveInput) -> TokenStream {
     };
 
     quote! {
-        fn tags(&self) -> rome_diagnostics::DiagnosticTags {
+        fn tags(&self) -> biome_diagnostics::DiagnosticTags {
             #tags
         }
     }
@@ -244,7 +244,7 @@ fn generate_tags(input: &DeriveInput) -> TokenStream {
 fn generate_source(input: &DeriveInput) -> TokenStream {
     match &input.source {
         Some(value) => quote! {
-            fn source(&self) -> Option<&dyn rome_diagnostics::Diagnostic> {
+            fn source(&self) -> Option<&dyn biome_diagnostics::Diagnostic> {
                 self.#value.as_deref()
             }
         },

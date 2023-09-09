@@ -1,5 +1,5 @@
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
-use rome_diagnostics::{Error, Result};
+use biome_diagnostics::{Error, Result};
 use std::ops::Deref;
 use std::path::Path;
 

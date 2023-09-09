@@ -14,9 +14,9 @@ use crate::workspace::{
 };
 use crate::{Configuration, Rules, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_parser::AnyParse;
 use rome_deserialize::json::deserialize_from_json_ast;
-use rome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
 use rome_fs::{RomePath, BIOME_JSON, ROME_JSON};
 use rome_json_analyze::analyze;
@@ -231,7 +231,7 @@ fn lint(params: LintParams) -> LintResults {
                 deserialized
                     .into_diagnostics()
                     .into_iter()
-                    .map(rome_diagnostics::serde::Diagnostic::new)
+                    .map(biome_diagnostics::serde::Diagnostic::new)
                     .collect::<Vec<_>>(),
             );
         }
@@ -289,7 +289,7 @@ fn lint(params: LintParams) -> LintResults {
 
                     let error = diagnostic.with_severity(severity);
 
-                    diagnostics.push(rome_diagnostics::serde::Diagnostic::new(error));
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
                 }
             }
 
@@ -299,7 +299,7 @@ fn lint(params: LintParams) -> LintResults {
         diagnostics.extend(
             analyze_diagnostics
                 .into_iter()
-                .map(rome_diagnostics::serde::Diagnostic::new)
+                .map(biome_diagnostics::serde::Diagnostic::new)
                 .collect::<Vec<_>>(),
         );
 

@@ -6,10 +6,10 @@ use crate::session::{
 };
 use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
+use biome_diagnostics::panic::PanicError;
 use futures::future::ready;
 use futures::FutureExt;
 use rome_console::markup;
-use rome_diagnostics::panic::PanicError;
 use rome_fs::{BIOME_JSON, ROME_JSON};
 use rome_service::workspace::{RageEntry, RageParams, RageResult};
 use rome_service::{workspace, Workspace};
@@ -358,7 +358,7 @@ impl LanguageServer for LSPServer {
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
-        rome_diagnostics::panic::catch_unwind(move || {
+        biome_diagnostics::panic::catch_unwind(move || {
             handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
         })
         .map_err(into_lsp_error)?
@@ -368,7 +368,7 @@ impl LanguageServer for LSPServer {
         &self,
         params: DocumentFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = rome_diagnostics::panic::catch_unwind(move || {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
             handlers::formatting::format(&self.session, params)
         });
 
@@ -379,7 +379,7 @@ impl LanguageServer for LSPServer {
         &self,
         params: DocumentRangeFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = rome_diagnostics::panic::catch_unwind(move || {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
             handlers::formatting::format_range(&self.session, params)
         });
 
@@ -390,7 +390,7 @@ impl LanguageServer for LSPServer {
         &self,
         params: DocumentOnTypeFormattingParams,
     ) -> LspResult<Option<Vec<TextEdit>>> {
-        let result = rome_diagnostics::panic::catch_unwind(move || {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
             handlers::formatting::format_on_type(&self.session, params)
         });
 
@@ -398,7 +398,7 @@ impl LanguageServer for LSPServer {
     }
 
     async fn rename(&self, params: RenameParams) -> LspResult<Option<WorkspaceEdit>> {
-        rome_diagnostics::panic::catch_unwind(move || {
+        biome_diagnostics::panic::catch_unwind(move || {
             let rename_enabled = self
                 .session
                 .extension_settings

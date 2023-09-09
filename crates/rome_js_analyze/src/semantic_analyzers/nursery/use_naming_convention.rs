@@ -8,6 +8,7 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_diagnostics::Applicability;
 use biome_js_unicode_table::is_js_ident;
 use bpaf::Bpaf;
 use rome_console::markup;
@@ -15,7 +16,6 @@ use rome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };
-use rome_diagnostics::Applicability;
 use rome_js_semantic::CanBeImportedExported;
 use rome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, inner_string_text, AnyJsClassMember, AnyJsObjectMember,

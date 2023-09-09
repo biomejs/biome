@@ -1,8 +1,8 @@
 use crate::TestFormatLanguage;
-use rome_diagnostics::console::fmt::{Formatter, Termcolor};
-use rome_diagnostics::console::markup;
-use rome_diagnostics::termcolor;
-use rome_diagnostics::{DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::console::fmt::{Formatter, Termcolor};
+use biome_diagnostics::console::markup;
+use biome_diagnostics::termcolor;
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use rome_rowan::SyntaxNode;
 
 /// Perform a second pass of formatting on a file, printing a diff if the

@@ -308,7 +308,7 @@ impl Rule for NoDuplicateObjectKeys {
         Some(JsRuleAction {
             category: biome_analyze::ActionCategory::QuickFix,
             // The property initialization could contain side effects
-            applicability: rome_diagnostics::Applicability::MaybeIncorrect,
+            applicability: biome_diagnostics::Applicability::MaybeIncorrect,
             message: markup!("Remove this " {member_definition.to_string()}).to_owned(),
             mutation: batch,
         })

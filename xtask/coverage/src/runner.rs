@@ -1,10 +1,10 @@
 use super::*;
 use crate::reporters::TestReporter;
-use rome_diagnostics::console::fmt::{Formatter, Termcolor};
-use rome_diagnostics::console::markup;
-use rome_diagnostics::termcolor::Buffer;
-use rome_diagnostics::Error;
-use rome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::console::fmt::{Formatter, Termcolor};
+use biome_diagnostics::console::markup;
+use biome_diagnostics::termcolor::Buffer;
+use biome_diagnostics::Error;
+use biome_diagnostics::PrintDiagnostic;
 use rome_js_parser::{parse, JsParserOptions, Parse};
 use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use rome_rowan::SyntaxKind;

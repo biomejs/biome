@@ -4,15 +4,15 @@ use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
 use crate::{
     Phase, Phases, Queryable, SuppressionCommentEmitter, SuppressionCommentEmitterPayload,
 };
-use rome_console::fmt::Display;
-use rome_console::{markup, MarkupBuf};
-use rome_diagnostics::advice::CodeSuggestionAdvice;
-use rome_diagnostics::location::AsSpan;
-use rome_diagnostics::Applicability;
-use rome_diagnostics::{
+use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::Applicability;
+use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
 };
+use rome_console::fmt::Display;
+use rome_console::{markup, MarkupBuf};
 use rome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::fmt::Debug;
 

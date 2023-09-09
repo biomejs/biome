@@ -17,9 +17,9 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
+use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_parser::AnyParse;
 use indexmap::IndexSet;
-use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use rome_formatter::{FormatError, Printed};
 use rome_fs::RomePath;
 use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -313,7 +313,7 @@ fn lint(params: LintParams) -> LintResults {
 
                     let error = diagnostic.with_severity(severity);
 
-                    diagnostics.push(rome_diagnostics::serde::Diagnostic::new(error));
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
                 }
             }
 
@@ -324,7 +324,7 @@ fn lint(params: LintParams) -> LintResults {
     diagnostics.extend(
         analyze_diagnostics
             .into_iter()
-            .map(rome_diagnostics::serde::Diagnostic::new)
+            .map(biome_diagnostics::serde::Diagnostic::new)
             .collect::<Vec<_>>(),
     );
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);

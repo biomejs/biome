@@ -245,8 +245,8 @@ use crate::diagnostic::{expected_token, ParseDiagnostic, ToDiagnostic};
 use crate::event::Event;
 use crate::event::Event::Token;
 use crate::token_source::{BumpWithContext, NthToken, TokenSource};
+use biome_diagnostics::location::AsSpan;
 use rome_console::fmt::Display;
-use rome_diagnostics::location::AsSpan;
 use rome_rowan::{
     AnyFileSource, AstNode, FileSource, FileSourceError, Language, SendNode, SyntaxKind,
     SyntaxNode, TextRange, TextSize,
@@ -267,8 +267,8 @@ pub mod tree_sink;
 
 use crate::parsed_syntax::ParsedSyntax;
 use crate::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_diagnostics::serde::Diagnostic;
 pub use marker::{CompletedMarker, Marker};
-use rome_diagnostics::serde::Diagnostic;
 pub use token_set::TokenSet;
 
 pub struct ParserContext<K: SyntaxKind> {

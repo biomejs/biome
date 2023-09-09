@@ -14,7 +14,7 @@ version              = "0.1.0"
 
 [dependencies]
 biome_suppression = { workspace = true }
-rome_diagnostics  = { workspace = true }
+biome_diagnostics  = { workspace = true }
 rome_formatter    = { workspace = true }
 rome_json_syntax  = { workspace = true }
 rome_rowan        = { workspace = true }

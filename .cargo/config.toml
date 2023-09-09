@@ -19,7 +19,7 @@ documentation = """
     -p rome_*analyze \
     -p rome_*_syntax \
     -p rome_*_factory \
-    -p rome_diagnostics \
+    -p biome_diagnostics \
     -p rome_service \
     -p rome_cli \
     -p rome_console \

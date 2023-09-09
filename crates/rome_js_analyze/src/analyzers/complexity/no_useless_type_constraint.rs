@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 
-use rome_diagnostics::Applicability;
+use biome_diagnostics::Applicability;
 use rome_js_syntax::TsTypeConstraintClause;
 use rome_rowan::{AstNode, BatchMutationExt};
 

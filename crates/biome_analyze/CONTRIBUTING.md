@@ -504,7 +504,7 @@ refer to the corresponding diagnostic category for this lint rule, if it
 has one. Using this macro instead of getting the category for a diagnostic
 by dynamically parsing its string name has the advantage of statically
 injecting the category at compile time and checking that it is correctly
-registered to the `rome_diagnostics` library.
+registered to the `biome_diagnostics` library.
 
 ```rust,ignore
 declare_rule! {

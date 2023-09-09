@@ -5,7 +5,7 @@ use crate::execute::process_file::{
 };
 use crate::execute::TraversalMode;
 use crate::FormatterReportFileDetail;
-use rome_diagnostics::{category, DiagnosticExt};
+use biome_diagnostics::{category, DiagnosticExt};
 use rome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;

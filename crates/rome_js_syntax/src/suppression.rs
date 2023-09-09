@@ -1,4 +1,4 @@
-use rome_diagnostics::{Category, Diagnostic};
+use biome_diagnostics::{Category, Diagnostic};
 use rome_rowan::{TextRange, TextSize};
 
 /// Single instance of a suppression comment, with the following syntax:
@@ -277,7 +277,7 @@ fn offset_from(base: &str, substr: &str) -> TextSize {
 
 #[cfg(test)]
 mod tests_rome_ignore {
-    use rome_diagnostics::category;
+    use biome_diagnostics::category;
     use rome_rowan::{TextRange, TextSize};
 
     use crate::suppression::{offset_from, SuppressionDiagnostic, SuppressionDiagnosticKind};
@@ -500,7 +500,7 @@ mod tests_rome_ignore {
 
 #[cfg(test)]
 mod tests_biome_ignore {
-    use rome_diagnostics::category;
+    use biome_diagnostics::category;
     use rome_rowan::{TextRange, TextSize};
 
     use crate::suppression::{offset_from, SuppressionDiagnostic, SuppressionDiagnosticKind};

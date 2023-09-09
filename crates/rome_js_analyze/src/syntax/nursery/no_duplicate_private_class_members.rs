@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 
-use rome_diagnostics::category;
+use biome_diagnostics::category;
 use rome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
 use rome_rowan::AstNode;
 

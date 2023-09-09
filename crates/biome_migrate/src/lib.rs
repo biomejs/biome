@@ -8,7 +8,7 @@ use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, InspectMatcher,
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
-use rome_diagnostics::Error;
+use biome_diagnostics::Error;
 use rome_json_syntax::JsonLanguage;
 use std::convert::Infallible;
 use std::path::{Path, PathBuf};

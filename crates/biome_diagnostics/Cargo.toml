@@ -1,0 +1,47 @@
+[package]
+authors.workspace = true
+categories        = ["development-tools"]
+description       = "Pretty error reporting library"
+documentation     = "https://docs.rs/biome_diagnostics"
+edition.workspace = true
+license.workspace = true
+name              = "biome_diagnostics"
+version           = "0.2.0"
+
+[[example]]
+name = "cli"
+test = true
+
+[[example]]
+name = "fs"
+test = true
+
+[[example]]
+name = "lint"
+test = true
+
+[[example]]
+name = "serde"
+test = true
+
+[dependencies]
+backtrace                   = "0.3.66"
+biome_text_edit             = { workspace = true }
+biome_text_size             = { workspace = true }
+bitflags                    = { workspace = true }
+bpaf                        = { workspace = true }
+rome_console                = { workspace = true, features = ["serde_markup"] }
+rome_diagnostics_categories = { workspace = true, features = ["serde"] }
+rome_diagnostics_macros     = { workspace = true }
+rome_rowan                  = { workspace = true }
+schemars                    = { workspace = true, optional = true }
+serde                       = { workspace = true, features = ["derive"] }
+termcolor                   = "1.1.2"
+unicode-width               = "0.1.9"
+
+[features]
+schema = ["schemars", "biome_text_edit/schemars", "rome_diagnostics_categories/schemars"]
+
+[dev-dependencies]
+serde_json = { workspace = true }
+trybuild   = "1.0.80"

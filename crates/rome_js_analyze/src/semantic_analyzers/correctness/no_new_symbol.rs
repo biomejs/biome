@@ -1,7 +1,7 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use rome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};

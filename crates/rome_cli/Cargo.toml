@@ -27,7 +27,7 @@ lazy_static         = { workspace = true }
 rayon               = "1.5.1"
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
-rome_diagnostics    = { workspace = true }
+biome_diagnostics    = { workspace = true }
 rome_formatter      = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }

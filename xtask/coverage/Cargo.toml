@@ -15,7 +15,7 @@ once_cell          = "1.9.0"
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = "1.5.5"
 rome_console       = { path = "../../crates/rome_console" }
-rome_diagnostics   = { path = "../../crates/rome_diagnostics" }
+biome_diagnostics   = { path = "../../crates/biome_diagnostics" }
 rome_js_parser     = { path = "../../crates/rome_js_parser" }
 rome_js_semantic   = { path = "../../crates/rome_js_semantic" }
 rome_js_syntax     = { path = "../../crates/rome_js_syntax" }
