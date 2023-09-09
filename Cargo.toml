@@ -29,9 +29,12 @@ biome_analyze                = { path = "./crates/biome_analyze" }
 biome_aria                   = { path = "./crates/biome_aria" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata" }
 biome_cli                    = { path = "./crates/biome_cli" }
+biome_console                = { version = "0.0.1", path = "./crates/biome_console" }
+biome_control_flow           = { path = "./crates/biome_control_flow" }
 biome_css_factory            = { path = "./crates/biome_css_factory" }
 biome_css_parser             = { path = "./crates/biome_css_parser" }
 biome_css_syntax             = { path = "./crates/biome_css_syntax" }
+biome_deserialize            = { version = "0.2.0", path = "./crates/biome_deserialize" }
 biome_diagnostics            = { version = "0.2.0", path = "./crates/biome_diagnostics" }
 biome_diagnostics_categories = { version = "0.2.0", path = "./crates/biome_diagnostics_categories" }
 biome_diagnostics_macros     = { version = "0.0.1", path = "./crates/biome_diagnostics_macros" }
@@ -45,9 +48,6 @@ biome_suppression            = { version = "0.2.0", path = "./crates/biome_suppr
 biome_test_utils             = { path = "./crates/biome_test_utils" }
 biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_edit" }
 biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_size" }
-biome_console                 = { version = "0.0.1", path = "./crates/biome_console" }
-biome_control_flow            = { path = "./crates/biome_control_flow" }
-biome_deserialize             = { version = "0.2.0", path = "./crates/biome_deserialize" }
 rome_formatter               = { version = "0.1.0", path = "./crates/rome_formatter" }
 rome_formatter_test          = { path = "./crates/rome_formatter_test" }
 rome_fs                      = { path = "./crates/rome_fs" }

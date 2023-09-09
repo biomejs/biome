@@ -9,8 +9,8 @@ repository.workspace = true
 version              = "0.2.0"
 
 [dependencies]
+biome_console     = { version = "0.0.1", path = "../biome_console" }
 biome_diagnostics = { version = "0.2.0", path = "../biome_diagnostics" }
-biome_console      = { version = "0.0.1", path = "../biome_console" }
 rome_rowan        = { version = "0.2.0", path = "../rome_rowan" }
 schemars          = { version = "0.8.10", optional = true }
 serde             = { version = "1.0.136", features = ["derive"], optional = true }

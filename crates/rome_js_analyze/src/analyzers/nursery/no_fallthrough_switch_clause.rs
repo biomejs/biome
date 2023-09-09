@@ -1,12 +1,12 @@
 use std::collections::VecDeque;
 
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use roaring::RoaringBitmap;
 use biome_console::markup;
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use roaring::RoaringBitmap;
 use rome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use rome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use rustc_hash::FxHashMap;

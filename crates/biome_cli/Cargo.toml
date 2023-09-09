@@ -13,6 +13,8 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow              = "1.0.52"
+biome_console       = { workspace = true }
+biome_deserialize   = { workspace = true }
 biome_diagnostics   = { workspace = true }
 biome_flags         = { workspace = true }
 biome_lsp           = { workspace = true }
@@ -26,8 +28,6 @@ hdrhistogram        = { version = "7.5.0", default-features = false }
 indexmap            = { workspace = true }
 lazy_static         = { workspace = true }
 rayon               = "1.5.1"
-biome_console        = { workspace = true }
-biome_deserialize    = { workspace = true }
 rome_formatter      = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }

@@ -12,12 +12,12 @@ version              = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 cfg-if            = "1.0.0"
 countme           = { workspace = true }
 drop_bomb         = "0.1.5"
 indexmap          = { workspace = true }
-biome_console      = { workspace = true }
 rome_rowan        = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }

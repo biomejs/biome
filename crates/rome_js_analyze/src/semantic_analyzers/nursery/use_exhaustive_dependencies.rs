@@ -1,10 +1,10 @@
 use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use bpaf::Bpaf;
 use biome_console::markup;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use bpaf::Bpaf;
 use rome_js_semantic::{Capture, SemanticModel};
 use rome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,

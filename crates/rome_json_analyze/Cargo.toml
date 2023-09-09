@@ -10,9 +10,9 @@ version              = "0.2.0"
 
 [dependencies]
 biome_analyze     = { workspace = true }
+biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 lazy_static       = { workspace = true }
-biome_console      = { workspace = true }
 rome_json_syntax  = { workspace = true }
 rome_rowan        = { workspace = true }
 
