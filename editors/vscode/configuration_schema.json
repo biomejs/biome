@@ -859,6 +859,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConfusingVoidType": {
+					"description": "Disallow void type outside of generic or return types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConstantCondition": {
 					"description": "Disallow constant expressions in conditions",
 					"anyOf": [

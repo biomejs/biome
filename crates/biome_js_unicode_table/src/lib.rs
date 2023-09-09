@@ -22,7 +22,7 @@ pub fn is_id_continue(c: char) -> bool {
 /// Currently, it doesn't check escaped unicode chars.
 ///
 /// ```
-/// use rome_js_unicode_table::is_js_ident;
+/// use biome_js_unicode_table::is_js_ident;
 ///
 /// assert!(is_js_ident("id0"));
 /// assert!(is_js_ident("$id$"));

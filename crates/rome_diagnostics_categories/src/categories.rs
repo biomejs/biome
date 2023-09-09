@@ -80,6 +80,7 @@ define_categories! {
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
 
     // nursery
+    "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/nursery/noAriaUnsupportedElements": "https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
     "lint/nursery/noBannedTypes": "https://biomejs.dev/linter/rules/no-banned-types",

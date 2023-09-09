@@ -173,13 +173,13 @@ version = "0.1.0"
 dependencies = [
  "biome_css_factory",
  "biome_css_syntax",
+ "biome_js_unicode_table",
  "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
  "rome_diagnostics",
- "rome_js_unicode_table",
  "rome_rowan",
  "tests_macros",
  "tracing",
@@ -195,6 +195,10 @@ dependencies = [
 [[package]]
 name = "biome_flags"
 version = "0.0.0"
+
+[[package]]
+name = "biome_js_unicode_table"
+version = "0.0.1"
 
 [[package]]
 name = "biome_lsp"
@@ -2126,6 +2130,7 @@ version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_aria",
+ "biome_js_unicode_table",
  "biome_test_utils",
  "biome_text_edit",
  "bpaf",
@@ -2142,7 +2147,6 @@ dependencies = [
  "rome_js_parser",
  "rome_js_semantic",
  "rome_js_syntax",
- "rome_js_unicode_table",
  "rome_json_factory",
  "rome_json_syntax",
  "rome_rowan",
@@ -2197,6 +2201,7 @@ dependencies = [
 name = "rome_js_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_js_unicode_table",
  "biome_parser",
  "bitflags 2.3.3",
  "cfg-if",
@@ -2210,7 +2215,6 @@ dependencies = [
  "rome_js_factory",
  "rome_js_parser",
  "rome_js_syntax",
- "rome_js_unicode_table",
  "rome_rowan",
  "schemars",
  "serde",
@@ -2265,10 +2269,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_js_unicode_table"
-version = "0.0.1"
-
-[[package]]
 name = "rome_json_analyze"
 version = "0.2.0"
 dependencies = [
@@ -2319,13 +2319,13 @@ dependencies = [
 name = "rome_json_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_js_unicode_table",
  "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
  "rome_diagnostics",
- "rome_js_unicode_table",
  "rome_json_factory",
  "rome_json_syntax",
  "rome_rowan",
