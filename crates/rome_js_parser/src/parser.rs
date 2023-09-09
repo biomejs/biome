@@ -3,7 +3,7 @@
 //! the parser yields events like `Start node`, `Error`, etc.
 //! These events are then applied to a `TreeSink`.
 
-use rome_parser::*;
+use biome_parser::*;
 pub(crate) mod rewrite_parser;
 pub(crate) mod single_token_parse_recovery;
 
@@ -16,15 +16,15 @@ use crate::{
     state::ParserStateCheckpoint,
     token_source::{JsTokenSource, TokenSourceCheckpoint},
 };
+use biome_parser::diagnostic::merge_diagnostics;
+use biome_parser::event::Event;
+use biome_parser::token_source::Trivia;
+use biome_parser::{ParserContext, ParserContextCheckpoint};
 pub(crate) use parsed_syntax::ParsedSyntax;
 use rome_js_syntax::{
     JsFileSource,
     JsSyntaxKind::{self},
 };
-use rome_parser::diagnostic::merge_diagnostics;
-use rome_parser::event::Event;
-use rome_parser::token_source::Trivia;
-use rome_parser::{ParserContext, ParserContextCheckpoint};
 
 /// An extremely fast, error tolerant, completely lossless JavaScript parser
 ///

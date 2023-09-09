@@ -5,7 +5,7 @@ use crate::{
     cursor, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
     SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent,
 };
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
 use serde::Serialize;
 use std::any::TypeId;

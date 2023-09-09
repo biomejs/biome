@@ -1,10 +1,10 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::RuleConfiguration;
+use biome_analyze::RuleFilter;
+use biome_diagnostics::{Category, Severity};
 use bpaf::Bpaf;
 use indexmap::IndexSet;
-use rome_analyze::RuleFilter;
-use rome_diagnostics::{Category, Severity};
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -62,7 +62,7 @@ impl Default for Rules {
     }
 }
 impl Rules {
-    #[doc = r" Checks if the code coming from [rome_diagnostics::Diagnostic] corresponds to a rule."]
+    #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
     #[doc = r" Usually the code is built like {category}/{rule_name}"]
     pub fn matches_diagnostic_code<'a>(
         &self,
@@ -84,8 +84,8 @@ impl Rules {
             _ => None,
         }
     }
-    #[doc = r" Given a category coming from [Diagnostic](rome_diagnostics::Diagnostic), this function returns"]
-    #[doc = r" the [Severity](rome_diagnostics::Severity) associated to the rule, if the configuration changed it."]
+    #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
+    #[doc = r" the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
     pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
@@ -199,9 +199,15 @@ impl Rules {
             None
         }
     }
-    pub(crate) const fn is_recommended(&self) -> bool { !matches!(self.recommended, Some(false)) }
-    pub(crate) const fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) const fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) const fn is_recommended(&self) -> bool {
+        !matches!(self.recommended, Some(false))
+    }
+    pub(crate) const fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) const fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     #[doc = r" It returns a tuple of filters. The first element of the tuple are the enabled rules,"]
     #[doc = r" while the second element are the disabled rules."]
     #[doc = r""]
@@ -556,12 +562,18 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_access_key.as_ref() {
@@ -791,7 +803,9 @@ impl A11y {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -799,7 +813,9 @@ impl A11y {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 20] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 22] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 22] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -1025,12 +1041,18 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_extra_boolean_cast.as_ref() {
@@ -1206,7 +1228,9 @@ impl Complexity {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -1214,7 +1238,9 @@ impl Complexity {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 13] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 16] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 16] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -1536,12 +1562,18 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_children_prop.as_ref() {
@@ -1811,7 +1843,9 @@ impl Correctness {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -1819,7 +1853,9 @@ impl Correctness {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 24] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -1909,6 +1945,15 @@ pub struct Nursery {
     #[bpaf(long("no-confusing-arrow"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_confusing_arrow: Option<RuleConfiguration>,
+    #[doc = "Disallow void type outside of generic or return types."]
+    #[bpaf(
+        long("no-confusing-void-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_confusing_void_type: Option<RuleConfiguration>,
     #[doc = "Disallow constant expressions in conditions"]
     #[bpaf(long("no-constant-condition"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2080,11 +2125,12 @@ pub struct Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 31] = [
+    pub(crate) const GROUP_RULES: [&'static str; 32] = [
         "noAccumulatingSpread",
         "noAriaUnsupportedElements",
         "noBannedTypes",
         "noConfusingArrow",
+        "noConfusingVoidType",
         "noConstantCondition",
         "noControlCharactersInRegex",
         "noDuplicateJsonKeys",
@@ -2138,26 +2184,26 @@ impl Nursery {
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 20] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 31] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 32] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2189,14 +2235,21 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
@@ -2219,139 +2272,144 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_constant_condition.as_ref() {
+        if let Some(rule) = self.no_confusing_void_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_control_characters_in_regex.as_ref() {
+        if let Some(rule) = self.no_constant_condition.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_control_characters_in_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_excessive_complexity.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
+        if let Some(rule) = self.no_excessive_complexity.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_global_is_finite.as_ref() {
+        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_global_is_nan.as_ref() {
+        if let Some(rule) = self.no_global_is_finite.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
+        if let Some(rule) = self.no_global_is_nan.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_nonoctal_decimal_escape.as_ref() {
+        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_redundant_roles.as_ref() {
+        if let Some(rule) = self.no_nonoctal_decimal_escape.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_self_assign.as_ref() {
+        if let Some(rule) = self.no_redundant_roles.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_static_only_class.as_ref() {
+        if let Some(rule) = self.no_self_assign.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unsafe_declaration_merging.as_ref() {
+        if let Some(rule) = self.no_static_only_class.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_useless_empty_export.as_ref() {
+        if let Some(rule) = self.no_unsafe_declaration_merging.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_useless_this_alias.as_ref() {
+        if let Some(rule) = self.no_useless_empty_export.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_void.as_ref() {
+        if let Some(rule) = self.no_useless_this_alias.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_aria_prop_types.as_ref() {
+        if let Some(rule) = self.no_void.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.use_aria_prop_types.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_collapsed_else_if.as_ref() {
+        if let Some(rule) = self.use_arrow_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
+        if let Some(rule) = self.use_collapsed_else_if.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_getter_return.as_ref() {
+        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_getter_return.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_is_array.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_literal_enum_members.as_ref() {
+        if let Some(rule) = self.use_is_array.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_literal_enum_members.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
+            }
+        }
+        if let Some(rule) = self.use_naming_convention.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
         index_set
@@ -2378,145 +2436,152 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_constant_condition.as_ref() {
+        if let Some(rule) = self.no_confusing_void_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_control_characters_in_regex.as_ref() {
+        if let Some(rule) = self.no_constant_condition.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_control_characters_in_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_excessive_complexity.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
+        if let Some(rule) = self.no_excessive_complexity.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_global_is_finite.as_ref() {
+        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_global_is_nan.as_ref() {
+        if let Some(rule) = self.no_global_is_finite.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
+        if let Some(rule) = self.no_global_is_nan.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_nonoctal_decimal_escape.as_ref() {
+        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_redundant_roles.as_ref() {
+        if let Some(rule) = self.no_nonoctal_decimal_escape.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_self_assign.as_ref() {
+        if let Some(rule) = self.no_redundant_roles.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_static_only_class.as_ref() {
+        if let Some(rule) = self.no_self_assign.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unsafe_declaration_merging.as_ref() {
+        if let Some(rule) = self.no_static_only_class.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_useless_empty_export.as_ref() {
+        if let Some(rule) = self.no_unsafe_declaration_merging.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_useless_this_alias.as_ref() {
+        if let Some(rule) = self.no_useless_empty_export.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_void.as_ref() {
+        if let Some(rule) = self.no_useless_this_alias.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_aria_prop_types.as_ref() {
+        if let Some(rule) = self.no_void.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.use_aria_prop_types.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_collapsed_else_if.as_ref() {
+        if let Some(rule) = self.use_arrow_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
+        if let Some(rule) = self.use_collapsed_else_if.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_getter_return.as_ref() {
+        if let Some(rule) = self.use_exhaustive_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_getter_return.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_hook_at_top_level.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_is_array.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_literal_enum_members.as_ref() {
+        if let Some(rule) = self.use_is_array.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_literal_enum_members.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
+            }
+        }
+        if let Some(rule) = self.use_naming_convention.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -2524,7 +2589,9 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 20] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 31] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 32] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -2549,6 +2616,7 @@ impl Nursery {
             "noAriaUnsupportedElements" => self.no_aria_unsupported_elements.as_ref(),
             "noBannedTypes" => self.no_banned_types.as_ref(),
             "noConfusingArrow" => self.no_confusing_arrow.as_ref(),
+            "noConfusingVoidType" => self.no_confusing_void_type.as_ref(),
             "noConstantCondition" => self.no_constant_condition.as_ref(),
             "noControlCharactersInRegex" => self.no_control_characters_in_regex.as_ref(),
             "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
@@ -2607,12 +2675,18 @@ impl Performance {
     const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 1] =
         [RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_delete.as_ref() {
@@ -2632,7 +2706,9 @@ impl Performance {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -2640,7 +2716,9 @@ impl Performance {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 1] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 1] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 1] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -2717,12 +2795,18 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
@@ -2752,7 +2836,9 @@ impl Security {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -2760,7 +2846,9 @@ impl Security {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 2] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 2] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 2] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -3042,12 +3130,18 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_arguments.as_ref() {
@@ -3317,7 +3411,9 @@ impl Style {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -3325,7 +3421,9 @@ impl Style {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 16] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
@@ -3713,12 +3811,18 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
     ];
     #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended(&self) -> bool { matches!(self.recommended, Some(true)) }
+    pub(crate) fn is_recommended(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
     pub(crate) const fn is_not_recommended(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) fn is_all(&self) -> bool { matches!(self.all, Some(true)) }
-    pub(crate) fn is_not_all(&self) -> bool { matches!(self.all, Some(false)) }
+    pub(crate) fn is_all(&self) -> bool {
+        matches!(self.all, Some(true))
+    }
+    pub(crate) fn is_not_all(&self) -> bool {
+        matches!(self.all, Some(false))
+    }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_array_index_key.as_ref() {
@@ -4058,7 +4162,9 @@ impl Suspicious {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool { Self::GROUP_RULES.contains(&rule_name) }
+    pub(crate) fn has_rule(rule_name: &str) -> bool {
+        Self::GROUP_RULES.contains(&rule_name)
+    }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
@@ -4066,7 +4172,9 @@ impl Suspicious {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 32] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 33] { Self::ALL_RULES_AS_FILTERS }
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 33] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,

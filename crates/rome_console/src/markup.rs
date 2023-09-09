@@ -4,7 +4,7 @@ use std::{
     io,
 };
 
-use rome_text_size::TextSize;
+use biome_text_size::TextSize;
 use termcolor::{Color, ColorSpec};
 
 use crate::fmt::{Display, Formatter, MarkupElements, Write};

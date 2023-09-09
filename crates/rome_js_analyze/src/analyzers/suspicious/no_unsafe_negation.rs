@@ -1,7 +1,9 @@
 use crate::JsRuleAction;
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression};
 use rome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};

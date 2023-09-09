@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use rome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,

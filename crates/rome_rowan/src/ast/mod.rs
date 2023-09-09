@@ -4,7 +4,7 @@
 //! from any error and produce an ast from any source code. If you don't want to account for
 //! optionals for everything, you can use ...
 
-use rome_text_size::TextRange;
+use biome_text_size::TextRange;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 use std::error::Error;

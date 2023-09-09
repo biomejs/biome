@@ -5,8 +5,8 @@ use crate::{
     fs::{TraversalContext, TraversalScope},
     FileSystem, RomePath,
 };
+use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use rayon::{scope, Scope};
-use rome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use std::fs::{DirEntry, FileType};
 use std::{
     env,

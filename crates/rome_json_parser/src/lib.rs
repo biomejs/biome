@@ -2,11 +2,11 @@
 
 use crate::parser::JsonParser;
 use crate::syntax::parse_root;
+pub use biome_parser::prelude::*;
+use biome_parser::tree_sink::LosslessTreeSink;
 pub use parser::JsonParserOptions;
 use rome_json_factory::JsonSyntaxFactory;
 use rome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
-pub use rome_parser::prelude::*;
-use rome_parser::tree_sink::LosslessTreeSink;
 use rome_rowan::{AstNode, NodeCache};
 
 mod lexer;
@@ -37,7 +37,7 @@ pub fn parse_json_with_cache(
         let (events, diagnostics, trivia) = parser.finish();
 
         let mut tree_sink = JsonLosslessTreeSink::with_cache(source, &trivia, cache);
-        rome_parser::event::process(&mut tree_sink, events, diagnostics);
+        biome_parser::event::process(&mut tree_sink, events, diagnostics);
         let (green, diagnostics) = tree_sink.finish();
 
         JsonParse::new(green, diagnostics)

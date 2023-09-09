@@ -3,11 +3,11 @@ mod registry;
 mod transformers;
 
 use crate::registry::visit_transformation_registry;
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
-use rome_diagnostics::Error;
+use biome_diagnostics::Error;
 use rome_js_syntax::{JsFileSource, JsLanguage};
 use rome_rowan::BatchMutation;
 use std::convert::Infallible;
@@ -99,7 +99,7 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 
 #[cfg(test)]
 mod tests {
-    use rome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter};
     use rome_js_parser::{parse, JsParserOptions};
     use rome_js_syntax::JsFileSource;
     use std::slice;

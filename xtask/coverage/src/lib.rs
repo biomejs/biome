@@ -16,8 +16,8 @@ use crate::reporters::{
     TestReporter,
 };
 use crate::runner::{run_test_suite, TestRunContext, TestSuite};
+use biome_parser::diagnostic::ParseDiagnostic;
 use jsx::jsx_babel::BabelJsxTestSuite;
-use rome_parser::diagnostic::ParseDiagnostic;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
 use symbols::msts::SymbolsMicrosoftTestSuite;

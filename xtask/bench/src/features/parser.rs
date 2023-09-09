@@ -3,13 +3,13 @@ use crate::features::print_stats;
 use crate::language::Parse;
 use crate::test_case::TestCase;
 use crate::BenchmarkSummary;
+use biome_diagnostics::console::fmt::Termcolor;
+use biome_diagnostics::console::markup;
+use biome_diagnostics::termcolor::Buffer;
+use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::PrintDiagnostic;
+use biome_parser::diagnostic::ParseDiagnostic;
 use itertools::Itertools;
-use rome_diagnostics::console::fmt::Termcolor;
-use rome_diagnostics::console::markup;
-use rome_diagnostics::termcolor::Buffer;
-use rome_diagnostics::DiagnosticExt;
-use rome_diagnostics::PrintDiagnostic;
-use rome_parser::diagnostic::ParseDiagnostic;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
 
@@ -59,7 +59,7 @@ impl Display for ParseMeasurement {
         let diagnostics = &self
             .diagnostics
             .iter()
-            .map(|diagnostic| rome_diagnostics::Error::from(diagnostic.clone()))
+            .map(|diagnostic| biome_diagnostics::Error::from(diagnostic.clone()))
             .group_by(|x| x.severity());
         for (severity, items) in diagnostics {
             let _ = writeln!(f, "\t\t{:?}: {}", severity, items.count());
@@ -72,7 +72,7 @@ impl Display for ParseMeasurement {
                 .clone()
                 .with_file_path(self.id.to_string())
                 .with_file_source_code(self.code.clone());
-            rome_diagnostics::console::fmt::Formatter::new(&mut Termcolor(&mut buffer))
+            biome_diagnostics::console::fmt::Formatter::new(&mut Termcolor(&mut buffer))
                 .write_markup(markup! {
                     {PrintDiagnostic::verbose(&error)}
                 })

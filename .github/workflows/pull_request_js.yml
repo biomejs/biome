@@ -47,7 +47,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@v0
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/rome_wasm
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev crates/biome_wasm
       - name: Install libraries
         working-directory: website
         run: pnpm i

@@ -13,12 +13,13 @@ use crate::{
     },
     Rules, WorkspaceError,
 };
-use indexmap::IndexSet;
-use rome_analyze::{
+use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
-use rome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
+use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
+use biome_parser::AnyParse;
+use indexmap::IndexSet;
 use rome_formatter::{FormatError, Printed};
 use rome_fs::RomePath;
 use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -34,7 +35,6 @@ use rome_js_semantic::{semantic_model, SemanticModelOptions};
 use rome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
 };
-use rome_parser::AnyParse;
 use rome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -313,7 +313,7 @@ fn lint(params: LintParams) -> LintResults {
 
                     let error = diagnostic.with_severity(severity);
 
-                    diagnostics.push(rome_diagnostics::serde::Diagnostic::new(error));
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
                 }
             }
 
@@ -324,7 +324,7 @@ fn lint(params: LintParams) -> LintResults {
     diagnostics.extend(
         analyze_diagnostics
             .into_iter()
-            .map(rome_diagnostics::serde::Diagnostic::new)
+            .map(biome_diagnostics::serde::Diagnostic::new)
             .collect::<Vec<_>>(),
     );
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);
@@ -353,9 +353,9 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
 
     fn record_rule<R>(&mut self)
     where
-        R: rome_analyze::Rule + 'static,
-        R::Query: rome_analyze::Queryable<Language = JsLanguage>,
-        <R::Query as rome_analyze::Queryable>::Output: Clone,
+        R: biome_analyze::Rule + 'static,
+        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
+        <R::Query as biome_analyze::Queryable>::Output: Clone,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,

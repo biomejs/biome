@@ -5,15 +5,15 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     Rules, WorkspaceError,
 };
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_diagnostics::{Diagnostic, Severity};
+use biome_parser::AnyParse;
 pub use javascript::JsFormatterSettings;
-use rome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use rome_console::fmt::Formatter;
 use rome_console::markup;
-use rome_diagnostics::{Diagnostic, Severity};
 use rome_formatter::Printed;
 use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
-use rome_parser::AnyParse;
 use rome_rowan::NodeCache;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -232,7 +232,7 @@ pub(crate) struct LintParams<'a> {
 }
 
 pub(crate) struct LintResults {
-    pub(crate) diagnostics: Vec<rome_diagnostics::serde::Diagnostic>,
+    pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u64,
 }

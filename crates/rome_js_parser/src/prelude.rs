@@ -1,2 +1,2 @@
 pub(crate) use crate::parser::JsParser;
-pub use rome_parser::prelude::*;
+pub use biome_parser::prelude::*;

@@ -1,7 +1,10 @@
 use crate::JsRuleAction;
-use rome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+};
+use biome_diagnostics::Applicability;
+use biome_js_unicode_table::is_js_ident;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make::{
     self, ident, js_literal_member_name, js_name, js_static_member_expression, token,
 };
@@ -9,7 +12,6 @@ use rome_js_syntax::{
     AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression, AnyJsName, JsComputedMemberName,
     JsLiteralMemberName, JsSyntaxKind, T,
 };
-use rome_js_unicode_table::is_js_ident;
 use rome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {

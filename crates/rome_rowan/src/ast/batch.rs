@@ -2,8 +2,8 @@ use crate::{
     chain_trivia_pieces, AstNode, Language, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxSlot,
     SyntaxToken,
 };
-use rome_text_edit::TextEdit;
-use rome_text_size::TextRange;
+use biome_text_edit::TextEdit;
+use biome_text_size::TextRange;
 use std::{
     cmp,
     collections::BinaryHeap,

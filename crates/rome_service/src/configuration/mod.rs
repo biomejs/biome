@@ -20,12 +20,12 @@ use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
 use crate::settings::{LanguagesSettings, LinterSettings};
 use crate::{DynRef, WorkspaceError, VERSION};
+use biome_analyze::{AnalyzerConfiguration, AnalyzerRules};
 use bpaf::Bpaf;
 pub use formatter::{formatter_configuration, FormatterConfiguration, PlainIndentStyle};
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
 pub use json::{json_configuration, JsonConfiguration};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
-use rome_analyze::{AnalyzerConfiguration, AnalyzerRules};
 use rome_deserialize::json::deserialize_from_json_str;
 use rome_deserialize::{Deserialized, StringSet};
 use rome_fs::{AutoSearchResult, FileSystem, OpenOptions};
@@ -471,7 +471,7 @@ pub fn create_config(
 /// ```
 ///
 /// [WorkspaceSettings]: crate::settings::WorkspaceSettings
-/// [metadata]: rome_analyze::RegistryRuleMetadata
+/// [metadata]: biome_analyze::RegistryRuleMetadata
 /// [configuration for the analyzer]: AnalyzerConfiguration
 pub fn to_analyzer_configuration<ToGlobals>(
     linter_settings: &LinterSettings,

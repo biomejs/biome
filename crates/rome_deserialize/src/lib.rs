@@ -4,8 +4,8 @@ mod visitor;
 pub mod json;
 pub mod string_set;
 
+use biome_diagnostics::Error;
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic};
-use rome_diagnostics::Error;
 use std::fmt::Debug;
 pub use string_set::{deserialize_string_set, serialize_string_set, StringSet};
 pub use visitor::VisitNode;

@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use rome_diagnostics::category;
+use biome_diagnostics::category;
+use biome_suppression::parse_suppression_comment;
 use rome_formatter::comments::{
     is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
 };
@@ -7,7 +8,6 @@ use rome_formatter::formatter::Formatter;
 use rome_formatter::{write, FormatResult, FormatRule};
 use rome_json_syntax::{JsonLanguage, TextLen};
 use rome_rowan::SyntaxTriviaPieceComments;
-use rome_suppression::parse_suppression_comment;
 
 pub type JsonComments = Comments<JsonLanguage>;
 

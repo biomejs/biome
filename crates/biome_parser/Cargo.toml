@@ -1,0 +1,16 @@
+[package]
+authors.workspace    = true
+description          = "Shared infrastructure for Rome's parser"
+documentation        = "https://docs.rs/biome_parser"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_parser"
+repository.workspace = true
+version              = "0.2.0"
+
+
+[dependencies]
+biome_diagnostics = { workspace = true }
+drop_bomb         = "0.1.5"
+rome_console      = { workspace = true }
+rome_rowan        = { workspace = true }

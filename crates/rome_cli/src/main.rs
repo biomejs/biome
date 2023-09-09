@@ -4,13 +4,13 @@
 //!
 //! [website]: https://biomejs.dev
 
+use biome_diagnostics::{set_bottom_frame, PrintDiagnostic};
 use bpaf::{Args, ParseFailure};
 use rome_cli::{
     biome_command, open_transport, setup_panic_handler, to_color_mode, BiomeCommand, CliDiagnostic,
     CliSession,
 };
 use rome_console::{markup, ConsoleExt, EnvConsole};
-use rome_diagnostics::{set_bottom_frame, PrintDiagnostic};
 use rome_service::workspace;
 use std::process::{ExitCode, Termination};
 use tokio::runtime::Runtime;

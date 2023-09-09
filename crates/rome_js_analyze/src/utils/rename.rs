@@ -1,6 +1,6 @@
+use biome_diagnostics::{Diagnostic, Location, Severity};
 use rome_console::fmt::Formatter;
 use rome_console::markup;
-use rome_diagnostics::{Diagnostic, Location, Severity};
 use rome_js_semantic::{ReferencesExtensions, SemanticModel};
 use rome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
@@ -325,7 +325,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
 mod tests {
     use crate::utils::rename::RenameError;
     use crate::{assert_rename_nok, assert_rename_ok};
-    use rome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use rome_js_syntax::TextRange;
 
     assert_rename_ok! {

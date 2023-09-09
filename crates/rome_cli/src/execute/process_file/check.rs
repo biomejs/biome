@@ -4,7 +4,7 @@ use crate::execute::process_file::organize_imports::organize_imports_with_guard;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::CliDiagnostic;
-use rome_diagnostics::Category;
+use biome_diagnostics::Category;
 use rome_service::workspace::{FeatureName, FileFeaturesResult};
 use std::path::Path;
 

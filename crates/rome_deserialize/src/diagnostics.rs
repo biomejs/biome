@@ -1,7 +1,7 @@
+use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::{Advices, Diagnostic, LogCategory, MessageAndDescription, Severity, Visit};
 use rome_console::fmt::Display;
 use rome_console::{markup, MarkupBuf};
-use rome_diagnostics::location::AsSpan;
-use rome_diagnostics::{Advices, Diagnostic, LogCategory, MessageAndDescription, Severity, Visit};
 use rome_rowan::{SyntaxError, TextRange};
 use serde::{Deserialize, Serialize};
 

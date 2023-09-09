@@ -1,0 +1,18 @@
+[package]
+authors.workspace    = true
+description          = "Simple text editing crate ported from rust-analyzer"
+documentation        = "https://docs.rs/biome_text_edit"
+edition.workspace    = true
+license              = "MIT OR Apache-2.0"
+name                 = "biome_text_edit"
+repository.workspace = true
+version              = "0.0.1"
+
+[dependencies]
+biome_text_size = { workspace = true, features = ["serde"] }
+schemars        = { workspace = true, optional = true }
+serde           = { workspace = true, features = ["derive"] }
+similar         = { version = "2.1.0", features = ["unicode"] }
+
+[features]
+schemars = ["dep:schemars", "biome_text_size/schemars"]

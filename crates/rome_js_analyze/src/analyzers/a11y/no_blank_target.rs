@@ -1,8 +1,8 @@
 use crate::JsRuleAction;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, token,

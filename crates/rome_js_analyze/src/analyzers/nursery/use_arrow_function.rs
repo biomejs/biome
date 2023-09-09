@@ -1,10 +1,10 @@
 use crate::JsRuleAction;
-use rome_analyze::{
+use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, AddVisitor, Phases, QueryMatch, Queryable,
     Rule, RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,

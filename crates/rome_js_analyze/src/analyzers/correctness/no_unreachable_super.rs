@@ -1,6 +1,9 @@
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
-use rome_control_flow::{ExceptionHandlerKind, InstructionKind};
+use rome_control_flow::{
+    builder::{BlockId, ROOT_BLOCK_ID},
+    ExceptionHandlerKind, InstructionKind,
+};
 use rome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsCallExpression, JsConstructorClassMember, JsSyntaxKind,
     JsThrowStatement, TextRange, WalkEvent,
@@ -82,7 +85,7 @@ pub(crate) enum RuleState {
 /// This allows traversing a control flow graph and retaining contextual information.
 #[derive(Debug, Copy, Clone)]
 struct BlockContext {
-    block_index: u32,
+    block_id: BlockId,
     super_call: Option<TextRange>,
 }
 
@@ -121,25 +124,19 @@ impl Rule for NoUnreachableSuper {
         // As soon as we detect the use of this without calling first `super`
 
         // stack of block contexts to process
-        let mut block_context_stack = Vec::new();
-        let mut visited_block_contexts = FxHashSet::default();
-        block_context_stack.push(BlockContext {
-            block_index: 0,
+        let mut block_context_stack = vec![BlockContext {
+            block_id: ROOT_BLOCK_ID,
             super_call: None,
-        });
-        // Set of couples (block_index, was_visited_with_super_call)
-        visited_block_contexts.insert((0u32, false));
+        }];
+        // Set of couples (block_id, was_visited_with_super_call)
+        let mut visited_block_contexts = FxHashSet::from_iter([(ROOT_BLOCK_ID, false)]);
         while let Some(BlockContext {
-            block_index,
+            block_id,
             super_call: mut super_,
         }) = block_context_stack.pop()
         {
             let had_super = super_.is_some();
-            // SAFETY: this is a safe conversion because it is already an index for `cfg.blocks`.
-            let block_index = block_index as usize;
-            let Some(block) = cfg.blocks.get(block_index) else {
-                continue;
-            };
+            let block = cfg.get(block_id);
             for instruction in block.instructions.iter() {
                 if let Some(NodeOrToken::Node(ref block_node)) = instruction.node {
                     let mut iter = block_node.preorder();
@@ -182,13 +179,14 @@ impl Rule for NoUnreachableSuper {
                 match instruction.kind {
                     InstructionKind::Statement => {}
                     InstructionKind::Jump {
-                        block, conditional, ..
+                        block: jump_block_id,
+                        conditional,
+                        ..
                     } => {
-                        let jump_block_index = block.index();
                         // Avoid cycles and redundant checks.
-                        if visited_block_contexts.insert((jump_block_index, super_.is_some())) {
+                        if visited_block_contexts.insert((jump_block_id, super_.is_some())) {
                             block_context_stack.push(BlockContext {
-                                block_index: jump_block_index,
+                                block_id: jump_block_id,
                                 super_call: super_,
                             });
                         }
@@ -222,7 +220,7 @@ impl Rule for NoUnreachableSuper {
                         // Avoid cycles and redundant checks.
                         if visited_block_contexts.insert((exception_handler.target, had_super)) {
                             block_context_stack.push(BlockContext {
-                                block_index: exception_handler.target,
+                                block_id: exception_handler.target,
                                 super_call: None,
                             });
                         }
@@ -231,7 +229,7 @@ impl Rule for NoUnreachableSuper {
                     // Avoid cycles and redundant checks.
                     if visited_block_contexts.insert((exception_handler.target, super_.is_some())) {
                         block_context_stack.push(BlockContext {
-                            block_index: exception_handler.target,
+                            block_id: exception_handler.target,
                             super_call: super_,
                         });
                     }

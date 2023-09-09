@@ -1,6 +1,6 @@
 use crate::syntax::SyntaxTrivia;
 use crate::{cursor, Language, NodeOrToken, SyntaxNode, SyntaxToken};
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::iter;
 use std::ptr::NonNull;
 

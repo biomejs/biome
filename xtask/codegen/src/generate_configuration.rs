@@ -1,10 +1,10 @@
+use biome_analyze::{
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+};
 use case::CaseExt;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
-use rome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
-};
 use rome_js_syntax::JsLanguage;
 use rome_json_syntax::JsonLanguage;
 use std::collections::BTreeMap;
@@ -154,10 +154,10 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
         use crate::RuleConfiguration;
-        use rome_analyze::RuleFilter;
+        use biome_analyze::RuleFilter;
         use indexmap::IndexSet;
         use bpaf::Bpaf;
-        use rome_diagnostics::{Category, Severity};
+        use biome_diagnostics::{Category, Severity};
 
         #[derive(Deserialize, Serialize, Debug, Clone, Bpaf)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -187,7 +187,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         }
         impl Rules {
 
-            /// Checks if the code coming from [rome_diagnostics::Diagnostic] corresponds to a rule.
+            /// Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule.
             /// Usually the code is built like {category}/{rule_name}
             pub fn matches_diagnostic_code<'a>(
                 &self,
@@ -204,8 +204,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 }
             }
 
-            /// Given a category coming from [Diagnostic](rome_diagnostics::Diagnostic), this function returns
-            /// the [Severity](rome_diagnostics::Severity) associated to the rule, if the configuration changed it.
+            /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
+            /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
             ///
             /// If not, the function returns [None].
             pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
@@ -315,7 +315,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let push_rules = quote! {
         use crate::configuration::linter::*;
         use crate::{RuleConfiguration, Rules};
-        use rome_analyze::{AnalyzerRules, MetadataRegistry};
+        use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
         pub(crate) fn push_to_analyzer_rules(
             rules: &Rules,

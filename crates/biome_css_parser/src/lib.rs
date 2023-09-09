@@ -5,9 +5,9 @@ use crate::parser::CssParser;
 use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+pub use biome_parser::prelude::*;
+use biome_parser::tree_sink::LosslessTreeSink;
 pub use parser::CssParserOptions;
-pub use rome_parser::prelude::*;
-use rome_parser::tree_sink::LosslessTreeSink;
 use rome_rowan::{AstNode, NodeCache};
 
 mod lexer;
@@ -38,7 +38,7 @@ pub fn parse_css_with_cache(
         let (events, diagnostics, trivia) = parser.finish();
 
         let mut tree_sink = CssLosslessTreeSink::with_cache(source, &trivia, cache);
-        rome_parser::event::process(&mut tree_sink, events, diagnostics);
+        biome_parser::event::process(&mut tree_sink, events, diagnostics);
         let (green, diagnostics) = tree_sink.finish();
 
         CssParse::new(green, diagnostics)

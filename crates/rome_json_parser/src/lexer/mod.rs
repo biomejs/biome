@@ -3,9 +3,9 @@
 #[rustfmt::skip]
 mod tests;
 
-use rome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_parser::diagnostic::ParseDiagnostic;
 use rome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use rome_parser::diagnostic::ParseDiagnostic;
 use std::iter::FusedIterator;
 use std::ops::Add;
 

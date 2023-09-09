@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::JsParser;
-use rome_diagnostics::location::AsSpan;
-use rome_parser::diagnostic::{expected_any, expected_node};
+use biome_diagnostics::location::AsSpan;
+use biome_parser::diagnostic::{expected_any, expected_node};
 use rome_rowan::TextRange;
 
 pub(crate) fn expected_ts_enum_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {

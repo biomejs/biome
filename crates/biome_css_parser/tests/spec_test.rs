@@ -1,9 +1,9 @@
 use biome_css_parser::{parse_css, CssParserOptions};
+use biome_diagnostics::display::PrintDiagnostic;
+use biome_diagnostics::termcolor;
+use biome_diagnostics::DiagnosticExt;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_diagnostics::display::PrintDiagnostic;
-use rome_diagnostics::termcolor;
-use rome_diagnostics::DiagnosticExt;
 use rome_rowan::SyntaxKind;
 use std::fmt::Write;
 use std::fs;

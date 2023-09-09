@@ -1,5 +1,5 @@
-use rome_analyze::QueryMatch;
-use rome_analyze::{AddVisitor, Phases, Queryable, ServiceBag};
+use biome_analyze::QueryMatch;
+use biome_analyze::{AddVisitor, Phases, Queryable, ServiceBag};
 use rome_js_syntax::AnyJsRoot;
 use rome_js_syntax::JsLanguage;
 use rome_js_syntax::TextRange;

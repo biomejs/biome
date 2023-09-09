@@ -9,14 +9,16 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_analyze       = { workspace = true, features = ["serde"] }
+biome_diagnostics   = { workspace = true }
 biome_flags         = { workspace = true }
+biome_parser        = { workspace = true }
+biome_text_edit     = { workspace = true }
 bpaf                = { workspace = true }
 dashmap             = { workspace = true }
 indexmap            = { workspace = true, features = ["serde"] }
-rome_analyze        = { workspace = true, features = ["serde"] }
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
-rome_diagnostics    = { workspace = true }
 rome_formatter      = { workspace = true, features = ["serde"] }
 rome_fs             = { workspace = true, features = ["serde"] }
 rome_js_analyze     = { workspace = true }
@@ -29,9 +31,7 @@ rome_json_analyze   = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-rome_parser         = { workspace = true }
 rome_rowan          = { workspace = true, features = ["serde"] }
-rome_text_edit      = { workspace = true }
 schemars            = { workspace = true, features = ["indexmap1"], optional = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true, features = ["raw_value"] }
@@ -43,7 +43,7 @@ schema = [
   "rome_js_analyze/schema",
   "rome_formatter/serde",
   "rome_js_factory",
-  "rome_text_edit/schemars",
+  "biome_text_edit/schemars",
 ]
 
 [dev-dependencies]

@@ -1,7 +1,7 @@
 use crate::{DeserializationDiagnostic, Deserialized, VisitNode};
+use biome_diagnostics::{DiagnosticExt, Error};
 use indexmap::IndexSet;
 use rome_console::markup;
-use rome_diagnostics::{DiagnosticExt, Error};
 use rome_json_parser::{parse_json, JsonParserOptions};
 use rome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,

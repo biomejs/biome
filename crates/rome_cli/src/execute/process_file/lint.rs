@@ -2,7 +2,7 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::CliDiagnostic;
-use rome_diagnostics::{category, Error};
+use biome_diagnostics::{category, Error};
 use rome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;

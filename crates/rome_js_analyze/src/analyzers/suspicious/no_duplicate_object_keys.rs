@@ -1,6 +1,6 @@
 use crate::utils::batch::JsBatchMutation;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::{
     AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
@@ -306,9 +306,9 @@ impl Rule for NoDuplicateObjectKeys {
         let mut batch = ctx.root().begin();
         batch.remove_js_object_member(&member_definition.node());
         Some(JsRuleAction {
-            category: rome_analyze::ActionCategory::QuickFix,
+            category: biome_analyze::ActionCategory::QuickFix,
             // The property initialization could contain side effects
-            applicability: rome_diagnostics::Applicability::MaybeIncorrect,
+            applicability: biome_diagnostics::Applicability::MaybeIncorrect,
             message: markup!("Remove this " {member_definition.to_string()}).to_owned(),
             mutation: batch,
         })

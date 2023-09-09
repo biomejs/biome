@@ -1,10 +1,10 @@
 use crate::ControlFlowGraph;
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use roaring::RoaringBitmap;
 use rome_console::markup;
-use rome_control_flow::{ExceptionHandlerKind, InstructionKind};
+use rome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
 use rome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use rome_rowan::{AstNode, NodeOrToken, TextRange};
-use rustc_hash::FxHashSet;
 
 declare_rule! {
     /// Enforce `get` methods to always return a value.
@@ -81,21 +81,16 @@ impl Rule for UseGetterReturn {
             return invalid_returns;
         }
         // stack of blocks to process
-        let mut block_stack = Vec::new();
-        let mut visited_blocks = FxHashSet::default();
-        block_stack.push(0u32);
-        visited_blocks.insert(0u32);
-        while let Some(block_index) = block_stack.pop() {
-            // SAFETY: this is a safe conversion because it is already an index for `cfg.blocks`.
-            let block_index = block_index as usize;
-            let Some(block) = cfg.blocks.get(block_index) else {
-                continue;
-            };
+        let mut block_stack = vec![ROOT_BLOCK_ID];
+        let mut visited_blocks = RoaringBitmap::new();
+        visited_blocks.insert(ROOT_BLOCK_ID.index());
+        while let Some(block_id) = block_stack.pop() {
+            let block = cfg.get(block_id);
             for exception_handler in block.exception_handlers.iter() {
                 // Ignore finally handler: they are already in the Control Flow Graph.
                 if matches!(exception_handler.kind, ExceptionHandlerKind::Catch) {
                     // Avoid cycles and redundant checks.
-                    if visited_blocks.insert(exception_handler.target) {
+                    if visited_blocks.insert(exception_handler.target.index()) {
                         block_stack.push(exception_handler.target);
                     }
                 }
@@ -104,12 +99,13 @@ impl Rule for UseGetterReturn {
                 match instruction.kind {
                     InstructionKind::Statement => {}
                     InstructionKind::Jump {
-                        block, conditional, ..
+                        conditional,
+                        block: jump_block_id,
+                        ..
                     } => {
-                        let jump_block_index = block.index();
                         // Avoid cycles and redundant checks.
-                        if visited_blocks.insert(jump_block_index) {
-                            block_stack.push(jump_block_index);
+                        if visited_blocks.insert(jump_block_id.index()) {
+                            block_stack.push(jump_block_id);
                         }
                         if !conditional {
                             // The next instructions are unreachable.

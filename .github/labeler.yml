@@ -9,22 +9,21 @@ A-Core:
   - crates/rome_deserializer/**
   - crates/rome_fs/**
   - crates/rome_rowan/**
-  - crates/rome_text_edit/**
-  - crates/rome_text_size/**
-  - crates/rome_suppression/**
-  - crates/rome_suppression/**
+  - crates/biome_text_edit/**
+  - crates/biome_text_size/**
+  - crates/biome_suppression/**
   - crates/biome_markup/**
 
 A-Project:
   - crates/rome_service/**
 
 A-Linter:
-  - crates/rome_analyze/**
+  - crates/biome_analyze/**
   - crates/rome_js_analyze/**
   - crates/rome_json_analyze/**
 
 A-Parser:
-  - crates/rome_parser/**
+  - crates/biome_parser/**
   - crates/rome_js_parser/**
   - crates/rome_js_syntax/**
   - crates/rome_json_parser/**
@@ -43,9 +42,9 @@ A-Editors:
   - crates/editors/**
 
 A-Diagnostic:
-  - crates/rome_diagnostics/**
-  - crates/rome_diagnostics_categories/**
-  - crates/rome_diagnostics_macros/**
+  - crates/biome_diagnostics/**
+  - crates/biome_diagnostics_categories/**
+  - crates/biome_diagnostics_macros/**
 
 A-Tooling:
   - xtask/**

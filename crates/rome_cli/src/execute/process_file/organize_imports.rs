@@ -3,7 +3,7 @@ use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
-use rome_diagnostics::category;
+use biome_diagnostics::category;
 
 /// Lints a single file and returns a [FileResult]
 pub(crate) fn organize_imports_with_guard<'ctx>(

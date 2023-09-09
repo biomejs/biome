@@ -2,10 +2,10 @@ use crate::runner::{TestCaseFiles, TestRunOutcome, TestRunResult, TestSuite, Tes
 use crate::{Summary, TestResults};
 use ascii_table::{Align, AsciiTable};
 use atty::Stream;
+use biome_diagnostics::termcolor::Buffer;
+use biome_diagnostics::{DiagnosticExt, Error};
 use colored::Colorize;
 use indicatif::ProgressBar;
-use rome_diagnostics::termcolor::Buffer;
-use rome_diagnostics::{DiagnosticExt, Error};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::io::Write;

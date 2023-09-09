@@ -1,0 +1,13 @@
+[package]
+authors              = ["Rome Tools and Contributors"]
+description          = "Unicode table for JavaScript IDs"
+documentation        = "https://docs.rs/rome_js_parser"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_js_unicode_table"
+repository.workspace = true
+version              = "0.0.1"
+
+[dependencies]
+
+[dev-dependencies]

@@ -13,8 +13,12 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow              = "1.0.52"
+biome_diagnostics   = { workspace = true }
 biome_flags         = { workspace = true }
 biome_lsp           = { workspace = true }
+biome_migrate       = { workspace = true }
+biome_text_edit     = { workspace = true }
+biome_text_size     = { workspace = true }
 bpaf                = { workspace = true }
 crossbeam           = "0.8.1"
 dashmap             = { workspace = true }
@@ -24,17 +28,13 @@ lazy_static         = { workspace = true }
 rayon               = "1.5.1"
 rome_console        = { workspace = true }
 rome_deserialize    = { workspace = true }
-rome_diagnostics    = { workspace = true }
 rome_formatter      = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
 rome_json_syntax    = { workspace = true }
-rome_migrate        = { workspace = true }
 rome_rowan          = { workspace = true }
 rome_service        = { workspace = true }
-rome_text_edit      = { workspace = true }
-rome_text_size      = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 tokio               = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }

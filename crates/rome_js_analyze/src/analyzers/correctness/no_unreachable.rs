@@ -1,9 +1,10 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use roaring::bitmap::RoaringBitmap;
-use rome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use rome_control_flow::{
-    builder::BlockId, ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
+    builder::{BlockId, ROOT_BLOCK_ID},
+    ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
 };
 use rome_js_syntax::{
     JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
@@ -263,13 +264,12 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
     let mut queue = VecDeque::new();
 
     if !cfg.blocks.is_empty() {
-        reachable_blocks.insert(0);
-        queue.push_back((0, None));
+        reachable_blocks.insert(ROOT_BLOCK_ID.index());
+        queue.push_back((ROOT_BLOCK_ID, None));
     }
 
-    while let Some((index, handlers)) = queue.pop_front() {
-        let index = index as usize;
-        let block = &cfg.blocks[index];
+    while let Some((block_id, handlers)) = queue.pop_front() {
+        let block = cfg.get(block_id);
 
         // Lookup the existence of an exception edge for this block but
         // defer its creation until an instruction that can throw is encountered
@@ -295,7 +295,7 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                 // additional path diverging towards the corresponding
                 // catch or finally block
                 if let Some((handler, handlers)) = exception_handlers.take() {
-                    if reachable_blocks.insert(handler.target) {
+                    if reachable_blocks.insert(handler.target.index()) {
                         queue.push_back((handler.target, find_catch_handlers(handlers)));
                     }
                 }
@@ -314,13 +314,13 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                         let handlers = handlers.and_then(<[_]>::split_first);
 
                         if let Some((handler, handlers)) = handlers {
-                            if reachable_blocks.insert(handler.target) {
+                            if reachable_blocks.insert(handler.target.index()) {
                                 queue.push_back((handler.target, Some(handlers)));
                             }
                         }
                     } else if reachable_blocks.insert(block.index()) {
                         // Insert an edge if this jump is reachable
-                        queue.push_back((block.index(), handlers));
+                        queue.push_back((block, handlers));
                     }
 
                     // Jump is a terminator instruction if it's unconditional
@@ -330,7 +330,7 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                 }
                 InstructionKind::Return => {
                     if let Some((handler, handlers)) = block.cleanup_handlers.split_first() {
-                        if reachable_blocks.insert(handler.target) {
+                        if reachable_blocks.insert(handler.target.index()) {
                             queue.push_back((handler.target, Some(handlers)));
                         }
                     }
@@ -366,9 +366,8 @@ fn analyze_fine(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
     let block_paths = traverse_cfg(cfg, signals);
 
     // Detect unreachable blocks using the result of the above traversal
-    'blocks: for (index, block) in cfg.blocks.iter().enumerate() {
-        let index = index as u32;
-        match block_paths.get(&index) {
+    'blocks: for (block_id, block) in cfg.block_id_iter() {
+        match block_paths.get(&block_id) {
             // Block has incoming paths, but may be unreachable if they all
             // have a dominating terminator intruction
             Some(paths) => {
@@ -415,7 +414,7 @@ fn analyze_fine(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
 /// created during the control flow traversal
 struct PathState<'cfg> {
     /// Index of the next block to visit
-    next_block: u32,
+    next_block: BlockId,
     /// Set of all blocks already visited on this path
     visited: RoaringBitmap,
     /// Current terminating instruction for the path, if one was
@@ -429,11 +428,11 @@ struct PathState<'cfg> {
 fn traverse_cfg(
     cfg: &JsControlFlowGraph,
     signals: &mut UnreachableRanges,
-) -> FxHashMap<u32, Vec<Option<Option<PathTerminator>>>> {
+) -> FxHashMap<BlockId, Vec<Option<Option<PathTerminator>>>> {
     let mut queue = VecDeque::new();
 
     queue.push_back(PathState {
-        next_block: 0,
+        next_block: ROOT_BLOCK_ID,
         visited: RoaringBitmap::new(),
         terminator: None,
         exception_handlers: None,
@@ -446,15 +445,14 @@ fn traverse_cfg(
     while let Some(mut path) = queue.pop_front() {
         // Add the block to the visited set for the path, and the current
         // state of the path to the global reachable blocks map
-        path.visited.insert(path.next_block);
+        path.visited.insert(path.next_block.index());
 
         block_paths
             .entry(path.next_block)
             .or_insert_with(Vec::new)
             .push(path.terminator);
 
-        let index = path.next_block as usize;
-        let block = &cfg.blocks[index];
+        let block = cfg.get(path.next_block);
 
         // Lookup the existence of an exception edge for this block but
         // defer its creation until an instruction that can throw is encountered
@@ -470,7 +468,7 @@ fn traverse_cfg(
                 // additional path diverging towards the corresponding
                 // catch or finally block
                 if let Some((handler, handlers)) = exception_handlers.take() {
-                    if !path.visited.contains(handler.target) {
+                    if !path.visited.contains(handler.target.index()) {
                         queue.push_back(PathState {
                             next_block: handler.target,
                             visited: path.visited.clone(),
@@ -575,7 +573,7 @@ fn handle_jump<'cfg>(
         let handlers = path.exception_handlers.and_then(<[_]>::split_first);
 
         if let Some((handler, handlers)) = handlers {
-            if !path.visited.contains(handler.target) {
+            if !path.visited.contains(handler.target.index()) {
                 queue.push_back(PathState {
                     next_block: handler.target,
                     visited: path.visited.clone(),
@@ -588,7 +586,7 @@ fn handle_jump<'cfg>(
         // Push the jump target block to the queue if it hasn't
         // been visited yet in this path
         queue.push_back(PathState {
-            next_block: block.index(),
+            next_block: block,
             visited: path.visited.clone(),
             terminator: path.terminator,
             exception_handlers: path.exception_handlers,
@@ -604,7 +602,7 @@ fn handle_return<'cfg>(
     cleanup_handlers: &'cfg [ExceptionHandler],
 ) {
     if let Some((handler, handlers)) = cleanup_handlers.split_first() {
-        if !path.visited.contains(handler.target) {
+        if !path.visited.contains(handler.target.index()) {
             queue.push_back(PathState {
                 next_block: handler.target,
                 visited: path.visited.clone(),

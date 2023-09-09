@@ -1,8 +1,8 @@
+use biome_diagnostics::display::PrintDiagnostic;
+use biome_diagnostics::termcolor;
+use biome_diagnostics::DiagnosticExt;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_diagnostics::display::PrintDiagnostic;
-use rome_diagnostics::termcolor;
-use rome_diagnostics::DiagnosticExt;
 use rome_json_parser::{parse_json, JsonParserOptions};
 use rome_rowan::SyntaxKind;
 use std::fmt::Write;

@@ -1,6 +1,6 @@
 use crate::aria_services::Aria;
-use rome_analyze::context::RuleContext;
-use rome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use rome_console::markup;
 use rome_js_syntax::jsx_ext::AnyJsxElement;
 use rome_js_syntax::JsxAttribute;
@@ -57,7 +57,7 @@ impl UseAriaPropsForRoleState {
             return None;
         }
         self.attribute.as_ref().map(|(attribute, role_name)| {
-            let joined_attributes = &self.missing_aria_props.join(", "); 
+            let joined_attributes = &self.missing_aria_props.join(", ");
             let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {}.", joined_attributes);
             RuleDiagnostic::new(
                 rule_category!(),

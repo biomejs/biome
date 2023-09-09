@@ -1,5 +1,5 @@
 * text=auto eol=lf
-crates/rome_js_unicode_table/src/tables.rs linguist-generated=true text=auto eol=lf
+crates/biome_js_unicode_table/src/tables.rs linguist-generated=true text=auto eol=lf
 **/generated/* linguist-generated=true text=auto eol=lf
 crates/rome_js_analyze/src/analyzers.rs linguist-generated=true text=auto eol=lf
 crates/rome_js_analyze/src/assists.rs linguist-generated=true text=auto eol=lf

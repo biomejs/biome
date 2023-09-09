@@ -29,6 +29,26 @@ impl<L: Language> ControlFlowGraph<L> {
             node,
         }
     }
+
+    /// Returns the block identified by `id`.
+    pub fn get(&self, id: BlockId) -> &BasicBlock<L> {
+        // SAFETY: safe conversion because a block id corresponds to its index in `self.blocks`.
+        let block_index = id.index() as usize;
+        &self.blocks[block_index]
+    }
+
+    /// Returns pairs that contain a block identifier and the associated block
+    pub fn block_id_iter(&self) -> impl Iterator<Item = (BlockId, &BasicBlock<L>)> {
+        // SAFETY: safe conversion because a block id corresponds to its index in `self.blocks`.
+        self.blocks.iter().enumerate().map(|(index, block)| {
+            (
+                BlockId {
+                    index: index as u32,
+                },
+                block,
+            )
+        })
+    }
 }
 
 /// A basic block represents an atomic unit of control flow, a flat list of
@@ -100,7 +120,7 @@ pub enum InstructionKind {
 #[derive(Debug, Clone, Copy)]
 pub struct ExceptionHandler {
     pub kind: ExceptionHandlerKind,
-    pub target: u32,
+    pub target: BlockId,
 }
 
 #[derive(Debug, Clone, Copy)]

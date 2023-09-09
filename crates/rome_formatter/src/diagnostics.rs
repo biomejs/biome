@@ -1,7 +1,7 @@
 use crate::prelude::TagKind;
+use biome_diagnostics::{category, Category, Diagnostic, DiagnosticTags, Location, Severity};
 use rome_console::fmt::Formatter;
 use rome_console::markup;
-use rome_diagnostics::{category, Category, Diagnostic, DiagnosticTags, Location, Severity};
 use rome_rowan::{SyntaxError, TextRange};
 use std::error::Error;
 
@@ -102,7 +102,7 @@ impl Diagnostic for FormatError {
 
     fn message(
         &self,
-        fmt: &mut rome_diagnostics::console::fmt::Formatter<'_>,
+        fmt: &mut biome_diagnostics::console::fmt::Formatter<'_>,
     ) -> std::io::Result<()> {
         match self {
             FormatError::SyntaxError => fmt.write_str("Syntax error."),
@@ -248,7 +248,7 @@ impl Diagnostic for PrintError {
 mod test {
     use crate::diagnostics::{ActualStart, InvalidDocumentError};
     use crate::prelude::{FormatError, TagKind};
-    use rome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use rome_js_syntax::TextRange;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

@@ -1,7 +1,7 @@
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
 use crate::{green, Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent};
-use rome_text_size::{TextRange, TextSize};
+use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
 use std::rc::Rc;

@@ -7,35 +7,35 @@ repository.workspace = true
 version              = "0.2.0"
 
 [dependencies]
-biome_aria            = { workspace = true }
-bpaf.workspace        = true
-lazy_static           = { workspace = true }
-natord                = "1.0.9"
-roaring               = "0.10.1"
-rome_analyze          = { workspace = true }
-rome_console          = { workspace = true }
-rome_control_flow     = { workspace = true }
-rome_deserialize      = { workspace = true }
-rome_diagnostics      = { workspace = true }
-rome_js_factory       = { workspace = true }
-rome_js_semantic      = { workspace = true }
-rome_js_syntax        = { workspace = true }
-rome_js_unicode_table = { workspace = true }
-rome_json_factory     = { workspace = true }
-rome_json_syntax      = { workspace = true }
-rome_rowan            = { workspace = true }
-rustc-hash            = { workspace = true }
-schemars              = { workspace = true, optional = true }
-serde                 = { workspace = true, features = ["derive"] }
-serde_json            = { workspace = true }
-smallvec              = { workspace = true }
+biome_analyze          = { workspace = true }
+biome_aria             = { workspace = true }
+biome_diagnostics      = { workspace = true }
+biome_js_unicode_table = { workspace = true }
+bpaf.workspace         = true
+lazy_static            = { workspace = true }
+natord                 = "1.0.9"
+roaring                = "0.10.1"
+rome_console           = { workspace = true }
+rome_control_flow      = { workspace = true }
+rome_deserialize       = { workspace = true }
+rome_js_factory        = { workspace = true }
+rome_js_semantic       = { workspace = true }
+rome_js_syntax         = { workspace = true }
+rome_json_factory      = { workspace = true }
+rome_json_syntax       = { workspace = true }
+rome_rowan             = { workspace = true }
+rustc-hash             = { workspace = true }
+schemars               = { workspace = true, optional = true }
+serde                  = { workspace = true, features = ["derive"] }
+serde_json             = { workspace = true }
+smallvec               = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils = { workspace = true }
+biome_text_edit  = { workspace = true }
 countme          = { workspace = true, features = ["enable"] }
 insta            = { workspace = true, features = ["glob"] }
 rome_js_parser   = { workspace = true, features = ["tests"] }
-rome_text_edit   = { workspace = true }
 tests_macros     = { workspace = true }
 
 [features]

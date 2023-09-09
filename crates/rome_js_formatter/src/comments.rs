@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
-use rome_diagnostics_categories::category;
+use biome_diagnostics_categories::category;
 use rome_formatter::comments::is_doc_comment;
 use rome_formatter::{
     comments::{
