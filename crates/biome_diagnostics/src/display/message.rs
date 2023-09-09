@@ -1,5 +1,5 @@
-use rome_console::fmt::{Formatter, Termcolor};
-use rome_console::{markup, MarkupBuf};
+use biome_console::fmt::{Formatter, Termcolor};
+use biome_console::{markup, MarkupBuf};
 use serde::{Deserialize, Serialize};
 use termcolor::NoColor;
 
@@ -69,7 +69,7 @@ impl std::fmt::Debug for MessageAndDescription {
     }
 }
 
-impl rome_console::fmt::Display for MessageAndDescription {
+impl biome_console::fmt::Display for MessageAndDescription {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup! {{self.message}})
     }

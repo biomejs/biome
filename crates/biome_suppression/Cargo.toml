@@ -10,5 +10,5 @@ version     = "0.2.0"
 
 [dependencies]
 biome_diagnostics = { workspace = true }
-rome_console      = { workspace = true }
+biome_console      = { workspace = true }
 rome_rowan        = { workspace = true }

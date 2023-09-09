@@ -2,12 +2,12 @@ use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
-use bpaf::Bpaf;
-use rome_console::markup;
-use rome_deserialize::{
+use biome_console::markup;
+use biome_deserialize::{
     json::{has_only_known_keys, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };
+use bpaf::Bpaf;
 use rome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator,

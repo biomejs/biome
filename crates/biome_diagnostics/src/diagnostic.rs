@@ -3,7 +3,7 @@ use std::{convert::Infallible, fmt::Debug, io};
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
 
-use rome_console::fmt;
+use biome_console::fmt;
 
 use crate::{Category, Location, Visit};
 

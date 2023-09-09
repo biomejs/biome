@@ -26,8 +26,8 @@ hdrhistogram        = { version = "7.5.0", default-features = false }
 indexmap            = { workspace = true }
 lazy_static         = { workspace = true }
 rayon               = "1.5.1"
-rome_console        = { workspace = true }
-rome_deserialize    = { workspace = true }
+biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
 rome_formatter      = { workspace = true }
 rome_fs             = { workspace = true }
 rome_json_formatter = { workspace = true }

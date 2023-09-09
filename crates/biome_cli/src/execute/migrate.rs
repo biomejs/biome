@@ -1,8 +1,8 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
+use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_migrate::{migrate_configuration, ControlFlow};
-use rome_console::{markup, ConsoleExt};
 use rome_fs::{FileSystemExt, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::JsonRoot;

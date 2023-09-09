@@ -5,7 +5,7 @@ use crate::globals::typescript::TYPESCRIPT_BUILTIN;
 use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType};
 use rome_rowan::AstNode;
 

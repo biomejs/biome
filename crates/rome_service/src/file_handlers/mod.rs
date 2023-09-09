@@ -6,11 +6,11 @@ use crate::{
     Rules, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
+use biome_console::fmt::Formatter;
+use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_parser::AnyParse;
 pub use javascript::JsFormatterSettings;
-use rome_console::fmt::Formatter;
-use rome_console::markup;
 use rome_formatter::Printed;
 use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
@@ -141,7 +141,7 @@ impl Language {
     }
 }
 
-impl rome_console::fmt::Display for Language {
+impl biome_console::fmt::Display for Language {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
             Language::JavaScript => fmt.write_markup(markup! { "JavaScript" }),
@@ -175,7 +175,7 @@ impl std::fmt::Display for Mime {
     }
 }
 
-impl rome_console::fmt::Display for Mime {
+impl biome_console::fmt::Display for Mime {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::io::Result<()> {
         write!(f, "{self}")
     }

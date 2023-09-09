@@ -1,0 +1,9 @@
+error: unexpected end of input
+ --> tests/markup/open_element_unfinished_4.rs:2:5
+  |
+2 | /     biome_console::markup! {
+3 | |         <Emphasis prop
+4 | |     }
+  | |_____^
+  |
+  = note: this error originates in the macro `biome_console::markup` (in Nightly builds, run with -Z macro-backtrace for more info)

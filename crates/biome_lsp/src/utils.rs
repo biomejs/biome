@@ -2,14 +2,14 @@ use crate::converters::line_index::LineIndex;
 use crate::converters::{from_proto, to_proto, PositionEncoding};
 use anyhow::{ensure, Context, Result};
 use biome_analyze::ActionCategory;
+use biome_console::fmt::Termcolor;
+use biome_console::fmt::{self, Formatter};
+use biome_console::MarkupBuf;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{
     Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
-use rome_console::fmt::Termcolor;
-use rome_console::fmt::{self, Formatter};
-use rome_console::MarkupBuf;
 use rome_rowan::TextSize;
 use rome_service::workspace::CodeAction;
 use std::any::Any;

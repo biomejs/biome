@@ -7,8 +7,8 @@ use crate::{
     AnalyzerDiagnostic, AnalyzerOptions, Queryable, RuleGroup, ServiceBag,
     SuppressionCommentEmitter,
 };
+use biome_console::MarkupBuf;
 use biome_diagnostics::{advice::CodeSuggestionAdvice, Applicability, CodeSuggestion, Error};
-use rome_console::MarkupBuf;
 use rome_rowan::{BatchMutation, Language};
 use std::borrow::Cow;
 use std::iter::FusedIterator;

@@ -4,8 +4,8 @@ use crate::{
     assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR,
     UNFORMATTED,
 };
+use biome_console::{BufferConsole, MarkupBuf};
 use bpaf::Args;
-use rome_console::{BufferConsole, MarkupBuf};
 use rome_fs::{FileSystemExt, MemoryFileSystem};
 use rome_service::DynRef;
 use std::path::{Path, PathBuf};

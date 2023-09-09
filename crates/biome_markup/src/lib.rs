@@ -11,7 +11,7 @@ impl ToTokens for StackEntry {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
         tokens.extend(quote! {
-            rome_console::MarkupElement::#name
+            biome_console::MarkupElement::#name
         });
 
         if !self.attributes.is_empty() {
@@ -137,7 +137,7 @@ pub fn markup(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     .collect();
 
                 output.push(quote! {
-                    rome_console::MarkupNode {
+                    biome_console::MarkupNode {
                         elements: &[ #( #elements ),* ],
                         content: &(#literal),
                     }
@@ -149,9 +149,9 @@ pub fn markup(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
                     let body = group.stream();
                     output.push(quote! {
-                        rome_console::MarkupNode {
+                        biome_console::MarkupNode {
                             elements: &[ #( #elements ),* ],
-                            content: &(#body) as &dyn rome_console::fmt::Display,
+                            content: &(#body) as &dyn biome_console::fmt::Display,
                         }
                     });
                 }
@@ -165,5 +165,5 @@ pub fn markup(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         abort!(top.name.span(), "unclosed element");
     }
 
-    quote! { rome_console::Markup(&[ #( #output ),* ]) }.into()
+    quote! { biome_console::Markup(&[ #( #output ),* ]) }.into()
 }

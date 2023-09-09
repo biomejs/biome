@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
     JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,

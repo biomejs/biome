@@ -1,8 +1,8 @@
 use crate::run_cli;
 use crate::snap_test::{CliSnapshot, SnapshotPayload};
 use biome_cli::CliDiagnostic;
+use biome_console::{BufferConsole, Console};
 use bpaf::Args;
-use rome_console::{BufferConsole, Console};
 use rome_fs::{FileSystem, MemoryFileSystem};
 use rome_service::DynRef;
 use std::path::{Path, PathBuf};

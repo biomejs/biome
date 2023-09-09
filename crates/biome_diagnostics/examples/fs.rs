@@ -1,9 +1,9 @@
 use std::io;
 
+use biome_console::{fmt, markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{
     Advices, Diagnostic, Location, LogCategory, PrintDiagnostic, Resource, SourceCode, Visit,
 };
-use rome_console::{fmt, markup, ConsoleExt, EnvConsole};
 use rome_rowan::{TextRange, TextSize};
 
 #[derive(Debug, Diagnostic)]

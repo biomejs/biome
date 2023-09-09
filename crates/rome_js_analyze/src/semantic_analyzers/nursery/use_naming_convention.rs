@@ -11,8 +11,8 @@ use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, Ru
 use biome_diagnostics::Applicability;
 use biome_js_unicode_table::is_js_ident;
 use bpaf::Bpaf;
-use rome_console::markup;
-use rome_deserialize::{
+use biome_console::markup;
+use biome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };

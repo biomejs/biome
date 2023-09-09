@@ -2,7 +2,7 @@ use super::use_exhaustive_dependencies::ReactExtensiveDependenciesOptions;
 use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::HooksOptions;
 use crate::{react::hooks::react_hook_configuration, semantic_services::Semantic};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_semantic::CallsExtensions;
 use rome_js_syntax::{AnyJsFunction, JsCallExpression, JsFunctionBody, JsSyntaxKind, TextRange};
 use rome_rowan::AstNode;

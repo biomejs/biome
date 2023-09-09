@@ -4,8 +4,8 @@ use rome_js_syntax::AnyJsRoot;
 use rome_js_syntax::JsLanguage;
 use rome_js_syntax::TextRange;
 
-pub type JsControlFlowGraph = rome_control_flow::ControlFlowGraph<JsLanguage>;
-pub(crate) type FunctionBuilder = rome_control_flow::builder::FunctionBuilder<JsLanguage>;
+pub type JsControlFlowGraph = biome_control_flow::ControlFlowGraph<JsLanguage>;
+pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<JsLanguage>;
 
 mod nodes;
 mod visitor;

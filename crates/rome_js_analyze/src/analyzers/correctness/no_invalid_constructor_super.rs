@@ -1,6 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::{markup, MarkupBuf};
+use biome_console::{markup, MarkupBuf};
 use rome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
 };

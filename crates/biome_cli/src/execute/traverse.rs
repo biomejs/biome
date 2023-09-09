@@ -8,6 +8,7 @@ use crate::{
     CliDiagnostic, CliSession, Execution, FormatterReportFileDetail, FormatterReportSummary,
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
 };
+use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
@@ -16,7 +17,6 @@ use crossbeam::{
     channel::{unbounded, Receiver, Sender},
     select,
 };
-use rome_console::{fmt, markup, Console, ConsoleExt};
 use rome_fs::{FileSystem, PathInterner, RomePath};
 use rome_fs::{TraversalContext, TraversalScope};
 use rome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};

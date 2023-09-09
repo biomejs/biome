@@ -1,10 +1,10 @@
 use crate::cli_options::CliOptions;
 use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::{CliDiagnostic, CliSession};
+use biome_console::{markup, Console, ConsoleExt};
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_deserialize::Deserialized;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use rome_console::{markup, Console, ConsoleExt};
-use rome_deserialize::json::deserialize_from_json_str;
-use rome_deserialize::Deserialized;
 use rome_fs::{FileSystem, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_service::configuration::diagnostics::CantLoadExtendFile;

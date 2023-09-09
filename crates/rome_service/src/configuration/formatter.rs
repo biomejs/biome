@@ -1,8 +1,8 @@
 use crate::configuration::merge::MergeWith;
 use crate::settings::FormatSettings;
 use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use biome_deserialize::StringSet;
 use bpaf::Bpaf;
-use rome_deserialize::StringSet;
 use rome_formatter::{IndentStyle, LineWidth};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;

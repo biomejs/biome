@@ -1,8 +1,8 @@
 use biome_cli::CliDiagnostic;
+use biome_console::fmt::{Formatter, Termcolor};
+use biome_console::{markup, BufferConsole, Markup};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{print_diagnostic_to_string, Error};
-use rome_console::fmt::{Formatter, Termcolor};
-use rome_console::{markup, BufferConsole, Markup};
 use rome_formatter::IndentStyle;
 use rome_fs::{FileSystemExt, MemoryFileSystem};
 use rome_json_formatter::context::JsonFormatOptions;

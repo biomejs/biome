@@ -1,4 +1,4 @@
-use rome_control_flow::{builder::BlockId, ExceptionHandlerKind};
+use biome_control_flow::{builder::BlockId, ExceptionHandlerKind};
 use rome_js_syntax::{JsCatchClause, JsFinallyClause, JsTryFinallyStatement, JsTryStatement};
 use rome_rowan::{declare_node_union, SyntaxResult};
 

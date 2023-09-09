@@ -1,8 +1,8 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
+use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_console::markup;
 use rome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
 };

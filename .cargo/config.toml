@@ -14,7 +14,7 @@ coverage = "run -p xtask_coverage --profile=release-with-debug --"
 documentation = """
     doc \
     -p rome_*formatter \
-    -p rome_control_flow \
+    -p biome_control_flow \
     -p biome_analyze \
     -p rome_*analyze \
     -p rome_*_syntax \
@@ -22,7 +22,7 @@ documentation = """
     -p biome_diagnostics \
     -p rome_service \
     -p biome_cli \
-    -p rome_console \
+    -p biome_console \
     -p rome_*parser \
     -p biome_text_edit \
     -p biome_text_size \

@@ -1,8 +1,8 @@
 use std::io;
 
+use biome_console::{fmt, markup, MarkupBuf};
 use biome_text_edit::TextEdit;
 use biome_text_size::TextRange;
-use rome_console::{fmt, markup, MarkupBuf};
 use serde::{
     de::{self, SeqAccess},
     Deserialize, Deserializer, Serialize, Serializer,

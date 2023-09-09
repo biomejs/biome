@@ -1,10 +1,10 @@
 use crate::file_handlers::Language;
 use crate::ConfigurationDiagnostic;
+use biome_console::fmt::Bytes;
+use biome_console::markup;
 use biome_diagnostics::{
     category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
 };
-use rome_console::fmt::Bytes;
-use rome_console::markup;
 use rome_formatter::{FormatError, PrintError};
 use rome_fs::FileSystemDiagnostic;
 use rome_js_analyze::utils::rename::RenameError;
@@ -156,7 +156,7 @@ impl Diagnostic for WorkspaceError {
         }
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match self {
             WorkspaceError::FormatWithErrorsDisabled(error) => error.message(fmt),
             WorkspaceError::FormatError(err) => err.message(fmt),
@@ -410,7 +410,7 @@ impl Diagnostic for FileTooLarge {
         Some(category!("internalError/fs"))
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
                 "Size of "{self.path}" is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project. The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't."
@@ -447,7 +447,7 @@ impl Diagnostic for SourceFileNotSupported {
         Location::builder().resource(&self.path).build()
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         if self.language != Language::Unknown {
             fmt.write_markup(markup! {
                 "Biome doesn't support this feature for the language "{{&self.language}}
@@ -507,7 +507,7 @@ impl Diagnostic for TransportError {
         }
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match self {
             TransportError::SerdeError(err) => write!(fmt, "serialization error: {err}"),
             TransportError::ChannelClosed => fmt.write_str(

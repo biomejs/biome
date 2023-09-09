@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
-use rome_control_flow::{
+use biome_console::markup;
+use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };

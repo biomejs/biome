@@ -17,7 +17,7 @@ cfg-if            = "1.0.0"
 countme           = { workspace = true }
 drop_bomb         = "0.1.5"
 indexmap          = { workspace = true }
-rome_console      = { workspace = true }
+biome_console      = { workspace = true }
 rome_rowan        = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }

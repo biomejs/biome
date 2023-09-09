@@ -1,8 +1,8 @@
+use biome_console::MarkupBuf;
 use biome_diagnostics::{
     advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
     DiagnosticTags, Error, Location, Severity, Visit,
 };
-use rome_console::MarkupBuf;
 use rome_rowan::TextRange;
 use std::fmt::{Debug, Display, Formatter};
 
@@ -53,10 +53,10 @@ impl Diagnostic for AnalyzerDiagnostic {
         }
     }
 
-    fn message(&self, fmt: &mut rome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match &self.kind {
             DiagnosticKind::Rule(rule_diagnostic) => {
-                rome_console::fmt::Display::fmt(&rule_diagnostic.message, fmt)
+                biome_console::fmt::Display::fmt(&rule_diagnostic.message, fmt)
             }
             DiagnosticKind::Raw(error) => error.message(fmt),
         }

@@ -132,7 +132,7 @@ fn generate_description(input: &DeriveInput) -> TokenStream {
             let mut write = biome_diagnostics::console::fmt::Termcolor(write);
             let mut write = biome_diagnostics::console::fmt::Formatter::new(&mut write);
 
-            use biome_diagnostics::console as rome_console;
+            use biome_diagnostics::console as biome_console;
             write.write_markup(&biome_diagnostics::console::markup!{ #markup })
                 .map_err(|_| ::std::fmt::Error)?;
 
@@ -157,7 +157,7 @@ fn generate_message(input: &DeriveInput) -> TokenStream {
             fmt.write_str(#value)
         },
         Some(StaticOrDynamic::Static(StringOrMarkup::Markup(markup))) => quote! {
-            use biome_diagnostics::console as rome_console;
+            use biome_diagnostics::console as biome_console;
             fmt.write_markup(biome_diagnostics::console::markup!{ #markup })
         },
         Some(StaticOrDynamic::Dynamic(value)) => quote! {

@@ -1,6 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_syntax::{JsReturnStatement, JsSetterClassMember, JsSetterObjectMember};
 use rome_rowan::{declare_node_union, AstNode};
 

@@ -2,9 +2,9 @@ use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
 };
+use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_unicode_table::is_js_ident;
-use rome_console::markup;
 use rome_js_factory::make::{
     self, ident, js_literal_member_name, js_name, js_static_member_expression, token,
 };

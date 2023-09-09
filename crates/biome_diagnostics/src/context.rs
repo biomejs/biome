@@ -1,4 +1,4 @@
-use rome_console::fmt;
+use biome_console::fmt;
 
 use crate::context::internal::{SeverityDiagnostic, TagsDiagnostic};
 use crate::{
@@ -249,8 +249,8 @@ mod internal {
 
     use std::{fmt::Debug, io};
 
+    use biome_console::{fmt, markup};
     use biome_text_edit::TextEdit;
-    use rome_console::{fmt, markup};
     use rome_rowan::TextRange;
 
     use crate::{

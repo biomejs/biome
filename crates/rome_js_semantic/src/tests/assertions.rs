@@ -1,9 +1,9 @@
 use crate::{semantic_events, SemanticEvent};
+use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,
 };
-use rome_console::{markup, ConsoleExt, EnvConsole};
 use rome_js_parser::JsParserOptions;
 use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
 use rome_rowan::{AstNode, NodeOrToken};

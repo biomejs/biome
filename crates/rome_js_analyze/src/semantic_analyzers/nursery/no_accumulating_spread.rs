@@ -1,5 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use rome_console::markup;
+use biome_console::markup;
 use rome_js_semantic::SemanticModel;
 use rome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,

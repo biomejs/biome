@@ -17,8 +17,8 @@ biome_text_edit     = { workspace = true }
 bpaf                = { workspace = true }
 dashmap             = { workspace = true }
 indexmap            = { workspace = true, features = ["serde"] }
-rome_console        = { workspace = true }
-rome_deserialize    = { workspace = true }
+biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
 rome_formatter      = { workspace = true, features = ["serde"] }
 rome_fs             = { workspace = true, features = ["serde"] }
 rome_js_analyze     = { workspace = true }

@@ -19,7 +19,7 @@ pub use termcolor;
 
 #[doc(hidden)]
 // Convenience re-export for procedural macro
-pub use rome_console as console;
+pub use biome_console as console;
 
 // Re-export macros from utility crates
 pub use biome_diagnostics_categories::{category, category_concat, Category};
@@ -35,8 +35,8 @@ pub use crate::display::{
 };
 pub use crate::error::{Error, Result};
 pub use crate::location::{LineIndex, LineIndexBuf, Location, Resource, SourceCode};
-use rome_console::fmt::{Formatter, Termcolor};
-use rome_console::markup;
+use biome_console::fmt::{Formatter, Termcolor};
+use biome_console::markup;
 use std::fmt::Write;
 
 pub mod prelude {

@@ -188,8 +188,8 @@ impl std::fmt::Display for RuleError {
     }
 }
 
-impl rome_console::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut rome_console::fmt::Formatter) -> std::io::Result<()> {
+impl biome_console::fmt::Display for RuleError {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
             RuleError::ReplacedRootWithNonRootError {
                 rule_name: Some((group, rule)),
@@ -215,11 +215,11 @@ impl Error for RuleError {}
 mod tests {
     use biome_analyze::options::RuleOptions;
     use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_console::fmt::{Formatter, Termcolor};
+    use biome_console::{markup, Markup};
     use biome_diagnostics::category;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use rome_console::fmt::{Formatter, Termcolor};
-    use rome_console::{markup, Markup};
     use rome_js_parser::{parse, JsParserOptions};
     use rome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;

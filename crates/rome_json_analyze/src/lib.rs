@@ -99,10 +99,10 @@ where
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
+    use biome_console::fmt::{Formatter, Termcolor};
+    use biome_console::{markup, Markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use rome_console::fmt::{Formatter, Termcolor};
-    use rome_console::{markup, Markup};
     use rome_json_parser::{parse_json, JsonParserOptions};
     use rome_json_syntax::TextRange;
     use std::slice;

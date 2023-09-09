@@ -2,8 +2,8 @@ use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_console::markup;
 use rome_js_factory::make;
 use rome_js_syntax::{
     JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList, TsObjectType,
