@@ -2,8 +2,8 @@
 bench_analyzer = "run -p xtask_bench --release -- --feature analyzer"
 bench_formatter = "run -p xtask_bench --release -- --feature formatter"
 bench_parser = "run -p xtask_bench --release -- --feature parser"
-biome-cli = "run -p rome_cli --release --"
-biome-cli-dev = "run -p rome_cli --"
+biome-cli = "run -p biome_cli --release --"
+biome-cli-dev = "run -p biome_cli --"
 codegen = "run -p xtask_codegen --"
 codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"
@@ -21,7 +21,7 @@ documentation = """
     -p rome_*_factory \
     -p biome_diagnostics \
     -p rome_service \
-    -p rome_cli \
+    -p biome_cli \
     -p rome_console \
     -p rome_*parser \
     -p biome_text_edit \

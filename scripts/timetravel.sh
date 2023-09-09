@@ -26,7 +26,7 @@ do
 
     # check if a compiled version of this commit already exists
     if [ ! -f "target/$i" ]; then
-        cargo build -p rome_cli --release 2>&1 > /dev/null
+        cargo build -p biome_cli --release 2>&1 > /dev/null
         cp target/release/biome "target/$i"
     fi
 

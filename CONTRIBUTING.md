@@ -74,7 +74,7 @@ just test
 If you want to test the tests for a single crate:
 
 ```shell
-just test-crate rome_cli
+just test-crate biome_cli
 ```
 
 To run only the doctests, you would need to pass an argument to the command:

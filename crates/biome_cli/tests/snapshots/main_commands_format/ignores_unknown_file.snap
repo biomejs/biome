@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `test.js`
+
+```js
+console.log('bar');
+
+```
+
+## `test.txt`
+
+```txt
+content
+```
+
+# Emitted Messages
+
+```block
+test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Formatter would have printed the following content:
+  
+    1   │ - console.log('bar');
+      1 │ + console.log("bar");
+    2 2 │   
+  
+
+```
+
+```block
+Compared 1 file(s) in <TIME>
+```
+
+

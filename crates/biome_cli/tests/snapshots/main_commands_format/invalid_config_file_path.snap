@@ -1,0 +1,24 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.js`
+
+```js
+content
+```
+
+# Termination Message
+
+```block
+test/rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome couldn't read the file
+  
+  × Biome couldn't read the following file, maybe for permissions reasons or it doesn't exists: test/rome.json
+  
+
+
+```
+
+

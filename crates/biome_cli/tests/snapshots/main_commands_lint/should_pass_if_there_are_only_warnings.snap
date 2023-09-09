@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noClassAssign": "warn"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+class A {};
+A = 0;
+
+```
+
+# Emitted Messages
+
+```block
+file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'A' is a class.
+  
+    1 │ class A {};
+  > 2 │ A = 0;
+      │ ^
+    3 │ 
+  
+  i 'A' is defined here.
+  
+  > 1 │ class A {};
+      │       ^
+    2 │ A = 0;
+    3 │ 
+  
+
+```
+
+```block
+Fixed 1 file(s) in <TIME>
+```
+
+

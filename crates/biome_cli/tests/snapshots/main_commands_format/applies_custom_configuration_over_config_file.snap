@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 160,
+    "indentStyle": "space",
+    "indentSize": 6
+  }
+}
+```
+
+## `file.js`
+
+```js
+function f() {
+        return {
+                a,
+                b,
+        };
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file(s) in <TIME>
+```
+
+

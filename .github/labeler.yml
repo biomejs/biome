@@ -1,7 +1,7 @@
 # See https://github.com/actions/labeler
 
 A-Cli:
-  - crates/rome_cli/**
+  - crates/biome_cli/**
   - crates/rome_fs/**
   - crates/rome_console/**
 
