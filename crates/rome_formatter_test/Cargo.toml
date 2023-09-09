@@ -9,17 +9,17 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_parser     = { workspace = true }
-insta            = { workspace = true, features = ["glob"] }
-rome_console     = { workspace = true }
-rome_diagnostics = { workspace = true }
-rome_formatter   = { workspace = true }
-rome_fs          = { workspace = true }
-rome_rowan       = { workspace = true }
-rome_service     = { workspace = true }
-serde            = { version = "1", features = ["derive"] }
-serde_json       = { workspace = true }
-similar          = "2.1.0"
-similar-asserts  = "1.2.0"
+biome_diagnostics = { workspace = true }
+biome_parser      = { workspace = true }
+insta             = { workspace = true, features = ["glob"] }
+rome_console      = { workspace = true }
+rome_formatter    = { workspace = true }
+rome_fs           = { workspace = true }
+rome_rowan        = { workspace = true }
+rome_service      = { workspace = true }
+serde             = { version = "1", features = ["derive"] }
+serde_json        = { workspace = true }
+similar           = "2.1.0"
+similar-asserts   = "1.2.0"
 
 [dev-dependencies]

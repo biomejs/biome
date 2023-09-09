@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, RefactorKind, Rule};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{
     JsBinaryExpression, JsBinaryExpressionFields, JsBinaryOperator, JsSyntaxKind, T,

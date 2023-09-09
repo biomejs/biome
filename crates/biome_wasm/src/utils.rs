@@ -3,10 +3,10 @@ use std::fmt::Display;
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
+use biome_diagnostics::serde::Diagnostic;
+use biome_diagnostics::{DiagnosticExt, LineIndexBuf, PrintDiagnostic, SourceCode};
 use rome_console::fmt::HTML;
 use rome_console::{fmt::Formatter, markup};
-use rome_diagnostics::serde::Diagnostic;
-use rome_diagnostics::{DiagnosticExt, LineIndexBuf, PrintDiagnostic, SourceCode};
 
 use super::IDiagnostic;
 
@@ -54,7 +54,7 @@ impl DiagnosticPrinter {
     fn print(
         &mut self,
         diagnostic: IDiagnostic,
-        printer: fn(&rome_diagnostics::Error) -> PrintDiagnostic<rome_diagnostics::Error>,
+        printer: fn(&biome_diagnostics::Error) -> PrintDiagnostic<biome_diagnostics::Error>,
     ) -> Result<(), Error> {
         let diag: Diagnostic =
             serde_wasm_bindgen::from_value(diagnostic.into()).map_err(into_error)?;

@@ -1,5 +1,5 @@
 use crate::{RuleKey, TextRange};
-use rome_diagnostics::{Diagnostic, LineIndexBuf, Resource, Result, SourceCode};
+use biome_diagnostics::{Diagnostic, LineIndexBuf, Resource, Result, SourceCode};
 use std::{
     any::{Any, TypeId},
     collections::HashMap,

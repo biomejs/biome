@@ -1,10 +1,10 @@
-use rome_console::fmt::Formatter;
-use rome_console::markup;
-use rome_diagnostics::adapters::{BpafError, IoError};
-use rome_diagnostics::{
+use biome_diagnostics::adapters::{BpafError, IoError};
+use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Error, Location, LogCategory,
     MessageAndDescription, Severity, Visit,
 };
+use rome_console::fmt::Formatter;
+use rome_console::markup;
 use rome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};

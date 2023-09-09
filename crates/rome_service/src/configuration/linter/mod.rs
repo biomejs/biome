@@ -5,9 +5,9 @@ pub use crate::configuration::linter::rules::{rules, Rules};
 use crate::configuration::merge::MergeWith;
 use crate::settings::LinterSettings;
 use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use biome_diagnostics::Severity;
 use bpaf::Bpaf;
 use rome_deserialize::StringSet;
-use rome_diagnostics::Severity;
 use rome_js_analyze::options::{possible_options, PossibleOptions};
 pub use rules::*;
 #[cfg(feature = "schema")]

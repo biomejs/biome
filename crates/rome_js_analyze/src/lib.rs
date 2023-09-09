@@ -5,7 +5,7 @@ use biome_analyze::{
     SuppressionKind,
 };
 use biome_aria::{AriaProperties, AriaRoles};
-use rome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
+use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
 use rome_js_syntax::suppression::SuppressionDiagnostic;
 use rome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
 use serde::{Deserialize, Serialize};
@@ -215,11 +215,11 @@ impl Error for RuleError {}
 mod tests {
     use biome_analyze::options::RuleOptions;
     use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_diagnostics::category;
+    use biome_diagnostics::termcolor::NoColor;
+    use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use rome_console::fmt::{Formatter, Termcolor};
     use rome_console::{markup, Markup};
-    use rome_diagnostics::category;
-    use rome_diagnostics::termcolor::NoColor;
-    use rome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use rome_js_parser::{parse, JsParserOptions};
     use rome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;

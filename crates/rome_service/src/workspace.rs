@@ -55,9 +55,9 @@ use crate::file_handlers::Capabilities;
 use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
+use biome_diagnostics::CodeSuggestion;
 use biome_text_edit::TextEdit;
 use rome_console::{markup, Markup, MarkupBuf};
-use rome_diagnostics::CodeSuggestion;
 use rome_formatter::Printed;
 use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
@@ -312,7 +312,7 @@ pub struct PullDiagnosticsParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullDiagnosticsResult {
-    pub diagnostics: Vec<rome_diagnostics::serde::Diagnostic>,
+    pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub errors: usize,
     pub skipped_diagnostics: u64,
 }
@@ -362,9 +362,9 @@ pub struct FormatOnTypeParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 /// Which fixes should be applied during the analyzing phase
 pub enum FixFileMode {
-    /// Applies [safe](rome_diagnostics::Applicability::Always) fixes
+    /// Applies [safe](biome_diagnostics::Applicability::Always) fixes
     SafeFixes,
-    /// Applies [safe](rome_diagnostics::Applicability::Always) and [unsafe](rome_diagnostics::Applicability::MaybeIncorrect) fixes
+    /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
 }
 

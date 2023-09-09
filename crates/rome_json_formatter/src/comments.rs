@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_diagnostics::category;
 use biome_suppression::parse_suppression_comment;
-use rome_diagnostics::category;
 use rome_formatter::comments::{
     is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
 };

@@ -9,6 +9,7 @@ version              = "0.2.0"
 [dependencies]
 biome_analyze          = { workspace = true }
 biome_aria             = { workspace = true }
+biome_diagnostics      = { workspace = true }
 biome_js_unicode_table = { workspace = true }
 bpaf.workspace         = true
 lazy_static            = { workspace = true }
@@ -17,7 +18,6 @@ roaring                = "0.10.1"
 rome_console           = { workspace = true }
 rome_control_flow      = { workspace = true }
 rome_deserialize       = { workspace = true }
-rome_diagnostics       = { workspace = true }
 rome_js_factory        = { workspace = true }
 rome_js_semantic       = { workspace = true }
 rome_js_syntax         = { workspace = true }

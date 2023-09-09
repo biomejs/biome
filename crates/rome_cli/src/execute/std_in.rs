@@ -3,8 +3,8 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession};
+use biome_diagnostics::PrintDiagnostic;
 use rome_console::{markup, ConsoleExt};
-use rome_diagnostics::PrintDiagnostic;
 use rome_fs::RomePath;
 use rome_service::workspace::{
     ChangeFileParams, FeatureName, FeaturesBuilder, FixFileParams, FormatFileParams, Language,
@@ -127,7 +127,7 @@ pub(crate) fn run<'a>(
                         old: content.to_string(),
                     },
                 };
-                diagnostics.push(rome_diagnostics::serde::Diagnostic::new(diagnostic));
+                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(diagnostic));
             }
         }
 

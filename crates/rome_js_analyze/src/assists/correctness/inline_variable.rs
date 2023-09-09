@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, RefactorKind, Rule};
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_semantic::{Reference, ReferencesExtensions};
 use rome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsIdentifierExpression,

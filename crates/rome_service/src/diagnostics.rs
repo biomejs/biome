@@ -1,8 +1,10 @@
 use crate::file_handlers::Language;
 use crate::ConfigurationDiagnostic;
+use biome_diagnostics::{
+    category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
+};
 use rome_console::fmt::Bytes;
 use rome_console::markup;
-use rome_diagnostics::{category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit};
 use rome_formatter::{FormatError, PrintError};
 use rome_fs::FileSystemDiagnostic;
 use rome_js_analyze::utils::rename::RenameError;
@@ -530,7 +532,7 @@ mod test {
     };
     use crate::file_handlers::Language;
     use crate::{TransportError, WorkspaceError};
-    use rome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use rome_formatter::FormatError;
     use rome_fs::RomePath;
     use std::ffi::OsStr;

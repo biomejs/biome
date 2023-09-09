@@ -1,9 +1,9 @@
 use crate::token_source::TokenSource;
 use crate::Parser;
-use rome_diagnostics::console::fmt::Display;
-use rome_diagnostics::console::{markup, MarkupBuf};
-use rome_diagnostics::location::AsSpan;
-use rome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
+use biome_diagnostics::console::fmt::Display;
+use biome_diagnostics::console::{markup, MarkupBuf};
+use biome_diagnostics::location::AsSpan;
+use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
 use rome_rowan::{SyntaxKind, TextLen, TextRange};
 use std::cmp::Ordering;
 
@@ -102,7 +102,7 @@ impl ParseDiagnostic {
     /// ```
     /// # use rome_console::fmt::{Termcolor};
     /// # use rome_console::markup;
-    /// # use rome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
+    /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
@@ -112,7 +112,7 @@ impl ParseDiagnostic {
     /// let mut diagnostic = ParseDiagnostic::new("this is wrong!", range)
     ///     .detail(TextRange::new(TextSize::from(6), TextSize::from(7)), "This is reason why it's broken");
     ///
-    /// let mut write = rome_diagnostics::termcolor::Buffer::no_color();
+    /// let mut write = biome_diagnostics::termcolor::Buffer::no_color();
     /// let error = diagnostic
     ///     .clone()
     ///     .with_file_path("example.js")
@@ -144,7 +144,7 @@ impl ParseDiagnostic {
     /// ```
     /// # use rome_console::fmt::{Termcolor};
     /// # use rome_console::markup;
-    /// # use rome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
+    /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
     /// # use rome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
@@ -154,7 +154,7 @@ impl ParseDiagnostic {
     /// let mut diagnostic = ParseDiagnostic::new("this is wrong!", range)
     ///     .hint("You should delete the code");
     ///
-    /// let mut write = rome_diagnostics::termcolor::Buffer::no_color();
+    /// let mut write = biome_diagnostics::termcolor::Buffer::no_color();
     /// let error = diagnostic
     ///     .clone()
     ///     .with_file_path("example.js")

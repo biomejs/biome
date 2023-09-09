@@ -133,9 +133,9 @@ dependencies = [
 name = "biome_analyze"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "bitflags 2.3.3",
  "rome_console",
- "rome_diagnostics",
  "rome_rowan",
  "rustc-hash",
  "schemars",
@@ -173,13 +173,13 @@ version = "0.1.0"
 dependencies = [
  "biome_css_factory",
  "biome_css_syntax",
+ "biome_diagnostics",
  "biome_js_unicode_table",
  "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
- "rome_diagnostics",
  "rome_rowan",
  "tests_macros",
  "tracing",
@@ -190,6 +190,46 @@ name = "biome_css_syntax"
 version = "0.2.0"
 dependencies = [
  "rome_rowan",
+]
+
+[[package]]
+name = "biome_diagnostics"
+version = "0.2.0"
+dependencies = [
+ "backtrace",
+ "biome_diagnostics_categories",
+ "biome_diagnostics_macros",
+ "biome_text_edit",
+ "biome_text_size",
+ "bitflags 2.3.3",
+ "bpaf",
+ "rome_console",
+ "rome_rowan",
+ "schemars",
+ "serde",
+ "serde_json",
+ "termcolor",
+ "trybuild",
+ "unicode-width",
+]
+
+[[package]]
+name = "biome_diagnostics_categories"
+version = "0.2.0"
+dependencies = [
+ "quote",
+ "schemars",
+ "serde",
+]
+
+[[package]]
+name = "biome_diagnostics_macros"
+version = "0.0.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -206,12 +246,12 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_analyze",
+ "biome_diagnostics",
  "biome_text_edit",
  "futures",
  "indexmap",
  "proptest",
  "rome_console",
- "rome_diagnostics",
  "rome_formatter",
  "rome_fs",
  "rome_js_formatter",
@@ -239,8 +279,8 @@ name = "biome_migrate"
 version = "0.2.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "lazy_static",
- "rome_diagnostics",
  "rome_json_parser",
  "rome_json_syntax",
  "rome_rowan",
@@ -250,9 +290,9 @@ dependencies = [
 name = "biome_parser"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "drop_bomb",
  "rome_console",
- "rome_diagnostics",
  "rome_rowan",
 ]
 
@@ -260,8 +300,8 @@ dependencies = [
 name = "biome_suppression"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "rome_console",
- "rome_diagnostics",
  "rome_rowan",
 ]
 
@@ -270,11 +310,11 @@ name = "biome_test_utils"
 version = "0.1.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "countme",
  "json_comments",
  "rome_console",
  "rome_deserialize",
- "rome_diagnostics",
  "rome_js_parser",
  "rome_js_syntax",
  "rome_json_parser",
@@ -310,11 +350,11 @@ dependencies = [
 name = "biome_wasm"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "console_error_panic_hook",
  "js-sys",
  "quote",
  "rome_console",
- "rome_diagnostics",
  "rome_js_factory",
  "rome_js_formatter",
  "rome_rowan",
@@ -1957,6 +1997,7 @@ name = "rome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_diagnostics",
  "biome_flags",
  "biome_lsp",
  "biome_migrate",
@@ -1974,7 +2015,6 @@ dependencies = [
  "rayon",
  "rome_console",
  "rome_deserialize",
- "rome_diagnostics",
  "rome_formatter",
  "rome_fs",
  "rome_js_formatter",
@@ -2018,9 +2058,9 @@ dependencies = [
 name = "rome_deserialize"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "indexmap",
  "rome_console",
- "rome_diagnostics",
  "rome_json_parser",
  "rome_json_syntax",
  "rome_rowan",
@@ -2031,56 +2071,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_diagnostics"
-version = "0.2.0"
-dependencies = [
- "backtrace",
- "biome_text_edit",
- "biome_text_size",
- "bitflags 2.3.3",
- "bpaf",
- "rome_console",
- "rome_diagnostics_categories",
- "rome_diagnostics_macros",
- "rome_rowan",
- "schemars",
- "serde",
- "serde_json",
- "termcolor",
- "trybuild",
- "unicode-width",
-]
-
-[[package]]
-name = "rome_diagnostics_categories"
-version = "0.2.0"
-dependencies = [
- "quote",
- "schemars",
- "serde",
-]
-
-[[package]]
-name = "rome_diagnostics_macros"
-version = "0.0.1"
-dependencies = [
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "rome_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_diagnostics",
  "cfg-if",
  "countme",
  "drop_bomb",
  "indexmap",
  "insta",
  "rome_console",
- "rome_diagnostics",
  "rome_js_parser",
  "rome_js_syntax",
  "rome_rowan",
@@ -2095,10 +2095,10 @@ dependencies = [
 name = "rome_formatter_test"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "biome_parser",
  "insta",
  "rome_console",
- "rome_diagnostics",
  "rome_formatter",
  "rome_fs",
  "rome_rowan",
@@ -2113,12 +2113,12 @@ dependencies = [
 name = "rome_fs"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "crossbeam",
  "indexmap",
  "parking_lot",
  "rayon",
  "rome_console",
- "rome_diagnostics",
  "schemars",
  "serde",
  "tracing",
@@ -2130,6 +2130,7 @@ version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_aria",
+ "biome_diagnostics",
  "biome_js_unicode_table",
  "biome_test_utils",
  "biome_text_edit",
@@ -2142,7 +2143,6 @@ dependencies = [
  "rome_console",
  "rome_control_flow",
  "rome_deserialize",
- "rome_diagnostics",
  "rome_js_factory",
  "rome_js_parser",
  "rome_js_semantic",
@@ -2170,6 +2170,8 @@ dependencies = [
 name = "rome_js_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_diagnostics",
+ "biome_diagnostics_categories",
  "biome_parser",
  "biome_text_size",
  "cfg-if",
@@ -2179,8 +2181,6 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rome_deserialize",
- "rome_diagnostics",
- "rome_diagnostics_categories",
  "rome_formatter",
  "rome_formatter_test",
  "rome_fs",
@@ -2201,6 +2201,7 @@ dependencies = [
 name = "rome_js_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_diagnostics",
  "biome_js_unicode_table",
  "biome_parser",
  "bitflags 2.3.3",
@@ -2211,7 +2212,6 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
- "rome_diagnostics",
  "rome_js_factory",
  "rome_js_parser",
  "rome_js_syntax",
@@ -2228,9 +2228,9 @@ dependencies = [
 name = "rome_js_semantic"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "biome_markup",
  "rome_console",
- "rome_diagnostics",
  "rome_js_parser",
  "rome_js_syntax",
  "rome_rowan",
@@ -2242,8 +2242,8 @@ dependencies = [
 name = "rome_js_syntax"
 version = "0.2.0"
 dependencies = [
+ "biome_diagnostics",
  "rome_console",
- "rome_diagnostics",
  "rome_js_factory",
  "rome_rowan",
  "schemars",
@@ -2255,11 +2255,11 @@ name = "rome_js_transform"
 version = "0.2.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_console",
- "rome_diagnostics",
  "rome_js_factory",
  "rome_js_formatter",
  "rome_js_parser",
@@ -2273,11 +2273,11 @@ name = "rome_json_analyze"
 version = "0.2.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "biome_test_utils",
  "insta",
  "lazy_static",
  "rome_console",
- "rome_diagnostics",
  "rome_json_factory",
  "rome_json_parser",
  "rome_json_syntax",
@@ -2298,11 +2298,11 @@ dependencies = [
 name = "rome_json_formatter"
 version = "0.1.0"
 dependencies = [
+ "biome_diagnostics",
  "biome_parser",
  "biome_suppression",
  "countme",
  "insta",
- "rome_diagnostics",
  "rome_formatter",
  "rome_formatter_test",
  "rome_fs",
@@ -2319,13 +2319,13 @@ dependencies = [
 name = "rome_json_parser"
 version = "0.1.0"
 dependencies = [
+ "biome_diagnostics",
  "biome_js_unicode_table",
  "biome_parser",
  "insta",
  "quickcheck",
  "quickcheck_macros",
  "rome_console",
- "rome_diagnostics",
  "rome_json_factory",
  "rome_json_syntax",
  "rome_rowan",
@@ -2364,6 +2364,7 @@ name = "rome_service"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "biome_flags",
  "biome_parser",
  "biome_text_edit",
@@ -2373,7 +2374,6 @@ dependencies = [
  "insta",
  "rome_console",
  "rome_deserialize",
- "rome_diagnostics",
  "rome_formatter",
  "rome_fs",
  "rome_js_analyze",
@@ -3524,6 +3524,7 @@ version = "0.0.0"
 dependencies = [
  "ansi_rgb",
  "biome_analyze",
+ "biome_diagnostics",
  "biome_parser",
  "countme",
  "criterion 0.5.1",
@@ -3534,7 +3535,6 @@ dependencies = [
  "pico-args",
  "regex",
  "rome_console",
- "rome_diagnostics",
  "rome_formatter",
  "rome_js_analyze",
  "rome_js_formatter",
@@ -3558,6 +3558,7 @@ dependencies = [
  "anyhow",
  "biome_analyze",
  "biome_aria",
+ "biome_diagnostics",
  "case",
  "convert_case",
  "filetime",
@@ -3568,7 +3569,6 @@ dependencies = [
  "pulldown-cmark",
  "quote",
  "rome_cli",
- "rome_diagnostics",
  "rome_js_analyze",
  "rome_js_factory",
  "rome_js_formatter",
@@ -3607,6 +3607,7 @@ dependencies = [
  "ascii_table",
  "atty",
  "backtrace",
+ "biome_diagnostics",
  "biome_parser",
  "colored",
  "indicatif",
@@ -3614,7 +3615,6 @@ dependencies = [
  "pico-args",
  "regex",
  "rome_console",
- "rome_diagnostics",
  "rome_js_parser",
  "rome_js_semantic",
  "rome_js_syntax",
@@ -3649,10 +3649,10 @@ name = "xtask_lintdoc"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_diagnostics",
  "convert_case",
  "pulldown-cmark",
  "rome_console",
- "rome_diagnostics",
  "rome_formatter",
  "rome_js_analyze",
  "rome_js_parser",

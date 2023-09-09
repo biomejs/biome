@@ -2,9 +2,9 @@
 
 use crate::RuleConfiguration;
 use biome_analyze::RuleFilter;
+use biome_diagnostics::{Category, Severity};
 use bpaf::Bpaf;
 use indexmap::IndexSet;
-use rome_diagnostics::{Category, Severity};
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -62,7 +62,7 @@ impl Default for Rules {
     }
 }
 impl Rules {
-    #[doc = r" Checks if the code coming from [rome_diagnostics::Diagnostic] corresponds to a rule."]
+    #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
     #[doc = r" Usually the code is built like {category}/{rule_name}"]
     pub fn matches_diagnostic_code<'a>(
         &self,
@@ -84,8 +84,8 @@ impl Rules {
             _ => None,
         }
     }
-    #[doc = r" Given a category coming from [Diagnostic](rome_diagnostics::Diagnostic), this function returns"]
-    #[doc = r" the [Severity](rome_diagnostics::Severity) associated to the rule, if the configuration changed it."]
+    #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
+    #[doc = r" the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
     pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {

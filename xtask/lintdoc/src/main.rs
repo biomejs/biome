@@ -2,6 +2,8 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
+use biome_diagnostics::termcolor::NoColor;
+use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
 use rome_console::fmt::Termcolor;
@@ -9,8 +11,6 @@ use rome_console::{
     fmt::{Formatter, HTML},
     markup, Console, Markup, MarkupBuf,
 };
-use rome_diagnostics::termcolor::NoColor;
-use rome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use rome_js_parser::JsParserOptions;
 use rome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
 use rome_json_parser::JsonParserOptions;
@@ -510,7 +510,7 @@ fn assert_lint(
 
     let mut all_diagnostics = vec![];
 
-    let mut write_diagnostic = |code: &str, diag: rome_diagnostics::Error| {
+    let mut write_diagnostic = |code: &str, diag: biome_diagnostics::Error| {
         let category = diag.category().map_or("", |code| code.name());
 
         Formatter::new(&mut write).write_markup(markup! {

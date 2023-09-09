@@ -1,8 +1,8 @@
 pub mod formatter;
 
 use crate::reports::formatter::{FormatterReportFileDetail, FormatterReportSummary};
+use biome_diagnostics::{Category, Severity};
 use formatter::FormatterReport;
-use rome_diagnostics::{Category, Severity};
 use rome_service::WorkspaceError;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -25,14 +25,14 @@ pub enum ReportErrorKind {
     Diff(ReportDiff),
 }
 
-/// Information computed from a [diagnostic][rome_diagnostics::Diagnostic]
+/// Information computed from a [diagnostic][biome_diagnostics::Diagnostic]
 #[derive(Debug, Serialize)]
 pub struct ReportDiagnostic {
-    /// Severity of the [diagnostic][rome_diagnostics::Diagnostic]
+    /// Severity of the [diagnostic][biome_diagnostics::Diagnostic]
     pub severity: Severity,
-    /// The code of the [diagnostic][rome_diagnostics::Diagnostic]
+    /// The code of the [diagnostic][biome_diagnostics::Diagnostic]
     pub code: Option<&'static Category>,
-    /// The title of the [diagnostic][rome_diagnostics::Diagnostic]
+    /// The title of the [diagnostic][biome_diagnostics::Diagnostic]
     pub title: String,
 }
 

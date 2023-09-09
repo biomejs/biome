@@ -1,4 +1,4 @@
-use rome_diagnostics::Diagnostic;
+use biome_diagnostics::Diagnostic;
 
 #[derive(Clone, Debug, PartialEq, Eq, Diagnostic)]
 #[diagnostic(category = "suppressions/parse")]

@@ -1,8 +1,8 @@
 use crate::Parse;
+use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::{termcolor::Buffer, PrintDiagnostic};
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_diagnostics::DiagnosticExt;
-use rome_diagnostics::{termcolor::Buffer, PrintDiagnostic};
 use rome_js_syntax::{JsLanguage, JsSyntaxNode};
 use rome_rowan::{AstNode, SyntaxKind, SyntaxSlot};
 use std::{fmt::Debug, path::Path};

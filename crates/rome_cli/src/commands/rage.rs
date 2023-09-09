@@ -1,7 +1,7 @@
+use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
+use biome_diagnostics::{termcolor, PrintDescription};
 use rome_console::fmt::{Display, Formatter};
 use rome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
-use rome_diagnostics::termcolor::{ColorChoice, WriteColor};
-use rome_diagnostics::{termcolor, PrintDescription};
 use rome_fs::FileSystem;
 use rome_service::workspace::{client, RageEntry, RageParams};
 use rome_service::{load_config, ConfigurationBasePath, DynRef, Workspace};

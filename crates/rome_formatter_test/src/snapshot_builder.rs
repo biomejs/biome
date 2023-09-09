@@ -1,8 +1,8 @@
+use biome_diagnostics::console::fmt::{Formatter, Termcolor};
+use biome_diagnostics::console::markup;
+use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::{termcolor, DiagnosticExt};
 use biome_parser::AnyParse;
-use rome_diagnostics::console::fmt::{Formatter, Termcolor};
-use rome_diagnostics::console::markup;
-use rome_diagnostics::PrintDiagnostic;
-use rome_diagnostics::{termcolor, DiagnosticExt};
 use rome_formatter::Printed;
 use std::ffi::OsStr;
 use std::fmt;

@@ -1,9 +1,9 @@
 use biome_analyze::{AnalyzerAction, AnalyzerOptions};
+use biome_diagnostics::termcolor::Buffer;
+use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use json_comments::StripComments;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_diagnostics::termcolor::Buffer;
-use rome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use rome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use rome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use rome_service::configuration::to_analyzer_configuration;
@@ -86,7 +86,7 @@ pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
 fn markup_to_string(markup: rome_console::Markup) -> String {
     let mut buffer = Vec::new();
     let mut write =
-        rome_console::fmt::Termcolor(rome_diagnostics::termcolor::NoColor::new(&mut buffer));
+        rome_console::fmt::Termcolor(biome_diagnostics::termcolor::NoColor::new(&mut buffer));
     let mut fmt = Formatter::new(&mut write);
     fmt.write_markup(markup).unwrap();
 

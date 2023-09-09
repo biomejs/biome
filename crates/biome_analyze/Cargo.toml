@@ -9,14 +9,14 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bitflags         = { workspace = true }
-rome_console     = { workspace = true }
-rome_diagnostics = { workspace = true }
-rome_rowan       = { workspace = true }
-rustc-hash       = { workspace = true }
-schemars         = { workspace = true, optional = true }
-serde            = { workspace = true, features = ["derive"] }
-tracing          = { workspace = true }
+biome_diagnostics = { workspace = true }
+bitflags          = { workspace = true }
+rome_console      = { workspace = true }
+rome_rowan        = { workspace = true }
+rustc-hash        = { workspace = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"] }
+tracing           = { workspace = true }
 
 
 [features]

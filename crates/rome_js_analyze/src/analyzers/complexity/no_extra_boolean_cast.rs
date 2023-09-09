@@ -1,8 +1,8 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
 };
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_syntax::{
     AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,

@@ -1,8 +1,8 @@
 pub mod pattern;
 
+use biome_diagnostics::Diagnostic;
 pub use pattern::{MatchOptions, Pattern, PatternError};
 use rome_console::markup;
-use rome_diagnostics::Diagnostic;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::RwLock;

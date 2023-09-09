@@ -2,14 +2,14 @@ use crate::converters::line_index::LineIndex;
 use crate::converters::{from_proto, to_proto, PositionEncoding};
 use anyhow::{ensure, Context, Result};
 use biome_analyze::ActionCategory;
+use biome_diagnostics::termcolor::NoColor;
+use biome_diagnostics::{
+    Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
+};
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use rome_console::fmt::Termcolor;
 use rome_console::fmt::{self, Formatter};
 use rome_console::MarkupBuf;
-use rome_diagnostics::termcolor::NoColor;
-use rome_diagnostics::{
-    Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
-};
 use rome_rowan::TextSize;
 use rome_service::workspace::CodeAction;
 use std::any::Any;
@@ -166,7 +166,7 @@ pub(crate) fn code_fix_to_lsp(
     })
 }
 
-/// Convert an [rome_diagnostics::Diagnostic] to a [lsp::Diagnostic], using the span
+/// Convert an [biome_diagnostics::Diagnostic] to a [lsp::Diagnostic], using the span
 /// of the diagnostic's primary label as the diagnostic range.
 /// Requires a [LineIndex] to convert a byte offset range to the line/col range
 /// expected by LSP.

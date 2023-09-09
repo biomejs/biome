@@ -2,8 +2,8 @@ use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
     Matcher, Rules, WorkspaceError,
 };
+use biome_diagnostics::Category;
 use indexmap::IndexSet;
-use rome_diagnostics::Category;
 use rome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use rome_fs::RomePath;
 use rome_js_syntax::JsLanguage;
@@ -116,7 +116,7 @@ impl WorkspaceSettings {
     pub fn get_severity_from_rule_code(
         &self,
         code: &Category,
-    ) -> Option<rome_diagnostics::Severity> {
+    ) -> Option<biome_diagnostics::Severity> {
         let rules = self.linter.rules.as_ref();
         if let Some(rules) = rules {
             rules.get_severity_from_code(code)

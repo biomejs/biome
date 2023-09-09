@@ -1,10 +1,10 @@
 use crate::test_utils::has_bogus_nodes_or_empty_slots;
 use crate::{parse, parse_module, test_utils::assert_errors_are_absent, JsParserOptions, Parse};
+use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::PrintDiagnostic;
 use expect_test::expect_file;
 use rome_console::fmt::{Formatter, Termcolor};
 use rome_console::markup;
-use rome_diagnostics::DiagnosticExt;
-use rome_diagnostics::PrintDiagnostic;
 use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxKind};
 use rome_js_syntax::{JsCallArguments, JsLogicalExpression, JsSyntaxToken};
 use rome_rowan::{AstNode, Direction, TextSize};
@@ -133,7 +133,7 @@ fn run_and_expect_errors(path: &str, _: &str, _: &str, _: &str) {
     assert_errors_are_present(&parse, &path);
     let mut actual = format!("{}\n\n{:#?}", ast, parse.syntax());
     for diag in parse.diagnostics() {
-        let mut write = rome_diagnostics::termcolor::Buffer::no_color();
+        let mut write = biome_diagnostics::termcolor::Buffer::no_color();
         let error = diag
             .clone()
             .with_file_path(path.file_name().unwrap().to_string_lossy().to_string())
@@ -385,7 +385,7 @@ fn diagnostics_print_correctly() {
 
     let root = parse_module(text, JsParserOptions::default());
     for diagnostic in root.diagnostics() {
-        let mut write = rome_diagnostics::termcolor::Buffer::no_color();
+        let mut write = biome_diagnostics::termcolor::Buffer::no_color();
         let error = diagnostic
             .clone()
             .with_file_path("example.js")

@@ -8,6 +8,7 @@ version = "0.0.0"
 ascii_table        = "4.0.2"
 atty               = { workspace = true }
 backtrace          = "0.3.65"
+biome_diagnostics  = { path = "../../crates/biome_diagnostics" }
 biome_parser       = { path = "../../crates/biome_parser" }
 colored            = "2.0.0"
 indicatif          = { version = "0.17.0", features = ["improved_unicode"] }
@@ -15,7 +16,6 @@ once_cell          = "1.9.0"
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = "1.5.5"
 rome_console       = { path = "../../crates/rome_console" }
-rome_diagnostics   = { path = "../../crates/rome_diagnostics" }
 rome_js_parser     = { path = "../../crates/rome_js_parser" }
 rome_js_semantic   = { path = "../../crates/rome_js_semantic" }
 rome_js_syntax     = { path = "../../crates/rome_js_syntax" }

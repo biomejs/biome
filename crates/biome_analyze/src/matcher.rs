@@ -203,8 +203,8 @@ mod tests {
         SyntaxVisitor,
     };
     use crate::{AnalyzerOptions, SuppressionKind};
-    use rome_diagnostics::{category, DiagnosticExt};
-    use rome_diagnostics::{Diagnostic, Severity};
+    use biome_diagnostics::{category, DiagnosticExt};
+    use biome_diagnostics::{Diagnostic, Severity};
     use rome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, SyntaxNode, TextRange, TextSize, TriviaPiece, TriviaPieceKind,

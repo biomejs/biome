@@ -1,8 +1,8 @@
 use crate::{PathInterner, RomePath};
+use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
+use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
-use rome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
-use rome_diagnostics::{Error, Severity};
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::panic::RefUnwindSafe;

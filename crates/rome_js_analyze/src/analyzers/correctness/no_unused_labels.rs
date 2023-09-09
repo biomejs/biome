@@ -3,8 +3,8 @@ use biome_analyze::{
     declare_rule, ActionCategory, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
     ServiceBag, Visitor, VisitorContext,
 };
+use biome_diagnostics::Applicability;
 use rome_console::markup;
-use rome_diagnostics::Applicability;
 use rome_js_syntax::{
     JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage, TextRange, WalkEvent,
 };

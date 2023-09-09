@@ -1,8 +1,8 @@
-use rome_console::MarkupBuf;
-use rome_diagnostics::{
+use biome_diagnostics::{
     advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
     DiagnosticTags, Error, Location, Severity, Visit,
 };
+use rome_console::MarkupBuf;
 use rome_rowan::TextRange;
 use std::fmt::{Debug, Display, Formatter};
 

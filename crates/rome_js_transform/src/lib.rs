@@ -7,7 +7,7 @@ use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
-use rome_diagnostics::Error;
+use biome_diagnostics::Error;
 use rome_js_syntax::{JsFileSource, JsLanguage};
 use rome_rowan::BatchMutation;
 use std::convert::Infallible;
