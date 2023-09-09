@@ -12,7 +12,7 @@ pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
 
 "<Info><Emphasis>"Files created "</Emphasis></Info>{HorizontalLine::new(106)}"
 
-  "<Dim>"- "</Dim><Emphasis>"biome.json: "</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://biomejs.dev/configuration">"https://biomejs.dev/configuration"</Hyperlink>"
+  "<Dim>"- "</Dim><Emphasis>"biome.json: "</Emphasis>"Your project configuration. Documentation: "<Hyperlink href="https://biomejs.dev/reference/configuration">"https://biomejs.dev/reference/configuration"</Hyperlink>"
 
 "<Info><Emphasis>"Next Steps "</Emphasis></Info>{HorizontalLine::new(109)}"
 
