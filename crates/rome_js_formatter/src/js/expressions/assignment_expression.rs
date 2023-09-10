@@ -4,7 +4,7 @@ use crate::utils::AnyJsAssignmentLike;
 use crate::parentheses::{
     is_arrow_function_body, is_first_in_statement, FirstInStatementMode, NeedsParentheses,
 };
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsForInitializer, JsArrowFunctionExpression, JsAssignmentExpression,

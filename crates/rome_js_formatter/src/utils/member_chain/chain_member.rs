@@ -1,12 +1,12 @@
 use crate::js::expressions::computed_member_expression::FormatComputedMemberLookup;
 use crate::prelude::*;
+use biome_formatter::write;
 use biome_js_syntax::{
     JsCallExpression, JsCallExpressionFields, JsComputedMemberExpression, JsImportCallExpression,
     JsStaticMemberExpression, JsStaticMemberExpressionFields, JsSyntaxNode,
     TsNonNullAssertionExpression, TsNonNullAssertionExpressionFields,
 };
 use biome_rowan::AstNode;
-use rome_formatter::write;
 use std::fmt::Debug;
 
 #[derive(Copy, Clone, Debug)]

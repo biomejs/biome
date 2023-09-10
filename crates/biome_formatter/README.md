@@ -12,11 +12,11 @@
 [discord-url]: https://discord.gg/BypW39g6Yc
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[cargo-badge]: https://badgen.net/crates/v/rome_formatter?&color=green
-[cargo-url]: https://crates.io/crates/rome_formatter/
+[cargo-badge]: https://badgen.net/crates/v/biome_formatter?&color=green
+[cargo-url]: https://crates.io/crates/biome_formatter/
 
 </div>
 
-# `rome_formatter`
+# `biome_formatter`
 
-Biome's formatter implementation. Follow the [documentation](https://docs.rs/rome_formatter/).
+Biome's formatter implementation. Follow the [documentation](https://docs.rs/biome_formatter/).

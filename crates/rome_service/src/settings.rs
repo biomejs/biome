@@ -3,11 +3,11 @@ use crate::{
     Matcher, Rules, WorkspaceError,
 };
 use biome_diagnostics::Category;
+use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use biome_fs::RomePath;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
-use rome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
@@ -226,7 +226,7 @@ pub trait Language: biome_rowan::Language {
     type OrganizeImportsSettings: Default;
 
     /// Fully resolved formatter options type for this language
-    type FormatOptions: rome_formatter::FormatOptions;
+    type FormatOptions: biome_formatter::FormatOptions;
 
     /// Settings that belong to the parser
     type ParserSettings: Default;

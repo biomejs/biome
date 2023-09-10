@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::{AnyJsBinaryLikeExpression, FormatOptionalSemicolon, FormatStatementSemicolon};
 
-use rome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{format_args, write, CstFormatContext};
 
 use crate::parentheses::{get_expression_left_side, AnyJsExpressionLeftSide};
 use biome_js_syntax::{

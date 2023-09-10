@@ -1,7 +1,7 @@
 use std::{env, path::Path};
 
+use biome_formatter::IndentStyle;
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use rome_formatter::IndentStyle;
 use rome_json_formatter::context::JsonFormatOptions;
 
 #[derive(serde::Serialize)]

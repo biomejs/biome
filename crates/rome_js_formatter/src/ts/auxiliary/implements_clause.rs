@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::{format_args, write};
 use biome_js_syntax::TsImplementsClause;
 use biome_js_syntax::TsImplementsClauseFields;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsImplementsClause;

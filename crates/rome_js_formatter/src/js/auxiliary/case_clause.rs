@@ -1,9 +1,9 @@
 use crate::prelude::*;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::AnyJsStatement;
 use biome_js_syntax::JsCaseClause;
 use biome_js_syntax::JsCaseClauseFields;
 use biome_rowan::AstNodeList;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCaseClause;

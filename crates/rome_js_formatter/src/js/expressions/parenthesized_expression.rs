@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{format_args, write, CstFormatContext};
 
 use crate::parentheses::NeedsParentheses;
 use biome_js_syntax::{

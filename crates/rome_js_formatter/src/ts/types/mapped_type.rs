@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::utils::FormatOptionalSemicolon;
+use biome_formatter::trivia::FormatLeadingComments;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::{JsSyntaxNode, TsMappedType, TsMappedTypeFields};
-use rome_formatter::trivia::FormatLeadingComments;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMappedType;

@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::{
     category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
 };
+use biome_formatter::{FormatError, PrintError};
 use biome_fs::FileSystemDiagnostic;
-use rome_formatter::{FormatError, PrintError};
 use rome_js_analyze::utils::rename::RenameError;
 use rome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -533,8 +533,8 @@ mod test {
     use crate::file_handlers::Language;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_formatter::FormatError;
     use biome_fs::RomePath;
-    use rome_formatter::FormatError;
     use std::ffi::OsStr;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_formatter::{write, FormatRuleWithOptions};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, JsArrayElementList, JsArrayExpressionFields,
 };
 use biome_js_syntax::{JsArrayExpression, JsSyntaxNode};
 use biome_rowan::SyntaxResult;
-use rome_formatter::{write, FormatRuleWithOptions};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayExpression {

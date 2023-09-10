@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::AnyJsAssignmentLike;
+use biome_formatter::write;
 use biome_js_syntax::JsObjectAssignmentPatternProperty;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPatternProperty;

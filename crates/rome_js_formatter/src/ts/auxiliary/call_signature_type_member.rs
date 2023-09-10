@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
-use rome_formatter::{format_args, write};
+use biome_formatter::{format_args, write};
 
 use biome_js_syntax::{TsCallSignatureTypeMember, TsCallSignatureTypeMemberFields};
 

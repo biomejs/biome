@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use crate::parentheses::{
     is_binary_like_left_or_right, is_callee, is_conditional_test, is_member_object, is_spread,

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::write;
 use biome_js_syntax::TsExternalModuleReference;
 use biome_js_syntax::TsExternalModuleReferenceFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExternalModuleReference;

@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::JsSyntaxKind::JS_SEQUENCE_EXPRESSION;
 use biome_js_syntax::{
     JsSequenceExpression, JsSequenceExpressionFields, JsSyntaxKind, JsSyntaxNode,
 };
 use biome_rowan::AstNode;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSequenceExpression;

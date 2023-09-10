@@ -1,6 +1,6 @@
 use crate::JsonCommentStyle;
-use rome_formatter::{prelude::*, IndentWidth};
-use rome_formatter::{
+use biome_formatter::{prelude::*, IndentWidth};
+use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineWidth, TransformSourceMap,
 };
 

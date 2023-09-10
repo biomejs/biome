@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::JsExportNamedFromClause;
 use biome_js_syntax::JsExportNamedFromClauseFields;

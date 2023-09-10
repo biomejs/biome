@@ -57,10 +57,10 @@ use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
+use biome_formatter::Printed;
 use biome_fs::RomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
-use rome_formatter::Printed;
 use std::collections::HashMap;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 

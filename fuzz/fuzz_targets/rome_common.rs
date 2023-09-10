@@ -8,7 +8,7 @@ use biome_diagnostics::Diagnostic;
 use biome_js_parser::parse;
 use biome_js_syntax::JsFileSource;
 use libfuzzer_sys::Corpus;
-use rome_formatter::format_node;
+use biome_formatter::format_node;
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::JsFormatLanguage;

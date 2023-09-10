@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::FormatOptionalSemicolon;
 
+use biome_formatter::write;
 use biome_js_syntax::TsIndexSignatureClassMember;
 use biome_js_syntax::TsIndexSignatureClassMemberFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIndexSignatureClassMember;

@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use rome_formatter::prelude::tag::Tag;
-use rome_formatter::{
+use biome_formatter::prelude::tag::Tag;
+use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
 };
 

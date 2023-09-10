@@ -3,7 +3,7 @@ use crate::workspace::{
     OrganizeImportsResult, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
-use rome_formatter::Printed;
+use biome_formatter::Printed;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 use std::{

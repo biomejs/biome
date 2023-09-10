@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use biome_diagnostics::category;
+use biome_formatter::comments::{
+    is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
+};
+use biome_formatter::formatter::Formatter;
+use biome_formatter::{write, FormatResult, FormatRule};
 use biome_json_syntax::{JsonLanguage, TextLen};
 use biome_rowan::SyntaxTriviaPieceComments;
 use biome_suppression::parse_suppression_comment;
-use rome_formatter::comments::{
-    is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
-};
-use rome_formatter::formatter::Formatter;
-use rome_formatter::{write, FormatResult, FormatRule};
 
 pub type JsonComments = Comments<JsonLanguage>;
 

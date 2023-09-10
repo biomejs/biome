@@ -1,8 +1,8 @@
 use crate::js::declarations::function_declaration::FormatFunction;
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
+use biome_formatter::write;
 use biome_js_syntax::TsDeclareFunctionExportDefaultDeclaration;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsDeclareFunctionExportDefaultDeclaration;

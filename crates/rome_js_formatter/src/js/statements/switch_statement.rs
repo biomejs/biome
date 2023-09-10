@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::write;
 use biome_js_syntax::{JsSwitchStatement, JsSwitchStatementFields};
 use biome_rowan::AstNodeList;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSwitchStatement;

@@ -14,8 +14,8 @@ pub trait MemoizeFormat<Context> {
     ///
     /// ```
     /// use std::cell::Cell;
-    /// use rome_formatter::{format, write};
-    /// use rome_formatter::prelude::*;
+    /// use biome_formatter::{format, write};
+    /// use biome_formatter::prelude::*;
     /// use biome_rowan::TextSize;
     ///
     /// struct MyFormat {
@@ -96,8 +96,8 @@ where
     ///
     /// ```rust
     /// use std::cell::Cell;
-    /// use rome_formatter::{format, write};
-    /// use rome_formatter::prelude::*;
+    /// use biome_formatter::{format, write};
+    /// use biome_formatter::prelude::*;
     /// use biome_rowan::TextSize;
     ///
     /// #[derive(Default)]

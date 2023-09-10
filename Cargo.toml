@@ -39,6 +39,7 @@ biome_diagnostics            = { version = "0.2.0", path = "./crates/biome_diagn
 biome_diagnostics_categories = { version = "0.2.0", path = "./crates/biome_diagnostics_categories" }
 biome_diagnostics_macros     = { version = "0.0.1", path = "./crates/biome_diagnostics_macros" }
 biome_flags                  = { path = "./crates/biome_flags" }
+biome_formatter              = { version = "0.1.0", path = "./crates/biome_formatter" }
 biome_formatter_test         = { path = "./crates/biome_formatter_test" }
 biome_fs                     = { path = "./crates/biome_fs" }
 biome_js_factory             = { version = "0.2.0", path = "./crates/biome_js_factory" }
@@ -57,7 +58,6 @@ biome_suppression            = { version = "0.2.0", path = "./crates/biome_suppr
 biome_test_utils             = { path = "./crates/biome_test_utils" }
 biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_edit" }
 biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_size" }
-rome_formatter               = { version = "0.1.0", path = "./crates/rome_formatter" }
 rome_js_analyze              = { path = "./crates/rome_js_analyze" }
 rome_js_formatter            = { path = "./crates/rome_js_formatter" }
 rome_json_analyze            = { path = "./crates/rome_json_analyze" }

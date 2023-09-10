@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::write;
 use biome_js_syntax::TsReturnTypeAnnotation;
 use biome_js_syntax::TsReturnTypeAnnotationFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsReturnTypeAnnotation;

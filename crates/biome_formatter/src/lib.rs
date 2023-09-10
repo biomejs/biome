@@ -501,15 +501,15 @@ impl Printed {
 /// Public return type of the formatter
 pub type FormatResult<F> = Result<F, FormatError>;
 
-/// Formatting trait for types that can create a formatted representation. The `rome_formatter` equivalent
+/// Formatting trait for types that can create a formatted representation. The `biome_formatter` equivalent
 /// to [std::fmt::Display].
 ///
 /// ## Example
 /// Implementing `Format` for a custom struct
 ///
 /// ```
-/// use rome_formatter::{format, write, IndentStyle, LineWidth};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, write, IndentStyle, LineWidth};
+/// use biome_formatter::prelude::*;
 /// use biome_rowan::TextSize;
 ///
 /// struct Paragraph(String);
@@ -659,13 +659,13 @@ pub trait FormatRuleWithOptions<T>: FormatRule<T> {
 ///
 /// ## Examples
 ///
-/// This can be useful if you want to format a `SyntaxNode` inside rome_formatter.. `SyntaxNode` doesn't implement [Format]
+/// This can be useful if you want to format a `SyntaxNode` inside biome_formatter.. `SyntaxNode` doesn't implement [Format]
 /// itself but the language specific crate implements `AsFormat` and `IntoFormat` for it and the returned [Format]
 /// implement [FormatWithRule].
 ///
 /// ```ignore
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{format, Formatted, FormatWithRule};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, Formatted, FormatWithRule};
 /// use biome_rowan::{Language, SyntaxNode};
 /// fn format_node<L: Language, F: FormatWithRule<SimpleFormatContext, Item=SyntaxNode<L>>>(node: F) -> FormatResult<Formatted<SimpleFormatContext>> {
 ///     let formatted = format!(SimpleFormatContext::default(), [node]);
@@ -797,8 +797,8 @@ where
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{VecBuffer, format_args, FormatState, write, Formatted};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{VecBuffer, format_args, FormatState, write, Formatted};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let mut state = FormatState::new(SimpleFormatContext::default());
@@ -816,8 +816,8 @@ where
 /// Please note that using [`write!`] might be preferable. Example:
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{VecBuffer, format_args, FormatState, write, Formatted};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{VecBuffer, format_args, FormatState, write, Formatted};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let mut state = FormatState::new(SimpleFormatContext::default());
@@ -851,8 +851,8 @@ pub fn write<Context>(
 /// Basic usage:
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [&format_args!(text("test"))])?;
@@ -864,8 +864,8 @@ pub fn write<Context>(
 /// Please note that using [`format!`] might be preferable. Example:
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{format};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [text("test")])?;

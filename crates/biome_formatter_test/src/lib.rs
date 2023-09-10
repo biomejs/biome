@@ -1,9 +1,9 @@
-use biome_parser::AnyParse;
-use biome_rowan::{Language, SyntaxNode, TextRange};
-use rome_formatter::{
+use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOptions, FormatResult, Formatted,
     Printed,
 };
+use biome_parser::AnyParse;
+use biome_rowan::{Language, SyntaxNode, TextRange};
 
 pub mod check_reformat;
 pub mod diff_report;

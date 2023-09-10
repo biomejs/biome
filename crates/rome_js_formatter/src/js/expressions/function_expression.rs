@@ -5,8 +5,8 @@ use crate::parentheses::{
     is_callee, is_first_in_statement, is_tag, FirstInStatementMode, NeedsParentheses,
 };
 
+use biome_formatter::FormatRuleWithOptions;
 use biome_js_syntax::{JsFunctionExpression, JsSyntaxNode};
-use rome_formatter::FormatRuleWithOptions;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsFunctionExpression {

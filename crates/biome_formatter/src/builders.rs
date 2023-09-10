@@ -19,8 +19,8 @@ use Tag::*;
 /// Soft line breaks are omitted if the enclosing `Group` fits on a single line
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -39,8 +39,8 @@ use Tag::*;
 ///
 /// Soft line breaks are emitted if the enclosing `Group` doesn't fit on a single line
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -75,8 +75,8 @@ pub const fn soft_line_break() -> Line {
 ///
 /// It forces a line break, even if the enclosing `Group` would otherwise fit on a single line.
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -106,8 +106,8 @@ pub const fn hard_line_break() -> Line {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// fn main() -> FormatResult<()> {
 /// let elements = format!(
@@ -138,8 +138,8 @@ pub const fn empty_line() -> Line {
 ///
 /// The line breaks are emitted as spaces if the enclosing `Group` fits on a a single line:
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -160,8 +160,8 @@ pub const fn empty_line() -> Line {
 ///
 /// The printer breaks the lines if the enclosing `Group` doesn't fit on a single line:
 /// ```
-/// use rome_formatter::{format_args, format, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format_args, format, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -222,8 +222,8 @@ impl std::fmt::Debug for Line {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::format;
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [text("Hello World")])?;
@@ -240,8 +240,8 @@ impl std::fmt::Debug for Line {
 /// enclosed in quotes (depending on the target language).
 ///
 /// ```
-/// use rome_formatter::format;
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// // the tab must be encoded as \\t to not literally print a tab character ("Hello{tab}World" vs "Hello\tWorld")
@@ -399,8 +399,8 @@ fn debug_assert_no_newlines(text: &str) {
 /// ## Examples
 ///
 /// ```
-/// use rome_formatter::{format};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format};
+/// use biome_formatter::prelude::*;
 ///
 /// fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -452,8 +452,8 @@ impl<Context> std::fmt::Debug for LineSuffix<'_, Context> {
 ///
 /// Forces the line suffix "c" to be printed before the token `d`.
 /// ```
-/// use rome_formatter::format;
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
 ///
 /// # fn  main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -493,8 +493,8 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// ## Examples
 ///
 /// ```rust
-/// # use rome_formatter::prelude::*;
-/// # use rome_formatter::{format, write, LineWidth};
+/// # use biome_formatter::prelude::*;
+/// # use biome_formatter::{format, write, LineWidth};
 ///
 /// #[derive(Debug, Copy, Clone)]
 /// enum MyLabels {
@@ -585,8 +585,8 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::format;
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// // the tab must be encoded as \\t to not literally print a tab character ("Hello{tab}World" vs "Hello\tWorld")
@@ -621,8 +621,8 @@ impl<Context> Format<Context> for Space {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
@@ -683,8 +683,8 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
@@ -750,8 +750,8 @@ impl<Context> std::fmt::Debug for Dedent<'_, Context> {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
@@ -812,8 +812,8 @@ where
 ///
 /// ```
 /// use std::num::NonZeroU8;
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let block = format!(SimpleFormatContext::default(), [
@@ -857,8 +857,8 @@ where
 ///
 /// ```
 /// use std::num::NonZeroU8;
-/// use rome_formatter::{format, format_args, IndentStyle, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, IndentStyle, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -944,8 +944,8 @@ impl<Context> std::fmt::Debug for Align<'_, Context> {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let block = format![
@@ -985,8 +985,8 @@ pub fn block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Cont
 /// Indents the content by one level and puts in new lines if the enclosing `Group` doesn't fit on a single line
 ///
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1016,8 +1016,8 @@ pub fn block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Cont
 ///
 /// Doesn't change the formatting if the enclosing `Group` fits on a single line
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1059,8 +1059,8 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 /// fit on a single line. Otherwise, just inserts a space.
 ///
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1093,8 +1093,8 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 ///
 /// Only adds a space if the enclosing `Group` fits on a single line
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1191,8 +1191,8 @@ impl<Context> std::fmt::Debug for BlockIndent<'_, Context> {
 /// Adds line breaks and indents the content if the enclosing group doesn't fit on the line.
 ///
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1223,8 +1223,8 @@ impl<Context> std::fmt::Debug for BlockIndent<'_, Context> {
 ///
 /// Adds spaces around the content if the group fits on the line
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1268,8 +1268,8 @@ pub fn soft_space_or_block_indent<Context>(content: &impl Format<Context>) -> Bl
 /// `Group` that fits on a single line
 ///
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1296,8 +1296,8 @@ pub fn soft_space_or_block_indent<Context>(content: &impl Format<Context>) -> Bl
 ///
 /// The printer breaks the `Group` over multiple lines if its content doesn't fit on a single line
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1394,8 +1394,8 @@ impl<Context> std::fmt::Debug for Group<'_, Context> {
 /// ## Examples
 ///
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1448,8 +1448,8 @@ impl<Context> Format<Context> for ExpandParent {
 ///
 /// Omits the trailing comma for the last array element if the `Group` fits on a single line
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let elements = format!(SimpleFormatContext::default(), [
@@ -1477,9 +1477,9 @@ impl<Context> Format<Context> for ExpandParent {
 ///
 /// Prints the trailing comma for the last array element if the `Group` doesn't fit on a single line
 /// ```
-/// use rome_formatter::{format_args, format, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::printer::PrintWidth;
+/// use biome_formatter::{format_args, format, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::printer::PrintWidth;
 ///
 /// fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1530,8 +1530,8 @@ where
 ///
 /// Adds the trailing comma for the last array element if the `Group` fits on a single line
 /// ```
-/// use rome_formatter::{format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [
@@ -1559,8 +1559,8 @@ where
 ///
 /// Omits the trailing comma for the last array element if the `Group` doesn't fit on a single line
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1621,8 +1621,8 @@ impl<Context> IfGroupBreaks<'_, Context> {
     /// The item `[4]` in this example fits on a single line but the trailing comma should still be printed
     ///
     /// ```
-    /// use rome_formatter::{format, format_args, write, LineWidth, SimpleFormatOptions};
-    /// use rome_formatter::prelude::*;
+    /// use biome_formatter::{format, format_args, write, LineWidth, SimpleFormatOptions};
+    /// use biome_formatter::prelude::*;
     ///
     /// # fn main() -> FormatResult<()> {
     /// let context = SimpleFormatContext::new(SimpleFormatOptions {
@@ -1698,8 +1698,8 @@ impl<Context> std::fmt::Debug for IfGroupBreaks<'_, Context> {
 /// This IR has the same semantics as using [if_group_breaks] and [if_group_fits_on_line] together.
 ///
 /// ```
-/// # use rome_formatter::prelude::*;
-/// # use rome_formatter::write;
+/// # use biome_formatter::prelude::*;
+/// # use biome_formatter::write;
 /// # let format = format_with(|f: &mut Formatter<SimpleFormatContext>| {
 /// let id = f.group_id("head");
 ///
@@ -1721,8 +1721,8 @@ impl<Context> std::fmt::Debug for IfGroupBreaks<'_, Context> {
 ///
 /// Indent the body of an arrow function if the group wrapping the signature breaks:
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions, write};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions, write};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let content = format_with(|f| {
@@ -1751,8 +1751,8 @@ impl<Context> std::fmt::Debug for IfGroupBreaks<'_, Context> {
 ///
 /// It doesn't add an indent if the group wrapping the signature doesn't break:
 /// ```
-/// use rome_formatter::{format, format_args, LineWidth, SimpleFormatOptions, write};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions, write};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let content = format_with(|f| {
@@ -1838,8 +1838,8 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{SimpleFormatContext, format, write};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{SimpleFormatContext, format, write};
 /// use biome_rowan::TextSize;
 ///
 /// struct MyFormat {
@@ -1895,8 +1895,8 @@ where
 /// # Example
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{SimpleFormatContext, format, write, Buffer};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{SimpleFormatContext, format, write, Buffer};
 ///
 /// struct MyFormat;
 ///
@@ -1933,8 +1933,8 @@ where
 /// Formatting the same value twice results in a panic.
 ///
 /// ```panics
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{SimpleFormatContext, format, write, Buffer};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{SimpleFormatContext, format, write, Buffer};
 /// use biome_rowan::TextSize;
 ///
 /// let mut count = 0;

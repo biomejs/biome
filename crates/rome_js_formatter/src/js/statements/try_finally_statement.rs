@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::JsTryFinallyStatement;
 use biome_js_syntax::JsTryFinallyStatementFields;

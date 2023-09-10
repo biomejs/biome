@@ -1,13 +1,13 @@
 use crate::context::QuoteStyle;
 use crate::prelude::*;
 use crate::JsCommentStyle;
+use biome_formatter::{comments::CommentStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
     JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,
     JsxText, TextLen,
 };
 use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
-use rome_formatter::{comments::CommentStyle, format_args, write};
 use std::iter::{FusedIterator, Peekable};
 use std::str::Chars;
 
@@ -563,10 +563,10 @@ mod tests {
     use crate::utils::jsx::{
         jsx_split_children, JsxChild, JsxChildrenIterator, JsxSplitChunksIterator, JsxTextChunk,
     };
+    use biome_formatter::comments::Comments;
     use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, JsxChildList, JsxText};
     use biome_rowan::{AstNode, TextSize};
-    use rome_formatter::comments::Comments;
 
     #[test]
     fn jsx_children_iterator_test() {

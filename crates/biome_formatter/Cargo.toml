@@ -1,10 +1,10 @@
 [package]
 authors.workspace    = true
 description          = "Rome's formatter shared infrastructure"
-documentation        = "https://docs.rs/rome_formatter"
+documentation        = "https://docs.rs/biome_formatter"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_formatter"
+name                 = "biome_formatter"
 repository.workspace = true
 version              = "0.1.0"
 

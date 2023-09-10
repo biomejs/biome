@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
+use biome_formatter::{format_args, write};
 use biome_js_syntax::JsExtendsClause;
 use biome_js_syntax::JsExtendsClauseFields;
 use biome_js_syntax::JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExtendsClause;

@@ -4,9 +4,9 @@ use crate::utils::jsx::{
     JsxChildrenIterator, JsxRawSpace, JsxSpace,
 };
 use crate::JsFormatter;
+use biome_formatter::format_element::tag::{GroupMode, Tag};
+use biome_formatter::{format_args, write, CstFormatContext, FormatRuleWithOptions, VecBuffer};
 use biome_js_syntax::{AnyJsxChild, JsxChildList};
-use rome_formatter::format_element::tag::{GroupMode, Tag};
-use rome_formatter::{format_args, write, CstFormatContext, FormatRuleWithOptions, VecBuffer};
 use std::cell::RefCell;
 
 #[derive(Debug, Clone, Default)]

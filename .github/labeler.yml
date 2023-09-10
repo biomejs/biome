@@ -32,7 +32,7 @@ A-Parser:
   - crates/biome_css_syntax/**
 
 A-Formatter:
-  - crates/rome_formatter/**
+  - crates/biome_formatter/**
   - crates/biome_formatter_test/**
   - crates/rome_js_formatter/**
   - crates/rome_json_formatter/**

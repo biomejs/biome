@@ -11,8 +11,8 @@
 /// as seen below.
 ///
 /// ```rust
-/// use rome_formatter::{SimpleFormatContext, format, format_args};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{SimpleFormatContext, format, format_args};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [
@@ -46,8 +46,8 @@ macro_rules! format_args {
 /// # Examples
 ///
 /// ```rust
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{Buffer, FormatState, SimpleFormatContext, VecBuffer, write};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{Buffer, FormatState, SimpleFormatContext, VecBuffer, write};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let mut state = FormatState::new(SimpleFormatContext::default());
@@ -79,8 +79,8 @@ macro_rules! write {
 /// An example:
 ///
 /// ```rust
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{FormatState, VecBuffer};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{FormatState, VecBuffer};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let mut state = FormatState::new(SimpleFormatContext::default());
@@ -123,8 +123,8 @@ macro_rules! dbg_write {
 /// ## Examples
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::format;
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::format;
 ///
 /// let formatted = format!(SimpleFormatContext::default(), [text("("), text("a"), text(")")]).unwrap();
 ///
@@ -153,8 +153,8 @@ macro_rules! format {
 /// ## Examples
 ///
 /// ```
-/// use rome_formatter::{Formatted, LineWidth, format, format_args, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{Formatted, LineWidth, format, format_args, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(
@@ -241,8 +241,8 @@ macro_rules! format {
 /// ### Enclosing group with `should_expand: true`
 ///
 /// ```
-/// use rome_formatter::{Formatted, LineWidth, format, format_args, SimpleFormatOptions};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{Formatted, LineWidth, format, format_args, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(

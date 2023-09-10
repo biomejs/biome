@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::write;
 use biome_js_syntax::TsImportTypeQualifier;
 use biome_js_syntax::TsImportTypeQualifierFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsImportTypeQualifier;

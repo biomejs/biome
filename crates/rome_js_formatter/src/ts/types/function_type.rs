@@ -6,9 +6,9 @@ use crate::parentheses::{
     is_includes_inferred_return_types_with_extends_constraints,
     operator_type_or_higher_needs_parens, NeedsParentheses,
 };
+use biome_formatter::write;
 use biome_js_syntax::TsFunctionTypeFields;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsFunctionType};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsFunctionType;

@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_formatter::write;
 use biome_json_syntax::{JsonRoot, JsonRootFields};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonRoot;

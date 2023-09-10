@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use crate::js::expressions::static_member_expression::member_chain_callee_needs_parens;
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;

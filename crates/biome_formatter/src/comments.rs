@@ -140,7 +140,7 @@ impl CommentKind {
     /// ## Examples
     ///
     /// ```rust
-    /// use rome_formatter::comments::CommentKind;
+    /// use biome_formatter::comments::CommentKind;
     ///
     /// // Block and InlineBlock comments can appear inline
     /// assert!(CommentKind::Block.is_inline());

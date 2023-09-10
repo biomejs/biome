@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_formatter::write;
 use biome_js_syntax::JsNewTargetExpressionFields;
 use biome_js_syntax::{JsNewTargetExpression, JsSyntaxNode};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsNewTargetExpression;

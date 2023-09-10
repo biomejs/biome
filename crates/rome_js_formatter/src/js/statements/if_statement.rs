@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{format_args, write, CstFormatContext};
 
 use crate::utils::FormatStatementBody;
 use biome_js_syntax::JsIfStatement;

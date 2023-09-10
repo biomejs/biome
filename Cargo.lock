@@ -185,7 +185,7 @@ dependencies = [
  "libc",
  "mimalloc",
  "rayon",
- "rome_formatter",
+ "biome_formatter",
  "rome_js_formatter",
  "rome_json_formatter",
  "rome_json_parser",
@@ -441,7 +441,7 @@ dependencies = [
  "futures",
  "indexmap",
  "proptest",
- "rome_formatter",
+ "biome_formatter",
  "rome_js_formatter",
  "rome_service",
  "serde",
@@ -2199,7 +2199,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_formatter"
+name = "biome_formatter"
 version = "0.1.0"
 dependencies = [
  "biome_console",
@@ -2229,7 +2229,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "insta",
- "rome_formatter",
+ "biome_formatter",
  "rome_service",
  "serde",
  "serde_json",
@@ -2292,7 +2292,7 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "rome_formatter",
+ "biome_formatter",
  "biome_formatter_test",
  "schemars",
  "serde",
@@ -2333,7 +2333,7 @@ dependencies = [
  "biome_suppression",
  "countme",
  "insta",
- "rome_formatter",
+ "biome_formatter",
  "biome_formatter_test",
  "rome_json_parser",
  "serde",
@@ -2381,7 +2381,7 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
- "rome_formatter",
+ "biome_formatter",
  "rome_js_analyze",
  "rome_js_formatter",
  "rome_json_analyze",
@@ -3539,7 +3539,7 @@ dependencies = [
  "mimalloc",
  "pico-args",
  "regex",
- "rome_formatter",
+ "biome_formatter",
  "rome_js_analyze",
  "rome_js_formatter",
  "rome_json_formatter",
@@ -3656,7 +3656,7 @@ dependencies = [
  "biome_json_syntax",
  "convert_case",
  "pulldown-cmark",
- "rome_formatter",
+ "biome_formatter",
  "rome_js_analyze",
  "rome_json_analyze",
  "rome_json_parser",

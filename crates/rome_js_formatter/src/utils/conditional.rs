@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{
+use biome_formatter::{
     write, CstFormatContext, FormatContext, FormatOwnedWithRule, FormatRefWithRule,
     FormatRuleWithOptions,
 };

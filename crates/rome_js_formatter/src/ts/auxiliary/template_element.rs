@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::FormatRuleWithOptions;
+use biome_formatter::FormatRuleWithOptions;
 
 use crate::js::auxiliary::template_element::{
     AnyTemplateElement, FormatTemplateElement, TemplateElementOptions,
