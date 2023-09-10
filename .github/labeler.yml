@@ -33,7 +33,7 @@ A-Parser:
 
 A-Formatter:
   - crates/rome_formatter/**
-  - crates/rome_formatter_test/**
+  - crates/biome_formatter_test/**
   - crates/rome_js_formatter/**
   - crates/rome_json_formatter/**
   - crates/rome_css_formatter/**

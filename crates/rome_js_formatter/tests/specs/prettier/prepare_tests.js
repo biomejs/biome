@@ -1,4 +1,4 @@
-const {extractPrettierTests} = require("../../../../rome_formatter_test/src/prettier/prepare_tests");
+const {extractPrettierTests} = require("../../../../biome_formatter_test/src/prettier/prepare_tests");
 
 async function main() {
 	await extractPrettierTests("js", {

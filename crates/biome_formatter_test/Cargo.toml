@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_formatter_test"
+name                 = "biome_formatter_test"
 repository.workspace = true
 version              = "0.2.0"
 

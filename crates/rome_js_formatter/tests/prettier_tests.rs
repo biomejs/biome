@@ -1,8 +1,8 @@
 use std::{env, path::Path};
 
+use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_js_syntax::JsFileSource;
 use rome_formatter::IndentStyle;
-use rome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use rome_js_formatter::context::JsFormatOptions;
 
 mod language;

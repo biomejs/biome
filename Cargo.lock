@@ -2220,7 +2220,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_formatter_test"
+name = "biome_formatter_test"
 version = "0.2.0"
 dependencies = [
  "biome_console",
@@ -2293,7 +2293,7 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rome_formatter",
- "rome_formatter_test",
+ "biome_formatter_test",
  "schemars",
  "serde",
  "serde_json",
@@ -2334,7 +2334,7 @@ dependencies = [
  "countme",
  "insta",
  "rome_formatter",
- "rome_formatter_test",
+ "biome_formatter_test",
  "rome_json_parser",
  "serde",
  "serde_json",
