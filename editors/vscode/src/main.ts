@@ -71,6 +71,8 @@ export async function activate(context: ExtensionContext) {
 		return;
 	}
 
+	outputChannel.appendLine(`Using Biome from ${command}`);
+
 	const statusBar = new StatusBar();
 
 	const serverOptions: ServerOptions = createMessageTransports.bind(
@@ -250,36 +252,19 @@ async function getWorkspaceDependency(
 			: `${packageName}/biome`;
 
 	for (const workspaceFolder of workspace.workspaceFolders) {
-		try {
-			const options = {
-				basedir: workspaceFolder.uri.fsPath,
-			};
+		const path = Uri.joinPath(
+			workspaceFolder.uri,
+			"node_modules",
+			".bin",
+			"biome",
+		);
 
-			const [manifestPath, binaryPath] = await Promise.all([
-				resolveAsync(manifestName, options),
-				resolveAsync(binaryName, options),
-			]);
-
-			if (!(manifestPath && binaryPath)) {
-				continue;
-			}
-
-			// Load the package.json manifest of the resolved package
-			const manifestUri = Uri.file(manifestPath);
-			const manifestData = await workspace.fs.readFile(manifestUri);
-
-			const { version } = JSON.parse(new TextDecoder().decode(manifestData));
-			if (typeof version !== "string") {
-				continue;
-			}
-
-			return binaryPath;
-		} catch (e) {
-			console.log(e);
-			window.showWarningMessage(`The extension couldn't resolve ${manifestName} or ${binaryName}.
-			If you installed "@biomejs/biome", it's a resolving issue due to your package manager. Check the troubleshooting section of the extension for more information on how to fix the issue.`);
+		if ((await fileExists(path))) {
+			return path.fsPath;
 		}
 	}
+
+	window.showWarningMessage("Unable to resolve the biome server from your dependencies.");
 
 	return undefined;
 }
