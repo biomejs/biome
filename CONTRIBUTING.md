@@ -157,6 +157,12 @@ When you apply changes to the binary, you need to do two things:
 When the daemon is running, it's possible to inspect its logs in the folder `biome-logs`, placed
 in the temporary folder of the operative system.
 
+### Debugging the VS Code extension
+
+The Biome VS Code extension can be debugged by running the `Debug Extension` launch configuration
+in VS Code. This will compile the extension, watch for modifications and start a separate VS Code
+instance with only the Biome extension installed.
+
 ### User files
 
 If files specific to your local development environment should be ignored, please add these files to a global git ignore file rather than to a git ignore file within Biome.
