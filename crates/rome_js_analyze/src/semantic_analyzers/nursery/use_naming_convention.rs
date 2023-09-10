@@ -22,11 +22,11 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
 use biome_js_unicode_table::is_js_ident;
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,
 };
 use bpaf::Bpaf;
-use rome_json_syntax::JsonLanguage;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 

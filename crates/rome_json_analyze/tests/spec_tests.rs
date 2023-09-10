@@ -1,6 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -8,7 +9,6 @@ use biome_test_utils::{
     write_analyzer_snapshot,
 };
 use rome_json_parser::{parse_json, JsonParserOptions};
-use rome_json_syntax::JsonLanguage;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json}", crate::run_test, "module"}

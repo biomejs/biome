@@ -1,9 +1,9 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, T, *};
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
 };
-use rome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, T, *};
 #[derive(Debug)]
 pub struct JsonSyntaxFactory;
 impl SyntaxFactory for JsonSyntaxFactory {

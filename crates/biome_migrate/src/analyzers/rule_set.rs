@@ -1,7 +1,7 @@
 use crate::declare_migration;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule};
-use rome_json_syntax::JsonObjectValue;
+use biome_json_syntax::JsonObjectValue;
 
 declare_migration! {
     pub(crate) RuleSet {

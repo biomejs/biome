@@ -2,10 +2,10 @@ use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptPars
 use crate::configuration::{JavascriptConfiguration, JavascriptFormatter};
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::SyntaxNode;
 use rome_js_formatter::context::trailing_comma::TrailingComma;
 use rome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
-use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 
 impl VisitJsonNode for JavascriptConfiguration {}
 

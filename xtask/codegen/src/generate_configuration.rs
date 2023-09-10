@@ -2,11 +2,11 @@ use biome_analyze::{
     GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_js_syntax::JsLanguage;
+use biome_json_syntax::JsonLanguage;
 use case::CaseExt;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
-use rome_json_syntax::JsonLanguage;
 use std::collections::BTreeMap;
 use xtask::*;
 use xtask_codegen::{to_lower_snake_case, update};
@@ -267,7 +267,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use crate::Rules;
         use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
         use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-        use rome_json_syntax::{AnyJsonValue, JsonLanguage};
+        use biome_json_syntax::{AnyJsonValue, JsonLanguage};
         use biome_rowan::{AstNode, SyntaxNode};
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 

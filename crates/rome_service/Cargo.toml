@@ -18,6 +18,7 @@ biome_fs            = { workspace = true, features = ["serde"] }
 biome_js_factory    = { workspace = true, optional = true }
 biome_js_semantic   = { workspace = true }
 biome_js_syntax     = { workspace = true, features = ["serde"] }
+biome_json_syntax   = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true, features = ["serde"] }
 biome_text_edit     = { workspace = true }
@@ -31,7 +32,6 @@ rome_js_parser      = { workspace = true }
 rome_json_analyze   = { workspace = true }
 rome_json_formatter = { workspace = true }
 rome_json_parser    = { workspace = true }
-rome_json_syntax    = { workspace = true }
 schemars            = { workspace = true, features = ["indexmap1"], optional = true }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true, features = ["raw_value"] }

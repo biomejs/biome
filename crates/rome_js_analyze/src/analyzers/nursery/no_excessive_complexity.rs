@@ -11,9 +11,9 @@ use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator,
 };
+use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 use bpaf::Bpaf;
-use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 

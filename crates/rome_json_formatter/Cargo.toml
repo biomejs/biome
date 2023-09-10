@@ -14,18 +14,18 @@ version              = "0.1.0"
 
 [dependencies]
 biome_diagnostics = { workspace = true }
+biome_json_syntax = { workspace = true }
 biome_rowan       = { workspace = true }
 biome_suppression = { workspace = true }
 rome_formatter    = { workspace = true }
-rome_json_syntax  = { workspace = true }
 
 [dev-dependencies]
 biome_fs            = { workspace = true }
+biome_json_factory  = { workspace = true }
 biome_parser        = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
 insta               = { workspace = true, features = ["glob"] }
 rome_formatter_test = { workspace = true }
-rome_json_factory   = { workspace = true }
 rome_json_parser    = { workspace = true }
 serde               = { version = "1", features = ["derive"] }
 serde_json          = { workspace = true }

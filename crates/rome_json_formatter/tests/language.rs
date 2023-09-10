@@ -1,3 +1,4 @@
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, SyntaxNode, TextRange};
 use rome_formatter::{FormatContext, FormatResult, Formatted, IndentStyle, LineWidth, Printed};
@@ -5,7 +6,6 @@ use rome_formatter_test::TestFormatLanguage;
 use rome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use rome_json_formatter::{format_node, format_range, JsonFormatLanguage};
 use rome_json_parser::{parse_json, JsonParserOptions};
-use rome_json_syntax::{JsonFileSource, JsonLanguage};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default)]

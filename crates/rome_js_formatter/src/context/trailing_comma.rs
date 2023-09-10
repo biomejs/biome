@@ -2,12 +2,12 @@ use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
 use biome_deserialize::json::with_only_known_variants;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
 use rome_formatter::formatter::Formatter;
 use rome_formatter::prelude::{if_group_breaks, text};
 use rome_formatter::write;
 use rome_formatter::{Format, FormatResult};
-use rome_json_syntax::JsonLanguage;
 use std::fmt;
 use std::str::FromStr;
 

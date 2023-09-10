@@ -145,7 +145,7 @@ impl LanguageKind {
         match self {
             LanguageKind::Js => "biome_js_syntax",
             LanguageKind::Css => "biome_css_syntax",
-            LanguageKind::Json => "rome_json_syntax",
+            LanguageKind::Json => "biome_json_syntax",
         }
     }
 
@@ -153,7 +153,7 @@ impl LanguageKind {
         match self {
             LanguageKind::Js => "biome_js_factory",
             LanguageKind::Css => "biome_css_factory",
-            LanguageKind::Json => "rome_json_factory",
+            LanguageKind::Json => "biome_json_factory",
         }
     }
 }

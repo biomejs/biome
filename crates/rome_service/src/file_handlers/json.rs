@@ -17,6 +17,7 @@ use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_fs::{RomePath, BIOME_JSON, ROME_JSON};
+use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, FileSource, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -25,7 +26,6 @@ use rome_json_analyze::analyze;
 use rome_json_formatter::context::JsonFormatOptions;
 use rome_json_formatter::format_node;
 use rome_json_parser::JsonParserOptions;
-use rome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use std::path::{Path, PathBuf};
 
 impl Language for JsonLanguage {

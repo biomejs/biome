@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_json_syntax::JsonNullValue;
+use biome_json_syntax::JsonNullValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonNullValue;

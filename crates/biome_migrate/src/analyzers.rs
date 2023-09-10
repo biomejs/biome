@@ -1,6 +1,6 @@
 use crate::analyzers::rule_set::RuleSet;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
-use rome_json_syntax::JsonLanguage;
+use biome_json_syntax::JsonLanguage;
 
 mod rule_set;
 

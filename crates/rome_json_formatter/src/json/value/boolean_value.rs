@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_json_syntax::JsonBooleanValue;
+use biome_json_syntax::JsonBooleanValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonBooleanValue;

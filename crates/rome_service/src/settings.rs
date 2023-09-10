@@ -5,9 +5,9 @@ use crate::{
 use biome_diagnostics::Category;
 use biome_fs::RomePath;
 use biome_js_syntax::JsLanguage;
+use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
 use rome_formatter::{IndentStyle, IndentWidth, LineWidth};
-use rome_json_syntax::JsonLanguage;
 use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},

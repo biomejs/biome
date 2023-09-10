@@ -14,9 +14,9 @@ use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
 use biome_deserialize::json::VisitJsonNode;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};
 use biome_rowan::AstNode;
 use bpaf::Bpaf;
-use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

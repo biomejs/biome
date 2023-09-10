@@ -1,7 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 use crate::prelude::*;
-use rome_json_syntax::AnyJsonValue;
+use biome_json_syntax::AnyJsonValue;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsonValue;
 impl FormatRule<AnyJsonValue> for FormatAnyJsonValue {

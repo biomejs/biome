@@ -27,7 +27,7 @@ A-Parser:
   - crates/rome_js_parser/**
   - crates/biome_js_syntax/**
   - crates/rome_json_parser/**
-  - crates/rome_json_syntax/**
+  - crates/biome_json_syntax/**
   - crates/biome_css_parser/**
   - crates/biome_css_syntax/**
 

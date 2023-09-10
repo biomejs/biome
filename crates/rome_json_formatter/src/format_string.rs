@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_json_syntax::JsonSyntaxToken;
 use rome_formatter::token::string::{normalize_string, Quote};
-use rome_json_syntax::JsonSyntaxToken;
 use std::borrow::Cow;
 
 pub(crate) fn format_string_token(token: &JsonSyntaxToken) -> CleanedStringLiteralText {

@@ -11,6 +11,7 @@ use crate::comments::JsonCommentStyle;
 pub(crate) use crate::context::JsonFormatContext;
 use crate::context::JsonFormatOptions;
 use crate::cst::FormatJsonSyntaxNode;
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
 use rome_formatter::comments::Comments;
 use rome_formatter::prelude::*;
@@ -19,7 +20,6 @@ use rome_formatter::{
     FormatToken, TransformSourceMap,
 };
 use rome_formatter::{Formatted, Printed};
-use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
