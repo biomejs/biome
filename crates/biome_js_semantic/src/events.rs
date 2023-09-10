@@ -300,6 +300,7 @@ impl SemanticEventExtractor {
             | JS_FUNCTION_BODY
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_MODULE_DECLARATION
+            | TS_EXTERNAL_MODULE_DECLARATION
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION

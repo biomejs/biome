@@ -32,6 +32,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining.
 - Fix [#168](https://github.com/biomejs/biome/issues/168), fix [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) false positive case when stable hook is on a new line.
+- Fix [#137](https://github.com/biomejs/biome/issues/137), fix [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) false positive case with TypeScript module declaration:
+  ```typescript
+  declare module '*.gif' {
+      const src: string;
+  }
+
+  declare module '*.bmp' {
+      const src: string;
+  }
+  ```
 
 ### Parser
 ### VSCode
