@@ -6,9 +6,9 @@
 			"script": "watch",
 			"isBackground": true,
 			"problemMatcher": "$ts-esbuild-watch",
-            "options": {
-                "cwd": "${workspaceFolder}/editors/vscode"
-            },
+			"options": {
+				"cwd": "${workspaceFolder}/editors/vscode"
+			},
 			"presentation": {
 				"echo": true,
 				"reveal": "always",
