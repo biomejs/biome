@@ -24,7 +24,7 @@
 		"url": "https://github.com/biomejs/biome/issues"
 	},
 	"engines": {
-		"vscode": "^1.81.0",
+		"vscode": "^1.80.0",
 		"npm": "^9"
 	},
 	"capabilities": {
@@ -149,10 +149,10 @@
 	"devDependencies": {
 		"@types/node": "^18.17.5",
 		"@types/resolve": "^1.20.2",
-		"@types/vscode": "^1.81.0",
+		"@types/vscode": "^1.80.0",
+		"@vscode/vsce": "^2.20.1",
 		"esbuild": "^0.19.2",
-		"typescript": "^5.1.6",
-		"@vscode/vsce": "^2.20.1"
+		"typescript": "^5.1.6"
 	},
 	"dependencies": {
 		"resolve": "^1.22.4",
