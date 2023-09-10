@@ -12,10 +12,10 @@ version              = "0.2.0"
 biome_analyze     = { workspace = true }
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_js_factory  = { workspace = true }
+biome_js_syntax   = { workspace = true }
 biome_rowan       = { workspace = true }
 lazy_static       = { workspace = true }
-biome_js_factory   = { workspace = true }
-biome_js_syntax    = { workspace = true }
 
 
 [dev-dependencies]

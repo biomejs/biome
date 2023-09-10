@@ -14,12 +14,12 @@ version              = "0.1.0"
 [dependencies]
 biome_deserialize            = { workspace = true }
 biome_diagnostics_categories = { workspace = true }
+biome_js_factory             = { workspace = true }
+biome_js_syntax              = { workspace = true }
 biome_rowan                  = { workspace = true }
 biome_text_size              = { workspace = true }
 cfg-if                       = "1.0.0"
 rome_formatter               = { workspace = true }
-biome_js_factory              = { workspace = true }
-biome_js_syntax               = { workspace = true }
 rome_json_syntax             = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
@@ -29,6 +29,7 @@ unicode-width                = "0.1.9"
 [dev-dependencies]
 biome_diagnostics   = { workspace = true }
 biome_fs            = { workspace = true }
+biome_js_factory    = { workspace = true }
 biome_parser        = { workspace = true }
 countme             = { workspace = true, features = ["enable"] }
 iai                 = "0.1.1"
@@ -36,7 +37,6 @@ insta               = { workspace = true, features = ["glob"] }
 quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }
 rome_formatter_test = { workspace = true }
-biome_js_factory     = { workspace = true }
 rome_js_parser      = { workspace = true }
 serde               = { version = "1", features = ["derive"] }
 serde_json          = { workspace = true }

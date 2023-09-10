@@ -24,12 +24,12 @@ biome_analyze       = { path = "../../crates/biome_analyze", optional = true }
 biome_aria          = { path = "../../crates/biome_aria", optional = true }
 biome_cli           = { workspace = true, optional = true }
 biome_diagnostics   = { path = "../../crates/biome_diagnostics", optional = true }
+biome_js_factory    = { path = "../../crates/biome_js_factory", optional = true }
+biome_js_syntax     = { path = "../../crates/biome_js_syntax", optional = true }
 biome_rowan         = { path = "../../crates/biome_rowan", optional = true }
 rome_js_analyze     = { path = "../../crates/rome_js_analyze", optional = true }
-biome_js_factory     = { path = "../../crates/biome_js_factory", optional = true }
 rome_js_formatter   = { path = "../../crates/rome_js_formatter", optional = true }
 rome_js_parser      = { workspace = true, optional = true }
-biome_js_syntax      = { path = "../../crates/biome_js_syntax", optional = true }
 rome_json_analyze   = { workspace = true, optional = true }
 rome_json_formatter = { path = "../../crates/rome_json_formatter", optional = true }
 rome_json_parser    = { path = "../../crates/rome_json_parser", optional = true }

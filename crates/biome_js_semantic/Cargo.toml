@@ -9,10 +9,10 @@ repository.workspace = true
 version              = "0.2.0"
 
 [dependencies]
-biome_rowan    = { workspace = true }
 biome_js_syntax = { workspace = true }
-rust-lapper    = "1.0.1"
-rustc-hash     = { workspace = true }
+biome_rowan     = { workspace = true }
+rust-lapper     = "1.0.1"
+rustc-hash      = { workspace = true }
 
 [dev-dependencies]
 biome_console     = { workspace = true }
