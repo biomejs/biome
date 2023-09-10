@@ -896,9 +896,9 @@ impl FusedIterator for BinaryLikePreorder {}
 mod tests {
     use crate::utils::binary_like_expression::{BinaryLikePreorder, VisitEvent};
     use crate::utils::AnyJsBinaryLikeExpression;
+    use biome_js_parser::{parse_module, JsParserOptions};
     use biome_js_syntax::JsLogicalExpression;
     use biome_rowan::AstNode;
-    use rome_js_parser::{parse_module, JsParserOptions};
 
     #[test]
     fn in_order_visits_every_binary_like_expression() {

@@ -100,8 +100,8 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter};
+    use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::JsFileSource;
-    use rome_js_parser::{parse, JsParserOptions};
     use std::slice;
 
     use crate::{transform, AnalysisFilter, ControlFlow};

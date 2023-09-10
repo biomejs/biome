@@ -1,8 +1,8 @@
+use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use rome_formatter_test::check_reformat::CheckReformat;
 use rome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteStyle, Semicolons};
 use rome_js_formatter::format_node;
-use rome_js_parser::{parse, JsParserOptions};
 
 mod language {
     include!("language.rs");

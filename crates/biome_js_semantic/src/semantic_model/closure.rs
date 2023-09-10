@@ -356,12 +356,12 @@ impl<T: HasClosureAstNode> ClosureExtensions for T {}
 #[cfg(test)]
 mod test {
     use super::*;
+    use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsArrowFunctionExpression, JsFileSource, JsSyntaxKind};
     use biome_rowan::SyntaxNodeCast;
-    use rome_js_parser::JsParserOptions;
 
     fn assert_closure(code: &str, name: &str, captures: &[&str]) {
-        let r = rome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+        let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
         let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
         let closure = if name != "ARROWFUNCTION" {
@@ -403,7 +403,7 @@ mod test {
     }
 
     fn get_closure_children(code: &str, name: &str) -> Vec<Closure> {
-        let r = rome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+        let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
         let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
         let closure = if name != "ARROWFUNCTION" {

@@ -1,4 +1,5 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
+use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -8,7 +9,7 @@ use biome_test_utils::{
 };
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
-use rome_js_parser::{parse, JsParserOptions};
+
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}

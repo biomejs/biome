@@ -323,7 +323,7 @@ documentation page](https://rustdocs.rome.tools/biome_analyze/index.html)
 ### JavaScript Parser
 
 To know the technical details of how our JavaScript works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_js_parser/index.html)
+documentation page](https://rustdocs.rome.tools/biome_js_parser/index.html)
 
 ### Formatter
 

@@ -3,9 +3,9 @@ use crate::{
     check_file_encoding,
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
 };
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, LanguageVariant};
 use biome_rowan::SyntaxKind;
-use rome_js_parser::JsParserOptions;
 use std::path::Path;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";
@@ -51,7 +51,7 @@ impl TestCase for BabelTypescriptTestCase {
             options.clone(),
         );
 
-        let result = rome_js_parser::parse(&self.code, source_type, options);
+        let result = biome_js_parser::parse(&self.code, source_type, options);
 
         if self.expected_to_fail && result.diagnostics().is_empty() {
             TestRunOutcome::IncorrectlyPassed(files)

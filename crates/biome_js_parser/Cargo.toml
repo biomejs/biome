@@ -1,12 +1,12 @@
 [package]
 authors.workspace    = true
 categories           = ["parser-implementations", "development-tools"]
-description          = "An extremely fast ECMAScript parser for Rome, forked from the RSlint project"
-documentation        = "https://docs.rs/rome_js_parser"
+description          = "An extremely fast ECMAScript parser for Biome, forked from the RSlint project"
+documentation        = "https://docs.rs/biome_js_parser"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true
-name                 = "rome_js_parser"
+name                 = "biome_js_parser"
 repository.workspace = true
 version              = "0.1.0"
 
@@ -29,10 +29,10 @@ smallvec               = { workspace = true }
 tracing                = { workspace = true }
 
 [dev-dependencies]
+biome_js_parser   = { workspace = true, features = ["serde"] }
 expect-test       = "1.2.2"
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
-rome_js_parser    = { workspace = true, features = ["serde"] }
 tests_macros      = { workspace = true }
 
 [features]

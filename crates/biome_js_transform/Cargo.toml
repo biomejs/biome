@@ -20,8 +20,8 @@ lazy_static       = { workspace = true }
 
 [dev-dependencies]
 biome_analyze     = { workspace = true }
+biome_js_parser   = { workspace = true }
 biome_test_utils  = { workspace = true }
 insta             = { workspace = true }
 rome_js_formatter = { workspace = true }
-rome_js_parser    = { workspace = true }
 tests_macros      = { workspace = true }

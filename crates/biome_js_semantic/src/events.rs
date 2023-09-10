@@ -137,7 +137,7 @@ impl SemanticEvent {
 /// the [PreOrder] of the tree, and must pull events until [Pop] returns [None].
 ///
 /// ```rust
-/// use rome_js_parser::*;
+/// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
@@ -1038,7 +1038,7 @@ impl Iterator for SemanticEventIterator {
 /// For a way to extract [SemanticEvent] which gives more control see [SemanticEventExtractor].
 ///
 /// ```rust
-/// use rome_js_parser::*;
+/// use biome_js_parser::*;
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());

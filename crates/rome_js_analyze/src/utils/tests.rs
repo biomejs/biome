@@ -1,5 +1,6 @@
 use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
+use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::{
@@ -7,13 +8,12 @@ use biome_js_syntax::{
     JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
-use rome_js_parser::JsParserOptions;
 use std::{any::type_name, fmt::Debug};
 
 /// Search and renames alls bindings where the name contains "a" replacing it to "b".
 /// Asserts the renaming worked.
 pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
-    let r = rome_js_parser::parse(
+    let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -41,15 +41,13 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
     let after = root.to_string();
     assert_eq!(expected, after.as_str());
 
-    assert!(!rome_js_parser::test_utils::has_bogus_nodes_or_empty_slots(
-        &root
-    ));
+    assert!(!biome_js_parser::test_utils::has_bogus_nodes_or_empty_slots(&root));
 }
 
 /// Search and renames one binding named "a" to "b".
 /// Asserts the renaming fails.
 pub fn assert_rename_binding_a_to_b_nok(before: &str) {
-    let r = rome_js_parser::parse(
+    let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -73,7 +71,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
     before: &str,
     expected: &str,
 ) {
-    let r = rome_js_parser::parse(
+    let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
         JsParserOptions::default(),
@@ -160,7 +158,7 @@ macro_rules! assert_remove_ok {
 
 #[test]
 pub fn ok_find_attributes_by_name() {
-    let r = rome_js_parser::parse(
+    let r = biome_js_parser::parse(
         r#"<a a="A" c="C" b="B" />"#,
         JsFileSource::jsx(),
         JsParserOptions::default(),

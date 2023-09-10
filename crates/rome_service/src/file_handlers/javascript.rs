@@ -19,6 +19,7 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_fs::RomePath;
+use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
@@ -31,11 +32,12 @@ use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use rome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
 };
-use rome_js_formatter::context::{
-    trailing_comma::TrailingComma, ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons,
-};
-use rome_js_formatter::{context::JsFormatOptions, format_node};
-use rome_js_parser::JsParserOptions;
+use rome_js_formatter::context::trailing_comma::TrailingComma;
+use rome_js_formatter::context::ArrowParentheses;
+use rome_js_formatter::context::JsFormatOptions;
+use rome_js_formatter::context::Semicolons;
+use rome_js_formatter::context::{QuoteProperties, QuoteStyle};
+use rome_js_formatter::format_node;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -174,7 +176,7 @@ fn parse(
     let options = JsParserOptions {
         parse_class_parameter_decorators: settings.parse_class_parameter_decorators,
     };
-    let parse = rome_js_parser::parse_js_with_cache(text, source_type, options, cache);
+    let parse = biome_js_parser::parse_js_with_cache(text, source_type, options, cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
     AnyParse::new(

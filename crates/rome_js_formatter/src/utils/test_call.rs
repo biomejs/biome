@@ -429,9 +429,9 @@ impl Iterator for CalleeNamesIterator {
 #[cfg(test)]
 mod test {
     use super::{contains_a_test_pattern, is_test_each_pattern_callee};
+    use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsCallExpression, JsFileSource, JsTemplateExpression};
     use biome_rowan::AstNodeList;
-    use rome_js_parser::{parse, JsParserOptions};
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
         let source_type = JsFileSource::js_module();

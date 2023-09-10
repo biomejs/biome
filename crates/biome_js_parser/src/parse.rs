@@ -45,7 +45,7 @@ impl<T> Parse<T> {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// use rome_js_parser::{JsParserOptions, parse_script};
+    /// use biome_js_parser::{JsParserOptions, parse_script};
     /// use biome_js_syntax::{JsIfStatement, JsSyntaxKind};
     /// use biome_rowan::{AstNode, AstNodeList};
     ///
@@ -130,7 +130,7 @@ fn parse_common(
 /// Or turned into a typed [`JsScript`](JsScript) with [`tree`](Parse::tree).
 ///
 /// ```
-/// use rome_js_parser::{JsParserOptions, parse_script};
+/// use biome_js_parser::{JsParserOptions, parse_script};
 /// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
 /// use biome_rowan::{AstNode, Direction};
 ///
@@ -173,7 +173,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Check the diagnostics emitted by the code
 /// ```
-/// use rome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::{JsParserOptions, parse_module};
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
 ///
@@ -188,7 +188,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Retrieve the emitted AST and check its kind:
 /// ```
-/// use rome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::{JsParserOptions, parse_module};
 /// use biome_js_syntax::JsSyntaxKind;
 /// use biome_rowan::AstNode;
 /// let source = r#"
@@ -214,7 +214,7 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 /// ### Examples
 ///
 /// ```
-/// use rome_js_parser::{JsParserOptions, parse};
+/// use biome_js_parser::{JsParserOptions, parse};
 /// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
@@ -242,7 +242,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// ### Examples
 ///
 /// ```
-/// use rome_js_parser::{JsParserOptions, parse_js_with_cache};
+/// use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 /// use biome_js_syntax::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///

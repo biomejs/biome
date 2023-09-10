@@ -25,7 +25,7 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// Represents a set of [SyntaxKind] as a bitfield, with each bit representing
 /// whether the corresponding [RawSyntaxKind] value is contained in the set
 ///
-/// This is similar to the `TokenSet` struct in `rome_js_parser`, with the
+/// This is similar to the `TokenSet` struct in `biome_js_parser`, with the
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

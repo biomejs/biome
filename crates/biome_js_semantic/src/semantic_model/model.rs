@@ -138,12 +138,12 @@ impl SemanticModel {
     /// Can also be called from [AstNode]::scope extension method.
     ///
     /// ```rust
-    /// use rome_js_parser::JsParserOptions;
+    /// use biome_js_parser::JsParserOptions;
     /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use biome_js_syntax::{JsFileSource, JsReferenceIdentifier};
     /// use biome_js_semantic::{semantic_model, SemanticModelOptions, SemanticScopeExtensions};
     ///
-    /// let r = rome_js_parser::parse("function f(){let a = arguments[0]; let b = a + 1;}", JsFileSource::js_module(), JsParserOptions::default());
+    /// let r = biome_js_parser::parse("function f(){let a = arguments[0]; let b = a + 1;}", JsFileSource::js_module(), JsParserOptions::default());
     /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
     ///
     /// let arguments_reference = r
@@ -188,12 +188,12 @@ impl SemanticModel {
     /// Can also be called from "binding" extension method.
     ///
     /// ```rust
-    /// use rome_js_parser::JsParserOptions;
+    /// use biome_js_parser::JsParserOptions;
     /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use biome_js_syntax::{JsFileSource, JsReferenceIdentifier};
     /// use biome_js_semantic::{semantic_model, BindingExtensions, SemanticModelOptions};
     ///
-    /// let r = rome_js_parser::parse("function f(){let a = arguments[0]; let b = a + 1;}", JsFileSource::js_module(), JsParserOptions::default());
+    /// let r = biome_js_parser::parse("function f(){let a = arguments[0]; let b = a + 1;}", JsFileSource::js_module(), JsParserOptions::default());
     /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
     ///
     /// let arguments_reference = r
@@ -341,12 +341,12 @@ impl SemanticModel {
     /// Returns all [Call] of a [AnyJsFunction].
     ///
     /// ```rust
-    /// use rome_js_parser::JsParserOptions;
+    /// use biome_js_parser::JsParserOptions;
     /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use biome_js_syntax::{JsFileSource, AnyJsFunction};
     /// use biome_js_semantic::{semantic_model, CallsExtensions, SemanticModelOptions};
     ///
-    /// let r = rome_js_parser::parse("function f(){} f() f()", JsFileSource::js_module(), JsParserOptions::default());
+    /// let r = biome_js_parser::parse("function f(){} f() f()", JsFileSource::js_module(), JsParserOptions::default());
     /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
     ///
     /// let f_declaration = r

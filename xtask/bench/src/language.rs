@@ -1,5 +1,6 @@
 use crate::test_case::TestCase;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_syntax::JsonSyntaxNode;
 use biome_parser::prelude::ParseDiagnostic;
@@ -8,7 +9,6 @@ use criterion::black_box;
 use rome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::{JsFormatContext, JsFormatOptions};
-use rome_js_parser::JsParserOptions;
 use rome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use rome_json_parser::JsonParserOptions;
 
@@ -31,7 +31,7 @@ impl<'a> Parse<'a> {
     pub fn parse(&self) -> Parsed {
         match self {
             Parse::JavaScript(source_type, code) => Parsed::JavaScript(
-                rome_js_parser::parse(code, *source_type, JsParserOptions::default()),
+                biome_js_parser::parse(code, *source_type, JsParserOptions::default()),
                 *source_type,
             ),
             Parse::Json(code) => Parsed::Json(rome_json_parser::parse_json(
@@ -44,7 +44,7 @@ impl<'a> Parse<'a> {
     pub fn parse_with_cache(&self, cache: &mut NodeCache) -> Parsed {
         match self {
             Parse::JavaScript(source_type, code) => Parsed::JavaScript(
-                rome_js_parser::parse_js_with_cache(
+                biome_js_parser::parse_js_with_cache(
                     code,
                     *source_type,
                     JsParserOptions::default(),
@@ -62,7 +62,7 @@ impl<'a> Parse<'a> {
 }
 
 pub enum Parsed {
-    JavaScript(rome_js_parser::Parse<AnyJsRoot>, JsFileSource),
+    JavaScript(biome_js_parser::Parse<AnyJsRoot>, JsFileSource),
     Json(rome_json_parser::JsonParse),
 }
 

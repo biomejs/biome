@@ -1,5 +1,5 @@
 //! A crate for generated Syntax node definitions and utility macros.
-//! Both rome_js_lexer and rome_js_parser rely on these definitions, therefore
+//! Both rome_js_lexer and biome_js_parser rely on these definitions, therefore
 //! they are wrapped in this crate to prevent cyclic dependencies
 
 #[macro_use]

@@ -639,6 +639,7 @@ mod tests {
         DecoratedComment, SourceComment,
     };
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
+    use biome_js_parser::{parse_module, JsParserOptions};
     use biome_js_syntax::{
         JsIdentifierExpression, JsLanguage, JsParameters, JsParenthesizedExpression,
         JsPropertyObjectMember, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
@@ -649,7 +650,6 @@ mod tests {
         chain_trivia_pieces, AstNode, BatchMutation, SyntaxNode, SyntaxTriviaPieceComments,
         TextRange,
     };
-    use rome_js_parser::{parse_module, JsParserOptions};
     use std::cell::RefCell;
 
     #[test]

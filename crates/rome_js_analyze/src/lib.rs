@@ -220,8 +220,8 @@ mod tests {
     use biome_diagnostics::category;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
-    use rome_js_parser::{parse, JsParserOptions};
     use std::slice;
 
     use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{Hooks, HooksOptions};

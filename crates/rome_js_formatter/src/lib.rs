@@ -561,10 +561,10 @@ mod tests {
     use super::format_range;
 
     use crate::context::JsFormatOptions;
+    use biome_js_parser::{parse, parse_script, JsParserOptions};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
     use rome_formatter::IndentStyle;
-    use rome_js_parser::{parse, parse_script, JsParserOptions};
 
     #[test]
     fn test_range_formatting() {

@@ -1,6 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -8,7 +9,6 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot, CheckActionType,
 };
-use rome_js_parser::{parse, JsParserOptions};
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}

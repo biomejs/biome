@@ -1,3 +1,4 @@
+use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, SyntaxNode};
@@ -9,7 +10,6 @@ use rome_js_formatter::context::{
     ArrowParentheses, JsFormatContext, JsFormatOptions, QuoteProperties, QuoteStyle, Semicolons,
 };
 use rome_js_formatter::{format_node, format_range, JsFormatLanguage};
-use rome_js_parser::{parse, JsParserOptions};
 use serde::{Deserialize, Serialize};
 
 pub struct JsTestFormatLanguage {
