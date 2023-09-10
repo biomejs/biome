@@ -12,6 +12,7 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 /// Return result of [react_hook_with_dependency].
+#[derive(Debug)]
 pub(crate) struct ReactCallWithDependencyResult {
     pub(crate) function_name_range: TextRange,
     pub(crate) closure_node: Option<AnyJsExpression>,
@@ -243,7 +244,7 @@ pub fn is_binding_react_stable(
                 .ok()?
                 .value_token()
                 .ok()?
-                .token_text();
+                .token_text_trimmed();
 
             let stable = StableReactHookConfiguration {
                 hook_name: hook_name.to_string(),
