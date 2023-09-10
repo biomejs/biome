@@ -168,6 +168,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
+ "biome_formatter",
  "biome_fs",
  "biome_json_syntax",
  "biome_lsp",
@@ -185,7 +186,6 @@ dependencies = [
  "libc",
  "mimalloc",
  "rayon",
- "biome_formatter",
  "rome_js_formatter",
  "rome_json_formatter",
  "rome_json_parser",
@@ -315,6 +315,45 @@ name = "biome_flags"
 version = "0.0.0"
 
 [[package]]
+name = "biome_formatter"
+version = "0.1.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_js_parser",
+ "biome_js_syntax",
+ "biome_rowan",
+ "cfg-if",
+ "countme",
+ "drop_bomb",
+ "indexmap",
+ "insta",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "tracing",
+ "unicode-width",
+]
+
+[[package]]
+name = "biome_formatter_test"
+version = "0.2.0"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_fs",
+ "biome_parser",
+ "biome_rowan",
+ "insta",
+ "rome_service",
+ "serde",
+ "serde_json",
+ "similar",
+ "similar-asserts",
+]
+
+[[package]]
 name = "biome_fs"
 version = "0.2.0"
 dependencies = [
@@ -435,13 +474,13 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_fs",
  "biome_rowan",
  "biome_text_edit",
  "futures",
  "indexmap",
  "proptest",
- "biome_formatter",
  "rome_js_formatter",
  "rome_service",
  "serde",
@@ -2199,45 +2238,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_formatter"
-version = "0.1.0"
-dependencies = [
- "biome_console",
- "biome_diagnostics",
- "biome_js_parser",
- "biome_js_syntax",
- "biome_rowan",
- "cfg-if",
- "countme",
- "drop_bomb",
- "indexmap",
- "insta",
- "rustc-hash",
- "schemars",
- "serde",
- "tracing",
- "unicode-width",
-]
-
-[[package]]
-name = "biome_formatter_test"
-version = "0.2.0"
-dependencies = [
- "biome_console",
- "biome_diagnostics",
- "biome_fs",
- "biome_parser",
- "biome_rowan",
- "insta",
- "biome_formatter",
- "rome_service",
- "serde",
- "serde_json",
- "similar",
- "similar-asserts",
-]
-
-[[package]]
 name = "rome_js_analyze"
 version = "0.2.0"
 dependencies = [
@@ -2278,6 +2278,8 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_diagnostics_categories",
+ "biome_formatter",
+ "biome_formatter_test",
  "biome_fs",
  "biome_js_factory",
  "biome_js_parser",
@@ -2292,8 +2294,6 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "biome_formatter",
- "biome_formatter_test",
  "schemars",
  "serde",
  "serde_json",
@@ -2325,6 +2325,8 @@ name = "rome_json_formatter"
 version = "0.1.0"
 dependencies = [
  "biome_diagnostics",
+ "biome_formatter",
+ "biome_formatter_test",
  "biome_fs",
  "biome_json_factory",
  "biome_json_syntax",
@@ -2333,8 +2335,6 @@ dependencies = [
  "biome_suppression",
  "countme",
  "insta",
- "biome_formatter",
- "biome_formatter_test",
  "rome_json_parser",
  "serde",
  "serde_json",
@@ -2368,6 +2368,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
+ "biome_formatter",
  "biome_fs",
  "biome_js_factory",
  "biome_js_parser",
@@ -2381,7 +2382,6 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
- "biome_formatter",
  "rome_js_analyze",
  "rome_js_formatter",
  "rome_json_analyze",
@@ -3526,6 +3526,7 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_syntax",
@@ -3539,7 +3540,6 @@ dependencies = [
  "mimalloc",
  "pico-args",
  "regex",
- "biome_formatter",
  "rome_js_analyze",
  "rome_js_formatter",
  "rome_json_formatter",
@@ -3651,12 +3651,12 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_syntax",
  "convert_case",
  "pulldown-cmark",
- "biome_formatter",
  "rome_js_analyze",
  "rome_json_analyze",
  "rome_json_parser",
