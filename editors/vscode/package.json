@@ -24,7 +24,7 @@
 		"url": "https://github.com/biomejs/biome/issues"
 	},
 	"engines": {
-		"vscode": "^1.81.0",
+		"vscode": "^1.80.0",
 		"npm": "^9"
 	},
 	"capabilities": {
