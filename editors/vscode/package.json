@@ -24,8 +24,7 @@
 		"url": "https://github.com/biomejs/biome/issues"
 	},
 	"engines": {
-		"vscode": "^1.80.0",
-		"npm": "^9"
+		"vscode": "^1.80.0"
 	},
 	"capabilities": {
 		"untrustedWorkspaces": {
@@ -136,14 +135,14 @@
 	"license": "MIT",
 	"scripts": {
 		"compile": "esbuild src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node14",
-		"watch": "npm run compile -- --sourcemap --watch",
-		"package": "vsce package -o biome_lsp.vsix",
-		"build": "npm run compile -- --minify && npm run package",
+		"watch": "pnpm run compile -- --sourcemap --watch",
+		"package": "vsce package --no-dependencies -o biome_lsp.vsix",
+		"build": "pnpm run compile --minify && pnpm run package",
 		"install-extension": "code --install-extension biome_lsp.vsix --force",
 		"format": "cargo biome-cli-dev format ./src/ ./scripts --write",
 		"check": "cargo biome-cli-dev check ./src/ ./scripts",
 		"check:apply": "cargo biome-cli-dev check ./src/ ./scripts --apply-unsafe",
-		"pack:dev": "npm run compile && npm run package && npm run install-extension",
+		"pack:dev": "pnpm run compile && pnpm run package && pnpm run install-extension",
 		"tsc": "tsc"
 	},
 	"devDependencies": {
