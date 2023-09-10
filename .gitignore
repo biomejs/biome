@@ -1,7 +1,10 @@
 .DS_Store
 Profile-*.json
 # Editor configuration
-.vscode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea
 .vs
 # Release artifacts
