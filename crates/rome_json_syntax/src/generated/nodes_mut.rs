@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::{generated::nodes::*, JsonSyntaxToken as SyntaxToken};
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 use std::iter::once;
 impl JsonArrayValue {
     pub fn with_l_brack_token(self, element: SyntaxToken) -> Self {

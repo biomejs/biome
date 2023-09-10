@@ -6,11 +6,11 @@ pub mod string_ext;
 mod syntax_node;
 
 pub use self::generated::*;
+pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use file_source::JsonFileSource;
-pub use rome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use syntax_node::*;
 
-use rome_rowan::{RawSyntaxKind, TokenText};
+use biome_rowan::{RawSyntaxKind, TokenText};
 
 impl From<u16> for JsonSyntaxKind {
     fn from(d: u16) -> JsonSyntaxKind {
@@ -43,7 +43,7 @@ impl JsonSyntaxKind {
     }
 }
 
-impl rome_rowan::SyntaxKind for JsonSyntaxKind {
+impl biome_rowan::SyntaxKind for JsonSyntaxKind {
     const TOMBSTONE: Self = JsonSyntaxKind::TOMBSTONE;
     const EOF: Self = JsonSyntaxKind::EOF;
 

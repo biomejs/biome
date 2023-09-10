@@ -16,7 +16,7 @@ pub trait MemoizeFormat<Context> {
     /// use std::cell::Cell;
     /// use rome_formatter::{format, write};
     /// use rome_formatter::prelude::*;
-    /// use rome_rowan::TextSize;
+    /// use biome_rowan::TextSize;
     ///
     /// struct MyFormat {
     ///   value: Cell<u64>
@@ -98,7 +98,7 @@ where
     /// use std::cell::Cell;
     /// use rome_formatter::{format, write};
     /// use rome_formatter::prelude::*;
-    /// use rome_rowan::TextSize;
+    /// use biome_rowan::TextSize;
     ///
     /// #[derive(Default)]
     /// struct Counter {

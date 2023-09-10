@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::{AnyJsMemberExpression, JsCallExpression};
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Prefer `for...of` statement instead of `Array.forEach`.

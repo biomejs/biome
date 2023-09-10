@@ -1,7 +1,7 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
+use biome_rowan::AstSeparatedList;
 use rome_js_syntax::TsTypeParameterList;
-use rome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeParameterList;

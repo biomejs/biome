@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_rowan::{declare_node_union, SyntaxResult};
 use rome_formatter::{format_args, write};
 use rome_js_syntax::{AnyJsAssignment, AnyTsType, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use rome_js_syntax::{TsAsAssignment, TsSatisfiesAssignment};
-use rome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsAsAssignment;

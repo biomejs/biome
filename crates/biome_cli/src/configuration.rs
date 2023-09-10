@@ -5,7 +5,7 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use rome_fs::{FileSystem, OpenOptions};
+use biome_fs::{FileSystem, OpenOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_service::configuration::diagnostics::CantLoadExtendFile;
 use rome_service::configuration::ConfigurationPayload;

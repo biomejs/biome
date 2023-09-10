@@ -12,11 +12,11 @@ use crate::{
     OperatorPrecedence, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
-use core::iter;
-use rome_rowan::{
+use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxResult,
     TextRange, TokenText,
 };
+use core::iter;
 
 const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
@@ -82,7 +82,7 @@ impl JsLiteralMemberName {
     /// ```
     /// use rome_js_syntax::{JsSyntaxKind, JsLanguage, JsSyntaxNode, JsLiteralMemberName};
     /// use rome_js_factory::JsSyntaxTreeBuilder;
-    /// use rome_rowan::AstNode;
+    /// use biome_rowan::AstNode;
     ///
     /// let node: JsSyntaxNode =
     ///     JsSyntaxTreeBuilder::wrap_with_node(JsSyntaxKind::JS_LITERAL_MEMBER_NAME, |builder| {
@@ -99,7 +99,7 @@ impl JsLiteralMemberName {
     /// ```
     /// use rome_js_syntax::{JsSyntaxKind, JsLanguage, JsSyntaxNode, JsLiteralMemberName};
     /// use rome_js_factory::JsSyntaxTreeBuilder;
-    /// use rome_rowan::AstNode;
+    /// use biome_rowan::AstNode;
     ///
     /// let node: JsSyntaxNode =
     ///     JsSyntaxTreeBuilder::wrap_with_node(JsSyntaxKind::JS_LITERAL_MEMBER_NAME, |builder| {
@@ -116,7 +116,7 @@ impl JsLiteralMemberName {
     /// ```
     /// use rome_js_syntax::{JsSyntaxKind, JsLanguage, JsSyntaxNode, JsLiteralMemberName};
     /// use rome_js_factory::JsSyntaxTreeBuilder;
-    /// use rome_rowan::AstNode;
+    /// use biome_rowan::AstNode;
     ///
     /// let node: JsSyntaxNode =
     ///     JsSyntaxTreeBuilder::wrap_with_node(JsSyntaxKind::JS_LITERAL_MEMBER_NAME, |builder| {
@@ -521,7 +521,7 @@ impl JsStringLiteralExpression {
     ///
     /// ```
     /// use rome_js_factory::make;
-    /// use rome_rowan::TriviaPieceKind;
+    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::js_string_literal_expression(make::js_string_literal("foo")
     ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));

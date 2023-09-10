@@ -7,8 +7,8 @@ use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
+use biome_rowan::{AstNode, NodeCache};
 pub use parser::CssParserOptions;
-use rome_rowan::{AstNode, NodeCache};
 
 mod lexer;
 mod parser;
@@ -62,7 +62,7 @@ impl CssParse {
     /// ```
     /// # use biome_css_parser::parse_css;
     /// # use biome_css_syntax::CssSyntaxKind;
-    /// # use rome_rowan::{AstNode, AstNodeList, SyntaxError};
+    /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use biome_css_syntax::CssSyntaxKind;

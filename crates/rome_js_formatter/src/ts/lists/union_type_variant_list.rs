@@ -35,9 +35,9 @@ use crate::ts::types::union_type::FormatTsUnionType;
 use crate::ts::types::unknown_type::FormatTsUnknownType;
 use crate::ts::types::void_type::FormatTsVoidType;
 use crate::JsCommentStyle;
+use biome_rowan::{AstSeparatedElement, AstSeparatedList};
 use rome_formatter::{comments::CommentStyle, write, FormatRuleWithOptions};
 use rome_js_syntax::{AnyTsType, JsLanguage, TsUnionType, TsUnionTypeVariantList};
-use rome_rowan::{AstSeparatedElement, AstSeparatedList};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsUnionTypeVariantList {

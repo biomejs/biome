@@ -3,7 +3,7 @@ use rome_formatter::{write, Buffer};
 use rome_js_syntax::{AnyTsTypeMember, TsTypeMemberList};
 
 use crate::context::Semicolons;
-use rome_rowan::AstNodeList;
+use biome_rowan::AstNodeList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeMemberList;

@@ -4,7 +4,7 @@ use biome_css_parser::{parse_css, CssParserOptions};
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
-use rome_rowan::SyntaxKind;
+use biome_rowan::SyntaxKind;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;

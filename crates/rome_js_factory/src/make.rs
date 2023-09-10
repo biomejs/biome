@@ -1,9 +1,9 @@
 use std::fmt::Display;
 
+use biome_rowan::TriviaPiece;
 use rome_js_syntax::{
     AnyJsExpression, JsParenthesizedExpression, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind,
 };
-use rome_rowan::TriviaPiece;
 
 pub use crate::generated::node_factory::*;
 

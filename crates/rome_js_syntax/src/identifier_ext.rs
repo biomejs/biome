@@ -1,5 +1,5 @@
 use crate::{JsIdentifierAssignment, JsReferenceIdentifier, JsSyntaxToken, JsxReferenceIdentifier};
-use rome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{declare_node_union, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsIdentifierUsage = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier

@@ -4,7 +4,7 @@ use biome_console::{fmt, markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{
     Advices, Diagnostic, Location, LogCategory, PrintDiagnostic, Resource, SourceCode, Visit,
 };
-use rome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextRange, TextSize};
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "args/fileNotFound", message = "No matching files found")]

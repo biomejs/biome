@@ -8,6 +8,7 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
+use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 use rome_formatter::{format_args, format_element, write, VecBuffer};
 use rome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
@@ -15,7 +16,6 @@ use rome_js_syntax::{
     JsCallExpression, JsExpressionStatement, JsFunctionExpression, JsImportCallExpression,
     JsLanguage,
 };
-use rome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCallArguments;

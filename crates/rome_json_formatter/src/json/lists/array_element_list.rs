@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
+use biome_rowan::{AstNode, AstSeparatedList};
 use rome_formatter::write;
 use rome_json_syntax::{AnyJsonValue, JsonArrayElementList};
-use rome_rowan::{AstNode, AstSeparatedList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonArrayElementList;

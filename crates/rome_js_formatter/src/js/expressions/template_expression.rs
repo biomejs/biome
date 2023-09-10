@@ -5,9 +5,9 @@ use crate::js::expressions::static_member_expression::member_chain_callee_needs_
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;
 use crate::parentheses::NeedsParentheses;
 use crate::utils::test_call::is_test_each_pattern;
+use biome_rowan::{declare_node_union, SyntaxResult};
 use rome_js_syntax::{AnyJsExpression, JsSyntaxNode, JsTemplateExpression, TsTemplateLiteralType};
 use rome_js_syntax::{JsSyntaxToken, TsTypeArguments};
-use rome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateExpression;

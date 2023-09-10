@@ -16,7 +16,7 @@ use crate::{
     TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
     TsTypeParameterName,
 };
-use rome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsBindingDeclaration =

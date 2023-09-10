@@ -3,7 +3,7 @@
 use crate::parse_recovery::RecoveryResult;
 use crate::prelude::*;
 use crate::ParserProgress;
-use rome_rowan::SyntaxKind;
+use biome_rowan::SyntaxKind;
 
 /// Use this trait to parse simple lists that don't have particular requirements.
 ///

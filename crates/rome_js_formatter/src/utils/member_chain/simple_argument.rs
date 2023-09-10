@@ -1,10 +1,10 @@
 use crate::utils::is_call_like_expression;
+use biome_rowan::{AstSeparatedList, SyntaxResult};
 use rome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsName, AnyJsObjectMember,
     AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread, JsStaticMemberExpressionFields,
     JsTemplateExpression, JsUnaryOperator,
 };
-use rome_rowan::{AstSeparatedList, SyntaxResult};
 
 /// This enum tracks the arguments inside a call expressions and checks if they are
 /// simple or not.

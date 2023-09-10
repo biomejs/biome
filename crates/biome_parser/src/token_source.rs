@@ -1,5 +1,5 @@
 use crate::diagnostic::ParseDiagnostic;
-use rome_rowan::{SyntaxKind, TextRange, TextSize, TriviaPieceKind};
+use biome_rowan::{SyntaxKind, TextRange, TextSize, TriviaPieceKind};
 
 /// A comment or a whitespace trivia in the source code.
 #[derive(Debug, Copy, Clone)]

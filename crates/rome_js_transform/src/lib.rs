@@ -8,8 +8,8 @@ use biome_analyze::{
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
 use biome_diagnostics::Error;
+use biome_rowan::BatchMutation;
 use rome_js_syntax::{JsFileSource, JsLanguage};
-use rome_rowan::BatchMutation;
 use std::convert::Infallible;
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules

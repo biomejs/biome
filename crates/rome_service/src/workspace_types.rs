@@ -11,11 +11,11 @@ use schemars::{
 use serde_json::Value;
 
 use crate::{workspace::*, WorkspaceError};
+use biome_rowan::{AstSeparatedList, TriviaPieceKind};
 use rome_js_factory::{
     make,
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},
 };
-use rome_rowan::{AstSeparatedList, TriviaPieceKind};
 
 /// Manages a queue of type definitions that need to be generated
 #[derive(Default)]

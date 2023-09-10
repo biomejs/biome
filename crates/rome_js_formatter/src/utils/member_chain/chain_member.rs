@@ -1,12 +1,12 @@
 use crate::js::expressions::computed_member_expression::FormatComputedMemberLookup;
 use crate::prelude::*;
+use biome_rowan::AstNode;
 use rome_formatter::write;
 use rome_js_syntax::{
     JsCallExpression, JsCallExpressionFields, JsComputedMemberExpression, JsImportCallExpression,
     JsStaticMemberExpression, JsStaticMemberExpressionFields, JsSyntaxNode,
     TsNonNullAssertionExpression, TsNonNullAssertionExpressionFields,
 };
-use rome_rowan::AstNode;
 use std::fmt::Debug;
 
 #[derive(Copy, Clone, Debug)]

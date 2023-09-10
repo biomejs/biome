@@ -1,5 +1,5 @@
 use crate::DeserializationDiagnostic;
-use rome_rowan::{Language, SyntaxNode};
+use biome_rowan::{Language, SyntaxNode};
 
 /// Generic trait to implement when resolving the configuration from a generic language
 pub trait VisitNode<L: Language>: Sized {

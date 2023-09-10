@@ -3,6 +3,7 @@
 use rustc_hash::FxHashMap;
 use std::collections::{HashMap, VecDeque};
 
+use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TokenText};
 use rome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression,
     JsCallExpression, JsForVariableDeclaration, JsIdentifierAssignment, JsIdentifierBinding,
@@ -10,7 +11,6 @@ use rome_js_syntax::{
     JsSyntaxToken, JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList,
     JsxReferenceIdentifier, TextRange, TextSize, TsIdentifierBinding, TsTypeParameterName,
 };
-use rome_rowan::{syntax::Preorder, AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TokenText};
 
 /// Events emitted by the [SemanticEventExtractor]. These events are later
 /// made into the Semantic Model.

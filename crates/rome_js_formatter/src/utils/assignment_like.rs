@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::AnyJsBinaryLikeExpression;
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 use rome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
 use rome_js_syntax::AnyJsLiteralExpression;
 use rome_js_syntax::{
@@ -17,7 +18,6 @@ use rome_js_syntax::{
     TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
     TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments,
 };
-use rome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 use std::iter;
 
 declare_node_union! {

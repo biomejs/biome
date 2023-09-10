@@ -1,5 +1,6 @@
 use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 use rome_js_parser::JsParserOptions;
 use rome_js_semantic::{semantic_model, SemanticModelOptions};
 use rome_js_syntax::JsSyntaxNode;
@@ -7,7 +8,6 @@ use rome_js_syntax::{
     AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
     JsVariableDeclarator,
 };
-use rome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 use std::{any::type_name, fmt::Debug};
 
 /// Search and renames alls bindings where the name contains "a" replacing it to "b".

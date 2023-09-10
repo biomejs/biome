@@ -1,4 +1,4 @@
-use rome_rowan::TextRange;
+use biome_rowan::TextRange;
 
 use crate::{JsSyntaxKind, JsSyntaxToken};
 
@@ -103,7 +103,7 @@ impl StaticValue {
     /// ```
     /// use rome_js_syntax::static_value::StaticValue;
     /// use rome_js_factory::make;
-    /// use rome_rowan::TriviaPieceKind;
+    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::js_string_literal("foo")
     ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
@@ -125,7 +125,7 @@ impl StaticValue {
     /// ```
     /// use rome_js_syntax::static_value::StaticValue;
     /// use rome_js_factory::make;
-    /// use rome_rowan::TriviaPieceKind;
+    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::js_string_literal("foo")
     ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);

@@ -4,13 +4,13 @@ use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNode};
 use bpaf::Bpaf;
 use rome_js_semantic::{Binding, BindingExtensions};
 use rome_js_syntax::{
     JsIdentifierAssignment, JsReferenceIdentifier, JsxReferenceIdentifier, TextRange,
 };
 use rome_json_syntax::JsonLanguage;
-use rome_rowan::{declare_node_union, AstNode, SyntaxNode};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 

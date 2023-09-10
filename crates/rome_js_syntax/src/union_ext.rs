@@ -4,7 +4,7 @@ use crate::{
     JsClassMemberList, JsDecoratorList, JsExtendsClause, JsSyntaxToken, TsImplementsClause,
     TsReturnTypeAnnotation, TsTypeAnnotation, TsTypeParameters,
 };
-use rome_rowan::{AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstSeparatedList, SyntaxResult};
 
 impl AnyJsClass {
     pub fn decorators(&self) -> JsDecoratorList {

@@ -1,8 +1,8 @@
 use crate::prelude::*;
+use biome_rowan::AstNodeList;
 use rome_formatter::{format_args, write};
 use rome_js_syntax::JsDefaultClause;
 use rome_js_syntax::{AnyJsStatement, JsDefaultClauseFields};
-use rome_rowan::AstNodeList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsDefaultClause;

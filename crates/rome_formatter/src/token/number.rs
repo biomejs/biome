@@ -1,5 +1,5 @@
 use crate::token::string::ToAsciiLowercaseCow;
-use rome_rowan::{Language, SyntaxToken};
+use biome_rowan::{Language, SyntaxToken};
 use std::borrow::Cow;
 use std::num::NonZeroUsize;
 

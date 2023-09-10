@@ -1,6 +1,6 @@
 pub use crate::generated::CssSyntaxFactory;
 use biome_css_syntax::CssLanguage;
-use rome_rowan::TreeBuilder;
+use biome_rowan::TreeBuilder;
 
 mod generated;
 

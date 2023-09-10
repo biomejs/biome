@@ -3,8 +3,8 @@ use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 use rome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
-use rome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_rule! {
     /// Prevent the usage of dangerous JSX props

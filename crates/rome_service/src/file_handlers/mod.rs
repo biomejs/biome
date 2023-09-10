@@ -9,12 +9,12 @@ use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Severity};
+use biome_fs::RomePath;
 use biome_parser::AnyParse;
+use biome_rowan::NodeCache;
 pub use javascript::JsFormatterSettings;
 use rome_formatter::Printed;
-use rome_fs::RomePath;
 use rome_js_syntax::{TextRange, TextSize};
-use rome_rowan::NodeCache;
 use std::ffi::OsStr;
 use std::path::Path;
 

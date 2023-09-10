@@ -39,8 +39,8 @@ impl Display for FileSourceError {
 ///
 /// ```
 /// use std::path::Path;
-/// use rome_rowan::{FileSource, FileSourceError};
-/// use rome_rowan::raw_language::RawLanguage;
+/// use biome_rowan::{FileSource, FileSourceError};
+/// use biome_rowan::raw_language::RawLanguage;
 /// struct UnknownFileSource {}
 ///
 /// impl TryFrom<&Path> for UnknownFileSource {

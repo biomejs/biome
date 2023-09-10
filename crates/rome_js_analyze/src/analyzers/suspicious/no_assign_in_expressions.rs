@@ -2,6 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, SyntaxResult};
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern,
@@ -21,7 +22,6 @@ use rome_js_syntax::{
     TsSatisfiesExpression, TsTypeAssertionAssignment, TsTypeAssertionAssignmentFields,
     TsTypeAssertionExpression,
 };
-use rome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, SyntaxResult};
 
 use crate::JsRuleAction;
 

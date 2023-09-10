@@ -6,9 +6,9 @@ use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
+use biome_fs::{FileSystem, OsFileSystem, RomePath};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
-use rome_fs::{FileSystem, OsFileSystem, RomePath};
 use rome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };

@@ -1,5 +1,5 @@
 use crate::JsonLanguage;
-use rome_rowan::{FileSource, FileSourceError};
+use biome_rowan::{FileSource, FileSourceError};
 use std::path::Path;
 
 #[derive(Debug, Default)]

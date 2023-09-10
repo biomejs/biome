@@ -3,7 +3,7 @@ use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use rome_js_syntax::JsWithStatement;
 
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 
 declare_rule! {
     /// Disallow `with` statements in non-strict contexts.

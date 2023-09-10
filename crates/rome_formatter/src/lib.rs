@@ -61,12 +61,12 @@ use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
 use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
-pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
-pub use group_id::GroupId;
-use rome_rowan::{
+use biome_rowan::{
     Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
     TextLen, TextRange, TextSize, TokenAtOffset,
 };
+pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
+pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
@@ -510,7 +510,7 @@ pub type FormatResult<F> = Result<F, FormatError>;
 /// ```
 /// use rome_formatter::{format, write, IndentStyle, LineWidth};
 /// use rome_formatter::prelude::*;
-/// use rome_rowan::TextSize;
+/// use biome_rowan::TextSize;
 ///
 /// struct Paragraph(String);
 ///
@@ -666,7 +666,7 @@ pub trait FormatRuleWithOptions<T>: FormatRule<T> {
 /// ```ignore
 /// use rome_formatter::prelude::*;
 /// use rome_formatter::{format, Formatted, FormatWithRule};
-/// use rome_rowan::{Language, SyntaxNode};
+/// use biome_rowan::{Language, SyntaxNode};
 /// fn format_node<L: Language, F: FormatWithRule<SimpleFormatContext, Item=SyntaxNode<L>>>(node: F) -> FormatResult<Formatted<SimpleFormatContext>> {
 ///     let formatted = format!(SimpleFormatContext::default(), [node]);
 ///     let syntax = node.item();

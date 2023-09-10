@@ -1,5 +1,5 @@
+use biome_rowan::{AstNode, SyntaxResult};
 use rome_js_syntax::JsReturnStatement;
-use rome_rowan::{AstNode, SyntaxResult};
 
 use crate::control_flow::{
     visitor::{NodeVisitor, StatementStack},

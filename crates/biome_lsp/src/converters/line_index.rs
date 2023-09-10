@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::mem;
 
 use crate::converters::{LineCol, WideChar, WideEncoding, WideLineCol};
-use rome_rowan::TextSize;
+use biome_rowan::TextSize;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct LineIndex {

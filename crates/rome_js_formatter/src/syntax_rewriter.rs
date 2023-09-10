@@ -1,14 +1,14 @@
 use crate::comments::is_type_comment;
 use crate::parentheses::AnyJsParenthesized;
+use biome_rowan::syntax::SyntaxTrivia;
+use biome_rowan::{
+    chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
+    VisitNodeSignal,
+};
 use rome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use rome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind,
     JsSyntaxNode,
-};
-use rome_rowan::syntax::SyntaxTrivia;
-use rome_rowan::{
-    chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
-    VisitNodeSignal,
 };
 use std::collections::BTreeSet;
 
@@ -79,7 +79,7 @@ impl JsFormatSyntaxRewriter {
     /// * `b`: `/* trailing b */ /* leading r-paren */ /* trailing r-paren */`
     ///
     /// The fact that the implementation appends the right parenthesis's leading trivia to the last token's trailing
-    /// trivia is slightly inconsistent with our [rome_rowan::SyntaxToken::trailing_trivia] definition as it can now happen that the
+    /// trivia is slightly inconsistent with our [biome_rowan::SyntaxToken::trailing_trivia] definition as it can now happen that the
     /// trailing trivia contains line breaks. In practice, this isn't a problem for the formatter.
     ///
     /// ## Leading Whitespace Trivia
@@ -442,6 +442,7 @@ fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
 mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::{format_node, JsFormatOptions, TextRange};
+    use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
     use rome_formatter::{SourceMarker, TransformSourceMap};
     use rome_js_parser::{parse, parse_module, JsParserOptions};
     use rome_js_syntax::{
@@ -449,7 +450,6 @@ mod tests {
         JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,
         JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
     };
-    use rome_rowan::{AstNode, SyntaxRewriter, TextSize};
 
     #[test]
     fn rebalances_logical_expressions() {

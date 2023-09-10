@@ -4,7 +4,7 @@ use biome_diagnostics::console::fmt::Display;
 use biome_diagnostics::console::{markup, MarkupBuf};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
-use rome_rowan::{SyntaxKind, TextLen, TextRange};
+use biome_rowan::{SyntaxKind, TextLen, TextRange};
 use std::cmp::Ordering;
 
 /// A specialized diagnostic for the parser
@@ -104,7 +104,7 @@ impl ParseDiagnostic {
     /// # use biome_console::markup;
     /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
-    /// # use rome_rowan::{TextSize, TextRange};
+    /// # use biome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
     ///
     /// let source = "const a";
@@ -146,7 +146,7 @@ impl ParseDiagnostic {
     /// # use biome_console::markup;
     /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
     /// # use biome_parser::diagnostic::ParseDiagnostic;
-    /// # use rome_rowan::{TextSize, TextRange};
+    /// # use biome_rowan::{TextSize, TextRange};
     /// # use std::fmt::Write;
     ///
     /// let source = "const a";

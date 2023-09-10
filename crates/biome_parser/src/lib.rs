@@ -247,7 +247,7 @@ use crate::event::Event::Token;
 use crate::token_source::{BumpWithContext, NthToken, TokenSource};
 use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
-use rome_rowan::{
+use biome_rowan::{
     AnyFileSource, AstNode, FileSource, FileSourceError, Language, SendNode, SyntaxKind,
     SyntaxNode, TextRange, TextSize,
 };

@@ -7,7 +7,7 @@ use crate::{
     write, Argument, Arguments, CstFormatContext, FormatRefWithRule, GroupId, SourceComment,
     TextRange,
 };
-use rome_rowan::{Language, SyntaxNode, SyntaxToken};
+use biome_rowan::{Language, SyntaxNode, SyntaxToken};
 #[cfg(debug_assertions)]
 use std::cell::Cell;
 

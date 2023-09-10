@@ -4,14 +4,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::AstNode;
+use biome_rowan::BatchMutationExt;
 use rome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
     JsInitializerClause, JsPropertyClassMember, JsSyntaxKind, JsVariableDeclaration,
     JsVariableDeclarator, JsVariableDeclaratorList, TsPropertyParameter, TsReadonlyModifier,
     TsTypeAnnotation,
 };
-use rome_rowan::AstNode;
-use rome_rowan::BatchMutationExt;
 
 declare_rule! {
     /// Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.

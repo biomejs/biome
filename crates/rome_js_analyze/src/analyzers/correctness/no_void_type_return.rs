@@ -1,12 +1,12 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{declare_node_union, AstNode};
 use rome_js_syntax::{
     AnyTsReturnType, JsArrowFunctionExpression, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
     JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsReturnStatement,
 };
-use rome_rowan::{declare_node_union, AstNode};
 
 use crate::control_flow::AnyJsControlFlowRoot;
 

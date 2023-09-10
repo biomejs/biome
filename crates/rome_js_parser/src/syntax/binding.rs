@@ -11,8 +11,8 @@ use crate::JsSyntaxFeature::StrictMode;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, ParsedSyntax};
 use biome_parser::diagnostic::expected_any;
+use biome_rowan::SyntaxKind as SyntaxKindTrait;
 use rome_js_syntax::{JsSyntaxKind::*, *};
-use rome_rowan::SyntaxKind as SyntaxKindTrait;
 
 pub(crate) fn parse_binding_pattern(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     match p.cur() {

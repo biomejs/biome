@@ -3,10 +3,10 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
 use crate::parentheses::NeedsParentheses;
+use biome_rowan::AstNode;
 use rome_js_syntax::JsStringLiteralExpressionFields;
 use rome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
 use rome_js_syntax::{JsStringLiteralExpression, JsSyntaxNode};
-use rome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStringLiteralExpression;

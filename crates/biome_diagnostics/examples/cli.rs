@@ -2,7 +2,7 @@ use std::io;
 
 use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{Advices, Diagnostic, LogCategory, PrintDiagnostic, Resource, Visit};
-use rome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextRange, TextSize};
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(

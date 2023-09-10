@@ -2,7 +2,7 @@ use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Advices, Diagnostic, LogCategory, MessageAndDescription, Severity, Visit};
-use rome_rowan::{SyntaxError, TextRange};
+use biome_rowan::{SyntaxError, TextRange};
 use serde::{Deserialize, Serialize};
 
 /// Diagnostic emitted during the deserialization

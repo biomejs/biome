@@ -1,4 +1,4 @@
-use rome_rowan::{SyntaxResult, TokenText};
+use biome_rowan::{SyntaxResult, TokenText};
 
 use crate::{inner_string_text, JsDirective};
 
@@ -10,7 +10,7 @@ impl JsDirective {
     /// ```
     /// use rome_js_factory::syntax::{JsDirective, JsSyntaxKind::*};
     /// use rome_js_factory::JsSyntaxTreeBuilder;
-    /// use rome_rowan::AstNode;
+    /// use biome_rowan::AstNode;
     /// let mut tree_builder = JsSyntaxTreeBuilder::new();
     ///         tree_builder.start_node(JS_DIRECTIVE);
     ///         tree_builder.token(JS_STRING_LITERAL, "\"use strict\"");
@@ -27,9 +27,9 @@ impl JsDirective {
 
 #[cfg(test)]
 mod tests {
+    use biome_rowan::AstNode;
     use rome_js_factory::syntax::{JsDirective, JsSyntaxKind::*};
     use rome_js_factory::JsSyntaxTreeBuilder;
-    use rome_rowan::AstNode;
 
     #[test]
     fn js_directive_inner_string_text() {

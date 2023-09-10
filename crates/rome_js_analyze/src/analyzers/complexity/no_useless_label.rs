@@ -8,7 +8,7 @@ use rome_js_syntax::{
 };
 
 use crate::JsRuleAction;
-use rome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Disallow unnecessary labels.

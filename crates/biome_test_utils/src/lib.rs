@@ -3,9 +3,9 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
+use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use json_comments::StripComments;
 use rome_json_parser::{JsonParserOptions, ParseDiagnostic};
-use rome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use rome_service::configuration::to_analyzer_configuration;
 use rome_service::settings::{Language, WorkspaceSettings};
 use rome_service::Configuration;
@@ -95,7 +95,7 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 
 // Check that all red / green nodes have correctly been released on exit
 extern "C" fn check_leaks() {
-    if let Some(report) = rome_rowan::check_live() {
+    if let Some(report) = biome_rowan::check_live() {
         panic!("\n{report}")
     }
 }

@@ -1,12 +1,12 @@
 use std::any::TypeId;
 
 use biome_analyze::{merge_node_visitors, Visitor, VisitorContext};
+use biome_rowan::{declare_node_union, AstNode, SyntaxError, SyntaxResult};
 use rome_js_syntax::{
     AnyJsFunction, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
     JsSetterObjectMember, JsStaticInitializationBlockClassMember,
 };
-use rome_rowan::{declare_node_union, AstNode, SyntaxError, SyntaxResult};
 
 use crate::ControlFlowGraph;
 
@@ -73,10 +73,10 @@ macro_rules! declare_visitor {
             fn read_top(self) -> SyntaxResult<&'a mut $visitor> {
                 #[cfg(debug_assertions)]
                 let (_, visitor) =
-                    self.$id.1.last_mut().ok_or(::rome_rowan::SyntaxError::MissingRequiredChild)?;
+                    self.$id.1.last_mut().ok_or(::biome_rowan::SyntaxError::MissingRequiredChild)?;
                 #[cfg(not(debug_assertions))]
                 let (_, visitor) =
-                    self.$id.last_mut().ok_or(::rome_rowan::SyntaxError::MissingRequiredChild)?;
+                    self.$id.last_mut().ok_or(::biome_rowan::SyntaxError::MissingRequiredChild)?;
 
                 let VisitorAdapter(visitor) = visitor;
                 let visitor = visitor.as_mut().map_err(|err| *err)?;

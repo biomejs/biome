@@ -13,7 +13,7 @@ use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
 };
-use rome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::fmt::Debug;
 
 /// Static metadata containing information about a rule

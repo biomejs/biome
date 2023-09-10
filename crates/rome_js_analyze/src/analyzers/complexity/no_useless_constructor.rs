@@ -3,11 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 use rome_js_syntax::{
     AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, AnyJsFormalParameter,
     JsCallExpression, JsConstructorClassMember,
 };
-use rome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 

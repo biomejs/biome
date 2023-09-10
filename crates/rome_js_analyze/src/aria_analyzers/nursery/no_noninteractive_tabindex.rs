@@ -2,11 +2,11 @@ use crate::aria_services::Aria;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_aria::AriaRoles;
 use biome_console::markup;
+use biome_rowan::{declare_node_union, AstNode};
 use rome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsNumberLiteralExpression,
     JsStringLiteralExpression, JsUnaryExpression, TextRange,
 };
-use rome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.

@@ -7,7 +7,7 @@ use crate::{
     RuleMetadata, ServiceBag, SignalEntry, Visitor,
 };
 use biome_diagnostics::Error;
-use rome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
+use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     any::TypeId,

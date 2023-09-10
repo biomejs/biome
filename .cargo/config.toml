@@ -28,7 +28,7 @@ documentation = """
     -p biome_text_size \
     -p rome_js_semantic \
     -p biome_markup \
-    -p rome_rowan
+    -p biome_rowan
     --no-deps
 """
 format = "fmt --all --verbose"

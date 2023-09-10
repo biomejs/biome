@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt};
 use rome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
-use rome_rowan::{AstNode, BatchMutationExt};
 
 use crate::{utils, JsRuleAction};
 

@@ -1,4 +1,4 @@
-use rome_rowan::{
+use biome_rowan::{
     raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     AstNode, AstNodeExt, BatchMutationExt, SyntaxNodeCast,
 };

@@ -9,8 +9,8 @@ use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{
     Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
+use biome_rowan::TextSize;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
-use rome_rowan::TextSize;
 use rome_service::workspace::CodeAction;
 use std::any::Any;
 use std::collections::HashMap;

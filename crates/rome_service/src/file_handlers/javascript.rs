@@ -18,10 +18,11 @@ use biome_analyze::{
     RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
+use biome_fs::RomePath;
 use biome_parser::AnyParse;
+use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use indexmap::IndexSet;
 use rome_formatter::{FormatError, Printed};
-use rome_fs::RomePath;
 use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use rome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
@@ -35,7 +36,6 @@ use rome_js_semantic::{semantic_model, SemanticModelOptions};
 use rome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
 };
-use rome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;

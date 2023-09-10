@@ -4,12 +4,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
     JsUnaryExpression, JsUnaryOperator, T,
 };
-use rome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 
 declare_rule! {
     /// Discard redundant terms from logical expressions.

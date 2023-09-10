@@ -2,13 +2,13 @@ use std::{env, fs, io, path::PathBuf};
 
 use quote::{format_ident, quote};
 
+use biome_rowan::AstNode;
 use rome_js_factory::syntax::JsFileSource;
 use rome_js_factory::{
     make,
     syntax::{AnyJsDeclaration, AnyJsModuleItem, AnyJsStatement},
 };
 use rome_js_formatter::{context::JsFormatOptions, format_node};
-use rome_rowan::AstNode;
 use rome_service::workspace_types::{generate_type, methods, ModuleQueue};
 
 fn main() -> io::Result<()> {

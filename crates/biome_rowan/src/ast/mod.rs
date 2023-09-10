@@ -46,7 +46,7 @@ where
     /// and will result in a compile-time error if the value overflows:
     ///
     /// ```compile_fail
-    /// # use rome_rowan::{SyntaxKindSet, RawSyntaxKind, raw_language::RawLanguage};
+    /// # use biome_rowan::{SyntaxKindSet, RawSyntaxKind, raw_language::RawLanguage};
     /// const EXAMPLE: SyntaxKindSet<RawLanguage> =
     ///     SyntaxKindSet::<RawLanguage>::from_raw(RawSyntaxKind(512));
     /// # println!("{EXAMPLE:?}"); // The constant must be used to be evaluated
@@ -149,8 +149,8 @@ pub trait AstNode: Clone {
     /// # Examples
     ///
     /// ```
-    /// # use rome_rowan::AstNode;
-    /// # use rome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::AstNode;
+    /// # use biome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
     ///
     /// let mut builder = RawSyntaxTreeBuilder::new();
     ///
@@ -182,8 +182,8 @@ pub trait AstNode: Clone {
     /// * [Ok] if the passed node can be cast into this [AstNode]
     /// * [Err] if the node is of another kind
     /// ```
-    /// # use rome_rowan::AstNode;
-    /// # use rome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::AstNode;
+    /// # use biome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
     ///
     /// let mut builder = RawSyntaxTreeBuilder::new();
     ///

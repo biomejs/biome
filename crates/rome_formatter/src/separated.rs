@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{write, CstFormatContext, GroupId};
-use rome_rowan::{AstNode, AstSeparatedElement, SyntaxResult, SyntaxToken};
+use biome_rowan::{AstNode, AstSeparatedElement, SyntaxResult, SyntaxToken};
 
 pub trait FormatSeparatedElementRule<N>
 where

@@ -1,4 +1,4 @@
-use rome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 
 use crate::{
     registry::NodeLanguage, AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag,
@@ -36,7 +36,7 @@ where
 }
 
 impl<L: Language + 'static> QueryMatch for SyntaxNode<L> {
-    fn text_range(&self) -> rome_rowan::TextRange {
+    fn text_range(&self) -> biome_rowan::TextRange {
         self.text_trimmed_range()
     }
 }
@@ -93,7 +93,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
 #[cfg(test)]
 mod tests {
 
-    use rome_rowan::{
+    use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, SyntaxNode,
     };

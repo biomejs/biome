@@ -4,9 +4,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression};
-use rome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
 
 declare_rule! {
     /// Disallow using unsafe negation.

@@ -14,8 +14,8 @@ mod vcs;
 use crate::Configuration;
 use biome_deserialize::json::{JsonDeserialize, VisitJsonNode};
 use biome_deserialize::DeserializationDiagnostic;
+use biome_rowan::AstNode;
 use rome_json_syntax::{AnyJsonValue, JsonRoot};
-use rome_rowan::AstNode;
 
 impl JsonDeserialize for Configuration {
     fn deserialize_from_ast(

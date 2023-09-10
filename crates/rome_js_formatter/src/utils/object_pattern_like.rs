@@ -1,6 +1,7 @@
 use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
 use crate::prelude::*;
 use crate::JsFormatContext;
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 use rome_formatter::formatter::Formatter;
 use rome_formatter::write;
 use rome_formatter::{Format, FormatResult};
@@ -9,7 +10,6 @@ use rome_js_syntax::{
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, JsObjectAssignmentPattern,
     JsObjectBindingPattern, JsSyntaxKind, JsSyntaxToken,
 };
-use rome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 
 declare_node_union! {
     pub (crate) JsObjectPatternLike = JsObjectAssignmentPattern | JsObjectBindingPattern

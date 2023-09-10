@@ -3,9 +3,9 @@ use crate::JsonParserOptions;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::TokenSource;
 use biome_parser::token_source::Trivia;
+use biome_rowan::TriviaPieceKind;
 use rome_json_syntax::JsonSyntaxKind::{EOF, TOMBSTONE};
 use rome_json_syntax::{JsonSyntaxKind, TextRange};
-use rome_rowan::TriviaPieceKind;
 
 pub(crate) struct JsonTokenSource<'source> {
     lexer: Lexer<'source>,

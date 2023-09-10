@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_fs"
+name                 = "biome_fs"
 repository.workspace = true
 version              = "0.2.0"
 

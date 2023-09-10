@@ -7,8 +7,8 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use std::time::Duration;
 
+use biome_rowan::NodeCache;
 use criterion::{BatchSize, BenchmarkId};
-use rome_rowan::NodeCache;
 
 pub use crate::features::analyzer::benchmark_analyze_lib;
 use crate::features::analyzer::AnalyzerMeasurement;

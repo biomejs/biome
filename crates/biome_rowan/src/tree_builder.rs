@@ -137,7 +137,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     /// `start_node_at`.
     /// Example:
     /// ```rust
-    /// # use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     /// # const PLUS: RawLanguageKind = RawLanguageKind::PLUS_TOKEN;
     /// # const OPERATION: RawLanguageKind = RawLanguageKind::ROOT;
     /// # struct Parser;

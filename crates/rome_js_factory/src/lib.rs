@@ -1,5 +1,5 @@
+use biome_rowan::TreeBuilder;
 use rome_js_syntax::JsLanguage;
-use rome_rowan::TreeBuilder;
 
 mod generated;
 pub use crate::generated::JsSyntaxFactory;

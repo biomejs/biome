@@ -17,7 +17,7 @@ use crate::configs::{
 use crate::snap_test::{markup_to_string, SnapshotPayload};
 use crate::{assert_cli_snapshot, run_cli, FORMATTED, LINT_ERROR, PARSE_ERROR};
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
-use rome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
 use rome_service::DynRef;
 
 const ERRORS: &str = r#"

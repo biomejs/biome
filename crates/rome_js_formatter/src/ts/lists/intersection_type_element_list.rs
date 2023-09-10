@@ -1,7 +1,7 @@
 use crate::{prelude::*, utils::is_object_like_type};
+use biome_rowan::AstSeparatedList;
 use rome_formatter::{format_args, write};
 use rome_js_syntax::TsIntersectionTypeElementList;
-use rome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIntersectionTypeElementList;

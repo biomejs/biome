@@ -809,10 +809,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
         };
         #[allow(unused)]
-        use rome_rowan::{
+        use biome_rowan::{
             AstNodeList, AstNodeListIterator, AstSeparatedList, AstSeparatedListNodesIterator
         };
-        use rome_rowan::{support, AstNode, SyntaxKindSet, RawSyntaxKind, SyntaxResult};
+        use biome_rowan::{support, AstNode, SyntaxKindSet, RawSyntaxKind, SyntaxResult};
         use std::fmt::{Debug, Formatter};
         #serde_import
 

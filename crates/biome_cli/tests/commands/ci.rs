@@ -5,8 +5,8 @@ use crate::{
     UNFORMATTED,
 };
 use biome_console::{BufferConsole, MarkupBuf};
+use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
-use rome_fs::{FileSystemExt, MemoryFileSystem};
 use rome_service::DynRef;
 use std::path::{Path, PathBuf};
 

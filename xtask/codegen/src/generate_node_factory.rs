@@ -207,7 +207,7 @@ pub fn generate_node_factory(ast: &AstSrc, language_kind: LanguageKind) -> Resul
         #![allow(clippy::redundant_closure)]
         #![allow(clippy::too_many_arguments)]
         use #syntax_crate::{*, #syntax_token as SyntaxToken, #syntax_node as SyntaxNode, #syntax_element as SyntaxElement};
-        use rome_rowan::AstNode;
+        use biome_rowan::AstNode;
 
         #(#nodes)*
         #(#lists)*

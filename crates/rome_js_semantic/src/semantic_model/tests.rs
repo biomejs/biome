@@ -4,12 +4,12 @@ mod test {
         semantic_model, BindingExtensions, CanBeImportedExported, SemanticModelOptions,
         SemanticScopeExtensions,
     };
+    use biome_rowan::{AstNode, SyntaxNodeCast};
     use rome_js_parser::JsParserOptions;
     use rome_js_syntax::{
         JsFileSource, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
         JsSyntaxKind, TsIdentifierBinding,
     };
-    use rome_rowan::{AstNode, SyntaxNodeCast};
 
     #[test]
     pub fn ok_semantic_model() {

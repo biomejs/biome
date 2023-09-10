@@ -7,10 +7,10 @@ use rome_formatter::{
 use crate::context::TabWidth;
 use crate::js::expressions::array_expression::FormatJsArrayExpressionOptions;
 use crate::js::lists::template_element_list::{TemplateElementIndention, TemplateElementLayout};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 use rome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
-use rome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateElement {

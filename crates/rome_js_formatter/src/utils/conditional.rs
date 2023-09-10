@@ -5,6 +5,7 @@ use rome_formatter::{
 };
 
 use crate::{AsFormat, IntoFormat};
+use biome_rowan::{declare_node_union, match_ast, AstNode, SyntaxResult};
 use rome_js_syntax::{
     AnyJsExpression, AnyTsType, JsAssignmentExpression, JsCallExpression,
     JsComputedMemberExpression, JsConditionalExpression, JsFileSource, JsInitializerClause,
@@ -12,7 +13,6 @@ use rome_js_syntax::{
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsAsExpression,
     TsConditionalType, TsNonNullAssertionExpression, TsSatisfiesExpression,
 };
-use rome_rowan::{declare_node_union, match_ast, AstNode, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType

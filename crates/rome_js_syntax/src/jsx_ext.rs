@@ -5,7 +5,7 @@ use crate::{
     AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, JsSyntaxToken, JsxAttribute,
     JsxAttributeList, JsxElement, JsxName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
 };
-use rome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
 
 impl JsxString {
     /// Get the inner text of a string not including the quotes
@@ -14,7 +14,7 @@ impl JsxString {
     ///
     /// ```
     /// use rome_js_factory::make;
-    /// use rome_rowan::TriviaPieceKind;
+    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::jsx_string(make::jsx_string_literal("button")
     ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));

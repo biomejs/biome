@@ -12,7 +12,7 @@ use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use crate::CliDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error};
-use rome_fs::RomePath;
+use biome_fs::RomePath;
 use rome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
 use std::marker::PhantomData;
 use std::ops::Deref;

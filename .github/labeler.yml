@@ -2,13 +2,13 @@
 
 A-Cli:
   - crates/biome_cli/**
-  - crates/rome_fs/**
+  - crates/biome_fs/**
   - crates/biome_console/**
 
 A-Core:
   - crates/rome_deserializer/**
-  - crates/rome_fs/**
-  - crates/rome_rowan/**
+  - crates/biome_fs/**
+  - crates/biome_rowan/**
   - crates/biome_text_edit/**
   - crates/biome_text_size/**
   - crates/biome_suppression/**

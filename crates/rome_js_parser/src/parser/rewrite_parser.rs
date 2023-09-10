@@ -9,8 +9,8 @@ use biome_parser::{
     event::Event,
     CompletedMarker, Marker,
 };
+use biome_rowan::TextSize;
 use rome_js_syntax::{JsSyntaxKind, TextRange};
-use rome_rowan::TextSize;
 
 /// Simplified parser API for when rewriting the AST structure with `rewrite_events`.
 ///

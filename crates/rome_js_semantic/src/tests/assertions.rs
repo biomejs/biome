@@ -4,9 +4,9 @@ use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,
 };
+use biome_rowan::{AstNode, NodeOrToken};
 use rome_js_parser::JsParserOptions;
 use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
-use rome_rowan::{AstNode, NodeOrToken};
 use std::collections::{BTreeMap, HashMap};
 
 /// This method helps testing scope resolution. It does this
@@ -373,7 +373,7 @@ impl SemanticAssertions {
 
         for node in root
             .syntax()
-            .preorder_with_tokens(rome_rowan::Direction::Next)
+            .preorder_with_tokens(biome_rowan::Direction::Next)
         {
             if let WalkEvent::Enter(NodeOrToken::Token(token)) = node {
                 let pieces = token

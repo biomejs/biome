@@ -67,7 +67,7 @@ use crate::parentheses::{
 };
 
 use crate::js::expressions::static_member_expression::AnyJsStaticMemberLike;
-use rome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::FusedIterator;
@@ -896,9 +896,9 @@ impl FusedIterator for BinaryLikePreorder {}
 mod tests {
     use crate::utils::binary_like_expression::{BinaryLikePreorder, VisitEvent};
     use crate::utils::AnyJsBinaryLikeExpression;
+    use biome_rowan::AstNode;
     use rome_js_parser::{parse_module, JsParserOptions};
     use rome_js_syntax::JsLogicalExpression;
-    use rome_rowan::AstNode;
 
     #[test]
     fn in_order_visits_every_binary_like_expression() {

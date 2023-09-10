@@ -82,8 +82,8 @@ use self::{builder::CommentsBuilderVisitor, map::CommentsMap};
 use crate::formatter::Formatter;
 use crate::{buffer::Buffer, write};
 use crate::{CstFormatContext, FormatResult, FormatRule, TextSize, TransformSourceMap};
-use rome_rowan::syntax::SyntaxElementKey;
-use rome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
+use biome_rowan::syntax::SyntaxElementKey;
+use biome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
 use rustc_hash::FxHashSet;
 #[cfg(debug_assertions)]
 use std::cell::{Cell, RefCell};
@@ -953,7 +953,7 @@ impl<L: Language> Comments<L> {
     /// If theres any node for which the formatting didn't very if it has a suppression comment.
     #[cfg(debug_assertions)]
     pub(crate) fn assert_checked_all_suppressions(&self, root: &SyntaxNode<L>) {
-        use rome_rowan::SyntaxKind;
+        use biome_rowan::SyntaxKind;
 
         let checked_nodes = self.data.checked_suppressions.borrow();
         for node in root.descendants() {

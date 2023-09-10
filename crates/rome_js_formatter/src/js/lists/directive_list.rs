@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use biome_rowan::{AstNode, AstNodeList};
 use rome_formatter::write;
 use rome_js_syntax::JsDirectiveList;
-use rome_rowan::{AstNode, AstNodeList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsDirectiveList;

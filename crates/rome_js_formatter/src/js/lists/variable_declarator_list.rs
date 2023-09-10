@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
+use biome_rowan::AstSeparatedList;
 use rome_js_syntax::{JsSyntaxKind, JsVariableDeclaratorList};
-use rome_rowan::AstSeparatedList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsVariableDeclaratorList;

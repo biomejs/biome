@@ -1,8 +1,8 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{declare_node_union, SyntaxResult, TextRange};
 use rome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
-use rome_rowan::{declare_node_union, SyntaxResult, TextRange};
 use std::{fmt::Display, str::FromStr};
 
 declare_rule! {

@@ -1,5 +1,5 @@
 use crate::{inner_string_text, AnyJsImportClause, JsImport, JsModuleSource};
-use rome_rowan::{SyntaxResult, TokenText};
+use biome_rowan::{SyntaxResult, TokenText};
 
 impl JsImport {
     /// It checks if the source of an import against the string `source_to_check`
@@ -36,7 +36,7 @@ impl JsModuleSource {
     /// ```
     /// use rome_js_factory::make::{ident, js_module_source};
     /// use rome_js_syntax::{AnyJsBinding, AnyJsImportClause, T};
-    /// use rome_rowan::TriviaPieceKind;
+    /// use biome_rowan::TriviaPieceKind;
     /// let source = js_module_source(ident("react").with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
     /// let text = source.inner_string_text().unwrap();
     /// assert_eq!(text.text(), "react");

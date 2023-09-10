@@ -1,6 +1,6 @@
 use super::*;
+use biome_rowan::TokenText;
 use rome_js_syntax::TextRange;
-use rome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 use std::rc::Rc;
 

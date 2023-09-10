@@ -1,8 +1,8 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{AstNode, TextRange};
 use rome_js_syntax::{binding_ext::AnyJsBindingDeclaration, TsInterfaceDeclaration};
-use rome_rowan::{AstNode, TextRange};
 
 declare_rule! {
     /// Disallow unsafe declaration merging between interfaces and classes.

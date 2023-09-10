@@ -3,8 +3,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_aria::AriaPropertyTypeEnum;
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
-use rome_rowan::AstNode;
 use std::slice::Iter;
 
 declare_rule! {

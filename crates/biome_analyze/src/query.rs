@@ -1,6 +1,6 @@
 use std::any::TypeId;
 
-use rome_rowan::{Language, SyntaxKindSet, TextRange};
+use biome_rowan::{Language, SyntaxKindSet, TextRange};
 
 use crate::{registry::Phase, services::FromServices, Phases, ServiceBag, Visitor};
 

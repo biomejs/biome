@@ -3,10 +3,10 @@
 use crate::*;
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
+use biome_rowan::{AstNode, NodeCache};
 use rome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
-use rome_rowan::{AstNode, NodeCache};
 use std::marker::PhantomData;
 
 /// A utility struct for managing the result of a parser job
@@ -47,7 +47,7 @@ impl<T> Parse<T> {
     /// ```
     /// use rome_js_parser::{JsParserOptions, parse_script};
     /// use rome_js_syntax::{JsIfStatement, JsSyntaxKind};
-    /// use rome_rowan::{AstNode, AstNodeList};
+    /// use biome_rowan::{AstNode, AstNodeList};
     ///
     /// let parse = parse_script(
     ///     "
@@ -132,7 +132,7 @@ fn parse_common(
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_script};
 /// use rome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
-/// use rome_rowan::{AstNode, Direction};
+/// use biome_rowan::{AstNode, Direction};
 ///
 /// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
 /// // Parse returns a JS Root which contains two lists, the directives and the statements, let's get the statements
@@ -190,7 +190,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_module};
 /// use rome_js_syntax::JsSyntaxKind;
-/// use rome_rowan::AstNode;
+/// use biome_rowan::AstNode;
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
 ///
@@ -244,7 +244,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_js_with_cache};
 /// use rome_js_syntax::JsFileSource;
-/// use rome_rowan::NodeCache;
+/// use biome_rowan::NodeCache;
 ///
 /// let source_type = JsFileSource::js_module();
 /// let mut cache = NodeCache::default();

@@ -1,10 +1,10 @@
 [package]
 authors              = ["Aleksey Kladov <aleksey.kladov@gmail.com>"]
 description          = "Library for generic lossless syntax trees"
-documentation        = "https://docs.rs/rome_rowan"
+documentation        = "https://docs.rs/biome_rowan"
 edition.workspace    = true
 license              = "MIT OR Apache-2.0"
-name                 = "rome_rowan"
+name                 = "biome_rowan"
 repository.workspace = true
 version              = "0.2.0"
 

@@ -5,7 +5,7 @@ use crate::{
     JsForVariableDeclaration, JsStatementList, JsSyntaxToken as SyntaxToken, JsVariableDeclaration,
     TsModuleDeclaration, T,
 };
-use rome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{declare_node_union, SyntaxResult};
 
 impl AnyJsSwitchClause {
     pub fn clause_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -132,9 +132,9 @@ impl TsModuleDeclaration {
 
 #[cfg(test)]
 mod tests {
+    use biome_rowan::AstNode;
     use rome_js_factory::syntax::{JsSyntaxKind::*, JsVariableDeclaration};
     use rome_js_factory::JsSyntaxTreeBuilder;
-    use rome_rowan::AstNode;
 
     #[test]
     fn is_var_check() {

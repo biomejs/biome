@@ -3,7 +3,7 @@ use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
 use crate::{format_element, write, Argument, Arguments, GroupId, TextRange, TextSize};
 use crate::{Buffer, VecBuffer};
-use rome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
+use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
@@ -1840,7 +1840,7 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 /// ```
 /// use rome_formatter::prelude::*;
 /// use rome_formatter::{SimpleFormatContext, format, write};
-/// use rome_rowan::TextSize;
+/// use biome_rowan::TextSize;
 ///
 /// struct MyFormat {
 ///     items: Vec<&'static str>,
@@ -1935,7 +1935,7 @@ where
 /// ```panics
 /// use rome_formatter::prelude::*;
 /// use rome_formatter::{SimpleFormatContext, format, write, Buffer};
-/// use rome_rowan::TextSize;
+/// use biome_rowan::TextSize;
 ///
 /// let mut count = 0;
 ///

@@ -31,10 +31,10 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 
 
 [build-dependencies]
+biome_rowan       = { workspace = true }
 quote             = "1.0.14"
 rome_js_factory   = { workspace = true }
 rome_js_formatter = { workspace = true }
-rome_rowan        = { workspace = true }
 rome_service      = { workspace = true, features = ["schema"] }
 schemars          = { workspace = true }
 serde_json        = { workspace = true }

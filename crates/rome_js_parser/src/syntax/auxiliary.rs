@@ -12,9 +12,9 @@ use crate::syntax::typescript::{
     parse_ts_enum_declaration, parse_ts_interface_declaration, parse_ts_type_alias_declaration,
 };
 use crate::{Absent, JsParser, ParsedSyntax};
+use biome_rowan::{TextRange, TextSize};
 use rome_js_syntax::JsSyntaxKind::{JS_BOGUS_STATEMENT, JS_VARIABLE_DECLARATION_CLAUSE};
 use rome_js_syntax::T;
-use rome_rowan::{TextRange, TextSize};
 
 // test js export_variable_clause
 // export let a;

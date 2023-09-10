@@ -1,7 +1,7 @@
+use biome_rowan::AstSeparatedList;
 use rome_js_syntax::{
     AnyTsType, JsSyntaxKind, JsSyntaxNode, TsIntersectionTypeElementList, TsUnionTypeVariantList,
 };
-use rome_rowan::AstSeparatedList;
 
 use crate::parentheses::{
     is_in_many_type_union_or_intersection_list, operator_type_or_higher_needs_parens,

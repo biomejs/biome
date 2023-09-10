@@ -9,7 +9,7 @@ use rome_js_syntax::{
     JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage, TextRange, WalkEvent,
 };
 
-use rome_rowan::{AstNode, BatchMutationExt, Language, NodeOrToken, SyntaxNode};
+use biome_rowan::{AstNode, BatchMutationExt, Language, NodeOrToken, SyntaxNode};
 use rustc_hash::FxHashMap;
 
 use crate::control_flow::AnyJsControlFlowRoot;

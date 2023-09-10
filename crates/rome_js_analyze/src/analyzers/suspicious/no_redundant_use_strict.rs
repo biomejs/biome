@@ -8,7 +8,7 @@ use rome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFunctionBody, JsModule, JsScript,
 };
 
-use rome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
  /// Prevents from having redundant `"use strict"`.

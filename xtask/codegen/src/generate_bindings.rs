@@ -1,3 +1,4 @@
+use biome_rowan::AstNode;
 use rome_js_factory::make;
 use rome_js_formatter::{context::JsFormatOptions, format_node};
 use rome_js_syntax::{
@@ -8,7 +9,6 @@ use rome_js_syntax::{
     AnyJsStatement, AnyTsName, AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource,
     TriviaPieceKind, T,
 };
-use rome_rowan::AstNode;
 use rome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::{to_camel_case, update};

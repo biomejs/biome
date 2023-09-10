@@ -8,8 +8,8 @@ use crate::{
     assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED,
 };
 use biome_console::{markup, BufferConsole, MarkupBuf};
+use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
-use rome_fs::{FileSystemExt, MemoryFileSystem};
 use rome_service::DynRef;
 use std::path::{Path, PathBuf};
 

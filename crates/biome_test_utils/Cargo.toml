@@ -11,13 +11,13 @@ biome_analyze     = { workspace = true }
 biome_console     = { workspace = true }
 biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_rowan       = { workspace = true }
 countme           = { workspace = true, features = ["enable"] }
 json_comments     = "0.2.1"
 rome_js_parser    = { workspace = true }
 rome_js_syntax    = { workspace = true }
 rome_json_parser  = { workspace = true }
 rome_json_syntax  = { workspace = true }
-rome_rowan        = { workspace = true }
 rome_service      = { workspace = true }
 serde             = { workspace = true }
 serde_json        = { workspace = true }

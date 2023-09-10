@@ -1,6 +1,6 @@
 use crate::{Printed, SourceMarker, TextRange};
-use rome_rowan::TextLen;
-use rome_rowan::{Language, SyntaxNode, TextSize};
+use biome_rowan::TextLen;
+use biome_rowan::{Language, SyntaxNode, TextSize};
 use rustc_hash::FxHashMap;
 use std::cmp::Ordering;
 use std::iter::FusedIterator;
@@ -594,7 +594,7 @@ impl ExactSizeIterator for DeletedRanges<'_> {}
 mod tests {
     use crate::source_map::DeletedRangeEntry;
     use crate::{TextRange, TextSize, TransformSourceMapBuilder};
-    use rome_rowan::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    use biome_rowan::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
 
     #[test]
     fn range_mapping() {

@@ -8,9 +8,9 @@ version = "0.2.0"
 [dependencies]
 biome_analyze     = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_rowan       = { workspace = true }
 lazy_static       = { workspace = true }
 rome_json_syntax  = { workspace = true }
-rome_rowan        = { workspace = true }
 
 [dev-dependencies]
 rome_json_parser = { workspace = true }

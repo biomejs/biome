@@ -1,6 +1,7 @@
 use crate::{declare_transformation, JsBatchMutation};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 use rome_js_factory::make::{
     ident, js_assignment_expression, js_call_argument_list, js_call_arguments, js_call_expression,
     js_computed_member_assignment, js_decorator_list, js_directive_list, js_expression_statement,
@@ -18,7 +19,6 @@ use rome_js_syntax::{
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
     JsStatementList, JsVariableStatement, TsEnumDeclaration, T,
 };
-use rome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
 declare_transformation! {
     /// Transform a TypeScript [TsEnumDeclaration]

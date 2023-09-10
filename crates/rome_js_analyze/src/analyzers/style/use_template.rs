@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
 use rome_js_factory::make;
 use rome_js_syntax::AnyJsTemplateElement::{self, JsTemplateElement};
 use rome_js_syntax::{
@@ -10,7 +11,6 @@ use rome_js_syntax::{
     JsParenthesizedExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
     JsTemplateElementList, JsTemplateExpression, T,
 };
-use rome_rowan::{AstNode, BatchMutationExt, WalkEvent};
 
 use crate::JsRuleAction;
 

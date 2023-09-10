@@ -24,21 +24,21 @@ pub mod type_ext;
 mod union_ext;
 
 pub use self::generated::*;
+pub use biome_rowan::{
+    SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
+    WalkEvent,
+};
 pub use expr_ext::*;
 pub use file_source::*;
 pub use function_ext::*;
 pub use identifier_ext::*;
 pub use modifier_ext::*;
-pub use rome_rowan::{
-    SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
-    WalkEvent,
-};
 pub use stmt_ext::*;
 pub use syntax_node::*;
 pub use type_ext::*;
 
 use crate::JsSyntaxKind::*;
-use rome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> JsSyntaxKind {
@@ -91,7 +91,7 @@ impl JsSyntaxKind {
     }
 }
 
-impl rome_rowan::SyntaxKind for JsSyntaxKind {
+impl biome_rowan::SyntaxKind for JsSyntaxKind {
     const TOMBSTONE: Self = TOMBSTONE;
     const EOF: Self = EOF;
 

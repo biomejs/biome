@@ -4,7 +4,7 @@ use crate::{
     AnalyzerOptions, LanguageRoot, QueryMatch, QueryMatcher, ServiceBag, SignalEntry,
     SuppressionCommentEmitter,
 };
-use rome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 use std::collections::BinaryHeap;
 
 /// Mutable context objects shared by all visitors
@@ -132,20 +132,20 @@ macro_rules! merge_node_visitors {
         }
 
         impl $crate::Visitor for $name {
-            type Language = <( $( <$visitor as $crate::NodeVisitor<$name>>::Node, )* ) as ::rome_rowan::macros::UnionLanguage>::Language;
+            type Language = <( $( <$visitor as $crate::NodeVisitor<$name>>::Node, )* ) as ::biome_rowan::macros::UnionLanguage>::Language;
 
             fn visit(
                 &mut self,
-                event: &::rome_rowan::WalkEvent<::rome_rowan::SyntaxNode<Self::Language>>,
+                event: &::biome_rowan::WalkEvent<::biome_rowan::SyntaxNode<Self::Language>>,
                 mut ctx: $crate::VisitorContext<Self::Language>,
             ) {
                 match event {
-                    ::rome_rowan::WalkEvent::Enter(node) => {
+                    ::biome_rowan::WalkEvent::Enter(node) => {
                         let kind = node.kind();
 
                         $(
-                            if <<$visitor as $crate::NodeVisitor<$name>>::Node as ::rome_rowan::AstNode>::can_cast(kind) {
-                                let node = <<$visitor as $crate::NodeVisitor<$name>>::Node as ::rome_rowan::AstNode>::unwrap_cast(node.clone());
+                            if <<$visitor as $crate::NodeVisitor<$name>>::Node as ::biome_rowan::AstNode>::can_cast(kind) {
+                                let node = <<$visitor as $crate::NodeVisitor<$name>>::Node as ::biome_rowan::AstNode>::unwrap_cast(node.clone());
                                 let state = <$visitor as $crate::NodeVisitor<$name>>::enter(node, &mut ctx, self);
 
                                 let stack_index = self.stack.len();
@@ -157,15 +157,15 @@ macro_rules! merge_node_visitors {
                             }
                         )*
                     }
-                    ::rome_rowan::WalkEvent::Leave(node) => {
+                    ::biome_rowan::WalkEvent::Leave(node) => {
                         let kind = node.kind();
 
                         $(
-                            if <<$visitor as $crate::NodeVisitor<$name>>::Node as ::rome_rowan::AstNode>::can_cast(kind) {
+                            if <<$visitor as $crate::NodeVisitor<$name>>::Node as ::biome_rowan::AstNode>::can_cast(kind) {
                                 self.stack.pop().unwrap();
                                 let (_, state) = self.$id.pop().unwrap();
 
-                                let node = <<$visitor as $crate::NodeVisitor<$name>>::Node as ::rome_rowan::AstNode>::unwrap_cast(node.clone());
+                                let node = <<$visitor as $crate::NodeVisitor<$name>>::Node as ::biome_rowan::AstNode>::unwrap_cast(node.clone());
                                 <$visitor as $crate::NodeVisitor<$name>>::exit(state, node, &mut ctx, self);
                                 return;
                             }

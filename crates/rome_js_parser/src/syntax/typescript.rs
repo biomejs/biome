@@ -11,8 +11,8 @@ use crate::syntax::js_parse_error::expected_expression;
 use crate::syntax::typescript::ts_parse_error::expected_ts_type;
 use crate::{Absent, JsParser, ParsedSyntax, Present};
 use biome_parser::diagnostic::expected_token_any;
+use biome_rowan::SyntaxKind;
 use rome_js_syntax::{JsSyntaxKind::*, *};
-use rome_rowan::SyntaxKind;
 
 pub(crate) use self::statement::*;
 use self::ts_parse_error::ts_member_cannot_be;

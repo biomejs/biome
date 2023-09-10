@@ -4,11 +4,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, TextRange,
 };
-use rome_rowan::{AstNode, BatchMutationExt};
 use std::str::FromStr;
 
 declare_rule! {

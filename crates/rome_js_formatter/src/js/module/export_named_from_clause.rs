@@ -2,9 +2,9 @@ use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 use rome_formatter::write;
 
+use biome_rowan::{AstNode, AstSeparatedElement};
 use rome_js_syntax::JsExportNamedFromClause;
 use rome_js_syntax::JsExportNamedFromClauseFields;
-use rome_rowan::{AstNode, AstSeparatedElement};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportNamedFromClause;

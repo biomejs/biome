@@ -5,11 +5,11 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use rome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
 };
 use rome_js_syntax::{AnyJsxElementName, JsxElement};
-use rome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_rule! {
     /// This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.

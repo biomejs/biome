@@ -1,4 +1,4 @@
-use rome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextRange, TextSize};
 use std::{ffi::OsStr, fs::read_to_string, ops::Range, path::Path};
 
 use crate::check_reformat::CheckReformat;

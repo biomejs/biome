@@ -8,7 +8,7 @@ on:
       - 'crates/rome_js_syntax/**'
       - 'crates/rome_js_factory/**'
       - 'crates/rome_js_parser/**'
-      - 'crates/rome_rowan/**'
+      - 'crates/biome_rowan/**'
       - 'xtask/**'
 
 env:

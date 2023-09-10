@@ -1,10 +1,10 @@
 use crate::prelude::*;
 use crate::utils::FormatLiteralStringToken;
 use crate::utils::StringLiteralParentKind;
+use biome_rowan::{declare_node_union, AstNode};
 use rome_formatter::write;
 use rome_js_syntax::JsSyntaxKind::JS_STRING_LITERAL;
 use rome_js_syntax::{AnyJsClassMemberName, AnyJsObjectMemberName};
-use rome_rowan::{declare_node_union, AstNode};
 use unicode_width::UnicodeWidthStr;
 
 declare_node_union! {

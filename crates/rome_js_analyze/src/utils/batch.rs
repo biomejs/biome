@@ -1,3 +1,4 @@
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation};
 use rome_js_factory::make::jsx_child_list;
 use rome_js_syntax::{
     AnyJsConstructorParameter, AnyJsFormalParameter, AnyJsObjectMember, AnyJsParameter,
@@ -5,7 +6,6 @@ use rome_js_syntax::{
     JsParameterList, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator,
     JsVariableDeclaratorList, JsVariableStatement, JsxChildList,
 };
-use rome_rowan::{AstNode, AstSeparatedList, BatchMutation};
 
 pub trait JsBatchMutation {
     /// Removes the declarator, and:

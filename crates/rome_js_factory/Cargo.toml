@@ -11,5 +11,5 @@ version              = "0.2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_rowan    = { workspace = true }
 rome_js_syntax = { workspace = true }
-rome_rowan     = { workspace = true }
