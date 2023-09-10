@@ -8,13 +8,13 @@ version = "0.0.0"
 biome_analyze     = { path = "../../crates/biome_analyze" }
 biome_console     = { path = "../../crates/biome_console" }
 biome_diagnostics = { path = "../../crates/biome_diagnostics" }
+biome_js_parser   = { path = "../../crates/biome_js_parser" }
 biome_js_syntax   = { path = "../../crates/biome_js_syntax" }
 biome_json_syntax = { path = "../../crates/biome_json_syntax" }
 convert_case      = "0.6.0"
 pulldown-cmark    = { version = "0.9", default-features = false }
 rome_formatter    = { path = "../../crates/rome_formatter" }
 rome_js_analyze   = { path = "../../crates/rome_js_analyze" }
-rome_js_parser    = { path = "../../crates/rome_js_parser" }
 rome_json_analyze = { path = "../../crates/rome_json_analyze" }
 rome_json_parser  = { path = "../../crates/rome_json_parser" }
 rome_service      = { path = "../../crates/rome_service" }

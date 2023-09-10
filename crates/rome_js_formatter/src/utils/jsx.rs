@@ -563,10 +563,10 @@ mod tests {
     use crate::utils::jsx::{
         jsx_split_children, JsxChild, JsxChildrenIterator, JsxSplitChunksIterator, JsxTextChunk,
     };
+    use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, JsxChildList, JsxText};
     use biome_rowan::{AstNode, TextSize};
     use rome_formatter::comments::Comments;
-    use rome_js_parser::{parse, JsParserOptions};
 
     #[test]
     fn jsx_children_iterator_test() {

@@ -12,15 +12,15 @@ pub fn is_constant(expr: &AnyJsExpression) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsFileSource, JsIdentifierBinding, JsVariableDeclarator};
-    use rome_js_parser::JsParserOptions;
 
     use crate::{semantic_model, SemanticModelOptions};
 
     fn assert_is_const(code: &str, is_const: bool) {
         use biome_rowan::AstNode;
         use biome_rowan::SyntaxNodeCast;
-        let r = rome_js_parser::parse(code, JsFileSource::js_module(), JsParserOptions::default());
+        let r = biome_js_parser::parse(code, JsFileSource::js_module(), JsParserOptions::default());
         let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
         let a_reference = r

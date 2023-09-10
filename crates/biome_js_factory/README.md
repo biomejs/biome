@@ -19,4 +19,4 @@
 
 # `biome_js_factory`
 
-Rome's JavaScript parser implementation. Follow the [documentation](https://docs.rs/rome_js_parser/latest).
+Rome's JavaScript parser implementation. Follow the [documentation](https://docs.rs/biome_js_parser/latest).

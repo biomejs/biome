@@ -1,4 +1,4 @@
-//! Takes comments from rome_js_parser and turns them into test data.
+//! Takes comments from biome_js_parser and turns them into test data.
 //! This code is derived from rust_analyzer/xtask/codegen/gen_parser_tests
 
 use std::{
@@ -43,7 +43,7 @@ fn extract_comment_blocks(
 }
 
 pub fn generate_parser_tests(mode: Mode) -> Result<()> {
-    let tests = tests_from_dir(&project_root().join(Path::new("crates/rome_js_parser/src")))?;
+    let tests = tests_from_dir(&project_root().join(Path::new("crates/biome_js_parser/src")))?;
     fn install_tests(tests: &HashMap<String, Test>, into: &str, mode: Mode) -> Result<bool> {
         let tests_dir = project_root().join(into);
         if !tests_dir.is_dir() {
@@ -81,17 +81,20 @@ pub fn generate_parser_tests(mode: Mode) -> Result<()> {
     }
 
     let mut some_file_was_updated = false;
-    some_file_was_updated |=
-        install_tests(&tests.ok, "crates/rome_js_parser/test_data/inline/ok", mode)?;
+    some_file_was_updated |= install_tests(
+        &tests.ok,
+        "crates/biome_js_parser/test_data/inline/ok",
+        mode,
+    )?;
     some_file_was_updated |= install_tests(
         &tests.err,
-        "crates/rome_js_parser/test_data/inline/err",
+        "crates/biome_js_parser/test_data/inline/err",
         mode,
     )?;
 
     if some_file_was_updated {
         let _ = filetime::set_file_mtime(
-            "crates/rome_js_parser/src/tests.rs",
+            "crates/biome_js_parser/src/tests.rs",
             filetime::FileTime::now(),
         );
     }

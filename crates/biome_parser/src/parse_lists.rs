@@ -8,7 +8,7 @@ use biome_rowan::SyntaxKind;
 /// Use this trait to parse simple lists that don't have particular requirements.
 ///
 /// ```rust,ignore
-/// use rome_js_parser::{ParseSeparatedList};
+/// use biome_js_parser::{ParseSeparatedList};
 ///
 /// struct MyList;
 ///
@@ -75,7 +75,7 @@ pub trait ParseNodeList {
 /// A trait to parse lists that will be separated by a recurring element
 ///
 /// ```rust,ignore
-/// use rome_js_parser::{ParseSeparatedList};
+/// use biome_js_parser::{ParseSeparatedList};
 ///
 /// struct MyList;
 ///

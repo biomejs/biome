@@ -1,8 +1,8 @@
 use biome_cli::biome_command;
+use biome_js_parser::{parse_module, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
-use rome_js_parser::{parse_module, JsParserOptions};
 use rome_service::VERSION;
 use std::fs;
 use xtask::{project_root, Result};

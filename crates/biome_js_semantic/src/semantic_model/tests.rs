@@ -4,16 +4,16 @@ mod test {
         semantic_model, BindingExtensions, CanBeImportedExported, SemanticModelOptions,
         SemanticScopeExtensions,
     };
+    use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{
         JsFileSource, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
         JsSyntaxKind, TsIdentifierBinding,
     };
     use biome_rowan::{AstNode, SyntaxNodeCast};
-    use rome_js_parser::JsParserOptions;
 
     #[test]
     pub fn ok_semantic_model() {
-        let r = rome_js_parser::parse(
+        let r = biome_js_parser::parse(
             "function f(){let a = arguments[0]; let b = a + 1; b = 2; console.log(b)}",
             JsFileSource::js_module(),
             JsParserOptions::default(),
@@ -117,7 +117,7 @@ mod test {
 
     #[test]
     pub fn ok_semantic_model_function_scope() {
-        let r = rome_js_parser::parse(
+        let r = biome_js_parser::parse(
             "function f() {} function g() {}",
             JsFileSource::js_module(),
             JsParserOptions::default(),
@@ -159,7 +159,7 @@ mod test {
 
     /// Finds the last time a token named "name" is used and see if its node is marked as exported
     fn assert_is_exported(is_exported: bool, name: &str, code: &str) {
-        let r = rome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+        let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
         let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
         let node = r
@@ -292,7 +292,7 @@ mod test {
 
     #[test]
     pub fn ok_semantic_model_globals() {
-        let r = rome_js_parser::parse(
+        let r = biome_js_parser::parse(
             "console.log()",
             JsFileSource::js_module(),
             JsParserOptions::default(),

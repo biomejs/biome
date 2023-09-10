@@ -9,11 +9,11 @@ use biome_console::{
 };
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
 use biome_json_syntax::JsonLanguage;
 use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
-use rome_js_parser::JsParserOptions;
 use rome_json_parser::JsonParserOptions;
 use rome_service::settings::WorkspaceSettings;
 use std::{
@@ -564,7 +564,7 @@ fn assert_lint(
     }
     match test.block_type {
         BlockType::Js(source_type) => {
-            let parse = rome_js_parser::parse(code, source_type, JsParserOptions::default());
+            let parse = biome_js_parser::parse(code, source_type, JsParserOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {

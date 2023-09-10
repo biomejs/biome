@@ -4,9 +4,9 @@ use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,
 };
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
 use biome_rowan::{AstNode, NodeOrToken};
-use rome_js_parser::JsParserOptions;
 use std::collections::{BTreeMap, HashMap};
 
 /// This method helps testing scope resolution. It does this
@@ -105,7 +105,7 @@ use std::collections::{BTreeMap, HashMap};
 /// if(true) ;/*NOEVENT*/;
 /// ```
 pub fn assert(code: &str, test_name: &str) {
-    let r = rome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+    let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
 
     if r.has_errors() {
         let mut console = EnvConsole::default();

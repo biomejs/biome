@@ -1,6 +1,6 @@
 [package]
 authors.workspace    = true
-description          = "Utilities to create JavaScript AST for rome_js_parser"
+description          = "Utilities to create JavaScript AST for biome_js_parser"
 documentation        = "https://docs.rs/biome_js_factory"
 edition.workspace    = true
 license.workspace    = true

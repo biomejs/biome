@@ -1,4 +1,5 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
+use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -8,7 +9,7 @@ use biome_test_utils::{
 };
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::format_node;
-use rome_js_parser::{parse, JsParserOptions};
+
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
@@ -25,7 +26,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if rule == "specs" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
     }
-    if rome_js_transform::metadata()
+    if biome_js_transform::metadata()
         .find_rule("transformations", rule)
         .is_none()
     {
@@ -101,23 +102,24 @@ pub(crate) fn analyze_and_snap(
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
     let mut transformations = vec![];
-    let (_, errors) = rome_js_transform::transform(&root, filter, &options, source_type, |event| {
-        for transformation in event.transformations() {
-            check_transformation(
-                input_file,
-                input_code,
-                source_type,
-                &transformation,
-                parser_options.clone(),
-            );
-            let node = transformation.mutation.commit();
+    let (_, errors) =
+        biome_js_transform::transform(&root, filter, &options, source_type, |event| {
+            for transformation in event.transformations() {
+                check_transformation(
+                    input_file,
+                    input_code,
+                    source_type,
+                    &transformation,
+                    parser_options.clone(),
+                );
+                let node = transformation.mutation.commit();
 
-            let formatted = format_node(JsFormatOptions::new(source_type), &node).unwrap();
+                let formatted = format_node(JsFormatOptions::new(source_type), &node).unwrap();
 
-            transformations.push(formatted.print().unwrap().as_code().to_string());
-        }
-        ControlFlow::<Never>::Continue(())
-    });
+                transformations.push(formatted.print().unwrap().as_code().to_string());
+            }
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

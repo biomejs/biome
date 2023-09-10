@@ -93,8 +93,8 @@ test-lintrule name:
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:
-  just _touch crates/rome_js_transform/tests/spec_tests.rs
-  cargo test -p rome_js_transform -- {{snakecase(name)}}
+  just _touch crates/biome_js_transform/tests/spec_tests.rs
+  cargo test -p biome_js_transform -- {{snakecase(name)}}
 
 
 # Alias for `cargo lint`, it runs clippy on the whole codebase

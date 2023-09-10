@@ -442,6 +442,7 @@ fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
 mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::{format_node, JsFormatOptions, TextRange};
+    use biome_js_parser::{parse, parse_module, JsParserOptions};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
         JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,
@@ -449,7 +450,6 @@ mod tests {
     };
     use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
     use rome_formatter::{SourceMarker, TransformSourceMap};
-    use rome_js_parser::{parse, parse_module, JsParserOptions};
 
     #[test]
     fn rebalances_logical_expressions() {

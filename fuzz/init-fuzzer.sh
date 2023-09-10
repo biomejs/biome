@@ -21,7 +21,7 @@ if [ ! -d corpus/rome_format_all ]; then
       find . -type f -exec chmod 644 {} \;
     fi
   fi
-  cp -r "../../../crates/rome_js_parser/test_data" .
+  cp -r "../../../crates/biome_js_parser/test_data" .
   find . -name \*.rast -delete
   cd -
   cargo fuzz cmin --strip-dead-code --features rome_all -s none rome_format_all

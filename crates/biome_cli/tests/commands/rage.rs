@@ -108,9 +108,9 @@ fn with_server_logs() {
 ├─15347ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
 ├─15347ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─15347ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
-├─┐rome_js_parser::parse::parse{file_id=FileId(0)}
+├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘
-├─┐rome_js_parser::parse::parse{file_id=FileId(1)}
+├─┐biome_js_parser::parse::parse{file_id=FileId(1)}
 ├─┘
 ├─16108ms INFO biome_lsp::server Starting Biome Language Server...
 ├─41801ms INFO biome_lsp::server Starting Biome Language Server...
@@ -125,9 +125,9 @@ INFO biome_cli::commands::daemon Received shutdown signal
 ├─7551ms INFO rome_service::configuration Attempting to load the configuration file at path "/home/micha/git/ant-design/biome.json"
 ├─7551ms ERROR rome_service::configuration Could not find the file configuration at "/home/micha/git/ant-design/biome.json"
 ├─7551ms ERROR rome_service::configuration Reason: Os { code: 2, kind: NotFound, message: "No such file or directory" }
-├─┐rome_js_parser::parse::parse{file_id=FileId(0)}
+├─┐biome_js_parser::parse::parse{file_id=FileId(0)}
 ├─┘
-├─┐rome_js_parser::parse::parse{file_id=FileId(1)}
+├─┐biome_js_parser::parse::parse{file_id=FileId(1)}
 ├─┘
 ├─7897ms INFO biome_lsp::server Starting Biome Language Server...
 "#,

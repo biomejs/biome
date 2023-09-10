@@ -1,5 +1,5 @@
 ---
-source: crates/rome_js_transform/tests/spec_tests.rs
+source: crates/biome_js_transform/tests/spec_tests.rs
 expression: index.ts
 ---
 # Input

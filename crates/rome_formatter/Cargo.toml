@@ -26,9 +26,9 @@ tracing           = { workspace = true }
 unicode-width     = "0.1.9"
 
 [dev-dependencies]
+biome_js_parser = { workspace = true }
 biome_js_syntax = { workspace = true }
 insta           = { workspace = true }
-rome_js_parser  = { workspace = true }
 
 [features]
 serde = ["dep:serde", "schemars", "biome_rowan/serde"]
