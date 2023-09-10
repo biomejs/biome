@@ -1,13 +1,13 @@
 use crate::{DeserializationDiagnostic, Deserialized, VisitNode};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, Error};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText};
 use indexmap::IndexSet;
 use rome_json_parser::{parse_json, JsonParserOptions};
 use rome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
     JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
 };
-use rome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText};
 use std::num::ParseIntError;
 
 /// Main trait to
@@ -536,7 +536,7 @@ pub fn with_only_known_variants(
 /// use biome_deserialize::json::{with_only_known_variants, has_only_known_keys, JsonDeserialize, VisitJsonNode};
 /// use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 /// use rome_json_syntax::JsonRoot;
-/// use rome_rowan::AstNode;
+/// use biome_rowan::AstNode;
 ///
 /// #[derive(Default, Debug, Eq, PartialEq)]
 /// struct NewConfiguration {

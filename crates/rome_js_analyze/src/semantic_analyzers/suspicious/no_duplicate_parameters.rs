@@ -1,11 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
 use rome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
     AnyJsObjectBindingPatternMember, JsIdentifierBinding,
 };
-use rome_rowan::AstNode;
 use rustc_hash::FxHashSet;
 
 declare_rule! {

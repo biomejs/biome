@@ -2,7 +2,7 @@ use crate::prelude::TagKind;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{category, Category, Diagnostic, DiagnosticTags, Location, Severity};
-use rome_rowan::{SyntaxError, TextRange};
+use biome_rowan::{SyntaxError, TextRange};
 use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]

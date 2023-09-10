@@ -3,7 +3,7 @@ use crate::{
     JsConstructorParameterList, JsConstructorParameters, JsDecoratorList, JsLanguage,
     JsParameterList, JsParameters, TsTypeAnnotation,
 };
-use rome_rowan::{
+use biome_rowan::{
     declare_node_union, AstNodeList, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxResult,
 };
 
@@ -201,7 +201,7 @@ impl AnyJsParameterList {
     ///     AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsFormalParameter,
     ///     AnyJsParameter, T,
     /// };
-    /// use rome_rowan::SyntaxResult;
+    /// use biome_rowan::SyntaxResult;
     ///
     /// let parameter_list = make::js_parameter_list(
     ///     Some(AnyJsParameter::AnyJsFormalParameter(
@@ -356,7 +356,7 @@ impl AnyJsParameterList {
     ///     AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsDecorator,
     ///     AnyJsFormalParameter, AnyJsParameter, T,
     /// };
-    /// use rome_rowan::SyntaxResult;
+    /// use biome_rowan::SyntaxResult;
     ///
     /// let parameter_list = make::js_parameter_list(
     ///     Some(AnyJsParameter::AnyJsFormalParameter(

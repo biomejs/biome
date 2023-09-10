@@ -3,9 +3,9 @@ use crate::{
     Matcher, Rules, WorkspaceError,
 };
 use biome_diagnostics::Category;
+use biome_fs::RomePath;
 use indexmap::IndexSet;
 use rome_formatter::{IndentStyle, IndentWidth, LineWidth};
-use rome_fs::RomePath;
 use rome_js_syntax::JsLanguage;
 use rome_json_syntax::JsonLanguage;
 use std::{
@@ -216,7 +216,7 @@ pub struct LanguagesSettings {
     pub json: LanguageSettings<JsonLanguage>,
 }
 
-pub trait Language: rome_rowan::Language {
+pub trait Language: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
 

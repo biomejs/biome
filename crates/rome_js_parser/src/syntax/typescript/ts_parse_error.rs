@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::JsParser;
 use biome_diagnostics::location::AsSpan;
 use biome_parser::diagnostic::{expected_any, expected_node};
-use rome_rowan::TextRange;
+use biome_rowan::TextRange;
 
 pub(crate) fn expected_ts_enum_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["identifier", "string literal", "computed name"], range).into_diagnostic(p)

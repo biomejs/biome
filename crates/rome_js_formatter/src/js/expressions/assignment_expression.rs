@@ -6,12 +6,12 @@ use crate::parentheses::{
 };
 use rome_formatter::write;
 
+use biome_rowan::{match_ast, AstNode};
 use rome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsForInitializer, JsArrowFunctionExpression, JsAssignmentExpression,
     JsComputedMemberName, JsExpressionStatement, JsForStatement, JsSequenceExpression,
     JsSyntaxKind, JsSyntaxNode,
 };
-use rome_rowan::{match_ast, AstNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAssignmentExpression;

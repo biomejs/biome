@@ -4,10 +4,10 @@ use crate::parser::JsonParser;
 use crate::syntax::parse_root;
 pub use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
+use biome_rowan::{AstNode, NodeCache};
 pub use parser::JsonParserOptions;
 use rome_json_factory::JsonSyntaxFactory;
 use rome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
-use rome_rowan::{AstNode, NodeCache};
 
 mod lexer;
 mod parser;
@@ -61,7 +61,7 @@ impl JsonParse {
     /// ```
     /// # use rome_json_parser::parse_json;
     /// # use rome_json_syntax::JsonSyntaxKind;
-    /// # use rome_rowan::{AstNode, AstNodeList, SyntaxError};
+    /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use rome_json_syntax::JsonSyntaxKind;

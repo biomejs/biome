@@ -12,13 +12,13 @@ mod scope;
 mod tests;
 
 use crate::{SemanticEvent, SemanticEventExtractor};
+use biome_rowan::AstNode;
 pub use closure::*;
 use rome_js_syntax::{
     AnyJsExpression, AnyJsRoot, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier, TextRange, TextSize,
     TsIdentifierBinding,
 };
-use rome_rowan::AstNode;
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{

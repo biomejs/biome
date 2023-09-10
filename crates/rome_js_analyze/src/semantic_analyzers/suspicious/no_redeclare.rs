@@ -2,12 +2,12 @@ use crate::semantic_services::SemanticServices;
 use biome_analyze::declare_rule;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_semantic::Scope;
 use rome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use rome_js_syntax::{
     AnyTsType, TextRange, TsIndexSignatureParameter, TsIndexSignatureTypeMember, TsTypeMemberList,
 };
-use rome_rowan::AstNode;
 use std::collections::HashMap;
 
 declare_rule! {

@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{AstNode, AstNodeList};
 use rome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
-use rome_rowan::{AstNode, AstNodeList};
 
 declare_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.

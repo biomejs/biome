@@ -8,7 +8,7 @@ use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
     IndentStyle, IndentWidth, LineWidth, PrinterOptions, TransformSourceMap,
 };
-use rome_rowan::TextSize;
+use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 use std::collections::HashMap;
 use std::ops::Deref;

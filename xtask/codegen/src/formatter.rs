@@ -362,7 +362,7 @@ fn generate_formatter(repo: &GitRepo, language_kind: LanguageKind) {
                 quote! {
                     use crate::prelude::*;
 
-                    use rome_rowan::AstNode;
+                    use biome_rowan::AstNode;
                     use #syntax_crate_ident::#node_id;
 
                     #[derive(Debug, Clone, Default)]

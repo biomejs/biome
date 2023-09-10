@@ -5,9 +5,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 
+use biome_rowan::AstNode;
 use rome_js_syntax::numbers::split_into_radix_and_number;
 use rome_js_syntax::JsNumberLiteralExpression;
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Disallow literal numbers that lose precision

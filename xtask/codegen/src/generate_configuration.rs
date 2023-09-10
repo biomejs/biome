@@ -268,7 +268,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
         use biome_deserialize::{DeserializationDiagnostic, VisitNode};
         use rome_json_syntax::{AnyJsonValue, JsonLanguage};
-        use rome_rowan::{AstNode, SyntaxNode};
+        use biome_rowan::{AstNode, SyntaxNode};
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 
         impl VisitJsonNode for Rules {}

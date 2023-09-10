@@ -5,7 +5,7 @@ use biome_diagnostics::Applicability;
 use rome_js_factory::make;
 use rome_js_syntax::{JsModule, JsScript, JsSyntaxKind};
 
-use rome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use super::use_const::{ConstBindings, VariableDeclaration};
 

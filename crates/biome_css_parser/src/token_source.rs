@@ -5,7 +5,7 @@ use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::TokenSource;
 use biome_parser::token_source::Trivia;
-use rome_rowan::TriviaPieceKind;
+use biome_rowan::TriviaPieceKind;
 
 pub(crate) struct CssTokenSource<'source> {
     lexer: Lexer<'source>,

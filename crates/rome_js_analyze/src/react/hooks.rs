@@ -1,6 +1,7 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use std::collections::{HashMap, HashSet};
 
+use biome_rowan::AstNode;
 use rome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use rome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
@@ -8,7 +9,6 @@ use rome_js_syntax::{
     JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression, JsVariableDeclarator,
     TextRange,
 };
-use rome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 /// Return result of [react_hook_with_dependency].

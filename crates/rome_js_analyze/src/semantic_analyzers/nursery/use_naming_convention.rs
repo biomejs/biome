@@ -15,6 +15,9 @@ use biome_deserialize::{
 };
 use biome_diagnostics::Applicability;
 use biome_js_unicode_table::is_js_ident;
+use biome_rowan::{
+    declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,
+};
 use bpaf::Bpaf;
 use rome_js_semantic::CanBeImportedExported;
 use rome_js_syntax::{
@@ -24,9 +27,6 @@ use rome_js_syntax::{
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
 use rome_json_syntax::JsonLanguage;
-use rome_rowan::{
-    declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,
-};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 

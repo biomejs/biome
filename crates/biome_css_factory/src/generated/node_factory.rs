@@ -6,7 +6,7 @@ use biome_css_syntax::{
     CssSyntaxElement as SyntaxElement, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken,
     *,
 };
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 pub fn css_any_function(css_simple_function: CssSimpleFunction) -> CssAnyFunction {
     CssAnyFunction::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ANY_FUNCTION,

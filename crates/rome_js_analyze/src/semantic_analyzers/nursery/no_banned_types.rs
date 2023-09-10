@@ -4,12 +4,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{
     JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList, TsObjectType,
     TsReferenceType, TsTypeConstraintClause,
 };
-use rome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
 
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;

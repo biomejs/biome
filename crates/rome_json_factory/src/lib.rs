@@ -1,6 +1,6 @@
 pub use crate::generated::JsonSyntaxFactory;
+use biome_rowan::TreeBuilder;
 use rome_json_syntax::JsonLanguage;
-use rome_rowan::TreeBuilder;
 
 mod generated;
 

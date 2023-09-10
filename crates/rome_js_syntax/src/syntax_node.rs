@@ -6,7 +6,7 @@
 //! This is a simple wrapper around the `rowan` crate which does most of the heavy lifting and is language agnostic.
 
 use crate::{AnyJsRoot, JsSyntaxKind};
-use rome_rowan::Language;
+use biome_rowan::Language;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
@@ -19,10 +19,10 @@ impl Language for JsLanguage {
     type Root = AnyJsRoot;
 }
 
-pub type JsSyntaxNode = rome_rowan::SyntaxNode<JsLanguage>;
-pub type JsSyntaxToken = rome_rowan::SyntaxToken<JsLanguage>;
-pub type JsSyntaxElement = rome_rowan::SyntaxElement<JsLanguage>;
-pub type JsSyntaxNodeChildren = rome_rowan::SyntaxNodeChildren<JsLanguage>;
-pub type JsSyntaxElementChildren = rome_rowan::SyntaxElementChildren<JsLanguage>;
-pub type JsSyntaxList = rome_rowan::SyntaxList<JsLanguage>;
-pub type JsSyntaxTrivia = rome_rowan::syntax::SyntaxTrivia<JsLanguage>;
+pub type JsSyntaxNode = biome_rowan::SyntaxNode<JsLanguage>;
+pub type JsSyntaxToken = biome_rowan::SyntaxToken<JsLanguage>;
+pub type JsSyntaxElement = biome_rowan::SyntaxElement<JsLanguage>;
+pub type JsSyntaxNodeChildren = biome_rowan::SyntaxNodeChildren<JsLanguage>;
+pub type JsSyntaxElementChildren = biome_rowan::SyntaxElementChildren<JsLanguage>;
+pub type JsSyntaxList = biome_rowan::SyntaxList<JsLanguage>;
+pub type JsSyntaxTrivia = biome_rowan::syntax::SyntaxTrivia<JsLanguage>;

@@ -1,8 +1,8 @@
 use crate::configuration::organize_imports::OrganizeImports;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_rowan::SyntaxNode;
 use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use rome_rowan::SyntaxNode;
 
 impl VisitJsonNode for OrganizeImports {}
 

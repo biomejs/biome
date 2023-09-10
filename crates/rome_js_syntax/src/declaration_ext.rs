@@ -1,4 +1,4 @@
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 
 use crate::{JsClassDeclaration, JsSyntaxKind, JsSyntaxNode, TsEnumDeclaration};
 

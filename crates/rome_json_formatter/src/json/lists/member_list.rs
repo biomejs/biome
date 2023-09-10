@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
+use biome_rowan::{AstNode, AstSeparatedList};
 use rome_json_syntax::JsonMemberList;
-use rome_rowan::{AstNode, AstSeparatedList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonMemberList;

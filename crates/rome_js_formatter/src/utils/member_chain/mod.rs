@@ -115,12 +115,12 @@ use crate::utils::member_chain::groups::{
 };
 use crate::utils::member_chain::simple_argument::SimpleArgument;
 use crate::JsLabels;
+use biome_rowan::{AstNode, SyntaxResult};
 use rome_formatter::{write, Buffer};
 use rome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
     JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,
 };
-use rome_rowan::{AstNode, SyntaxResult};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone)]

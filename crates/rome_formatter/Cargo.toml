@@ -14,11 +14,11 @@ version              = "0.1.0"
 [dependencies]
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_rowan       = { workspace = true }
 cfg-if            = "1.0.0"
 countme           = { workspace = true }
 drop_bomb         = "0.1.5"
 indexmap          = { workspace = true }
-rome_rowan        = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"], optional = true }
@@ -31,7 +31,7 @@ rome_js_parser = { workspace = true }
 rome_js_syntax = { workspace = true }
 
 [features]
-serde = ["dep:serde", "schemars", "rome_rowan/serde"]
+serde = ["dep:serde", "schemars", "biome_rowan/serde"]
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

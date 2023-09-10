@@ -49,7 +49,7 @@ use biome_console::markup;
 use biome_diagnostics::{
     category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags, Severity,
 };
-use rome_rowan::{
+use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextLen, TextRange,
     TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,
 };

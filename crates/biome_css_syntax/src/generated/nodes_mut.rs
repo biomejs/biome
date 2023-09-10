@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::{generated::nodes::*, CssSyntaxToken as SyntaxToken};
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 use std::iter::once;
 impl CssAnyFunction {
     pub fn with_css_simple_function(self, element: CssSimpleFunction) -> Self {

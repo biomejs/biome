@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::token_source::Trivia;
-use rome_rowan::{
+use biome_rowan::{
     Language, NodeCache, SyntaxFactory, SyntaxKind, SyntaxNode, TextRange, TextSize, TreeBuilder,
     TriviaPiece,
 };
@@ -112,7 +112,7 @@ where
 
     /// Finishes the tree and return the root node with possible parser errors.
     ///
-    /// If tree is finished without a [rome_rowan::SyntaxKind::EOF], one will be generated and all pending trivia
+    /// If tree is finished without a [biome_rowan::SyntaxKind::EOF], one will be generated and all pending trivia
     /// will be appended to its leading trivia.
     pub fn finish(self) -> (SyntaxNode<L>, Vec<ParseDiagnostic>) {
         (self.inner.finish(), self.errors)

@@ -4,8 +4,8 @@ use super::{
 };
 use crate::source_map::{DeletedRangeEntry, DeletedRanges};
 use crate::{TextRange, TextSize};
-use rome_rowan::syntax::SyntaxElementKey;
-use rome_rowan::{
+use biome_rowan::syntax::SyntaxElementKey;
+use biome_rowan::{
     Direction, Language, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WalkEvent,
 };
 use rustc_hash::FxHashSet;
@@ -639,16 +639,16 @@ mod tests {
         DecoratedComment, SourceComment,
     };
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
+    use biome_rowan::syntax::SyntaxElementKey;
+    use biome_rowan::{
+        chain_trivia_pieces, AstNode, BatchMutation, SyntaxNode, SyntaxTriviaPieceComments,
+        TextRange,
+    };
     use rome_js_parser::{parse_module, JsParserOptions};
     use rome_js_syntax::{
         JsIdentifierExpression, JsLanguage, JsParameters, JsParenthesizedExpression,
         JsPropertyObjectMember, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
         JsSyntaxKind, JsSyntaxNode, JsUnaryExpression,
-    };
-    use rome_rowan::syntax::SyntaxElementKey;
-    use rome_rowan::{
-        chain_trivia_pieces, AstNode, BatchMutation, SyntaxNode, SyntaxTriviaPieceComments,
-        TextRange,
     };
     use std::cell::RefCell;
 

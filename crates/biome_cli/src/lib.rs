@@ -7,7 +7,7 @@
 //! execute the traversal of directory and files, based on the command that were passed.
 
 use biome_console::{ColorMode, Console};
-use rome_fs::OsFileSystem;
+use biome_fs::OsFileSystem;
 use rome_service::{App, DynRef, Workspace, WorkspaceRef};
 use std::env;
 

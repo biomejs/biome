@@ -4,6 +4,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast};
 use bpaf::Bpaf;
 use rome_js_semantic::{Capture, SemanticModel};
 use rome_js_syntax::{
@@ -11,7 +12,6 @@ use rome_js_syntax::{
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
 use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
-use rome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::str::FromStr;

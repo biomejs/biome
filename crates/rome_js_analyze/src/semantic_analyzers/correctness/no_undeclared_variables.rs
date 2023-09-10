@@ -6,8 +6,8 @@ use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::{JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType};
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Prevents the usage of variables that haven't been declared inside the document.

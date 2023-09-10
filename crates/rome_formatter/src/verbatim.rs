@@ -2,7 +2,7 @@ use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::trivia::{FormatLeadingComments, FormatTrailingComments};
 use crate::{write, CstFormatContext, FormatWithRule};
-use rome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRange};
+use biome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors

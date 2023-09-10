@@ -2,11 +2,11 @@ use crate::prelude::*;
 
 use crate::jsx::lists::child_list::{FormatChildrenResult, FormatJsxChildList, JsxChildListLayout};
 use crate::utils::jsx::{is_jsx_suppressed, is_meaningful_jsx_text};
+use biome_rowan::{declare_node_union, SyntaxResult};
 use rome_formatter::{format_args, write, CstFormatContext, FormatResult, FormatRuleWithOptions};
 use rome_js_syntax::{
     AnyJsExpression, AnyJsxChild, JsxChildList, JsxElement, JsxExpressionChild, JsxFragment,
 };
-use rome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxElement;

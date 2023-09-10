@@ -23,8 +23,8 @@ use crate::printer::line_suffixes::{LineSuffixEntry, LineSuffixes};
 use crate::printer::queue::{
     AllPredicate, FitsEndPredicate, FitsQueue, PrintQueue, Queue, SingleEntryPredicate,
 };
+use biome_rowan::{TextLen, TextSize};
 use drop_bomb::DebugDropBomb;
-use rome_rowan::{TextLen, TextSize};
 use std::num::NonZeroU8;
 use unicode_width::UnicodeWidthChar;
 

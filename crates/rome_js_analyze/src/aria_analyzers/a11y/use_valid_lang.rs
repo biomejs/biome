@@ -2,8 +2,8 @@ use crate::aria_services::Aria;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{AstNode, TextRange};
 use rome_js_syntax::jsx_ext::AnyJsxElement;
-use rome_rowan::{AstNode, TextRange};
 declare_rule! {
     /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
     ///

@@ -1,4 +1,4 @@
-use rome_rowan::SyntaxKind;
+use biome_rowan::SyntaxKind;
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

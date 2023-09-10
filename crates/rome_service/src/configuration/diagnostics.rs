@@ -6,7 +6,7 @@ use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Severity, Visit,
 };
-use rome_rowan::SyntaxError;
+use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 

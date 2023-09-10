@@ -1,7 +1,9 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use biome_rowan::{
+    AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
+};
 use rome_js_syntax::{JsSyntaxKind, JsSyntaxKind::*, T, *};
-use rome_rowan::{AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind};
 #[derive(Debug)]
 pub struct JsSyntaxFactory;
 impl SyntaxFactory for JsSyntaxFactory {

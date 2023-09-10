@@ -1,5 +1,5 @@
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 use rome_js_syntax::{JsDebuggerStatement, JsEmptyStatement, JsExpressionStatement};
-use rome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 use crate::control_flow::{
     visitor::{NodeVisitor, StatementStack},

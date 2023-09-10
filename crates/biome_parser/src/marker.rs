@@ -3,8 +3,8 @@ use crate::event::Event::Token;
 use crate::token_source::TokenSource;
 use crate::Parser;
 
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use drop_bomb::DebugDropBomb;
-use rome_rowan::{SyntaxKind, TextRange, TextSize};
 use std::num::NonZeroU32;
 
 /// A structure signifying the start of parsing of a syntax tree node

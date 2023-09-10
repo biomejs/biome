@@ -1,5 +1,5 @@
 use biome_console::Console;
-use rome_fs::{FileSystem, OsFileSystem};
+use biome_fs::{FileSystem, OsFileSystem};
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 

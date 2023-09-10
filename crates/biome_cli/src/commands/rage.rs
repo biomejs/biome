@@ -2,7 +2,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
-use rome_fs::FileSystem;
+use biome_fs::FileSystem;
 use rome_service::workspace::{client, RageEntry, RageParams};
 use rome_service::{load_config, ConfigurationBasePath, DynRef, Workspace};
 use std::{env, io, ops::Deref};

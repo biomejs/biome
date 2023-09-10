@@ -1,10 +1,10 @@
 use super::*;
+use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
 use rome_js_syntax::{
     JsArrowFunctionExpression, JsConstructorClassMember, JsFunctionDeclaration,
     JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
 };
-use rome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
 use std::rc::Rc;
 
 /// Marker trait that groups all "AstNode" that have closure
@@ -356,9 +356,9 @@ impl<T: HasClosureAstNode> ClosureExtensions for T {}
 #[cfg(test)]
 mod test {
     use super::*;
+    use biome_rowan::SyntaxNodeCast;
     use rome_js_parser::JsParserOptions;
     use rome_js_syntax::{JsArrowFunctionExpression, JsFileSource, JsSyntaxKind};
-    use rome_rowan::SyntaxNodeCast;
 
     fn assert_closure(code: &str, name: &str, captures: &[&str]) {
         let r = rome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());

@@ -363,12 +363,12 @@ mod tests {
     use crate::context::QuoteStyle;
     use crate::utils::quickcheck_utils::*;
     use crate::utils::FormatLiteralStringToken;
+    use biome_rowan::AstNode;
     use quickcheck_macros::*;
     use rome_formatter::token::string::ToAsciiLowercaseCow;
     use rome_js_factory::JsSyntaxTreeBuilder;
     use rome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
     use rome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};
-    use rome_rowan::AstNode;
     use std::borrow::Cow;
 
     #[quickcheck]

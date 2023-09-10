@@ -3,9 +3,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxKind, TsEnumDeclaration};
-use rome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Require that each enum member value be explicitly initialized.

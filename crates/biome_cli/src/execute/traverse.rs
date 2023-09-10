@@ -13,12 +13,12 @@ use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
 };
+use biome_fs::{FileSystem, PathInterner, RomePath};
+use biome_fs::{TraversalContext, TraversalScope};
 use crossbeam::{
     channel::{unbounded, Receiver, Sender},
     select,
 };
-use rome_fs::{FileSystem, PathInterner, RomePath};
-use rome_fs::{TraversalContext, TraversalScope};
 use rome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use rome_service::{
     workspace::{FeatureName, SupportsFeatureParams},

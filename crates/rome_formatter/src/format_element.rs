@@ -6,8 +6,8 @@ use std::borrow::Cow;
 
 use crate::{TagKind, TextSize};
 #[cfg(target_pointer_width = "64")]
-use rome_rowan::static_assert;
-use rome_rowan::TokenText;
+use biome_rowan::static_assert;
+use biome_rowan::TokenText;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -375,7 +375,7 @@ mod tests {
 }
 
 #[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<rome_rowan::TextRange>() == 8usize);
+static_assert!(std::mem::size_of::<biome_rowan::TextRange>() == 8usize);
 
 #[cfg(target_pointer_width = "64")]
 static_assert!(std::mem::size_of::<crate::format_element::tag::VerbatimKind>() == 8usize);

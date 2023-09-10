@@ -5,7 +5,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-use rome_rowan::{Language, SyntaxElement, SyntaxNode};
+use biome_rowan::{Language, SyntaxElement, SyntaxNode};
 
 pub mod builder;
 
@@ -97,7 +97,7 @@ pub struct Instruction<L: Language> {
 /// The different types of supported [Instruction]
 #[derive(Copy, Clone, Debug)]
 pub enum InstructionKind {
-    /// Indicates the [SyntaxNode](rome_rowan::SyntaxNode) associated with this
+    /// Indicates the [SyntaxNode](biome_rowan::SyntaxNode) associated with this
     /// instruction is to be evaluated at this point in the program
     Statement,
     /// This instruction may cause the control flow to diverge towards `block`,
@@ -141,7 +141,7 @@ pub enum ExceptionHandlerKind {
 ///     block_1["<b>block_1</b><br/>Jump { condition: JS_BINARY_EXPRESSION 49..58, block: 2 }<br/>Jump { block: 3 }"]
 ///     block_2["<b>block_2</b><br/>Statement(JS_POST_UPDATE_EXPRESSION 60..63)"]
 ///     block_3["<b>block_3</b><br/>Statement(JS_EXPRESSION_STATEMENT 260..277)"]
-///     
+///
 ///     block_0 --> block_1
 ///     block_1 -- "JS_BINARY_EXPRESSION 49..58" --> block_2
 ///     block_1 --> block_3

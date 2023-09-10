@@ -4,9 +4,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use rome_js_factory::make;
 use rome_js_syntax::JsStringLiteralExpression;
-use rome_rowan::{AstNode, BatchMutationExt, TextRange};
 use std::{collections::HashSet, ops::Range};
 
 declare_rule! {

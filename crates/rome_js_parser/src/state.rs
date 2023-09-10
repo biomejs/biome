@@ -1,8 +1,8 @@
 use crate::prelude::*;
+use biome_rowan::{TextRange, TextSize};
 use bitflags::bitflags;
 use indexmap::IndexMap;
 use rome_js_syntax::JsFileSource;
-use rome_rowan::{TextRange, TextSize};
 use std::collections::HashSet;
 use std::ops::{Deref, DerefMut, Range};
 

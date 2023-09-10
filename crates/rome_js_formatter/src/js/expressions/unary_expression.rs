@@ -3,10 +3,10 @@ use rome_formatter::{format_args, write};
 
 use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
 
+use biome_rowan::match_ast;
 use rome_js_syntax::JsSyntaxNode;
 use rome_js_syntax::JsUnaryExpression;
 use rome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
-use rome_rowan::match_ast;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsUnaryExpression;

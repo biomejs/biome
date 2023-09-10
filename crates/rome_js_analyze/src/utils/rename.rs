@@ -1,13 +1,13 @@
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
+use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
 use rome_js_semantic::{ReferencesExtensions, SemanticModel};
 use rome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TextRange,
     TsIdentifierBinding,
 };
-use rome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 

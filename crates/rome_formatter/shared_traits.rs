@@ -27,11 +27,11 @@ where
 /// Implement [AsFormat] for [SyntaxResult] where `T` implements [AsFormat].
 ///
 /// Useful to format mandatory AST fields without having to unwrap the value first.
-impl<T, C> AsFormat<C> for rome_rowan::SyntaxResult<T>
+impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = rome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -64,11 +64,11 @@ pub(crate) trait IntoFormat<Context> {
     fn into_format(self) -> Self::Format;
 }
 
-impl<T, Context> IntoFormat<Context> for rome_rowan::SyntaxResult<T>
+impl<T, Context> IntoFormat<Context> for biome_rowan::SyntaxResult<T>
 where
     T: IntoFormat<Context>,
 {
-    type Format = rome_rowan::SyntaxResult<T::Format>;
+    type Format = biome_rowan::SyntaxResult<T::Format>;
 
     fn into_format(self) -> Self::Format {
         self.map(IntoFormat::into_format)

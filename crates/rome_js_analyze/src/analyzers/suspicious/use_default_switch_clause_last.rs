@@ -1,8 +1,8 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{AstNode, Direction};
 use rome_js_syntax::{JsCaseClause, JsDefaultClause};
-use rome_rowan::{AstNode, Direction};
 
 declare_rule! {
     /// Enforce default clauses in switch statements to be last

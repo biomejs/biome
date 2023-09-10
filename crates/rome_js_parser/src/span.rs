@@ -1,4 +1,4 @@
-use rome_rowan::{Language, SyntaxElement, SyntaxNode, SyntaxToken, TextRange, TextSize};
+use biome_rowan::{Language, SyntaxElement, SyntaxNode, SyntaxToken, TextRange, TextSize};
 use std::{fmt::Debug, ops::Range};
 
 /// A value which can be used as the range inside of a diagnostic.

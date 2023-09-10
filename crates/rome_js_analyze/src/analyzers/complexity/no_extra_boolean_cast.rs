@@ -3,12 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast};
 use rome_js_syntax::{
     AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,
     JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement,
 };
-use rome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast};
 
 use crate::JsRuleAction;
 
@@ -246,7 +246,7 @@ impl Rule for NoExtraBooleanCast {
 /// Return [Rule::State] `(JsAnyExpression, ExtraBooleanCastType)` if it is a DoubleNegation Expression
 ///
 fn is_double_negation_ignore_parenthesis(
-    syntax: &rome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
+    syntax: &biome_rowan::SyntaxNode<rome_js_syntax::JsLanguage>,
 ) -> Option<(AnyJsExpression, ExtraBooleanCastType)> {
     if let Some(negation_expr) = is_negation(syntax) {
         let argument = negation_expr.argument().ok()?;

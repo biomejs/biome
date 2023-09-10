@@ -3,8 +3,8 @@ use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
 
+use biome_rowan::AstNode;
 use rome_js_syntax::{AnyJsStatement, JsForStatement, JsInExpression, JsSyntaxNode};
-use rome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInExpression;

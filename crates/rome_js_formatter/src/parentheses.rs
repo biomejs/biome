@@ -39,6 +39,7 @@
 
 use crate::utils::{AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression};
 
+use biome_rowan::{declare_node_union, match_ast, AstNode, AstSeparatedList, SyntaxResult};
 use rome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsFunctionBody,
     AnyJsLiteralExpression, AnyTsReturnType, AnyTsType, JsArrowFunctionExpression,
@@ -49,7 +50,6 @@ use rome_js_syntax::{
     TsConstructorType, TsFunctionType, TsIndexedAccessType, TsIntersectionTypeElementList,
     TsParenthesizedType, TsUnionTypeVariantList,
 };
-use rome_rowan::{declare_node_union, match_ast, AstNode, AstSeparatedList, SyntaxResult};
 
 /// Node that may be parenthesized to ensure it forms valid syntax or to improve readability
 pub trait NeedsParentheses: AstNode<Language = JsLanguage> {
@@ -1040,9 +1040,9 @@ pub(crate) fn debug_assert_is_parent(node: &JsSyntaxNode, parent: &JsSyntaxNode)
 pub(crate) mod tests {
     use super::NeedsParentheses;
     use crate::transform;
+    use biome_rowan::AstNode;
     use rome_js_parser::JsParserOptions;
     use rome_js_syntax::{JsFileSource, JsLanguage};
-    use rome_rowan::AstNode;
 
     pub(crate) fn assert_needs_parentheses_impl<
         T: AstNode<Language = JsLanguage> + std::fmt::Debug + NeedsParentheses,

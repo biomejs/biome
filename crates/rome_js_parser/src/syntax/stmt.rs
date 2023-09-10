@@ -33,8 +33,8 @@ use crate::{parser, JsParser, JsSyntaxFeature, ParseRecovery};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::ParserProgress;
+use biome_rowan::SyntaxKind;
 use rome_js_syntax::{JsSyntaxKind::*, *};
-use rome_rowan::SyntaxKind;
 
 pub const STMT_RECOVERY_SET: TokenSet<JsSyntaxKind> = token_set![
     L_CURLY,

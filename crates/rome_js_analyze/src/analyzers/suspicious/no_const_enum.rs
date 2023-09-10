@@ -2,8 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 use rome_js_syntax::TsEnumDeclaration;
-use rome_rowan::{chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 

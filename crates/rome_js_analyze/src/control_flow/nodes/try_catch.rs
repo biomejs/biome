@@ -1,6 +1,6 @@
 use biome_control_flow::{builder::BlockId, ExceptionHandlerKind};
+use biome_rowan::{declare_node_union, SyntaxResult};
 use rome_js_syntax::{JsCatchClause, JsFinallyClause, JsTryFinallyStatement, JsTryStatement};
-use rome_rowan::{declare_node_union, SyntaxResult};
 
 use crate::control_flow::{
     visitor::{NodeVisitor, StatementStack},

@@ -5,6 +5,7 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
 };
+use biome_rowan::{declare_node_union, AstNode};
 use roaring::bitmap::RoaringBitmap;
 use rome_js_syntax::{
     JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
@@ -12,7 +13,6 @@ use rome_js_syntax::{
     JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
 };
-use rome_rowan::{declare_node_union, AstNode};
 use rustc_hash::FxHashMap;
 
 use crate::control_flow::{ControlFlowGraph, JsControlFlowGraph};

@@ -21,7 +21,7 @@
 //! - Completely error tolerant, able to produce an AST from any source code.
 //! - Zero cost for converting untyped nodes to a typed AST.
 //! - Ability to go from AST to SyntaxNodes to SyntaxTokens to source code and back very easily with nearly zero cost.
-//! - Very easy tree traversal through [`SyntaxNode`](rome_rowan::SyntaxNode).
+//! - Very easy tree traversal through [`SyntaxNode`](biome_rowan::SyntaxNode).
 //! - Descriptive errors with multiple labels and notes.
 //! - Very cheap cloning, cloning an ast node or syntax node is the cost of adding a reference to an Rc.
 //! - Cheap incremental reparsing of changed text.
@@ -32,12 +32,12 @@
 //! It is inspired by the rust analyzer parser but adapted for JavaScript.
 //!
 //! # Syntax Nodes vs AST Nodes
-//! The crate relies on a concept of untyped [rome_js_syntax::JsSyntaxNode]s vs typed [rome_rowan::AstNode]s.
+//! The crate relies on a concept of untyped [rome_js_syntax::JsSyntaxNode]s vs typed [biome_rowan::AstNode]s.
 //! Syntax nodes represent the syntax tree in an untyped way. They represent a location in an immutable
 //! tree with two pointers. The syntax tree is composed of [rome_js_syntax::JsSyntaxNode]s and [rome_js_syntax::JsSyntaxToken]s in a nested
 //! tree structure. Each node can have parents, siblings, children, descendants, etc.
 //!
-//! [rome_rowan::AstNode]s represent a typed version of a syntax node. They have the same exact representation as syntax nodes
+//! [biome_rowan::AstNode]s represent a typed version of a syntax node. They have the same exact representation as syntax nodes
 //! therefore a conversion between either has zero runtime cost. Every piece of data of an ast node is optional,
 //! this is due to the fact that the parser is completely error tolerant.
 //!

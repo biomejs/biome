@@ -13,12 +13,12 @@ use crate::parentheses::{
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
 use crate::utils::test_call::is_test_call_argument;
 use crate::utils::{resolve_left_most_expression, AssignmentLikeLayout};
+use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 use rome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement, JsArrowFunctionExpression,
     JsFormalParameter, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
 };
-use rome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsArrowFunctionExpression {

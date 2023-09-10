@@ -5,8 +5,8 @@ use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 use crate::Rules;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_rowan::{AstNode, SyntaxNode};
 use rome_json_syntax::{AnyJsonValue, JsonLanguage};
-use rome_rowan::{AstNode, SyntaxNode};
 impl VisitJsonNode for Rules {}
 impl VisitNode<JsonLanguage> for Rules {
     fn visit_member_name(

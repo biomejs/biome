@@ -1,7 +1,7 @@
 use crate::converters::line_index::LineIndex;
 use crate::converters::PositionEncoding;
 use anyhow::{Context, Result};
-use rome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextRange, TextSize};
 use tower_lsp::lsp_types;
 
 /// The function is used to convert TextSize to a LSP position.

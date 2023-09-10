@@ -1,8 +1,8 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{declare_node_union, AstNode};
 use rome_js_syntax::*;
-use rome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
     /// Disallow control flow statements in finally blocks.

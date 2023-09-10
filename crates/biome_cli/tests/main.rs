@@ -12,7 +12,7 @@ use std::path::Path;
 
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
 use biome_console::{markup, BufferConsole, Console, ConsoleExt};
-use rome_fs::{FileSystem, MemoryFileSystem};
+use biome_fs::{FileSystem, MemoryFileSystem};
 use rome_service::{App, DynRef};
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -164,8 +164,8 @@ mod configuration {
     };
     use crate::snap_test::SnapshotPayload;
     use biome_console::BufferConsole;
+    use biome_fs::MemoryFileSystem;
     use bpaf::Args;
-    use rome_fs::MemoryFileSystem;
     use rome_service::DynRef;
     use std::path::Path;
 
@@ -293,8 +293,8 @@ mod reporter_json {
     use super::*;
     use crate::snap_test::SnapshotPayload;
     use crate::UNFORMATTED;
+    use biome_fs::FileSystemExt;
     use bpaf::Args;
-    use rome_fs::FileSystemExt;
 
     #[test]
     fn reports_formatter_check_mode() {

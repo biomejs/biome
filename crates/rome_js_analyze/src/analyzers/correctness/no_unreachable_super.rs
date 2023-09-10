@@ -4,11 +4,11 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_rowan::{AstNode, NodeOrToken};
 use rome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsCallExpression, JsConstructorClassMember, JsSyntaxKind,
     JsThrowStatement, TextRange, WalkEvent,
 };
-use rome_rowan::{AstNode, NodeOrToken};
 use rustc_hash::FxHashSet;
 
 use crate::control_flow::{AnyJsControlFlowRoot, ControlFlowGraph};

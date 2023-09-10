@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::{operator_type_or_higher_needs_parens, NeedsParentheses};
+use biome_rowan::AstNode;
 use rome_formatter::write;
 use rome_js_syntax::{JsSyntaxNode, TsTypeOperatorType, TsTypeOperatorTypeFields};
-use rome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeOperatorType;

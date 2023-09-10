@@ -3,9 +3,9 @@ use crate::{
     check_file_encoding,
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
 };
+use biome_rowan::SyntaxKind;
 use rome_js_parser::JsParserOptions;
 use rome_js_syntax::{JsFileSource, LanguageVariant};
-use rome_rowan::SyntaxKind;
 use std::path::Path;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";

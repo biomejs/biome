@@ -5,6 +5,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{
+    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
+    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+};
 use rome_js_factory::make;
 use rome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
@@ -12,10 +16,6 @@ use rome_js_syntax::{
     JsGetterClassMember, JsGetterObjectMember, JsLanguage, JsMethodClassMember,
     JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
     JsStaticInitializationBlockClassMember, JsThisExpression, T,
-};
-use rome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
 };
 
 declare_rule! {

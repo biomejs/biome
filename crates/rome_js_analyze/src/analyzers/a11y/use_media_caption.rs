@@ -1,9 +1,9 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::jsx_ext::AnyJsxElement;
 use rome_js_syntax::{AnyJsxChild, JsxElement, TextRange};
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.

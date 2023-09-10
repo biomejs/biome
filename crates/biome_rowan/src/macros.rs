@@ -5,8 +5,8 @@ use crate::{AstNode, Language};
 /// # Example:
 ///
 /// ```
-/// use rome_rowan::{match_ast, AstNode};
-/// use rome_rowan::raw_language::{LiteralExpression, RawLanguageRoot, RawLanguageKind, RawSyntaxTreeBuilder};
+/// use biome_rowan::{match_ast, AstNode};
+/// use biome_rowan::raw_language::{LiteralExpression, RawLanguageRoot, RawLanguageKind, RawSyntaxTreeBuilder};
 ///
 /// let mut builder = RawSyntaxTreeBuilder::new();
 /// builder.start_node(RawLanguageKind::ROOT);

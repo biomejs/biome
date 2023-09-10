@@ -1,8 +1,8 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_rowan::AstNode;
 use rome_js_syntax::JsBinaryExpression;
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Disallow comparisons where both sides are exactly the same.

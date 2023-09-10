@@ -1,5 +1,5 @@
+use biome_rowan::{AstNode, TriviaPiece};
 use rome_js_syntax::{JsLanguage, JsSyntaxNode, JsSyntaxToken, TriviaPieceKind};
-use rome_rowan::{AstNode, TriviaPiece};
 
 /// Add any leading and trailing trivia from given source node to the token.
 ///

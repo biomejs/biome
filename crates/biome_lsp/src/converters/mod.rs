@@ -1,4 +1,4 @@
-use rome_rowan::TextSize;
+use biome_rowan::TextSize;
 use tower_lsp::lsp_types::{ClientCapabilities, PositionEncodingKind};
 
 pub(crate) mod from_proto;
@@ -89,7 +89,7 @@ mod tests {
     use crate::converters::to_proto::position;
     use crate::converters::WideEncoding::{Utf16, Utf32};
     use crate::converters::{LineCol, PositionEncoding, WideEncoding};
-    use rome_rowan::TextSize;
+    use biome_rowan::TextSize;
     use tower_lsp::lsp_types::Position;
 
     macro_rules! check_conversion {

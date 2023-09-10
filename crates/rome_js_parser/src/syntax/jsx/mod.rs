@@ -3,8 +3,8 @@ pub mod jsx_parse_errors;
 
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
+use biome_rowan::TextRange;
 use rome_js_syntax::JsSyntaxKind::*;
-use rome_rowan::TextRange;
 
 use crate::lexer::{JsSyntaxKind, LexContext, ReLexContext, T};
 use crate::syntax::expr::{

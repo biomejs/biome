@@ -1,4 +1,4 @@
-use rome_fs::RomePath;
+use biome_fs::RomePath;
 use rome_js_syntax::TextSize;
 use rome_service::workspace::{server, FileGuard, Language, OpenFileParams};
 

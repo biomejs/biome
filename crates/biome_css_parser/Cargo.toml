@@ -17,7 +17,7 @@ biome_css_syntax       = { workspace = true }
 biome_diagnostics      = { workspace = true }
 biome_js_unicode_table = { workspace = true }
 biome_parser           = { workspace = true }
-rome_rowan             = { workspace = true }
+biome_rowan            = { workspace = true }
 tracing                = { workspace = true }
 
 [dev-dependencies]

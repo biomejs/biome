@@ -5,8 +5,8 @@ use crate::parentheses::{
     is_check_type, is_in_many_type_union_or_intersection_list,
     operator_type_or_higher_needs_parens, NeedsParentheses,
 };
+use biome_rowan::AstNode;
 use rome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsConditionalType};
-use rome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConditionalType;

@@ -41,9 +41,9 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::split_into_radix_and_number;
+    use biome_rowan::AstNode;
     use rome_js_factory::syntax::{JsNumberLiteralExpression, JsSyntaxKind::*};
     use rome_js_factory::JsSyntaxTreeBuilder;
-    use rome_rowan::AstNode;
 
     fn assert_float(literal: &str, value: f64) {
         let mut tree_builder = JsSyntaxTreeBuilder::new();

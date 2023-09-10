@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
 use biome_aria::{AriaProperties, AriaRoles};
+use biome_rowan::AstNode;
 use rome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
-use rome_rowan::AstNode;
 use std::collections::HashMap;
 use std::sync::Arc;
 

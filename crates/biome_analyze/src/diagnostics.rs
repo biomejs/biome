@@ -3,7 +3,7 @@ use biome_diagnostics::{
     advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
     DiagnosticTags, Error, Location, Severity, Visit,
 };
-use rome_rowan::TextRange;
+use biome_rowan::TextRange;
 use std::fmt::{Debug, Display, Formatter};
 
 use crate::rule::RuleDiagnostic;

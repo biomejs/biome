@@ -11,11 +11,11 @@ version              = "0.2.0"
 [dependencies]
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_fs          = { workspace = true }
 biome_parser      = { workspace = true }
+biome_rowan       = { workspace = true }
 insta             = { workspace = true, features = ["glob"] }
 rome_formatter    = { workspace = true }
-rome_fs           = { workspace = true }
-rome_rowan        = { workspace = true }
 rome_service      = { workspace = true }
 serde             = { version = "1", features = ["derive"] }
 serde_json        = { workspace = true }

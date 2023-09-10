@@ -76,8 +76,8 @@ impl<L: Language> SyntaxToken<L> {
     /// Returns the text of the token, including all trivia.
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    /// use rome_rowan::*;
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
     /// let mut token = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
     ///     builder.token_with_trivia(
     ///         RawLanguageKind::LET_TOKEN,
@@ -97,8 +97,8 @@ impl<L: Language> SyntaxToken<L> {
     /// Returns the text of a token, including all trivia as an owned value.
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    /// use rome_rowan::*;
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
     /// let mut token = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
     ///     builder.token_with_trivia(
     ///         RawLanguageKind::LET_TOKEN,
@@ -130,8 +130,8 @@ impl<L: Language> SyntaxToken<L> {
     /// Returns the text of the token, excluding all trivia.
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    /// use rome_rowan::*;
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
     /// let mut token = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
     ///     builder.token_with_trivia(
     ///         RawLanguageKind::LET_TOKEN,
@@ -317,8 +317,8 @@ impl<L: Language> SyntaxToken<L> {
     /// # Examples
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind};
-    /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind};
+    /// use biome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
     ///     RawLanguageKind::LET_TOKEN,
@@ -350,8 +350,8 @@ impl<L: Language> SyntaxToken<L> {
     /// # Examples
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind};
-    /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind};
+    /// use biome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
     ///     RawLanguageKind::LET_TOKEN,
@@ -383,8 +383,8 @@ impl<L: Language> SyntaxToken<L> {
     /// # Examples
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind};
-    /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind};
+    /// use biome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
     ///     RawLanguageKind::LET_TOKEN,
@@ -409,8 +409,8 @@ impl<L: Language> SyntaxToken<L> {
     /// # Examples
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind};
-    /// use rome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind};
+    /// use biome_rowan::{RawSyntaxToken, SyntaxToken, TriviaPiece};
     ///
     /// let token = SyntaxToken::<RawLanguage>::new_detached(
     ///     RawLanguageKind::LET_TOKEN,
@@ -449,8 +449,8 @@ impl<L: Language> SyntaxToken<L> {
     /// Looking backward in the text, a token owns all of its preceding trivia up to and including the first newline character.
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    /// use rome_rowan::*;
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
     /// let mut token = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
     ///     builder.token_with_trivia(
     ///         RawLanguageKind::LET_TOKEN,
@@ -473,8 +473,8 @@ impl<L: Language> SyntaxToken<L> {
     /// A token owns all of its following trivia up to, but not including, the next newline character.
     ///
     /// ```
-    /// use rome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    /// use rome_rowan::*;
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
     /// let mut token = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
     ///     builder.token_with_trivia(
     ///         RawLanguageKind::LET_TOKEN,

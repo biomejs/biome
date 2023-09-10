@@ -1,8 +1,8 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
-use rome_rowan::AstNode;
 
 declare_rule! {
     ///  Disallow labels that share a name with a variable

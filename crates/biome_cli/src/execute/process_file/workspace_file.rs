@@ -1,7 +1,7 @@
 use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
-use rome_fs::{File, OpenOptions, RomePath};
+use biome_fs::{File, OpenOptions, RomePath};
 use rome_service::file_handlers::Language;
 use rome_service::workspace::{FileGuard, OpenFileParams};
 use rome_service::{Workspace, WorkspaceError};

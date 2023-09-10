@@ -15,13 +15,13 @@ biome_console          = { workspace = true }
 biome_diagnostics      = { workspace = true }
 biome_js_unicode_table = { workspace = true }
 biome_parser           = { workspace = true }
+biome_rowan            = { workspace = true }
 bitflags               = { workspace = true }
 cfg-if                 = "1.0.0"
 drop_bomb              = "0.1.5"
 indexmap               = { workspace = true }
 rome_js_factory        = { workspace = true }
 rome_js_syntax         = { workspace = true }
-rome_rowan             = { workspace = true }
 schemars               = { workspace = true, optional = true }
 serde                  = { workspace = true, features = ["derive"] }
 serde_json             = { workspace = true }

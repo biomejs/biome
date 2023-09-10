@@ -21,8 +21,8 @@ use crate::{Language, SyntaxNode, SyntaxSlot, SyntaxToken};
 ///
 /// ```
 /// # use std::iter;
-/// # use rome_rowan::{AstNode, SyntaxNode, SyntaxRewriter, VisitNodeSignal};
-/// # use rome_rowan::raw_language::{LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+/// # use biome_rowan::{AstNode, SyntaxNode, SyntaxRewriter, VisitNodeSignal};
+/// # use biome_rowan::raw_language::{LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
 ///
 /// struct ReplaceNumberLiteralRewriter;
 ///

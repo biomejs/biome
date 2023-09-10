@@ -2,8 +2,8 @@
 
 #[doc = r" Reconstruct an AstNode from a SyntaxNode"]
 #[doc = r""]
-#[doc = r" This macros performs a match over the [kind](rome_rowan::SyntaxNode::kind)"]
-#[doc = r" of the provided [rome_rowan::SyntaxNode] and constructs the appropriate"]
+#[doc = r" This macros performs a match over the [kind](biome_rowan::SyntaxNode::kind)"]
+#[doc = r" of the provided [biome_rowan::SyntaxNode] and constructs the appropriate"]
 #[doc = r" AstNode type for it, then execute the provided expression over it."]
 #[doc = r""]
 #[doc = r" # Examples"]

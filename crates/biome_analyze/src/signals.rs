@@ -9,7 +9,7 @@ use crate::{
 };
 use biome_console::MarkupBuf;
 use biome_diagnostics::{advice::CodeSuggestionAdvice, Applicability, CodeSuggestion, Error};
-use rome_rowan::{BatchMutation, Language};
+use biome_rowan::{BatchMutation, Language};
 use std::borrow::Cow;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;

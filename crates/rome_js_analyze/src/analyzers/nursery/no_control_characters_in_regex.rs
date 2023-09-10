@@ -1,11 +1,11 @@
 use crate::utils::escape_string;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 use rome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
     JsStringLiteralExpression,
 };
-use rome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 use std::{iter::Peekable, str::Chars};
 
 declare_rule! {

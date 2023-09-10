@@ -3,13 +3,13 @@ mod generated;
 mod syntax_node;
 
 pub use self::generated::*;
-pub use rome_rowan::{
+pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
-use rome_rowan::RawSyntaxKind;
+use biome_rowan::RawSyntaxKind;
 
 impl From<u16> for CssSyntaxKind {
     fn from(d: u16) -> CssSyntaxKind {
@@ -51,7 +51,7 @@ impl CssSyntaxKind {
     }
 }
 
-impl rome_rowan::SyntaxKind for CssSyntaxKind {
+impl biome_rowan::SyntaxKind for CssSyntaxKind {
     const TOMBSTONE: Self = CssSyntaxKind::TOMBSTONE;
     const EOF: Self = EOF;
 

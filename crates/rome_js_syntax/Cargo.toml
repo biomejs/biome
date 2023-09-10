@@ -11,7 +11,7 @@ version              = "0.2.0"
 [dependencies]
 biome_console     = { version = "0.0.1", path = "../biome_console" }
 biome_diagnostics = { version = "0.2.0", path = "../biome_diagnostics" }
-rome_rowan        = { version = "0.2.0", path = "../rome_rowan" }
+biome_rowan       = { version = "0.2.0", path = "../biome_rowan" }
 schemars          = { version = "0.8.10", optional = true }
 serde             = { version = "1.0.136", features = ["derive"], optional = true }
 
@@ -19,4 +19,4 @@ serde             = { version = "1.0.136", features = ["derive"], optional = tru
 rome_js_factory = { path = "../rome_js_factory" }
 
 [features]
-serde = ["dep:serde", "schemars", "rome_rowan/serde"]
+serde = ["dep:serde", "schemars", "biome_rowan/serde"]

@@ -8,7 +8,7 @@ use rome_js_syntax::{
     JsShorthandNamedImportSpecifier,
 };
 
-use rome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
     ///  Disallow assigning to imported bindings

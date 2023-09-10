@@ -139,7 +139,7 @@ impl SemanticModel {
     ///
     /// ```rust
     /// use rome_js_parser::JsParserOptions;
-    /// use rome_rowan::{AstNode, SyntaxNodeCast};
+    /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use rome_js_syntax::{JsFileSource, JsReferenceIdentifier};
     /// use rome_js_semantic::{semantic_model, SemanticModelOptions, SemanticScopeExtensions};
     ///
@@ -189,7 +189,7 @@ impl SemanticModel {
     ///
     /// ```rust
     /// use rome_js_parser::JsParserOptions;
-    /// use rome_rowan::{AstNode, SyntaxNodeCast};
+    /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use rome_js_syntax::{JsFileSource, JsReferenceIdentifier};
     /// use rome_js_semantic::{semantic_model, BindingExtensions, SemanticModelOptions};
     ///
@@ -342,7 +342,7 @@ impl SemanticModel {
     ///
     /// ```rust
     /// use rome_js_parser::JsParserOptions;
-    /// use rome_rowan::{AstNode, SyntaxNodeCast};
+    /// use biome_rowan::{AstNode, SyntaxNodeCast};
     /// use rome_js_syntax::{JsFileSource, AnyJsFunction};
     /// use rome_js_semantic::{semantic_model, CallsExtensions, SemanticModelOptions};
     ///

@@ -2,11 +2,11 @@
 
 #![allow(clippy::redundant_closure)]
 #![allow(clippy::too_many_arguments)]
+use biome_rowan::AstNode;
 use rome_json_syntax::{
     JsonSyntaxElement as SyntaxElement, JsonSyntaxNode as SyntaxNode,
     JsonSyntaxToken as SyntaxToken, *,
 };
-use rome_rowan::AstNode;
 pub fn json_array_value(
     l_brack_token: SyntaxToken,
     r_brack_token: SyntaxToken,

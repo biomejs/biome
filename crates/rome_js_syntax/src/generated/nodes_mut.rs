@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::{generated::nodes::*, JsSyntaxToken as SyntaxToken};
-use rome_rowan::AstNode;
+use biome_rowan::AstNode;
 use std::iter::once;
 impl JsAccessorModifier {
     pub fn with_modifier_token(self, element: SyntaxToken) -> Self {

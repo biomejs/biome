@@ -3,9 +3,9 @@ use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::HooksOption
 use crate::{react::hooks::react_hook_configuration, semantic_services::Semantic};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_rowan::AstNode;
 use rome_js_semantic::CallsExtensions;
 use rome_js_syntax::{AnyJsFunction, JsCallExpression, JsFunctionBody, JsSyntaxKind, TextRange};
-use rome_rowan::AstNode;
 
 declare_rule! {
     /// Enforce that all React hooks are being called from the Top Level

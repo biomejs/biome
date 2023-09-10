@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 use biome_diagnostics_categories::category;
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use rome_formatter::comments::is_doc_comment;
 use rome_formatter::{
     comments::{
@@ -17,7 +18,6 @@ use rome_js_syntax::{
     JsFormalParameter, JsFunctionBody, JsIdentifierExpression, JsIfStatement, JsLanguage,
     JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
 };
-use rome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 
 pub type JsComments = Comments<JsLanguage>;
 
@@ -803,7 +803,7 @@ fn handle_try_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement
                 finally.body()
             } else {
                 // Use an err, so that the following code skips over it
-                Err(rome_rowan::SyntaxError::MissingRequiredChild)
+                Err(biome_rowan::SyntaxError::MissingRequiredChild)
             };
 
             //

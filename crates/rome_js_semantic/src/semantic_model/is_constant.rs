@@ -1,5 +1,5 @@
+use biome_rowan::AstNode;
 use rome_js_syntax::{AnyJsExpression, JsSyntaxKind};
-use rome_rowan::AstNode;
 
 pub fn is_constant(expr: &AnyJsExpression) -> bool {
     for node in expr.syntax().descendants() {
@@ -18,8 +18,8 @@ mod tests {
     use crate::{semantic_model, SemanticModelOptions};
 
     fn assert_is_const(code: &str, is_const: bool) {
-        use rome_rowan::AstNode;
-        use rome_rowan::SyntaxNodeCast;
+        use biome_rowan::AstNode;
+        use biome_rowan::SyntaxNodeCast;
         let r = rome_js_parser::parse(code, JsFileSource::js_module(), JsParserOptions::default());
         let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 

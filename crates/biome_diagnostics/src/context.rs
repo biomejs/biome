@@ -250,8 +250,8 @@ mod internal {
     use std::{fmt::Debug, io};
 
     use biome_console::{fmt, markup};
+    use biome_rowan::TextRange;
     use biome_text_edit::TextEdit;
-    use rome_rowan::TextRange;
 
     use crate::{
         diagnostic::internal::AsDiagnostic, Advices, Backtrace, Category, Diagnostic,

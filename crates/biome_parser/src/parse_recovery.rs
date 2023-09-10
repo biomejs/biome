@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_rowan::SyntaxKind;
+use biome_rowan::SyntaxKind;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 

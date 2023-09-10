@@ -123,7 +123,7 @@ impl DiffReport {
     }
 
     fn print(&self) {
-        if let Some(report) = rome_rowan::check_live() {
+        if let Some(report) = biome_rowan::check_live() {
             panic!("\n{report}")
         }
         // Only create the report file if the REPORT_PRETTIER

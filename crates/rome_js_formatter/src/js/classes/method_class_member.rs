@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use crate::js::declarations::function_declaration::should_group_function_parameters;
+use biome_rowan::{declare_node_union, SyntaxResult};
 use rome_formatter::write;
 use rome_js_syntax::{
     AnyJsClassMemberName, AnyJsObjectMemberName, JsConstructorClassMember, JsConstructorParameters,
@@ -8,7 +9,6 @@ use rome_js_syntax::{
     TsReturnTypeAnnotation, TsTypeParameters,
 };
 use rome_js_syntax::{JsMethodClassMember, JsMethodObjectMember, JsSyntaxToken};
-use rome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsMethodClassMember;

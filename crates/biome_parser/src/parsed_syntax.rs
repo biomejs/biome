@@ -1,7 +1,7 @@
 use crate::parse_recovery::{ParseRecovery, RecoveryResult};
 use crate::parsed_syntax::ParsedSyntax::{Absent, Present};
 use crate::prelude::*;
-use rome_rowan::TextRange;
+use biome_rowan::TextRange;
 
 /// Syntax that is either present in the source tree or absent.
 ///

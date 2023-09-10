@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::JsFormatContext;
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
 use rome_formatter::write;
 use rome_formatter::{Format, FormatResult};
 use rome_js_syntax::{JsObjectExpression, JsSyntaxToken, TsObjectType};
-use rome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
 
 declare_node_union! {
     pub (crate) JsObjectLike = JsObjectExpression | TsObjectType

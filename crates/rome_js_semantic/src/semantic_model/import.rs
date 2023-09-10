@@ -1,9 +1,9 @@
 use super::*;
 use crate::{HasDeclarationAstNode, SemanticModel};
+use biome_rowan::AstNode;
 use rome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierBinding, JsLanguage, JsSyntaxKind,
 };
-use rome_rowan::AstNode;
 
 pub(crate) fn is_imported(node: &JsSyntaxNode) -> bool {
     node.ancestors()

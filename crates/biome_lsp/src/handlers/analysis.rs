@@ -5,7 +5,7 @@ use crate::utils;
 use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
-use rome_fs::RomePath;
+use biome_fs::RomePath;
 use rome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
     SupportsFeatureParams,

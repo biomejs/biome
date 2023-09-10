@@ -9,7 +9,7 @@ use rome_js_syntax::{
     TriviaPieceKind, T,
 };
 
-use rome_rowan::{declare_node_union, AstNode, BatchMutationExt, SyntaxTriviaPiece};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, SyntaxTriviaPiece};
 
 use crate::JsRuleAction;
 use crate::{use_block_statements_diagnostic, use_block_statements_replace_body};

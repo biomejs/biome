@@ -2,7 +2,7 @@ use crate::{
     AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleFilter, RuleGroup, ServiceBag,
     SuppressionCommentEmitter,
 };
-use rome_rowan::{Language, TextRange};
+use biome_rowan::{Language, TextRange};
 use std::{
     any::{Any, TypeId},
     cmp::Ordering,
@@ -205,7 +205,7 @@ mod tests {
     use crate::{AnalyzerOptions, SuppressionKind};
     use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
-    use rome_rowan::{
+    use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, SyntaxNode, TextRange, TextSize, TriviaPiece, TriviaPieceKind,
     };

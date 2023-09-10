@@ -2,9 +2,9 @@ use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_rowan::{AstNode, BatchMutationExt};
 use rome_js_factory::make;
 use rome_js_syntax::{global_identifier, AnyJsExpression, T};
-use rome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Use `Number.isFinite` instead of global `isFinite`.

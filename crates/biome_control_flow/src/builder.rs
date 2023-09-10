@@ -1,4 +1,4 @@
-use rome_rowan::{Language, SyntaxElement, SyntaxNode};
+use biome_rowan::{Language, SyntaxElement, SyntaxNode};
 
 use crate::{
     BasicBlock, ControlFlowGraph, ExceptionHandler, ExceptionHandlerKind, Instruction,

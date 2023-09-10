@@ -1,9 +1,9 @@
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, Direction, WalkEvent};
 use rome_js_factory::make;
 use rome_js_syntax::{
     inner_string_text, AnyJsStatement, JsLanguage, JsModuleItemList, JsStatementList, JsSyntaxNode,
     JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, T,
 };
-use rome_rowan::{AstNode, AstSeparatedList, BatchMutation, Direction, WalkEvent};
 use std::iter;
 
 pub mod batch;
