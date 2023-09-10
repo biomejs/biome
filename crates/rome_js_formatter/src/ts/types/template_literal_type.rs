@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsTemplateLiteralTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsTemplateLiteralType};
 use rome_formatter::write;
-use rome_js_syntax::TsTemplateLiteralTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsTemplateLiteralType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTemplateLiteralType;

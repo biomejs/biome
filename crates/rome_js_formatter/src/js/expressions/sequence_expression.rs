@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
-use biome_rowan::AstNode;
-use rome_formatter::{format_args, write};
-use rome_js_syntax::JsSyntaxKind::JS_SEQUENCE_EXPRESSION;
-use rome_js_syntax::{
+use biome_js_syntax::JsSyntaxKind::JS_SEQUENCE_EXPRESSION;
+use biome_js_syntax::{
     JsSequenceExpression, JsSequenceExpressionFields, JsSyntaxKind, JsSyntaxNode,
 };
+use biome_rowan::AstNode;
+use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSequenceExpression;
@@ -93,7 +93,7 @@ impl NeedsParentheses for JsSequenceExpression {
 mod tests {
 
     use crate::assert_not_needs_parentheses;
-    use rome_js_syntax::JsSequenceExpression;
+    use biome_js_syntax::JsSequenceExpression;
 
     #[test]
     fn needs_parentheses() {

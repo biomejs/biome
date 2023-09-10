@@ -5,7 +5,7 @@ use rome_formatter::{format_args, write};
 use crate::parentheses::{
     is_callee, is_first_in_statement, FirstInStatementMode, NeedsParentheses,
 };
-use rome_js_syntax::{JsClassExpression, JsSyntaxNode};
+use biome_js_syntax::{JsClassExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassExpression;
@@ -56,7 +56,7 @@ impl NeedsParentheses for JsClassExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsClassExpression;
+    use biome_js_syntax::JsClassExpression;
 
     #[test]
     fn needs_parentheses() {

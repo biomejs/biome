@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::token::number::format_number_token;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsNumberLiteralType, TsNumberLiteralTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsNumberLiteralType, TsNumberLiteralTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNumberLiteralType;

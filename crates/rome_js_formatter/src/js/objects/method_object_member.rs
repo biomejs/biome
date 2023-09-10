@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::js::classes::method_class_member::FormatAnyJsMethodMember;
-use rome_js_syntax::JsMethodObjectMember;
+use biome_js_syntax::JsMethodObjectMember;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsMethodObjectMember;

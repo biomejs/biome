@@ -1,7 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{declare_node_union, AstNode, TextRange};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsExpression, JsAssignmentExpression,
     JsAssignmentWithDefault, JsAwaitExpression, JsCallExpression, JsComputedMemberExpression,
     JsConditionalExpression, JsExtendsClause, JsForOfStatement, JsInExpression,
@@ -10,6 +9,7 @@ use rome_js_syntax::{
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.

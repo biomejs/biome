@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::array::write_array_node;
-use rome_js_syntax::JsArrayBindingPatternElementList;
+use biome_js_syntax::JsArrayBindingPatternElementList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayBindingPatternElementList;

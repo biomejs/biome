@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, FormatStatementSemicolon, StringLiteralParentKind};
 use rome_formatter::write;
 
-use rome_js_syntax::JsDirective;
-use rome_js_syntax::JsDirectiveFields;
+use biome_js_syntax::JsDirective;
+use biome_js_syntax::JsDirectiveFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsDirective;

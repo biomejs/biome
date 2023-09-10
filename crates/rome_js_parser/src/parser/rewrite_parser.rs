@@ -4,13 +4,13 @@ use crate::token_source::TokenSourceCheckpoint;
 use crate::prelude::*;
 use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
+use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_parser::{
     diagnostic::{ParseDiagnostic, ToDiagnostic},
     event::Event,
     CompletedMarker, Marker,
 };
 use biome_rowan::TextSize;
-use rome_js_syntax::{JsSyntaxKind, TextRange};
 
 /// Simplified parser API for when rewriting the AST structure with `rewrite_events`.
 ///

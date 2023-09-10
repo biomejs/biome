@@ -1,16 +1,16 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{
-    declare_node_union, AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError,
-    SyntaxResult, TextRange,
-};
-use rome_js_syntax::{
+use biome_js_syntax::{
     inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
     AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectMember, JsAssignmentExpression,
     JsAssignmentOperator, JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName, JsReferenceIdentifier,
     JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
+};
+use biome_rowan::{
+    declare_node_union, AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError,
+    SyntaxResult, TextRange,
 };
 use std::collections::VecDeque;
 use std::iter::FusedIterator;

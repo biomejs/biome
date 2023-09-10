@@ -3,8 +3,8 @@ use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
 
+use biome_js_syntax::{AnyJsStatement, JsForStatement, JsInExpression, JsSyntaxNode};
 use biome_rowan::AstNode;
-use rome_js_syntax::{AnyJsStatement, JsForStatement, JsInExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInExpression;
@@ -59,7 +59,7 @@ fn is_in_for_initializer(expression: &JsInExpression) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsFileSource, JsInExpression};
+    use biome_js_syntax::{JsFileSource, JsInExpression};
 
     #[test]
     fn needs_parentheses() {

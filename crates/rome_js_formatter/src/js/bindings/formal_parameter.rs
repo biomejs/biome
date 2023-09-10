@@ -4,8 +4,8 @@ use rome_formatter::write;
 use crate::utils::FormatInitializerClause;
 
 use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
-use rome_js_syntax::JsFormalParameter;
-use rome_js_syntax::JsFormalParameterFields;
+use biome_js_syntax::JsFormalParameter;
+use biome_js_syntax::JsFormalParameterFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFormalParameter;

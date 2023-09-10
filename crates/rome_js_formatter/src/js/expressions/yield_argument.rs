@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsYieldArgument;
-use rome_js_syntax::JsYieldArgumentFields;
+use biome_js_syntax::JsYieldArgument;
+use biome_js_syntax::JsYieldArgumentFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsYieldArgument;

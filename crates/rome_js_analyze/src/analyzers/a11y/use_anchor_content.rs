@@ -1,9 +1,9 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::JsxElement;
 use biome_rowan::AstNode;
-use rome_js_syntax::jsx_ext::AnyJsxElement;
-use rome_js_syntax::JsxElement;
 
 declare_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.

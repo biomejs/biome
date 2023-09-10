@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::{AnyJsAssignmentLike, FormatStatementSemicolon};
+use biome_js_syntax::TsTypeAliasDeclaration;
 use rome_formatter::write;
-use rome_js_syntax::TsTypeAliasDeclaration;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeAliasDeclaration;

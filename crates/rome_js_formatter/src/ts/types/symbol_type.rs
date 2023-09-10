@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsSymbolType, TsSymbolTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsSymbolType, TsSymbolTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSymbolType;

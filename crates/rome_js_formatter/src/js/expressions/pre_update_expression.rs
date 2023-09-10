@@ -1,12 +1,12 @@
 use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
 use crate::prelude::*;
 
-use biome_rowan::match_ast;
-use rome_formatter::write;
-use rome_js_syntax::JsPreUpdateExpressionFields;
-use rome_js_syntax::{
+use biome_js_syntax::JsPreUpdateExpressionFields;
+use biome_js_syntax::{
     JsPreUpdateExpression, JsPreUpdateOperator, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
 };
+use biome_rowan::match_ast;
+use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPreUpdateExpression;
@@ -51,7 +51,7 @@ impl NeedsParentheses for JsPreUpdateExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsPreUpdateExpression;
+    use biome_js_syntax::JsPreUpdateExpression;
 
     #[test]
     fn needs_parentheses() {

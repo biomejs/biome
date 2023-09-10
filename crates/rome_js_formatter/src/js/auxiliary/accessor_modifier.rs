@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_js_syntax::{JsAccessorModifier, JsAccessorModifierFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsAccessorModifier, JsAccessorModifierFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAccessorModifier;

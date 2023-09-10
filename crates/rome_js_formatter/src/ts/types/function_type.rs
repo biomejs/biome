@@ -6,9 +6,9 @@ use crate::parentheses::{
     is_includes_inferred_return_types_with_extends_constraints,
     operator_type_or_higher_needs_parens, NeedsParentheses,
 };
+use biome_js_syntax::TsFunctionTypeFields;
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsFunctionType};
 use rome_formatter::write;
-use rome_js_syntax::TsFunctionTypeFields;
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsFunctionType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsFunctionType;
@@ -90,7 +90,7 @@ pub(super) fn function_like_type_needs_parentheses(
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsFunctionType;
+    use biome_js_syntax::TsFunctionType;
 
     #[test]
     fn needs_parentheses() {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::format_class::FormatClass;
 
-use rome_js_syntax::JsClassDeclaration;
+use biome_js_syntax::JsClassDeclaration;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassDeclaration;

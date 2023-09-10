@@ -32,9 +32,9 @@
 //! It is inspired by the rust analyzer parser but adapted for JavaScript.
 //!
 //! # Syntax Nodes vs AST Nodes
-//! The crate relies on a concept of untyped [rome_js_syntax::JsSyntaxNode]s vs typed [biome_rowan::AstNode]s.
+//! The crate relies on a concept of untyped [biome_js_syntax::JsSyntaxNode]s vs typed [biome_rowan::AstNode]s.
 //! Syntax nodes represent the syntax tree in an untyped way. They represent a location in an immutable
-//! tree with two pointers. The syntax tree is composed of [rome_js_syntax::JsSyntaxNode]s and [rome_js_syntax::JsSyntaxToken]s in a nested
+//! tree with two pointers. The syntax tree is composed of [biome_js_syntax::JsSyntaxNode]s and [biome_js_syntax::JsSyntaxToken]s in a nested
 //! tree structure. Each node can have parents, siblings, children, descendants, etc.
 //!
 //! [biome_rowan::AstNode]s represent a typed version of a syntax node. They have the same exact representation as syntax nodes
@@ -135,10 +135,10 @@ pub use crate::{
     options::JsParserOptions,
     parse::*,
 };
+use biome_js_factory::JsSyntaxFactory;
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, LanguageVariant};
 use biome_parser::tree_sink::LosslessTreeSink;
 pub(crate) use parser::{JsParser, ParseRecovery};
-use rome_js_factory::JsSyntaxFactory;
-use rome_js_syntax::{JsLanguage, JsSyntaxKind, LanguageVariant};
 pub(crate) use state::{ParserState, StrictMode};
 use std::fmt::Debug;
 

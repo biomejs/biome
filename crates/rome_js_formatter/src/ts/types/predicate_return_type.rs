@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsPredicateReturnType;
+use biome_js_syntax::TsPredicateReturnTypeFields;
 use rome_formatter::write;
-use rome_js_syntax::TsPredicateReturnType;
-use rome_js_syntax::TsPredicateReturnTypeFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsPredicateReturnType;

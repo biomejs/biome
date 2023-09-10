@@ -2,13 +2,13 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::JsLabels;
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
-use rome_formatter::{format_args, write};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsComputedMember, AnyJsExpression, AnyJsName,
     JsAssignmentExpression, JsInitializerClause, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
 };
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticMemberExpression;
@@ -208,7 +208,7 @@ pub(crate) fn member_chain_callee_needs_parens(
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsStaticMemberExpression;
+    use biome_js_syntax::JsStaticMemberExpression;
 
     #[test]
     fn needs_parentheses() {

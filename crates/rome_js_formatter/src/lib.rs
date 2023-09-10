@@ -179,6 +179,9 @@ mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
 
+use biome_js_syntax::{
+    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+};
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, SyntaxNode};
 use rome_formatter::format_element::tag::Label;
@@ -188,9 +191,6 @@ use rome_formatter::{
     TransformSourceMap,
 };
 use rome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
-use rome_js_syntax::{
-    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-};
 
 use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
@@ -561,10 +561,10 @@ mod tests {
     use super::format_range;
 
     use crate::context::JsFormatOptions;
+    use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
     use rome_formatter::IndentStyle;
     use rome_js_parser::{parse, parse_script, JsParserOptions};
-    use rome_js_syntax::JsFileSource;
 
     #[test]
     fn test_range_formatting() {

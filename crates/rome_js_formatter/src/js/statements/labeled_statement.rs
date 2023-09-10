@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsLabeledStatementFields;
-use rome_js_syntax::{AnyJsStatement, JsLabeledStatement};
+use biome_js_syntax::JsLabeledStatementFields;
+use biome_js_syntax::{AnyJsStatement, JsLabeledStatement};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLabeledStatement;

@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::{format_args, write, CstFormatContext};
 
 use crate::utils::FormatStatementBody;
-use rome_js_syntax::JsForStatement;
-use rome_js_syntax::JsForStatementFields;
+use biome_js_syntax::JsForStatement;
+use biome_js_syntax::JsForStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsForStatement;

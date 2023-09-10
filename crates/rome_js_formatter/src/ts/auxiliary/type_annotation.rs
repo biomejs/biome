@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsTypeAnnotation, TsTypeAnnotationFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsTypeAnnotation, TsTypeAnnotationFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeAnnotation;

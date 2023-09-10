@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{JsxAttributeInitializerClause, JsxAttributeInitializerClauseFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsxAttributeInitializerClause, JsxAttributeInitializerClauseFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxAttributeInitializerClause;

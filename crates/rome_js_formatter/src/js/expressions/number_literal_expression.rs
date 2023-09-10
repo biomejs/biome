@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::token::number::format_number_token;
 
 use crate::parentheses::{is_member_object, NeedsParentheses};
-use rome_js_syntax::JsNumberLiteralExpression;
-use rome_js_syntax::{JsNumberLiteralExpressionFields, JsSyntaxNode};
+use biome_js_syntax::JsNumberLiteralExpression;
+use biome_js_syntax::{JsNumberLiteralExpressionFields, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsNumberLiteralExpression;
@@ -33,7 +33,7 @@ impl NeedsParentheses for JsNumberLiteralExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsNumberLiteralExpression;
+    use biome_js_syntax::JsNumberLiteralExpression;
 
     #[test]
     fn needs_parentheses() {

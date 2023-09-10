@@ -2,9 +2,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::*;
 
 use crate::JsRuleAction;
 

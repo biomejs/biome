@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsNonNullAssertionAssignmentFields;
+use biome_js_syntax::{JsSyntaxNode, TsNonNullAssertionAssignment};
 use rome_formatter::write;
-use rome_js_syntax::TsNonNullAssertionAssignmentFields;
-use rome_js_syntax::{JsSyntaxNode, TsNonNullAssertionAssignment};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNonNullAssertionAssignment;

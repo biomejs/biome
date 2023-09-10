@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::TsModuleDeclaration;
 use biome_rowan::AstNode;
-use rome_js_syntax::TsModuleDeclaration;
 
 declare_rule! {
     /// Disallow the use of TypeScript's `namespace`s.

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_js_syntax::JsClassMemberList;
+use biome_js_syntax::JsClassMemberList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassMemberList;

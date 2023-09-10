@@ -3,13 +3,13 @@ use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{declare_node_union, AstNode};
-use rome_js_semantic::SemanticModel;
-use rome_js_syntax::jsx_ext::AnyJsxElement;
-use rome_js_syntax::{
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{
     AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression, JsPropertyObjectMember,
     JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
+use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property

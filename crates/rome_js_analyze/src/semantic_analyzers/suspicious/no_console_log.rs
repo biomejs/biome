@@ -1,8 +1,8 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{global_identifier, AnyJsMemberExpression, JsCallExpression};
 use biome_rowan::AstNode;
-use rome_js_syntax::{global_identifier, AnyJsMemberExpression, JsCallExpression};
 
 declare_rule! {
     /// Disallow the use of `console.log`

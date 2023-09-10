@@ -1,10 +1,10 @@
 use crate::prelude::*;
 use crate::utils::sort_modifiers_by_precedence;
 use crate::{AsFormat, IntoFormat};
+use biome_js_syntax::JsSyntaxKind::JS_DECORATOR;
+use biome_js_syntax::{JsLanguage, Modifiers};
 use biome_rowan::{AstNode, AstNodeList, NodeOrToken};
 use rome_formatter::{format_args, write};
-use rome_js_syntax::JsSyntaxKind::JS_DECORATOR;
-use rome_js_syntax::{JsLanguage, Modifiers};
 
 pub(crate) struct FormatModifiers<List> {
     pub(crate) list: List,

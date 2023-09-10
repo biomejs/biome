@@ -54,13 +54,13 @@
 //! and right side of each Right side.
 
 use crate::prelude::*;
-use rome_formatter::{format_args, write, Buffer, CstFormatContext};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, AnyJsInProperty, JsBinaryExpression, JsBinaryOperator, JsDoWhileStatement,
     JsIfStatement, JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
     JsPrivateName, JsSwitchStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression,
     JsWhileStatement, OperatorPrecedence,
 };
+use rome_formatter::{format_args, write, Buffer, CstFormatContext};
 
 use crate::parentheses::{
     is_arrow_function_body, is_callee, is_member_object, is_spread, is_tag, NeedsParentheses,
@@ -896,9 +896,9 @@ impl FusedIterator for BinaryLikePreorder {}
 mod tests {
     use crate::utils::binary_like_expression::{BinaryLikePreorder, VisitEvent};
     use crate::utils::AnyJsBinaryLikeExpression;
+    use biome_js_syntax::JsLogicalExpression;
     use biome_rowan::AstNode;
     use rome_js_parser::{parse_module, JsParserOptions};
-    use rome_js_syntax::JsLogicalExpression;
 
     #[test]
     fn in_order_visits_every_binary_like_expression() {

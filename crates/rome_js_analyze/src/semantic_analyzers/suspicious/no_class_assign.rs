@@ -1,8 +1,8 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use rome_js_semantic::{Reference, ReferencesExtensions};
-use rome_js_syntax::AnyJsClass;
+use biome_js_semantic::{Reference, ReferencesExtensions};
+use biome_js_syntax::AnyJsClass;
 
 use crate::semantic_services::Semantic;
 

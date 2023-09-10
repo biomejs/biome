@@ -8,7 +8,7 @@ use xtask::Result;
 pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Result<String> {
     let (syntax_crate, syntax_kind, factory_kind) = match language_kind {
         LanguageKind::Js => (
-            quote! { rome_js_syntax },
+            quote! { biome_js_syntax },
             quote! { JsSyntaxKind },
             quote! { JsSyntaxFactory },
         ),

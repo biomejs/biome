@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
 use biome_aria::{AriaProperties, AriaRoles};
+use biome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use biome_rowan::AstNode;
-use rome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -75,11 +75,11 @@ impl AriaServices {
 mod tests {
     use crate::aria_services::AriaServices;
     use biome_aria::{AriaProperties, AriaRoles};
-    use rome_js_factory::make::{
+    use biome_js_factory::make::{
         ident, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_name,
         jsx_string, jsx_string_literal, token,
     };
-    use rome_js_syntax::{AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T};
+    use biome_js_syntax::{AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T};
     use std::sync::Arc;
 
     #[test]

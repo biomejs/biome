@@ -1,6 +1,14 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 use biome_diagnostics_categories::category;
+use biome_js_syntax::suppression::parse_suppression_comment;
+use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
+use biome_js_syntax::{
+    AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
+    JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
+    JsFormalParameter, JsFunctionBody, JsIdentifierExpression, JsIfStatement, JsLanguage,
+    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
+};
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use rome_formatter::comments::is_doc_comment;
 use rome_formatter::{
@@ -9,14 +17,6 @@ use rome_formatter::{
         DecoratedComment, SourceComment,
     },
     write,
-};
-use rome_js_syntax::suppression::parse_suppression_comment;
-use rome_js_syntax::JsSyntaxKind::JS_EXPORT;
-use rome_js_syntax::{
-    AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
-    JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
-    JsFormalParameter, JsFunctionBody, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
 };
 
 pub type JsComments = Comments<JsLanguage>;

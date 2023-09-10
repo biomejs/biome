@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsComputedMemberName;
+use biome_js_syntax::JsComputedMemberNameFields;
 use rome_formatter::write;
-use rome_js_syntax::JsComputedMemberName;
-use rome_js_syntax::JsComputedMemberNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsComputedMemberName;

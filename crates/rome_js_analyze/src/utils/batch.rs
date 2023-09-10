@@ -1,11 +1,11 @@
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutation};
-use rome_js_factory::make::jsx_child_list;
-use rome_js_syntax::{
+use biome_js_factory::make::jsx_child_list;
+use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsFormalParameter, AnyJsObjectMember, AnyJsParameter,
     AnyJsxChild, JsConstructorParameterList, JsFormalParameter, JsLanguage, JsObjectMemberList,
     JsParameterList, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator,
     JsVariableDeclaratorList, JsVariableStatement, JsxChildList,
 };
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation};
 
 pub trait JsBatchMutation {
     /// Removes the declarator, and:
@@ -293,7 +293,7 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
 #[cfg(test)]
 mod tests {
     use crate::assert_remove_ok;
-    use rome_js_syntax::{AnyJsObjectMember, JsFormalParameter, JsVariableDeclarator};
+    use biome_js_syntax::{AnyJsObjectMember, JsFormalParameter, JsVariableDeclarator};
 
     // Remove JsVariableDeclarator
     assert_remove_ok! {

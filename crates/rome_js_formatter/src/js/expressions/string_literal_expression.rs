@@ -3,10 +3,10 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::JsStringLiteralExpressionFields;
+use biome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
+use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxNode};
 use biome_rowan::AstNode;
-use rome_js_syntax::JsStringLiteralExpressionFields;
-use rome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
-use rome_js_syntax::{JsStringLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStringLiteralExpression;
@@ -52,7 +52,7 @@ impl NeedsParentheses for JsStringLiteralExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsFileSource, JsStringLiteralExpression, ModuleKind};
+    use biome_js_syntax::{JsFileSource, JsStringLiteralExpression, ModuleKind};
 
     #[test]
     fn needs_parentheses() {

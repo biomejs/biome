@@ -1,9 +1,9 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_semantic::{AllBindingWriteReferencesIter, Reference, ReferencesExtensions};
+use biome_js_syntax::{AnyJsBinding, AnyJsBindingPattern, AnyJsFormalParameter, AnyJsParameter};
 use biome_rowan::AstNode;
-use rome_js_semantic::{AllBindingWriteReferencesIter, Reference, ReferencesExtensions};
-use rome_js_syntax::{AnyJsBinding, AnyJsBindingPattern, AnyJsFormalParameter, AnyJsParameter};
 
 declare_rule! {
     /// Disallow reassigning `function` parameters.

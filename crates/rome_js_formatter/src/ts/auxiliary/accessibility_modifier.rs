@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsAccessibilityModifier;
+use biome_js_syntax::TsAccessibilityModifierFields;
 use rome_formatter::write;
-use rome_js_syntax::TsAccessibilityModifier;
-use rome_js_syntax::TsAccessibilityModifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsAccessibilityModifier;

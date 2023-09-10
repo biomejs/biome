@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use rome_formatter::{format_args, write};
 
-use rome_js_syntax::{TsEnumDeclaration, TsEnumDeclarationFields};
+use biome_js_syntax::{TsEnumDeclaration, TsEnumDeclarationFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsEnumDeclaration;

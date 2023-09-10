@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsBigintType, TsBigintTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsBigintType, TsBigintTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsBigintType;

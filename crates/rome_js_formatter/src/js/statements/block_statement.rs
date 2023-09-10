@@ -1,11 +1,11 @@
 use crate::prelude::*;
+use biome_js_syntax::JsBlockStatement;
+use biome_js_syntax::{AnyJsStatement, JsEmptyStatement};
 use rome_formatter::{write, Buffer, CstFormatContext};
-use rome_js_syntax::JsBlockStatement;
-use rome_js_syntax::{AnyJsStatement, JsEmptyStatement};
 
+use biome_js_syntax::JsBlockStatementFields;
+use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{AstNode, AstNodeList, SyntaxNodeOptionExt};
-use rome_js_syntax::JsBlockStatementFields;
-use rome_js_syntax::JsSyntaxKind;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBlockStatement;

@@ -34,9 +34,9 @@ use crate::span::Span;
 use crate::syntax::class::parse_decorators;
 use crate::JsSyntaxFeature::TypeScript;
 use crate::{Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
-use rome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
-use rome_js_syntax::T;
-use rome_js_syntax::{JsSyntaxKind::*, *};
+use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
+use biome_js_syntax::T;
+use biome_js_syntax::{JsSyntaxKind::*, *};
 
 use super::{expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent};
 

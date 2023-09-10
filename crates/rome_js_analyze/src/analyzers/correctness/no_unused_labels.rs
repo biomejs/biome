@@ -5,7 +5,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_js_syntax::{
+use biome_js_syntax::{
     JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage, TextRange, WalkEvent,
 };
 

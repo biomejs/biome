@@ -3,9 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{AnyJsStatement, JsForStatement, JsForStatementFields, T};
 use biome_rowan::BatchMutationExt;
-use rome_js_factory::make;
-use rome_js_syntax::{AnyJsStatement, JsForStatement, JsForStatementFields, T};
 
 use crate::JsRuleAction;
 

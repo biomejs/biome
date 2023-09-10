@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::jsx::tag::opening_element::AnyJsxOpeningElement;
 
 use crate::utils::jsx::is_jsx_suppressed;
-use rome_js_syntax::JsxSelfClosingElement;
+use biome_js_syntax::JsxSelfClosingElement;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxSelfClosingElement;

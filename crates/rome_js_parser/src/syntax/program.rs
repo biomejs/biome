@@ -6,8 +6,8 @@ use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode};
 use crate::syntax::stmt::parse_directives;
 use crate::JsParser;
-use rome_js_syntax::JsSyntaxKind::*;
-use rome_js_syntax::ModuleKind;
+use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::ModuleKind;
 
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";

@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsStringLiteralType, TsStringLiteralTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsStringLiteralType, TsStringLiteralTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsStringLiteralType;

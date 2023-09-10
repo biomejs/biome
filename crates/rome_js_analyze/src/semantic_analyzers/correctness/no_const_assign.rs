@@ -2,13 +2,13 @@ use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{AstNode, TextRange};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
     JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,
     JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsVariableDeclaration,
     JsVariableDeclarator, JsVariableDeclaratorList,
 };
+use biome_rowan::{AstNode, TextRange};
 
 declare_rule! {
     /// Prevents from having `const` variables being re-assigned.

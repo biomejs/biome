@@ -1,6 +1,6 @@
+use biome_js_syntax::{JsFileSource, ModuleKind};
 use rome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use rome_js_formatter::context::JsFormatOptions;
-use rome_js_syntax::{JsFileSource, ModuleKind};
 use std::path::Path;
 
 mod language {

@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::jsx::tag::element::AnyJsxTagWithChildren;
 use crate::utils::jsx::is_jsx_suppressed;
+use biome_js_syntax::JsxFragment;
 use rome_formatter::write;
-use rome_js_syntax::JsxFragment;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxFragment;

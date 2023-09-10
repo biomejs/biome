@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::js::expressions::await_expression::await_or_yield_needs_parens;
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::{JsSyntaxKind, JsYieldExpressionFields};
-use rome_js_syntax::{JsSyntaxNode, JsYieldExpression};
+use biome_js_syntax::{JsSyntaxKind, JsYieldExpressionFields};
+use biome_js_syntax::{JsSyntaxNode, JsYieldExpression};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsYieldExpression;
@@ -35,7 +35,7 @@ impl NeedsParentheses for JsYieldExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsYieldExpression;
+    use biome_js_syntax::JsYieldExpression;
 
     #[test]
     fn needs_parentheses() {

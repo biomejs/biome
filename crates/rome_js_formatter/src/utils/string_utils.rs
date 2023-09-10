@@ -1,8 +1,8 @@
 use crate::context::{JsFormatOptions, QuoteProperties, QuoteStyle};
 use crate::prelude::*;
+use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
+use biome_js_syntax::{JsFileSource, JsSyntaxToken};
 use rome_formatter::token::string::normalize_string;
-use rome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
-use rome_js_syntax::{JsFileSource, JsSyntaxToken};
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
@@ -177,7 +177,7 @@ struct LiteralStringNormaliser<'token> {
     chosen_quote_properties: QuoteProperties,
 }
 
-/// Convenience enum to map [rome_js_syntax::JsFileSource] by just reading
+/// Convenience enum to map [biome_js_syntax::JsFileSource] by just reading
 /// the type of file
 #[derive(Eq, PartialEq)]
 pub(crate) enum SourceFileKind {
@@ -363,12 +363,12 @@ mod tests {
     use crate::context::QuoteStyle;
     use crate::utils::quickcheck_utils::*;
     use crate::utils::FormatLiteralStringToken;
+    use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
+    use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};
     use biome_rowan::AstNode;
     use quickcheck_macros::*;
     use rome_formatter::token::string::ToAsciiLowercaseCow;
-    use rome_js_factory::JsSyntaxTreeBuilder;
-    use rome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
-    use rome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};
     use std::borrow::Cow;
 
     #[quickcheck]

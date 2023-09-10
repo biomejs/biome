@@ -13,12 +13,12 @@ use crate::parentheses::{
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
 use crate::utils::test_call::is_test_call_argument;
 use crate::utils::{resolve_left_most_expression, AssignmentLikeLayout};
-use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement, JsArrowFunctionExpression,
     JsFormalParameter, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
 };
+use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsArrowFunctionExpression {
@@ -678,7 +678,7 @@ pub(crate) fn is_multiline_template_starting_on_same_line(template: &JsTemplateE
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsArrowFunctionExpression, JsFileSource};
+    use biome_js_syntax::{JsArrowFunctionExpression, JsFileSource};
 
     #[test]
     fn needs_parentheses() {

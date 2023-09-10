@@ -4,12 +4,12 @@ use rome_formatter::{write, CstFormatContext};
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;
 use crate::utils::test_call::is_test_call_argument;
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
-use rome_js_syntax::{
+use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
+use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsFormalParameter, AnyTsType, JsArrowFunctionExpression,
     JsConstructorParameters, JsParameters, JsSyntaxToken,
 };
+use biome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsParameters;
@@ -204,7 +204,7 @@ pub(crate) fn should_hug_function_parameters(
     parameters: &FormatAnyJsParameters,
     comments: &JsComments,
 ) -> FormatResult<bool> {
-    use rome_js_syntax::{
+    use biome_js_syntax::{
         AnyJsBinding::*, AnyJsBindingPattern::*, AnyJsExpression::*, AnyJsFormalParameter::*,
         AnyJsParameter::*,
     };

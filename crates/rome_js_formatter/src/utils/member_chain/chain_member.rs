@@ -1,12 +1,12 @@
 use crate::js::expressions::computed_member_expression::FormatComputedMemberLookup;
 use crate::prelude::*;
-use biome_rowan::AstNode;
-use rome_formatter::write;
-use rome_js_syntax::{
+use biome_js_syntax::{
     JsCallExpression, JsCallExpressionFields, JsComputedMemberExpression, JsImportCallExpression,
     JsStaticMemberExpression, JsStaticMemberExpressionFields, JsSyntaxNode,
     TsNonNullAssertionExpression, TsNonNullAssertionExpressionFields,
 };
+use biome_rowan::AstNode;
+use rome_formatter::write;
 use std::fmt::Debug;
 
 #[derive(Copy, Clone, Debug)]
@@ -28,18 +28,18 @@ pub(crate) enum CallExpressionPosition {
 /// Data structure that holds the node with its formatted version
 #[derive(Clone, Debug)]
 pub(crate) enum ChainMember {
-    /// Holds onto a [rome_js_syntax::JsStaticMemberExpression]
+    /// Holds onto a [biome_js_syntax::JsStaticMemberExpression]
     StaticMember {
         expression: JsStaticMemberExpression,
     },
 
-    /// Holds onto a [rome_js_syntax::JsCallExpression]
+    /// Holds onto a [biome_js_syntax::JsCallExpression]
     CallExpression {
         expression: JsCallExpression,
         position: CallExpressionPosition,
     },
 
-    /// Holds onto a [rome_js_syntax::JsComputedMemberExpression]
+    /// Holds onto a [biome_js_syntax::JsComputedMemberExpression]
     ComputedMember {
         expression: JsComputedMemberExpression,
     },
@@ -48,13 +48,13 @@ pub(crate) enum ChainMember {
         expression: TsNonNullAssertionExpression,
     },
 
-    /// Any other node that are not  [rome_js_syntax::JsCallExpression] or [rome_js_syntax::JsStaticMemberExpression]
+    /// Any other node that are not  [biome_js_syntax::JsCallExpression] or [biome_js_syntax::JsStaticMemberExpression]
     /// Are tracked using this variant
     Node(JsSyntaxNode),
 }
 
 impl ChainMember {
-    /// checks if the current node is a [rome_js_syntax::JsCallExpression], or a [rome_js_syntax::JsImportExpression]
+    /// checks if the current node is a [biome_js_syntax::JsCallExpression], or a [biome_js_syntax::JsImportExpression]
     pub fn is_call_like_expression(&self) -> bool {
         match self {
             ChainMember::CallExpression { .. } => true,

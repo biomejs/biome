@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::AnyJsAssignmentLike;
 
+use biome_js_syntax::JsPropertyObjectMember;
 use rome_formatter::write;
-use rome_js_syntax::JsPropertyObjectMember;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPropertyObjectMember;

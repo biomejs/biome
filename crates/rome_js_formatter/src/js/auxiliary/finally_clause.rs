@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsFinallyClause;
+use biome_js_syntax::JsFinallyClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::JsFinallyClause;
-use rome_js_syntax::JsFinallyClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFinallyClause;

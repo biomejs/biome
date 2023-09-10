@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
 
+use biome_js_syntax::{TsPropertySignatureTypeMember, TsPropertySignatureTypeMemberFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsPropertySignatureTypeMember, TsPropertySignatureTypeMemberFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsPropertySignatureTypeMember;

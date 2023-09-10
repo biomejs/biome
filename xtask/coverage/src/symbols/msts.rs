@@ -1,5 +1,5 @@
-use rome_js_semantic::SemanticEvent;
-use rome_js_syntax::JsFileSource;
+use biome_js_semantic::SemanticEvent;
+use biome_js_syntax::JsFileSource;
 
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};
 use crate::check_file_encoding;
@@ -80,7 +80,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
         );
 
         let r = rome_js_parser::parse(&code, JsFileSource::tsx(), options);
-        let mut actual: Vec<_> = rome_js_semantic::semantic_events(r.syntax())
+        let mut actual: Vec<_> = biome_js_semantic::semantic_events(r.syntax())
             .into_iter()
             .filter(|x| {
                 // We filter any event pointing to string literals.

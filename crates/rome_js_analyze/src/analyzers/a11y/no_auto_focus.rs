@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt};
-use rome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute};
 
 declare_rule! {
     /// Enforce that autoFocus prop is not used on elements.

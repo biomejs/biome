@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::FormatStatementSemicolon;
 
-use rome_js_syntax::JsExportFromClause;
-use rome_js_syntax::JsExportFromClauseFields;
+use biome_js_syntax::JsExportFromClause;
+use biome_js_syntax::JsExportFromClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportFromClause;

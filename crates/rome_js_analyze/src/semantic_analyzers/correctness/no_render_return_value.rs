@@ -3,8 +3,8 @@ use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{JsCallExpression, JsExpressionStatement};
 use biome_rowan::AstNode;
-use rome_js_syntax::{JsCallExpression, JsExpressionStatement};
 
 declare_rule! {
     /// Prevent the usage of the return value of `React.render`.

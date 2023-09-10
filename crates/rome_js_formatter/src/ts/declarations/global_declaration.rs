@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::TsGlobalDeclaration;
-use rome_js_syntax::TsGlobalDeclarationFields;
+use biome_js_syntax::TsGlobalDeclaration;
+use biome_js_syntax::TsGlobalDeclarationFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsGlobalDeclaration;

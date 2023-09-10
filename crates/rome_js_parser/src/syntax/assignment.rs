@@ -14,9 +14,9 @@ use crate::syntax::object::{is_at_object_member_name, parse_object_member_name};
 use crate::syntax::pattern::{ParseArrayPattern, ParseObjectPattern, ParseWithDefaultPattern};
 use crate::JsParser;
 use crate::ParsedSyntax::{Absent, Present};
+use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_any;
 use biome_rowan::AstNode;
-use rome_js_syntax::{JsSyntaxKind::*, *};
 
 // test js assignment_target
 // foo += bar = b ??= 3;

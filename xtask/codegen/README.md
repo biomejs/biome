@@ -3,7 +3,7 @@
 This crate contains local commands used to auto-generate source code.
 
 ## `cargo codegen grammar`
-This command transforms the `js.ungram` file into the `rome_js_syntax` crate.
+This command transforms the `js.ungram` file into the `biome_js_syntax` crate.
 
 The project uses [`ungrammar`](https://github.com/rust-analyzer/ungrammar) to define the syntax of the language.
 

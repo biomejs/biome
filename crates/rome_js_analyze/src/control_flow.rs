@@ -1,8 +1,8 @@
 use biome_analyze::QueryMatch;
 use biome_analyze::{AddVisitor, Phases, Queryable, ServiceBag};
-use rome_js_syntax::AnyJsRoot;
-use rome_js_syntax::JsLanguage;
-use rome_js_syntax::TextRange;
+use biome_js_syntax::AnyJsRoot;
+use biome_js_syntax::JsLanguage;
+use biome_js_syntax::TextRange;
 
 pub type JsControlFlowGraph = biome_control_flow::ControlFlowGraph<JsLanguage>;
 pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<JsLanguage>;

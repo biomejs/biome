@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsImportAssertion;
+use biome_js_syntax::JsImportAssertionFields;
 use rome_formatter::write;
-use rome_js_syntax::JsImportAssertion;
-use rome_js_syntax::JsImportAssertionFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportAssertion;

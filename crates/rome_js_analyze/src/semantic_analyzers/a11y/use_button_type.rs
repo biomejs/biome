@@ -2,11 +2,11 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{declare_node_union, AstNode};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsxElementName, JsCallExpression, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement,
     TextRange,
 };
+use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
     /// Enforces the usage of the attribute `type` for the element `button`

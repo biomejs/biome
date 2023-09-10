@@ -1,9 +1,9 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_semantic::ReferencesExtensions;
+use biome_js_syntax::JsCatchClause;
 use biome_rowan::{AstNode, TextRange};
-use rome_js_semantic::ReferencesExtensions;
-use rome_js_syntax::JsCatchClause;
 
 declare_rule! {
     /// Disallow reassigning exceptions in catch clauses.

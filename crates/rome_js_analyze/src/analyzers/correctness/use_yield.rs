@@ -4,8 +4,8 @@ use biome_analyze::{
     Visitor, VisitorContext,
 };
 use biome_console::markup;
+use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
-use rome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 
 declare_rule! {
     /// Require generator functions to contain `yield`.

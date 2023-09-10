@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsTryFinallyStatement;
-use rome_js_syntax::JsTryFinallyStatementFields;
+use biome_js_syntax::JsTryFinallyStatement;
+use biome_js_syntax::JsTryFinallyStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTryFinallyStatement;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsRestTupleTypeElement, TsRestTupleTypeElementFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsRestTupleTypeElement, TsRestTupleTypeElementFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsRestTupleTypeElement;

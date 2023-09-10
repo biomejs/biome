@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{JsExportDefaultDeclarationClause, JsExportDefaultDeclarationClauseFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsExportDefaultDeclarationClause, JsExportDefaultDeclarationClauseFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportDefaultDeclarationClause;

@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_js_syntax::{AnyTsTypeMember, TsTypeMemberList};
 use rome_formatter::{write, Buffer};
-use rome_js_syntax::{AnyTsTypeMember, TsTypeMemberList};
 
 use crate::context::Semicolons;
 use biome_rowan::AstNodeList;

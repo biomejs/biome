@@ -3,8 +3,8 @@
 #[path = "rome_common.rs"]
 mod rome_common;
 
+use biome_js_syntax::JsFileSource;
 use libfuzzer_sys::Corpus;
-use rome_js_syntax::JsFileSource;
 
 pub fn do_fuzz(case: &[u8]) -> Corpus {
     let parse_type = JsFileSource::d_ts();

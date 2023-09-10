@@ -6,12 +6,12 @@ use crate::parentheses::{
 };
 use rome_formatter::write;
 
-use biome_rowan::{match_ast, AstNode};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsForInitializer, JsArrowFunctionExpression, JsAssignmentExpression,
     JsComputedMemberName, JsExpressionStatement, JsForStatement, JsSequenceExpression,
     JsSyntaxKind, JsSyntaxNode,
 };
+use biome_rowan::{match_ast, AstNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAssignmentExpression;
@@ -105,7 +105,7 @@ impl NeedsParentheses for JsAssignmentExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsAssignmentExpression;
+    use biome_js_syntax::JsAssignmentExpression;
 
     #[test]
     fn needs_parentheses() {

@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 use biome_rowan::{AstNode, BatchMutationExt};
-use rome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 
 use crate::{utils, JsRuleAction};
 
@@ -115,7 +115,7 @@ impl Rule for NoUnnecessaryContinue {
 }
 
 fn is_continue_un_necessary(node: &JsContinueStatement) -> Option<bool> {
-    use rome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::JsSyntaxKind::*;
     let syntax = node.syntax();
     let ancestors: Vec<_> = syntax
         .ancestors()

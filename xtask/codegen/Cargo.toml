@@ -24,12 +24,12 @@ biome_analyze       = { path = "../../crates/biome_analyze", optional = true }
 biome_aria          = { path = "../../crates/biome_aria", optional = true }
 biome_cli           = { workspace = true, optional = true }
 biome_diagnostics   = { path = "../../crates/biome_diagnostics", optional = true }
+biome_js_factory    = { path = "../../crates/biome_js_factory", optional = true }
+biome_js_syntax     = { path = "../../crates/biome_js_syntax", optional = true }
 biome_rowan         = { path = "../../crates/biome_rowan", optional = true }
 rome_js_analyze     = { path = "../../crates/rome_js_analyze", optional = true }
-rome_js_factory     = { path = "../../crates/rome_js_factory", optional = true }
 rome_js_formatter   = { path = "../../crates/rome_js_formatter", optional = true }
 rome_js_parser      = { workspace = true, optional = true }
-rome_js_syntax      = { path = "../../crates/rome_js_syntax", optional = true }
 rome_json_analyze   = { workspace = true, optional = true }
 rome_json_formatter = { path = "../../crates/rome_json_formatter", optional = true }
 rome_json_parser    = { path = "../../crates/rome_json_parser", optional = true }
@@ -42,7 +42,7 @@ serde_json          = { version = "1.0.74", optional = true }
 configuration = [
   "biome_analyze",
   "rome_js_analyze",
-  "rome_js_syntax",
+  "biome_js_syntax",
   "rome_json_analyze",
   "rome_json_syntax",
   "pulldown-cmark",
@@ -52,11 +52,11 @@ schema = [
   "serde_json",
   "biome_rowan",
   "rome_service",
-  "rome_js_syntax",
-  "rome_js_factory",
+  "biome_js_syntax",
+  "biome_js_factory",
   "rome_js_formatter",
   "rome_json_formatter",
   "rome_json_parser",
   "biome_diagnostics",
 ]
-website = ["rome_service", "biome_cli/docgen", "rome_js_parser", "rome_js_formatter", "rome_js_syntax"]
+website = ["rome_service", "biome_cli/docgen", "rome_js_parser", "rome_js_formatter", "biome_js_syntax"]

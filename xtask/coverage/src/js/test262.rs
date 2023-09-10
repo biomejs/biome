@@ -1,11 +1,11 @@
 use crate::runner::{
     create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
 };
+use biome_js_syntax::JsFileSource;
 use biome_rowan::syntax::SyntaxKind;
 use biome_rowan::AstNode;
 use regex::Regex;
 use rome_js_parser::{parse, JsParserOptions};
-use rome_js_syntax::JsFileSource;
 use serde::Deserialize;
 use std::io;
 use std::path::Path;

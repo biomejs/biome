@@ -3,8 +3,8 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::{termcolor::Buffer, PrintDiagnostic};
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_rowan::{AstNode, SyntaxKind, SyntaxSlot};
-use rome_js_syntax::{JsLanguage, JsSyntaxNode};
 use std::{fmt::Debug, path::Path};
 
 /// This check is used in the parser test to ensure it doesn't emit

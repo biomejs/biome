@@ -1,14 +1,14 @@
 use crate::prelude::*;
 
 use crate::js::declarations::function_declaration::should_group_function_parameters;
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_formatter::write;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsClassMemberName, AnyJsObjectMemberName, JsConstructorClassMember, JsConstructorParameters,
     JsFunctionBody, JsParameters, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
     TsReturnTypeAnnotation, TsTypeParameters,
 };
-use rome_js_syntax::{JsMethodClassMember, JsMethodObjectMember, JsSyntaxToken};
+use biome_js_syntax::{JsMethodClassMember, JsMethodObjectMember, JsSyntaxToken};
+use biome_rowan::{declare_node_union, SyntaxResult};
+use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsMethodClassMember;

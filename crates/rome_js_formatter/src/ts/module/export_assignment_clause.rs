@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 
+use biome_js_syntax::TsExportAssignmentClause;
+use biome_js_syntax::TsExportAssignmentClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::TsExportAssignmentClause;
-use rome_js_syntax::TsExportAssignmentClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExportAssignmentClause;

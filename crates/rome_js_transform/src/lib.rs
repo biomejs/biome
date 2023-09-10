@@ -8,8 +8,8 @@ use biome_analyze::{
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
 use biome_diagnostics::Error;
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::BatchMutation;
-use rome_js_syntax::{JsFileSource, JsLanguage};
 use std::convert::Infallible;
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
@@ -100,8 +100,8 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter};
+    use biome_js_syntax::JsFileSource;
     use rome_js_parser::{parse, JsParserOptions};
-    use rome_js_syntax::JsFileSource;
     use std::slice;
 
     use crate::{transform, AnalysisFilter, ControlFlow};

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::format_modifiers::FormatModifiers;
-use rome_js_syntax::TsMethodSignatureModifierList;
+use biome_js_syntax::TsMethodSignatureModifierList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMethodSignatureModifierList;

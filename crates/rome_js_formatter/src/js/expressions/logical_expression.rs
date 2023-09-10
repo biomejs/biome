@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsLogicalExpression, JsSyntaxNode};
 use biome_rowan::AstNode;
-use rome_js_syntax::{JsLogicalExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLogicalExpression;
@@ -36,7 +36,7 @@ impl NeedsParentheses for JsLogicalExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsFileSource, JsLogicalExpression};
+    use biome_js_syntax::{JsFileSource, JsLogicalExpression};
 
     #[test]
     fn needs_parentheses() {

@@ -228,7 +228,7 @@ fn update_js_registry_builder(
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
-        use rome_js_syntax::JsLanguage;
+        use biome_js_syntax::JsLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<JsLanguage>>(registry: &mut V) {
             #( #categories )*

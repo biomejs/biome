@@ -1,6 +1,6 @@
 use crate::parentheses::NeedsParentheses;
 use crate::FormatBogusNodeRule;
-use rome_js_syntax::{JsSyntaxNode, TsBogusType};
+use biome_js_syntax::{JsSyntaxNode, TsBogusType};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatTsBogusType;

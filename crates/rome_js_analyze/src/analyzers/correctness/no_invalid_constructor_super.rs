@@ -1,10 +1,10 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::{markup, MarkupBuf};
-use biome_rowan::{AstNode, AstNodeList, TextRange};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
 };
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 
 declare_rule! {
     /// Prevents the incorrect use of `super()` inside classes.

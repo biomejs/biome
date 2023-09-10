@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
-use rome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 
 declare_rule! {
     /// Enforce using `else if` instead of nested `if` in `else` clauses.

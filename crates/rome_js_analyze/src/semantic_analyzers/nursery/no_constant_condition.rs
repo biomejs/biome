@@ -1,14 +1,14 @@
 use crate::{semantic_services::Semantic, utils::rename::RenamableNode};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
-use rome_js_semantic::SemanticModel;
-use rome_js_syntax::{
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement,
     AnyJsTemplateElement, JsAssignmentOperator, JsConditionalExpression, JsDoWhileStatement,
     JsForStatement, JsFunctionDeclaration, JsFunctionExpression, JsIfStatement, JsLogicalOperator,
     JsStatementList, JsSyntaxKind, JsUnaryOperator, JsWhileStatement, JsYieldExpression, TextRange,
 };
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 
 declare_rule! {
     /// Disallow constant expressions in conditions
@@ -480,9 +480,9 @@ fn get_boolean_value(node: AnyJsLiteralExpression) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use biome_js_syntax::{AnyJsLiteralExpression, JsFileSource};
     use biome_rowan::SyntaxNodeCast;
     use rome_js_parser::JsParserOptions;
-    use rome_js_syntax::{AnyJsLiteralExpression, JsFileSource};
 
     use super::get_boolean_value;
 

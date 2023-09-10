@@ -249,7 +249,7 @@ mod test {
     use crate::diagnostics::{ActualStart, InvalidDocumentError};
     use crate::prelude::{FormatError, TagKind};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
-    use rome_js_syntax::TextRange;
+    use biome_js_syntax::TextRange;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);

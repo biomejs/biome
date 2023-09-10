@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::js::bindings::parameters::FormatAnyJsParameters;
-use rome_js_syntax::JsConstructorParameters;
+use biome_js_syntax::JsConstructorParameters;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsConstructorParameters;

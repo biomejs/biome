@@ -24,10 +24,10 @@ use crate::syntax::typescript::{
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, JsSyntaxFeature, ParseRecovery};
+use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
-use rome_js_syntax::JsSyntaxKind::*;
-use rome_js_syntax::{JsSyntaxKind, TextRange, T};
 
 /// A function declaration, this could be async and or a generator. This takes a marker
 /// because you need to first advance over async or start a marker and feed it in.

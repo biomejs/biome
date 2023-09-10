@@ -4,13 +4,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_semantic::SemanticModel;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
     global_identifier, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
     JsCallExpression, JsSyntaxToken,
 };
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
     /// Disallow `parseInt()` and `Number.parseInt()` in favor of binary, octal, and hexadecimal literals

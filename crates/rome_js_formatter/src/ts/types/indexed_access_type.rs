@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsIndexedAccessTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsIndexedAccessType};
 use rome_formatter::write;
-use rome_js_syntax::TsIndexedAccessTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsIndexedAccessType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIndexedAccessType;

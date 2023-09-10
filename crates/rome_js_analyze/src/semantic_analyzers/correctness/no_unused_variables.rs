@@ -3,13 +3,13 @@ use crate::{semantic_services::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, BatchMutationExt};
-use rome_js_semantic::{ReferencesExtensions, SemanticScopeExtensions};
-use rome_js_syntax::{
+use biome_js_semantic::{ReferencesExtensions, SemanticScopeExtensions};
+use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction},
     JsClassExpression, JsFunctionDeclaration, JsFunctionExpression, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator,
 };
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Disallow unused variables.

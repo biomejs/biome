@@ -2,14 +2,14 @@ use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::Semantic, JsR
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_semantic::ReferencesExtensions;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_semantic::ReferencesExtensions;
+use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
     JsThisExpression, JsVariableDeclaration, JsVariableDeclarator, T,
 };
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
     /// Disallow useless `this` aliasing.

@@ -1,6 +1,6 @@
 use super::{LexContext, Lexer, LexerCheckpoint, ReLexContext, TextRange, TokenFlags};
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxKind::EOF};
 use biome_parser::diagnostic::ParseDiagnostic;
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxKind::EOF};
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 
@@ -283,8 +283,8 @@ impl From<&LexerCheckpoint> for LookaheadToken {
 mod tests {
     use super::BufferedLexer;
     use crate::lexer::{LexContext, Lexer, TextRange, TextSize};
-    use rome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
-    use rome_js_syntax::T;
+    use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
+    use biome_js_syntax::T;
 
     #[test]
     fn without_lookahead() {

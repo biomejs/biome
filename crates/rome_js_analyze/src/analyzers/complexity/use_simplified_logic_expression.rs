@@ -4,12 +4,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
     JsUnaryExpression, JsUnaryOperator, T,
 };
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 
 declare_rule! {
     /// Discard redundant terms from logical expressions.
@@ -67,7 +67,7 @@ impl Rule for UseSimplifiedLogicExpression {
         let left = node.left().ok()?;
         let right = node.right().ok()?;
         match node.operator().ok()? {
-            rome_js_syntax::JsLogicalOperator::NullishCoalescing
+            biome_js_syntax::JsLogicalOperator::NullishCoalescing
                 if matches!(
                     left,
                     AnyJsExpression::AnyJsLiteralExpression(
@@ -77,7 +77,7 @@ impl Rule for UseSimplifiedLogicExpression {
             {
                 return Some((false, right));
             }
-            rome_js_syntax::JsLogicalOperator::LogicalOr => {
+            biome_js_syntax::JsLogicalOperator::LogicalOr => {
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
@@ -97,7 +97,7 @@ impl Rule for UseSimplifiedLogicExpression {
                         .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
                 }
             }
-            rome_js_syntax::JsLogicalOperator::LogicalAnd => {
+            biome_js_syntax::JsLogicalOperator::LogicalAnd => {
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left

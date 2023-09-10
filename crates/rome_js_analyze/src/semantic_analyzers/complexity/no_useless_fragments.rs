@@ -5,12 +5,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
-use rome_js_factory::make::{ident, js_expression_statement, jsx_string, jsx_tag_expression};
-use rome_js_syntax::{
+use biome_js_factory::make::{ident, js_expression_statement, jsx_string, jsx_tag_expression};
+use biome_js_syntax::{
     AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
     JsxChildList, JsxElement, JsxFragment, JsxTagExpression,
 };
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
 declare_rule! {
     /// Disallow unnecessary fragments

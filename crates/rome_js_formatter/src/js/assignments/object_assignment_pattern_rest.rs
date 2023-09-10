@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsObjectAssignmentPatternRest;
-use rome_js_syntax::JsObjectAssignmentPatternRestFields;
+use biome_js_syntax::JsObjectAssignmentPatternRest;
+use biome_js_syntax::JsObjectAssignmentPatternRestFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPatternRest;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsOptionalTupleTypeElement, TsOptionalTupleTypeElementFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsOptionalTupleTypeElement, TsOptionalTupleTypeElementFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsOptionalTupleTypeElement;

@@ -4,15 +4,15 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_unicode_table::is_js_ident;
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
-use rome_js_factory::make::{
+use biome_js_factory::make::{
     self, ident, js_literal_member_name, js_name, js_static_member_expression, token,
 };
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression, AnyJsName, JsComputedMemberName,
     JsLiteralMemberName, JsSyntaxKind, T,
 };
+use biome_js_unicode_table::is_js_ident;
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Enforce the usage of a literal access to properties over computed property access.

@@ -1,7 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 use crate::prelude::*;
-use rome_js_syntax::AnyJsArrayElement;
+use biome_js_syntax::AnyJsArrayElement;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsArrayElement;
 impl FormatRule<AnyJsArrayElement> for FormatAnyJsArrayElement {

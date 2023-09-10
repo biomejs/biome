@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsPropertyParameter, TsPropertyParameterFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsPropertyParameter, TsPropertyParameterFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsPropertyParameter;

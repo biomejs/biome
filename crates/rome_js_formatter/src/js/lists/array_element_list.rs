@@ -4,8 +4,8 @@ use rome_formatter::{write, CstFormatContext, FormatRuleWithOptions, GroupId};
 use crate::utils::array::write_array_node;
 
 use crate::context::trailing_comma::FormatTrailingComma;
+use biome_js_syntax::JsArrayElementList;
 use biome_rowan::{AstNode, AstSeparatedList};
-use rome_js_syntax::JsArrayElementList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayElementList {
@@ -97,9 +97,9 @@ pub(crate) fn can_concisely_print_array_list(
     list: &JsArrayElementList,
     comments: &JsComments,
 ) -> bool {
-    use rome_js_syntax::AnyJsArrayElement::*;
-    use rome_js_syntax::AnyJsExpression::*;
-    use rome_js_syntax::JsUnaryOperator::*;
+    use biome_js_syntax::AnyJsArrayElement::*;
+    use biome_js_syntax::AnyJsExpression::*;
+    use biome_js_syntax::JsUnaryOperator::*;
 
     if list.is_empty() {
         return false;
@@ -108,7 +108,7 @@ pub(crate) fn can_concisely_print_array_list(
     list.elements().all(|item| {
         let syntax = match item.into_node() {
             Ok(AnyJsExpression(AnyJsLiteralExpression(
-                rome_js_syntax::AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+                biome_js_syntax::AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
             ))) => literal.into_syntax(),
 
             Ok(AnyJsExpression(JsUnaryExpression(expr))) => {
@@ -117,7 +117,7 @@ pub(crate) fn can_concisely_print_array_list(
 
                 match argument {
                     Ok(AnyJsLiteralExpression(
-                        rome_js_syntax::AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+                        biome_js_syntax::AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
                     )) => {
                         if signed && !comments.has_comments(literal.syntax()) {
                             expr.into_syntax()

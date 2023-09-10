@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsExportAsClause;
-use rome_js_syntax::JsExportAsClauseFields;
+use biome_js_syntax::JsExportAsClause;
+use biome_js_syntax::JsExportAsClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportAsClause;

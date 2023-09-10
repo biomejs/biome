@@ -2,11 +2,11 @@ use crate::prelude::*;
 
 use crate::js::expressions::static_member_expression::member_chain_callee_needs_parens;
 use crate::parentheses::NeedsParentheses;
-use rome_formatter::{format_args, write};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression, JsComputedMemberExpression,
     JsSyntaxKind, JsSyntaxNode,
 };
+use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsComputedMemberExpression;
@@ -87,7 +87,7 @@ impl NeedsParentheses for JsComputedMemberExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsComputedMemberExpression;
+    use biome_js_syntax::JsComputedMemberExpression;
 
     #[test]
     fn needs_parentheses() {

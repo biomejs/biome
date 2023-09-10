@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::write;
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::JsSuperExpressionFields;
-use rome_js_syntax::{JsSuperExpression, JsSyntaxNode};
+use biome_js_syntax::JsSuperExpressionFields;
+use biome_js_syntax::{JsSuperExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSuperExpression;

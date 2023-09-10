@@ -1,11 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Ast, RefactorKind, Rule};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::BatchMutationExt;
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     JsBinaryExpression, JsBinaryExpressionFields, JsBinaryOperator, JsSyntaxKind, T,
 };
+use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
 

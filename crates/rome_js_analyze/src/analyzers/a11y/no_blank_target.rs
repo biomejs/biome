@@ -3,15 +3,15 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
-use rome_js_factory::make::{
+use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, token,
 };
-use rome_js_syntax::jsx_ext::AnyJsxElement;
-use rome_js_syntax::{
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList, T,
 };
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
 declare_rule! {
     /// Disallow `target="_blank"` attribute without `rel="noreferrer"`

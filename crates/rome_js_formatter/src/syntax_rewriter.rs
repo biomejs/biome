@@ -1,15 +1,15 @@
 use crate::comments::is_type_comment;
 use crate::parentheses::AnyJsParenthesized;
+use biome_js_syntax::{
+    AnyJsAssignment, AnyJsExpression, AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind,
+    JsSyntaxNode,
+};
 use biome_rowan::syntax::SyntaxTrivia;
 use biome_rowan::{
     chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
     VisitNodeSignal,
 };
 use rome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
-use rome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind,
-    JsSyntaxNode,
-};
 use std::collections::BTreeSet;
 
 pub(super) fn transform(root: JsSyntaxNode) -> (JsSyntaxNode, TransformSourceMap) {
@@ -357,7 +357,7 @@ impl JsFormatSyntaxRewriter {
                             {
                                 logical
                                     .with_left(
-                                        rome_js_factory::make::js_logical_expression(
+                                        biome_js_factory::make::js_logical_expression(
                                             left, operator, right_left,
                                         )
                                         .into(),
@@ -442,14 +442,14 @@ fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
 mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::{format_node, JsFormatOptions, TextRange};
-    use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
-    use rome_formatter::{SourceMarker, TransformSourceMap};
-    use rome_js_parser::{parse, parse_module, JsParserOptions};
-    use rome_js_syntax::{
+    use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
         JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,
         JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
     };
+    use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
+    use rome_formatter::{SourceMarker, TransformSourceMap};
+    use rome_js_parser::{parse, parse_module, JsParserOptions};
 
     #[test]
     fn rebalances_logical_expressions() {

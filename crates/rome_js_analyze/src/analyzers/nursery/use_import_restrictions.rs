@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::JsModuleSource;
 use biome_rowan::{AstNode, TokenText};
-use rome_js_syntax::JsModuleSource;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 

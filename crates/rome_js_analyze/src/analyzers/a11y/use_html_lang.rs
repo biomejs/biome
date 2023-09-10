@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
 use biome_rowan::AstNode;
-use rome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
 
 declare_rule! {
     /// Enforce that `html` element has `lang` attribute.

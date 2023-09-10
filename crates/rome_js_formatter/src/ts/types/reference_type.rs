@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsReferenceType, TsReferenceTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsReferenceType, TsReferenceTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsReferenceType;

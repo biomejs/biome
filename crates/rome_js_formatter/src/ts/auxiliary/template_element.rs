@@ -4,7 +4,7 @@ use rome_formatter::FormatRuleWithOptions;
 use crate::js::auxiliary::template_element::{
     AnyTemplateElement, FormatTemplateElement, TemplateElementOptions,
 };
-use rome_js_syntax::TsTemplateElement;
+use biome_js_syntax::TsTemplateElement;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTemplateElement {

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsModuleDeclaration;
+use biome_js_syntax::TsModuleDeclarationFields;
 use rome_formatter::write;
-use rome_js_syntax::TsModuleDeclaration;
-use rome_js_syntax::TsModuleDeclarationFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsModuleDeclaration;

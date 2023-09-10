@@ -1,13 +1,13 @@
 use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
-use rome_js_parser::JsParserOptions;
-use rome_js_semantic::{semantic_model, SemanticModelOptions};
-use rome_js_syntax::JsSyntaxNode;
-use rome_js_syntax::{
+use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::{
     AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
     JsVariableDeclarator,
 };
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
+use rome_js_parser::JsParserOptions;
 use std::{any::type_name, fmt::Debug};
 
 /// Search and renames alls bindings where the name contains "a" replacing it to "b".
@@ -168,7 +168,7 @@ pub fn ok_find_attributes_by_name() {
     let list = r
         .syntax()
         .descendants()
-        .find_map(rome_js_syntax::JsxAttributeList::cast)
+        .find_map(biome_js_syntax::JsxAttributeList::cast)
         .unwrap();
     let [a, c, d] = list.find_by_names(["a", "c", "d"]);
     assert_eq!(

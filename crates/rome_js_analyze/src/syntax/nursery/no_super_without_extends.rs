@@ -2,8 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
+use biome_js_syntax::{JsClassDeclaration, JsSuperExpression};
 use biome_rowan::AstNode;
-use rome_js_syntax::{JsClassDeclaration, JsSuperExpression};
 
 declare_rule! {
     /// Catch a `SyntaxError` when writing calling `super()` on a class that doesn't extends any class

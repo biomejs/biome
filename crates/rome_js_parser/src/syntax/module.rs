@@ -30,12 +30,12 @@ use crate::syntax::typescript::{
 };
 use crate::JsSyntaxFeature::TypeScript;
 use crate::{Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
+use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::ParserProgress;
-use rome_js_syntax::JsSyntaxKind::*;
-use rome_js_syntax::{JsSyntaxKind, TextRange, T};
 use std::collections::HashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};

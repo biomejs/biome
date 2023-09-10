@@ -1,12 +1,12 @@
 //! Utilities for high level parsing of js code.
 
 use crate::*;
+use biome_js_syntax::{
+    AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
+};
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
 use biome_rowan::{AstNode, NodeCache};
-use rome_js_syntax::{
-    AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
-};
 use std::marker::PhantomData;
 
 /// A utility struct for managing the result of a parser job
@@ -46,7 +46,7 @@ impl<T> Parse<T> {
     ///
     /// ```
     /// use rome_js_parser::{JsParserOptions, parse_script};
-    /// use rome_js_syntax::{JsIfStatement, JsSyntaxKind};
+    /// use biome_js_syntax::{JsIfStatement, JsSyntaxKind};
     /// use biome_rowan::{AstNode, AstNodeList};
     ///
     /// let parse = parse_script(
@@ -131,7 +131,7 @@ fn parse_common(
 ///
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_script};
-/// use rome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
+/// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
 /// use biome_rowan::{AstNode, Direction};
 ///
 /// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
@@ -189,7 +189,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 /// Retrieve the emitted AST and check its kind:
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_module};
-/// use rome_js_syntax::JsSyntaxKind;
+/// use biome_js_syntax::JsSyntaxKind;
 /// use biome_rowan::AstNode;
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
@@ -215,7 +215,7 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 ///
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse};
-/// use rome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
+/// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
 /// let mut parsed = parse("type F = {}", module, JsParserOptions::default());
@@ -243,7 +243,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 ///
 /// ```
 /// use rome_js_parser::{JsParserOptions, parse_js_with_cache};
-/// use rome_js_syntax::JsFileSource;
+/// use biome_js_syntax::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///
 /// let source_type = JsFileSource::js_module();

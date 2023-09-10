@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_js_syntax::{AnyJsStatement, JsStatementList};
+use biome_js_syntax::{AnyJsStatement, JsStatementList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStatementList;

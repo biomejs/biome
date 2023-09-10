@@ -5,8 +5,8 @@ use crate::utils::{
     union_or_intersection_type_needs_parentheses, FormatTypeMemberSeparator,
     TsIntersectionOrUnionTypeList,
 };
+use biome_js_syntax::{JsSyntaxNode, TsIntersectionType, TsIntersectionTypeFields};
 use rome_formatter::{format_args, write};
-use rome_js_syntax::{JsSyntaxNode, TsIntersectionType, TsIntersectionTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIntersectionType;
@@ -45,7 +45,7 @@ impl NeedsParentheses for TsIntersectionType {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsIntersectionType;
+    use biome_js_syntax::TsIntersectionType;
 
     #[test]
     fn needs_parentheses() {

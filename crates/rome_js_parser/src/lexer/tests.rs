@@ -3,8 +3,8 @@
 
 use super::{LexContext, Lexer, TextSize};
 use crate::span::Span;
+use biome_js_syntax::JsSyntaxKind::{self, EOF};
 use quickcheck_macros::quickcheck;
-use rome_js_syntax::JsSyntaxKind::{self, EOF};
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
@@ -27,7 +27,7 @@ macro_rules! assert_lex {
         $(
             assert_eq!(
                 tokens[idx].0,
-                rome_js_syntax::JsSyntaxKind::$kind,
+                biome_js_syntax::JsSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
                 tokens[idx].0,

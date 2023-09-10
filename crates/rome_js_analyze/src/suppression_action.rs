@@ -1,12 +1,12 @@
 use crate::utils::batch::JsBatchMutation;
 use biome_analyze::SuppressionCommentEmitterPayload;
-use biome_rowan::{AstNode, TokenAtOffset, TriviaPieceKind};
-use rome_js_factory::make::{jsx_expression_child, jsx_ident, jsx_text, token};
-use rome_js_syntax::jsx_ext::AnyJsxElement;
-use rome_js_syntax::{
+use biome_js_factory::make::{jsx_expression_child, jsx_ident, jsx_text, token};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{
     AnyJsxChild, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsxChildList, JsxElement,
     JsxOpeningElement, JsxSelfClosingElement, JsxText, TextRange, T,
 };
+use biome_rowan::{AstNode, TokenAtOffset, TriviaPieceKind};
 
 /// Considering that the detection of suppression comments in the linter is "line based", the function starts
 /// querying the node covered by the text range of the diagnostic, until it finds the first token that has a newline

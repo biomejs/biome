@@ -2,7 +2,7 @@ use crate::prelude::*;
 use rome_formatter::{FormatOwnedWithRule, FormatRefWithRule};
 
 use crate::{AsFormat, IntoFormat, JsFormatContext};
-use rome_js_syntax::{map_syntax_node, JsSyntaxNode};
+use biome_js_syntax::{map_syntax_node, JsSyntaxNode};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatJsSyntaxNode;

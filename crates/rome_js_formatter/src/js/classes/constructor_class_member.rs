@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::js::classes::method_class_member::FormatAnyJsMethodMember;
+use biome_js_syntax::JsConstructorClassMember;
 use rome_formatter::write;
-use rome_js_syntax::JsConstructorClassMember;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsConstructorClassMember;

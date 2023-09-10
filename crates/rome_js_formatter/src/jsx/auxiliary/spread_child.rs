@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::{JsxSpreadChild, JsxSpreadChildFields};
+use biome_js_syntax::{JsxSpreadChild, JsxSpreadChildFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxSpreadChild;

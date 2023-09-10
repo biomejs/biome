@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsNameWithTypeArguments, TsNameWithTypeArgumentsFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsNameWithTypeArguments, TsNameWithTypeArgumentsFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNameWithTypeArguments;

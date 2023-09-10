@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsObjectBindingPatternRest;
+use biome_js_syntax::JsObjectBindingPatternRestFields;
 use rome_formatter::write;
-use rome_js_syntax::JsObjectBindingPatternRest;
-use rome_js_syntax::JsObjectBindingPatternRestFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectBindingPatternRest;

@@ -4,11 +4,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImportNamedClause, TriviaPieceKind, T,
 };
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
     /// Enforce the use of `import type` when an `import` only has specifiers with `type` qualifier.

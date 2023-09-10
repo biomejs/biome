@@ -5,14 +5,14 @@ use rome_formatter::{
 };
 
 use crate::{AsFormat, IntoFormat};
-use biome_rowan::{declare_node_union, match_ast, AstNode, SyntaxResult};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, AnyTsType, JsAssignmentExpression, JsCallExpression,
     JsComputedMemberExpression, JsConditionalExpression, JsFileSource, JsInitializerClause,
     JsNewExpression, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsAsExpression,
     TsConditionalType, TsNonNullAssertionExpression, TsSatisfiesExpression,
 };
+use biome_rowan::{declare_node_union, match_ast, AstNode, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType
@@ -810,7 +810,7 @@ impl Format<JsFormatContext> for FormatJsxChainExpression<'_> {
         let no_wrap = match self.expression {
             JsIdentifierExpression(identifier) if identifier.name()?.is_undefined() => true,
             AnyJsLiteralExpression(
-                rome_js_syntax::AnyJsLiteralExpression::JsNullLiteralExpression(_),
+                biome_js_syntax::AnyJsLiteralExpression::JsNullLiteralExpression(_),
             ) => true,
             JsConditionalExpression(_) if self.alternate => true,
             _ => false,

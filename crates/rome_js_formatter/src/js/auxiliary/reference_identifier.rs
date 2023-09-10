@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsReferenceIdentifier;
+use biome_js_syntax::JsReferenceIdentifierFields;
 use rome_formatter::write;
-use rome_js_syntax::JsReferenceIdentifier;
-use rome_js_syntax::JsReferenceIdentifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsReferenceIdentifier;

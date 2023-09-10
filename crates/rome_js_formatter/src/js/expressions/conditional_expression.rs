@@ -6,7 +6,7 @@ use crate::parentheses::{
     is_binary_like_left_or_right, is_conditional_test, is_spread,
     update_or_lower_expression_needs_parentheses, NeedsParentheses,
 };
-use rome_js_syntax::{JsConditionalExpression, JsSyntaxKind, JsSyntaxNode};
+use biome_js_syntax::{JsConditionalExpression, JsSyntaxKind, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsConditionalExpression {
@@ -62,7 +62,7 @@ impl NeedsParentheses for JsConditionalExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsConditionalExpression, JsFileSource};
+    use biome_js_syntax::{JsConditionalExpression, JsFileSource};
 
     #[test]
     fn needs_parentheses() {

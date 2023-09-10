@@ -2,7 +2,7 @@
 
 use std::collections::{HashSet, VecDeque};
 
-use rome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
+use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use schemars::{
     gen::{SchemaGenerator, SchemaSettings},
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
@@ -11,11 +11,11 @@ use schemars::{
 use serde_json::Value;
 
 use crate::{workspace::*, WorkspaceError};
-use biome_rowan::{AstSeparatedList, TriviaPieceKind};
-use rome_js_factory::{
+use biome_js_factory::{
     make,
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},
 };
+use biome_rowan::{AstSeparatedList, TriviaPieceKind};
 
 /// Manages a queue of type definitions that need to be generated
 #[derive(Default)]

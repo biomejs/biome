@@ -2,7 +2,7 @@ use crate::prelude::*;
 use rome_formatter::write;
 
 use crate::js::declarations::function_declaration::FormatFunction;
-use rome_js_syntax::JsFunctionExportDefaultDeclaration;
+use biome_js_syntax::JsFunctionExportDefaultDeclaration;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFunctionExportDefaultDeclaration;

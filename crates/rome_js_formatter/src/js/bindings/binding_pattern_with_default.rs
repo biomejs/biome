@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsBindingPatternWithDefault;
+use biome_js_syntax::JsBindingPatternWithDefaultFields;
 use rome_formatter::write;
-use rome_js_syntax::JsBindingPatternWithDefault;
-use rome_js_syntax::JsBindingPatternWithDefaultFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBindingPatternWithDefault;

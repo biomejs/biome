@@ -1,7 +1,7 @@
 use crate::semantic_services::SemanticServices;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use rome_js_syntax::TextRange;
+use biome_js_syntax::TextRange;
 
 declare_rule! {
     /// Disallow the use of ```arguments```

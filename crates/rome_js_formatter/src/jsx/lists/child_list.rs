@@ -4,9 +4,9 @@ use crate::utils::jsx::{
     JsxChildrenIterator, JsxRawSpace, JsxSpace,
 };
 use crate::JsFormatter;
+use biome_js_syntax::{AnyJsxChild, JsxChildList};
 use rome_formatter::format_element::tag::{GroupMode, Tag};
 use rome_formatter::{format_args, write, CstFormatContext, FormatRuleWithOptions, VecBuffer};
-use rome_js_syntax::{AnyJsxChild, JsxChildList};
 use std::cell::RefCell;
 
 #[derive(Debug, Clone, Default)]
@@ -308,7 +308,7 @@ impl FormatJsxChildList {
     /// [JsxText] and [JsxExpressionChild] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &JsxChildList, f: &mut JsFormatter) {
-        use rome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
+        use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
         use AnyJsxChild::*;
 
         for child in node {

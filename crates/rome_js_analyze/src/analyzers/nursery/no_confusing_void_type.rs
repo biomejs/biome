@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{AnyTsType, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNode};
-use rome_js_syntax::{AnyTsType, JsSyntaxKind};
 
 declare_rule! {
     ///

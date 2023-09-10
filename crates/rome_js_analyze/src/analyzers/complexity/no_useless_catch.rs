@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{JsCatchClause, TextRange};
 use biome_rowan::{AstNode, AstNodeList};
-use rome_js_syntax::{JsCatchClause, TextRange};
 
 declare_rule! {
     /// Disallow unnecessary `catch` clauses.
