@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use biome_json_syntax::JsonObjectValue;
 use biome_rowan::AstNode;
 use rome_formatter::{format_args, write};
-use rome_json_syntax::JsonObjectValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonObjectValue;

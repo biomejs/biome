@@ -59,10 +59,10 @@ rome_js_analyze              = { path = "./crates/rome_js_analyze" }
 rome_js_formatter            = { path = "./crates/rome_js_formatter" }
 rome_js_parser               = { path = "./crates/rome_js_parser" }
 rome_json_analyze            = { path = "./crates/rome_json_analyze" }
-rome_json_factory            = { version = "0.2.0", path = "./crates/rome_json_factory" }
+biome_json_factory            = { version = "0.2.0", path = "./crates/biome_json_factory" }
 rome_json_formatter          = { path = "./crates/rome_json_formatter" }
 rome_json_parser             = { path = "./crates/rome_json_parser" }
-rome_json_syntax             = { version = "0.2.0", path = "./crates/rome_json_syntax" }
+biome_json_syntax             = { version = "0.2.0", path = "./crates/biome_json_syntax" }
 rome_service                 = { path = "./crates/rome_service" }
 tests_macros                 = { path = "./crates/tests_macros" }
 

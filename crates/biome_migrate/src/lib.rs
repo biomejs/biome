@@ -9,7 +9,7 @@ use biome_analyze::{
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
 };
 use biome_diagnostics::Error;
-use rome_json_syntax::JsonLanguage;
+use biome_json_syntax::JsonLanguage;
 use std::convert::Infallible;
 use std::path::{Path, PathBuf};
 

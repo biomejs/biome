@@ -4,7 +4,7 @@ description          = "SyntaxKind and common rowan definitions for rome_json_pa
 documentation        = "https://docs.rs/rome_json_parser"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_json_syntax"
+name                 = "biome_json_syntax"
 repository.workspace = true
 version              = "0.2.0"
 

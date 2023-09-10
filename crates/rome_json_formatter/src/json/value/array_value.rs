@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use biome_json_syntax::JsonArrayValue;
+use biome_json_syntax::JsonArrayValueFields;
 use rome_formatter::write;
-use rome_json_syntax::JsonArrayValue;
-use rome_json_syntax::JsonArrayValueFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonArrayValue;

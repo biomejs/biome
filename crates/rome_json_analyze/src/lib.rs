@@ -9,7 +9,7 @@ use biome_analyze::{
     MetadataRegistry, RuleRegistry, SuppressionKind,
 };
 use biome_diagnostics::Error;
-use rome_json_syntax::JsonLanguage;
+use biome_json_syntax::JsonLanguage;
 
 /// Return the static [MetadataRegistry] for the JSON analyzer rules
 pub fn metadata() -> &'static MetadataRegistry {
@@ -103,8 +103,8 @@ mod tests {
     use biome_console::{markup, Markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_json_syntax::TextRange;
     use rome_json_parser::{parse_json, JsonParserOptions};
-    use rome_json_syntax::TextRange;
     use std::slice;
 
     use crate::{analyze, AnalysisFilter, ControlFlow};

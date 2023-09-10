@@ -4,7 +4,7 @@ description          = "Utilities to create JSON AST for rome_json_parser"
 documentation        = "https://docs.rs/rome_json_parser"
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_json_factory"
+name                 = "biome_json_factory"
 repository.workspace = true
 version              = "0.2.0"
 
@@ -12,4 +12,4 @@ version              = "0.2.0"
 
 [dependencies]
 biome_rowan      = { workspace = true }
-rome_json_syntax = { workspace = true }
+biome_json_syntax = { workspace = true }

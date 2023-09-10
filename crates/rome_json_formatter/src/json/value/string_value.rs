@@ -1,6 +1,6 @@
 use crate::format_string::format_string_token;
 use crate::prelude::*;
-use rome_json_syntax::JsonStringValue;
+use biome_json_syntax::JsonStringValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonStringValue;

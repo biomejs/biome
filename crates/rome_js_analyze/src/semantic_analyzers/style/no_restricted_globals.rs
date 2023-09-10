@@ -8,9 +8,9 @@ use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{
     JsIdentifierAssignment, JsReferenceIdentifier, JsxReferenceIdentifier, TextRange,
 };
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::{declare_node_union, AstNode, SyntaxNode};
 use bpaf::Bpaf;
-use rome_json_syntax::JsonLanguage;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 

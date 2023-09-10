@@ -20,7 +20,7 @@ biome_rowan                  = { workspace = true }
 biome_text_size              = { workspace = true }
 cfg-if                       = "1.0.0"
 rome_formatter               = { workspace = true }
-rome_json_syntax             = { workspace = true }
+biome_json_syntax             = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 tracing                      = { workspace = true }

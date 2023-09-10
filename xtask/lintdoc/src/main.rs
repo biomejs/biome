@@ -10,11 +10,11 @@ use biome_console::{
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
+use biome_json_syntax::JsonLanguage;
 use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
 use rome_js_parser::JsParserOptions;
 use rome_json_parser::JsonParserOptions;
-use rome_json_syntax::JsonLanguage;
 use rome_service::settings::WorkspaceSettings;
 use std::{
     collections::BTreeMap,

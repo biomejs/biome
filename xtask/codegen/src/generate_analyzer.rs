@@ -247,7 +247,7 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
-        use rome_json_syntax::JsonLanguage;
+        use biome_json_syntax::JsonLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<JsonLanguage>>(registry: &mut V) {
             #( #categories )*

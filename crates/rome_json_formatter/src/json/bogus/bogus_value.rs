@@ -1,5 +1,5 @@
 use crate::FormatBogusNodeRule;
-use rome_json_syntax::JsonBogusValue;
+use biome_json_syntax::JsonBogusValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonBogusValue;

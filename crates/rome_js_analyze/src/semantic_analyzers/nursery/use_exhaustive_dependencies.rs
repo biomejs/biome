@@ -9,9 +9,9 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast};
 use bpaf::Bpaf;
-use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::str::FromStr;

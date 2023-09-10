@@ -18,7 +18,7 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
             quote! { CssSyntaxFactory },
         ),
         LanguageKind::Json => (
-            quote! { rome_json_syntax },
+            quote! { biome_json_syntax },
             quote! { JsonSyntaxKind },
             quote! { JsonSyntaxFactory },
         ),

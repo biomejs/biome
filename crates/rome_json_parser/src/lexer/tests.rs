@@ -2,8 +2,8 @@
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
 use super::{Lexer, TextSize};
+use biome_json_syntax::JsonSyntaxKind::{self, EOF};
 use quickcheck_macros::quickcheck;
-use rome_json_syntax::JsonSyntaxKind::{self, EOF};
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
@@ -22,7 +22,7 @@ macro_rules! assert_lex {
         $(
             assert_eq!(
                 tokens[idx].kind,
-                rome_json_syntax::JsonSyntaxKind::$kind,
+                biome_json_syntax::JsonSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
                 tokens[idx].kind,

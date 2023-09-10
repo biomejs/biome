@@ -26,7 +26,7 @@ rome_js_parser = { path = "../crates/rome_js_parser" }
 biome_js_syntax = { path = "../crates/biome_js_syntax" }
 rome_json_formatter = { path = "../crates/rome_json_formatter" }
 rome_json_parser = { path = "../crates/rome_json_parser" }
-rome_json_syntax = { path = "../crates/rome_json_syntax" }
+biome_json_syntax = { path = "../crates/biome_json_syntax" }
 rome_service = { path = "../crates/rome_service" }
 similar = { version = "2.2.1" }
 

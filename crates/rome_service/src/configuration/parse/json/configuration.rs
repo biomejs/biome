@@ -8,8 +8,8 @@ use crate::configuration::{
 use crate::Configuration;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::SyntaxNode;
-use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 
 impl VisitJsonNode for Configuration {}
 

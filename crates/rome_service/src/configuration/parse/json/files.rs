@@ -1,8 +1,8 @@
 use crate::configuration::FilesConfiguration;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
-use rome_json_syntax::JsonLanguage;
 use std::num::NonZeroU64;
 
 impl VisitJsonNode for FilesConfiguration {}

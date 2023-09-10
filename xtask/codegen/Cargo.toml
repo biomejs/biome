@@ -33,7 +33,7 @@ rome_js_parser      = { workspace = true, optional = true }
 rome_json_analyze   = { workspace = true, optional = true }
 rome_json_formatter = { path = "../../crates/rome_json_formatter", optional = true }
 rome_json_parser    = { path = "../../crates/rome_json_parser", optional = true }
-rome_json_syntax    = { workspace = true, optional = true }
+biome_json_syntax    = { workspace = true, optional = true }
 rome_service        = { path = "../../crates/rome_service", features = ["schema"], optional = true }
 schemars            = { version = "0.8.10", optional = true }
 serde_json          = { version = "1.0.74", optional = true }
@@ -44,7 +44,7 @@ configuration = [
   "rome_js_analyze",
   "biome_js_syntax",
   "rome_json_analyze",
-  "rome_json_syntax",
+  "biome_json_syntax",
   "pulldown-cmark",
 ]
 schema = [

@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_json_syntax::JsonNumberValue;
 use rome_formatter::token::number::format_number_token;
-use rome_json_syntax::JsonNumberValue;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsonNumberValue;

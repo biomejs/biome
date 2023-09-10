@@ -16,6 +16,6 @@ rome_js_analyze   = { path = "../../crates/rome_js_analyze" }
 rome_js_parser    = { path = "../../crates/rome_js_parser" }
 rome_json_analyze = { path = "../../crates/rome_json_analyze" }
 rome_json_parser  = { path = "../../crates/rome_json_parser" }
-rome_json_syntax  = { path = "../../crates/rome_json_syntax" }
+biome_json_syntax  = { path = "../../crates/biome_json_syntax" }
 rome_service      = { path = "../../crates/rome_service" }
 xtask             = { path = '../', version = "0.0" }
