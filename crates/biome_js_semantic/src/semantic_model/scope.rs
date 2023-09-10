@@ -97,7 +97,7 @@ impl Scope {
     }
 
     /// Checks if the current scope is one of the ancestor of "other". Given
-    /// that [ancestors] return "self" as the first scope,
+    /// that [Scope::ancestors] return "self" as the first scope,
     /// this function returns true for:
     ///
     /// ```rust,ignore
@@ -205,11 +205,11 @@ impl FusedIterator for ScopeBindingsIter {}
 /// get its [Scope].
 pub trait SemanticScopeExtensions {
     /// Returns the [Scope] which this object is part of.
-    /// See [scope](semantic_model::SemanticModel::scope)
+    /// See [scope](crate::SemanticModel::scope)
     fn scope(&self, model: &SemanticModel) -> Scope;
 
     /// Returns the [Scope] which this object was hosted to, if any.
-    /// See [scope](semantic_model::SemanticModel::scope_hoisted_to)
+    /// See [scope](crate::SemanticModel::scope_hoisted_to)
     fn scope_hoisted_to(&self, model: &SemanticModel) -> Option<Scope>;
 }
 

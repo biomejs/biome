@@ -16,27 +16,16 @@ If you think you need this then you probably want the undefined type instead.
 ### Invalid
 
 ```ts
-type PossibleValues = number | void;
-type MorePossibleValues = string | ((number & any) | (string | void));
+let foo: void;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is not valid as a constituent in a union type</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>type PossibleValues = number | void;
-   <strong>   │ </strong>                               <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>type MorePossibleValues = string | ((number &amp; any) | (string | void));
-    <strong>3 │ </strong>
-  
-nursery/noConfusingVoidType.js:2:64 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is not valid as a constituent in a union type</span>
-  
-    <strong>1 │ </strong>type PossibleValues = number | void;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>type MorePossibleValues = string | ((number &amp; any) | (string | void));
-   <strong>   │ </strong>                                                               <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let foo: void;
+   <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
   
 </code></pre>
 
@@ -73,29 +62,16 @@ interface Interface {
 </code></pre>
 
 ```ts
-let foo: void;
-let bar = 1 as unknown as void;
-let baz = 1 as unknown as void | string;
+type PossibleValues = number | void;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:10 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noConfusingVoidType.js:1:32 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is not valid as a constituent in a union type</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let foo: void;
-   <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>let bar = 1 as unknown as void;
-    <strong>3 │ </strong>let baz = 1 as unknown as void | string;
-  
-nursery/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules/no-confusing-void-type">lint/nursery/noConfusingVoidType</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">void is only valid as a return type or a type argument in generic type</span>
-  
-    <strong>1 │ </strong>let foo: void;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>let bar = 1 as unknown as void;
-   <strong>   │ </strong>                          <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>let baz = 1 as unknown as void | string;
-    <strong>4 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>type PossibleValues = number | void;
+   <strong>   │ </strong>                               <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
   
 </code></pre>
 
@@ -103,11 +79,15 @@ nursery/noConfusingVoidType.js:2:27 <a href="https://biomejs.dev/linter/rules/no
 
 ```ts
 function foo(): void {};
+```
+
+```ts
 function doSomething(this: void) {}
+```
+
+```ts
 function printArg<T = void>(arg: T) {}
-logAndReturn<void>(undefined);
-let voidPromise: Promise<void> = new Promise<void>(() => { });
-let voidMap: Map<string, void> = new Map<string, void>();
+printArg<void>(undefined);
 ```
 
 ## Related links

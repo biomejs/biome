@@ -4,7 +4,6 @@ use biome_js_syntax::{AnyTsType, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNode};
 
 declare_rule! {
-    ///
     /// Disallow `void` type outside of generic or return types.
     ///
     /// `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
@@ -16,8 +15,7 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```ts,expect_diagnostic
-    /// type PossibleValues = number | void;
-    /// type MorePossibleValues = string | ((number & any) | (string | void));
+    /// let foo: void;
     /// ```
     ///
     /// ```ts,expect_diagnostic
@@ -31,22 +29,23 @@ declare_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// let foo: void;
-    /// let bar = 1 as unknown as void;
-    /// let baz = 1 as unknown as void | string;
+    /// type PossibleValues = number | void;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```ts
     /// function foo(): void {};
-    /// function doSomething(this: void) {}
-    /// function printArg<T = void>(arg: T) {}
-    /// logAndReturn<void>(undefined);
-    /// let voidPromise: Promise<void> = new Promise<void>(() => { });
-    /// let voidMap: Map<string, void> = new Map<string, void>();
     /// ```
     ///
+    /// ```ts
+    /// function doSomething(this: void) {}
+    /// ```
+    ///
+    /// ```ts
+    /// function printArg<T = void>(arg: T) {}
+    /// printArg<void>(undefined);
+    /// ```
     pub(crate) NoConfusingVoidType {
         version: "1.0.0",
         name: "noConfusingVoidType",

@@ -3,10 +3,10 @@ use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
-/// Builds the [SemanticModel] consuming [SemanticEvent] and [SyntaxNode].
+/// Builds the [SemanticModel] consuming [SemanticEvent] and [JsSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
 ///
-/// [SemanticModelBuilder] consumes all the [SemanticEvents] and build all the
+/// [SemanticModelBuilder] consumes all the [SemanticEvent] and build all the
 /// data necessary to build a [SemanticModelData], that is allocated with an [Arc]
 /// and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
