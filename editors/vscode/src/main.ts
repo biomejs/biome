@@ -259,12 +259,14 @@ async function getWorkspaceDependency(
 			"biome",
 		);
 
-		if ((await fileExists(path))) {
+		if (await fileExists(path)) {
 			return path.fsPath;
 		}
 	}
 
-	window.showWarningMessage("Unable to resolve the biome server from your dependencies.");
+	window.showWarningMessage(
+		"Unable to resolve the biome server from your dependencies.",
+	);
 
 	return undefined;
 }
