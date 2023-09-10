@@ -102,7 +102,7 @@ impl PartialEq for SemanticModelData {
 impl Eq for SemanticModelData {}
 
 /// The façade for all semantic information.
-/// - Scope: [scope]
+/// - Scope: [Scope]
 /// - Declarations: [declaration]
 ///
 /// See [SemanticModelData] for more information about the internals.
@@ -338,7 +338,7 @@ impl SemanticModel {
         }
     }
 
-    /// Returns all [Call] of a [AnyJsFunction].
+    /// Returns all [FunctionCall] of a [AnyJsFunction].
     ///
     /// ```rust
     /// use biome_js_parser::JsParserOptions;

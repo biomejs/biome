@@ -123,7 +123,7 @@ impl SemanticEvent {
     }
 }
 
-/// Extracts [SemanticEvent] from [SyntaxNode].
+/// Extracts [SemanticEvent] from [JsSyntaxNode].
 ///
 /// The extraction is not entirely pull based, nor entirely push based.
 /// This happens because some nodes can generate multiple events.
@@ -134,7 +134,7 @@ impl SemanticEvent {
 /// For a simpler way to extract [SemanticEvent] see [semantic_events] or [SemanticEventIterator].
 ///
 /// To use the [SemanticEventExtractor] one must push the current node, following
-/// the [PreOrder] of the tree, and must pull events until [Pop] returns [None].
+/// the pre-order of the tree, and must pull events until `pop` returns [None].
 ///
 /// ```rust
 /// use biome_js_parser::*;
@@ -1033,7 +1033,7 @@ impl Iterator for SemanticEventIterator {
     }
 }
 
-/// Extracts [SemanticEvent] from [SyntaxNode].
+/// Extracts [SemanticEvent] from [JsSyntaxNode].
 ///
 /// For a way to extract [SemanticEvent] which gives more control see [SemanticEventExtractor].
 ///

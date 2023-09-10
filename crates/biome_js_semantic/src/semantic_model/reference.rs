@@ -102,7 +102,7 @@ impl Reference {
         matches!(reference.ty, SemanticModelReferenceType::Write { .. })
     }
 
-    /// Returns this reference as a [Call] if possible
+    /// Returns this reference as a [FunctionCall] if possible
     pub fn as_call(&self) -> Option<FunctionCall> {
         let call = self.syntax().ancestors().find(|x| {
             !matches!(
