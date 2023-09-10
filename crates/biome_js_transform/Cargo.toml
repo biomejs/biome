@@ -2,7 +2,7 @@
 authors.workspace    = true
 edition.workspace    = true
 license.workspace    = true
-name                 = "rome_js_transform"
+name                 = "biome_js_transform"
 repository.workspace = true
 version              = "0.2.0"
 

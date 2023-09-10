@@ -364,6 +364,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_js_transform"
+version = "0.2.0"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_diagnostics",
+ "biome_js_factory",
+ "biome_js_formatter",
+ "biome_js_syntax",
+ "biome_rowan",
+ "biome_test_utils",
+ "insta",
+ "lazy_static",
+ "rome_js_parser",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_js_unicode_table"
 version = "0.0.1"
 
