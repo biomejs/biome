@@ -17,8 +17,8 @@ documentation = """
     -p biome_control_flow \
     -p biome_analyze \
     -p rome_*analyze \
-    -p rome_*_syntax \
-    -p rome_*_factory \
+    -p biome_*_syntax \
+    -p biome_*_factory \
     -p biome_diagnostics \
     -p rome_service \
     -p biome_cli \
