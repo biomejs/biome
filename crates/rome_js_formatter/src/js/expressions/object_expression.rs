@@ -1,8 +1,8 @@
 use crate::parentheses::{is_first_in_statement, FirstInStatementMode, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
+use biome_js_syntax::{JsObjectExpression, JsSyntaxKind, JsSyntaxNode};
 use rome_formatter::write;
-use rome_js_syntax::{JsObjectExpression, JsSyntaxKind, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectExpression;
@@ -39,7 +39,7 @@ impl NeedsParentheses for JsObjectExpression {
 #[cfg(test)]
 mod tests {
     use crate::assert_needs_parentheses;
-    use rome_js_syntax::JsObjectExpression;
+    use biome_js_syntax::JsObjectExpression;
 
     #[test]
     fn needs_parentheses() {

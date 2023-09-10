@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'crates/rome_js_syntax/**'
-      - 'crates/rome_js_factory/**'
+      - 'crates/biome_js_syntax/**'
+      - 'crates/biome_js_factory/**'
       - 'crates/rome_js_parser/**'
       - 'crates/biome_rowan/**'
       - 'xtask/**'

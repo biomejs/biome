@@ -2,1422 +2,1422 @@
 
 use crate::{Format, FormatElement, FormatNode, Formatter};
 use rome_formatter::FormatResult;
-impl Format for rome_js_syntax::JsScript {
+impl Format for biome_js_syntax::JsScript {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsModule {
+impl Format for biome_js_syntax::JsModule {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExpressionSnipped {
+impl Format for biome_js_syntax::JsExpressionSnipped {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsDirective {
+impl Format for biome_js_syntax::JsDirective {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBlockStatement {
+impl Format for biome_js_syntax::JsBlockStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBreakStatement {
+impl Format for biome_js_syntax::JsBreakStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsClassDeclaration {
+impl Format for biome_js_syntax::JsClassDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsContinueStatement {
+impl Format for biome_js_syntax::JsContinueStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsDebuggerStatement {
+impl Format for biome_js_syntax::JsDebuggerStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsDoWhileStatement {
+impl Format for biome_js_syntax::JsDoWhileStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsEmptyStatement {
+impl Format for biome_js_syntax::JsEmptyStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExpressionStatement {
+impl Format for biome_js_syntax::JsExpressionStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsForInStatement {
+impl Format for biome_js_syntax::JsForInStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsForOfStatement {
+impl Format for biome_js_syntax::JsForOfStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsForStatement {
+impl Format for biome_js_syntax::JsForStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsIfStatement {
+impl Format for biome_js_syntax::JsIfStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsLabeledStatement {
+impl Format for biome_js_syntax::JsLabeledStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsReturnStatement {
+impl Format for biome_js_syntax::JsReturnStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSwitchStatement {
+impl Format for biome_js_syntax::JsSwitchStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsThrowStatement {
+impl Format for biome_js_syntax::JsThrowStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsTryFinallyStatement {
+impl Format for biome_js_syntax::JsTryFinallyStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsTryStatement {
+impl Format for biome_js_syntax::JsTryStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsVariableStatement {
+impl Format for biome_js_syntax::JsVariableStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsWhileStatement {
+impl Format for biome_js_syntax::JsWhileStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsWithStatement {
+impl Format for biome_js_syntax::JsWithStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFunctionDeclaration {
+impl Format for biome_js_syntax::JsFunctionDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsEnumDeclaration {
+impl Format for biome_js_syntax::TsEnumDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeAliasDeclaration {
+impl Format for biome_js_syntax::TsTypeAliasDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsInterfaceDeclaration {
+impl Format for biome_js_syntax::TsInterfaceDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDeclareFunctionDeclaration {
+impl Format for biome_js_syntax::TsDeclareFunctionDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDeclareStatement {
+impl Format for biome_js_syntax::TsDeclareStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsModuleDeclaration {
+impl Format for biome_js_syntax::TsModuleDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExternalModuleDeclaration {
+impl Format for biome_js_syntax::TsExternalModuleDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsGlobalDeclaration {
+impl Format for biome_js_syntax::TsGlobalDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsImportEqualsDeclaration {
+impl Format for biome_js_syntax::TsImportEqualsDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsElseClause {
+impl Format for biome_js_syntax::JsElseClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsVariableDeclaration {
+impl Format for biome_js_syntax::JsVariableDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsForVariableDeclaration {
+impl Format for biome_js_syntax::JsForVariableDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsVariableDeclarator {
+impl Format for biome_js_syntax::JsVariableDeclarator {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsCaseClause {
+impl Format for biome_js_syntax::JsCaseClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsDefaultClause {
+impl Format for biome_js_syntax::JsDefaultClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsCatchClause {
+impl Format for biome_js_syntax::JsCatchClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFinallyClause {
+impl Format for biome_js_syntax::JsFinallyClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsCatchDeclaration {
+impl Format for biome_js_syntax::JsCatchDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeAnnotation {
+impl Format for biome_js_syntax::TsTypeAnnotation {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::ImportMeta {
+impl Format for biome_js_syntax::ImportMeta {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayExpression {
+impl Format for biome_js_syntax::JsArrayExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrowFunctionExpression {
+impl Format for biome_js_syntax::JsArrowFunctionExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsAssignmentExpression {
+impl Format for biome_js_syntax::JsAssignmentExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsAwaitExpression {
+impl Format for biome_js_syntax::JsAwaitExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBinaryExpression {
+impl Format for biome_js_syntax::JsBinaryExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsCallExpression {
+impl Format for biome_js_syntax::JsCallExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsClassExpression {
+impl Format for biome_js_syntax::JsClassExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsComputedMemberExpression {
+impl Format for biome_js_syntax::JsComputedMemberExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsConditionalExpression {
+impl Format for biome_js_syntax::JsConditionalExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFunctionExpression {
+impl Format for biome_js_syntax::JsFunctionExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsIdentifierExpression {
+impl Format for biome_js_syntax::JsIdentifierExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportCallExpression {
+impl Format for biome_js_syntax::JsImportCallExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsInExpression {
+impl Format for biome_js_syntax::JsInExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsInstanceofExpression {
+impl Format for biome_js_syntax::JsInstanceofExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsLogicalExpression {
+impl Format for biome_js_syntax::JsLogicalExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNewExpression {
+impl Format for biome_js_syntax::JsNewExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectExpression {
+impl Format for biome_js_syntax::JsObjectExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsParenthesizedExpression {
+impl Format for biome_js_syntax::JsParenthesizedExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPostUpdateExpression {
+impl Format for biome_js_syntax::JsPostUpdateExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPreUpdateExpression {
+impl Format for biome_js_syntax::JsPreUpdateExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSequenceExpression {
+impl Format for biome_js_syntax::JsSequenceExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsStaticMemberExpression {
+impl Format for biome_js_syntax::JsStaticMemberExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSuperExpression {
+impl Format for biome_js_syntax::JsSuperExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsThisExpression {
+impl Format for biome_js_syntax::JsThisExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnaryExpression {
+impl Format for biome_js_syntax::JsUnaryExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsYieldExpression {
+impl Format for biome_js_syntax::JsYieldExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::NewTarget {
+impl Format for biome_js_syntax::NewTarget {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsTemplate {
+impl Format for biome_js_syntax::JsTemplate {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeAssertionExpression {
+impl Format for biome_js_syntax::TsTypeAssertionExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAsExpression {
+impl Format for biome_js_syntax::TsAsExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNonNullAssertionExpression {
+impl Format for biome_js_syntax::TsNonNullAssertionExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxTagExpression {
+impl Format for biome_js_syntax::JsxTagExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeArguments {
+impl Format for biome_js_syntax::TsTypeArguments {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsTemplateChunkElement {
+impl Format for biome_js_syntax::JsTemplateChunkElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsTemplateElement {
+impl Format for biome_js_syntax::JsTemplateElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsCallArguments {
+impl Format for biome_js_syntax::JsCallArguments {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsYieldArgument {
+impl Format for biome_js_syntax::JsYieldArgument {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeParameters {
+impl Format for biome_js_syntax::TsTypeParameters {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsParameters {
+impl Format for biome_js_syntax::JsParameters {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsReturnTypeAnnotation {
+impl Format for biome_js_syntax::TsReturnTypeAnnotation {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFunctionBody {
+impl Format for biome_js_syntax::JsFunctionBody {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSpread {
+impl Format for biome_js_syntax::JsSpread {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayHole {
+impl Format for biome_js_syntax::JsArrayHole {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsReferenceIdentifier {
+impl Format for biome_js_syntax::JsReferenceIdentifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPrivateName {
+impl Format for biome_js_syntax::JsPrivateName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsLiteralMemberName {
+impl Format for biome_js_syntax::JsLiteralMemberName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsComputedMemberName {
+impl Format for biome_js_syntax::JsComputedMemberName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPropertyObjectMember {
+impl Format for biome_js_syntax::JsPropertyObjectMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsMethodObjectMember {
+impl Format for biome_js_syntax::JsMethodObjectMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsGetterObjectMember {
+impl Format for biome_js_syntax::JsGetterObjectMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSetterObjectMember {
+impl Format for biome_js_syntax::JsSetterObjectMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsShorthandPropertyObjectMember {
+impl Format for biome_js_syntax::JsShorthandPropertyObjectMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExtendsClause {
+impl Format for biome_js_syntax::JsExtendsClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsImplementsClause {
+impl Format for biome_js_syntax::TsImplementsClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsClassExportDefaultDeclaration {
+impl Format for biome_js_syntax::JsClassExportDefaultDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPrivateClassMemberName {
+impl Format for biome_js_syntax::JsPrivateClassMemberName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsConstructorClassMember {
+impl Format for biome_js_syntax::JsConstructorClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsStaticInitializationBlockClassMember {
+impl Format for biome_js_syntax::JsStaticInitializationBlockClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsPropertyClassMember {
+impl Format for biome_js_syntax::JsPropertyClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsMethodClassMember {
+impl Format for biome_js_syntax::JsMethodClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsGetterClassMember {
+impl Format for biome_js_syntax::JsGetterClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsSetterClassMember {
+impl Format for biome_js_syntax::JsSetterClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsConstructorSignatureClassMember {
+impl Format for biome_js_syntax::TsConstructorSignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsPropertySignatureClassMember {
+impl Format for biome_js_syntax::TsPropertySignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMethodSignatureClassMember {
+impl Format for biome_js_syntax::TsMethodSignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsGetterSignatureClassMember {
+impl Format for biome_js_syntax::TsGetterSignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsSetterSignatureClassMember {
+impl Format for biome_js_syntax::TsSetterSignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIndexSignatureClassMember {
+impl Format for biome_js_syntax::TsIndexSignatureClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsEmptyClassMember {
+impl Format for biome_js_syntax::JsEmptyClassMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsStaticModifier {
+impl Format for biome_js_syntax::JsStaticModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDeclareModifier {
+impl Format for biome_js_syntax::TsDeclareModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsReadonlyModifier {
+impl Format for biome_js_syntax::TsReadonlyModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAbstractModifier {
+impl Format for biome_js_syntax::TsAbstractModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsOverrideModifier {
+impl Format for biome_js_syntax::TsOverrideModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAccessibilityModifier {
+impl Format for biome_js_syntax::TsAccessibilityModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsConstructorParameters {
+impl Format for biome_js_syntax::JsConstructorParameters {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsRestParameter {
+impl Format for biome_js_syntax::JsRestParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsPropertyParameter {
+impl Format for biome_js_syntax::TsPropertyParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsInitializerClause {
+impl Format for biome_js_syntax::JsInitializerClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsOptionalPropertyAnnotation {
+impl Format for biome_js_syntax::TsOptionalPropertyAnnotation {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDefinitePropertyAnnotation {
+impl Format for biome_js_syntax::TsDefinitePropertyAnnotation {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIndexSignatureParameter {
+impl Format for biome_js_syntax::TsIndexSignatureParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsIdentifierAssignment {
+impl Format for biome_js_syntax::JsIdentifierAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsStaticMemberAssignment {
+impl Format for biome_js_syntax::JsStaticMemberAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsComputedMemberAssignment {
+impl Format for biome_js_syntax::JsComputedMemberAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsParenthesizedAssignment {
+impl Format for biome_js_syntax::JsParenthesizedAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNonNullAssertionAssignment {
+impl Format for biome_js_syntax::TsNonNullAssertionAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAsAssignment {
+impl Format for biome_js_syntax::TsAsAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeAssertionAssignment {
+impl Format for biome_js_syntax::TsTypeAssertionAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsAssignmentWithDefault {
+impl Format for biome_js_syntax::JsAssignmentWithDefault {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayAssignmentPattern {
+impl Format for biome_js_syntax::JsArrayAssignmentPattern {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectAssignmentPattern {
+impl Format for biome_js_syntax::JsObjectAssignmentPattern {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayAssignmentPatternRestElement {
+impl Format for biome_js_syntax::JsArrayAssignmentPatternRestElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
+impl Format for biome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectAssignmentPatternProperty {
+impl Format for biome_js_syntax::JsObjectAssignmentPatternProperty {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectAssignmentPatternRest {
+impl Format for biome_js_syntax::JsObjectAssignmentPatternRest {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsIdentifierBinding {
+impl Format for biome_js_syntax::JsIdentifierBinding {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBindingPatternWithDefault {
+impl Format for biome_js_syntax::JsBindingPatternWithDefault {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayBindingPattern {
+impl Format for biome_js_syntax::JsArrayBindingPattern {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectBindingPattern {
+impl Format for biome_js_syntax::JsObjectBindingPattern {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsArrayBindingPatternRestElement {
+impl Format for biome_js_syntax::JsArrayBindingPatternRestElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectBindingPatternProperty {
+impl Format for biome_js_syntax::JsObjectBindingPatternProperty {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectBindingPatternRest {
+impl Format for biome_js_syntax::JsObjectBindingPatternRest {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsObjectBindingPatternShorthandProperty {
+impl Format for biome_js_syntax::JsObjectBindingPatternShorthandProperty {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsStringLiteralExpression {
+impl Format for biome_js_syntax::JsStringLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNumberLiteralExpression {
+impl Format for biome_js_syntax::JsNumberLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBigIntLiteralExpression {
+impl Format for biome_js_syntax::JsBigIntLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsBooleanLiteralExpression {
+impl Format for biome_js_syntax::JsBooleanLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNullLiteralExpression {
+impl Format for biome_js_syntax::JsNullLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsRegexLiteralExpression {
+impl Format for biome_js_syntax::JsRegexLiteralExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsVariableDeclarationClause {
+impl Format for biome_js_syntax::JsVariableDeclarationClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDefiniteVariableAnnotation {
+impl Format for biome_js_syntax::TsDefiniteVariableAnnotation {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExport {
+impl Format for biome_js_syntax::JsExport {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImport {
+impl Format for biome_js_syntax::JsImport {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportBareClause {
+impl Format for biome_js_syntax::JsImportBareClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportNamedClause {
+impl Format for biome_js_syntax::JsImportNamedClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportDefaultClause {
+impl Format for biome_js_syntax::JsImportDefaultClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportNamespaceClause {
+impl Format for biome_js_syntax::JsImportNamespaceClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsModuleSource {
+impl Format for biome_js_syntax::JsModuleSource {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportAssertion {
+impl Format for biome_js_syntax::JsImportAssertion {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsDefaultImportSpecifier {
+impl Format for biome_js_syntax::JsDefaultImportSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNamedImportSpecifiers {
+impl Format for biome_js_syntax::JsNamedImportSpecifiers {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNamespaceImportSpecifier {
+impl Format for biome_js_syntax::JsNamespaceImportSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsShorthandNamedImportSpecifier {
+impl Format for biome_js_syntax::JsShorthandNamedImportSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsNamedImportSpecifier {
+impl Format for biome_js_syntax::JsNamedImportSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsLiteralExportName {
+impl Format for biome_js_syntax::JsLiteralExportName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsImportAssertionEntry {
+impl Format for biome_js_syntax::JsImportAssertionEntry {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportDefaultDeclarationClause {
+impl Format for biome_js_syntax::JsExportDefaultDeclarationClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportDefaultExpressionClause {
+impl Format for biome_js_syntax::JsExportDefaultExpressionClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportNamedClause {
+impl Format for biome_js_syntax::JsExportNamedClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportFromClause {
+impl Format for biome_js_syntax::JsExportFromClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportNamedFromClause {
+impl Format for biome_js_syntax::JsExportNamedFromClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExportAsNamespaceClause {
+impl Format for biome_js_syntax::TsExportAsNamespaceClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExportAssignmentClause {
+impl Format for biome_js_syntax::TsExportAssignmentClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExportDeclareClause {
+impl Format for biome_js_syntax::TsExportDeclareClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFunctionExportDefaultDeclaration {
+impl Format for biome_js_syntax::JsFunctionExportDefaultDeclaration {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportNamedShorthandSpecifier {
+impl Format for biome_js_syntax::JsExportNamedShorthandSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportNamedSpecifier {
+impl Format for biome_js_syntax::JsExportNamedSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportAsClause {
+impl Format for biome_js_syntax::JsExportAsClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsExportNamedFromSpecifier {
+impl Format for biome_js_syntax::JsExportNamedFromSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsName {
+impl Format for biome_js_syntax::JsName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsFormalParameter {
+impl Format for biome_js_syntax::JsFormalParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsThisParameter {
+impl Format for biome_js_syntax::TsThisParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAnyType {
+impl Format for biome_js_syntax::TsAnyType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsUnknownType {
+impl Format for biome_js_syntax::TsUnknownType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNumberType {
+impl Format for biome_js_syntax::TsNumberType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsBooleanType {
+impl Format for biome_js_syntax::TsBooleanType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsBigintType {
+impl Format for biome_js_syntax::TsBigintType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsStringType {
+impl Format for biome_js_syntax::TsStringType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsSymbolType {
+impl Format for biome_js_syntax::TsSymbolType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsVoidType {
+impl Format for biome_js_syntax::TsVoidType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsUndefinedType {
+impl Format for biome_js_syntax::TsUndefinedType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNeverType {
+impl Format for biome_js_syntax::TsNeverType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsParenthesizedType {
+impl Format for biome_js_syntax::TsParenthesizedType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsReferenceType {
+impl Format for biome_js_syntax::TsReferenceType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsArrayType {
+impl Format for biome_js_syntax::TsArrayType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTupleType {
+impl Format for biome_js_syntax::TsTupleType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeofType {
+impl Format for biome_js_syntax::TsTypeofType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsImportType {
+impl Format for biome_js_syntax::TsImportType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeOperatorType {
+impl Format for biome_js_syntax::TsTypeOperatorType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIndexedAccessType {
+impl Format for biome_js_syntax::TsIndexedAccessType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMappedType {
+impl Format for biome_js_syntax::TsMappedType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsObjectType {
+impl Format for biome_js_syntax::TsObjectType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNonPrimitiveType {
+impl Format for biome_js_syntax::TsNonPrimitiveType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsThisType {
+impl Format for biome_js_syntax::TsThisType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNumberLiteralType {
+impl Format for biome_js_syntax::TsNumberLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsBigIntLiteralType {
+impl Format for biome_js_syntax::TsBigIntLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsStringLiteralType {
+impl Format for biome_js_syntax::TsStringLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNullLiteralType {
+impl Format for biome_js_syntax::TsNullLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsBooleanLiteralType {
+impl Format for biome_js_syntax::TsBooleanLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTemplateLiteralType {
+impl Format for biome_js_syntax::TsTemplateLiteralType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsInferType {
+impl Format for biome_js_syntax::TsInferType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIntersectionType {
+impl Format for biome_js_syntax::TsIntersectionType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsUnionType {
+impl Format for biome_js_syntax::TsUnionType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsFunctionType {
+impl Format for biome_js_syntax::TsFunctionType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsConstructorType {
+impl Format for biome_js_syntax::TsConstructorType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsConditionalType {
+impl Format for biome_js_syntax::TsConditionalType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIdentifierBinding {
+impl Format for biome_js_syntax::TsIdentifierBinding {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsEnumMember {
+impl Format for biome_js_syntax::TsEnumMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExternalModuleReference {
+impl Format for biome_js_syntax::TsExternalModuleReference {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsModuleBlock {
+impl Format for biome_js_syntax::TsModuleBlock {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsQualifiedModuleName {
+impl Format for biome_js_syntax::TsQualifiedModuleName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsEmptyExternalModuleDeclarationBody {
+impl Format for biome_js_syntax::TsEmptyExternalModuleDeclarationBody {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeParameterName {
+impl Format for biome_js_syntax::TsTypeParameterName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeParameterModifier {
+impl Format for biome_js_syntax::TsTypeParameterModifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsPredicateReturnType {
+impl Format for biome_js_syntax::TsPredicateReturnType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAssertsReturnType {
+impl Format for biome_js_syntax::TsAssertsReturnType {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsAssertsCondition {
+impl Format for biome_js_syntax::TsAssertsCondition {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeParameter {
+impl Format for biome_js_syntax::TsTypeParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTypeConstraintClause {
+impl Format for biome_js_syntax::TsTypeConstraintClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsDefaultTypeClause {
+impl Format for biome_js_syntax::TsDefaultTypeClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsExtendsClause {
+impl Format for biome_js_syntax::TsExtendsClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNameWithTypeArguments {
+impl Format for biome_js_syntax::TsNameWithTypeArguments {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsCallSignatureTypeMember {
+impl Format for biome_js_syntax::TsCallSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsPropertySignatureTypeMember {
+impl Format for biome_js_syntax::TsPropertySignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsConstructSignatureTypeMember {
+impl Format for biome_js_syntax::TsConstructSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMethodSignatureTypeMember {
+impl Format for biome_js_syntax::TsMethodSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsGetterSignatureTypeMember {
+impl Format for biome_js_syntax::TsGetterSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsSetterSignatureTypeMember {
+impl Format for biome_js_syntax::TsSetterSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsIndexSignatureTypeMember {
+impl Format for biome_js_syntax::TsIndexSignatureTypeMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMappedTypeReadonlyModifierClause {
+impl Format for biome_js_syntax::TsMappedTypeReadonlyModifierClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMappedTypeAsClause {
+impl Format for biome_js_syntax::TsMappedTypeAsClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsMappedTypeOptionalModifierClause {
+impl Format for biome_js_syntax::TsMappedTypeOptionalModifierClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsImportTypeQualifier {
+impl Format for biome_js_syntax::TsImportTypeQualifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsNamedTupleTypeElement {
+impl Format for biome_js_syntax::TsNamedTupleTypeElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsRestTupleTypeElement {
+impl Format for biome_js_syntax::TsRestTupleTypeElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsOptionalTupleTypeElement {
+impl Format for biome_js_syntax::TsOptionalTupleTypeElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTemplateChunkElement {
+impl Format for biome_js_syntax::TsTemplateChunkElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsTemplateElement {
+impl Format for biome_js_syntax::TsTemplateElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::TsQualifiedName {
+impl Format for biome_js_syntax::TsQualifiedName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxElement {
+impl Format for biome_js_syntax::JsxElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxSelfClosingElement {
+impl Format for biome_js_syntax::JsxSelfClosingElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxFragment {
+impl Format for biome_js_syntax::JsxFragment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxOpeningElement {
+impl Format for biome_js_syntax::JsxOpeningElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxClosingElement {
+impl Format for biome_js_syntax::JsxClosingElement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxOpeningFragment {
+impl Format for biome_js_syntax::JsxOpeningFragment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxClosingFragment {
+impl Format for biome_js_syntax::JsxClosingFragment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxName {
+impl Format for biome_js_syntax::JsxName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxReferenceIdentifier {
+impl Format for biome_js_syntax::JsxReferenceIdentifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxNamespaceName {
+impl Format for biome_js_syntax::JsxNamespaceName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxMemberName {
+impl Format for biome_js_syntax::JsxMemberName {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxAttribute {
+impl Format for biome_js_syntax::JsxAttribute {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxSpreadAttribute {
+impl Format for biome_js_syntax::JsxSpreadAttribute {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxAttributeInitializerClause {
+impl Format for biome_js_syntax::JsxAttributeInitializerClause {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxString {
+impl Format for biome_js_syntax::JsxString {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxExpressionAttributeValue {
+impl Format for biome_js_syntax::JsxExpressionAttributeValue {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxText {
+impl Format for biome_js_syntax::JsxText {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxExpressionChild {
+impl Format for biome_js_syntax::JsxExpressionChild {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsxSpreadChild {
+impl Format for biome_js_syntax::JsxSpreadChild {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknown {
+impl Format for biome_js_syntax::JsUnknown {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownStatement {
+impl Format for biome_js_syntax::JsUnknownStatement {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownExpression {
+impl Format for biome_js_syntax::JsUnknownExpression {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownMember {
+impl Format for biome_js_syntax::JsUnknownMember {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownBinding {
+impl Format for biome_js_syntax::JsUnknownBinding {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownAssignment {
+impl Format for biome_js_syntax::JsUnknownAssignment {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownParameter {
+impl Format for biome_js_syntax::JsUnknownParameter {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownImportAssertionEntry {
+impl Format for biome_js_syntax::JsUnknownImportAssertionEntry {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
 }
-impl Format for rome_js_syntax::JsUnknownNamedImportSpecifier {
+impl Format for biome_js_syntax::JsUnknownNamedImportSpecifier {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }

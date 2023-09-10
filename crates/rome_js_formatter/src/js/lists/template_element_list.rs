@@ -3,12 +3,12 @@ use crate::js::auxiliary::template_chunk_element::AnyTemplateChunkElement;
 use crate::js::auxiliary::template_element::{AnyTemplateElement, TemplateElementOptions};
 use crate::prelude::*;
 use crate::utils::test_each_template::EachTemplateTable;
-use biome_rowan::{declare_node_union, AstNodeListIterator, SyntaxResult};
-use rome_formatter::FormatRuleWithOptions;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyTsTemplateElement,
     JsLanguage, JsTemplateElementList, TsTemplateElementList,
 };
+use biome_rowan::{declare_node_union, AstNodeListIterator, SyntaxResult};
+use rome_formatter::FormatRuleWithOptions;
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone, Default)]

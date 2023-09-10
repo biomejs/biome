@@ -29,15 +29,15 @@ pub(crate) use assignment_like::{
 pub(crate) use binary_like_expression::{
     needs_binary_like_parentheses, AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
 };
+use biome_js_syntax::JsSyntaxToken;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifiers,
+};
 use biome_rowan::{AstNode, AstNodeList};
 pub(crate) use conditional::{AnyJsConditional, ConditionalJsxChain};
 pub(crate) use object_like::JsObjectLike;
 pub(crate) use object_pattern_like::JsObjectPatternLike;
 use rome_formatter::{format_args, write, Buffer};
-use rome_js_syntax::JsSyntaxToken;
-use rome_js_syntax::{
-    AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifiers,
-};
 pub(crate) use string_utils::*;
 pub(crate) use typescript::{
     is_object_like_type, should_hug_type, union_or_intersection_type_needs_parentheses,
@@ -66,7 +66,7 @@ pub(crate) fn is_long_curried_call(expression: Option<&JsCallExpression>) -> boo
 }
 
 /// Utility function to format the separators of the nodes that belong to the unions
-/// of [rome_js_syntax::TsAnyTypeMember].
+/// of [biome_js_syntax::TsAnyTypeMember].
 ///
 /// We can have two kind of separators: `,`, `;` or ASI.
 /// Because of how the grammar crafts the nodes, the parent will add the separator to the node.
@@ -91,7 +91,7 @@ impl Format<JsFormatContext> for FormatTypeMemberSeparator<'_> {
     }
 }
 
-/// Utility function to format the node [rome_js_syntax::JsInitializerClause]
+/// Utility function to format the node [biome_js_syntax::JsInitializerClause]
 pub(crate) struct FormatInitializerClause<'a> {
     initializer: Option<&'a JsInitializerClause>,
 }

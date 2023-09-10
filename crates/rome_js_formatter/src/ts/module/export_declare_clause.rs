@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsExportDeclareClause;
+use biome_js_syntax::TsExportDeclareClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::TsExportDeclareClause;
-use rome_js_syntax::TsExportDeclareClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExportDeclareClause;

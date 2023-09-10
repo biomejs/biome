@@ -3,7 +3,7 @@ use rome_formatter::write;
 
 use crate::parentheses::NeedsParentheses;
 use crate::utils::member_chain::MemberChain;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsCallExpressionFields, JsSyntaxKind, JsSyntaxNode,
 };
 
@@ -70,7 +70,7 @@ impl NeedsParentheses for JsCallExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsCallExpression;
+    use biome_js_syntax::JsCallExpression;
 
     #[test]
     fn needs_parentheses() {

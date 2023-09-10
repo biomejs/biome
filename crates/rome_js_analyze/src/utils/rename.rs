@@ -1,13 +1,13 @@
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
-use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
-use rome_js_semantic::{ReferencesExtensions, SemanticModel};
-use rome_js_syntax::{
+use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TextRange,
     TsIdentifierBinding,
 };
+use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -326,7 +326,7 @@ mod tests {
     use crate::utils::rename::RenameError;
     use crate::{assert_rename_nok, assert_rename_ok};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
-    use rome_js_syntax::TextRange;
+    use biome_js_syntax::TextRange;
 
     assert_rename_ok! {
         ok_rename_declaration,

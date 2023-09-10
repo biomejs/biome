@@ -1,12 +1,12 @@
 use crate::js::auxiliary::template_element::TemplateElementOptions;
 use crate::js::lists::template_element_list::{TemplateElementIndention, TemplateElementLayout};
 use crate::prelude::*;
+use biome_js_syntax::{AnyJsTemplateElement, JsTemplateElementList};
 use biome_text_size::{TextRange, TextSize};
 use rome_formatter::printer::Printer;
 use rome_formatter::{
     format_args, write, CstFormatContext, FormatOptions, RemoveSoftLinesBuffer, VecBuffer,
 };
-use rome_js_syntax::{AnyJsTemplateElement, JsTemplateElementList};
 use std::cmp;
 use unicode_width::UnicodeWidthStr;
 

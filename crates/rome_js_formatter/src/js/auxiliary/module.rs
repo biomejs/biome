@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::FormatInterpreterToken;
 
-use rome_js_syntax::JsModule;
-use rome_js_syntax::JsModuleFields;
+use biome_js_syntax::JsModule;
+use biome_js_syntax::JsModuleFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsModule;

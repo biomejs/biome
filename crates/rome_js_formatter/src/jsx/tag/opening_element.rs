@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_formatter::{write, CstFormatContext};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeValue, AnyJsxElementName, JsSyntaxToken, JsxAttributeList,
     JsxOpeningElement, JsxSelfClosingElement, JsxString, TsTypeArguments,
 };
+use biome_rowan::{declare_node_union, SyntaxResult};
+use rome_formatter::{write, CstFormatContext};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxOpeningElement;

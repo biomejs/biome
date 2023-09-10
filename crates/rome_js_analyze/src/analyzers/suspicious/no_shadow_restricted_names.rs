@@ -1,8 +1,8 @@
 use crate::globals::runtime::BUILTIN;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
-use rome_js_syntax::JsIdentifierBinding;
 
 declare_rule! {
     /// Disallow identifiers from shadowing restricted names.

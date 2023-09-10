@@ -2,7 +2,7 @@ use crate::prelude::*;
 use rome_formatter::{format_args, write, CstFormatContext};
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, JsParenthesizedExpression, JsParenthesizedExpressionFields, JsSyntaxNode,
 };
 

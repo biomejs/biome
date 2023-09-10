@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
-use rome_js_syntax::JsLiteralExportName;
-use rome_js_syntax::JsLiteralExportNameFields;
-use rome_js_syntax::JsSyntaxKind::JS_STRING_LITERAL;
+use biome_js_syntax::JsLiteralExportName;
+use biome_js_syntax::JsLiteralExportNameFields;
+use biome_js_syntax::JsSyntaxKind::JS_STRING_LITERAL;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLiteralExportName;

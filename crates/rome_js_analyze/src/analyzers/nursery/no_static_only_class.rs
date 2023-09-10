@@ -1,12 +1,12 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{AstNode, AstNodeList};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
     JsSetterClassMember, TsGetterSignatureClassMember, TsIndexSignatureClassMember,
     TsInitializedPropertySignatureClassMember, TsMethodSignatureClassMember,
     TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
+use biome_rowan::{AstNode, AstNodeList};
 
 declare_rule! {
     /// This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.

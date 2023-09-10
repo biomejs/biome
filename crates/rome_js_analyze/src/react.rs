@@ -2,14 +2,14 @@
 
 pub mod hooks;
 
-use biome_rowan::{AstNode, AstSeparatedList};
-use rome_js_semantic::{Binding, SemanticModel};
-use rome_js_syntax::{
+use biome_js_semantic::{Binding, SemanticModel};
+use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
     JsCallExpression, JsIdentifierBinding, JsImport, JsImportNamedClause,
     JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsObjectExpression,
     JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
 };
+use biome_rowan::{AstNode, AstSeparatedList};
 
 /// A trait to share common logic among data structures that "mimic" react APIs
 pub(crate) trait ReactApiCall {

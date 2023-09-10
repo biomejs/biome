@@ -6,8 +6,8 @@ use crate::parentheses::{
     update_or_lower_expression_needs_parentheses, NeedsParentheses,
 };
 
-use rome_js_syntax::{JsAwaitExpression, JsSyntaxNode};
-use rome_js_syntax::{JsAwaitExpressionFields, JsSyntaxKind};
+use biome_js_syntax::{JsAwaitExpression, JsSyntaxNode};
+use biome_js_syntax::{JsAwaitExpressionFields, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAwaitExpression;
@@ -87,7 +87,7 @@ pub(super) fn await_or_yield_needs_parens(parent: &JsSyntaxNode, node: &JsSyntax
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsAwaitExpression;
+    use biome_js_syntax::JsAwaitExpression;
 
     #[test]
     fn needs_parentheses() {

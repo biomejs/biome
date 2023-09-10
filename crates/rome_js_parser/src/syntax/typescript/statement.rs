@@ -18,9 +18,9 @@ use crate::syntax::typescript::{
     parse_ts_type, parse_ts_type_parameters, TypeContext, TypeMembers,
 };
 use crate::{syntax, Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
+use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use rome_js_syntax::{JsSyntaxKind::*, *};
 
 fn parse_literal_as_ts_enum_member(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();

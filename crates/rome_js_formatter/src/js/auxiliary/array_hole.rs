@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use rome_js_syntax::JsArrayHole;
+use biome_js_syntax::JsArrayHole;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayHole;

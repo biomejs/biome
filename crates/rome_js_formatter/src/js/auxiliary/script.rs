@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::FormatInterpreterToken;
 use rome_formatter::write;
 
-use rome_js_syntax::JsScript;
-use rome_js_syntax::JsScriptFields;
+use biome_js_syntax::JsScript;
+use biome_js_syntax::JsScriptFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsScript;

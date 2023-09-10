@@ -1,14 +1,14 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use std::collections::{HashMap, HashSet};
 
-use biome_rowan::AstNode;
-use rome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
-use rome_js_syntax::{
+use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
+use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
     AnyJsMemberExpression, JsArrayBindingPattern, JsArrayBindingPatternElementList,
     JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression, JsVariableDeclarator,
     TextRange,
 };
+use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 /// Return result of [react_hook_with_dependency].
@@ -258,8 +258,8 @@ pub fn is_binding_react_stable(
 #[cfg(test)]
 mod test {
     use super::*;
+    use biome_js_syntax::JsFileSource;
     use rome_js_parser::JsParserOptions;
-    use rome_js_syntax::JsFileSource;
 
     #[test]
     pub fn ok_react_stable_captures() {

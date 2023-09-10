@@ -3,8 +3,8 @@ use crate::utils::FormatOptionalSemicolon;
 
 use crate::js::classes::method_class_member::FormatAnyJsMethodMember;
 
+use biome_js_syntax::TsMethodSignatureClassMember;
 use rome_formatter::write;
-use rome_js_syntax::TsMethodSignatureClassMember;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMethodSignatureClassMember;

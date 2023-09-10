@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{JsxOpeningFragment, JsxOpeningFragmentFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsxOpeningFragment, JsxOpeningFragmentFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxOpeningFragment;

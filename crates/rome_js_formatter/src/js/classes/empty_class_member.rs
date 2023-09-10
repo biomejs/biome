@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use rome_js_syntax::JsEmptyClassMember;
-use rome_js_syntax::JsEmptyClassMemberFields;
+use biome_js_syntax::JsEmptyClassMember;
+use biome_js_syntax::JsEmptyClassMemberFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsEmptyClassMember;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::AnyJsAssignmentLike;
+use biome_js_syntax::JsVariableDeclarator;
 use rome_formatter::write;
-use rome_js_syntax::JsVariableDeclarator;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsVariableDeclarator;

@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 
+use biome_js_syntax::TsExportAsNamespaceClause;
+use biome_js_syntax::TsExportAsNamespaceClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::TsExportAsNamespaceClause;
-use rome_js_syntax::TsExportAsNamespaceClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExportAsNamespaceClause;

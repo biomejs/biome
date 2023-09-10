@@ -3,9 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
 
 use crate::JsRuleAction;
 

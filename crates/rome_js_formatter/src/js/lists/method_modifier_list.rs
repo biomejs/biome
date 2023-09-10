@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::format_modifiers::FormatModifiers;
-use rome_js_syntax::JsMethodModifierList;
+use biome_js_syntax::JsMethodModifierList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsMethodModifierList;

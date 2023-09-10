@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsStatement, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
     JsLabeledStatement, JsSwitchStatement, JsWhileStatement,
 };

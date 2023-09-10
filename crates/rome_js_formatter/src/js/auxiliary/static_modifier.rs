@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsStaticModifier;
-use rome_js_syntax::JsStaticModifierFields;
+use biome_js_syntax::JsStaticModifier;
+use biome_js_syntax::JsStaticModifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticModifier;

@@ -1,6 +1,6 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
-use rome_js_syntax::JsExportNamedFromSpecifierList;
+use biome_js_syntax::JsExportNamedFromSpecifierList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportNamedFromSpecifierList;

@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::{format_args, write};
 
 use crate::utils::FormatStatementBody;
-use rome_js_syntax::JsWithStatement;
-use rome_js_syntax::JsWithStatementFields;
+use biome_js_syntax::JsWithStatement;
+use biome_js_syntax::JsWithStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsWithStatement;

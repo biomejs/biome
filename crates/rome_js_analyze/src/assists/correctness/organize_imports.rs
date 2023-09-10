@@ -11,14 +11,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImport,
+    JsLanguage, JsModule, JsSyntaxToken, TextRange, TriviaPieceKind, T,
+};
 use biome_rowan::{
     chain_trivia_pieces, syntax::SyntaxTrivia, AstNode, AstNodeExt, AstNodeList, AstSeparatedList,
     BatchMutationExt, SyntaxTriviaPiece, TokenText, TriviaPiece,
-};
-use rome_js_factory::make;
-use rome_js_syntax::{
-    AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImport,
-    JsLanguage, JsModule, JsSyntaxToken, TextRange, TriviaPieceKind, T,
 };
 
 use crate::JsRuleAction;

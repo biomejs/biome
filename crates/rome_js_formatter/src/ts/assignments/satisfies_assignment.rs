@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::assignments::as_assignment::TsAsOrSatisfiesAssignment;
-use rome_js_syntax::JsSyntaxNode;
-use rome_js_syntax::TsSatisfiesAssignment;
+use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::TsSatisfiesAssignment;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSatisfiesAssignment;
@@ -28,7 +28,7 @@ impl NeedsParentheses for TsSatisfiesAssignment {
 mod tests {
 
     use crate::assert_needs_parentheses;
-    use rome_js_syntax::TsSatisfiesAssignment;
+    use biome_js_syntax::TsSatisfiesAssignment;
 
     #[test]
     fn needs_parentheses() {

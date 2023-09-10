@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_js_syntax::JsSwitchCaseList;
+use biome_js_syntax::JsSwitchCaseList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSwitchCaseList;

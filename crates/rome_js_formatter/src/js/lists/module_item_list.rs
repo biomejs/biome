@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList};
+use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsModuleItemList;

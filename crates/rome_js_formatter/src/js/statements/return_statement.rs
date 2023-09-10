@@ -4,10 +4,10 @@ use crate::utils::{AnyJsBinaryLikeExpression, FormatOptionalSemicolon, FormatSta
 use rome_formatter::{format_args, write, CstFormatContext};
 
 use crate::parentheses::{get_expression_left_side, AnyJsExpressionLeftSide};
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, JsReturnStatement, JsSequenceExpression, JsSyntaxToken, JsThrowStatement,
 };
+use biome_rowan::{declare_node_union, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsReturnStatement;

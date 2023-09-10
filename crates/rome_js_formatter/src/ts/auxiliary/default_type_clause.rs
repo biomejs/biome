@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsDefaultTypeClause, TsDefaultTypeClauseFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsDefaultTypeClause, TsDefaultTypeClauseFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsDefaultTypeClause;

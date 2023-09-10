@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::FormatInitializerClause;
 
+use biome_js_syntax::{TsEnumMember, TsEnumMemberFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsEnumMember, TsEnumMemberFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsEnumMember;

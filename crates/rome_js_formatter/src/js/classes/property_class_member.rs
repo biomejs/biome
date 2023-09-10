@@ -1,12 +1,12 @@
 use crate::context::Semicolons;
 use crate::prelude::*;
 use crate::utils::{AnyJsAssignmentLike, FormatSemicolon};
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_formatter::write;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, JsInitializerClause, JsPropertyClassMember,
     JsSyntaxToken, TsInitializedPropertySignatureClassMember, TsPropertySignatureClassMember,
 };
+use biome_rowan::{declare_node_union, SyntaxResult};
+use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPropertyClassMember;

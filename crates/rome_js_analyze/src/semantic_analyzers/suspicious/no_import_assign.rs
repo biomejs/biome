@@ -1,8 +1,8 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use rome_js_semantic::ReferencesExtensions;
-use rome_js_syntax::{
+use biome_js_semantic::ReferencesExtensions;
+use biome_js_syntax::{
     JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsImportDefaultClause,
     JsImportNamespaceClause, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
     JsShorthandNamedImportSpecifier,

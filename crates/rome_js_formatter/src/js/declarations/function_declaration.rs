@@ -2,14 +2,14 @@ use crate::prelude::*;
 
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
-use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_formatter::{write, RemoveSoftLinesBuffer};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsBinding, AnyTsReturnType, AnyTsType, JsFunctionBody, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsParameters, JsSyntaxToken,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
     TsReturnTypeAnnotation, TsTypeParameters,
 };
+use biome_rowan::{declare_node_union, SyntaxResult};
+use rome_formatter::{write, RemoveSoftLinesBuffer};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFunctionDeclaration;

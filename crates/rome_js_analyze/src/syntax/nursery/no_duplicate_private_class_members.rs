@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 
 use biome_diagnostics::category;
+use biome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
 use biome_rowan::AstNode;
-use rome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
 
 declare_rule! {
     /// Catch a `SyntaxError` when defining duplicate private class members.

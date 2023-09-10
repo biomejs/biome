@@ -39,8 +39,7 @@
 
 use crate::utils::{AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression};
 
-use biome_rowan::{declare_node_union, match_ast, AstNode, AstSeparatedList, SyntaxResult};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsFunctionBody,
     AnyJsLiteralExpression, AnyTsReturnType, AnyTsType, JsArrowFunctionExpression,
     JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator, JsComputedMemberAssignment,
@@ -50,6 +49,7 @@ use rome_js_syntax::{
     TsConstructorType, TsFunctionType, TsIndexedAccessType, TsIntersectionTypeElementList,
     TsParenthesizedType, TsUnionTypeVariantList,
 };
+use biome_rowan::{declare_node_union, match_ast, AstNode, AstSeparatedList, SyntaxResult};
 
 /// Node that may be parenthesized to ensure it forms valid syntax or to improve readability
 pub trait NeedsParentheses: AstNode<Language = JsLanguage> {
@@ -1040,9 +1040,9 @@ pub(crate) fn debug_assert_is_parent(node: &JsSyntaxNode, parent: &JsSyntaxNode)
 pub(crate) mod tests {
     use super::NeedsParentheses;
     use crate::transform;
+    use biome_js_syntax::{JsFileSource, JsLanguage};
     use biome_rowan::AstNode;
     use rome_js_parser::JsParserOptions;
-    use rome_js_syntax::{JsFileSource, JsLanguage};
 
     pub(crate) fn assert_needs_parentheses_impl<
         T: AstNode<Language = JsLanguage> + std::fmt::Debug + NeedsParentheses,
@@ -1133,7 +1133,7 @@ pub(crate) mod tests {
     ///
     /// ```
     /// # use rome_js_formatter::assert_needs_parentheses;
-    /// use rome_js_syntax::JsStaticMemberExpression;
+    /// use biome_js_syntax::JsStaticMemberExpression;
     ///
     /// assert_needs_parentheses!("new (test().a)()", JsStaticMemberExpression);
     /// ```
@@ -1141,7 +1141,7 @@ pub(crate) mod tests {
     /// Asserts that [NeedsParentheses.needs_parentheses()] returns true for the only [JsStaticMemberExpression] in the program.
     ///
     /// ```
-    /// # use rome_js_syntax::JsStaticMemberExpression;
+    /// # use biome_js_syntax::JsStaticMemberExpression;
     /// use rome_js_formatter::assert_needs_parentheses;
     ///
     /// assert_needs_parentheses!("new (test().a).b)()", JsStaticMemberExpression[1]);
@@ -1151,14 +1151,14 @@ pub(crate) mod tests {
     #[macro_export]
     macro_rules! assert_needs_parentheses {
         ($input:expr, $Node:ident) => {{
-            $crate::assert_needs_parentheses!($input, $Node, rome_js_syntax::JsFileSource::ts())
+            $crate::assert_needs_parentheses!($input, $Node, biome_js_syntax::JsFileSource::ts())
         }};
 
         ($input:expr, $Node:ident[$index:expr]) => {{
             $crate::assert_needs_parentheses!(
                 $input,
                 $Node[$index],
-                rome_js_syntax::JsFileSource::ts()
+                biome_js_syntax::JsFileSource::ts()
             )
         }};
 
@@ -1185,7 +1185,7 @@ pub(crate) mod tests {
     ///
     ///
     /// ```
-    /// # use rome_js_syntax::JsStaticMemberExpression;
+    /// # use biome_js_syntax::JsStaticMemberExpression;
     /// use rome_js_formatter::assert_not_needs_parentheses;
     ///
     /// assert_not_needs_parentheses!("a.b", JsStaticMemberExpression);
@@ -1194,7 +1194,7 @@ pub(crate) mod tests {
     /// Asserts that [NeedsParentheses.needs_parentheses()] returns true for the only [JsStaticMemberExpression] in the program.
     ///
     /// ```
-    /// # use rome_js_syntax::JsStaticMemberExpression;
+    /// # use biome_js_syntax::JsStaticMemberExpression;
     /// use rome_js_formatter::assert_not_needs_parentheses;
     ///
     /// assert_not_needs_parentheses!("a.b.c", JsStaticMemberExpression[0]);
@@ -1204,14 +1204,18 @@ pub(crate) mod tests {
     #[macro_export]
     macro_rules! assert_not_needs_parentheses {
         ($input:expr, $Node:ident) => {{
-            $crate::assert_not_needs_parentheses!($input, $Node, rome_js_syntax::JsFileSource::ts())
+            $crate::assert_not_needs_parentheses!(
+                $input,
+                $Node,
+                biome_js_syntax::JsFileSource::ts()
+            )
         }};
 
         ($input:expr, $Node:ident[$index:expr]) => {{
             $crate::assert_not_needs_parentheses!(
                 $input,
                 $Node[$index],
-                rome_js_syntax::JsFileSource::ts()
+                biome_js_syntax::JsFileSource::ts()
             )
         }};
 

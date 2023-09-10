@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsIdentifierBinding;
+use biome_js_syntax::JsIdentifierBindingFields;
 use rome_formatter::write;
-use rome_js_syntax::JsIdentifierBinding;
-use rome_js_syntax::JsIdentifierBindingFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsIdentifierBinding;

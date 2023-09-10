@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsDeclareStatement;
+use biome_js_syntax::TsDeclareStatementFields;
 use rome_formatter::write;
-use rome_js_syntax::TsDeclareStatement;
-use rome_js_syntax::TsDeclareStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsDeclareStatement;

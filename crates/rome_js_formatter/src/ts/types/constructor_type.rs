@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::types::function_type::function_like_type_needs_parentheses;
+use biome_js_syntax::TsConstructorTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsConstructorType};
 use rome_formatter::write;
-use rome_js_syntax::TsConstructorTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsConstructorType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConstructorType;
@@ -54,7 +54,7 @@ impl NeedsParentheses for TsConstructorType {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsConstructorType;
+    use biome_js_syntax::TsConstructorType;
 
     #[test]
     fn needs_parentheses() {

@@ -36,15 +36,15 @@ use crate::syntax::typescript::{
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, StrictMode};
+use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::TextSize;
+use biome_js_syntax::{JsSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::ParserProgress;
 use biome_rowan::{SyntaxKind, TextRange};
 use bitflags::bitflags;
 use drop_bomb::DebugDropBomb;
-use rome_js_syntax::JsSyntaxKind::*;
-use rome_js_syntax::TextSize;
-use rome_js_syntax::{JsSyntaxKind, T};
 use smallvec::SmallVec;
 use std::fmt::Debug;
 use std::ops::Add;

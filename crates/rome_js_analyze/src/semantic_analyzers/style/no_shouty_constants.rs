@@ -2,15 +2,15 @@ use crate::{semantic_services::Semantic, utils::batch::JsBatchMutation, JsRuleAc
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
-use rome_js_factory::make::{js_literal_member_name, js_property_object_member};
-use rome_js_semantic::{Reference, ReferencesExtensions};
-use rome_js_syntax::{
+use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
+use biome_js_semantic::{Reference, ReferencesExtensions};
+use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMemberName, JsIdentifierBinding,
     JsIdentifierExpression, JsReferenceIdentifier, JsShorthandPropertyObjectMember,
     JsStringLiteralExpression, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarator,
     JsVariableDeclaratorList,
 };
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
 
 declare_rule! {
     /// Disallow the use of constants which its value is the upper-case version of its name.

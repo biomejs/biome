@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsImportNamespaceClause;
+use biome_js_syntax::JsImportNamespaceClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::JsImportNamespaceClause;
-use rome_js_syntax::JsImportNamespaceClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportNamespaceClause;

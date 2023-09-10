@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsPrivateName;
+use biome_js_syntax::JsPrivateNameFields;
 use rome_formatter::write;
-use rome_js_syntax::JsPrivateName;
-use rome_js_syntax::JsPrivateNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPrivateName;

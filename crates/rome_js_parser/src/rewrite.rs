@@ -4,9 +4,9 @@ use crate::lexer::TextSize;
 use crate::parser::rewrite_parser::{RewriteParser, RewriteToken};
 use crate::parser::JsParserCheckpoint;
 use crate::JsParser;
+use biome_js_syntax::JsSyntaxKind;
 use biome_parser::tree_sink::TreeSink;
 use biome_parser::{event::process, prelude::*};
-use rome_js_syntax::JsSyntaxKind;
 
 struct RewriteParseEventsTreeSink<'r, 'p, T> {
     reparse: &'r mut T,

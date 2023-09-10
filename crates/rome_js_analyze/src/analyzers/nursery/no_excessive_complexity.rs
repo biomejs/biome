@@ -7,12 +7,12 @@ use biome_deserialize::{
     json::{has_only_known_keys, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
-use bpaf::Bpaf;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator,
 };
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use bpaf::Bpaf;
 use rome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -302,7 +302,7 @@ impl CognitiveComplexityVisitor {
 /// Note: These are mostly nodes that increase the complexity of the function's
 /// control flow.
 fn increases_nesting(node: &SyntaxNode<JsLanguage>) -> bool {
-    use rome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::JsSyntaxKind::*;
     is_loop_node(node)
         || matches!(
             node.kind(),
@@ -311,7 +311,7 @@ fn increases_nesting(node: &SyntaxNode<JsLanguage>) -> bool {
 }
 
 fn is_loop_node(node: &SyntaxNode<JsLanguage>) -> bool {
-    use rome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::JsSyntaxKind::*;
     matches!(
         node.kind(),
         JS_DO_WHILE_STATEMENT
@@ -338,7 +338,7 @@ fn is_loop_node(node: &SyntaxNode<JsLanguage>) -> bool {
 /// specifically (probably because it's highly specific to JavaScript), so its
 /// inclusion here is a personal judgement call.
 fn receives_structural_penalty(node: &SyntaxNode<JsLanguage>) -> bool {
-    use rome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::JsSyntaxKind::*;
     receives_nesting_penalty(node)
         || matches!(node.kind(), JS_FINALLY_CLAUSE | JS_WITH_STATEMENT)
         || JsBreakStatement::cast_ref(node)
@@ -354,7 +354,7 @@ fn receives_structural_penalty(node: &SyntaxNode<JsLanguage>) -> bool {
 ///
 /// Note: This is a strict subset of the nodes that receive a structural penalty.
 fn receives_nesting_penalty(node: &SyntaxNode<JsLanguage>) -> bool {
-    use rome_js_syntax::JsSyntaxKind::*;
+    use biome_js_syntax::JsSyntaxKind::*;
     is_loop_node(node)
         || matches!(
             node.kind(),

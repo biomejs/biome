@@ -16,15 +16,15 @@ use crate::{
     state::ParserStateCheckpoint,
     token_source::{JsTokenSource, TokenSourceCheckpoint},
 };
+use biome_js_syntax::{
+    JsFileSource,
+    JsSyntaxKind::{self},
+};
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
 use biome_parser::{ParserContext, ParserContextCheckpoint};
 pub(crate) use parsed_syntax::ParsedSyntax;
-use rome_js_syntax::{
-    JsFileSource,
-    JsSyntaxKind::{self},
-};
 
 /// An extremely fast, error tolerant, completely lossless JavaScript parser
 ///
@@ -219,7 +219,7 @@ pub struct JsParserCheckpoint {
 mod tests {
     use crate::prelude::*;
     use crate::JsParserOptions;
-    use rome_js_syntax::{JsFileSource, JsSyntaxKind};
+    use biome_js_syntax::{JsFileSource, JsSyntaxKind};
 
     #[test]
     #[should_panic(

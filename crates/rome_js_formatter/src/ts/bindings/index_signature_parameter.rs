@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsIndexSignatureParameter, TsIndexSignatureParameterFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsIndexSignatureParameter, TsIndexSignatureParameterFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIndexSignatureParameter;

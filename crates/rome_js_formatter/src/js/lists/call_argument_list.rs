@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::write_arguments_multi_line;
+use biome_js_syntax::JsCallArgumentList;
 use rome_formatter::write;
-use rome_js_syntax::JsCallArgumentList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCallArgumentList;

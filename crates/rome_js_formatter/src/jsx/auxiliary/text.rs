@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsxText;
 use rome_formatter::FormatResult;
-use rome_js_syntax::JsxText;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxText;

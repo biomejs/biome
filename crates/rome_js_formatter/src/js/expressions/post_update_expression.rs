@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::write;
 
 use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
-use rome_js_syntax::JsPostUpdateExpressionFields;
-use rome_js_syntax::{JsPostUpdateExpression, JsSyntaxNode};
+use biome_js_syntax::JsPostUpdateExpressionFields;
+use biome_js_syntax::{JsPostUpdateExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPostUpdateExpression;
@@ -33,7 +33,7 @@ impl NeedsParentheses for JsPostUpdateExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsPostUpdateExpression;
+    use biome_js_syntax::JsPostUpdateExpression;
 
     #[test]
     fn needs_parentheses() {

@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
+use biome_js_syntax::JsLiteralMemberNameFields;
+use biome_js_syntax::{JsLiteralMemberName, JsSyntaxKind};
 use rome_formatter::write;
-use rome_js_syntax::JsLiteralMemberNameFields;
-use rome_js_syntax::{JsLiteralMemberName, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLiteralMemberName;

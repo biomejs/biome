@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsReadonlyModifier;
+use biome_js_syntax::TsReadonlyModifierFields;
 use rome_formatter::write;
-use rome_js_syntax::TsReadonlyModifier;
-use rome_js_syntax::TsReadonlyModifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsReadonlyModifier;

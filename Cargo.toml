@@ -53,11 +53,11 @@ biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_
 rome_formatter               = { version = "0.1.0", path = "./crates/rome_formatter" }
 rome_formatter_test          = { path = "./crates/rome_formatter_test" }
 rome_js_analyze              = { path = "./crates/rome_js_analyze" }
-rome_js_factory              = { version = "0.2.0", path = "./crates/rome_js_factory" }
+biome_js_factory              = { version = "0.2.0", path = "./crates/biome_js_factory" }
 rome_js_formatter            = { path = "./crates/rome_js_formatter" }
 rome_js_parser               = { path = "./crates/rome_js_parser" }
-rome_js_semantic             = { path = "./crates/rome_js_semantic" }
-rome_js_syntax               = { version = "0.2.0", path = "./crates/rome_js_syntax" }
+biome_js_semantic             = { path = "./crates/biome_js_semantic" }
+biome_js_syntax               = { version = "0.2.0", path = "./crates/biome_js_syntax" }
 rome_json_analyze            = { path = "./crates/rome_json_analyze" }
 rome_json_factory            = { version = "0.2.0", path = "./crates/rome_json_factory" }
 rome_json_formatter          = { path = "./crates/rome_json_formatter" }

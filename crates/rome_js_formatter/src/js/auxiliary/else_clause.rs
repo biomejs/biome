@@ -1,16 +1,16 @@
 use crate::prelude::*;
 
 use crate::utils::FormatStatementBody;
+use biome_js_syntax::JsElseClause;
+use biome_js_syntax::JsElseClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::JsElseClause;
-use rome_js_syntax::JsElseClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsElseClause;
 
 impl FormatNodeRule<JsElseClause> for FormatJsElseClause {
     fn fmt_fields(&self, node: &JsElseClause, f: &mut JsFormatter) -> FormatResult<()> {
-        use rome_js_syntax::AnyJsStatement::*;
+        use biome_js_syntax::AnyJsStatement::*;
 
         let JsElseClauseFields {
             else_token,

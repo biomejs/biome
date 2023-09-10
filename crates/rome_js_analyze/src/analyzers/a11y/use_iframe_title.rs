@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use rome_js_syntax::jsx_ext::AnyJsxElement;
 
 declare_rule! {
     /// Enforces the usage of the attribute `title` for the element `iframe`.

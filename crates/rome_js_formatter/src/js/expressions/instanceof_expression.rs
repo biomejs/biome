@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::{JsInstanceofExpression, JsSyntaxNode};
+use biome_js_syntax::{JsInstanceofExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInstanceofExpression;
@@ -30,7 +30,7 @@ impl NeedsParentheses for JsInstanceofExpression {
 #[cfg(test)]
 mod tests {
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsFileSource, JsInstanceofExpression};
+    use biome_js_syntax::{JsFileSource, JsInstanceofExpression};
 
     #[test]
     fn needs_parentheses() {

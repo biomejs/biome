@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use rome_js_syntax::JsxAttributeList;
+use biome_js_syntax::JsxAttributeList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxAttributeList;

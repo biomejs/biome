@@ -20,8 +20,8 @@ bitflags               = { workspace = true }
 cfg-if                 = "1.0.0"
 drop_bomb              = "0.1.5"
 indexmap               = { workspace = true }
-rome_js_factory        = { workspace = true }
-rome_js_syntax         = { workspace = true }
+biome_js_factory        = { workspace = true }
+biome_js_syntax         = { workspace = true }
 schemars               = { workspace = true, optional = true }
 serde                  = { workspace = true, features = ["derive"] }
 serde_json             = { workspace = true }
@@ -37,7 +37,7 @@ tests_macros      = { workspace = true }
 
 [features]
 schemars = ["dep:schemars"]
-serde    = ["rome_js_syntax/serde"]
+serde    = ["biome_js_syntax/serde"]
 tests    = []
 
 # cargo-workspaces metadata

@@ -1,7 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 use crate::prelude::*;
-use rome_js_syntax::AnyJsBindingPattern;
+use biome_js_syntax::AnyJsBindingPattern;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsBindingPattern;
 impl FormatRule<AnyJsBindingPattern> for FormatAnyJsBindingPattern {

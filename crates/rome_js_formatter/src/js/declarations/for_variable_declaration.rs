@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsForVariableDeclaration;
+use biome_js_syntax::JsForVariableDeclarationFields;
 use rome_formatter::{format_args, write};
-use rome_js_syntax::JsForVariableDeclaration;
-use rome_js_syntax::JsForVariableDeclarationFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsForVariableDeclaration;

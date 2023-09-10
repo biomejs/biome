@@ -1,5 +1,6 @@
 use crate::test_case::TestCase;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::NodeCache;
 use criterion::black_box;
@@ -7,7 +8,6 @@ use rome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::{JsFormatContext, JsFormatOptions};
 use rome_js_parser::JsParserOptions;
-use rome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use rome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use rome_json_parser::JsonParserOptions;
 use rome_json_syntax::JsonSyntaxNode;

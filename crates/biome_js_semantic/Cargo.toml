@@ -1,0 +1,21 @@
+[package]
+authors.workspace    = true
+description          = "Semantic model for the JavaScript language"
+documentation        = "https://docs.rs/biome_js_semantic"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_js_semantic"
+repository.workspace = true
+version              = "0.2.0"
+
+[dependencies]
+biome_rowan    = { workspace = true }
+biome_js_syntax = { workspace = true }
+rust-lapper    = "1.0.1"
+rustc-hash     = { workspace = true }
+
+[dev-dependencies]
+biome_console     = { workspace = true }
+biome_diagnostics = { workspace = true }
+biome_markup      = { workspace = true }
+rome_js_parser    = { workspace = true }

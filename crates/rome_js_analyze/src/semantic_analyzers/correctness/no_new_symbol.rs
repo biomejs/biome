@@ -2,9 +2,9 @@ use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 
 declare_rule! {
     /// Disallow `new` operators with the `Symbol` object.

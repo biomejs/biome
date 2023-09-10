@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsMappedTypeReadonlyModifierClause;
+use biome_js_syntax::TsMappedTypeReadonlyModifierClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::TsMappedTypeReadonlyModifierClause;
-use rome_js_syntax::TsMappedTypeReadonlyModifierClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMappedTypeReadonlyModifierClause;

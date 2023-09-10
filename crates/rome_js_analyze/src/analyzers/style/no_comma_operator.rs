@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
-use rome_js_syntax::{JsForStatement, JsSequenceExpression};
 
 declare_rule! {
     /// Disallow comma operator.

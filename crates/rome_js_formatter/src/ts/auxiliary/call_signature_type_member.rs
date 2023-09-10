@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
 use rome_formatter::{format_args, write};
 
-use rome_js_syntax::{TsCallSignatureTypeMember, TsCallSignatureTypeMemberFields};
+use biome_js_syntax::{TsCallSignatureTypeMember, TsCallSignatureTypeMemberFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsCallSignatureTypeMember;

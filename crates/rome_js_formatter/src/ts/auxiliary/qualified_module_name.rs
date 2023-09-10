@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsQualifiedModuleName;
+use biome_js_syntax::TsQualifiedModuleNameFields;
 use rome_formatter::write;
-use rome_js_syntax::TsQualifiedModuleName;
-use rome_js_syntax::TsQualifiedModuleNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsQualifiedModuleName;

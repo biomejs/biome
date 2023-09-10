@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
 
 use crate::js::classes::method_class_member::FormatAnyJsMethodMember;
+use biome_js_syntax::TsMethodSignatureTypeMember;
 use rome_formatter::write;
-use rome_js_syntax::TsMethodSignatureTypeMember;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMethodSignatureTypeMember;

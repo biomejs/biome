@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsShorthandNamedImportSpecifier;
+use biome_js_syntax::JsShorthandNamedImportSpecifierFields;
 use rome_formatter::write;
-use rome_js_syntax::JsShorthandNamedImportSpecifier;
-use rome_js_syntax::JsShorthandNamedImportSpecifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsShorthandNamedImportSpecifier;

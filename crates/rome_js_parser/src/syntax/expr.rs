@@ -30,11 +30,11 @@ use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax
 use crate::JsSyntaxFeature::{Jsx, StrictMode, TypeScript};
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{syntax, JsParser, ParseRecovery, ParsedSyntax};
+use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::ParserProgress;
 use bitflags::bitflags;
-use rome_js_syntax::{JsSyntaxKind::*, *};
 
 pub const EXPR_RECOVERY_SET: TokenSet<JsSyntaxKind> =
     token_set![VAR_KW, R_PAREN, L_PAREN, L_BRACK, R_BRACK];

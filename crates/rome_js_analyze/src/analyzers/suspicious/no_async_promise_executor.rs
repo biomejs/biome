@@ -1,9 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{AstNode, AstSeparatedList};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
 };
+use biome_rowan::{AstNode, AstSeparatedList};
 
 declare_rule! {
     /// Disallows using an async function as a Promise executor.

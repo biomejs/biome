@@ -3,10 +3,10 @@ use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, Ru
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, BatchMutationExt};
-use rome_js_syntax::{
+use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
 };
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.

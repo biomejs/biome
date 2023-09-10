@@ -6,9 +6,9 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use roaring::RoaringBitmap;
-use rome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use rustc_hash::FxHashMap;
 
 use crate::{control_flow::AnyJsControlFlowRoot, ControlFlowGraph};

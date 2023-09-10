@@ -14,8 +14,8 @@ biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
 lazy_static       = { workspace = true }
-rome_js_factory   = { workspace = true }
-rome_js_syntax    = { workspace = true }
+biome_js_factory   = { workspace = true }
+biome_js_syntax    = { workspace = true }
 
 
 [dev-dependencies]

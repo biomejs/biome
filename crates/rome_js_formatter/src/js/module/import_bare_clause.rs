@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsImportBareClause;
+use biome_js_syntax::JsImportBareClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::JsImportBareClause;
-use rome_js_syntax::JsImportBareClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportBareClause;

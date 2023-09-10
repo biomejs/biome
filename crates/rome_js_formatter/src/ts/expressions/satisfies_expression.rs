@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::expressions::as_expression::TsAsOrSatisfiesExpression;
-use rome_js_syntax::{JsSyntaxNode, TsSatisfiesExpression};
+use biome_js_syntax::{JsSyntaxNode, TsSatisfiesExpression};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSatisfiesExpression;
@@ -27,7 +27,7 @@ impl NeedsParentheses for TsSatisfiesExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::{JsFileSource, TsSatisfiesExpression};
+    use biome_js_syntax::{JsFileSource, TsSatisfiesExpression};
 
     #[test]
     fn needs_parentheses() {

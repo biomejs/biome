@@ -2,8 +2,8 @@ use crate::js::bindings::parameters::ParameterLayout;
 use crate::prelude::*;
 
 use crate::context::trailing_comma::FormatTrailingComma;
-use rome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
-use rome_js_syntax::{AnyJsConstructorParameter, AnyJsParameter, JsParameterList};
+use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
+use biome_js_syntax::{AnyJsConstructorParameter, AnyJsParameter, JsParameterList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsParameterList;

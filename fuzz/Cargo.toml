@@ -23,7 +23,7 @@ rome_formatter = { path = "../crates/rome_formatter" }
 rome_js_analyze = { path = "../crates/rome_js_analyze" }
 rome_js_formatter = { path = "../crates/rome_js_formatter" }
 rome_js_parser = { path = "../crates/rome_js_parser" }
-rome_js_syntax = { path = "../crates/rome_js_syntax" }
+biome_js_syntax = { path = "../crates/biome_js_syntax" }
 rome_json_formatter = { path = "../crates/rome_json_formatter" }
 rome_json_parser = { path = "../crates/rome_json_parser" }
 rome_json_syntax = { path = "../crates/rome_json_syntax" }

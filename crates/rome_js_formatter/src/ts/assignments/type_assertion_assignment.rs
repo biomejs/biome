@@ -1,9 +1,9 @@
 use crate::prelude::*;
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsTypeAssertionAssignmentFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsTypeAssertionAssignmentFields};
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::TsTypeAssertionAssignment;
+use biome_js_syntax::TsTypeAssertionAssignment;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeAssertionAssignment;
@@ -54,7 +54,7 @@ impl NeedsParentheses for TsTypeAssertionAssignment {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsTypeAssertionAssignment;
+    use biome_js_syntax::TsTypeAssertionAssignment;
 
     #[test]
     fn needs_parentheses() {

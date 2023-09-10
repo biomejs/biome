@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsName;
+use biome_js_syntax::JsNameFields;
 use rome_formatter::write;
-use rome_js_syntax::JsName;
-use rome_js_syntax::JsNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsName;

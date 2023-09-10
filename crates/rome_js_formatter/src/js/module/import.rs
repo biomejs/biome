@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::FormatStatementSemicolon;
 
-use rome_js_syntax::JsImport;
-use rome_js_syntax::JsImportFields;
+use biome_js_syntax::JsImport;
+use biome_js_syntax::JsImportFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImport;

@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 use biome_rowan::AstNode;
-use rome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 
 declare_rule! {
     /// Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.

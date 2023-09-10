@@ -1,10 +1,10 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{AstNode, TextRange};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsUnaryOperator,
     TsEnumDeclaration,
 };
+use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashSet;
 
 declare_rule! {

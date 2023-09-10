@@ -3,10 +3,10 @@ use rome_formatter::{format_args, write};
 
 use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
 
+use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::JsUnaryExpression;
+use biome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
 use biome_rowan::match_ast;
-use rome_js_syntax::JsSyntaxNode;
-use rome_js_syntax::JsUnaryExpression;
-use rome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsUnaryExpression;
@@ -77,7 +77,7 @@ impl NeedsParentheses for JsUnaryExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsUnaryExpression;
+    use biome_js_syntax::JsUnaryExpression;
 
     #[test]
     fn needs_parentheses() {

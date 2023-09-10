@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsTryStatement;
+use biome_js_syntax::JsTryStatementFields;
 use rome_formatter::write;
-use rome_js_syntax::JsTryStatement;
-use rome_js_syntax::JsTryStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTryStatement;

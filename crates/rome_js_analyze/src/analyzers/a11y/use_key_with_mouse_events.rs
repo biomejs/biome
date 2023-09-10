@@ -2,8 +2,8 @@ use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::{markup, MarkupBuf};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use rome_js_syntax::jsx_ext::AnyJsxElement;
 
 declare_rule! {
     /// Enforce `onMouseOver` / `onMouseOut` are accompanied by `onFocus` / `onBlur`.

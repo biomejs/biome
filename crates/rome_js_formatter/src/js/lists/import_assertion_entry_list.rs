@@ -1,6 +1,6 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
-use rome_js_syntax::JsImportAssertionEntryList;
+use biome_js_syntax::JsImportAssertionEntryList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportAssertionEntryList;

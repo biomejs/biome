@@ -1,6 +1,6 @@
 use crate::js::lists::template_element_list::AnyTemplateElementList;
 use crate::prelude::*;
-use rome_js_syntax::TsTemplateElementList;
+use biome_js_syntax::TsTemplateElementList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTemplateElementList;

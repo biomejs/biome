@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{JsxClosingElement, JsxClosingElementFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsxClosingElement, JsxClosingElementFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxClosingElement;

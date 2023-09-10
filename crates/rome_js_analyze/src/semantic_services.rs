@@ -2,9 +2,9 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
 };
+use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::{AstNode, SyntaxNode};
-use rome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
-use rome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 
 pub struct SemanticServices {
     model: SemanticModel,

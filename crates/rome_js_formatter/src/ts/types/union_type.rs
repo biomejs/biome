@@ -4,10 +4,10 @@ use crate::utils::{
     should_hug_type, union_or_intersection_type_needs_parentheses, FormatTypeMemberSeparator,
     TsIntersectionOrUnionTypeList,
 };
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TsTupleTypeElementList, TsUnionType};
+use biome_js_syntax::{JsSyntaxNode, TsUnionTypeFields};
 use biome_rowan::SyntaxNodeOptionExt;
 use rome_formatter::{format_args, write, Buffer};
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TsTupleTypeElementList, TsUnionType};
-use rome_js_syntax::{JsSyntaxNode, TsUnionTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsUnionType;

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsArrayBindingPattern;
+use biome_js_syntax::JsArrayBindingPatternFields;
 use rome_formatter::write;
-use rome_js_syntax::JsArrayBindingPattern;
-use rome_js_syntax::JsArrayBindingPatternFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayBindingPattern;

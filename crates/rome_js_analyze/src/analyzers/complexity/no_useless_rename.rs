@@ -2,12 +2,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{declare_node_union, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     JsExportNamedFromSpecifier, JsExportNamedSpecifier, JsNamedImportSpecifier,
     JsObjectBindingPatternProperty, JsSyntaxElement,
 };
+use biome_rowan::{declare_node_union, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 

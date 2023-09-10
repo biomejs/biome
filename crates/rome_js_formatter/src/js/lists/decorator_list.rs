@@ -1,14 +1,14 @@
 use crate::prelude::*;
 use crate::utils::format_modifiers::should_expand_decorators;
-use biome_rowan::SyntaxNodeOptionExt;
-use rome_formatter::write;
-use rome_js_syntax::JsSyntaxKind::{
+use biome_js_syntax::JsSyntaxKind::{
     JS_CLASS_EXPRESSION, JS_FORMAL_PARAMETER, JS_REST_PARAMETER, TS_PROPERTY_PARAMETER,
 };
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration, JsDecoratorList,
     JsExport,
 };
+use biome_rowan::SyntaxNodeOptionExt;
+use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsDecoratorList;

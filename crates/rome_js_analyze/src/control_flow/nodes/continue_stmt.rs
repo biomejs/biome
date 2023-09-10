@@ -1,7 +1,7 @@
 use std::any::TypeId;
 
+use biome_js_syntax::JsContinueStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
-use rome_js_syntax::JsContinueStatement;
 
 use crate::control_flow::{
     nodes::{DoWhileVisitor, ForInVisitor, ForOfVisitor, ForVisitor, WhileVisitor},

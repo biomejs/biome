@@ -2,8 +2,8 @@ use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::Semantic, JsR
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_js_factory::make;
-use rome_js_syntax::{JsModule, JsScript, JsSyntaxKind};
+use biome_js_factory::make;
+use biome_js_syntax::{JsModule, JsScript, JsSyntaxKind};
 
 use biome_rowan::{AstNode, BatchMutationExt};
 

@@ -1,10 +1,10 @@
 use crate::utils::is_call_like_expression;
-use biome_rowan::{AstSeparatedList, SyntaxResult};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsName, AnyJsObjectMember,
     AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread, JsStaticMemberExpressionFields,
     JsTemplateExpression, JsUnaryOperator,
 };
+use biome_rowan::{AstSeparatedList, SyntaxResult};
 
 /// This enum tracks the arguments inside a call expressions and checks if they are
 /// simple or not.
@@ -26,13 +26,13 @@ use rome_js_syntax::{
 ///
 /// This algorithm is inspired from [Prettier].
 ///
-/// [JsThisExpression]: [rome_js_syntax::JsThisExpression]
-/// [JsIdentifierExpression]: [rome_js_syntax::JsIdentifierExpression]
-/// [JsSuperExpression]: [rome_js_syntax::JsSuperExpression]
+/// [JsThisExpression]: [biome_js_syntax::JsThisExpression]
+/// [JsIdentifierExpression]: [biome_js_syntax::JsIdentifierExpression]
+/// [JsSuperExpression]: [biome_js_syntax::JsSuperExpression]
 /// [is_simple_static_member_expression]: [Simple::is_simple_static_member_expression]
 /// [is_simple_array_expression]: [Simple::is_simple_array_expression]
-/// [JsUnaryExpression]: [rome_js_syntax::JsUnaryExpression]
-/// [TsNonNullAssertionExpression]: [rome_js_syntax::TsNonNullAssertionExpression]
+/// [JsUnaryExpression]: [biome_js_syntax::JsUnaryExpression]
+/// [TsNonNullAssertionExpression]: [biome_js_syntax::TsNonNullAssertionExpression]
 /// [Prettier]: https://github.com/prettier/prettier/blob/a9de2a128cc8eea84ddd90efdc210378a894ab6b/src/language-js/utils/index.js#L802-L886
 #[derive(Debug)]
 pub(crate) enum SimpleArgument {

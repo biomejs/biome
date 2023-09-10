@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use biome_js_syntax::JsCatchClause;
+use biome_js_syntax::JsCatchClauseFields;
 use rome_formatter::write;
-use rome_js_syntax::JsCatchClause;
-use rome_js_syntax::JsCatchClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCatchClause;

@@ -23,8 +23,8 @@ use biome_analyze::{{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic,
 }};
 use biome_console::markup;
-use rome_js_semantic::{{Reference, ReferencesExtensions}};
-use rome_js_syntax::JsIdentifierBinding;
+use biome_js_semantic::{{Reference, ReferencesExtensions}};
+use biome_js_syntax::JsIdentifierBinding;
 
 declare_rule! {{
     /// Succinct description of the rule.

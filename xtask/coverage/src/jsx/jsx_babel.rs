@@ -3,9 +3,9 @@ use crate::{
     check_file_encoding,
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
 };
+use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::SyntaxKind;
 use rome_js_parser::{parse, JsParserOptions};
-use rome_js_syntax::{JsFileSource, ModuleKind};
 use std::path::Path;
 
 const OK_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/jsx/basic";

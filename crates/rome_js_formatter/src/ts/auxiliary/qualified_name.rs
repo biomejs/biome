@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsQualifiedName;
+use biome_js_syntax::TsQualifiedNameFields;
 use rome_formatter::write;
-use rome_js_syntax::TsQualifiedName;
-use rome_js_syntax::TsQualifiedNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsQualifiedName;

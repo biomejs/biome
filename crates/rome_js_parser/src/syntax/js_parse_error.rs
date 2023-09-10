@@ -4,8 +4,8 @@ use crate::prelude::*;
 use crate::span::Span;
 use crate::JsParser;
 use crate::JsSyntaxFeature::TypeScript;
+use biome_js_syntax::TextRange;
 use biome_parser::diagnostic::{expected_any, expected_node};
-use rome_js_syntax::TextRange;
 
 pub(crate) fn expected_function_body(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("function body", range).into_diagnostic(p)

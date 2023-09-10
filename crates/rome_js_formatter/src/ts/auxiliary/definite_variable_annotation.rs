@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::TsDefiniteVariableAnnotation;
+use biome_js_syntax::TsDefiniteVariableAnnotationFields;
 use rome_formatter::write;
-use rome_js_syntax::TsDefiniteVariableAnnotation;
-use rome_js_syntax::TsDefiniteVariableAnnotationFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsDefiniteVariableAnnotation;

@@ -5,8 +5,8 @@ use crate::parentheses::{
     is_callee, is_first_in_statement, is_tag, FirstInStatementMode, NeedsParentheses,
 };
 
+use biome_js_syntax::{JsFunctionExpression, JsSyntaxNode};
 use rome_formatter::FormatRuleWithOptions;
-use rome_js_syntax::{JsFunctionExpression, JsSyntaxNode};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsFunctionExpression {
@@ -48,7 +48,7 @@ impl NeedsParentheses for JsFunctionExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsFunctionExpression;
+    use biome_js_syntax::JsFunctionExpression;
 
     #[test]
     fn needs_parentheses() {

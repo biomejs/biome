@@ -5,8 +5,8 @@ use std::borrow::Cow;
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::JsBigintLiteralExpressionFields;
-use rome_js_syntax::{JsBigintLiteralExpression, JsSyntaxNode};
+use biome_js_syntax::JsBigintLiteralExpressionFields;
+use biome_js_syntax::{JsBigintLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBigintLiteralExpression;

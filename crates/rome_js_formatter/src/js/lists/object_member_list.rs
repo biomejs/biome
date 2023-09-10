@@ -1,7 +1,7 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
+use biome_js_syntax::JsObjectMemberList;
 use biome_rowan::{AstNode, AstSeparatedList};
-use rome_js_syntax::JsObjectMemberList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectMemberList;

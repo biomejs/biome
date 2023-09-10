@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsSpread;
+use biome_js_syntax::JsSpreadFields;
 use rome_formatter::write;
-use rome_js_syntax::JsSpread;
-use rome_js_syntax::JsSpreadFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSpread;

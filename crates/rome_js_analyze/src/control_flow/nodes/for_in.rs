@@ -1,6 +1,6 @@
 use biome_control_flow::builder::BlockId;
+use biome_js_syntax::{JsForInStatement, JsLabeledStatement, JsSyntaxToken};
 use biome_rowan::{AstNode, SyntaxResult};
-use rome_js_syntax::{JsForInStatement, JsLabeledStatement, JsSyntaxToken};
 
 use crate::control_flow::{
     visitor::{NodeVisitor, StatementStack},

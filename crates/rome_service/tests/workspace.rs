@@ -1,5 +1,5 @@
 use biome_fs::RomePath;
-use rome_js_syntax::TextSize;
+use biome_js_syntax::TextSize;
 use rome_service::workspace::{server, FileGuard, Language, OpenFileParams};
 
 #[test]

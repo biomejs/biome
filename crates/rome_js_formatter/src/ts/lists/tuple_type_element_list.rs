@@ -1,6 +1,6 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
-use rome_js_syntax::TsTupleTypeElementList;
+use biome_js_syntax::TsTupleTypeElementList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTupleTypeElementList;

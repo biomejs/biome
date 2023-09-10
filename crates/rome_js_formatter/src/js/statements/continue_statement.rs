@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::FormatStatementSemicolon;
 
-use rome_js_syntax::JsContinueStatement;
-use rome_js_syntax::JsContinueStatementFields;
+use biome_js_syntax::JsContinueStatement;
+use biome_js_syntax::JsContinueStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsContinueStatement;

@@ -3,11 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields, T,
 };
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 
 use crate::JsRuleAction;
 
@@ -105,7 +105,7 @@ impl Rule for NoImplicitBoolean {
         )?;
         let attr_value = make::jsx_expression_attribute_value(
             make::token(JsSyntaxKind::L_CURLY),
-            rome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+            biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsBooleanLiteralExpression(
                     make::js_boolean_literal_expression(make::token(T![true])),
                 ),

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsFunctionBody;
+use biome_js_syntax::JsFunctionBodyFields;
 use rome_formatter::{format_args, write};
-use rome_js_syntax::JsFunctionBody;
-use rome_js_syntax::JsFunctionBodyFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFunctionBody;

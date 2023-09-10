@@ -2,9 +2,9 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsImportTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsImportType};
 use rome_formatter::write;
-use rome_js_syntax::TsImportTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsImportType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsImportType;

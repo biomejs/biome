@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsAssertsReturnTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsAssertsReturnType};
 use rome_formatter::write;
-use rome_js_syntax::TsAssertsReturnTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsAssertsReturnType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsAssertsReturnType;

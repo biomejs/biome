@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use rome_js_syntax::JsArrowFunctionExpression;
+use biome_js_syntax::JsArrowFunctionExpression;
 
 declare_rule! {
     /// Disallow arrow functions where they could be confused with comparisons.

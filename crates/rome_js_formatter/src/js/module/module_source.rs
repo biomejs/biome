@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
+use biome_js_syntax::JsModuleSource;
+use biome_js_syntax::JsModuleSourceFields;
 use rome_formatter::write;
-use rome_js_syntax::JsModuleSource;
-use rome_js_syntax::JsModuleSourceFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsModuleSource;

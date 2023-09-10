@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsAssignmentWithDefault;
-use rome_js_syntax::JsAssignmentWithDefaultFields;
+use biome_js_syntax::JsAssignmentWithDefault;
+use biome_js_syntax::JsAssignmentWithDefaultFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAssignmentWithDefault;

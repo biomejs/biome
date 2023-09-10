@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsPrivateClassMemberName;
+use biome_js_syntax::JsPrivateClassMemberNameFields;
 use rome_formatter::write;
-use rome_js_syntax::JsPrivateClassMemberName;
-use rome_js_syntax::JsPrivateClassMemberNameFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPrivateClassMemberName;

@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
-use rome_js_syntax::JsImportAssertionEntryFields;
-use rome_js_syntax::{JsImportAssertionEntry, JsSyntaxKind};
+use biome_js_syntax::JsImportAssertionEntryFields;
+use biome_js_syntax::{JsImportAssertionEntry, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportAssertionEntry;

@@ -1,8 +1,7 @@
 use crate::{declare_transformation, JsBatchMutation};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule};
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
-use rome_js_factory::make::{
+use biome_js_factory::make::{
     ident, js_assignment_expression, js_call_argument_list, js_call_arguments, js_call_expression,
     js_computed_member_assignment, js_decorator_list, js_directive_list, js_expression_statement,
     js_formal_parameter, js_function_body, js_function_expression, js_identifier_assignment,
@@ -12,13 +11,14 @@ use rome_js_factory::make::{
     js_string_literal, js_string_literal_expression, js_variable_declaration,
     js_variable_declarator, js_variable_declarator_list, js_variable_statement, token,
 };
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument,
     AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsParameter,
     AnyJsStatement, JsAssignmentExpression, JsComputedMemberAssignment, JsExpressionStatement,
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
     JsStatementList, JsVariableStatement, TsEnumDeclaration, T,
 };
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
 declare_transformation! {
     /// Transform a TypeScript [TsEnumDeclaration]

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsThisParameter, TsThisParameterFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsThisParameter, TsThisParameterFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsThisParameter;

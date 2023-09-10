@@ -2,12 +2,12 @@ use crate::prelude::*;
 use crate::AsFormat;
 
 use crate::context::trailing_comma::FormatTrailingComma;
-use biome_rowan::{AstNode, AstSeparatedList};
-use rome_formatter::write;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
     JsLanguage,
 };
+use biome_rowan::{AstNode, AstSeparatedList};
+use rome_formatter::write;
 
 /// Utility function to print array-like nodes (array expressions, array bindings and assignment patterns)
 pub(crate) fn write_array_node<N, I>(node: &N, f: &mut JsFormatter) -> FormatResult<()>

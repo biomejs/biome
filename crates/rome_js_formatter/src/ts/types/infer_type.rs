@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::parentheses::{operator_type_or_higher_needs_parens, NeedsParentheses};
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsInferType, TsInferTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsInferType, TsInferTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsInferType;
@@ -43,7 +43,7 @@ impl NeedsParentheses for TsInferType {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsInferType;
+    use biome_js_syntax::TsInferType;
 
     #[test]
     fn needs_parentheses() {

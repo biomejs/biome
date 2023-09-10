@@ -4,9 +4,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression};
 use biome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
-use rome_js_factory::make;
-use rome_js_syntax::{AnyJsExpression, JsInExpression, JsInstanceofExpression};
 
 declare_rule! {
     /// Disallow using unsafe negation.
@@ -52,7 +52,7 @@ impl Rule for NoUnsafeNegation {
                 let left = expr.left().ok()?;
                 if let Some(unary) = left.as_js_unary_expression() {
                     match unary.operator().ok()? {
-                        rome_js_syntax::JsUnaryOperator::LogicalNot => Some(()),
+                        biome_js_syntax::JsUnaryOperator::LogicalNot => Some(()),
                         _ => None,
                     }
                 } else {
@@ -61,11 +61,11 @@ impl Rule for NoUnsafeNegation {
             }
             JsInOrInstanceOfExpression::JsInExpression(expr) => {
                 let left = expr.property().ok()?;
-                if let Some(rome_js_syntax::AnyJsExpression::JsUnaryExpression(unary)) =
+                if let Some(biome_js_syntax::AnyJsExpression::JsUnaryExpression(unary)) =
                     left.as_any_js_expression()
                 {
                     match unary.operator().ok()? {
-                        rome_js_syntax::JsUnaryOperator::LogicalNot => Some(()),
+                        biome_js_syntax::JsUnaryOperator::LogicalNot => Some(()),
                         _ => None,
                     }
                 } else {
@@ -103,7 +103,7 @@ impl Rule for NoUnsafeNegation {
                     .clone()
                     .replace_node_discard_trivia(left.clone(), argument)?;
                 let next_parenthesis_expression = make::parenthesized(
-                    rome_js_syntax::AnyJsExpression::JsInstanceofExpression(next_expr),
+                    biome_js_syntax::AnyJsExpression::JsInstanceofExpression(next_expr),
                 );
                 let next_unary_expression = make::js_unary_expression(
                     unary_expression.operator_token().ok()?,
@@ -120,10 +120,11 @@ impl Rule for NoUnsafeNegation {
                 let argument = unary_expression.argument().ok()?;
                 let next_expr = expr.clone().replace_node_discard_trivia(
                     left.clone(),
-                    rome_js_syntax::AnyJsInProperty::AnyJsExpression(argument),
+                    biome_js_syntax::AnyJsInProperty::AnyJsExpression(argument),
                 )?;
-                let next_parenthesis_expression =
-                    make::parenthesized(rome_js_syntax::AnyJsExpression::JsInExpression(next_expr));
+                let next_parenthesis_expression = make::parenthesized(
+                    biome_js_syntax::AnyJsExpression::JsInExpression(next_expr),
+                );
                 let next_unary_expression = make::js_unary_expression(
                     unary_expression.operator_token().ok()?,
                     AnyJsExpression::JsParenthesizedExpression(next_parenthesis_expression),

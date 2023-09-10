@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
+use biome_js_syntax::{JsEmptyStatement, JsEmptyStatementFields, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNodeOptionExt};
-use rome_js_syntax::{JsEmptyStatement, JsEmptyStatementFields, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsEmptyStatement;

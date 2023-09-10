@@ -1,12 +1,12 @@
 use crate::parentheses::{is_callee, is_tag, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::jsx::{get_wrap_state, WrapState};
-use biome_rowan::AstNode;
-use rome_formatter::{format_args, write};
-use rome_js_syntax::{
+use biome_js_syntax::{
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsxExpressionChild, JsxTagExpression,
 };
+use biome_rowan::AstNode;
+use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxTagExpression;

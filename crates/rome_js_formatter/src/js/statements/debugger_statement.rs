@@ -3,8 +3,8 @@ use rome_formatter::write;
 
 use crate::utils::FormatStatementSemicolon;
 
-use rome_js_syntax::JsDebuggerStatement;
-use rome_js_syntax::JsDebuggerStatementFields;
+use biome_js_syntax::JsDebuggerStatement;
+use biome_js_syntax::JsDebuggerStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsDebuggerStatement;

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::format_modifiers::FormatModifiers;
-use rome_js_syntax::TsPropertySignatureModifierList;
+use biome_js_syntax::TsPropertySignatureModifierList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsPropertySignatureModifierList;

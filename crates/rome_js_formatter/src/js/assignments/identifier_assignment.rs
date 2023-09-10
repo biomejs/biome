@@ -2,8 +2,8 @@ use crate::prelude::*;
 use rome_formatter::write;
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::{JsForOfStatement, JsIdentifierAssignmentFields};
-use rome_js_syntax::{JsIdentifierAssignment, JsSyntaxNode};
+use biome_js_syntax::{JsForOfStatement, JsIdentifierAssignmentFields};
+use biome_js_syntax::{JsIdentifierAssignment, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsIdentifierAssignment;
@@ -41,7 +41,7 @@ impl NeedsParentheses for JsIdentifierAssignment {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::JsIdentifierAssignment;
+    use biome_js_syntax::JsIdentifierAssignment;
 
     #[test]
     fn needs_parentheses() {

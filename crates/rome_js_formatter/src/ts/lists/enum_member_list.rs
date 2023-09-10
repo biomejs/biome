@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::context::trailing_comma::FormatTrailingComma;
-use rome_js_syntax::TsEnumMemberList;
+use biome_js_syntax::TsEnumMemberList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsEnumMemberList;

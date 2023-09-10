@@ -3,8 +3,8 @@ use crate::js::classes::property_class_member::{
 };
 use crate::prelude::*;
 use crate::utils::AnyJsAssignmentLike;
+use biome_js_syntax::TsPropertySignatureClassMember;
 use rome_formatter::write;
-use rome_js_syntax::TsPropertySignatureClassMember;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsPropertySignatureClassMember;

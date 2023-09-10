@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsSetterClassMember;
+use biome_js_syntax::JsSetterClassMemberFields;
 use rome_formatter::write;
-use rome_js_syntax::JsSetterClassMember;
-use rome_js_syntax::JsSetterClassMemberFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSetterClassMember;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
+use biome_js_syntax::{TsExtendsClause, TsExtendsClauseFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsExtendsClause, TsExtendsClauseFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExtendsClause;

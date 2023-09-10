@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsExportNamedSpecifier;
-use rome_js_syntax::JsExportNamedSpecifierFields;
+use biome_js_syntax::JsExportNamedSpecifier;
+use biome_js_syntax::JsExportNamedSpecifierFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExportNamedSpecifier;

@@ -1,6 +1,6 @@
 use crate::context::trailing_comma::FormatTrailingComma;
 use crate::prelude::*;
-use rome_js_syntax::{AnyJsObjectAssignmentPatternMember, JsObjectAssignmentPatternPropertyList};
+use biome_js_syntax::{AnyJsObjectAssignmentPatternMember, JsObjectAssignmentPatternPropertyList};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPatternPropertyList;

@@ -1,8 +1,8 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_js_syntax::TsPropertyParameter;
 use biome_rowan::AstNode;
-use rome_js_syntax::TsPropertyParameter;
 
 declare_rule! {
     /// Disallow the use of parameter properties in class constructors.

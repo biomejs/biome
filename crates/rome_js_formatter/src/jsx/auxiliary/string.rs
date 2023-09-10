@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
+use biome_js_syntax::JsxString;
 use rome_formatter::write;
-use rome_js_syntax::JsxString;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxString;

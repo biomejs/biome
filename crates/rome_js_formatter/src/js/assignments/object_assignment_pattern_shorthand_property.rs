@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsObjectAssignmentPatternShorthandProperty;
-use rome_js_syntax::JsObjectAssignmentPatternShorthandPropertyFields;
+use biome_js_syntax::JsObjectAssignmentPatternShorthandProperty;
+use biome_js_syntax::JsObjectAssignmentPatternShorthandPropertyFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPatternShorthandProperty;

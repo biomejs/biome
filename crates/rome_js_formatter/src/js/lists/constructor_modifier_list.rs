@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_js_syntax::JsConstructorModifierList;
 use biome_rowan::AstNodeList;
-use rome_js_syntax::JsConstructorModifierList;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsConstructorModifierList;

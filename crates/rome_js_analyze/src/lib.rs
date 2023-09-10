@@ -6,8 +6,8 @@ use biome_analyze::{
 };
 use biome_aria::{AriaProperties, AriaRoles};
 use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
-use rome_js_syntax::suppression::SuppressionDiagnostic;
-use rome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
+use biome_js_syntax::suppression::SuppressionDiagnostic;
+use biome_js_syntax::{suppression::parse_suppression_comment, JsFileSource, JsLanguage};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::{borrow::Cow, error::Error};
@@ -220,8 +220,8 @@ mod tests {
     use biome_diagnostics::category;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_js_syntax::{JsFileSource, TextRange, TextSize};
     use rome_js_parser::{parse, JsParserOptions};
-    use rome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;
 
     use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{Hooks, HooksOptions};

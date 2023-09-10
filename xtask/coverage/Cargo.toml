@@ -18,8 +18,8 @@ once_cell          = "1.9.0"
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = "1.5.5"
 rome_js_parser     = { path = "../../crates/rome_js_parser" }
-rome_js_semantic   = { path = "../../crates/rome_js_semantic" }
-rome_js_syntax     = { path = "../../crates/rome_js_syntax" }
+biome_js_semantic   = { path = "../../crates/biome_js_semantic" }
+biome_js_syntax     = { path = "../../crates/biome_js_syntax" }
 serde              = { version = "1.0.133", features = ["derive"] }
 serde_json         = "1.0.74"
 serde_yaml         = "0.9.9"

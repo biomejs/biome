@@ -19,6 +19,10 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_fs::RomePath;
+use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_syntax::{
+    AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
+};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use indexmap::IndexSet;
@@ -32,10 +36,6 @@ use rome_js_formatter::context::{
 };
 use rome_js_formatter::{context::JsFormatOptions, format_node};
 use rome_js_parser::JsParserOptions;
-use rome_js_semantic::{semantic_model, SemanticModelOptions};
-use rome_js_syntax::{
-    AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
-};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;

@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::{is_callee, is_member_object, is_spread, is_tag, NeedsParentheses};
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
+use biome_js_syntax::{JsSyntaxKind, TsTypeAssertionExpression, TsTypeAssertionExpressionFields};
 use rome_formatter::{format_args, write};
-use rome_js_syntax::{AnyJsExpression, JsSyntaxNode};
-use rome_js_syntax::{JsSyntaxKind, TsTypeAssertionExpression, TsTypeAssertionExpressionFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeAssertionExpression;
@@ -105,7 +105,7 @@ pub(super) fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: &JsSyntax
 #[cfg(test)]
 mod tests {
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use rome_js_syntax::TsTypeAssertionExpression;
+    use biome_js_syntax::TsTypeAssertionExpression;
 
     #[test]
     fn needs_parentheses() {

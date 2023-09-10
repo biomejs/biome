@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
 
+use biome_js_syntax::{TsIndexSignatureTypeMember, TsIndexSignatureTypeMemberFields};
 use rome_formatter::write;
-use rome_js_syntax::{TsIndexSignatureTypeMember, TsIndexSignatureTypeMemberFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIndexSignatureTypeMember;

@@ -1,13 +1,13 @@
 use crate::parentheses::{get_expression_left_side, AnyJsExpressionLeftSide, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
-use biome_rowan::SyntaxNodeOptionExt;
-use rome_formatter::{write, CstFormatContext};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsExpressionStatement, JsSyntaxKind,
     JsUnaryOperator,
 };
-use rome_js_syntax::{AnyJsLiteralExpression, JsExpressionStatementFields};
+use biome_js_syntax::{AnyJsLiteralExpression, JsExpressionStatementFields};
+use biome_rowan::SyntaxNodeOptionExt;
+use rome_formatter::{write, CstFormatContext};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExpressionStatement;

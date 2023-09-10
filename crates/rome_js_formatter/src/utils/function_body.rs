@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_js_syntax::AnyJsFunctionBody;
 use rome_formatter::write;
-use rome_js_syntax::AnyJsFunctionBody;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub enum FunctionBodyCacheMode {

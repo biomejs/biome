@@ -2,15 +2,15 @@ use crate::prelude::*;
 use rome_formatter::{format_args, write, CstFormatContext};
 
 use crate::utils::FormatStatementBody;
-use rome_js_syntax::JsIfStatement;
-use rome_js_syntax::JsIfStatementFields;
+use biome_js_syntax::JsIfStatement;
+use biome_js_syntax::JsIfStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsIfStatement;
 
 impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
     fn fmt_fields(&self, node: &JsIfStatement, f: &mut JsFormatter) -> FormatResult<()> {
-        use rome_js_syntax::AnyJsStatement::*;
+        use biome_js_syntax::AnyJsStatement::*;
 
         let JsIfStatementFields {
             if_token,

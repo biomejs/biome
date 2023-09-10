@@ -3,12 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
     OperatorPrecedence, T,
 };
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::iter;

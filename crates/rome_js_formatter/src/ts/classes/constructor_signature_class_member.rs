@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::FormatOptionalSemicolon;
 
+use biome_js_syntax::TsConstructorSignatureClassMember;
+use biome_js_syntax::TsConstructorSignatureClassMemberFields;
 use rome_formatter::write;
-use rome_js_syntax::TsConstructorSignatureClassMember;
-use rome_js_syntax::TsConstructorSignatureClassMemberFields;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConstructorSignatureClassMember;

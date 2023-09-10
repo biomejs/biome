@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::js::statements::return_statement::AnyJsStatementWithArgument;
-use rome_js_syntax::JsThrowStatement;
+use biome_js_syntax::JsThrowStatement;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsThrowStatement;

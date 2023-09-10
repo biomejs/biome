@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::utils::FormatStatementBody;
+use biome_js_syntax::JsForInStatement;
+use biome_js_syntax::JsForInStatementFields;
 use rome_formatter::{format_args, write};
-use rome_js_syntax::JsForInStatement;
-use rome_js_syntax::JsForInStatementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsForInStatement;

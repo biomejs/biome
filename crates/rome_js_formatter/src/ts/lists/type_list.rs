@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_js_syntax::TsTypeList;
+use biome_js_syntax::TsTypeList;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeList;

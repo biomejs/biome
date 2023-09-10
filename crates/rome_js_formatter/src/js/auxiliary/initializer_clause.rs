@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::utils::{with_assignment_layout, AssignmentLikeLayout};
+use biome_js_syntax::JsInitializerClause;
+use biome_js_syntax::JsInitializerClauseFields;
 use rome_formatter::{write, FormatRuleWithOptions};
-use rome_js_syntax::JsInitializerClause;
-use rome_js_syntax::JsInitializerClauseFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInitializerClause {

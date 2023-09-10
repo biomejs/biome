@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::TsExternalModuleDeclarationFields;
-use rome_js_syntax::{AnyTsExternalModuleDeclarationBody, TsExternalModuleDeclaration};
+use biome_js_syntax::TsExternalModuleDeclarationFields;
+use biome_js_syntax::{AnyTsExternalModuleDeclarationBody, TsExternalModuleDeclaration};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsExternalModuleDeclaration;

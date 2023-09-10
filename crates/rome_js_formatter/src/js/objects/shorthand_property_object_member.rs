@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsShorthandPropertyObjectMember;
+use biome_js_syntax::JsShorthandPropertyObjectMemberFields;
 use rome_formatter::write;
-use rome_js_syntax::JsShorthandPropertyObjectMember;
-use rome_js_syntax::JsShorthandPropertyObjectMemberFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsShorthandPropertyObjectMember;

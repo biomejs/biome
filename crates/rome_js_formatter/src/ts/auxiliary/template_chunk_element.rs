@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::js::auxiliary::template_chunk_element::AnyTemplateChunkElement;
-use rome_js_syntax::TsTemplateChunkElement;
+use biome_js_syntax::TsTemplateChunkElement;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTemplateChunkElement;

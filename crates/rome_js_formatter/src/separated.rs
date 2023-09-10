@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::{AsFormat, FormatJsSyntaxToken};
+use biome_js_syntax::{JsLanguage, JsSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
 use rome_formatter::separated::{FormatSeparatedElementRule, FormatSeparatedIter};
 use rome_formatter::FormatRefWithRule;
-use rome_js_syntax::{JsLanguage, JsSyntaxToken};
 use std::marker::PhantomData;
 
 #[derive(Clone)]

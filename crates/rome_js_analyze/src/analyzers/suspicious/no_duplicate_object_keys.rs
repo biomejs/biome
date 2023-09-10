@@ -2,13 +2,13 @@ use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
 };
-use rome_js_syntax::{
+use biome_js_syntax::{
     JsMethodObjectMember, JsPropertyObjectMember, JsShorthandPropertyObjectMember, TextRange,
 };
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt::Display;

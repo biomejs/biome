@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsRestParameter;
+use biome_js_syntax::JsRestParameterFields;
 use rome_formatter::write;
-use rome_js_syntax::JsRestParameter;
-use rome_js_syntax::JsRestParameterFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsRestParameter;

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
-use rome_js_syntax::{AnyJsComputedMember, JsComputedMemberAssignment, JsSyntaxNode};
+use biome_js_syntax::{AnyJsComputedMember, JsComputedMemberAssignment, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsComputedMemberAssignment;

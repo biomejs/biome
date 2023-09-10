@@ -26,7 +26,7 @@ documentation = """
     -p rome_*parser \
     -p biome_text_edit \
     -p biome_text_size \
-    -p rome_js_semantic \
+    -p biome_js_semantic \
     -p biome_markup \
     -p biome_rowan
     --no-deps

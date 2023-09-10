@@ -1,10 +1,10 @@
 use crate::prelude::*;
-use biome_rowan::{SyntaxResult, TokenText};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
     AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsSyntaxNode, JsTemplateExpression,
 };
+use biome_rowan::{SyntaxResult, TokenText};
 
 /// Returns `Ok(true)` if `maybe_argument` is an argument of a [test call expression](is_test_call_expression).
 pub(crate) fn is_test_call_argument(maybe_argument: &JsSyntaxNode) -> SyntaxResult<bool> {
@@ -33,11 +33,11 @@ pub(crate) fn is_test_call_argument(maybe_argument: &JsSyntaxNode) -> SyntaxResu
 /// 5. The second argument has to be an [arrow function expression] or [function expression]
 /// 6. Both function must have zero or one parameters
 ///
-/// [call expression]: crate::rome_js_syntax::JsCallExpression
-/// [callee]: crate::rome_js_syntax::AnyJsExpression
-/// [arguments]: crate::rome_js_syntax::JsCallArgumentList
-/// [arrow function expression]: crate::rome_js_syntax::JsArrowFunctionExpression
-/// [function expression]: crate::rome_js_syntax::JsCallArgumentList
+/// [call expression]: crate::biome_js_syntax::JsCallExpression
+/// [callee]: crate::biome_js_syntax::AnyJsExpression
+/// [arguments]: crate::biome_js_syntax::JsCallArgumentList
+/// [arrow function expression]: crate::biome_js_syntax::JsArrowFunctionExpression
+/// [function expression]: crate::biome_js_syntax::JsCallArgumentList
 pub(crate) fn is_test_call_expression(call_expression: &JsCallExpression) -> SyntaxResult<bool> {
     use AnyJsExpression::*;
 
@@ -429,9 +429,9 @@ impl Iterator for CalleeNamesIterator {
 #[cfg(test)]
 mod test {
     use super::{contains_a_test_pattern, is_test_each_pattern_callee};
+    use biome_js_syntax::{JsCallExpression, JsFileSource, JsTemplateExpression};
     use biome_rowan::AstNodeList;
     use rome_js_parser::{parse, JsParserOptions};
-    use rome_js_syntax::{JsCallExpression, JsFileSource, JsTemplateExpression};
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
         let source_type = JsFileSource::js_module();

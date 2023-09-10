@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsSyntaxNode, TsNeverType, TsNeverTypeFields};
 use rome_formatter::write;
-use rome_js_syntax::{JsSyntaxNode, TsNeverType, TsNeverTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNeverType;

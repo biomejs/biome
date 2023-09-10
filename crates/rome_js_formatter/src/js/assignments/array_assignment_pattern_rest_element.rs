@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use rome_formatter::write;
 
-use rome_js_syntax::JsArrayAssignmentPatternRestElement;
-use rome_js_syntax::JsArrayAssignmentPatternRestElementFields;
+use biome_js_syntax::JsArrayAssignmentPatternRestElement;
+use biome_js_syntax::JsArrayAssignmentPatternRestElementFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayAssignmentPatternRestElement;

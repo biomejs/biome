@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::TsParenthesizedTypeFields;
+use biome_js_syntax::{JsSyntaxNode, TsParenthesizedType};
 use rome_formatter::write;
-use rome_js_syntax::TsParenthesizedTypeFields;
-use rome_js_syntax::{JsSyntaxNode, TsParenthesizedType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsParenthesizedType;

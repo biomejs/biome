@@ -2,8 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_js_factory::make;
-use rome_js_syntax::{
+use biome_js_factory::make;
+use biome_js_syntax::{
     AnyJsStatement, JsDoWhileStatement, JsElseClause, JsForInStatement, JsForOfStatement,
     JsForStatement, JsIfStatement, JsLanguage, JsSyntaxTrivia, JsWhileStatement, JsWithStatement,
     TriviaPieceKind, T,

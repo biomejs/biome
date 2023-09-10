@@ -1,7 +1,7 @@
 use crate::js::expressions::static_member_expression::AnyJsStaticMemberLike;
 use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
-use rome_js_syntax::{JsStaticMemberAssignment, JsSyntaxNode};
+use biome_js_syntax::{JsStaticMemberAssignment, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticMemberAssignment;

@@ -58,7 +58,7 @@
 //! }
 //! ```
 //!
-//! When we track the first [rome_js_syntax::JsCallExpression], we hold basically all the children,
+//! When we track the first [biome_js_syntax::JsCallExpression], we hold basically all the children,
 //! that applies for the rest of the nodes. If we decided to format all the children of each node,
 //! we will risk to format the last node, the `Reference`, four times.
 //!
@@ -82,11 +82,11 @@
 //! The first group is special, because it holds the reference; it has its own heuristic.
 //! Inside the first group we store the first element of the flattened array, then:
 //!
-//! 1. as many as [rome_js_syntax::JsCallExpression] we can find, this cover cases like
+//! 1. as many as [biome_js_syntax::JsCallExpression] we can find, this cover cases like
 //! `something()()().then()`;
-//! 2. as many as [rome_js_syntax::JsComputedMemberExpression] we can find, this cover cases like
+//! 2. as many as [biome_js_syntax::JsComputedMemberExpression] we can find, this cover cases like
 //! `something()()[1][3].then()`;
-//! 3. as many as consecutive [rome_js_syntax::JsStaticMemberExpression] or [rome_js_syntax::JsComputedMemberExpression], this cover cases like
+//! 3. as many as consecutive [biome_js_syntax::JsStaticMemberExpression] or [biome_js_syntax::JsComputedMemberExpression], this cover cases like
 //! `this.items[0].then()`
 //!
 //! The rest of the groups are essentially a sequence of `[StaticMemberExpression , CallExpression]`.
@@ -115,12 +115,12 @@ use crate::utils::member_chain::groups::{
 };
 use crate::utils::member_chain::simple_argument::SimpleArgument;
 use crate::JsLabels;
-use biome_rowan::{AstNode, SyntaxResult};
-use rome_formatter::{write, Buffer};
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
     JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,
 };
+use biome_rowan::{AstNode, SyntaxResult};
+use rome_formatter::{write, Buffer};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone)]

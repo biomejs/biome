@@ -1,7 +1,7 @@
 use std::any::TypeId;
 
+use biome_js_syntax::JsBreakStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
-use rome_js_syntax::JsBreakStatement;
 
 use crate::control_flow::{
     nodes::{

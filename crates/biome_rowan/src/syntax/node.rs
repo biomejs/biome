@@ -29,7 +29,7 @@ impl<L: Language> SyntaxNode<L> {
     ///
     /// In general this function should not be used directly but through the
     /// type-checked factory function / builders generated from the grammar of
-    /// the corresponding language (eg. `rome_js_factory::make`)
+    /// the corresponding language (eg. `biome_js_factory::make`)
     pub fn new_detached<I>(kind: L::Kind, slots: I) -> SyntaxNode<L>
     where
         I: IntoIterator<Item = Option<SyntaxElement<L>>>,

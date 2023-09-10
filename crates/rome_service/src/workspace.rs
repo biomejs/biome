@@ -58,9 +58,9 @@ pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_fs::RomePath;
+use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use rome_formatter::Printed;
-use rome_js_syntax::{TextRange, TextSize};
 use std::collections::HashMap;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 

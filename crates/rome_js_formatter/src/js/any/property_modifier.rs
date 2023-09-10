@@ -1,7 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 use crate::prelude::*;
-use rome_js_syntax::AnyJsPropertyModifier;
+use biome_js_syntax::AnyJsPropertyModifier;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyJsPropertyModifier;
 impl FormatRule<AnyJsPropertyModifier> for FormatAnyJsPropertyModifier {

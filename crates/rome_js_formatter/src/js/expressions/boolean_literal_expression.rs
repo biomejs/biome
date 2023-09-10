@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::JsBooleanLiteralExpressionFields;
+use biome_js_syntax::{JsBooleanLiteralExpression, JsSyntaxNode};
 use rome_formatter::write;
-use rome_js_syntax::JsBooleanLiteralExpressionFields;
-use rome_js_syntax::{JsBooleanLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBooleanLiteralExpression;

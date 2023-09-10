@@ -1,11 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_rowan::AstNode;
-use rome_js_semantic::SemanticModel;
-use rome_js_syntax::{
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsFormalParameter, JsParameterList, JsParameters, JsSpread,
 };
+use biome_rowan::AstNode;
 
 use crate::semantic_services::Semantic;
 

@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use rome_js_syntax::{
+use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFunctionBody, JsModule, JsScript,
 };
 
@@ -99,7 +99,7 @@ impl Rule for NoRedundantUseStrict {
         let mut outer_most: Option<AnyJsStrictModeNode> = None;
         let root = ctx.root();
         match root {
-            rome_js_syntax::AnyJsRoot::JsModule(js_module) => outer_most = Some(js_module.into()),
+            biome_js_syntax::AnyJsRoot::JsModule(js_module) => outer_most = Some(js_module.into()),
             _ => {
                 for n in node.syntax().ancestors() {
                     if let Some(parent) = AnyNodeWithDirectives::cast_ref(&n) {
