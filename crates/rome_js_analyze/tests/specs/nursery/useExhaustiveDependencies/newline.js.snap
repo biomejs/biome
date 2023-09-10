@@ -1,0 +1,24 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+expression: newline.js
+---
+# Input
+```js
+import { useState, useEffect } from 'react';
+
+export const OtherComponent = () => {
+	const [stringContent, setString] =
+		useState('Something');
+
+	useEffect(() => {
+		setString((content) => {
+			return `${content} other`;
+		});
+	}, []);
+
+	return stringContent;
+};
+
+```
+
+
