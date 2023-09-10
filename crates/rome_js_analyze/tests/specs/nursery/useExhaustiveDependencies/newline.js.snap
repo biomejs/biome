@@ -4,6 +4,8 @@ expression: newline.js
 ---
 # Input
 ```js
+import { useState, useEffect } from 'react';
+
 export const OtherComponent = () => {
 	const [stringContent, setString] =
 		useState('Something');
