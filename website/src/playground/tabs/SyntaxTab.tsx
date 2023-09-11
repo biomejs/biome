@@ -1,5 +1,5 @@
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { romeAst } from "codemirror-lang-rome-ast";
+import { romeAst as biomeAst } from "codemirror-lang-rome-ast";
 import React from "react";
 import CodeMirror from "../CodeMirror";
 import Collapsible from "../Collapsible";
@@ -9,7 +9,7 @@ interface Props {
 	cst: string;
 }
 
-const biomeAstCodeMirrorExtension = [romeAst()];
+const biomeAstCodeMirrorExtension = [biomeAst()];
 
 export default React.forwardRef<ReactCodeMirrorRef, Props>(function SyntaxTab(
 	{ ast, cst },

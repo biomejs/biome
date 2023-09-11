@@ -3,7 +3,7 @@ title: Getting Started
 description: Learn how to set up a new project with Biome.
 ---
 
-import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
 import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
@@ -35,7 +35,7 @@ Check the [versioning page](/internals/versioning/) for more information.
 
 You can now run Biome with:
 
-<PackageManagerRomeCommand command="" />
+<PackageManagerBiomeCommand command="" />
 
 ## Configuration
 
@@ -44,7 +44,7 @@ It eliminates  the need to repeat the CLI options every time you run a command a
 
 To create the configuration, run the `init` command in the root folder of your project:
 
-<PackageManagerRomeCommand command="init" />
+<PackageManagerBiomeCommand command="init" />
 
 After running the `init` command, you'll now have a new `biome.json` file in your directory:
 
@@ -73,11 +73,11 @@ Formatting is enabled because the configuration doesn't explicitly [disable](/re
 
 You can lint any file or directory running:
 
-<PackageManagerRomeCommand command="check <files>" />
+<PackageManagerBiomeCommand command="check <files>" />
 
 or format your files and directories with:
 
-<PackageManagerRomeCommand command="format <files> --write" />
+<PackageManagerBiomeCommand command="format <files> --write" />
 
 {/**Make sure to update the redirect in `static/_redirects` when changing the editors title -->**/}
 

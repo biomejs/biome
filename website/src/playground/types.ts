@@ -59,7 +59,7 @@ export const emptyPrettierOutput: PrettierOutput = {
 	ir: "",
 };
 
-export interface RomeOutput {
+export interface BiomeOutput {
 	syntax: {
 		ast: string;
 		cst: string;
@@ -80,7 +80,7 @@ export interface RomeOutput {
 	};
 }
 
-export const emptyRomeOutput: RomeOutput = {
+export const emptyBiomeOutput: BiomeOutput = {
 	syntax: {
 		ast: "",
 		cst: "",
@@ -121,7 +121,7 @@ export interface PlaygroundSettings {
 export interface PlaygroundFileState {
 	content: string;
 	prettier: PrettierOutput;
-	rome: RomeOutput;
+	biome: BiomeOutput;
 }
 
 export interface PlaygroundState {
@@ -142,7 +142,7 @@ export const defaultPlaygroundState: PlaygroundState = {
 		"main.tsx": {
 			content: "",
 			prettier: emptyPrettierOutput,
-			rome: emptyRomeOutput,
+			biome: emptyBiomeOutput,
 		},
 	},
 	settings: {
@@ -172,9 +172,9 @@ export interface PlaygroundProps {
 export type Tree = ReturnType<typeof parser.parse>;
 type RangeMapKey = [number, number];
 type RangeMapValue = [number, number];
-export interface RomeAstSyntacticData {
+export interface BiomeAstSyntacticData {
 	ast: Tree;
 	// key is range of original `SyntaxToken`, value is the range string, like `20..20` corresponding range in
-	// `rome_xx_ast` `Display` string.
+	// `biome_xx_ast` `Display` string.
 	rangeMap: Map<RangeMapKey, RangeMapValue>;
 }

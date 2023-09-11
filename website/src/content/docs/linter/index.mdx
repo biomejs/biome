@@ -3,7 +3,7 @@ title: Linter
 description: How to use the Biome linter.
 ---
 
-import PackageManagerRomeCommand from "@src/components/PackageManagerRomeCommand.astro";
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
 
 Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
@@ -14,7 +14,7 @@ Biome's linter statically analyzes your code to catch common errors and to help 
 
 You can start by running the CLI with the `--help` flag:
 
-<PackageManagerRomeCommand command="check --help" />
+<PackageManagerBiomeCommand command="check --help" />
 
 Which will show you the options available at the moment:
 
@@ -100,13 +100,13 @@ You can achieve this by adding a suppression comment above the line that emits t
 Suppression comments have the following format:
 
 ```js
-// rome-ignore lint: <explanation>
-// rome-ignore lint/suspicious/noDebugger: <explanation>
+// biome-ignore lint: <explanation>
+// biome-ignore lint/suspicious/noDebugger: <explanation>
 ```
 
 Where
 
-- `rome-ignore` is the start of a suppression comment;
+- `biome-ignore` is the start of a suppression comment;
 - `lint` suppresses the linter;
 - `/suspicious/noDebugger`: **optional**, group and name of the rule you want to suppress;
 - `<explanation>` explanation why the rule is disabled
@@ -114,9 +114,9 @@ Where
 Here's an example:
 
 ```ts
-// rome-ignore lint: reason
+// biome-ignore lint: reason
 debugger;
-// rome-ignore lint/suspicious/noDebugger: reason
+// biome-ignore lint/suspicious/noDebugger: reason
 debugger;
 ```
 

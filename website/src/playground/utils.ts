@@ -6,7 +6,7 @@ import {
 	PlaygroundSettings,
 	PlaygroundState,
 	emptyPrettierOutput,
-	emptyRomeOutput,
+	emptyBiomeOutput,
 } from "./types";
 
 export function classNames(
@@ -113,7 +113,7 @@ export function getFileState(
 	return (
 		state.files[filename] ?? {
 			content: "",
-			rome: emptyRomeOutput,
+			biome: emptyBiomeOutput,
 			prettier: emptyPrettierOutput,
 		}
 	);
