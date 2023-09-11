@@ -252,7 +252,7 @@ self.addEventListener("message", async (e) => {
 			self.postMessage({
 				type: "updated",
 				filename,
-				romeOutput: biomeOutput,
+				biomeOutput,
 			});
 			break;
 		}
