@@ -115,12 +115,12 @@ use crate::utils::member_chain::groups::{
 };
 use crate::utils::member_chain::simple_argument::SimpleArgument;
 use crate::JsLabels;
+use biome_formatter::{write, Buffer};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
     JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,
 };
 use biome_rowan::{AstNode, SyntaxResult};
-use rome_formatter::{write, Buffer};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone)]

@@ -11,19 +11,19 @@ use crate::comments::JsonCommentStyle;
 pub(crate) use crate::context::JsonFormatContext;
 use crate::context::JsonFormatOptions;
 use crate::cst::FormatJsonSyntaxNode;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
-use biome_rowan::{AstNode, SyntaxNode, TextRange};
-use rome_formatter::comments::Comments;
-use rome_formatter::prelude::*;
-use rome_formatter::{
+use biome_formatter::comments::Comments;
+use biome_formatter::prelude::*;
+use biome_formatter::{
     write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     FormatToken, TransformSourceMap,
 };
-use rome_formatter::{Formatted, Printed};
+use biome_formatter::{Formatted, Printed};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
+use biome_rowan::{AstNode, SyntaxNode, TextRange};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
-    type Format<'a>: rome_formatter::Format<Context>
+    type Format<'a>: biome_formatter::Format<Context>
     where
         Self: 'a;
 
@@ -78,7 +78,7 @@ where
 ///
 /// The difference to [AsFormat] is that this trait takes ownership of `self`.
 pub(crate) trait IntoFormat<Context> {
-    type Format: rome_formatter::Format<Context>;
+    type Format: biome_formatter::Format<Context>;
 
     fn into_format(self) -> Self::Format;
 }
@@ -184,7 +184,7 @@ where
         f.context().comments().is_suppressed(node.syntax())
     }
 
-    /// Formats the [leading comments](rome_formatter::comments#leading-comments) of the node.
+    /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
@@ -192,7 +192,7 @@ where
         format_leading_comments(node.syntax()).fmt(f)
     }
 
-    /// Formats the [dangling comments](rome_formatter::comments#dangling-comments) of the node.
+    /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
     ///
     /// You should override this method if the node handled by this rule can have dangling comments because the
     /// default implementation formats the dangling comments at the end of the node, which isn't ideal but ensures that
@@ -205,7 +205,7 @@ where
             .fmt(f)
     }
 
-    /// Formats the [trailing comments](rome_formatter::comments#trailing-comments) of the node.
+    /// Formats the [trailing comments](biome_formatter::comments#trailing-comments) of the node.
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
@@ -293,7 +293,7 @@ pub fn format_range(
     root: &JsonSyntaxNode,
     range: TextRange,
 ) -> FormatResult<Printed> {
-    rome_formatter::format_range(root, range, JsonFormatLanguage::new(options))
+    biome_formatter::format_range(root, range, JsonFormatLanguage::new(options))
 }
 
 /// Formats a JSON syntax tree.
@@ -303,7 +303,7 @@ pub fn format_node(
     options: JsonFormatOptions,
     root: &JsonSyntaxNode,
 ) -> FormatResult<Formatted<JsonFormatContext>> {
-    rome_formatter::format_node(root, JsonFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsonFormatLanguage::new(options))
 }
 
 /// Formats a single node within a file, supported by Biome.
@@ -317,7 +317,7 @@ pub fn format_node(
 ///
 /// Returns the [Printed] code.
 pub fn format_sub_tree(options: JsonFormatOptions, root: &JsonSyntaxNode) -> FormatResult<Printed> {
-    rome_formatter::format_sub_tree(root, JsonFormatLanguage::new(options))
+    biome_formatter::format_sub_tree(root, JsonFormatLanguage::new(options))
 }
 
 #[cfg(test)]

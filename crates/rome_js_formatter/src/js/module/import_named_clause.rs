@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
+use biome_formatter::{write, CstFormatContext};
 use biome_js_syntax::AnyJsNamedImport;
 use biome_js_syntax::AnyJsNamedImportSpecifier;
 use biome_js_syntax::JsImportNamedClause;
 use biome_js_syntax::JsImportNamedClauseFields;
 use biome_js_syntax::JsNamedImportSpecifiersFields;
-use rome_formatter::{write, CstFormatContext};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportNamedClause;

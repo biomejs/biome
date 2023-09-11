@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{
+use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
 };
 use std::iter::once;

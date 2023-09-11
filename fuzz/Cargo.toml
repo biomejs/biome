@@ -19,7 +19,7 @@ arbitrary = { version = "1.3.0", features = ["derive"] }
 libfuzzer-sys = { git = "https://github.com/rust-fuzz/libfuzzer", default-features = false }
 biome_analyze = { path = "../crates/biome_analyze" }
 biome_diagnostics = { path = "../crates/biome_diagnostics" }
-rome_formatter = { path = "../crates/rome_formatter" }
+biome_formatter = { path = "../crates/biome_formatter" }
 rome_js_analyze = { path = "../crates/rome_js_analyze" }
 rome_js_formatter = { path = "../crates/rome_js_formatter" }
 biome_js_parser = { path = "../crates/biome_js_parser" }

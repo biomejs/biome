@@ -13,12 +13,12 @@ anyhow            = "1.0.52"
 biome_analyze     = { workspace = true }
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
+biome_formatter   = { workspace = true }
 biome_fs          = { workspace = true }
 biome_rowan       = { workspace = true }
 biome_text_edit   = { workspace = true }
 futures           = "0.3"
 indexmap          = { workspace = true }
-rome_formatter    = { workspace = true }
 rome_js_formatter = { workspace = true }
 rome_service      = { workspace = true }
 serde             = { workspace = true, features = ["derive"] }

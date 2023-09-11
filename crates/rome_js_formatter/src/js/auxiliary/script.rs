@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatInterpreterToken;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::JsScript;
 use biome_js_syntax::JsScriptFields;

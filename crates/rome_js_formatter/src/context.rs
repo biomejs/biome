@@ -2,15 +2,15 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
 use biome_deserialize::json::with_only_known_variants;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
-use rome_formatter::printer::PrinterOptions;
-use rome_formatter::token::string::Quote;
-use rome_formatter::{
+use biome_formatter::printer::PrinterOptions;
+use biome_formatter::token::string::Quote;
+use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
     LineWidth, TransformSourceMap,
 };
+use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
+use biome_json_syntax::JsonLanguage;
+use biome_rowan::SyntaxNode;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{format_args, write};
+use biome_formatter::{format_args, write};
 
 use crate::utils::FormatStatementSemicolon;
 

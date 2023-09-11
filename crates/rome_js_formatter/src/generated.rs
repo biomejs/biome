@@ -3,7 +3,7 @@
 use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, IntoFormat, JsFormatContext, JsFormatter,
 };
-use rome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
 impl FormatRule<biome_js_syntax::JsScript> for crate::js::auxiliary::script::FormatJsScript {
     type Context = JsFormatContext;
     #[inline(always)]

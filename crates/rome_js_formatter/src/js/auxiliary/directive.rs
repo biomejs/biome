@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, FormatStatementSemicolon, StringLiteralParentKind};
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::JsDirective;
 use biome_js_syntax::JsDirectiveFields;

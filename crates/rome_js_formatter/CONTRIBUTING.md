@@ -15,7 +15,7 @@ Import the `FormatNode` trait and implement it for your Node.
 
 ```rust
 use rome_js_formatter::prelude::*;
-use rome_formatter::{write, format_args};
+use biome_formatter::{write, format_args};
 
 struct Buzz {
  blast: String

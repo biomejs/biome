@@ -1,5 +1,6 @@
 use crate::comments::is_type_comment;
 use crate::parentheses::AnyJsParenthesized;
+use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind,
     JsSyntaxNode,
@@ -9,7 +10,6 @@ use biome_rowan::{
     chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
     VisitNodeSignal,
 };
-use rome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use std::collections::BTreeSet;
 
 pub(super) fn transform(root: JsSyntaxNode) -> (JsSyntaxNode, TransformSourceMap) {
@@ -442,6 +442,7 @@ fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
 mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::{format_node, JsFormatOptions, TextRange};
+    use biome_formatter::{SourceMarker, TransformSourceMap};
     use biome_js_parser::{parse, parse_module, JsParserOptions};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
@@ -449,7 +450,6 @@ mod tests {
         JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
     };
     use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
-    use rome_formatter::{SourceMarker, TransformSourceMap};
 
     #[test]
     fn rebalances_logical_expressions() {

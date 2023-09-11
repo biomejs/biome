@@ -1,5 +1,5 @@
 ---
-source: crates/rome_formatter/src/diagnostics.rs
+source: crates/biome_formatter/src/diagnostics.rs
 expression: content
 ---
 example.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

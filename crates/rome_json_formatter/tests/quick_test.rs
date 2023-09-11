@@ -1,4 +1,4 @@
-use rome_formatter_test::check_reformat::CheckReformat;
+use biome_formatter_test::check_reformat::CheckReformat;
 use rome_json_formatter::context::JsonFormatOptions;
 use rome_json_formatter::format_node;
 use rome_json_parser::{parse_json, JsonParserOptions};

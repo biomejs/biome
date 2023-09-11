@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
+use biome_formatter::{write, RemoveSoftLinesBuffer};
 use biome_js_syntax::{
     AnyJsBinding, AnyTsReturnType, AnyTsType, JsFunctionBody, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsParameters, JsSyntaxToken,
@@ -9,7 +10,6 @@ use biome_js_syntax::{
     TsReturnTypeAnnotation, TsTypeParameters,
 };
 use biome_rowan::{declare_node_union, SyntaxResult};
-use rome_formatter::{write, RemoveSoftLinesBuffer};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsFunctionDeclaration;

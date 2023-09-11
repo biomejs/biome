@@ -20,7 +20,7 @@ pub trait Buffer {
     /// # Examples
     ///
     /// ```
-    /// use rome_formatter::{Buffer, FormatElement, FormatState, SimpleFormatContext, VecBuffer};
+    /// use biome_formatter::{Buffer, FormatElement, FormatState, SimpleFormatContext, VecBuffer};
     ///
     /// let mut state = FormatState::new(SimpleFormatContext::default());
     /// let mut buffer = VecBuffer::new(&mut state);
@@ -45,8 +45,8 @@ pub trait Buffer {
     /// # Examples
     ///
     /// ```
-    /// use rome_formatter::prelude::*;
-    /// use rome_formatter::{Buffer, FormatState, SimpleFormatContext, VecBuffer, format_args};
+    /// use biome_formatter::prelude::*;
+    /// use biome_formatter::{Buffer, FormatState, SimpleFormatContext, VecBuffer, format_args};
     ///
     /// let mut state = FormatState::new(SimpleFormatContext::default());
     /// let mut buffer = VecBuffer::new(&mut state);
@@ -260,8 +260,8 @@ Make sure that you take and restore the snapshot in order and that this snapshot
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::{FormatState, Formatted, PreambleBuffer, SimpleFormatContext, VecBuffer, write};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{FormatState, Formatted, PreambleBuffer, SimpleFormatContext, VecBuffer, write};
+/// use biome_formatter::prelude::*;
 ///
 /// struct Preamble;
 ///
@@ -291,8 +291,8 @@ Make sure that you take and restore the snapshot in order and that this snapshot
 /// The pre-amble does not get written if no content is written to the buffer.
 ///
 /// ```
-/// use rome_formatter::{FormatState, Formatted, PreambleBuffer, SimpleFormatContext, VecBuffer, write};
-/// use rome_formatter::prelude::*;
+/// use biome_formatter::{FormatState, Formatted, PreambleBuffer, SimpleFormatContext, VecBuffer, write};
+/// use biome_formatter::prelude::*;
 ///
 /// struct Preamble;
 ///
@@ -439,12 +439,12 @@ where
 /// # Examples
 ///
 /// ```
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{format, write};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, write};
 ///
 /// # fn main() -> FormatResult<()> {
-/// use rome_formatter::{RemoveSoftLinesBuffer, SimpleFormatContext, VecBuffer};
-/// use rome_formatter::prelude::format_with;
+/// use biome_formatter::{RemoveSoftLinesBuffer, SimpleFormatContext, VecBuffer};
+/// use biome_formatter::prelude::format_with;
 /// let formatted = format!(
 ///     SimpleFormatContext::default(),
 ///     [format_with(|f| {
@@ -619,8 +619,8 @@ pub trait BufferExtensions: Buffer + Sized {
     ///
     /// ```
     /// use std::ops::Deref;
-    /// use rome_formatter::prelude::*;
-    /// use rome_formatter::{write, format, SimpleFormatContext};
+    /// use biome_formatter::prelude::*;
+    /// use biome_formatter::{write, format, SimpleFormatContext};
     ///
     /// # fn main() -> FormatResult<()> {
     /// let formatted = format!(SimpleFormatContext::default(), [format_with(|f| {

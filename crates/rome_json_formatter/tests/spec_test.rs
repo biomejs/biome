@@ -1,4 +1,4 @@
-use rome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
+use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use rome_json_formatter::context::JsonFormatOptions;
 use std::path::Path;
 

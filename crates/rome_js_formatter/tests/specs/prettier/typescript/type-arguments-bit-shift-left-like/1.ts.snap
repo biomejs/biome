@@ -1,5 +1,5 @@
 ---
-source: crates/rome_formatter_test/src/snapshot_builder.rs
+source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/type-arguments-bit-shift-left-like/1.ts
 ---
 

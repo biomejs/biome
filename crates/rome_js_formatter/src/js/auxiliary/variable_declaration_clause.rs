@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
-use rome_formatter::write;
+use biome_formatter::write;
 
 use biome_js_syntax::JsVariableDeclarationClause;
 use biome_js_syntax::JsVariableDeclarationClauseFields;

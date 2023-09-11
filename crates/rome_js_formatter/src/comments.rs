@@ -1,6 +1,14 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 use biome_diagnostics_categories::category;
+use biome_formatter::comments::is_doc_comment;
+use biome_formatter::{
+    comments::{
+        CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
+        DecoratedComment, SourceComment,
+    },
+    write,
+};
 use biome_js_syntax::suppression::parse_suppression_comment;
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
 use biome_js_syntax::{
@@ -10,14 +18,6 @@ use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
-use rome_formatter::comments::is_doc_comment;
-use rome_formatter::{
-    comments::{
-        CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
-        DecoratedComment, SourceComment,
-    },
-    write,
-};
 
 pub type JsComments = Comments<JsLanguage>;
 

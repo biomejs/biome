@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use biome_formatter::FormatError::SyntaxError;
+use biome_formatter::{format_args, write, FormatRuleWithOptions, GroupId};
 use biome_js_syntax::{TsTypeParameters, TsTypeParametersFields};
-use rome_formatter::FormatError::SyntaxError;
-use rome_formatter::{format_args, write, FormatRuleWithOptions, GroupId};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeParameters {

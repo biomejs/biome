@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::token::number::format_number_token;
+use biome_formatter::token::number::format_number_token;
 
 use crate::parentheses::{is_member_object, NeedsParentheses};
 use biome_js_syntax::JsNumberLiteralExpression;

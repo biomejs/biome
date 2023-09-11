@@ -22,7 +22,7 @@ the snapshots:
 2. Remove all the directories inside
 	 `crates/rome_json_formatter/tests/specs/prettier` to ensure all obsolete tests are
 	 removed
-3. Go to `crates/rome_formatter_test/src/prettier` directory
+3. Go to `crates/biome_formatter_test/src/prettier` directory
 4. Install prettier ``pnpm install``
 5. Go to `crates/rome_json_formatter/tests/specs/prettier` directory
 6. Run

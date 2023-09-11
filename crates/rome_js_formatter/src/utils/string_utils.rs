@@ -1,8 +1,8 @@
 use crate::context::{JsFormatOptions, QuoteProperties, QuoteStyle};
 use crate::prelude::*;
+use biome_formatter::token::string::normalize_string;
 use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
 use biome_js_syntax::{JsFileSource, JsSyntaxToken};
-use rome_formatter::token::string::normalize_string;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
@@ -363,12 +363,12 @@ mod tests {
     use crate::context::QuoteStyle;
     use crate::utils::quickcheck_utils::*;
     use crate::utils::FormatLiteralStringToken;
+    use biome_formatter::token::string::ToAsciiLowercaseCow;
     use biome_js_factory::JsSyntaxTreeBuilder;
     use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
     use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};
     use biome_rowan::AstNode;
     use quickcheck_macros::*;
-    use rome_formatter::token::string::ToAsciiLowercaseCow;
     use std::borrow::Cow;
 
     #[quickcheck]

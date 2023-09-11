@@ -2,9 +2,9 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::types::function_type::function_like_type_needs_parentheses;
+use biome_formatter::write;
 use biome_js_syntax::TsConstructorTypeFields;
 use biome_js_syntax::{JsSyntaxNode, TsConstructorType};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConstructorType;

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::{AnyJsConditional, ConditionalJsxChain};
-use rome_formatter::FormatRuleWithOptions;
+use biome_formatter::FormatRuleWithOptions;
 
 use crate::parentheses::{
     is_binary_like_left_or_right, is_conditional_test, is_spread,

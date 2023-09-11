@@ -2,7 +2,7 @@
 use crate::features::print_stats;
 use crate::language::FormatNode;
 use crate::BenchmarkSummary;
-use rome_formatter::Printed;
+use biome_formatter::Printed;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
 

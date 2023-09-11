@@ -505,7 +505,7 @@ impl BoilerplateImpls {
         let formatter_context_ident = self.language.format_context_ident();
 
         let tokens = quote! {
-            use rome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
+            use biome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
             use crate::{AsFormat, IntoFormat, FormatNodeRule, FormatBogusNodeRule, #formatter_ident, #formatter_context_ident};
 
             #( #impls )*

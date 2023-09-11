@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_formatter::write;
 use biome_js_syntax::JsStaticInitializationBlockClassMember;
 use biome_js_syntax::JsStaticInitializationBlockClassMemberFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticInitializationBlockClassMember;

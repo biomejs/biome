@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::utils::FormatOptionalSemicolon;
+use biome_formatter::write;
 use biome_js_syntax::TsEmptyExternalModuleDeclarationBody;
 use biome_js_syntax::TsEmptyExternalModuleDeclarationBodyFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsEmptyExternalModuleDeclarationBody;

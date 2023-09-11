@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::AnyJsClass;
-use rome_formatter::{format_args, write};
 
 pub struct FormatClass<'a> {
     class: &'a AnyJsClass,

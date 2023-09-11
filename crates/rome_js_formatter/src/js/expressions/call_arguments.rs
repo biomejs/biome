@@ -8,6 +8,7 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
+use biome_formatter::{format_args, format_element, write, VecBuffer};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsCallArgumentList, JsCallArguments, JsCallArgumentsFields,
@@ -15,7 +16,6 @@ use biome_js_syntax::{
     JsLanguage,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
-use rome_formatter::{format_args, format_element, write, VecBuffer};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCallArguments;
@@ -370,7 +370,7 @@ fn write_grouped_arguments(
         grouped_arg.will_break(f)
     };
 
-    // We now cache them the delimiters tokens. This is needed because `[rome_formatter::best_fitting]` will try to
+    // We now cache them the delimiters tokens. This is needed because `[biome_formatter::best_fitting]` will try to
     // print each version first
     // tokens on the left
     let l_paren = l_paren_token.format().memoized();

@@ -3,7 +3,7 @@
 use crate::{
     AsFormat, FormatBogusNodeRule, FormatNodeRule, IntoFormat, JsonFormatContext, JsonFormatter,
 };
-use rome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
+use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatRule};
 impl FormatRule<biome_json_syntax::JsonRoot> for crate::json::auxiliary::root::FormatJsonRoot {
     type Context = JsonFormatContext;
     #[inline(always)]

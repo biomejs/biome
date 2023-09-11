@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{FormatOwnedWithRule, FormatRefWithRule};
+use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule};
 
 use crate::{AsFormat, IntoFormat, JsFormatContext};
 use biome_js_syntax::{map_syntax_node, JsSyntaxNode};
@@ -7,7 +7,7 @@ use biome_js_syntax::{map_syntax_node, JsSyntaxNode};
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatJsSyntaxNode;
 
-impl rome_formatter::FormatRule<JsSyntaxNode> for FormatJsSyntaxNode {
+impl biome_formatter::FormatRule<JsSyntaxNode> for FormatJsSyntaxNode {
     type Context = JsFormatContext;
 
     fn fmt(&self, node: &JsSyntaxNode, f: &mut JsFormatter) -> FormatResult<()> {

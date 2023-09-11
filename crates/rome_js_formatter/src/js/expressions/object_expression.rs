@@ -1,8 +1,8 @@
 use crate::parentheses::{is_first_in_statement, FirstInStatementMode, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
+use biome_formatter::write;
 use biome_js_syntax::{JsObjectExpression, JsSyntaxKind, JsSyntaxNode};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectExpression;

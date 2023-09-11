@@ -1,5 +1,5 @@
+use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_js_syntax::{JsFileSource, ModuleKind};
-use rome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use rome_js_formatter::context::JsFormatOptions;
 use std::path::Path;
 

@@ -1,11 +1,11 @@
 use crate::utils::should_hug_type;
 use crate::{prelude::*, utils::is_object_like_type};
+use biome_formatter::FormatError::SyntaxError;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyTsType, JsSyntaxKind, JsVariableDeclarator, TsTypeArguments,
     TsTypeArgumentsFields,
 };
-use rome_formatter::FormatError::SyntaxError;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeArguments;

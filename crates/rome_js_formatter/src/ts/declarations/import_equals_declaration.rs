@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 
+use biome_formatter::write;
 use biome_js_syntax::TsImportEqualsDeclaration;
 use biome_js_syntax::TsImportEqualsDeclarationFields;
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsImportEqualsDeclaration;

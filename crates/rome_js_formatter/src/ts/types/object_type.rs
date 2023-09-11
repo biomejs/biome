@@ -1,8 +1,8 @@
 use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
+use biome_formatter::write;
 use biome_js_syntax::{JsSyntaxNode, TsObjectType};
-use rome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsObjectType;

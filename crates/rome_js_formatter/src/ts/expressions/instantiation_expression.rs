@@ -2,8 +2,8 @@ use crate::{
     parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses},
     prelude::*,
 };
+use biome_formatter::write;
 use biome_js_syntax::{TsInstantiationExpression, TsInstantiationExpressionFields};
-use rome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsInstantiationExpression;
 impl FormatNodeRule<TsInstantiationExpression> for FormatTsInstantiationExpression {

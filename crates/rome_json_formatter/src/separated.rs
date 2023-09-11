@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use crate::FormatJsonSyntaxToken;
-use biome_json_syntax::{JsonLanguage, JsonSyntaxToken};
-use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
-use rome_formatter::separated::{
+use biome_formatter::separated::{
     FormatSeparatedElementRule, FormatSeparatedIter, TrailingSeparator,
 };
-use rome_formatter::FormatRefWithRule;
+use biome_formatter::FormatRefWithRule;
+use biome_json_syntax::{JsonLanguage, JsonSyntaxToken};
+use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;
 
 #[derive(Clone)]

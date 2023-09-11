@@ -29,6 +29,7 @@ pub(crate) use assignment_like::{
 pub(crate) use binary_like_expression::{
     needs_binary_like_parentheses, AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
 };
+use biome_formatter::{format_args, write, Buffer};
 use biome_js_syntax::JsSyntaxToken;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifiers,
@@ -37,7 +38,6 @@ use biome_rowan::{AstNode, AstNodeList};
 pub(crate) use conditional::{AnyJsConditional, ConditionalJsxChain};
 pub(crate) use object_like::JsObjectLike;
 pub(crate) use object_pattern_like::JsObjectPatternLike;
-use rome_formatter::{format_args, write, Buffer};
 pub(crate) use string_utils::*;
 pub(crate) use typescript::{
     is_object_like_type, should_hug_type, union_or_intersection_type_needs_parentheses,

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::format_class::FormatClass;
-use rome_formatter::{format_args, write};
+use biome_formatter::{format_args, write};
 
 use crate::parentheses::{
     is_callee, is_first_in_statement, FirstInStatementMode, NeedsParentheses,

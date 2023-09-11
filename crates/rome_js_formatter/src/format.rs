@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::{Format, FormatElement, FormatNode, Formatter};
-use rome_formatter::FormatResult;
+use biome_formatter::FormatResult;
 impl Format for biome_js_syntax::JsScript {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)

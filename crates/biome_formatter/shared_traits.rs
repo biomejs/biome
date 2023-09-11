@@ -4,7 +4,7 @@
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
-    type Format<'a>: rome_formatter::Format<Context>
+    type Format<'a>: biome_formatter::Format<Context>
     where
         Self: 'a;
 
@@ -59,7 +59,7 @@ where
 ///
 /// The difference to [AsFormat] is that this trait takes ownership of `self`.
 pub(crate) trait IntoFormat<Context> {
-    type Format: rome_formatter::Format<Context>;
+    type Format: biome_formatter::Format<Context>;
 
     fn into_format(self) -> Self::Format;
 }

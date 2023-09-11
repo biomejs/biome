@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 use biome_json_syntax::{map_syntax_node, JsonSyntaxNode};
-use rome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatJsonSyntaxNode;

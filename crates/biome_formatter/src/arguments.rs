@@ -28,7 +28,7 @@ impl<Context> Clone for Argument<'_, Context> {
 impl<Context> Copy for Argument<'_, Context> {}
 
 impl<'fmt, Context> Argument<'fmt, Context> {
-    /// Called by the [rome_formatter::format_args] macro. Creates a mono-morphed value for formatting
+    /// Called by the [biome_formatter::format_args] macro. Creates a mono-morphed value for formatting
     /// an object.
     #[doc(hidden)]
     #[inline]
@@ -64,8 +64,8 @@ impl<'fmt, Context> Argument<'fmt, Context> {
 /// It will call the `format` function for every of it's objects.
 ///
 /// ```rust
-/// use rome_formatter::prelude::*;
-/// use rome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, format_args};
 ///
 /// # fn main() -> FormatResult<()> {
 /// let formatted = format!(SimpleFormatContext::default(), [

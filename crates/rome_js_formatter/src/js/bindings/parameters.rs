@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rome_formatter::{write, CstFormatContext};
+use biome_formatter::{write, CstFormatContext};
 
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;

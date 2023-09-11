@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use crate::utils::FormatStatementBody;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::JsWhileStatement;
 use biome_js_syntax::JsWhileStatementFields;
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsWhileStatement;

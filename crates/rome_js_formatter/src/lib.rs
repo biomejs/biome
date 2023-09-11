@@ -158,7 +158,7 @@
 //! called `"Unimplemented tokens/nodes"`; a test, in order to be valid, can't have that section;
 //!
 //!    If removing a token is the actual behaviour (removing some parenthesis or a semicolon), then the correct way
-//!    to do it by using the formatter API [rome_formatter::trivia::format_removed];
+//!    to do it by using the formatter API [biome_formatter::trivia::format_removed];
 //! - the emitted code is not a valid program anymore, the test suite will parse again the emitted code and it will
 //! fail if there are syntax errors;
 //! - the emitted code, when formatted again, differs from the original; this usually happens when removing/adding new
@@ -179,18 +179,18 @@ mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
 
+use biome_formatter::format_element::tag::Label;
+use biome_formatter::prelude::*;
+use biome_formatter::{
+    comments::Comments, write, CstFormatContext, Format, FormatLanguage, FormatToken,
+    TransformSourceMap,
+};
+use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
 };
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, SyntaxNode};
-use rome_formatter::format_element::tag::Label;
-use rome_formatter::prelude::*;
-use rome_formatter::{
-    comments::Comments, write, CstFormatContext, Format, FormatLanguage, FormatToken,
-    TransformSourceMap,
-};
-use rome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
 
 use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
@@ -199,7 +199,7 @@ use crate::syntax_rewriter::transform;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
-    type Format<'a>: rome_formatter::Format<Context>
+    type Format<'a>: biome_formatter::Format<Context>
     where
         Self: 'a;
 
@@ -254,7 +254,7 @@ where
 ///
 /// The difference to [AsFormat] is that this trait takes ownership of `self`.
 pub(crate) trait IntoFormat<Context> {
-    type Format: rome_formatter::Format<Context>;
+    type Format: biome_formatter::Format<Context>;
 
     fn into_format(self) -> Self::Format;
 }
@@ -384,7 +384,7 @@ where
         f.context().comments().is_suppressed(node.syntax())
     }
 
-    /// Formats the [leading comments](rome_formatter::comments#leading-comments) of the node.
+    /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
@@ -392,7 +392,7 @@ where
         format_leading_comments(node.syntax()).fmt(f)
     }
 
-    /// Formats the [dangling comments](rome_formatter::comments#dangling-comments) of the node.
+    /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
     ///
     /// You should override this method if the node handled by this rule can have dangling comments because the
     /// default implementation formats the dangling comments at the end of the node, which isn't ideal but ensures that
@@ -405,7 +405,7 @@ where
             .fmt(f)
     }
 
-    /// Formats the [trailing comments](rome_formatter::comments#trailing-comments) of the node.
+    /// Formats the [trailing comments](biome_formatter::comments#trailing-comments) of the node.
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
@@ -511,7 +511,7 @@ pub fn format_range(
     root: &JsSyntaxNode,
     range: TextRange,
 ) -> FormatResult<Printed> {
-    rome_formatter::format_range(root, range, JsFormatLanguage::new(options))
+    biome_formatter::format_range(root, range, JsFormatLanguage::new(options))
 }
 
 /// Formats a JavaScript (and its super languages) file based on its features.
@@ -521,7 +521,7 @@ pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    rome_formatter::format_node(root, JsFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsFormatLanguage::new(options))
 }
 
 /// Formats a single node within a file, supported by Biome.
@@ -535,7 +535,7 @@ pub fn format_node(
 ///
 /// It returns a [Formatted] result
 pub fn format_sub_tree(options: JsFormatOptions, root: &JsSyntaxNode) -> FormatResult<Printed> {
-    rome_formatter::format_sub_tree(root, JsFormatLanguage::new(options))
+    biome_formatter::format_sub_tree(root, JsFormatLanguage::new(options))
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -561,10 +561,10 @@ mod tests {
     use super::format_range;
 
     use crate::context::JsFormatOptions;
+    use biome_formatter::IndentStyle;
     use biome_js_parser::{parse, parse_script, JsParserOptions};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
-    use rome_formatter::IndentStyle;
 
     #[test]
     fn test_range_formatting() {

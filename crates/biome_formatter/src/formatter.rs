@@ -49,8 +49,8 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// ## Examples
     ///
     /// ```rust
-    /// use rome_formatter::format;
-    /// use rome_formatter::prelude::*;
+    /// use biome_formatter::format;
+    /// use biome_formatter::prelude::*;
     ///
     /// # fn main() -> FormatResult<()> {
     /// let formatted = format!(SimpleFormatContext::default(), [format_with(|f| {
@@ -81,8 +81,8 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// Joining different tokens by separating them with a comma and a space.
     ///
     /// ```
-    /// use rome_formatter::{format, format_args};
-    /// use rome_formatter::prelude::*;
+    /// use biome_formatter::{format, format_args};
+    /// use biome_formatter::prelude::*;
     ///
     /// # fn main() -> FormatResult<()> {
     /// let formatted = format!(SimpleFormatContext::default(), [format_with(|f| {
@@ -140,8 +140,8 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// ## Examples
     ///
     /// ```rust
-    /// use rome_formatter::prelude::*;
-    /// use rome_formatter::{format, format_args};
+    /// use biome_formatter::prelude::*;
+    /// use biome_formatter::{format, format_args};
     ///
     /// # fn main() -> FormatResult<()> {
     /// let formatted = format!(SimpleFormatContext::default(), [format_with(|f| {
@@ -162,8 +162,8 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// ```
     ///
     /// ```rust
-    /// use rome_formatter::prelude::*;
-    /// use rome_formatter::{format, format_args};
+    /// use biome_formatter::prelude::*;
+    /// use biome_formatter::{format, format_args};
     ///
     /// # fn main() -> FormatResult<()> {
     /// let entries = vec![

@@ -5,8 +5,8 @@ use crate::utils::{
     union_or_intersection_type_needs_parentheses, FormatTypeMemberSeparator,
     TsIntersectionOrUnionTypeList,
 };
+use biome_formatter::{format_args, write};
 use biome_js_syntax::{JsSyntaxNode, TsIntersectionType, TsIntersectionTypeFields};
-use rome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIntersectionType;
