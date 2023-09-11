@@ -7,6 +7,7 @@ on:
     paths:
       - 'crates/biome_js_syntax/**'
       - 'crates/biome_js_factory/**'
+      - 'crates/biome_js_semantic/**'
       - 'crates/rome_js_parser/**'
       - 'crates/biome_rowan/**'
       - 'xtask/**'
