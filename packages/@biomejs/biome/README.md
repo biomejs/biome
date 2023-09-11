@@ -38,7 +38,7 @@ Read more about our [project philosophy][biome-philosophy].
 **Biome** unifies functionality that has previously been separate tools.
 Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelizing work, caching, and configuration.
 
-**Biome** is designed to eventually replace [Babel](https://babeljs.io/), [ESLint](https://eslint.org/), [webpack](https://webpack.js.org/), [Prettier](https://prettier.io/), [Jest](https://jestjs.io/), and others.
+**Biome** is designed to eventually replace [ESLint](https://eslint.org/), [Prettier](https://prettier.io/), and others.
 
 **Biome** has first-class IDE support,
 with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
