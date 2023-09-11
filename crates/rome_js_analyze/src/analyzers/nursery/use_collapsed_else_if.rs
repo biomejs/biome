@@ -40,6 +40,17 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// if (condition) {
+    ///     // ...
+    /// } else {
+    ///     // Comment
+    ///     if (anotherCondition) {
+    ///         // ...
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -129,15 +140,11 @@ impl Rule for UseCollapsedElseIf {
             .l_curly_token()
             .ok()?
             .has_trailing_comments()
-            || if_statement.syntax().has_leading_comments()
-            || if_statement.syntax().has_trailing_comments()
+            || if_statement.syntax().has_comments_direct()
             || block_statement.r_curly_token().ok()?.has_leading_comments();
-
-        let applicability = if has_comments {
-            Applicability::MaybeIncorrect
-        } else {
-            Applicability::Always
-        };
+        if has_comments {
+            return None;
+        }
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node(
@@ -147,7 +154,7 @@ impl Rule for UseCollapsedElseIf {
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability,
+            applicability: Applicability::Always,
             message: markup! { "Use collapsed "<Emphasis>"else if"</Emphasis>" instead." }
                 .to_owned(),
             mutation,

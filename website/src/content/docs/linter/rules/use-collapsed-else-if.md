@@ -99,6 +99,35 @@ if (condition) {
   
 </code></pre>
 
+```jsx
+if (condition) {
+    // ...
+} else {
+    // Comment
+    if (anotherCondition) {
+        // ...
+    }
+}
+```
+
+<pre class="language-text"><code class="language-text">nursery/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/nursery/useCollapsedElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
+  
+    <strong>1 │ </strong>if (condition) {
+    <strong>2 │ </strong>    // ...
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>} else {
+   <strong>   │ </strong>        
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    // Comment
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    if (anotherCondition) {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>        // ...
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>    }
+   <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
+    <strong>8 │ </strong>}
+    <strong>9 │ </strong>
+  
+</code></pre>
+
 ### Valid
 
 ```jsx
