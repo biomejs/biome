@@ -23,7 +23,7 @@ documentation = """
     -p rome_service \
     -p biome_cli \
     -p biome_console \
-    -p rome_*parser \
+    -p biome_*parser \
     -p biome_text_edit \
     -p biome_text_size \
     -p biome_js_semantic \
