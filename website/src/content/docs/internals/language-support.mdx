@@ -3,16 +3,18 @@ title: Language support
 description: Languages and features supported by Biome.
 ---
 
-| Language                          | Parsing                                                 | Formatting                                              | Linting                                                 |
-|-----------------------------------|---------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------------|
-| [JavaScript](#javascript-support) | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| [TypeScript](#typescript-support) | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSX                               | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSON                              | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSONC                             | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| HTML                              | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| CSS                               | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| Markdown                          | <span aria-label="Not in progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| Language                                | Parsing                                                 | Formatting                                              | Linting                                                 |
+|-----------------------------------------|---------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------------|
+| [JavaScript](#javascript-support)       | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
+| [TypeScript](#typescript-support)       | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
+| JSX                                     | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
+| JSON                                    | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
+| JSONC                                   | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
+| HTML                                    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| [Vue](#html-super-languages-support)    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| [Svelte](#html-super-languages-support) | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| CSS                                     | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| Markdown                                | <span aria-label="Not in progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
 
 
 ## JavaScript support
@@ -25,3 +27,8 @@ Biome supports only the official syntax. The team starts development of the new 
 ## TypeScript support
 
 Biome supports TypeScript version 5.2.
+
+## HTML super languages support
+
+These languages require CSS, HTML and JavaScript parsing to be supported properly. Once those parsers are
+available, the works around these super languages can start.
