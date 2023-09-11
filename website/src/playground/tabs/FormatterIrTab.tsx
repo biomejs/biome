@@ -7,7 +7,7 @@ import type { PrettierOutput } from "../types";
 
 interface Props {
 	prettier: PrettierOutput;
-	Biome: string;
+	biome: string;
 }
 
 const formatterIrCodeMirrorExtension = [BiomeFormatterIr()];
