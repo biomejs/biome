@@ -1,0 +1,58 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```js
+{
+	"foo": "",
+	"foo": "",
+	"foo": "",
+	"foo": ""
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:2 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The key foo was already declared.
+
+    1 │ {
+  > 2 │ 	"foo": "",
+      │ 	^^^^^
+    3 │ 	"foo": "",
+    4 │ 	"foo": "",
+
+  i This where a duplicated key was declared again.
+
+    1 │ {
+    2 │ 	"foo": "",
+  > 3 │ 	"foo": "",
+      │ 	^^^^^
+    4 │ 	"foo": "",
+    5 │ 	"foo": ""
+
+  i This where a duplicated key was declared again.
+
+    2 │ 	"foo": "",
+    3 │ 	"foo": "",
+  > 4 │ 	"foo": "",
+      │ 	^^^^^
+    5 │ 	"foo": ""
+    6 │ }
+
+  i This where a duplicated key was declared again.
+
+    3 │ 	"foo": "",
+    4 │ 	"foo": "",
+  > 5 │ 	"foo": ""
+      │ 	^^^^^
+    6 │ }
+    7 │
+
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+
+
+```

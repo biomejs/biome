@@ -1,0 +1,80 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{"x"::"b"}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..4 "\"x\"" [] [],
+                },
+                colon_token: COLON@4..5 ":" [] [],
+                value: missing (required),
+            },
+            missing separator,
+            JsonMember {
+                name: missing (required),
+                colon_token: COLON@5..6 ":" [] [],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@6..9 "\"b\"" [] [],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@9..10 "}" [] [],
+    },
+    eof_token: EOF@10..10 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..10
+  0: JSON_OBJECT_VALUE@0..10
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..9
+      0: JSON_MEMBER@1..5
+        0: JSON_MEMBER_NAME@1..4
+          0: JSON_STRING_LITERAL@1..4 "\"x\"" [] []
+        1: COLON@4..5 ":" [] []
+        2: (empty)
+      1: (empty)
+      2: JSON_MEMBER@5..9
+        0: (empty)
+        1: COLON@5..6 ":" [] []
+        2: JSON_STRING_VALUE@6..9
+          0: JSON_STRING_LITERAL@6..9 "\"b\"" [] []
+    2: R_CURLY@9..10 "}" [] []
+  1: EOF@10..10 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_double_colon.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found ':'
+
+  > 1 │ {"x"::"b"}
+      │      ^
+
+  i Expected an array, an object, or a literal here
+
+  > 1 │ {"x"::"b"}
+      │      ^
+
+```

@@ -11,10 +11,10 @@ use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
-use rome_json_parser::JsonParserOptions;
 use rome_service::settings::WorkspaceSettings;
 use std::{
     collections::BTreeMap,
@@ -110,7 +110,7 @@ fn main() -> Result<()> {
 
     let mut visitor = LintRulesVisitor::default();
     rome_js_analyze::visit_registry(&mut visitor);
-    rome_json_analyze::visit_registry(&mut visitor);
+    biome_json_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor {
         mut groups,
@@ -635,7 +635,7 @@ fn assert_lint(
             }
         }
         BlockType::Json => {
-            let parse = rome_json_parser::parse_json(code, JsonParserOptions::default());
+            let parse = biome_json_parser::parse_json(code, JsonParserOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
@@ -656,7 +656,7 @@ fn assert_lint(
                 };
 
                 let options = AnalyzerOptions::default();
-                let (_, diagnostics) = rome_json_analyze::analyze(
+                let (_, diagnostics) = biome_json_analyze::analyze(
                     &root.value().unwrap(),
                     filter,
                     &options,

@@ -24,14 +24,14 @@ use biome_analyze::{AnalyzerConfiguration, AnalyzerRules};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, StringSet};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
 pub use formatter::{formatter_configuration, FormatterConfiguration, PlainIndentStyle};
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
 pub use json::{json_configuration, JsonConfiguration};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
 use rome_js_analyze::metadata;
-use rome_json_formatter::context::JsonFormatOptions;
-use rome_json_parser::{parse_json, JsonParserOptions};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::io::ErrorKind;
@@ -423,7 +423,7 @@ pub fn create_config(
 
     let parsed = parse_json(&contents, JsonParserOptions::default());
     let formatted =
-        rome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())?
+        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())?
             .print()
             .expect("valid format document");
 

@@ -1,0 +1,69 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{"asd":"asd"
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..6 "\"asd\"" [] [],
+                },
+                colon_token: COLON@6..7 ":" [] [],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@7..12 "\"asd\"" [] [],
+                },
+            },
+        ],
+        r_curly_token: missing (required),
+    },
+    eof_token: EOF@12..12 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..12
+  0: JSON_OBJECT_VALUE@0..12
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..12
+      0: JSON_MEMBER@1..12
+        0: JSON_MEMBER_NAME@1..6
+          0: JSON_STRING_LITERAL@1..6 "\"asd\"" [] []
+        1: COLON@6..7 ":" [] []
+        2: JSON_STRING_VALUE@7..12
+          0: JSON_STRING_LITERAL@7..12 "\"asd\"" [] []
+    2: (empty)
+  1: EOF@12..12 "" [] []
+
+```
+
+## Diagnostics
+
+```
+structure_unclosed_object.json:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+
+  > 1 │ {"asd":"asd"
+      │
+
+  i the file ends here
+
+  > 1 │ {"asd":"asd"
+      │
+
+```

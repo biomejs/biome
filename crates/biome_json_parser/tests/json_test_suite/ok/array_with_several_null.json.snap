@@ -1,0 +1,70 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[1,null,null,null,2]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@1..2 "1" [] [],
+            },
+            COMMA@2..3 "," [] [],
+            JsonNullValue {
+                value_token: NULL_KW@3..7 "null" [] [],
+            },
+            COMMA@7..8 "," [] [],
+            JsonNullValue {
+                value_token: NULL_KW@8..12 "null" [] [],
+            },
+            COMMA@12..13 "," [] [],
+            JsonNullValue {
+                value_token: NULL_KW@13..17 "null" [] [],
+            },
+            COMMA@17..18 "," [] [],
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@18..19 "2" [] [],
+            },
+        ],
+        r_brack_token: R_BRACK@19..20 "]" [] [],
+    },
+    eof_token: EOF@20..20 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..20
+  0: JSON_ARRAY_VALUE@0..20
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..19
+      0: JSON_NUMBER_VALUE@1..2
+        0: JSON_NUMBER_LITERAL@1..2 "1" [] []
+      1: COMMA@2..3 "," [] []
+      2: JSON_NULL_VALUE@3..7
+        0: NULL_KW@3..7 "null" [] []
+      3: COMMA@7..8 "," [] []
+      4: JSON_NULL_VALUE@8..12
+        0: NULL_KW@8..12 "null" [] []
+      5: COMMA@12..13 "," [] []
+      6: JSON_NULL_VALUE@13..17
+        0: NULL_KW@13..17 "null" [] []
+      7: COMMA@17..18 "," [] []
+      8: JSON_NUMBER_VALUE@18..19
+        0: JSON_NUMBER_LITERAL@18..19 "2" [] []
+    2: R_BRACK@19..20 "]" [] []
+  1: EOF@20..20 "" [] []
+
+```

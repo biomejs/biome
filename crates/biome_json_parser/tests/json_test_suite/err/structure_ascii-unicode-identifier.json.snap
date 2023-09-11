@@ -1,0 +1,46 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+aå
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonBogusValue {
+        items: [
+            IDENT@0..3 "aå" [] [],
+        ],
+    },
+    eof_token: EOF@3..3 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..3
+  0: JSON_BOGUS_VALUE@0..3
+    0: IDENT@0..3 "aå" [] []
+  1: EOF@3..3 "" [] []
+
+```
+
+## Diagnostics
+
+```
+structure_ascii-unicode-identifier.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × String values must be double quoted.
+
+  > 1 │ aå
+      │ ^^
+
+```

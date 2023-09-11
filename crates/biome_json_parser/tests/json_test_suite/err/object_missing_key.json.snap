@@ -1,0 +1,66 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{:"b"}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: missing (required),
+                colon_token: COLON@1..2 ":" [] [],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@2..5 "\"b\"" [] [],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@5..6 "}" [] [],
+    },
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..6
+  0: JSON_OBJECT_VALUE@0..6
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..5
+      0: JSON_MEMBER@1..5
+        0: (empty)
+        1: COLON@1..2 ":" [] []
+        2: JSON_STRING_VALUE@2..5
+          0: JSON_STRING_LITERAL@2..5 "\"b\"" [] []
+    2: R_CURLY@5..6 "}" [] []
+  1: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_missing_key.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a property but instead found ':'
+
+  > 1 │ {:"b"}
+      │  ^
+
+  i Expected a property here
+
+  > 1 │ {:"b"}
+      │  ^
+
+```

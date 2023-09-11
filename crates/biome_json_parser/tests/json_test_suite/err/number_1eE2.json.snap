@@ -1,0 +1,61 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[1eE2]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..5 "1eE2" [] [],
+                ],
+            },
+        ],
+        r_brack_token: R_BRACK@5..6 "]" [] [],
+    },
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..6
+  0: JSON_ARRAY_VALUE@0..6
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..5
+      0: JSON_BOGUS_VALUE@1..5
+        0: ERROR_TOKEN@1..5 "1eE2" [] []
+    2: R_BRACK@5..6 "]" [] []
+  1: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+number_1eE2.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing exponent
+
+  > 1 │ [1eE2]
+      │  ^^
+
+  i Expected a digit as the exponent
+
+  > 1 │ [1eE2]
+      │    ^
+
+```

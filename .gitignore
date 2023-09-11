@@ -22,5 +22,5 @@ packages/@biomejs/cli-*
 dhat-heap.json
 
 crates/rome_js_formatter/report.*
-crates/rome_json_formatter/report.*
+crates/biome_json_formatter/report.*
 .vercel

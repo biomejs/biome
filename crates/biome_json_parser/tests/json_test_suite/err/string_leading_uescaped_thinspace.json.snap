@@ -1,0 +1,74 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[\u0020"asd"]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..2 "\\" [] [],
+                    IDENT@2..7 "u0020" [] [],
+                ],
+            },
+            missing separator,
+            JsonStringValue {
+                value_token: JSON_STRING_LITERAL@7..12 "\"asd\"" [] [],
+            },
+        ],
+        r_brack_token: R_BRACK@12..13 "]" [] [],
+    },
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..13
+  0: JSON_ARRAY_VALUE@0..13
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..12
+      0: JSON_BOGUS_VALUE@1..7
+        0: ERROR_TOKEN@1..2 "\\" [] []
+        1: IDENT@2..7 "u0020" [] []
+      1: (empty)
+      2: JSON_STRING_VALUE@7..12
+        0: JSON_STRING_LITERAL@7..12 "\"asd\"" [] []
+    2: R_BRACK@12..13 "]" [] []
+  1: EOF@13..13 "" [] []
+
+```
+
+## Diagnostics
+
+```
+string_leading_uescaped_thinspace.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `\`
+
+  > 1 │ [\u0020"asd"]
+      │  ^
+
+string_leading_uescaped_thinspace.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `"asd"`
+
+  > 1 │ [\u0020"asd"]
+      │        ^^^^^
+
+  i Remove "asd"
+
+```

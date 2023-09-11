@@ -5,17 +5,17 @@
 
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, RuleFilter};
 use biome_diagnostics::Diagnostic;
+use biome_formatter::format_node;
+use biome_js_parser::parse;
 use biome_js_parser::parse;
 use biome_js_syntax::JsFileSource;
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::JsonFormatLanguage;
+use biome_json_parser::parse_json;
 use libfuzzer_sys::Corpus;
-use biome_formatter::format_node;
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::JsFormatLanguage;
-use biome_js_parser::parse;
-use rome_json_formatter::context::JsonFormatOptions;
-use rome_json_formatter::JsonFormatLanguage;
-use rome_json_parser::parse_json;
 use rome_service::Rules;
 use similar::TextDiff;
 use std::fmt::{Display, Formatter};

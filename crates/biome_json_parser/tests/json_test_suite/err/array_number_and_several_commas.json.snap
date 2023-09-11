@@ -1,0 +1,79 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[1,,]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@1..2 "1" [] [],
+            },
+            COMMA@2..3 "," [] [],
+            missing element,
+            COMMA@3..4 "," [] [],
+            missing element,
+        ],
+        r_brack_token: R_BRACK@4..5 "]" [] [],
+    },
+    eof_token: EOF@5..5 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..5
+  0: JSON_ARRAY_VALUE@0..5
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..4
+      0: JSON_NUMBER_VALUE@1..2
+        0: JSON_NUMBER_LITERAL@1..2 "1" [] []
+      1: COMMA@2..3 "," [] []
+      2: (empty)
+      3: COMMA@3..4 "," [] []
+      4: (empty)
+    2: R_BRACK@4..5 "]" [] []
+  1: EOF@5..5 "" [] []
+
+```
+
+## Diagnostics
+
+```
+array_number_and_several_commas.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found ','
+
+  > 1 │ [1,,]
+      │    ^
+
+  i Expected an array, an object, or a literal here
+
+  > 1 │ [1,,]
+      │    ^
+
+array_number_and_several_commas.json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found ']'
+
+  > 1 │ [1,,]
+      │     ^
+
+  i Expected an array, an object, or a literal here
+
+  > 1 │ [1,,]
+      │     ^
+
+```

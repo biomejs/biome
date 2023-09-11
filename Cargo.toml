@@ -47,7 +47,10 @@ biome_js_parser              = { path = "./crates/biome_js_parser" }
 biome_js_semantic            = { path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.2.0", path = "./crates/biome_js_syntax" }
 biome_js_unicode_table       = { version = "0.0.1", path = "./crates/biome_js_unicode_table" }
+biome_json_analyze           = { path = "./crates/biome_json_analyze" }
 biome_json_factory           = { version = "0.2.0", path = "./crates/biome_json_factory" }
+biome_json_formatter         = { path = "./crates/biome_json_formatter" }
+biome_json_parser            = { path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.2.0", path = "./crates/biome_json_syntax" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_markup                 = { version = "0.0.1", path = "./crates/biome_markup" }
@@ -60,9 +63,6 @@ biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_
 biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_size" }
 rome_js_analyze              = { path = "./crates/rome_js_analyze" }
 rome_js_formatter            = { path = "./crates/rome_js_formatter" }
-rome_json_analyze            = { path = "./crates/rome_json_analyze" }
-rome_json_formatter          = { path = "./crates/rome_json_formatter" }
-rome_json_parser             = { path = "./crates/rome_json_parser" }
 rome_service                 = { path = "./crates/rome_service" }
 tests_macros                 = { path = "./crates/tests_macros" }
 

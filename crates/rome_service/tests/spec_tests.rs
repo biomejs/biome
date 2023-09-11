@@ -1,6 +1,6 @@
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
-use rome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParserOptions;
 use rome_service::Configuration;
 use std::ffi::OsStr;
 use std::fs::read_to_string;

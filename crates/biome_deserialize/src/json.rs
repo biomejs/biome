@@ -1,13 +1,13 @@
 use crate::{DeserializationDiagnostic, Deserialized, VisitNode};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, Error};
+use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
     JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText};
 use indexmap::IndexSet;
-use rome_json_parser::{parse_json, JsonParserOptions};
 use std::num::ParseIntError;
 
 /// Main trait to
@@ -586,7 +586,7 @@ pub fn with_only_known_variants(
 ///     }
 /// }
 ///
-///  use rome_json_parser::JsonParserOptions;
+///  use biome_json_parser::JsonParserOptions;
 /// # fn main() -> Result<(), DeserializationDiagnostic> {
 /// let source = r#"{ "lorem": true }"#;
 ///  let deserialized = deserialize_from_json_str::<NewConfiguration>(&source, JsonParserOptions::default());

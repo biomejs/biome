@@ -64,7 +64,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
     let mut visitor = LintRulesVisitor::default();
     rome_js_analyze::visit_registry(&mut visitor);
-    rome_json_analyze::visit_registry(&mut visitor);
+    biome_json_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups } = visitor;
 

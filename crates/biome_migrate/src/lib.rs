@@ -97,7 +97,7 @@ where
 mod test {
     use crate::migrate_configuration;
     use biome_analyze::{ControlFlow, Never};
-    use rome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{parse_json, JsonParserOptions};
     use std::path::Path;
 
     #[test]

@@ -1,0 +1,80 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{"a":"a" 123}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..4 "\"a\"" [] [],
+                },
+                colon_token: COLON@4..5 ":" [] [],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@5..9 "\"a\"" [] [Whitespace(" ")],
+                },
+            },
+            missing separator,
+            JsonMember {
+                name: missing (required),
+                colon_token: missing (required),
+                value: JsonNumberValue {
+                    value_token: JSON_NUMBER_LITERAL@9..12 "123" [] [],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@12..13 "}" [] [],
+    },
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..13
+  0: JSON_OBJECT_VALUE@0..13
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..12
+      0: JSON_MEMBER@1..9
+        0: JSON_MEMBER_NAME@1..4
+          0: JSON_STRING_LITERAL@1..4 "\"a\"" [] []
+        1: COLON@4..5 ":" [] []
+        2: JSON_STRING_VALUE@5..9
+          0: JSON_STRING_LITERAL@5..9 "\"a\"" [] [Whitespace(" ")]
+      1: (empty)
+      2: JSON_MEMBER@9..12
+        0: (empty)
+        1: (empty)
+        2: JSON_NUMBER_VALUE@9..12
+          0: JSON_NUMBER_LITERAL@9..12 "123" [] []
+    2: R_CURLY@12..13 "}" [] []
+  1: EOF@13..13 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_garbage_at_end.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `123`
+
+  > 1 │ {"a":"a" 123}
+      │          ^^^
+
+  i Remove 123
+
+```

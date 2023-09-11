@@ -1,7 +1,7 @@
 [package]
 authors.workspace    = true
-description          = "Utilities to create JSON AST for rome_json_parser"
-documentation        = "https://docs.rs/rome_json_parser"
+description          = "Utilities to create JSON AST for biome_json_parser"
+documentation        = "https://docs.rs/biome_json_parser"
 edition.workspace    = true
 license.workspace    = true
 name                 = "biome_json_factory"
