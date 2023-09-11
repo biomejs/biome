@@ -63,19 +63,21 @@ JsonRoot {
 array_items_separated_by_semicolon.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ [1:2]
       │   ^
-
+  
   i Remove :
-
+  
 array_items_separated_by_semicolon.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `2`
-
+  
   > 1 │ [1:2]
       │    ^
-
+  
   i Remove 2
-
+  
 ```
+
+

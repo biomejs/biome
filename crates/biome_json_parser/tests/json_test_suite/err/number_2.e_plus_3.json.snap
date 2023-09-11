@@ -49,22 +49,24 @@ JsonRoot {
 number_2.e_plus_3.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '2.e+3'
-
+  
   > 1 │ [2.e+3]
       │  ^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [2.e+3]
       │  ^^^^^
-
+  
 number_2.e_plus_3.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing fraction
-
+  
   > 1 │ [2.e+3]
       │    ^
-
+  
   i Remove the `.`
-
+  
 ```
+
+

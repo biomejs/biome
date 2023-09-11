@@ -51,13 +51,15 @@ JsonRoot {
 number_real_garbage_after_e.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing exponent
-
+  
   > 1 │ [1ea]
       │  ^^
-
+  
   i Expected a digit as the exponent
-
+  
   > 1 │ [1ea]
       │    ^
-
+  
 ```
+
+

@@ -51,13 +51,15 @@ JsonRoot {
 array_comma_and_number.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found ','
-
+  
   > 1 │ [,1]
       │  ^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [,1]
       │  ^
-
+  
 ```
+
+

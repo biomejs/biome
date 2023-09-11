@@ -56,17 +56,19 @@ JsonRoot {
 number_minus_space_1.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Minus must be followed by a digit
-
+  
   > 1 │ [- 1]
       │  ^
-
+  
 number_minus_space_1.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `1`
-
+  
   > 1 │ [- 1]
       │    ^
-
+  
   i Remove 1
-
+  
 ```
+
+

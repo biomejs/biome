@@ -47,25 +47,27 @@ JsonRoot {
 string_1_surrogate_then_escape.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ ["\uD800\"]
       │  ^^^^^^^^^^
-
+  
   i file ends here
-
+  
   > 1 │ ["\uD800\"]
-      │
-
+      │            
+  
 string_1_surrogate_then_escape.json:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ ["\uD800\"]
-      │
-
+      │            
+  
   i the file ends here
-
+  
   > 1 │ ["\uD800\"]
-      │
-
+      │            
+  
 ```
+
+

@@ -76,8 +76,10 @@ JsonRoot {
 object_with_trailing_garbage.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `#`
-
+  
   > 1 │ {"a":"b"}#
       │          ^
-
+  
 ```
+
+

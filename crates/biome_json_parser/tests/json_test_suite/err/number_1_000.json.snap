@@ -56,8 +56,10 @@ JsonRoot {
 number_1_000.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The JSON standard doesn't allow octal number notation (numbers starting with zero)
-
+  
   > 1 │ [1 000.0]
       │    ^
-
+  
 ```
+
+

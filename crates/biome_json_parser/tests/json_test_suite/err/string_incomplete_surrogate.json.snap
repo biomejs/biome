@@ -49,27 +49,29 @@ JsonRoot {
 string_incomplete_surrogate.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '"\uD834\uDd"'
-
+  
   > 1 │ ["\uD834\uDd"]
       │  ^^^^^^^^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["\uD834\uDd"]
       │  ^^^^^^^^^^^^
-
+  
 string_incomplete_surrogate.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid unicode sequence
-
+  
   > 1 │ ["\uD834\uDd"]
       │         ^^^^
-
+  
   i Non hexadecimal number
-
+  
   > 1 │ ["\uD834\uDd"]
       │             ^
-
+  
   i A unicode escape sequence must consist of 4 hexadecimal numbers: `\uXXXX`, e.g. `\u002F' for '/'.
-
+  
 ```
+
+

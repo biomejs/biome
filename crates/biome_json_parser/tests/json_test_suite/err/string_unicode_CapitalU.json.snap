@@ -39,22 +39,24 @@ JsonRoot {
 string_unicode_CapitalU.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '"\UA66D"'
-
+  
   > 1 │ "\UA66D"
       │ ^^^^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ "\UA66D"
       │ ^^^^^^^^
-
+  
 string_unicode_CapitalU.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid escape sequence
-
+  
   > 1 │ "\UA66D"
       │  ^^
-
-  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number.
-
+  
+  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. 
+  
 ```
+
+

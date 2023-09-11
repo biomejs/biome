@@ -49,13 +49,15 @@ JsonRoot {
 number_0_capital_E+.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing exponent
-
+  
   > 1 │ [0E+]
       │  ^^^
-
+  
   i Expected a digit as the exponent
-
+  
   > 1 │ [0E+]
       │     ^
-
+  
 ```
+
+

@@ -61,13 +61,15 @@ JsonRoot {
 object_trailing_comma.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found '}'
-
+  
   > 1 │ {"id":0,}
       │         ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,}
       │         ^
-
+  
 ```
+
+

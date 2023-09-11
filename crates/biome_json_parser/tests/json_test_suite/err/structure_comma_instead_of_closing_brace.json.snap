@@ -61,13 +61,15 @@ JsonRoot {
 structure_comma_instead_of_closing_brace.json:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found the end of the file
-
+  
   > 1 │ {"x": true,
-      │
-
+      │            
+  
   i Expected a property here
-
+  
   > 1 │ {"x": true,
-      │
-
+      │            
+  
 ```
+
+

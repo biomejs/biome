@@ -54,10 +54,12 @@ JsonRoot {
 array_1_true_without_comma.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `true`
-
+  
   > 1 │ [1 true]
       │    ^^^^
-
+  
   i Remove true
-
+  
 ```
+
+

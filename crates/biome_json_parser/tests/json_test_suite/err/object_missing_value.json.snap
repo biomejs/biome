@@ -54,13 +54,15 @@ JsonRoot {
 object_missing_value.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found the end of the file
-
+  
   > 1 │ {"a":
-      │
-
+      │      
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ {"a":
-      │
-
+      │      
+  
 ```
+
+

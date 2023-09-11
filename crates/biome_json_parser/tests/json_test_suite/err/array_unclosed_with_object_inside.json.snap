@@ -51,13 +51,15 @@ JsonRoot {
 array_unclosed_with_object_inside.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ [{}
-      │
-
+      │    
+  
   i the file ends here
-
+  
   > 1 │ [{}
-      │
-
+      │    
+  
 ```
+
+

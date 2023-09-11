@@ -49,8 +49,10 @@ JsonRoot {
 structure_whitespace_U+2060_word_joiner.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `�`
-
+  
   > 1 │ [�]
-      │
-
+      │  
+  
 ```
+
+

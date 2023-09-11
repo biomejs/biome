@@ -68,22 +68,24 @@ JsonRoot {
 object_comma_instead_of_colon.json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `,`
-
+  
   > 1 │ {"x", null}
       │     ^
-
+  
   i Remove ,
-
+  
 object_comma_instead_of_colon.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found 'null'
-
+  
   > 1 │ {"x", null}
       │       ^^^^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"x", null}
       │       ^^^^
-
+  
 ```
+
+

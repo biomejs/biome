@@ -41,10 +41,12 @@ JsonRoot {
 structure_whitespace_formfeed.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The JSON standard only allows tabs, whitespace, carriage return and line feed whitespace.
-
+  
   > 1 │ [↡]
-      │
-
+      │  
+  
   i Use a regular whitespace character instead.
-
+  
 ```
+
+

@@ -39,8 +39,10 @@ JsonRoot {
 structure_UTF8_BOM_no_data.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `�`
-
+  
   > 1 │ �
-      │
-
+      │ 
+  
 ```
+
+

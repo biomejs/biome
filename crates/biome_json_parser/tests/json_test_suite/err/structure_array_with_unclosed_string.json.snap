@@ -47,25 +47,27 @@ JsonRoot {
 structure_array_with_unclosed_string.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ ["asd]
       │  ^^^^^
-
+  
   i file ends here
-
+  
   > 1 │ ["asd]
-      │
-
+      │       
+  
 structure_array_with_unclosed_string.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ ["asd]
-      │
-
+      │       
+  
   i the file ends here
-
+  
   > 1 │ ["asd]
-      │
-
+      │       
+  
 ```
+
+

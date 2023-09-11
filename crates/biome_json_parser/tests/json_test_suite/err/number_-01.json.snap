@@ -49,20 +49,22 @@ JsonRoot {
 number_-01.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '-01'
-
+  
   > 1 │ [-01]
       │  ^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [-01]
       │  ^^^
-
+  
 number_-01.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The JSON standard doesn't allow octal number notation (numbers starting with zero)
-
+  
   > 1 │ [-01]
       │   ^
-
+  
 ```
+
+

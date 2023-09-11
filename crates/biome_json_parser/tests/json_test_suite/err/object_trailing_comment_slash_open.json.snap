@@ -76,8 +76,10 @@ JsonRoot {
 object_trailing_comment_slash_open.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × JSON standard does not allow comments.
-
+  
   > 1 │ {"a":"b"}//
       │          ^^
-
+  
 ```
+
+

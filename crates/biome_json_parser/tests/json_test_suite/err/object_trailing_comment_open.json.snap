@@ -78,15 +78,17 @@ JsonRoot {
 object_trailing_comment_open.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × JSON standard does not allow comments.
-
+  
   > 1 │ {"a":"b"}/**//
       │          ^^^^
-
+  
 object_trailing_comment_open.json:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `/`
-
+  
   > 1 │ {"a":"b"}/**//
       │              ^
-
+  
 ```
+
+

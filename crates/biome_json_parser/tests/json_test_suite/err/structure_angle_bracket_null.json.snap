@@ -65,24 +65,26 @@ JsonRoot {
 structure_angle_bracket_null.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `<`
-
+  
   > 1 │ [<null>]
       │  ^
-
+  
 structure_angle_bracket_null.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `null`
-
+  
   > 1 │ [<null>]
       │   ^^^^
-
+  
   i Remove null
-
+  
 structure_angle_bracket_null.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `>`
-
+  
   > 1 │ [<null>]
       │       ^
-
+  
 ```
+
+

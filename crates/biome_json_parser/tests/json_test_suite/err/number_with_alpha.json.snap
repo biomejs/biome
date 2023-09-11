@@ -63,19 +63,21 @@ JsonRoot {
 number_with_alpha.json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `a`
-
+  
   > 1 │ [1.2a-3]
       │     ^
-
+  
   i Remove a
-
+  
 number_with_alpha.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `-3`
-
+  
   > 1 │ [1.2a-3]
       │      ^^
-
+  
   i Remove -3
-
+  
 ```
+
+

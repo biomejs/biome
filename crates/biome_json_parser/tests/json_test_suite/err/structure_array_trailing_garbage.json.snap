@@ -66,8 +66,10 @@ JsonRoot {
 structure_array_trailing_garbage.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
-
+  
   > 1 │ [1]x
       │    ^
-
+  
 ```
+
+

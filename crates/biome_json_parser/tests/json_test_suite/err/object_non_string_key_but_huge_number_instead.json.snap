@@ -68,22 +68,24 @@ JsonRoot {
 object_non_string_key_but_huge_number_instead.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found '9999E9999'
-
+  
   > 1 │ {9999E9999:1}
       │  ^^^^^^^^^
-
+  
   i Expected a property here
-
+  
   > 1 │ {9999E9999:1}
       │  ^^^^^^^^^
-
+  
 object_non_string_key_but_huge_number_instead.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ {9999E9999:1}
       │           ^
-
+  
   i Remove :
-
+  
 ```
+
+

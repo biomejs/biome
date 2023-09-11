@@ -63,19 +63,21 @@ JsonRoot {
 array_colon_instead_of_comma.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ ["": 1]
       │    ^
-
+  
   i Remove :
-
+  
 array_colon_instead_of_comma.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `1`
-
+  
   > 1 │ ["": 1]
       │      ^
-
+  
   i Remove 1
-
+  
 ```
+
+

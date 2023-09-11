@@ -58,17 +58,19 @@ JsonRoot {
 string_leading_uescaped_thinspace.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `\`
-
+  
   > 1 │ [\u0020"asd"]
       │  ^
-
+  
 string_leading_uescaped_thinspace.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `"asd"`
-
+  
   > 1 │ [\u0020"asd"]
       │        ^^^^^
-
+  
   i Remove "asd"
-
+  
 ```
+
+

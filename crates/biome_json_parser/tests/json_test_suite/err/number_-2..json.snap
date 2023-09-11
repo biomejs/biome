@@ -49,22 +49,24 @@ JsonRoot {
 number_-2..json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '-2.'
-
+  
   > 1 │ [-2.]
       │  ^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [-2.]
       │  ^^^
-
+  
 number_-2..json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing fraction
-
+  
   > 1 │ [-2.]
       │     ^
-
+  
   i Remove the `.`
-
+  
 ```
+
+

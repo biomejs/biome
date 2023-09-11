@@ -49,8 +49,10 @@ JsonRoot {
 incomplete_null.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
-
+  
   > 1 │ [nul]
       │  ^^^
-
+  
 ```
+
+

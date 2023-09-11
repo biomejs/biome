@@ -47,25 +47,27 @@ JsonRoot {
 string_incomplete_escape.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ ["\"]
       │  ^^^^
-
+  
   i file ends here
-
+  
   > 1 │ ["\"]
-      │
-
+      │      
+  
 string_incomplete_escape.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ ["\"]
-      │
-
+      │      
+  
   i the file ends here
-
+  
   > 1 │ ["\"]
-      │
-
+      │      
+  
 ```
+
+

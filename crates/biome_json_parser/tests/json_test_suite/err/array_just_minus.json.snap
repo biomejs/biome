@@ -49,8 +49,10 @@ JsonRoot {
 array_just_minus.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Minus must be followed by a digit
-
+  
   > 1 │ [-]
       │  ^
-
+  
 ```
+
+

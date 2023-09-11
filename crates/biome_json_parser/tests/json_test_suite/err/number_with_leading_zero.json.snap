@@ -49,8 +49,10 @@ JsonRoot {
 number_with_leading_zero.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The JSON standard doesn't allow octal number notation (numbers starting with zero)
-
+  
   > 1 │ [012]
       │  ^
-
+  
 ```
+
+

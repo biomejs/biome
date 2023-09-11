@@ -48,25 +48,27 @@ JsonRoot {
 array_just_comma.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found ','
-
+  
   > 1 │ [,]
       │  ^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [,]
       │  ^
-
+  
 array_just_comma.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found ']'
-
+  
   > 1 │ [,]
       │   ^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [,]
       │   ^
-
+  
 ```
+
+

@@ -56,8 +56,10 @@ JsonRoot {
 object_bad_value.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
-
+  
   > 1 │ ["x", truth]
       │       ^^^^^
-
+  
 ```
+
+

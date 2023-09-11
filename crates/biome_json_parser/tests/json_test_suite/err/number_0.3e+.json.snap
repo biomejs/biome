@@ -49,13 +49,15 @@ JsonRoot {
 number_0.3e+.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing exponent
-
+  
   > 1 │ [0.3e+]
       │  ^^^^^
-
+  
   i Expected a digit as the exponent
-
+  
   > 1 │ [0.3e+]
       │       ^
-
+  
 ```
+
+

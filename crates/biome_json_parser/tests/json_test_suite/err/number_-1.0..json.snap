@@ -49,20 +49,22 @@ JsonRoot {
 number_-1.0..json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '-1.0.'
-
+  
   > 1 │ [-1.0.]
       │  ^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [-1.0.]
       │  ^^^^^
-
+  
 number_-1.0..json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid fraction part
-
+  
   > 1 │ [-1.0.]
       │      ^
-
+  
 ```
+
+

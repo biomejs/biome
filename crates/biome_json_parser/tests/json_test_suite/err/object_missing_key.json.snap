@@ -54,13 +54,15 @@ JsonRoot {
 object_missing_key.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ':'
-
+  
   > 1 │ {:"b"}
       │  ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {:"b"}
       │  ^
-
+  
 ```
+
+

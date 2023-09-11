@@ -56,10 +56,12 @@ JsonRoot {
 number_invalid-negative-real.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `foo`
-
+  
   > 1 │ [-123.123foo]
       │          ^^^
-
+  
   i Remove foo
-
+  
 ```
+
+

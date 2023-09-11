@@ -55,25 +55,27 @@ JsonRoot {
 array_double_extra_comma.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found ','
-
+  
   > 1 │ ["x",,]
       │      ^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["x",,]
       │      ^
-
+  
 array_double_extra_comma.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found ']'
-
+  
   > 1 │ ["x",,]
       │       ^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["x",,]
       │       ^
-
+  
 ```
+
+

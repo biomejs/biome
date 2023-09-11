@@ -48,25 +48,27 @@ JsonRoot {
 structure_open_object_comma.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ','
-
+  
   > 1 │ {,
       │  ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {,
       │  ^
-
+  
 structure_open_object_comma.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found the end of the file
-
+  
   > 1 │ {,
-      │
-
+      │   
+  
   i Expected a property here
-
+  
   > 1 │ {,
-      │
-
+      │   
+  
 ```
+
+

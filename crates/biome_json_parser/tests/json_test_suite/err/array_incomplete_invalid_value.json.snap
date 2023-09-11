@@ -49,20 +49,22 @@ JsonRoot {
 array_incomplete_invalid_value.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
-
+  
   > 1 │ [x
       │  ^
-
+  
 array_incomplete_invalid_value.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ [x
-      │
-
+      │   
+  
   i the file ends here
-
+  
   > 1 │ [x
-      │
-
+      │   
+  
 ```
+
+

@@ -56,22 +56,24 @@ JsonRoot {
 number_invalid+-.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing exponent
-
+  
   > 1 │ [0e+-1]
       │  ^^^
-
+  
   i Expected a digit as the exponent
-
+  
   > 1 │ [0e+-1]
       │     ^
-
+  
 number_invalid+-.json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `-1`
-
+  
   > 1 │ [0e+-1]
       │     ^^
-
+  
   i Remove -1
-
+  
 ```
+
+

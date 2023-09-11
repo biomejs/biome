@@ -57,10 +57,12 @@ JsonRoot {
 object_missing_semicolon.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `"b"`
-
+  
   > 1 │ {"a" "b"}
       │      ^^^
-
+  
   i Remove "b"
-
+  
 ```
+
+

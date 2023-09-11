@@ -71,10 +71,12 @@ JsonRoot {
 object_with_single_string.json:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `}`
-
+  
   > 1 │ { "foo" : "bar", "a" }
       │                      ^
-
+  
   i Remove }
-
+  
 ```
+
+

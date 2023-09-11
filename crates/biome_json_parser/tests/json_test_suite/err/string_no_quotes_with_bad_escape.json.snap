@@ -51,8 +51,10 @@ JsonRoot {
 string_no_quotes_with_bad_escape.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `\`
-
+  
   > 1 │ [\n]
       │  ^
-
+  
 ```
+
+

@@ -47,25 +47,27 @@ JsonRoot {
 string_escaped_backslash_bad.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ ["\\\"]
       │  ^^^^^^
-
+  
   i file ends here
-
+  
   > 1 │ ["\\\"]
-      │
-
+      │        
+  
 string_escaped_backslash_bad.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ ["\\\"]
-      │
-
+      │        
+  
   i the file ends here
-
+  
   > 1 │ ["\\\"]
-      │
-
+      │        
+  
 ```
+
+

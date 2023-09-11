@@ -96,43 +96,45 @@ JsonRoot {
 object_repeated_null_null.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found 'null'
-
+  
   > 1 │ {null:null,null:null}
       │  ^^^^
-
+  
   i Expected a property here
-
+  
   > 1 │ {null:null,null:null}
       │  ^^^^
-
+  
 object_repeated_null_null.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ {null:null,null:null}
       │      ^
-
+  
   i Remove :
-
+  
 object_repeated_null_null.json:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found 'null'
-
+  
   > 1 │ {null:null,null:null}
       │            ^^^^
-
+  
   i Expected a property here
-
+  
   > 1 │ {null:null,null:null}
       │            ^^^^
-
+  
 object_repeated_null_null.json:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ {null:null,null:null}
       │                ^
-
+  
   i Remove :
-
+  
 ```
+
+

@@ -63,19 +63,21 @@ JsonRoot {
 number_with_alpha_char.json:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `H`
-
+  
   > 1 │ [1.8011670033376514H-308]
       │                    ^
-
+  
   i Remove H
-
+  
 number_with_alpha_char.json:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `-308`
-
+  
   > 1 │ [1.8011670033376514H-308]
       │                     ^^^^
-
+  
   i Remove -308
-
+  
 ```
+
+

@@ -100,99 +100,101 @@ JsonRoot {
 structure_open_open.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '"\{["\'
-
+  
   > 1 │ ["\{["\{["\{["\{
       │  ^^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["\{["\{["\{["\{
       │  ^^^^^^
-
+  
 structure_open_open.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid escape sequence
-
+  
   > 1 │ ["\{["\{["\{["\{
       │   ^^
-
-  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number.
-
+  
+  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. 
+  
 structure_open_open.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `\`
-
+  
   > 1 │ ["\{["\{["\{["\{
       │       ^
-
+  
 structure_open_open.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
-
+  
   > 1 │ ["\{["\{["\{["\{
       │        ^
-
+  
   i Remove {
-
+  
 structure_open_open.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found '['
-
+  
   > 1 │ ["\{["\{["\{["\{
       │         ^
-
+  
   i Expected a property here
-
+  
   > 1 │ ["\{["\{["\{["\{
       │         ^
-
+  
 structure_open_open.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '"\{["\'
-
+  
   > 1 │ ["\{["\{["\{["\{
       │          ^^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["\{["\{["\{["\{
       │          ^^^^^^
-
+  
 structure_open_open.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid escape sequence
-
+  
   > 1 │ ["\{["\{["\{["\{
       │           ^^
-
-  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number.
-
+  
+  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. 
+  
 structure_open_open.json:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `\`
-
+  
   > 1 │ ["\{["\{["\{["\{
       │               ^
-
+  
 structure_open_open.json:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
-
+  
   > 1 │ ["\{["\{["\{["\{
       │                ^
-
+  
   i Remove {
-
+  
 structure_open_open.json:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
   > 1 │ ["\{["\{["\{["\{
-      │
-
+      │                 
+  
   i the file ends here
-
+  
   > 1 │ ["\{["\{["\{["\{
-      │
-
+      │                 
+  
 ```
+
+

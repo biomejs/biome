@@ -51,8 +51,10 @@ JsonRoot {
 number_minus_infinity.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Minus must be followed by a digit
-
+  
   > 1 │ [-Infinity]
       │  ^
-
+  
 ```
+
+

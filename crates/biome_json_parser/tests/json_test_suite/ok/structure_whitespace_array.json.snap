@@ -6,7 +6,7 @@ expression: snapshot
 ## Input
 
 ```json
- []
+ [] 
 ```
 
 
@@ -34,3 +34,5 @@ JsonRoot {
   1: EOF@4..4 "" [] []
 
 ```
+
+

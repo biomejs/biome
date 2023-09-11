@@ -49,20 +49,22 @@ JsonRoot {
 number_neg_real_without_int_part.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '-.123'
-
+  
   > 1 │ [-.123]
       │  ^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ [-.123]
       │  ^^^^^
-
+  
 number_neg_real_without_int_part.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid fraction part
-
+  
   > 1 │ [-.123]
       │   ^
-
+  
 ```
+
+

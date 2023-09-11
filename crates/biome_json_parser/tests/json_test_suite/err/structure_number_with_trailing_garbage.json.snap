@@ -56,8 +56,10 @@ JsonRoot {
 structure_number_with_trailing_garbage.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `@`
-
+  
   > 1 │ 2@
       │  ^
-
+  
 ```
+
+

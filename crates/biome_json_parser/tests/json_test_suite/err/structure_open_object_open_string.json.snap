@@ -54,25 +54,27 @@ JsonRoot {
 structure_open_object_open_string.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ {"a
       │  ^^
-
+  
   i file ends here
-
+  
   > 1 │ {"a
-      │
-
+      │    
+  
 structure_open_object_open_string.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead the file ends
-
+  
   > 1 │ {"a
-      │
-
+      │    
+  
   i the file ends here
-
+  
   > 1 │ {"a
-      │
-
+      │    
+  
 ```
+
+

@@ -57,13 +57,15 @@ JsonRoot {
 structure_unclosed_object.json:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
   > 1 │ {"asd":"asd"
-      │
-
+      │             
+  
   i the file ends here
-
+  
   > 1 │ {"asd":"asd"
-      │
-
+      │             
+  
 ```
+
+

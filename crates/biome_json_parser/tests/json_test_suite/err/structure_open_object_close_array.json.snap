@@ -60,13 +60,15 @@ JsonRoot {
 structure_open_object_close_array.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ']'
-
+  
   > 1 │ {]
       │  ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {]
       │  ^
-
+  
 ```
+
+

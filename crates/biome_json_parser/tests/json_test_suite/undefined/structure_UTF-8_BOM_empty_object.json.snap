@@ -60,17 +60,19 @@ JsonRoot {
 structure_UTF-8_BOM_empty_object.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `�`
-
+  
   > 1 │ �{}
-      │
-
+      │ 
+  
 structure_UTF-8_BOM_empty_object.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
-
+  
   > 1 │ �{}
       │ ^^
-
+  
   i Use an array for a sequence of values: `[1, 2]`
-
+  
 ```
+
+

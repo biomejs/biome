@@ -68,22 +68,24 @@ JsonRoot {
 object_non_string_key.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found '1'
-
+  
   > 1 │ {1:1}
       │  ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {1:1}
       │  ^
-
+  
 object_non_string_key.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ {1:1}
       │   ^
-
+  
   i Remove :
-
+  
 ```
+
+

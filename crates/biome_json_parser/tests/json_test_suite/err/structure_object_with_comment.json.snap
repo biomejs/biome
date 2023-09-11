@@ -77,26 +77,28 @@ JsonRoot {
 structure_object_with_comment.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × JSON standard does not allow comments.
-
+  
   > 1 │ {"a":/*comment*/"b"}
       │      ^^^^^^^^^^^
-
+  
 structure_object_with_comment.json:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `"b"`
-
+  
   > 1 │ {"a":/*comment*/"b"}
       │                 ^^^
-
+  
   i Remove "b"
-
+  
 structure_object_with_comment.json:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `}`
-
+  
   > 1 │ {"a":/*comment*/"b"}
       │                    ^
-
+  
   i Remove }
-
+  
 ```
+
+

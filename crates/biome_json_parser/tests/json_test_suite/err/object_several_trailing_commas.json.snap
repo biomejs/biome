@@ -77,61 +77,63 @@ JsonRoot {
 object_several_trailing_commas.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ','
-
+  
   > 1 │ {"id":0,,,,,}
       │         ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,,,,,}
       │         ^
-
+  
 object_several_trailing_commas.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ','
-
+  
   > 1 │ {"id":0,,,,,}
       │          ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,,,,,}
       │          ^
-
+  
 object_several_trailing_commas.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ','
-
+  
   > 1 │ {"id":0,,,,,}
       │           ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,,,,,}
       │           ^
-
+  
 object_several_trailing_commas.json:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found ','
-
+  
   > 1 │ {"id":0,,,,,}
       │            ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,,,,,}
       │            ^
-
+  
 object_several_trailing_commas.json:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a property but instead found '}'
-
+  
   > 1 │ {"id":0,,,,,}
       │             ^
-
+  
   i Expected a property here
-
+  
   > 1 │ {"id":0,,,,,}
       │             ^
-
+  
 ```
+
+

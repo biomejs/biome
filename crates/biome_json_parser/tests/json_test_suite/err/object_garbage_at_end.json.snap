@@ -71,10 +71,12 @@ JsonRoot {
 object_garbage_at_end.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `123`
-
+  
   > 1 │ {"a":"a" 123}
       │          ^^^
-
+  
   i Remove 123
-
+  
 ```
+
+

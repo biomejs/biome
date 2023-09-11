@@ -65,8 +65,10 @@ JsonRoot {
 object_unquoted_key.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Property key must be double quoted
-
+  
   > 1 │ {a: "b"}
       │  ^
-
+  
 ```
+
+

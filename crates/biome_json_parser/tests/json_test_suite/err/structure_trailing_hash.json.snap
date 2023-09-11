@@ -87,17 +87,19 @@ JsonRoot {
 structure_trailing_hash.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `#`
-
+  
   > 1 │ {"a":"b"}#{}
       │          ^
-
+  
 structure_trailing_hash.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
-
+  
   > 1 │ {"a":"b"}#{}
       │           ^^
-
+  
   i Use an array for a sequence of values: `[1, 2]`
-
+  
 ```
+
+

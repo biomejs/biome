@@ -49,22 +49,24 @@ JsonRoot {
 string_incomplete_surrogate_escape_invalid.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found '"\uD800\uD800\x"'
-
+  
   > 1 │ ["\uD800\uD800\x"]
       │  ^^^^^^^^^^^^^^^^
-
+  
   i Expected an array, an object, or a literal here
-
+  
   > 1 │ ["\uD800\uD800\x"]
       │  ^^^^^^^^^^^^^^^^
-
+  
 string_incomplete_surrogate_escape_invalid.json:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid escape sequence
-
+  
   > 1 │ ["\uD800\uD800\x"]
       │               ^^
-
-  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number.
-
+  
+  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. 
+  
 ```
+
+

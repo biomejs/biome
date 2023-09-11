@@ -39,8 +39,10 @@ JsonRoot {
 structure_single_star.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `*`
-
+  
   > 1 │ *
       │ ^
-
+  
 ```
+
+

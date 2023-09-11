@@ -65,19 +65,21 @@ JsonRoot {
 object_single_quote.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × JSON standard does not allow single quoted strings
-
+  
   > 1 │ {'a':0}
       │  ^^^
-
+  
   i Use double quotes to escape the string.
-
+  
 object_single_quote.json:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
   > 1 │ {'a':0}
       │     ^
-
+  
   i Remove :
-
+  
 ```
+
+

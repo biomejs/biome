@@ -56,10 +56,12 @@ JsonRoot {
 number_neg_with_garbage_at_end.json:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `x`
-
+  
   > 1 │ [-1x]
       │    ^
-
+  
   i Remove x
-
+  
 ```
+
+

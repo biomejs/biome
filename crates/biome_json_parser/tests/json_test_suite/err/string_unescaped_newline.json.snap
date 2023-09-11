@@ -64,54 +64,56 @@ JsonRoot {
 string_unescaped_newline.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ ["new
       │  ^^^^
     2 │ line"]
-
+  
   i line breaks here
-
+  
   > 1 │ ["new
-      │
+      │      
   > 2 │ line"]
-      │
-
+      │ 
+  
 string_unescaped_newline.json:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `line`
-
+  
     1 │ ["new
   > 2 │ line"]
       │ ^^^^
-
+  
   i Remove line
-
+  
 string_unescaped_newline.json:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
     1 │ ["new
   > 2 │ line"]
       │     ^^
-
+  
   i file ends here
-
+  
     1 │ ["new
   > 2 │ line"]
-      │
-
+      │       
+  
 string_unescaped_newline.json:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
     1 │ ["new
   > 2 │ line"]
-      │
-
+      │       
+  
   i the file ends here
-
+  
     1 │ ["new
   > 2 │ line"]
-      │
-
+      │       
+  
 ```
+
+

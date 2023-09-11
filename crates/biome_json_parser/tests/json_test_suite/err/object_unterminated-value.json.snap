@@ -57,25 +57,27 @@ JsonRoot {
 object_unterminated-value.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ {"a":"a
       │      ^^
-
+  
   i file ends here
-
+  
   > 1 │ {"a":"a
-      │
-
+      │        
+  
 object_unterminated-value.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
   > 1 │ {"a":"a
-      │
-
+      │        
+  
   i the file ends here
-
+  
   > 1 │ {"a":"a
-      │
-
+      │        
+  
 ```
+
+

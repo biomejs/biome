@@ -56,20 +56,22 @@ JsonRoot {
 structure_unclosed_array_unfinished_true.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × String values must be double quoted.
-
+  
   > 1 │ [ false, tru
       │          ^^^
-
+  
 structure_unclosed_array_unfinished_true.json:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
   > 1 │ [ false, tru
-      │
-
+      │             
+  
   i the file ends here
-
+  
   > 1 │ [ false, tru
-      │
-
+      │             
+  
 ```
+
+

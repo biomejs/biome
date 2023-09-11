@@ -6,7 +6,7 @@ expression: snapshot
 ## Input
 
 ```json
-
+ 
 ```
 
 
@@ -34,13 +34,15 @@ JsonRoot {
 single_space.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an array, an object, or a literal but instead found the end of the file
-
-  > 1 │
-      │
-
+  
+  > 1 │  
+      │  
+  
   i Expected an array, an object, or a literal here
-
-  > 1 │
-      │
-
+  
+  > 1 │  
+      │  
+  
 ```
+
+

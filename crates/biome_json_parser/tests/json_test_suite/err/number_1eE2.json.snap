@@ -49,13 +49,15 @@ JsonRoot {
 number_1eE2.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing exponent
-
+  
   > 1 │ [1eE2]
       │  ^^
-
+  
   i Expected a digit as the exponent
-
+  
   > 1 │ [1eE2]
       │    ^
-
+  
 ```
+
+

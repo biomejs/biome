@@ -66,10 +66,12 @@ JsonRoot {
 array_extra_close.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
-
+  
   > 1 │ ["x"]]
       │      ^
-
+  
   i Use an array for a sequence of values: `[1, 2]`
-
+  
 ```
+
+

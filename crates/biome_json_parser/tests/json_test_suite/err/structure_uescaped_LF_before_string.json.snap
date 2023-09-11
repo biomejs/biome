@@ -58,17 +58,19 @@ JsonRoot {
 structure_uescaped_LF_before_string.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `\`
-
+  
   > 1 │ [\u000A""]
       │  ^
-
+  
 structure_uescaped_LF_before_string.json:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `""`
-
+  
   > 1 │ [\u000A""]
       │        ^^
-
+  
   i Remove ""
-
+  
 ```
+
+

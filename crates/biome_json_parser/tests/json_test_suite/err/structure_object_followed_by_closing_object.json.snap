@@ -60,10 +60,12 @@ JsonRoot {
 structure_object_followed_by_closing_object.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × End of file expected
-
+  
   > 1 │ {}}
       │   ^
-
+  
   i Use an array for a sequence of values: `[1, 2]`
-
+  
 ```
+
+

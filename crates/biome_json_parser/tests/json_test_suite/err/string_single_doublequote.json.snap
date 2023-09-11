@@ -37,13 +37,15 @@ JsonRoot {
 string_single_doublequote.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
   > 1 │ "
       │ ^
-
+  
   i file ends here
-
+  
   > 1 │ "
-      │
-
+      │  
+  
 ```
+
+

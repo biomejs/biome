@@ -56,10 +56,12 @@ JsonRoot {
 number_hex_1_digit.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `x1`
-
+  
   > 1 │ [0x1]
       │   ^^
-
+  
   i Remove x1
-
+  
 ```
+
+
