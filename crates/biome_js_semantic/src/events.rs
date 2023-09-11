@@ -403,6 +403,7 @@ impl SemanticEventExtractor {
             | TS_ENUM_DECLARATION
             | TS_INTERFACE_DECLARATION
             | TS_MODULE_DECLARATION
+            | TS_EXTERNAL_MODULE_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION => {
                 let parent_scope = self.scopes.get(self.scopes.len() - 2);
                 let parent_scope = parent_scope.map(|scope| scope.scope_id);
@@ -565,7 +566,8 @@ impl SemanticEventExtractor {
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
-            | TS_MODULE_DECLARATION => {
+            | TS_MODULE_DECLARATION
+            | TS_EXTERNAL_MODULE_DECLARATION => {
                 self.pop_scope(node.text_range());
             }
             _ => {}
@@ -884,6 +886,7 @@ impl SemanticEventExtractor {
                 | TS_ENUM_DECLARATION
                 | TS_INTERFACE_DECLARATION
                 | TS_MODULE_DECLARATION
+                | TS_EXTERNAL_MODULE_DECLARATION
         ));
         let is_exported = matches!(
             declaration.parent().kind(),
