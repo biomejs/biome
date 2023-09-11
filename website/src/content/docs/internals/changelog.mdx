@@ -78,6 +78,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   export * as MY_NAMESPACE from "./lib.js";
   ```
 
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters.
+  The rule now gives suggestions instead of safe fixes when parameters are annotated with types.
+
+- [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) now only provides safe code fixes.
+
 ## 1.1.1 (2023-09-07)
 
 ### Analyzer
@@ -159,10 +164,6 @@ multiple servers in the `rage` output.
   ```
 - You can use `// biome-ignore` as suppression comment.
 - The `// rome-ignore` suppression is deprecated.
-
-
-- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters.
-  The rule now gives suggestions instead of safe fixes when parameters are annotated with types.
 
 #### Bug fixes
 
