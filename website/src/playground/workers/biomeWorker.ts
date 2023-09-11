@@ -7,13 +7,13 @@ import init, {
 } from "@biomejs/wasm-web";
 import {
 	ArrowParentheses,
+	BiomeOutput,
 	IndentStyle,
 	LintRules,
 	LoadingState,
 	PlaygroundSettings,
 	QuoteProperties,
 	QuoteStyle,
-	BiomeOutput,
 	Semicolons,
 } from "../types";
 import { isJsonFilename } from "../utils";

@@ -5,8 +5,8 @@ import {
 	PlaygroundFileState,
 	PlaygroundSettings,
 	PlaygroundState,
-	emptyPrettierOutput,
 	emptyBiomeOutput,
+	emptyPrettierOutput,
 } from "./types";
 
 export function classNames(

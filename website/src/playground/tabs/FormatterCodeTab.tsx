@@ -1,8 +1,8 @@
 import fastDiff from "fast-diff";
 import CodeMirror, { BiomeExtension } from "../CodeMirror";
 import Collapsible from "../Collapsible";
-import PrettierHeader from "../components/PrettierHeader";
 import BiomeHeader from "../components/BiomeHeader";
+import PrettierHeader from "../components/PrettierHeader";
 import type { PrettierOutput } from "../types";
 
 interface Props {

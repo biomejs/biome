@@ -25,7 +25,7 @@ import FormatterCodeTab from "./tabs/FormatterCodeTab";
 import FormatterIrTab from "./tabs/FormatterIrTab";
 import SettingsTab from "./tabs/SettingsTab";
 import SyntaxTab from "./tabs/SyntaxTab";
-import type { PlaygroundProps, BiomeAstSyntacticData } from "./types";
+import type { BiomeAstSyntacticData, PlaygroundProps } from "./types";
 import {
 	getCurrentCode,
 	getFileState,

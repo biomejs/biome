@@ -13,8 +13,8 @@ import {
 	Semicolons,
 	TrailingComma,
 	defaultPlaygroundState,
-	emptyPrettierOutput,
 	emptyBiomeOutput,
+	emptyPrettierOutput,
 } from "./types";
 import {
 	createLocalStorage,
