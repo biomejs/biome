@@ -6,3 +6,4 @@ package-lock.json
 
 # Auto generated
 src/_includes/styles
+.astro/

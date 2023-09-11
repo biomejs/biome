@@ -2,7 +2,7 @@
 		"name": "@biomejs/website",
 		"private": true,
 		"scripts": {
-				"start": "astro dev",
+				"start": "astro dev --open",
 				"format": "cargo biome-cli-dev format --write .",
 				"tsc": "tsc --skipLibCheck",
 				"check": "cargo biome-cli-dev check ./",
