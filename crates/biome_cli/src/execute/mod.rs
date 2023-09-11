@@ -8,6 +8,7 @@ use crate::cli_options::CliOptions;
 use crate::commands::MigrateSubCommand;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
+use crate::reporter::ConsoleReporter;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
@@ -15,6 +16,7 @@ use biome_service::workspace::{FeatureName, FeaturesBuilder, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
+use std::sync::RwLock;
 
 /// Useful information during the traversal of files and virtual content
 pub(crate) struct Execution {
@@ -338,6 +340,7 @@ pub(crate) fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        traverse(mode, session, cli_options, paths)
+        let reporter = ConsoleReporter::new(true, cli_options.verbose);
+        traverse(mode, session, cli_options, paths, reporter)
     }
 }
