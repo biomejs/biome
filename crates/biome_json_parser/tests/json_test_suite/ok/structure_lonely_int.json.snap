@@ -1,0 +1,32 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+42
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonNumberValue {
+        value_token: JSON_NUMBER_LITERAL@0..2 "42" [] [],
+    },
+    eof_token: EOF@2..2 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..2
+  0: JSON_NUMBER_VALUE@0..2
+    0: JSON_NUMBER_LITERAL@0..2 "42" [] []
+  1: EOF@2..2 "" [] []
+
+```

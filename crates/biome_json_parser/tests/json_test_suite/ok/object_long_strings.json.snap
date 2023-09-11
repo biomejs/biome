@@ -1,0 +1,99 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{"x":[{"id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}], "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..4 "\"x\"" [] [],
+                },
+                colon_token: COLON@4..5 ":" [] [],
+                value: JsonArrayValue {
+                    l_brack_token: L_BRACK@5..6 "[" [] [],
+                    elements: JsonArrayElementList [
+                        JsonObjectValue {
+                            l_curly_token: L_CURLY@6..7 "{" [] [],
+                            json_member_list: JsonMemberList [
+                                JsonMember {
+                                    name: JsonMemberName {
+                                        value_token: JSON_STRING_LITERAL@7..11 "\"id\"" [] [],
+                                    },
+                                    colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                                    value: JsonStringValue {
+                                        value_token: JSON_STRING_LITERAL@13..55 "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"" [] [],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@55..56 "}" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@56..57 "]" [] [],
+                },
+            },
+            COMMA@57..59 "," [] [Whitespace(" ")],
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@59..63 "\"id\"" [] [],
+                },
+                colon_token: COLON@63..65 ":" [] [Whitespace(" ")],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@65..107 "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"" [] [],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@107..108 "}" [] [],
+    },
+    eof_token: EOF@108..108 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..108
+  0: JSON_OBJECT_VALUE@0..108
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..107
+      0: JSON_MEMBER@1..57
+        0: JSON_MEMBER_NAME@1..4
+          0: JSON_STRING_LITERAL@1..4 "\"x\"" [] []
+        1: COLON@4..5 ":" [] []
+        2: JSON_ARRAY_VALUE@5..57
+          0: L_BRACK@5..6 "[" [] []
+          1: JSON_ARRAY_ELEMENT_LIST@6..56
+            0: JSON_OBJECT_VALUE@6..56
+              0: L_CURLY@6..7 "{" [] []
+              1: JSON_MEMBER_LIST@7..55
+                0: JSON_MEMBER@7..55
+                  0: JSON_MEMBER_NAME@7..11
+                    0: JSON_STRING_LITERAL@7..11 "\"id\"" [] []
+                  1: COLON@11..13 ":" [] [Whitespace(" ")]
+                  2: JSON_STRING_VALUE@13..55
+                    0: JSON_STRING_LITERAL@13..55 "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"" [] []
+              2: R_CURLY@55..56 "}" [] []
+          2: R_BRACK@56..57 "]" [] []
+      1: COMMA@57..59 "," [] [Whitespace(" ")]
+      2: JSON_MEMBER@59..107
+        0: JSON_MEMBER_NAME@59..63
+          0: JSON_STRING_LITERAL@59..63 "\"id\"" [] []
+        1: COLON@63..65 ":" [] [Whitespace(" ")]
+        2: JSON_STRING_VALUE@65..107
+          0: JSON_STRING_LITERAL@65..107 "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"" [] []
+    2: R_CURLY@107..108 "}" [] []
+  1: EOF@108..108 "" [] []
+
+```

@@ -1,0 +1,82 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{ "foo" : "bar", "a" }
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@2..8 "\"foo\"" [] [Whitespace(" ")],
+                },
+                colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+                value: JsonStringValue {
+                    value_token: JSON_STRING_LITERAL@10..15 "\"bar\"" [] [],
+                },
+            },
+            COMMA@15..17 "," [] [Whitespace(" ")],
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@17..21 "\"a\"" [] [Whitespace(" ")],
+                },
+                colon_token: missing (required),
+                value: missing (required),
+            },
+        ],
+        r_curly_token: R_CURLY@21..22 "}" [] [],
+    },
+    eof_token: EOF@22..22 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..22
+  0: JSON_OBJECT_VALUE@0..22
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JSON_MEMBER_LIST@2..21
+      0: JSON_MEMBER@2..15
+        0: JSON_MEMBER_NAME@2..8
+          0: JSON_STRING_LITERAL@2..8 "\"foo\"" [] [Whitespace(" ")]
+        1: COLON@8..10 ":" [] [Whitespace(" ")]
+        2: JSON_STRING_VALUE@10..15
+          0: JSON_STRING_LITERAL@10..15 "\"bar\"" [] []
+      1: COMMA@15..17 "," [] [Whitespace(" ")]
+      2: JSON_MEMBER@17..21
+        0: JSON_MEMBER_NAME@17..21
+          0: JSON_STRING_LITERAL@17..21 "\"a\"" [] [Whitespace(" ")]
+        1: (empty)
+        2: (empty)
+    2: R_CURLY@21..22 "}" [] []
+  1: EOF@22..22 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_with_single_string.json:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `}`
+  
+  > 1 │ { "foo" : "bar", "a" }
+      │                      ^
+  
+  i Remove }
+  
+```
+
+

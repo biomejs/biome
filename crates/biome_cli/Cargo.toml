@@ -12,36 +12,36 @@ name = "biome"
 path = "src/main.rs"
 
 [dependencies]
-anyhow              = "1.0.52"
-biome_console       = { workspace = true }
-biome_deserialize   = { workspace = true }
-biome_diagnostics   = { workspace = true }
-biome_flags         = { workspace = true }
-biome_formatter     = { workspace = true }
-biome_fs            = { workspace = true }
-biome_json_syntax   = { workspace = true }
-biome_lsp           = { workspace = true }
-biome_migrate       = { workspace = true }
-biome_rowan         = { workspace = true }
-biome_text_edit     = { workspace = true }
-biome_text_size     = { workspace = true }
-bpaf                = { workspace = true }
-crossbeam           = "0.8.1"
-dashmap             = { workspace = true }
-hdrhistogram        = { version = "7.5.0", default-features = false }
-indexmap            = { workspace = true }
-lazy_static         = { workspace = true }
-rayon               = "1.5.1"
-rome_json_formatter = { workspace = true }
-rome_json_parser    = { workspace = true }
-rome_service        = { workspace = true }
-serde               = { workspace = true, features = ["derive"] }
-serde_json          = { workspace = true }
-tokio               = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
-tracing             = { workspace = true }
-tracing-appender    = "0.2"
-tracing-subscriber  = { version = "0.3.16", features = ["env-filter"] }
-tracing-tree        = "0.2.2"
+anyhow               = "1.0.52"
+biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
+biome_diagnostics    = { workspace = true }
+biome_flags          = { workspace = true }
+biome_formatter      = { workspace = true }
+biome_fs             = { workspace = true }
+biome_json_formatter = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_json_syntax    = { workspace = true }
+biome_lsp            = { workspace = true }
+biome_migrate        = { workspace = true }
+biome_rowan          = { workspace = true }
+biome_text_edit      = { workspace = true }
+biome_text_size      = { workspace = true }
+bpaf                 = { workspace = true }
+crossbeam            = "0.8.1"
+dashmap              = { workspace = true }
+hdrhistogram         = { version = "7.5.0", default-features = false }
+indexmap             = { workspace = true }
+lazy_static          = { workspace = true }
+rayon                = "1.5.1"
+rome_service         = { workspace = true }
+serde                = { workspace = true, features = ["derive"] }
+serde_json           = { workspace = true }
+tokio                = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
+tracing              = { workspace = true }
+tracing-appender     = "0.2"
+tracing-subscriber   = { version = "0.3.16", features = ["env-filter"] }
+tracing-tree         = "0.2.2"
 
 [target.'cfg(unix)'.dependencies]
 libc  = "0.2.127"
@@ -54,11 +54,11 @@ mimalloc = "0.1.29"
 tikv-jemallocator = "0.5.0"
 
 [dev-dependencies]
-insta               = { workspace = true }
-rome_js_formatter   = { workspace = true }
-rome_json_formatter = { workspace = true }
-rome_json_parser    = { workspace = true }
-tokio               = { workspace = true, features = ["io-util"] }
+biome_json_formatter = { workspace = true }
+biome_json_parser    = { workspace = true }
+insta                = { workspace = true }
+rome_js_formatter    = { workspace = true }
+tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
 docgen = ["bpaf/docgen"]

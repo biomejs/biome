@@ -18,14 +18,14 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, Printed};
 use biome_fs::{RomePath, BIOME_JSON, ROME_JSON};
+use biome_json_analyze::analyze;
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::format_node;
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, FileSource, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use rome_json_analyze::analyze;
-use rome_json_formatter::context::JsonFormatOptions;
-use rome_json_formatter::format_node;
-use rome_json_parser::JsonParserOptions;
 use std::path::{Path, PathBuf};
 
 impl Language for JsonLanguage {
@@ -117,7 +117,7 @@ fn parse(
             || source_type.is_jsonc()
             || is_file_allowed_as_jsonc(rome_path),
     };
-    let parse = rome_json_parser::parse_json_with_cache(text, cache, options);
+    let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
     AnyParse::new(
@@ -179,7 +179,7 @@ fn format_range(
     let options = settings.format_options::<JsonLanguage>(rome_path);
 
     let tree = parse.syntax();
-    let printed = rome_json_formatter::format_range(options, &tree, range)?;
+    let printed = biome_json_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
 
@@ -215,7 +215,7 @@ fn format_on_type(
         None => panic!("found a token with no parent"),
     };
 
-    let printed = rome_json_formatter::format_sub_tree(options, &root_node)?;
+    let printed = biome_json_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
 }
 fn lint(params: LintParams) -> LintResults {

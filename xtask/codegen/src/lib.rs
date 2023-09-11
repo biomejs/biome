@@ -137,7 +137,7 @@ impl LanguageKind {
         match self {
             LanguageKind::Js => "rome_js_formatter",
             LanguageKind::Css => "rome_css_formatter",
-            LanguageKind::Json => "rome_json_formatter",
+            LanguageKind::Json => "biome_json_formatter",
         }
     }
 

@@ -3,10 +3,10 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_fs::{FileSystemExt, OpenOptions};
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::AstNode;
-use rome_json_parser::JsonParserOptions;
 use rome_service::workspace::FixAction;
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -33,7 +33,8 @@ pub(crate) fn run(
         fs.open_with_options(configuration_file_path.as_path(), open_options)?;
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
-    let parsed = rome_json_parser::parse_json(&configuration_content, JsonParserOptions::default());
+    let parsed =
+        biome_json_parser::parse_json(&configuration_content, JsonParserOptions::default());
     let mut errors = 0;
     let mut tree = parsed.tree();
     let mut actions = Vec::new();

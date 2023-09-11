@@ -289,7 +289,7 @@ mod test {
     use crate::{Configuration, MatchOptions, Matcher};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
-    use rome_json_parser::JsonParserOptions;
+    use biome_json_parser::JsonParserOptions;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);

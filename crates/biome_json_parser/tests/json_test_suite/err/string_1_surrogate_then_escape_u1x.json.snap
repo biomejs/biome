@@ -1,0 +1,77 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+["\uD800\u1x"]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..13 "\"\\uD800\\u1x\"" [] [],
+                ],
+            },
+        ],
+        r_brack_token: R_BRACK@13..14 "]" [] [],
+    },
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..14
+  0: JSON_ARRAY_VALUE@0..14
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..13
+      0: JSON_BOGUS_VALUE@1..13
+        0: ERROR_TOKEN@1..13 "\"\\uD800\\u1x\"" [] []
+    2: R_BRACK@13..14 "]" [] []
+  1: EOF@14..14 "" [] []
+
+```
+
+## Diagnostics
+
+```
+string_1_surrogate_then_escape_u1x.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found '"\uD800\u1x"'
+  
+  > 1 │ ["\uD800\u1x"]
+      │  ^^^^^^^^^^^^
+  
+  i Expected an array, an object, or a literal here
+  
+  > 1 │ ["\uD800\u1x"]
+      │  ^^^^^^^^^^^^
+  
+string_1_surrogate_then_escape_u1x.json:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid unicode sequence
+  
+  > 1 │ ["\uD800\u1x"]
+      │         ^^^
+  
+  i Non hexadecimal number
+  
+  > 1 │ ["\uD800\u1x"]
+      │            ^
+  
+  i A unicode escape sequence must consist of 4 hexadecimal numbers: `\uXXXX`, e.g. `\u002F' for '/'.
+  
+```
+
+

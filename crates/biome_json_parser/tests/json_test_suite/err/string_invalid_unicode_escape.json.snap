@@ -1,0 +1,77 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+["\uqqqq"]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..9 "\"\\uqqqq\"" [] [],
+                ],
+            },
+        ],
+        r_brack_token: R_BRACK@9..10 "]" [] [],
+    },
+    eof_token: EOF@10..10 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..10
+  0: JSON_ARRAY_VALUE@0..10
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..9
+      0: JSON_BOGUS_VALUE@1..9
+        0: ERROR_TOKEN@1..9 "\"\\uqqqq\"" [] []
+    2: R_BRACK@9..10 "]" [] []
+  1: EOF@10..10 "" [] []
+
+```
+
+## Diagnostics
+
+```
+string_invalid_unicode_escape.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found '"\uqqqq"'
+  
+  > 1 │ ["\uqqqq"]
+      │  ^^^^^^^^
+  
+  i Expected an array, an object, or a literal here
+  
+  > 1 │ ["\uqqqq"]
+      │  ^^^^^^^^
+  
+string_invalid_unicode_escape.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid unicode sequence
+  
+  > 1 │ ["\uqqqq"]
+      │   ^^
+  
+  i Non hexadecimal number
+  
+  > 1 │ ["\uqqqq"]
+      │     ^
+  
+  i A unicode escape sequence must consist of 4 hexadecimal numbers: `\uXXXX`, e.g. `\u002F' for '/'.
+  
+```
+
+

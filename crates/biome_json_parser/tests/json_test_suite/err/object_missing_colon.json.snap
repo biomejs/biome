@@ -1,0 +1,70 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{"a" b}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..5 "\"a\"" [] [Whitespace(" ")],
+                },
+                colon_token: missing (required),
+                value: JsonBogusValue {
+                    items: [
+                        IDENT@5..6 "b" [] [],
+                    ],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@6..7 "}" [] [],
+    },
+    eof_token: EOF@7..7 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..7
+  0: JSON_OBJECT_VALUE@0..7
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..6
+      0: JSON_MEMBER@1..6
+        0: JSON_MEMBER_NAME@1..5
+          0: JSON_STRING_LITERAL@1..5 "\"a\"" [] [Whitespace(" ")]
+        1: (empty)
+        2: JSON_BOGUS_VALUE@5..6
+          0: IDENT@5..6 "b" [] []
+    2: R_CURLY@6..7 "}" [] []
+  1: EOF@7..7 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_missing_colon.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `b`
+  
+  > 1 │ {"a" b}
+      │      ^
+  
+  i Remove b
+  
+```
+
+

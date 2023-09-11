@@ -3,9 +3,9 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Args;
-use rome_json_formatter::context::JsonFormatOptions;
-use rome_json_parser::{parse_json, JsonParserOptions};
 use rome_service::DynRef;
 use std::path::Path;
 
@@ -54,7 +54,7 @@ fn creates_config_file() {
         .expect("failed to read file from memory FS");
     let parsed = parse_json(CONFIG_INIT_DEFAULT, JsonParserOptions::default());
     let formatted =
-        rome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
+        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
             .expect("valid format document")
             .print()
             .expect("valid format document");
@@ -100,7 +100,7 @@ fn creates_config_file_when_rome_installed_via_package_manager() {
         JsonParserOptions::default(),
     );
     let formatted =
-        rome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
+        biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
             .expect("valid format document")
             .print()
             .expect("valid format document");

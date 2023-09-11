@@ -1,0 +1,91 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{9999E9999:1}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: missing (required),
+                colon_token: missing (required),
+                value: JsonNumberValue {
+                    value_token: JSON_NUMBER_LITERAL@1..10 "9999E9999" [] [],
+                },
+            },
+            missing separator,
+            JsonMember {
+                name: missing (required),
+                colon_token: COLON@10..11 ":" [] [],
+                value: JsonNumberValue {
+                    value_token: JSON_NUMBER_LITERAL@11..12 "1" [] [],
+                },
+            },
+        ],
+        r_curly_token: R_CURLY@12..13 "}" [] [],
+    },
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..13
+  0: JSON_OBJECT_VALUE@0..13
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..12
+      0: JSON_MEMBER@1..10
+        0: (empty)
+        1: (empty)
+        2: JSON_NUMBER_VALUE@1..10
+          0: JSON_NUMBER_LITERAL@1..10 "9999E9999" [] []
+      1: (empty)
+      2: JSON_MEMBER@10..12
+        0: (empty)
+        1: COLON@10..11 ":" [] []
+        2: JSON_NUMBER_VALUE@11..12
+          0: JSON_NUMBER_LITERAL@11..12 "1" [] []
+    2: R_CURLY@12..13 "}" [] []
+  1: EOF@13..13 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_non_string_key_but_huge_number_instead.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a property but instead found '9999E9999'
+  
+  > 1 │ {9999E9999:1}
+      │  ^^^^^^^^^
+  
+  i Expected a property here
+  
+  > 1 │ {9999E9999:1}
+      │  ^^^^^^^^^
+  
+object_non_string_key_but_huge_number_instead.json:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+  > 1 │ {9999E9999:1}
+      │           ^
+  
+  i Remove :
+  
+```
+
+

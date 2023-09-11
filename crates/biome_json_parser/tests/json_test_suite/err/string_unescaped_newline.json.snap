@@ -1,0 +1,119 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+["new
+line"]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonStringValue {
+                value_token: JSON_STRING_LITERAL@1..5 "\"new" [] [],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
+                    IDENT@5..10 "line" [Newline("\n")] [],
+                ],
+            },
+            missing separator,
+            JsonStringValue {
+                value_token: JSON_STRING_LITERAL@10..12 "\"]" [] [],
+            },
+        ],
+        r_brack_token: missing (required),
+    },
+    eof_token: EOF@12..12 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..12
+  0: JSON_ARRAY_VALUE@0..12
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..12
+      0: JSON_STRING_VALUE@1..5
+        0: JSON_STRING_LITERAL@1..5 "\"new" [] []
+      1: (empty)
+      2: JSON_BOGUS_VALUE@5..10
+        0: IDENT@5..10 "line" [Newline("\n")] []
+      3: (empty)
+      4: JSON_STRING_VALUE@10..12
+        0: JSON_STRING_LITERAL@10..12 "\"]" [] []
+    2: (empty)
+  1: EOF@12..12 "" [] []
+
+```
+
+## Diagnostics
+
+```
+string_unescaped_newline.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ ["new
+      │  ^^^^
+    2 │ line"]
+  
+  i line breaks here
+  
+  > 1 │ ["new
+      │      
+  > 2 │ line"]
+      │ 
+  
+string_unescaped_newline.json:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `line`
+  
+    1 │ ["new
+  > 2 │ line"]
+      │ ^^^^
+  
+  i Remove line
+  
+string_unescaped_newline.json:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    1 │ ["new
+  > 2 │ line"]
+      │     ^^
+  
+  i file ends here
+  
+    1 │ ["new
+  > 2 │ line"]
+      │       
+  
+string_unescaped_newline.json:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead the file ends
+  
+    1 │ ["new
+  > 2 │ line"]
+      │       
+  
+  i the file ends here
+  
+    1 │ ["new
+  > 2 │ line"]
+      │       
+  
+```
+
+

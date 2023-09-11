@@ -1,0 +1,32 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+null
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonNullValue {
+        value_token: NULL_KW@0..4 "null" [] [],
+    },
+    eof_token: EOF@4..4 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..4
+  0: JSON_NULL_VALUE@0..4
+    0: NULL_KW@0..4 "null" [] []
+  1: EOF@4..4 "" [] []
+
+```

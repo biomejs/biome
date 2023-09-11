@@ -1,0 +1,72 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+["\a"]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..5 "\"\\a\"" [] [],
+                ],
+            },
+        ],
+        r_brack_token: R_BRACK@5..6 "]" [] [],
+    },
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..6
+  0: JSON_ARRAY_VALUE@0..6
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..5
+      0: JSON_BOGUS_VALUE@1..5
+        0: ERROR_TOKEN@1..5 "\"\\a\"" [] []
+    2: R_BRACK@5..6 "]" [] []
+  1: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+string_invalid_backslash_esc.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found '"\a"'
+  
+  > 1 │ ["\a"]
+      │  ^^^^
+  
+  i Expected an array, an object, or a literal here
+  
+  > 1 │ ["\a"]
+      │  ^^^^
+  
+string_invalid_backslash_esc.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid escape sequence
+  
+  > 1 │ ["\a"]
+      │   ^^
+  
+  i Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. 
+  
+```
+
+

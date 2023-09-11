@@ -1,0 +1,81 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[1,
+1
+,1
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@1..2 "1" [] [],
+            },
+            COMMA@2..3 "," [] [],
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@3..5 "1" [Newline("\n")] [],
+            },
+            COMMA@5..7 "," [Newline("\n")] [],
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@7..8 "1" [] [],
+            },
+        ],
+        r_brack_token: missing (required),
+    },
+    eof_token: EOF@8..8 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..8
+  0: JSON_ARRAY_VALUE@0..8
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..8
+      0: JSON_NUMBER_VALUE@1..2
+        0: JSON_NUMBER_LITERAL@1..2 "1" [] []
+      1: COMMA@2..3 "," [] []
+      2: JSON_NUMBER_VALUE@3..5
+        0: JSON_NUMBER_LITERAL@3..5 "1" [Newline("\n")] []
+      3: COMMA@5..7 "," [Newline("\n")] []
+      4: JSON_NUMBER_VALUE@7..8
+        0: JSON_NUMBER_LITERAL@7..8 "1" [] []
+    2: (empty)
+  1: EOF@8..8 "" [] []
+
+```
+
+## Diagnostics
+
+```
+array_unclosed_with_new_lines.json:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead the file ends
+  
+    1 │ [1,
+    2 │ 1
+  > 3 │ ,1
+      │   
+  
+  i the file ends here
+  
+    1 │ [1,
+    2 │ 1
+  > 3 │ ,1
+      │   
+  
+```
+
+

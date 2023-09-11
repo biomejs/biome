@@ -20,13 +20,13 @@ A-Project:
 A-Linter:
   - crates/biome_analyze/**
   - crates/rome_js_analyze/**
-  - crates/rome_json_analyze/**
+  - crates/biome_json_analyze/**
 
 A-Parser:
   - crates/biome_parser/**
   - crates/rome_js_parser/**
   - crates/biome_js_syntax/**
-  - crates/rome_json_parser/**
+  - crates/biome_json_parser/**
   - crates/biome_json_syntax/**
   - crates/biome_css_parser/**
   - crates/biome_css_syntax/**
@@ -35,7 +35,7 @@ A-Formatter:
   - crates/biome_formatter/**
   - crates/biome_formatter_test/**
   - crates/rome_js_formatter/**
-  - crates/rome_json_formatter/**
+  - crates/biome_json_formatter/**
   - crates/rome_css_formatter/**
 
 A-Editors:

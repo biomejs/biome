@@ -1,0 +1,85 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{key: 'value'}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonBogusValue {
+        items: [
+            L_CURLY@0..1 "{" [] [],
+            JsonBogus {
+                items: [
+                    JsonBogus {
+                        items: [
+                            JsonBogus {
+                                items: [
+                                    IDENT@1..4 "key" [] [],
+                                ],
+                            },
+                            COLON@4..6 ":" [] [Whitespace(" ")],
+                        ],
+                    },
+                    JsonBogusValue {
+                        items: [
+                            ERROR_TOKEN@6..13 "'value'" [] [],
+                        ],
+                    },
+                ],
+            },
+            R_CURLY@13..14 "}" [] [],
+        ],
+    },
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..14
+  0: JSON_BOGUS_VALUE@0..14
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_BOGUS@1..13
+      0: JSON_BOGUS@1..6
+        0: JSON_BOGUS@1..4
+          0: IDENT@1..4 "key" [] []
+        1: COLON@4..6 ":" [] [Whitespace(" ")]
+      1: JSON_BOGUS_VALUE@6..13
+        0: ERROR_TOKEN@6..13 "'value'" [] []
+    2: R_CURLY@13..14 "}" [] []
+  1: EOF@14..14 "" [] []
+
+```
+
+## Diagnostics
+
+```
+object_key_with_single_quotes.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Property key must be double quoted
+  
+  > 1 │ {key: 'value'}
+      │  ^^^
+  
+object_key_with_single_quotes.json:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × JSON standard does not allow single quoted strings
+  
+  > 1 │ {key: 'value'}
+      │       ^^^^^^^
+  
+  i Use double quotes to escape the string.
+  
+```
+
+

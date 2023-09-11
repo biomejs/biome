@@ -48,7 +48,7 @@ fn generate_json_analyzer() -> Result<()> {
     generate_category(
         "analyzers",
         &mut analyzers,
-        project_root().join("crates/rome_json_analyze/src"),
+        project_root().join("crates/biome_json_analyze/src"),
     )?;
 
     update_json_registry_builder(analyzers)
@@ -241,7 +241,7 @@ fn update_js_registry_builder(
 }
 
 fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
-    let path = project_root().join("crates/rome_json_analyze/src/registry.rs");
+    let path = project_root().join("crates/biome_json_analyze/src/registry.rs");
 
     let categories = analyzers.into_values();
 

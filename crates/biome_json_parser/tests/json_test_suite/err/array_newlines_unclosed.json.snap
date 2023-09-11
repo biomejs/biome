@@ -1,0 +1,85 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+["a",
+4
+,1,
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonStringValue {
+                value_token: JSON_STRING_LITERAL@1..4 "\"a\"" [] [],
+            },
+            COMMA@4..5 "," [] [],
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@5..7 "4" [Newline("\n")] [],
+            },
+            COMMA@7..9 "," [Newline("\n")] [],
+            JsonNumberValue {
+                value_token: JSON_NUMBER_LITERAL@9..10 "1" [] [],
+            },
+            COMMA@10..11 "," [] [],
+            missing element,
+        ],
+        r_brack_token: missing (required),
+    },
+    eof_token: EOF@11..11 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..11
+  0: JSON_ARRAY_VALUE@0..11
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..11
+      0: JSON_STRING_VALUE@1..4
+        0: JSON_STRING_LITERAL@1..4 "\"a\"" [] []
+      1: COMMA@4..5 "," [] []
+      2: JSON_NUMBER_VALUE@5..7
+        0: JSON_NUMBER_LITERAL@5..7 "4" [Newline("\n")] []
+      3: COMMA@7..9 "," [Newline("\n")] []
+      4: JSON_NUMBER_VALUE@9..10
+        0: JSON_NUMBER_LITERAL@9..10 "1" [] []
+      5: COMMA@10..11 "," [] []
+      6: (empty)
+    2: (empty)
+  1: EOF@11..11 "" [] []
+
+```
+
+## Diagnostics
+
+```
+array_newlines_unclosed.json:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an array, an object, or a literal but instead found the end of the file
+  
+    1 │ ["a",
+    2 │ 4
+  > 3 │ ,1,
+      │    
+  
+  i Expected an array, an object, or a literal here
+  
+    1 │ ["a",
+    2 │ 4
+  > 3 │ ,1,
+      │    
+  
+```
+
+

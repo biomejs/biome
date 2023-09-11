@@ -1,0 +1,42 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+[" "]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonStringValue {
+                value_token: JSON_STRING_LITERAL@1..6 "\"\u{2028}\"" [] [],
+            },
+        ],
+        r_brack_token: R_BRACK@6..7 "]" [] [],
+    },
+    eof_token: EOF@7..7 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..7
+  0: JSON_ARRAY_VALUE@0..7
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..6
+      0: JSON_STRING_VALUE@1..6
+        0: JSON_STRING_LITERAL@1..6 "\"\u{2028}\"" [] []
+    2: R_BRACK@6..7 "]" [] []
+  1: EOF@7..7 "" [] []
+
+```

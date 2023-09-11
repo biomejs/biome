@@ -3,14 +3,14 @@ use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCat
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
+use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonSyntaxNode;
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::NodeCache;
 use criterion::black_box;
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::{JsFormatContext, JsFormatOptions};
-use rome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
-use rome_json_parser::JsonParserOptions;
 
 pub enum Parse<'a> {
     JavaScript(JsFileSource, &'a str),
@@ -34,7 +34,7 @@ impl<'a> Parse<'a> {
                 biome_js_parser::parse(code, *source_type, JsParserOptions::default()),
                 *source_type,
             ),
-            Parse::Json(code) => Parsed::Json(rome_json_parser::parse_json(
+            Parse::Json(code) => Parsed::Json(biome_json_parser::parse_json(
                 code,
                 JsonParserOptions::default(),
             )),
@@ -52,7 +52,7 @@ impl<'a> Parse<'a> {
                 ),
                 *source_type,
             ),
-            Parse::Json(code) => Parsed::Json(rome_json_parser::parse_json_with_cache(
+            Parse::Json(code) => Parsed::Json(biome_json_parser::parse_json_with_cache(
                 code,
                 cache,
                 JsonParserOptions::default(),
@@ -63,7 +63,7 @@ impl<'a> Parse<'a> {
 
 pub enum Parsed {
     JavaScript(biome_js_parser::Parse<AnyJsRoot>, JsFileSource),
-    Json(rome_json_parser::JsonParse),
+    Json(biome_json_parser::JsonParse),
 }
 
 impl Parsed {
@@ -104,7 +104,7 @@ impl FormatNode {
                     .map(FormattedNode::JavaScript)
             }
             FormatNode::Json(root) => {
-                rome_json_formatter::format_node(JsonFormatOptions::default(), root)
+                biome_json_formatter::format_node(JsonFormatOptions::default(), root)
                     .map(FormattedNode::Json)
             }
         }
