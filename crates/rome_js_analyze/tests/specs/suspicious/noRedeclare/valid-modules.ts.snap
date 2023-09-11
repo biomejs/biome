@@ -1,0 +1,25 @@
+---
+source: crates/rome_js_analyze/tests/spec_tests.rs
+expression: valid-modules.ts
+---
+# Input
+```js
+declare module '*.gif' {
+	const src: string
+}
+
+declare module '*.bmp' {
+	const src: string
+}
+
+declare module a {
+	const src: string
+}
+
+declare module b {
+	const src: string
+}
+
+```
+
+
