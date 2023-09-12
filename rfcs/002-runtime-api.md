@@ -17,7 +17,7 @@ From now on the document will use some terms, here's their context inside the do
 
 - **Frontend**: the code written for the runtimes (Node.js, Deno, browser, etc.);
 - **Rust Workspace**: the main hub where the bulk of the logic resides. It's the Rust code that live
-  inside the `rome_service` crate;
+  inside the `biome_service` crate;
 - **Runtime Workspace**: it's the shared code used by the different Frontends;
 
 

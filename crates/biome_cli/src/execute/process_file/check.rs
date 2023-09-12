@@ -5,7 +5,7 @@ use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::CliDiagnostic;
 use biome_diagnostics::Category;
-use rome_service::workspace::{FeatureName, FileFeaturesResult};
+use biome_service::workspace::{FeatureName, FileFeaturesResult};
 use std::path::Path;
 
 pub(crate) fn check_file<'ctx>(

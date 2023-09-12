@@ -9,10 +9,10 @@ use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{BIOME_JSON, ROME_JSON};
+use biome_service::workspace::{RageEntry, RageParams, RageResult};
+use biome_service::{workspace, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
-use rome_service::workspace::{RageEntry, RageParams, RageResult};
-use rome_service::{workspace, Workspace};
 use serde_json::json;
 use std::collections::HashMap;
 use std::panic::RefUnwindSafe;
@@ -70,7 +70,7 @@ impl LSPServer {
     async fn rage(&self, params: RageParams) -> LspResult<RageResult> {
         let mut entries = vec![
             RageEntry::section("Server"),
-            RageEntry::pair("Version", rome_service::VERSION),
+            RageEntry::pair("Version", biome_service::VERSION),
             RageEntry::pair("Name", env!("CARGO_PKG_NAME")),
             RageEntry::pair("CPU Architecture", std::env::consts::ARCH),
             RageEntry::pair("OS", std::env::consts::OS),
@@ -262,7 +262,7 @@ impl LanguageServer for LSPServer {
             capabilities: server_capabilities,
             server_info: Some(ServerInfo {
                 name: String::from(env!("CARGO_PKG_NAME")),
-                version: Some(rome_service::VERSION.to_string()),
+                version: Some(biome_service::VERSION.to_string()),
             }),
         };
 

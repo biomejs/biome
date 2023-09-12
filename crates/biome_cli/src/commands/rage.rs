@@ -3,8 +3,8 @@ use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
 use biome_fs::FileSystem;
-use rome_service::workspace::{client, RageEntry, RageParams};
-use rome_service::{load_config, ConfigurationBasePath, DynRef, Workspace};
+use biome_service::workspace::{client, RageEntry, RageParams};
+use biome_service::{load_config, ConfigurationBasePath, DynRef, Workspace};
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
@@ -98,7 +98,7 @@ impl Display for RunningRomeServer {
         };
 
         for version in versions {
-            if version == rome_service::VERSION {
+            if version == biome_service::VERSION {
                 let runtime = Runtime::new()?;
                 match service::open_transport(runtime) {
                     Ok(None) => {

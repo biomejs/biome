@@ -1,13 +1,13 @@
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
-use rome_service::workspace::{
+use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
     GetSyntaxTreeParams, OrganizeImportsParams, PullActionsParams, PullDiagnosticsParams,
     RenameParams, UpdateSettingsParams,
 };
-use rome_service::workspace::{OpenFileParams, SupportsFeatureParams};
+use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 
 mod utils;
 

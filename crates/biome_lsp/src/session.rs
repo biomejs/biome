@@ -7,14 +7,14 @@ use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
 use biome_fs::{FileSystem, OsFileSystem, RomePath};
-use futures::stream::futures_unordered::FuturesUnordered;
-use futures::StreamExt;
-use rome_service::workspace::{
+use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
-use rome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use rome_service::{load_config, ConfigurationBasePath, Workspace};
-use rome_service::{DynRef, WorkspaceError};
+use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
+use biome_service::{load_config, ConfigurationBasePath, Workspace};
+use biome_service::{DynRef, WorkspaceError};
+use futures::stream::futures_unordered::FuturesUnordered;
+use futures::StreamExt;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::path::PathBuf;

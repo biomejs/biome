@@ -1,6 +1,6 @@
 use crate::utils::into_lsp_error;
 use anyhow::Error;
-use rome_service::WorkspaceError;
+use biome_service::WorkspaceError;
 use std::fmt::{Display, Formatter};
 use tower_lsp::lsp_types::MessageType;
 

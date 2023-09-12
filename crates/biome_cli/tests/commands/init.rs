@@ -5,8 +5,8 @@ use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_service::DynRef;
 use bpaf::Args;
-use rome_service::DynRef;
 use std::path::Path;
 
 #[test]

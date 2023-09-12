@@ -1,0 +1,54 @@
+[package]
+authors.workspace    = true
+categories           = ["development-tools"]
+description          = "Rome's JavaScript formatter"
+documentation        = "https://docs.rs/biome_js_formatter"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_js_formatter"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_deserialize            = { workspace = true }
+biome_diagnostics_categories = { workspace = true }
+biome_formatter              = { workspace = true }
+biome_js_factory             = { workspace = true }
+biome_js_syntax              = { workspace = true }
+biome_json_syntax            = { workspace = true }
+biome_rowan                  = { workspace = true }
+biome_text_size              = { workspace = true }
+cfg-if                       = "1.0.0"
+schemars                     = { workspace = true, optional = true }
+serde                        = { workspace = true, features = ["derive"], optional = true }
+tracing                      = { workspace = true }
+unicode-width                = "0.1.9"
+
+[dev-dependencies]
+biome_diagnostics    = { workspace = true }
+biome_formatter_test = { workspace = true }
+biome_fs             = { workspace = true }
+biome_js_factory     = { workspace = true }
+biome_js_parser      = { workspace = true }
+biome_parser         = { workspace = true }
+countme              = { workspace = true, features = ["enable"] }
+iai                  = "0.1.1"
+insta                = { workspace = true, features = ["glob"] }
+quickcheck           = { workspace = true }
+quickcheck_macros    = { workspace = true }
+serde                = { version = "1", features = ["derive"] }
+serde_json           = { workspace = true }
+tests_macros         = { workspace = true }
+
+[[bench]]
+harness = false
+name    = "iai"
+
+[features]
+serde = ["dep:serde", "schemars"]
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true

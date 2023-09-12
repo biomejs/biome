@@ -9,7 +9,7 @@ use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
 use biome_fs::RomePath;
-use rome_service::workspace::{FeatureName, FixFileMode};
+use biome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;

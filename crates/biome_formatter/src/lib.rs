@@ -594,10 +594,10 @@ impl<Context> Format<Context> for () {
 /// Implementing [Format] on the object itself is preferred over implementing [FormatRule] but
 /// this isn't possible inside of a dependent crate for external type.
 ///
-/// For example, the `rome_js_formatter` crate isn't able to implement [Format] on `JsIfStatement`
+/// For example, the `biome_js_formatter` crate isn't able to implement [Format] on `JsIfStatement`
 /// because both the [Format] trait and `JsIfStatement` are external types (Rust's orphan rule).
 ///
-/// That's why the `rome_js_formatter` crate must define a new-type that implements the formatting
+/// That's why the `biome_js_formatter` crate must define a new-type that implements the formatting
 /// of `JsIfStatement`.
 pub trait FormatRule<T> {
     type Context;

@@ -1,7 +1,7 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt, HorizontalLine};
-use rome_service::configuration::Configuration;
-use rome_service::create_config;
+use biome_service::configuration::Configuration;
+use biome_service::create_config;
 
 pub(crate) fn init(mut session: CliSession) -> Result<(), CliDiagnostic> {
     let fs = &mut session.app.fs;

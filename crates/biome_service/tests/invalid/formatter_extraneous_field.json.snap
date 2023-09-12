@@ -1,0 +1,26 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: formatter_extraneous_field.json
+---
+formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `foo`.
+  
+    1 │ {
+    2 │ 	"formatter": {
+  > 3 │ 		"foo": "bar"
+      │ 		^^^^^
+    4 │ 	}
+    5 │ }
+  
+  i Accepted keys
+  
+  - enabled
+  - formatWithErrors
+  - indentStyle
+  - indentSize
+  - lineWidth
+  - ignore
+  
+
+

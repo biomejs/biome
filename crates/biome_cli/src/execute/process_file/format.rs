@@ -6,7 +6,7 @@ use crate::execute::process_file::{
 use crate::execute::TraversalMode;
 use crate::FormatterReportFileDetail;
 use biome_diagnostics::{category, DiagnosticExt};
-use rome_service::workspace::RuleCategories;
+use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 

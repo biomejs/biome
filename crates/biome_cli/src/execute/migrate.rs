@@ -7,7 +7,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::AstNode;
-use rome_service::workspace::FixAction;
+use biome_service::workspace::FixAction;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;

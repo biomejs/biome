@@ -6,8 +6,8 @@ use crate::{
 };
 use biome_console::{BufferConsole, MarkupBuf};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_service::DynRef;
 use bpaf::Args;
-use rome_service::DynRef;
 use std::path::{Path, PathBuf};
 
 const INCORRECT_CODE: &str = "let a = !b || !c";

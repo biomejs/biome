@@ -6,11 +6,11 @@ use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::RomePath;
-use rome_service::workspace::{
+use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
     SupportsFeatureParams,
 };
-use rome_service::WorkspaceError;
+use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use tower_lsp::lsp_types::{

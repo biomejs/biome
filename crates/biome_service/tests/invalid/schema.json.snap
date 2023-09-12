@@ -1,0 +1,16 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: schema.json
+---
+schema.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key $schema is incorrect. Expected a string.
+  
+    1 │ {
+  > 2 │ 	"$schema": false
+      │ 	           ^^^^^
+    3 │ }
+    4 │ 
+  
+
+

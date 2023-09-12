@@ -1,12 +1,12 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::VERSION;
-use bpaf::Bpaf;
-use rome_service::configuration::vcs::VcsConfiguration;
-use rome_service::configuration::{
+use biome_service::configuration::vcs::VcsConfiguration;
+use biome_service::configuration::{
     configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
     vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
 };
-use rome_service::Configuration;
+use biome_service::Configuration;
+use bpaf::Bpaf;
 use std::ffi::OsString;
 
 pub(crate) mod check;

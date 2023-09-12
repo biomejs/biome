@@ -1,0 +1,7 @@
+---
+source: crates/biome_service/src/configuration/diagnostics.rs
+expression: content
+---
+biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × It seems that a configuration file already exists

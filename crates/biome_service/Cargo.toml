@@ -1,0 +1,51 @@
+[package]
+authors.workspace    = true
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_service"
+repository.workspace = true
+version              = "0.0.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_analyze        = { workspace = true, features = ["serde"] }
+biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
+biome_diagnostics    = { workspace = true }
+biome_flags          = { workspace = true }
+biome_formatter      = { workspace = true, features = ["serde"] }
+biome_fs             = { workspace = true, features = ["serde"] }
+biome_js_analyze     = { workspace = true }
+biome_js_factory     = { workspace = true, optional = true }
+biome_js_formatter   = { workspace = true, features = ["serde"] }
+biome_js_parser      = { workspace = true }
+biome_js_semantic    = { workspace = true }
+biome_js_syntax      = { workspace = true, features = ["serde"] }
+biome_json_analyze   = { workspace = true }
+biome_json_formatter = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_json_syntax    = { workspace = true }
+biome_parser         = { workspace = true }
+biome_rowan          = { workspace = true, features = ["serde"] }
+biome_text_edit      = { workspace = true }
+bpaf                 = { workspace = true }
+dashmap              = { workspace = true }
+indexmap             = { workspace = true, features = ["serde"] }
+schemars             = { workspace = true, features = ["indexmap1"], optional = true }
+serde                = { workspace = true, features = ["derive"] }
+serde_json           = { workspace = true, features = ["raw_value"] }
+tracing              = { workspace = true, features = ["attributes"] }
+
+[features]
+schema = [
+  "dep:schemars",
+  "biome_js_analyze/schema",
+  "biome_formatter/serde",
+  "biome_js_factory",
+  "biome_text_edit/schemars",
+]
+
+[dev-dependencies]
+insta        = { workspace = true }
+tests_macros = { workspace = true }

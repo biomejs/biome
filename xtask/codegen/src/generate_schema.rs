@@ -1,6 +1,6 @@
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
-use rome_service::Configuration;
+use biome_service::Configuration;
 use schemars::schema_for;
 use serde_json::to_string;
 use xtask::{project_root, Mode, Result};

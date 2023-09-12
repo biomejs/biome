@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rome_service::workspace::{
+use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, GetFileContentParams, Language, OpenFileParams,
 };
 use tower_lsp::lsp_types;

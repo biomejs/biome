@@ -2,9 +2,9 @@ use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
 use biome_fs::{File, OpenOptions, RomePath};
-use rome_service::file_handlers::Language;
-use rome_service::workspace::{FileGuard, OpenFileParams};
-use rome_service::{Workspace, WorkspaceError};
+use biome_service::file_handlers::Language;
+use biome_service::workspace::{FileGuard, OpenFileParams};
+use biome_service::{Workspace, WorkspaceError};
 use std::path::{Path, PathBuf};
 
 /// Small wrapper that holds information and operations around the current processed file

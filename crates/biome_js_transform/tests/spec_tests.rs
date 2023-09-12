@@ -1,4 +1,6 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
+use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::format_node;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
@@ -7,8 +9,6 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
     write_transformation_snapshot,
 };
-use rome_js_formatter::context::JsFormatOptions;
-use rome_js_formatter::format_node;
 
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 

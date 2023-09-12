@@ -13,14 +13,14 @@ contributors = "run -p xtask_contributors --"
 coverage = "run -p xtask_coverage --profile=release-with-debug --"
 documentation = """
     doc \
-    -p rome_*formatter \
+    -p biome_*formatter \
     -p biome_control_flow \
     -p biome_analyze \
     -p biome_*analyze \
     -p biome_*_syntax \
     -p biome_*_factory \
     -p biome_diagnostics \
-    -p rome_service \
+    -p biome_service \
     -p biome_cli \
     -p biome_console \
     -p biome_*parser \

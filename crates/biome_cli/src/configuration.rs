@@ -7,9 +7,9 @@ use biome_deserialize::Deserialized;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
-use rome_service::configuration::diagnostics::CantLoadExtendFile;
-use rome_service::configuration::ConfigurationPayload;
-use rome_service::{
+use biome_service::configuration::diagnostics::CantLoadExtendFile;
+use biome_service::configuration::ConfigurationPayload;
+use biome_service::{
     load_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic, DynRef, MergeWith,
     WorkspaceError,
 };

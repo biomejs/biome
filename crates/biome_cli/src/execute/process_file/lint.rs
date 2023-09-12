@@ -3,7 +3,7 @@ use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::CliDiagnostic;
 use biome_diagnostics::{category, Error};
-use rome_service::workspace::RuleCategories;
+use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 

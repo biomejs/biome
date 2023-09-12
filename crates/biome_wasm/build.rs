@@ -7,9 +7,9 @@ use biome_js_factory::{
     make,
     syntax::{AnyJsDeclaration, AnyJsModuleItem, AnyJsStatement},
 };
+use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
-use rome_js_formatter::{context::JsFormatOptions, format_node};
-use rome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 
 fn main() -> io::Result<()> {
     let methods = methods();

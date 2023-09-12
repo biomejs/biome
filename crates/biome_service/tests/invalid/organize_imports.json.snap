@@ -1,0 +1,17 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: organize_imports.json
+---
+organize_imports.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key enabled is incorrect. Expected a boolean.
+  
+    1 │ {
+    2 │ 	"organizeImports": {
+  > 3 │ 		"enabled": "false"
+      │ 		           ^^^^^^^
+    4 │ 	}
+    5 │ }
+  
+
+

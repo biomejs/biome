@@ -1,0 +1,16 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: wrong_extends_type.json
+---
+wrong_extends_type.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key extends is incorrect. Expected a array.
+  
+    1 │ {
+  > 2 │ 	"extends": "something"
+      │ 	           ^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+
+

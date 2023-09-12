@@ -345,7 +345,7 @@ where
 
         // Using the `enclosing` as default but it's mainly to satisfy Rust. The only case where it is used
         // is if someone formats a Parenthesized expression as the root. Something we explicitly disallow
-        // in rome_js_formatter
+        // in biome_js_formatter
         let enclosing = preceding.parent().unwrap_or(enclosing);
 
         // Update the lines after of all comments as well as the positioning of end of line comments.

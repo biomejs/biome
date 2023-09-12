@@ -10,8 +10,8 @@ use biome_diagnostics::{
     Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
 use biome_rowan::TextSize;
+use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
-use rome_service::workspace::CodeAction;
 use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
