@@ -6,6 +6,10 @@ on:
   pull_request:
     branches:
       - main
+# Cancel jobs when the PR is updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 jobs:
   preview-deploy:
     runs-on: ubuntu-latest
@@ -13,7 +17,7 @@ jobs:
     # Check if the event is not triggered by a fork
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -30,7 +34,7 @@ jobs:
         with:
           version: 8
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:

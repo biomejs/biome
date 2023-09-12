@@ -1,5 +1,5 @@
-# Parser benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench`, a new result will be commented at the bottom of this PR.
+# Formatter benchmark, compares main and PR branch with Criterion.
+# Comment with text containing `!bench_formatter`, a new result will be commented at the bottom of this PR.
 
 name: Formatter Benchmark
 
@@ -29,13 +29,12 @@ jobs:
             return response.data.head.sha;
 
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: false
           ref: ${{ steps.sha.outputs.result }}
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
 
       - name: Install critcmp
         run: cargo install critcmp
@@ -47,7 +46,7 @@ jobs:
         run: cargo bench_formatter --save-baseline pr
 
       - name: Checkout Main Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           clean: false
           ref: main

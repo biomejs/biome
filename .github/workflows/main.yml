@@ -19,16 +19,14 @@ jobs:
     name: Format Rust Files
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Support longpaths
         run: git config core.longpaths true
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           components: rustfmt
           bins: taplo-cli
@@ -42,9 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           components: clippy
       - name: Run cargo check
@@ -56,12 +54,10 @@ jobs:
     name: Check Dependencies
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           channel: nightly
       - name: Install udeps
@@ -69,22 +65,20 @@ jobs:
       - name: Run udeps
         run: cargo +nightly udeps
 
-
   test:
+    name: Test
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: windows-latest
           - os: ubuntu-latest
           - os: macos-latest
-
-    name: Test
-    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           bins: cargo-nextest
       - name: Run tests on ${{ matrix.os }}
@@ -95,23 +89,21 @@ jobs:
   coverage:
     name: Test262 Coverage
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest]
-
     steps:
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths
         if: matrix.os == 'windows-latest'
         run: git config --system core.longpaths true
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage
       - name: Run Test262 suite
