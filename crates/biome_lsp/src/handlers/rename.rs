@@ -29,7 +29,7 @@ pub(crate) fn rename(session: &Session, params: RenameParams) -> Result<Option<W
 
     let result = session
         .workspace
-        .rename(rome_service::workspace::RenameParams {
+        .rename(biome_service::workspace::RenameParams {
             path: rome_path,
             symbol_at: cursor_range,
             new_name: params.new_name,

@@ -1,0 +1,18 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: vcs_wrong_client.json
+---
+vcs_wrong_client.json:4:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown value `gitgit`.
+
+    2 │ 	"vcs": {
+    3 │ 		"enabled": true,
+  > 4 │ 		"clientKind": "gitgit"
+      │ 		              ^^^^^^^^
+    5 │ 	}
+    6 │ }
+
+  i Accepted values:
+
+  - git

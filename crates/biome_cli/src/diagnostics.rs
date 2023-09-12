@@ -5,7 +5,7 @@ use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Error, Location, LogCategory,
     MessageAndDescription, Severity, Visit,
 };
-use rome_service::WorkspaceError;
+use biome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};
 
@@ -43,7 +43,7 @@ pub enum CliDiagnostic {
     FileCheck(FileCheck),
     /// When an argument is higher than the expected maximum
     OverflowNumberArgument(OverflowNumberArgument),
-    /// Wrapper for an underlying `rome_service` error
+    /// Wrapper for an underlying `biome_service` error
     WorkspaceError(WorkspaceError),
     /// Wrapper for an underlying `std::io` error
     IoError(IoDiagnostic),

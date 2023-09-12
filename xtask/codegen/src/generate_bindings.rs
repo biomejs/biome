@@ -8,8 +8,8 @@ use biome_js_syntax::{
     TriviaPieceKind, T,
 };
 use biome_rowan::AstNode;
+use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use rome_js_formatter::{context::JsFormatOptions, format_node};
-use rome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::{to_camel_case, update};
 

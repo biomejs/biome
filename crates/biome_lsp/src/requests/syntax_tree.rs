@@ -1,6 +1,6 @@
 use crate::session::Session;
 use anyhow::Result;
-use rome_service::workspace::GetSyntaxTreeParams;
+use biome_service::workspace::GetSyntaxTreeParams;
 use serde::{Deserialize, Serialize};
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
 use tracing::info;

@@ -5,7 +5,7 @@ use crate::{
 };
 use biome_console::{markup, ConsoleExt};
 use biome_lsp::ServerFactory;
-use rome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
+use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
 use std::{env, fs, path::PathBuf};
 use tokio::io;
 use tokio::runtime::Runtime;

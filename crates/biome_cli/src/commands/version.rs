@@ -1,6 +1,6 @@
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, ConsoleExt};
-use rome_service::workspace::ServerInfo;
+use biome_service::workspace::ServerInfo;
 
 use crate::{CliDiagnostic, CliSession, VERSION};
 

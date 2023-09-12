@@ -2,8 +2,8 @@ use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
+use biome_service::DynRef;
 use bpaf::Args;
-use rome_service::DynRef;
 
 #[test]
 fn ok() {

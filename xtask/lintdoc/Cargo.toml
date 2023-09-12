@@ -17,5 +17,5 @@ biome_json_syntax  = { path = "../../crates/biome_json_syntax" }
 convert_case       = "0.6.0"
 pulldown-cmark     = { version = "0.9", default-features = false }
 rome_js_analyze    = { path = "../../crates/rome_js_analyze" }
-rome_service       = { path = "../../crates/rome_service" }
+biome_service       = { path = "../../crates/biome_service" }
 xtask              = { path = '../', version = "0.0" }

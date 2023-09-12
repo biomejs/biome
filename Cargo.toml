@@ -63,7 +63,7 @@ biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_
 biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_size" }
 rome_js_analyze              = { path = "./crates/rome_js_analyze" }
 rome_js_formatter            = { path = "./crates/rome_js_formatter" }
-rome_service                 = { path = "./crates/rome_service" }
+biome_service                 = { path = "./crates/biome_service" }
 tests_macros                 = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace

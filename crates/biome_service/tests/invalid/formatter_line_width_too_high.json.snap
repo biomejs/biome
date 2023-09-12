@@ -1,0 +1,16 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: formatter_line_width_too_high.json
+---
+formatter_line_width_too_high.json:3:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × number too large to fit in target type
+
+    1 │ {
+    2 │ 	"formatter": {
+  > 3 │ 		"lineWidth": 129785
+      │ 		             ^^^^^^
+    4 │ 	}
+    5 │ }
+
+  i Maximum value accepted is 320

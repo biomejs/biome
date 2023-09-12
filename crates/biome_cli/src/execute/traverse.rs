@@ -15,14 +15,14 @@ use biome_diagnostics::{
 };
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
+use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
+use biome_service::{
+    workspace::{FeatureName, SupportsFeatureParams},
+    Workspace, WorkspaceError,
+};
 use crossbeam::{
     channel::{unbounded, Receiver, Sender},
     select,
-};
-use rome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
-use rome_service::{
-    workspace::{FeatureName, SupportsFeatureParams},
-    Workspace, WorkspaceError,
 };
 use std::collections::HashSet;
 use std::{

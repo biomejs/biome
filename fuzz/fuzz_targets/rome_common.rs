@@ -12,11 +12,11 @@ use biome_js_syntax::JsFileSource;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::JsonFormatLanguage;
 use biome_json_parser::parse_json;
+use biome_service::Rules;
 use libfuzzer_sys::Corpus;
 use rome_js_analyze::analyze;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::JsFormatLanguage;
-use rome_service::Rules;
 use similar::TextDiff;
 use std::fmt::{Display, Formatter};
 

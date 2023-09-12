@@ -6,7 +6,7 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::RomePath;
-use rome_service::workspace::{
+use biome_service::workspace::{
     ChangeFileParams, FeatureName, FeaturesBuilder, FixFileParams, FormatFileParams, Language,
     OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
     SupportsFeatureParams,

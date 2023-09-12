@@ -16,11 +16,11 @@ use std::{
 };
 
 use anyhow::{bail, ensure, Context, Error};
-use dashmap::DashMap;
-use rome_service::{
+use biome_service::{
     workspace::{TransportRequest, WorkspaceTransport},
     TransportError,
 };
+use dashmap::DashMap;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::{
     from_slice, from_str, to_vec,

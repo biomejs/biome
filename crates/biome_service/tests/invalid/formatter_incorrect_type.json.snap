@@ -1,0 +1,13 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: formatter_incorrect_type.json
+---
+formatter_incorrect_type.json:2:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key formatter is incorrect. Expected a object.
+
+    1 │ {
+  > 2 │ 	"formatter": "string"
+      │ 	             ^^^^^^^^
+    3 │ }
+    4 │

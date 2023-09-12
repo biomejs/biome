@@ -2,7 +2,7 @@ use crate::converters::{from_proto, to_proto};
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use anyhow::Context;
-use rome_service::workspace::{FormatFileParams, FormatOnTypeParams, FormatRangeParams};
+use biome_service::workspace::{FormatFileParams, FormatOnTypeParams, FormatRangeParams};
 use tower_lsp::lsp_types::*;
 use tracing::debug;
 

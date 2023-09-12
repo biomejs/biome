@@ -23,7 +23,7 @@ use tracing::Instrument;
 /// Returns the name of the global named pipe used to communicate with the
 /// server daemon
 fn get_pipe_name() -> String {
-    format!(r"\\.\pipe\rome-service-{}", rome_service::VERSION)
+    format!(r"\\.\pipe\rome-service-{}", biome_service::VERSION)
 }
 
 pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {

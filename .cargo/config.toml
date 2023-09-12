@@ -20,7 +20,7 @@ documentation = """
     -p biome_*_syntax \
     -p biome_*_factory \
     -p biome_diagnostics \
-    -p rome_service \
+    -p biome_service \
     -p biome_cli \
     -p biome_console \
     -p biome_*parser \

@@ -5,10 +5,10 @@ use crate::{
     configuration::load_configuration, execute_mode, CliDiagnostic, CliSession, Execution,
     TraversalMode,
 };
-use rome_service::configuration::organize_imports::OrganizeImports;
-use rome_service::configuration::{FormatterConfiguration, LinterConfiguration};
-use rome_service::workspace::UpdateSettingsParams;
-use rome_service::{Configuration, MergeWith};
+use biome_service::configuration::organize_imports::OrganizeImports;
+use biome_service::configuration::{FormatterConfiguration, LinterConfiguration};
+use biome_service::workspace::UpdateSettingsParams;
+use biome_service::{Configuration, MergeWith};
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {

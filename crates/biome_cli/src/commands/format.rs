@@ -3,10 +3,10 @@ use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::execute::ReportMode;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
-use rome_service::configuration::vcs::VcsConfiguration;
-use rome_service::configuration::{FilesConfiguration, FormatterConfiguration};
-use rome_service::workspace::UpdateSettingsParams;
-use rome_service::{JavascriptFormatter, MergeWith};
+use biome_service::configuration::vcs::VcsConfiguration;
+use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
+use biome_service::workspace::UpdateSettingsParams;
+use biome_service::{JavascriptFormatter, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
 

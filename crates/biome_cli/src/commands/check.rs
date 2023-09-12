@@ -2,10 +2,10 @@ use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
-use rome_service::configuration::organize_imports::OrganizeImports;
-use rome_service::configuration::{FormatterConfiguration, LinterConfiguration};
-use rome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use rome_service::{Configuration, MergeWith};
+use biome_service::configuration::organize_imports::OrganizeImports;
+use biome_service::configuration::{FormatterConfiguration, LinterConfiguration};
+use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
+use biome_service::{Configuration, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
 

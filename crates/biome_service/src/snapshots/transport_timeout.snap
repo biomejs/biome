@@ -1,0 +1,12 @@
+---
+source: crates/biome_service/src/diagnostics.rs
+expression: content
+---
+internalError/io  INTERNAL  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × the request to the remote workspace timed out
+  
+  ! This diagnostic was derived from an internal Biome error. Potential bug, please report it if necessary.
+  
+
+

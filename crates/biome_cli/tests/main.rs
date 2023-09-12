@@ -13,7 +13,7 @@ use std::path::Path;
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
 use biome_console::{markup, BufferConsole, Console, ConsoleExt};
 use biome_fs::{FileSystem, MemoryFileSystem};
-use rome_service::{App, DynRef};
+use biome_service::{App, DynRef};
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const FORMATTED: &str = "statement();\n";
@@ -165,8 +165,8 @@ mod configuration {
     use crate::snap_test::SnapshotPayload;
     use biome_console::BufferConsole;
     use biome_fs::MemoryFileSystem;
+    use biome_service::DynRef;
     use bpaf::Args;
-    use rome_service::DynRef;
     use std::path::Path;
 
     #[test]
@@ -400,7 +400,7 @@ pub(crate) fn run_cli<'app>(
 ) -> Result<(), CliDiagnostic> {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
-    use rome_service::{workspace, WorkspaceRef};
+    use biome_service::{workspace, WorkspaceRef};
     use tokio::{
         io::{duplex, split},
         runtime::Runtime,

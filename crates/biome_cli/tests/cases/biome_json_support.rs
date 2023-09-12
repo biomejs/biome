@@ -3,8 +3,8 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_service::DynRef;
 use bpaf::Args;
-use rome_service::DynRef;
 use std::path::{Path, PathBuf};
 
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {

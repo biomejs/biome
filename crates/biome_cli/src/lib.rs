@@ -8,7 +8,7 @@
 
 use biome_console::{ColorMode, Console};
 use biome_fs::OsFileSystem;
-use rome_service::{App, DynRef, Workspace, WorkspaceRef};
+use biome_service::{App, DynRef, Workspace, WorkspaceRef};
 use std::env;
 
 mod cli_options;

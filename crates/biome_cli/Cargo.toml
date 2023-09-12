@@ -34,7 +34,7 @@ hdrhistogram         = { version = "7.5.0", default-features = false }
 indexmap             = { workspace = true }
 lazy_static          = { workspace = true }
 rayon                = "1.5.1"
-rome_service         = { workspace = true }
+biome_service         = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tokio                = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }

@@ -1,0 +1,14 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: vcs_incorrect_type.json
+---
+vcs_incorrect_type.json:5:20 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key useIgnoreFile is incorrect. Expected a boolean.
+
+    3 │ 		"enabled": true,
+    4 │ 		"clientKind": "git",
+  > 5 │ 		"useIgnoreFile": "false"
+      │ 		                 ^^^^^^^
+    6 │ 	}
+    7 │ }

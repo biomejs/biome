@@ -27,7 +27,7 @@ biome_js_syntax = { path = "../crates/biome_js_syntax" }
 biome_json_formatter = { path = "../crates/biome_json_formatter" }
 biome_json_parser = { path = "../crates/biome_json_parser" }
 biome_json_syntax = { path = "../crates/biome_json_syntax" }
-rome_service = { path = "../crates/rome_service" }
+biome_service = { path = "../crates/biome_service" }
 similar = { version = "2.2.1" }
 
 # Prevent this from interfering with workspaces

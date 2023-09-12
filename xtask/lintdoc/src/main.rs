@@ -13,9 +13,9 @@ use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_service::settings::WorkspaceSettings;
 use convert_case::{Case, Casing};
 use pulldown_cmark::{html::write_html, CodeBlockKind, Event, LinkType, Parser, Tag};
-use rome_service::settings::WorkspaceSettings;
 use std::{
     collections::BTreeMap,
     fmt::Write as _,

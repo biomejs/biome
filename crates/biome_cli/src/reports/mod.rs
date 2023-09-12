@@ -2,8 +2,8 @@ pub mod formatter;
 
 use crate::reports::formatter::{FormatterReportFileDetail, FormatterReportSummary};
 use biome_diagnostics::{Category, Severity};
+use biome_service::WorkspaceError;
 use formatter::FormatterReport;
-use rome_service::WorkspaceError;
 use serde::Serialize;
 use std::collections::HashMap;
 

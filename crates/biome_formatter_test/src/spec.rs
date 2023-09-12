@@ -7,8 +7,8 @@ use biome_formatter::{FormatOptions, Printed};
 use biome_fs::RomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use rome_service::workspace::{FeatureName, FeaturesBuilder, SupportsFeatureParams};
-use rome_service::App;
+use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportsFeatureParams};
+use biome_service::App;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 

@@ -1,0 +1,18 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: hooks_incorrect_options.json
+---
+hooks_incorrect_options.json:9:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `hooksTYPO`.
+
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"hooksTYPO": {}
+       │ 						^^^^^^^^^^^
+    10 │ 					}
+    11 │ 				}
+
+  i Accepted keys
+
+  - hooks

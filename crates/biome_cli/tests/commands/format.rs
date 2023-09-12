@@ -9,8 +9,8 @@ use crate::{
 };
 use biome_console::{markup, BufferConsole, MarkupBuf};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_service::DynRef;
 use bpaf::Args;
-use rome_service::DynRef;
 use std::path::{Path, PathBuf};
 
 // six spaces

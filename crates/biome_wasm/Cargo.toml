@@ -18,7 +18,7 @@ default = ["console_error_panic_hook"]
 biome_console      = { workspace = true }
 biome_diagnostics  = { path = "../../crates/biome_diagnostics" }
 js-sys             = "0.3.59"
-rome_service       = { path = "../../crates/rome_service" }
+biome_service       = { path = "../../crates/biome_service" }
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.4.5"
 wasm-bindgen       = { version = "0.2.82", features = ["serde-serialize"] }
@@ -35,6 +35,6 @@ biome_js_factory  = { workspace = true }
 biome_rowan       = { workspace = true }
 quote             = "1.0.14"
 rome_js_formatter = { workspace = true }
-rome_service      = { workspace = true, features = ["schema"] }
+biome_service      = { workspace = true, features = ["schema"] }
 schemars          = { workspace = true }
 serde_json        = { workspace = true }

@@ -12,10 +12,10 @@ use xtask::*;
 use xtask_codegen::{to_lower_snake_case, update};
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
-    let config_root = project_root().join("crates/rome_service/src/configuration/linter");
+    let config_root = project_root().join("crates/biome_service/src/configuration/linter");
     let config_parsing_root =
-        project_root().join("crates/rome_service/src/configuration/parse/json/");
-    let push_rules_directory = project_root().join("crates/rome_service/src/configuration");
+        project_root().join("crates/biome_service/src/configuration/parse/json/");
+    let push_rules_directory = project_root().join("crates/biome_service/src/configuration");
 
     #[derive(Default)]
     struct LintRulesVisitor {

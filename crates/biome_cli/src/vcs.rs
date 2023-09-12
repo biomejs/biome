@@ -4,9 +4,9 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::StringSet;
 use biome_diagnostics::PrintDiagnostic;
-use rome_service::configuration::vcs::{VcsClientKind, VcsConfiguration};
-use rome_service::configuration::FilesConfiguration;
-use rome_service::{Configuration, WorkspaceError};
+use biome_service::configuration::vcs::{VcsClientKind, VcsConfiguration};
+use biome_service::configuration::FilesConfiguration;
+use biome_service::{Configuration, WorkspaceError};
 use std::path::PathBuf;
 
 /// This function will check if the configuration is set to use the VCS integration and try to

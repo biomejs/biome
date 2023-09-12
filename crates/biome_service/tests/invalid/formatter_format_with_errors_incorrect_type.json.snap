@@ -1,0 +1,14 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: formatter_format_with_errors_incorrect_type.json
+---
+formatter_format_with_errors_incorrect_type.json:3:23 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key formatWithErrors is incorrect. Expected a boolean.
+
+    1 │ {
+    2 │ 	"formatter": {
+  > 3 │ 		"formatWithErrors": "string"
+      │ 		                    ^^^^^^^^
+    4 │ 	}
+    5 │ }

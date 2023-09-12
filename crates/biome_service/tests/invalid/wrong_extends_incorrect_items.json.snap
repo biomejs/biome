@@ -1,0 +1,39 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: wrong_extends_incorrect_items.json
+---
+wrong_extends_incorrect_items.json:2:32 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incorrect type, expected a string.
+
+    1 │ {
+  > 2 │ 	"extends": ["something.json", 3, false, null]
+      │ 	                              ^
+    3 │ }
+    4 │
+
+
+
+
+wrong_extends_incorrect_items.json:2:35 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incorrect type, expected a string.
+
+    1 │ {
+  > 2 │ 	"extends": ["something.json", 3, false, null]
+      │ 	                                 ^^^^^
+    3 │ }
+    4 │
+
+
+
+
+wrong_extends_incorrect_items.json:2:42 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incorrect type, expected a string.
+
+    1 │ {
+  > 2 │ 	"extends": ["something.json", 3, false, null]
+      │ 	                                        ^^^^
+    3 │ }
+    4 │
