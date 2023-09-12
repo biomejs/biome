@@ -129,6 +129,10 @@ If defined here, they should not emit diagnostics.
  */
 export interface JsonConfiguration {
 	/**
+	 * Formatting options
+	 */
+	formatter?: JsonFormatter;
+	/**
 	 * Parsing options
 	 */
 	parser?: JsonParser;
@@ -196,9 +200,25 @@ export interface JavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
+	 * Control the formatter for JavaScript (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+	 */
+	indentSize?: number;
+	/**
+	 * The indent style applied to JavaScript (and its super languages) files.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
 	jsxQuoteStyle?: QuoteStyle;
+	/**
+	 * What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
 	/**
 	 * When properties in objects are quoted. Defaults to asNeeded.
 	 */
@@ -227,6 +247,24 @@ export interface JavascriptParser {
 These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
+}
+export interface JsonFormatter {
+	/**
+	 * Control the formatter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+	 */
+	indent_size?: number;
+	/**
+	 * The indent style applied to JSON (and its super languages) files.
+	 */
+	indent_style?: PlainIndentStyle;
+	/**
+	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+	 */
+	line_width?: LineWidth;
 }
 /**
  * Options that changes how the JSON parser behaves

@@ -97,8 +97,7 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
             diagnostics
         );
     } else {
-        // test passed, not errors
-        assert!(true);
+        // test passed, no errors
     }
 }
 
