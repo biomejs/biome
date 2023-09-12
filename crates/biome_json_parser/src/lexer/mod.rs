@@ -1,4 +1,4 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
+//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the biome-json parser.
 
 #[rustfmt::skip]
 mod tests;

@@ -2,7 +2,7 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `/test/rome.json`
+## `/test/biome.json`
 
 ```json
 {
@@ -26,14 +26,6 @@ function f() {
 ```
 
 # Emitted Messages
-
-```block
-rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The configuration file rome.json is deprecated. Use biome.json instead.
-  
-
-```
 
 ```block
 Formatted 1 file(s) in <TIME>

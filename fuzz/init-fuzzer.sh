@@ -9,9 +9,9 @@ if ! cargo fuzz --help >&/dev/null; then
   cargo install --git https://github.com/rust-fuzz/cargo +stable-fuzz.git
 fi
 
-if [ ! -d corpus/rome_format_all ]; then
-  mkdir -p corpus/rome_format_all
-  cd corpus/rome_format_all
+if [ ! -d corpus/biome_format_all ]; then
+  mkdir -p corpus/biome_format_all
+  cd corpus/biome_format_all
   if [ -z ${CI+x} ]; then
     read -p "Would you like to build a corpus from a javascript source code dataset? (this will take a long time!) [Y/n] " -n 1 -r
     echo
@@ -24,16 +24,16 @@ if [ ! -d corpus/rome_format_all ]; then
   cp -r "../../../crates/biome_js_parser/test_data" .
   find . -name \*.rast -delete
   cd -
-  cargo fuzz cmin --strip-dead-code --features rome_all -s none rome_format_all
+  cargo fuzz cmin --strip-dead-code --features biome_all -s none biome_format_all
 fi
 
-if [ ! -d corpus/rome_format_json ]; then
-  mkdir -p corpus/rome_format_json
-  cd corpus/rome_format_json
+if [ ! -d corpus/biome_format_json ]; then
+  mkdir -p corpus/biome_format_json
+  cd corpus/biome_format_json
   cp -r "../../../crates/biome_json_parser/tests/json_test_suite" .
   find . -name \*.rast -delete
   cd -
-  cargo fuzz cmin --strip-dead-code -s none rome_format_json
+  cargo fuzz cmin --strip-dead-code -s none biome_format_json
 fi
 
 echo "Done! You are ready to fuzz."

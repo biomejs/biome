@@ -1,4 +1,4 @@
-//! An extremely fast, lookup table based, СSS lexer which yields SyntaxKind tokens used by the rome-css parser.
+//! An extremely fast, lookup table based, СSS lexer which yields SyntaxKind tokens used by the biome-css parser.
 #[rustfmt::skip]
 mod tests;
 

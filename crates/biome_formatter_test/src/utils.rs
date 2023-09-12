@@ -89,7 +89,7 @@ const ROME_CURSOR_PLACEHOLDER: &str = "<|>";
 const ROME_RANGE_START_PLACEHOLDER: &str = "<<<ROME_RANGE_START>>>";
 const ROME_RANGE_END_PLACEHOLDER: &str = "<<<ROME_RANGE_END>>>";
 
-pub(crate) fn strip_rome_placeholders(
+pub(crate) fn strip_biome_placeholders(
     input_code: &mut String,
 ) -> (Option<usize>, Option<usize>, Option<usize>) {
     StripPlaceholders::new(

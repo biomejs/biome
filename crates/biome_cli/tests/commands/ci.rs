@@ -733,7 +733,7 @@ fn ci_formatter_linter_organize_imports() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
     "linter": {
         "enabled": true,
         "rules": {
@@ -754,7 +754,7 @@ something( )
     "#;
 
     let file_path = Path::new("biome.json");
-    fs.insert(file_path.into(), rome_json.as_bytes());
+    fs.insert(file_path.into(), biome_json.as_bytes());
 
     let file_path = Path::new("file.js");
     fs.insert(file_path.into(), input.as_bytes());
@@ -790,7 +790,7 @@ fn ignore_vcs_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "vcs": {
             "enabled": true,
             "clientKind": "git",
@@ -813,7 +813,7 @@ file2.js
 
     // configuration
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     // git folder
     let git_folder = Path::new(".git");

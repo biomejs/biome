@@ -1,4 +1,4 @@
-# rome-fuzz
+# biome-fuzz
 
 Fuzzers and associated utilities for automatic testing of Biome.
 
@@ -75,9 +75,9 @@ Since Biome's primary function is parsing, formatting, and linting, we can use f
 detect crashes or panics, but also to detect violations of guarantees of the crate.
 This concept is used extensively throughout the fuzzers.
 
-### `rome_parse_*`
+### `biome_parse_*`
 
-Each of the `rome_parse_*` fuzz harnesses utilise the [round-trip
+Each of the `biome_parse_*` fuzz harnesses utilise the [round-trip
 property](https://blog.ssanj.net/posts/2016-06-26-property-based-testing-patterns.html) of parsing
 and unparsing; that is, given a particular input, if we parse some code successfully, we expect the
 unparsed code to have the content as the original code.
@@ -87,7 +87,7 @@ training](https://www.sri.inf.ethz.ch/js150).
 
 Errata for specific fuzzers can be seen below.
 
-#### `rome_parse_json`
+#### `biome_parse_json`
 
 Since JSON formats are distinct from JS source code and are a relatively simple format, it is not
 strictly necessary to use the shared corpus.
@@ -96,19 +96,20 @@ max out their coverage with minimal or no corpora.
 
 At time of writing (June 11, 2023), JSONC does not seem to be supported, so it is not fuzzed.
 
-#### `rome_parse_all`
+#### `biome_parse_all`
 
 This fuzz harness merely merges all the JS parsers together to create a shared corpus.
 It can be used in place of the parsers for d_ts, jsx, module, script, tsx, and typescript in
 continuous integration.
 
-### `rome_format_*`
+### `biome_format_*`
 
 These fuzzers use the same corpora as the fuzzers previously mentioned, but check the correctness of
 the formatters as well.
 We assume the following qualities of formatters:
- - Formatters will not introduce syntax errors into the program
- - Formatting code twice will have the same result as formatting code once
+
+- Formatters will not introduce syntax errors into the program
+- Formatting code twice will have the same result as formatting code once
 
 In this way, we verify the [idempotency](https://en.wikipedia.org/wiki/Idempotence) and syntax
 preservation property of formatting.

@@ -12,7 +12,7 @@ use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use crate::CliDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -112,11 +112,11 @@ impl<'ctx, 'app> Deref for SharedTraversalOptions<'ctx, 'app> {
 /// write mode is enabled
 pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
     tracing::trace_span!("process_file", path = ?path).in_scope(move || {
-        let rome_path = RomePath::new(path);
+        let biome_path = BiomePath::new(path);
         let file_features = ctx
             .workspace
             .file_features(SupportsFeatureParams {
-                path: rome_path,
+                path: biome_path,
                 feature: FeaturesBuilder::new()
                     .with_formatter()
                     .with_linter()

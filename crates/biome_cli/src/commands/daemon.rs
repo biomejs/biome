@@ -147,7 +147,7 @@ const fn log_file_name_prefix() -> &'static str {
 }
 
 pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
-    let logs_dir = rome_log_dir();
+    let logs_dir = biome_log_dir();
 
     let most_recent = fs::read_dir(logs_dir)?
         .flatten()
@@ -177,7 +177,7 @@ pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber() {
-    let file_appender = tracing_appender::rolling::hourly(rome_log_dir(), log_file_name_prefix());
+    let file_appender = tracing_appender::rolling::hourly(biome_log_dir(), log_file_name_prefix());
 
     registry()
         .with(
@@ -193,7 +193,7 @@ fn setup_tracing_subscriber() {
         .init();
 }
 
-pub(super) fn rome_log_dir() -> PathBuf {
+pub(super) fn biome_log_dir() -> PathBuf {
     match env::var_os("BIOME_LOG_DIR") {
         Some(directory) => PathBuf::from(directory),
         None => env::temp_dir().join("biome-logs"),
@@ -205,7 +205,7 @@ pub(super) fn rome_log_dir() -> PathBuf {
 /// - All spans and events at level debug in crates whose name starts with `biome`
 struct LoggingFilter;
 
-/// Tracing filter used for spans emitted by `rome*` crates
+/// Tracing filter used for spans emitted by `biome*` crates
 const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
     LevelFilter::TRACE
 } else {
@@ -214,8 +214,7 @@ const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
 
 impl LoggingFilter {
     fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        // TODO: keep "rome" until all internal crates are moved to "biome_"
-        let filter = if meta.target().starts_with("rome") || meta.target().starts_with("biome") {
+        let filter = if meta.target().starts_with("biome") {
             SELF_FILTER
         } else {
             LevelFilter::INFO

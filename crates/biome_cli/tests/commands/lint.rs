@@ -794,7 +794,7 @@ fn fs_error_dereferenced_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("lint_rome_test_broken_symlink");
+    let root_path = temp_dir().join("lint_biome_test_broken_symlink");
     let subdir_path = root_path.join("prefix");
 
     let _ = remove_dir_all(&root_path);
@@ -838,7 +838,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("lint_rome_test_infinite_symlink_expansion_to_dirs");
+    let root_path = temp_dir().join("lint_biome_test_infinite_symlink_expansion_to_dirs");
     let subdir1_path = root_path.join("prefix");
     let subdir2_path = root_path.join("foo").join("bar");
 
@@ -881,7 +881,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
 fn fs_error_infinite_symlink_expansion_to_files() {
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("lint_rome_test_infinite_symlink_expansion_to_files");
+    let root_path = temp_dir().join("lint_biome_test_infinite_symlink_expansion_to_files");
     let subdir1_path = root_path.join("prefix");
     let subdir2_path = root_path.join("foo").join("bar");
 
@@ -1015,7 +1015,7 @@ fn fs_files_ignore_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("lint_rome_test_files_ignore_symlink");
+    let root_path = temp_dir().join("lint_biome_test_files_ignore_symlink");
     let src_path = root_path.join("src");
 
     let testcase1_path = root_path.join("hidden_testcase1");
@@ -1065,7 +1065,7 @@ fn fs_files_ignore_symlink() {
         check_windows_symlink!(symlink_dir(&testcase2_path, symlink_testcase2_path));
     }
 
-    let config_path = root_path.join("rome.json");
+    let config_path = root_path.join("biome.json");
     let mut config_file = File::create(config_path).unwrap();
     config_file
         .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
@@ -1525,7 +1525,7 @@ fn all_rules() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "linter": {
             "rules": { "all": true }
         }
@@ -1535,7 +1535,7 @@ fn all_rules() {
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1559,7 +1559,7 @@ fn top_level_all_down_level_not_all() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "linter": {
             "rules": {
                 "all": true,
@@ -1583,7 +1583,7 @@ fn top_level_all_down_level_not_all() {
     fs.insert(file_path.into(), code.as_bytes());
 
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1607,7 +1607,7 @@ fn top_level_not_all_down_level_all() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "linter": {
             "rules": {
                 "all": false,
@@ -1631,7 +1631,7 @@ fn top_level_not_all_down_level_all() {
     fs.insert(file_path.into(), code.as_bytes());
 
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1655,7 +1655,7 @@ fn ignore_configured_globals() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "javascript": {
             "globals": ["foo", "bar"]
         }
@@ -1668,7 +1668,7 @@ fn ignore_configured_globals() {
     fs.insert(file_path.into(), code.as_bytes());
 
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1692,7 +1692,7 @@ fn ignore_vcs_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "vcs": {
             "enabled": true,
             "clientKind": "git",
@@ -1715,7 +1715,7 @@ file2.js
 
     // configuration
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     // git folder
     let git_folder = Path::new(".git");
@@ -1754,7 +1754,7 @@ fn ignore_vcs_os_independent_parse() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "vcs": {
             "enabled": true,
             "clientKind": "git",
@@ -1779,7 +1779,7 @@ fn ignore_vcs_os_independent_parse() {
 
     // configuration
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     // git folder
     let git_folder = Path::new(".git");

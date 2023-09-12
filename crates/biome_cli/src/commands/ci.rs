@@ -16,7 +16,7 @@ pub(crate) struct CiCommandPayload {
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) rome_configuration: Configuration,
+    pub(crate) biome_configuration: Configuration,
     pub(crate) cli_options: CliOptions,
 }
 
@@ -61,14 +61,14 @@ pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(
         return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. This is probably and error."));
     }
 
-    configuration.merge_with(payload.rome_configuration.files);
-    configuration.merge_with(payload.rome_configuration.vcs);
+    configuration.merge_with(payload.biome_configuration.files);
+    configuration.merge_with(payload.biome_configuration.vcs);
     configuration.merge_with_if(
-        payload.rome_configuration.formatter,
+        payload.biome_configuration.formatter,
         !configuration.is_formatter_disabled(),
     );
     configuration.merge_with_if(
-        payload.rome_configuration.organize_imports,
+        payload.biome_configuration.organize_imports,
         !configuration.is_organize_imports_disabled(),
     );
 

@@ -8,7 +8,7 @@ use crate::cli_options::CliOptions;
 use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
@@ -232,8 +232,8 @@ pub(crate) fn execute_mode(
 
     // don't do any traversal if there's some content coming from stdin
     if let Some((path, content)) = mode.as_stdin_file() {
-        let rome_path = RomePath::new(path);
-        std_in::run(session, &mode, rome_path, content.as_str())
+        let biome_path = BiomePath::new(path);
+        std_in::run(session, &mode, biome_path, content.as_str())
     } else if let TraversalMode::Migrate {
         write,
         configuration_file_path,

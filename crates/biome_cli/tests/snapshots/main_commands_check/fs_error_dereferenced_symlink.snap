@@ -16,11 +16,11 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-<TEMP_DIR>/check_rome_test_broken_symlink/broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━
+<TEMP_DIR>/check_biome_test_broken_symlink/broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink
   
-  i Biome encountered a file system entry that is a broken symbolic link: <TEMP_DIR>/check_rome_test_broken_symlink/broken_symlink
+  i Biome encountered a file system entry that is a broken symbolic link: <TEMP_DIR>/check_biome_test_broken_symlink/broken_symlink
   
 
 ```

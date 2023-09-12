@@ -13,7 +13,7 @@ use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
 };
-use biome_fs::{FileSystem, PathInterner, RomePath};
+use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{
@@ -89,7 +89,7 @@ pub(crate) fn traverse(
 
     let duration = thread::scope(|s| {
         thread::Builder::new()
-            .name(String::from("rome::console"))
+            .name(String::from("biome::console"))
             .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
                     execution: &execution,
@@ -231,7 +231,7 @@ fn init_thread_pool() {
     static INIT_ONCE: Once = Once::new();
     INIT_ONCE.call_once(|| {
         rayon::ThreadPoolBuilder::new()
-            .thread_name(|index| format!("rome::worker_{index}"))
+            .thread_name(|index| format!("biome::worker_{index}"))
             .build_global()
             .expect("failed to initialize the global thread pool");
     });
@@ -623,11 +623,11 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
             .ok();
     }
 
-    pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &RomePath) {
+    pub(crate) fn miss_handler_err(&self, err: WorkspaceError, biome_path: &BiomePath) {
         self.push_diagnostic(
             StdError::from(err)
                 .with_category(category!("files/missingHandler"))
-                .with_file_path(rome_path.display().to_string()),
+                .with_file_path(biome_path.display().to_string()),
         );
     }
 }
@@ -641,12 +641,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         self.push_message(error);
     }
 
-    fn can_handle(&self, rome_path: &RomePath) -> bool {
-        if rome_path.is_dir() {
+    fn can_handle(&self, biome_path: &BiomePath) -> bool {
+        if biome_path.is_dir() {
             let can_handle = !self
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {
-                    rome_path: rome_path.clone(),
+                    biome_path: biome_path.clone(),
                     feature: self.execution.as_feature_name(),
                 })
                 .unwrap_or_else(|err| {
@@ -657,7 +657,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             feature: FeaturesBuilder::new()
                 .with_linter()
                 .with_formatter()
@@ -668,7 +668,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         let file_features = match file_features {
             Ok(file_features) => file_features,
             Err(err) => {
-                self.miss_handler_err(err, rome_path);
+                self.miss_handler_err(err, biome_path);
 
                 return false;
             }

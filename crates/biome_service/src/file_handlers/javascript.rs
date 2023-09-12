@@ -19,7 +19,7 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, Printed};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
@@ -91,7 +91,7 @@ impl Language for JsLanguage {
     fn resolve_format_options(
         global: &FormatSettings,
         language: &JsFormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> JsFormatOptions {
         JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(global.indent_style.unwrap_or_default())
@@ -146,7 +146,7 @@ impl ExtensionHandler for JsFileHandler {
     }
 }
 
-fn extension_error(path: &RomePath) -> WorkspaceError {
+fn extension_error(path: &BiomePath) -> WorkspaceError {
     let language = Features::get_language(path).or(LanguageId::from_path(path));
     WorkspaceError::source_file_not_supported(
         language,
@@ -159,14 +159,14 @@ fn extension_error(path: &RomePath) -> WorkspaceError {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
     cache: &mut NodeCache,
 ) -> AnyParse {
     let source_type =
-        JsFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
+        JsFileSource::try_from(biome_path.as_path()).unwrap_or_else(|_| match language_hint {
             LanguageId::JavaScriptReact => JsFileSource::jsx(),
             LanguageId::TypeScript => JsFileSource::ts(),
             LanguageId::TypeScriptReact => JsFileSource::tsx(),
@@ -187,7 +187,7 @@ fn parse(
     )
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: JsSyntaxNode = parse.syntax();
     let tree: AnyJsRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -240,11 +240,11 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -372,7 +372,7 @@ fn code_actions(
     range: TextRange,
     rules: Option<&Rules>,
     settings: SettingsHandle,
-    path: &RomePath,
+    path: &BiomePath,
 ) -> PullActionsResult {
     let tree = parse.tree();
 
@@ -440,12 +440,12 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         fix_file_mode,
         settings,
         should_format,
-        rome_path,
+        biome_path,
     } = params;
 
     let file_source = parse
-        .file_source(rome_path)
-        .map_err(|_| extension_error(params.rome_path))?;
+        .file_source(biome_path)
+        .map_err(|_| extension_error(params.biome_path))?;
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
 
@@ -465,7 +465,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(rome_path.as_path()));
+    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(biome_path.as_path()));
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -533,7 +533,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             None => {
                 let code = if should_format {
                     format_node(
-                        settings.format_options::<JsLanguage>(rome_path),
+                        settings.format_options::<JsLanguage>(biome_path),
                         tree.syntax(),
                     )?
                     .print()?
@@ -554,11 +554,11 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path);
 
     debug!("Format with the following options: \n{}", options);
 
@@ -572,12 +572,12 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path);
 
     let tree = parse.syntax();
     let printed = biome_js_formatter::format_range(options, &tree, range)?;
@@ -585,12 +585,12 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsLanguage>(rome_path);
+    let options = settings.format_options::<JsLanguage>(biome_path);
 
     let tree = parse.syntax();
 
@@ -621,7 +621,7 @@ fn format_on_type(
 }
 
 fn rename(
-    _rome_path: &RomePath,
+    _biome_path: &BiomePath,
     parse: AnyParse,
     symbol_at: TextSize,
     new_name: String,

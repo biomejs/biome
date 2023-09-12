@@ -534,7 +534,7 @@ mod test {
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_formatter::FormatError;
-    use biome_fs::RomePath;
+    use biome_fs::BiomePath;
     use std::ffi::OsStr;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -604,7 +604,7 @@ mod test {
 
     #[test]
     fn source_file_not_supported() {
-        let path = RomePath::new("not_supported.toml");
+        let path = BiomePath::new("not_supported.toml");
         snap_diagnostic(
             "source_file_not_supported",
             WorkspaceError::SourceFileNotSupported(SourceFileNotSupported {

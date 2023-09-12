@@ -5,7 +5,7 @@ use crate::utils;
 use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, SourceActionKind};
 use biome_diagnostics::Applicability;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FixFileParams, PullActionsParams,
     SupportsFeatureParams,
@@ -36,10 +36,10 @@ pub(crate) fn code_actions(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>> {
     let url = params.text_document.uri.clone();
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: rome_path,
+        path: biome_path,
         feature: FeaturesBuilder::new()
             .with_linter()
             .with_organize_imports()
@@ -70,7 +70,7 @@ pub(crate) fn code_actions(
     }
 
     let url = params.text_document.uri.clone();
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
     let doc = session.document(&url)?;
     let position_encoding = session.position_encoding();
 
@@ -84,7 +84,7 @@ pub(crate) fn code_actions(
         })?;
 
     let result = match session.workspace.pull_actions(PullActionsParams {
-        path: rome_path.clone(),
+        path: biome_path.clone(),
         range: cursor_range,
     }) {
         Ok(result) => result,
@@ -103,7 +103,7 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(session, &url, rome_path, &doc.line_index, &diagnostics)?
+        fix_all(session, &url, biome_path, &doc.line_index, &diagnostics)?
     } else {
         None
     };
@@ -166,19 +166,19 @@ pub(crate) fn code_actions(
 fn fix_all(
     session: &Session,
     url: &lsp::Url,
-    rome_path: RomePath,
+    biome_path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
 ) -> Result<Option<CodeActionOrCommand>, WorkspaceError> {
     let should_format = session
         .workspace
         .file_features(SupportsFeatureParams {
-            path: rome_path.clone(),
+            path: biome_path.clone(),
             feature: vec![FeatureName::Format],
         })?
         .supports_for(&FeatureName::Format);
     let fixed = session.workspace.fix_file(FixFileParams {
-        path: rome_path,
+        path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
     })?;

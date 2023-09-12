@@ -4,7 +4,7 @@ use crate::{
 };
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
@@ -239,7 +239,7 @@ pub trait Language: biome_rowan::Language {
     fn resolve_format_options(
         global: &FormatSettings,
         language: &Self::FormatterSettings,
-        path: &RomePath,
+        path: &BiomePath,
     ) -> Self::FormatOptions;
 }
 
@@ -345,7 +345,7 @@ impl<'a> AsRef<WorkspaceSettings> for SettingsHandle<'a> {
 
 impl<'a> SettingsHandle<'a> {
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(self, path: &RomePath) -> L::FormatOptions
+    pub(crate) fn format_options<L>(self, path: &BiomePath) -> L::FormatOptions
     where
         L: Language,
     {

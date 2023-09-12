@@ -72,7 +72,7 @@ fn creates_config_file() {
 }
 
 #[test]
-fn creates_config_file_when_rome_installed_via_package_manager() {
+fn creates_config_file_when_biome_installed_via_package_manager() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -110,7 +110,7 @@ fn creates_config_file_when_rome_installed_via_package_manager() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "creates_config_file_when_rome_installed_via_package_manager",
+        "creates_config_file_when_biome_installed_via_package_manager",
         fs,
         console,
         result,

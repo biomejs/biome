@@ -1,4 +1,4 @@
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_syntax::TextSize;
 use biome_service::workspace::{server, FileGuard, Language, OpenFileParams};
 
@@ -15,7 +15,7 @@ fn debug_control_flow() {
     let file = FileGuard::open(
         workspace.as_ref(),
         OpenFileParams {
-            path: RomePath::new("file.js"),
+            path: BiomePath::new("file.js"),
             content: SOURCE.into(),
             version: 0,
             language_hint: Language::JavaScript,

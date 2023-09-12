@@ -302,7 +302,7 @@ fn custom_config_file_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config_path = Path::new("/test/rome.json");
+    let config_path = Path::new("/test/biome.json");
     fs.insert(config_path.into(), CONFIG_FORMAT.as_bytes());
 
     let file_path = Path::new("file.js");
@@ -1663,7 +1663,7 @@ fn ignore_vcs_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{
+    let biome_json = r#"{
         "vcs": {
             "enabled": true,
             "clientKind": "git",
@@ -1692,7 +1692,7 @@ file2.js
 
     // configuration
     let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
+    fs.insert(config_path.into(), biome_json.as_bytes());
 
     // git folder
     let git_folder = Path::new(".git");
@@ -1856,13 +1856,13 @@ fn ignore_comments_error_when_allow_comments() {
 }
 
 	"#;
-    let rome_config = "biome.json";
+    let biome_config = "biome.json";
     let code = r#"
 /*test*/ [1, 2, 3]
 	"#;
     let file_path = Path::new("tsconfig.json");
     fs.insert(file_path.into(), code.as_bytes());
-    fs.insert(rome_config.into(), config_json);
+    fs.insert(biome_config.into(), config_json);
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),

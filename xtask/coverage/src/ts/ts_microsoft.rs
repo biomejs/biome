@@ -176,7 +176,7 @@ fn add_file_if_supported(files: &mut TestCaseFiles, name: String, content: Strin
         let is_module_regex = Regex::new("(import|export)\\s").unwrap();
         // A very basic heuristic to determine if a module is a `Script` or a `Module`.
         // The TypeScript parser automatically detects whatever a file is a module or a script
-        // by the presence of any module syntax. Rome's parser doesn't support this today
+        // by the presence of any module syntax. Biome's parser doesn't support this today
         // because it would require moving any "strict mode" or "module" specific checks
         // into a second compiler pass. The reason this is needed is that the module syntax
         // may appear at the very end of the file after the parser has already processed

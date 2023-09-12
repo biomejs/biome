@@ -97,7 +97,7 @@ fn with_server_logs() {
     let mut console = BufferConsole::default();
 
     let result = {
-        let log_dir = TestLogDir::new("rome-test-logs");
+        let log_dir = TestLogDir::new("biome-test-logs");
         fs::create_dir_all(&log_dir.path).expect("Failed to create test log directory");
 
         fs::write(log_dir.path.join("server.log.2022-10-14-16"), r#"
@@ -165,7 +165,7 @@ fn run_rage<'app>(
     console: &'app mut dyn Console,
     args: Args,
 ) -> Result<(), CliDiagnostic> {
-    let _test_dir = TestLogDir::new("rome-rage-test");
+    let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)
 }
 

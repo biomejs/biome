@@ -39,7 +39,7 @@ impl FromStr for ReportType {
 
 struct DiffReportItem {
     file_name: &'static str,
-    rome_formatted_result: String,
+    biome_formatted_result: String,
     prettier_formatted_result: String,
 }
 pub struct DiffReport {
@@ -79,7 +79,7 @@ impl DiffReport {
     pub fn report(
         &self,
         file_name: &'static str,
-        rome_formatted_result: &str,
+        biome_formatted_result: &str,
         prettier_formatted_result: &str,
     ) {
         match env::var("REPORT_PRETTIER") {
@@ -87,7 +87,7 @@ impl DiffReport {
                 if !Self::is_ignored(file_name) {
                     self.state.lock().unwrap().push(DiffReportItem {
                         file_name,
-                        rome_formatted_result: rome_formatted_result.to_owned(),
+                        biome_formatted_result: biome_formatted_result.to_owned(),
                         prettier_formatted_result: prettier_formatted_result.to_owned(),
                     });
                 }
@@ -159,39 +159,39 @@ impl DiffReport {
 
         for DiffReportItem {
             file_name,
-            rome_formatted_result,
+            biome_formatted_result,
             prettier_formatted_result,
         } in state.iter()
         {
             file_count += 1;
 
-            let rome_lines = rome_formatted_result.lines().count();
+            let rome_lines = biome_formatted_result.lines().count();
             let prettier_lines = prettier_formatted_result.lines().count();
 
-            let (matched_lines, ratio, diff) = if rome_formatted_result == prettier_formatted_result
-            {
-                (rome_lines, 1f64, None)
-            } else {
-                let mut matched_lines = 0;
-                let mut diff = String::new();
+            let (matched_lines, ratio, diff) =
+                if biome_formatted_result == prettier_formatted_result {
+                    (rome_lines, 1f64, None)
+                } else {
+                    let mut matched_lines = 0;
+                    let mut diff = String::new();
 
-                for (tag, line) in diff_lines(
-                    Algorithm::default(),
-                    prettier_formatted_result,
-                    rome_formatted_result,
-                ) {
-                    if matches!(tag, ChangeTag::Equal) {
-                        matched_lines += 1;
+                    for (tag, line) in diff_lines(
+                        Algorithm::default(),
+                        prettier_formatted_result,
+                        biome_formatted_result,
+                    ) {
+                        if matches!(tag, ChangeTag::Equal) {
+                            matched_lines += 1;
+                        }
+
+                        let line = line.strip_suffix('\n').unwrap_or(line);
+                        writeln!(diff, "{}{}", tag, line).unwrap();
                     }
 
-                    let line = line.strip_suffix('\n').unwrap_or(line);
-                    writeln!(diff, "{}{}", tag, line).unwrap();
-                }
+                    let ratio = matched_lines as f64 / rome_lines.max(prettier_lines) as f64;
 
-                let ratio = matched_lines as f64 / rome_lines.max(prettier_lines) as f64;
-
-                (matched_lines, ratio, Some(diff))
-            };
+                    (matched_lines, ratio, Some(diff))
+                };
 
             total_lines += rome_lines.max(prettier_lines);
             total_matched_lines += matched_lines;

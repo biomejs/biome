@@ -10,7 +10,7 @@ use biome_diagnostics::{Error, Severity};
 use parking_lot::{lock_api::ArcMutexGuard, Mutex, RawMutex, RwLock};
 
 use crate::fs::OpenOptions;
-use crate::{FileSystem, RomePath, TraversalContext, TraversalScope};
+use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
 use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
 
@@ -236,8 +236,8 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
 
                 if should_process_file {
                     let _ = ctx.interner().intern_path(path.into());
-                    let rome_path = RomePath::new(path);
-                    if !ctx.can_handle(&rome_path) {
+                    let biome_path = BiomePath::new(path);
+                    if !ctx.can_handle(&biome_path) {
                         continue;
                     }
                     ctx.handle_file(path);
@@ -279,7 +279,7 @@ mod tests {
     use parking_lot::Mutex;
 
     use crate::{fs::FileSystemExt, OpenOptions};
-    use crate::{FileSystem, MemoryFileSystem, PathInterner, RomePath, TraversalContext};
+    use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
 
     #[test]
     fn fs_read_only() {
@@ -455,7 +455,7 @@ mod tests {
                 panic!("unexpected error {err:?}")
             }
 
-            fn can_handle(&self, _: &RomePath) -> bool {
+            fn can_handle(&self, _: &BiomePath) -> bool {
                 true
             }
 

@@ -8,4 +8,4 @@ pub use fs::{
     ROME_JSON,
 };
 pub use interner::PathInterner;
-pub use path::RomePath;
+pub use path::BiomePath;

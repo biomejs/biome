@@ -3,7 +3,7 @@ use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
-    FileSystem, RomePath,
+    BiomePath, FileSystem,
 };
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use rayon::{scope, Scope};
@@ -230,7 +230,7 @@ fn handle_dir_entry<'scope>(
     }
 
     if file_type.is_dir() {
-        if ctx.can_handle(&RomePath::new(path.clone())) {
+        if ctx.can_handle(&BiomePath::new(path.clone())) {
             scope.spawn(move |scope| {
                 handle_dir(scope, ctx, &path, origin_path);
             });
@@ -249,9 +249,9 @@ fn handle_dir_entry<'scope>(
         // In case the file is inside a directory that is behind a symbolic link,
         // the unresolved origin path is used to construct a new path.
         // This is required to support ignore patterns to symbolic links.
-        let rome_path = if let Some(origin_path) = origin_path {
+        let biome_path = if let Some(origin_path) = origin_path {
             if let Some(file_name) = path.file_name() {
-                RomePath::new(origin_path.join(file_name))
+                BiomePath::new(origin_path.join(file_name))
             } else {
                 ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                     path: path.to_string_lossy().to_string(),
@@ -261,7 +261,7 @@ fn handle_dir_entry<'scope>(
                 return;
             }
         } else {
-            RomePath::new(&path)
+            BiomePath::new(&path)
         };
 
         // Performing this check here let's us skip skip unsupported
@@ -269,7 +269,7 @@ fn handle_dir_entry<'scope>(
         // doing a directory traversal, but printing an error message if the
         // user explicitly requests an unsupported file to be handled.
         // This check also works for symbolic links.
-        if !ctx.can_handle(&rome_path) {
+        if !ctx.can_handle(&biome_path) {
             return;
         }
 

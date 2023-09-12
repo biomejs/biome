@@ -44,7 +44,7 @@ pub(crate) fn rage(session: CliSession) -> Result<(), CliDiagnostic> {
             .app
             .console
             .log(markup!("Discovering running Biome servers..."));
-        session.app.console.log(markup!({ RunningRomeServer }));
+        session.app.console.log(markup!({ RunningBiomeServer }));
     }
 
     Ok(())
@@ -85,9 +85,9 @@ impl Display for WorkspaceRage<'_> {
 }
 
 /// Prints information about other running biome server instances.
-struct RunningRomeServer;
+struct RunningBiomeServer;
 
-impl Display for RunningRomeServer {
+impl Display for RunningBiomeServer {
     fn fmt(&self, f: &mut Formatter) -> io::Result<()> {
         let versions = match enumerate_pipes() {
             Ok(iter) => iter,
@@ -130,7 +130,7 @@ impl Display for RunningRomeServer {
                     }
                 }
 
-                RomeServerLog.fmt(f)?;
+                BiomeServerLog.fmt(f)?;
             } else {
                 markup!("\n"<Emphasis>"Incompatible Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
 
@@ -250,9 +250,9 @@ impl Display for KeyValuePair<'_> {
     }
 }
 
-struct RomeServerLog;
+struct BiomeServerLog;
 
-impl Display for RomeServerLog {
+impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file() {
             markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"
@@ -276,7 +276,7 @@ struct ConnectedClientServerLog<'a>(&'a dyn Workspace);
 impl Display for ConnectedClientServerLog<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if self.0.server_info().is_some() {
-            RomeServerLog.fmt(fmt)
+            BiomeServerLog.fmt(fmt)
         } else {
             Ok(())
         }

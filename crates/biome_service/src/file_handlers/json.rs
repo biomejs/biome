@@ -17,7 +17,7 @@ use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, Printed};
-use biome_fs::{RomePath, BIOME_JSON, ROME_JSON};
+use biome_fs::{BiomePath, BIOME_JSON, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
@@ -41,7 +41,7 @@ impl Language for JsonLanguage {
     fn resolve_format_options(
         global: &FormatSettings,
         _language: &Self::FormatterSettings,
-        _path: &RomePath,
+        _path: &BiomePath,
     ) -> Self::FormatOptions {
         JsonFormatOptions::default()
             .with_indent_style(global.indent_style.unwrap_or_default())
@@ -99,7 +99,7 @@ fn is_file_allowed_as_jsonc(path: &Path) -> bool {
 }
 
 fn parse(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     language_hint: LanguageId,
     text: &str,
     settings: SettingsHandle,
@@ -107,7 +107,7 @@ fn parse(
 ) -> AnyParse {
     let parser = &settings.as_ref().languages.json.parser;
     let source_type =
-        JsonFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
+        JsonFileSource::try_from(biome_path.as_path()).unwrap_or_else(|_| match language_hint {
             LanguageId::Json => JsonFileSource::json(),
             LanguageId::Jsonc => JsonFileSource::jsonc(),
             _ => JsonFileSource::json(),
@@ -115,7 +115,7 @@ fn parse(
     let options: JsonParserOptions = JsonParserOptions {
         allow_comments: parser.allow_comments
             || source_type.is_jsonc()
-            || is_file_allowed_as_jsonc(rome_path),
+            || is_file_allowed_as_jsonc(biome_path),
     };
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
@@ -128,7 +128,7 @@ fn parse(
     )
 }
 
-fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
     let syntax: JsonSyntaxNode = parse.syntax();
     let tree: JsonRoot = parse.tree();
     GetSyntaxTreeResult {
@@ -138,11 +138,11 @@ fn debug_syntax_tree(_rome_path: &RomePath, parse: AnyParse) -> GetSyntaxTreeRes
 }
 
 fn debug_formatter_ir(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -153,11 +153,11 @@ fn debug_formatter_ir(
 
 #[tracing::instrument(level = "debug", skip(parse))]
 fn format(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     tracing::debug!("Format with the following options: \n{}", options);
 
@@ -171,12 +171,12 @@ fn format(
 }
 
 fn format_range(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
     let printed = biome_json_formatter::format_range(options, &tree, range)?;
@@ -184,12 +184,12 @@ fn format_range(
 }
 
 fn format_on_type(
-    rome_path: &RomePath,
+    biome_path: &BiomePath,
     parse: AnyParse,
     settings: SettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<JsonLanguage>(rome_path);
+    let options = settings.format_options::<JsonLanguage>(biome_path);
 
     let tree = parse.syntax();
 
@@ -315,7 +315,7 @@ fn code_actions(
     _range: TextRange,
     _rules: Option<&Rules>,
     _settings: SettingsHandle,
-    _path: &RomePath,
+    _path: &BiomePath,
 ) -> PullActionsResult {
     PullActionsResult {
         actions: Vec::new(),

@@ -1,5 +1,5 @@
 [package]
-name = "rome_fuzz"
+name = "biome_fuzz"
 version = "0.0.0"
 authors = ["Addison Crump <research@addisoncrump.info>"]
 publish = false
@@ -9,7 +9,7 @@ edition = "2021"
 default = ["libfuzzer"]
 full-idempotency = []
 libfuzzer = ["libfuzzer-sys/link_libfuzzer"]
-rome_all = []
+biome_all = []
 
 [package.metadata]
 cargo-fuzz = true
@@ -35,70 +35,70 @@ similar = { version = "2.2.1" }
 members = ["."]
 
 [[bin]]
-name = "rome_parse_all"
-path = "fuzz_targets/rome_parse_all.rs"
-required-features = ["rome_all"]
+name = "biome_parse_all"
+path = "fuzz_targets/biome_parse_all.rs"
+required-features = ["biome_all"]
 
 [[bin]]
-name = "rome_parse_d_ts"
-path = "fuzz_targets/rome_parse_d_ts.rs"
+name = "biome_parse_d_ts"
+path = "fuzz_targets/biome_parse_d_ts.rs"
 
 [[bin]]
-name = "rome_parse_json"
-path = "fuzz_targets/rome_parse_json.rs"
+name = "biome_parse_json"
+path = "fuzz_targets/biome_parse_json.rs"
 
 [[bin]]
-name = "rome_parse_module"
-path = "fuzz_targets/rome_parse_module.rs"
+name = "biome_parse_module"
+path = "fuzz_targets/biome_parse_module.rs"
 
 [[bin]]
-name = "rome_parse_script"
-path = "fuzz_targets/rome_parse_script.rs"
+name = "biome_parse_script"
+path = "fuzz_targets/biome_parse_script.rs"
 
 [[bin]]
-name = "rome_parse_jsx"
-path = "fuzz_targets/rome_parse_jsx.rs"
+name = "biome_parse_jsx"
+path = "fuzz_targets/biome_parse_jsx.rs"
 
 [[bin]]
-name = "rome_parse_tsx"
-path = "fuzz_targets/rome_parse_tsx.rs"
+name = "biome_parse_tsx"
+path = "fuzz_targets/biome_parse_tsx.rs"
 
 [[bin]]
-name = "rome_parse_typescript"
-path = "fuzz_targets/rome_parse_typescript.rs"
+name = "biome_parse_typescript"
+path = "fuzz_targets/biome_parse_typescript.rs"
 
 [[bin]]
-name = "rome_format_all"
-path = "fuzz_targets/rome_format_all.rs"
-required-features = ["rome_all"]
+name = "biome_format_all"
+path = "fuzz_targets/biome_format_all.rs"
+required-features = ["biome_all"]
 
 [[bin]]
-name = "rome_format_d_ts"
-path = "fuzz_targets/rome_format_d_ts.rs"
+name = "biome_format_d_ts"
+path = "fuzz_targets/biome_format_d_ts.rs"
 
 [[bin]]
-name = "rome_format_json"
-path = "fuzz_targets/rome_format_json.rs"
+name = "biome_format_json"
+path = "fuzz_targets/biome_format_json.rs"
 
 [[bin]]
-name = "rome_format_module"
-path = "fuzz_targets/rome_format_module.rs"
+name = "biome_format_module"
+path = "fuzz_targets/biome_format_module.rs"
 
 [[bin]]
-name = "rome_format_script"
-path = "fuzz_targets/rome_format_script.rs"
+name = "biome_format_script"
+path = "fuzz_targets/biome_format_script.rs"
 
 [[bin]]
-name = "rome_format_jsx"
-path = "fuzz_targets/rome_format_jsx.rs"
+name = "biome_format_jsx"
+path = "fuzz_targets/biome_format_jsx.rs"
 
 [[bin]]
-name = "rome_format_tsx"
-path = "fuzz_targets/rome_format_tsx.rs"
+name = "biome_format_tsx"
+path = "fuzz_targets/biome_format_tsx.rs"
 
 [[bin]]
-name = "rome_format_typescript"
-path = "fuzz_targets/rome_format_typescript.rs"
+name = "biome_format_typescript"
+path = "fuzz_targets/biome_format_typescript.rs"
 
 # enabling debug seems to cause a massive use of RAM (>12GB)
 [profile.release]

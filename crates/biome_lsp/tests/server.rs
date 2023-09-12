@@ -2,7 +2,7 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Error;
 use anyhow::Result;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_lsp::LSPServer;
 use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
@@ -255,8 +255,8 @@ impl Server {
         .await
     }
 
-    /// Basic implementation of the `rome/shutdown` request for tests
-    async fn rome_shutdown(&mut self) -> Result<()> {
+    /// Basic implementation of the `biome/shutdown` request for tests
+    async fn biome_shutdown(&mut self) -> Result<()> {
         self.request::<_, ()>("biome/shutdown", "_rome_shutdown", ())
             .await?
             .context("biome/shutdown returned None")?;
@@ -411,7 +411,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: RomePath::new("document.js"),
+                path: BiomePath::new("document.js"),
             },
         )
         .await?
@@ -1107,7 +1107,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_diagnostics_for_rome_json() -> Result<()> {
+async fn pull_diagnostics_for_biome_json() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -1125,7 +1125,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
         }
     }"#;
     server
-        .open_named_document(incorrect_config, url!("rome.json"), "json")
+        .open_named_document(incorrect_config, url!("biome.json"), "json")
         .await?;
 
     let notification = tokio::select! {
@@ -1139,7 +1139,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
         notification,
         Some(ServerNotification::PublishDiagnostics(
             PublishDiagnosticsParams {
-                uri: url!("rome.json"),
+                uri: url!("biome.json"),
                 version: Some(0),
                 diagnostics: vec![lsp::Diagnostic {
                     range: lsp::Range {
@@ -1519,7 +1519,7 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: RomePath::new("document.js"),
+                path: BiomePath::new("document.js"),
             },
         )
         .await?
@@ -1604,7 +1604,7 @@ async fn server_shutdown() -> Result<()> {
     let cancellation = factory.cancellation();
     let cancellation = cancellation.notified();
 
-    server.rome_shutdown().await?;
+    server.biome_shutdown().await?;
 
     cancellation.await;
 

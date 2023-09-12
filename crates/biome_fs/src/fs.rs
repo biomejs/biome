@@ -1,4 +1,4 @@
-use crate::{PathInterner, RomePath};
+use crate::{BiomePath, PathInterner};
 use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
 use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
@@ -264,7 +264,7 @@ pub trait TraversalContext: Sync {
     /// Checks if the traversal context can handle a particular path, used as
     /// an optimization to bail out of scheduling a file handler if it wouldn't
     /// be able to process the file anyway
-    fn can_handle(&self, path: &RomePath) -> bool;
+    fn can_handle(&self, path: &BiomePath) -> bool;
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true

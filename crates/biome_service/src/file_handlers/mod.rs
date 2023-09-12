@@ -10,7 +10,7 @@ use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -188,7 +188,7 @@ pub struct FixAllParams<'a> {
     pub(crate) settings: SettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
-    pub(crate) rome_path: &'a RomePath,
+    pub(crate) biome_path: &'a BiomePath,
 }
 
 #[derive(Default)]
@@ -200,7 +200,7 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
 }
 
-type Parse = fn(&RomePath, Language, &str, SettingsHandle, &mut NodeCache) -> AnyParse;
+type Parse = fn(&BiomePath, Language, &str, SettingsHandle, &mut NodeCache) -> AnyParse;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -208,9 +208,9 @@ pub struct ParserCapabilities {
     pub(crate) parse: Option<Parse>,
 }
 
-type DebugSyntaxTree = fn(&RomePath, AnyParse) -> GetSyntaxTreeResult;
+type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR = fn(&RomePath, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -228,7 +228,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
     pub(crate) max_diagnostics: u64,
-    pub(crate) path: &'a RomePath,
+    pub(crate) path: &'a BiomePath,
 }
 
 pub(crate) struct LintResults {
@@ -239,9 +239,9 @@ pub(crate) struct LintResults {
 
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions =
-    fn(AnyParse, TextRange, Option<&Rules>, SettingsHandle, &RomePath) -> PullActionsResult;
+    fn(AnyParse, TextRange, Option<&Rules>, SettingsHandle, &BiomePath) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
-type Rename = fn(&RomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
 type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;
 
 #[derive(Default)]
@@ -258,11 +258,11 @@ pub struct AnalyzerCapabilities {
     pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
-type Format = fn(&RomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
+type Format = fn(&BiomePath, AnyParse, SettingsHandle) -> Result<Printed, WorkspaceError>;
 type FormatRange =
-    fn(&RomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
+    fn(&BiomePath, AnyParse, SettingsHandle, TextRange) -> Result<Printed, WorkspaceError>;
 type FormatOnType =
-    fn(&RomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
+    fn(&BiomePath, AnyParse, SettingsHandle, TextSize) -> Result<Printed, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -318,25 +318,25 @@ impl Features {
     }
 
     /// Return a [Language] from a string
-    pub(crate) fn get_language(rome_path: &RomePath) -> Language {
-        rome_path
+    pub(crate) fn get_language(biome_path: &BiomePath) -> Language {
+        biome_path
             .extension()
             .and_then(OsStr::to_str)
             .map(Language::from_extension)
-            .or(rome_path
+            .or(biome_path
                 .file_name()
                 .and_then(OsStr::to_str)
                 .map(Language::from_known_filename))
             .unwrap_or_default()
     }
 
-    /// Returns the [Capabilities] associated with a [RomePath]
+    /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(
         &self,
-        rome_path: &RomePath,
+        biome_path: &BiomePath,
         language_hint: Language,
     ) -> Capabilities {
-        match Self::get_language(rome_path).or(language_hint) {
+        match Self::get_language(biome_path).or(language_hint) {
             Language::JavaScript
             | Language::JavaScriptReact
             | Language::TypeScript

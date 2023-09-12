@@ -6,7 +6,7 @@ use fastbloom_rs::{BloomFilter, FilterBuilder, Membership};
 use qp_trie::Trie;
 
 pub fn keywords() -> Vec<String> {
-    let repeat = std::env::var("ROME_BENCH_CONTAINS_REPEAT")
+    let repeat = std::env::var("BIOME_BENCH_CONTAINS_REPEAT")
         .unwrap_or_else(|_| "1".to_string())
         .parse()
         .unwrap();

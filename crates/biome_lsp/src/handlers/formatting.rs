@@ -12,14 +12,14 @@ pub(crate) fn format(
     params: DocumentFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
 
     let doc = session.document(&url)?;
 
     debug!("Formatting...");
     let printed = session
         .workspace
-        .format_file(FormatFileParams { path: rome_path })?;
+        .format_file(FormatFileParams { path: biome_path })?;
 
     let num_lines: u32 = doc.line_index.len();
 
@@ -45,7 +45,7 @@ pub(crate) fn format_range(
     params: DocumentRangeFormattingParams,
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
     let doc = session.document(&url)?;
 
     let position_encoding = session.position_encoding();
@@ -58,7 +58,7 @@ pub(crate) fn format_range(
         })?;
 
     let formatted = session.workspace.format_range(FormatRangeParams {
-        path: rome_path,
+        path: biome_path,
         range: format_range,
     })?;
 
@@ -91,7 +91,7 @@ pub(crate) fn format_on_type(
     let url = params.text_document_position.text_document.uri;
     let position = params.text_document_position.position;
 
-    let rome_path = session.file_path(&url)?;
+    let biome_path = session.file_path(&url)?;
     let doc = session.document(&url)?;
 
     let position_encoding = session.position_encoding();
@@ -99,7 +99,7 @@ pub(crate) fn format_on_type(
         .with_context(|| format!("failed to access position {position:?} in document {url}"))?;
 
     let formatted = session.workspace.format_on_type(FormatOnTypeParams {
-        path: rome_path,
+        path: biome_path,
         offset,
     })?;
 

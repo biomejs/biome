@@ -2,10 +2,10 @@
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	feature: FeatureName[];
-	path: RomePath;
+	path: BiomePath;
 }
 export type FeatureName = "Format" | "Lint" | "OrganizeImports";
-export interface RomePath {
+export interface BiomePath {
 	path: string;
 }
 export interface SupportsFeatureResult {
@@ -1075,7 +1075,7 @@ export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 /**
@@ -1091,40 +1091,40 @@ export type Language =
 	| "Unknown";
 export interface ChangeFileParams {
 	content: string;
-	path: RomePath;
+	path: BiomePath;
 	version: number;
 }
 export interface CloseFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
 }
 export interface OrganizeImportsParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface OrganizeImportsResult {
 	code: string;
 }
 export interface GetFileContentParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export type TextSize = number;
 export interface GetFormatterIRParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
-	path: RomePath;
+	path: BiomePath;
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
@@ -1432,7 +1432,7 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface PullActionsResult {
@@ -1485,7 +1485,7 @@ export type SourceActionKind =
  */
 export type Applicability = "Always" | "MaybeIncorrect";
 export interface FormatFileParams {
-	path: RomePath;
+	path: BiomePath;
 }
 export interface Printed {
 	code: string;
@@ -1507,16 +1507,16 @@ export interface SourceMarker {
 	source: TextSize;
 }
 export interface FormatRangeParams {
-	path: RomePath;
+	path: BiomePath;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
 	offset: TextSize;
-	path: RomePath;
+	path: BiomePath;
 }
 export interface FixFileParams {
 	fix_file_mode: FixFileMode;
-	path: RomePath;
+	path: BiomePath;
 	should_format: boolean;
 }
 /**
@@ -1553,7 +1553,7 @@ export interface FixAction {
 }
 export interface RenameParams {
 	new_name: string;
-	path: RomePath;
+	path: BiomePath;
 	symbol_at: TextSize;
 }
 export interface RenameResult {

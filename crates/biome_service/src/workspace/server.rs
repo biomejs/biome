@@ -20,7 +20,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
@@ -35,9 +35,9 @@ pub(super) struct WorkspaceServer {
     /// global settings object for this workspace
     settings: RwLock<WorkspaceSettings>,
     /// Stores the document (text content + version number) associated with a URL
-    documents: DashMap<RomePath, Document>,
+    documents: DashMap<BiomePath, Document>,
     /// Stores the result of the parser (syntax tree + diagnostics) for a given URL
-    syntax: DashMap<RomePath, AnyParse>,
+    syntax: DashMap<BiomePath, AnyParse>,
 }
 
 /// The `Workspace` object is long lived, so we want it to be able to cross
@@ -76,14 +76,14 @@ impl WorkspaceServer {
     }
 
     /// Get the supported capabilities for a given file path
-    fn get_capabilities(&self, path: &RomePath) -> Capabilities {
+    fn get_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_language(path);
 
         self.features.get_capabilities(path, language)
     }
 
     /// Retrieves the supported language of a file
-    fn get_language(&self, path: &RomePath) -> Language {
+    fn get_language(&self, path: &BiomePath) -> Language {
         self.documents
             .get(path)
             .map(|doc| doc.language_hint)
@@ -93,7 +93,7 @@ impl WorkspaceServer {
     /// Return an error factory function for unsupported features at a given path
     fn build_capability_error<'a>(
         &'a self,
-        path: &'a RomePath,
+        path: &'a BiomePath,
         // feature_name: &'a str,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
@@ -130,12 +130,12 @@ impl WorkspaceServer {
     /// if the language associated with the file has no parser capability
     fn get_parse(
         &self,
-        rome_path: RomePath,
+        biome_path: BiomePath,
         feature: Option<FeatureName>,
     ) -> Result<AnyParse, WorkspaceError> {
         let ignored = if let Some(feature) = feature {
             self.is_path_ignored(IsPathIgnoredParams {
-                rome_path: rome_path.clone(),
+                biome_path: biome_path.clone(),
                 feature,
             })?
         } else {
@@ -145,25 +145,25 @@ impl WorkspaceServer {
         if ignored {
             return Err(WorkspaceError::file_ignored(format!(
                 "{}",
-                rome_path.to_path_buf().display()
+                biome_path.to_path_buf().display()
             )));
         }
 
-        match self.syntax.entry(rome_path) {
+        match self.syntax.entry(biome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
-                let rome_path = entry.key();
-                let capabilities = self.get_capabilities(rome_path);
+                let biome_path = entry.key();
+                let capabilities = self.get_capabilities(biome_path);
 
                 let mut document = self
                     .documents
-                    .get_mut(rome_path)
+                    .get_mut(biome_path)
                     .ok_or_else(WorkspaceError::not_found)?;
 
                 let parse = capabilities
                     .parser
                     .parse
-                    .ok_or_else(self.build_capability_error(rome_path))?;
+                    .ok_or_else(self.build_capability_error(biome_path))?;
 
                 let size_limit = {
                     let settings = self.settings();
@@ -176,7 +176,7 @@ impl WorkspaceServer {
                 let size = document.content.as_bytes().len();
                 if size >= size_limit {
                     return Err(WorkspaceError::file_too_large(
-                        rome_path.to_path_buf().display().to_string(),
+                        biome_path.to_path_buf().display().to_string(),
                         size,
                         size_limit,
                     ));
@@ -184,7 +184,7 @@ impl WorkspaceServer {
 
                 let settings = self.settings();
                 let parsed = parse(
-                    rome_path,
+                    biome_path,
                     document.language_hint,
                     document.content.as_str(),
                     settings,
@@ -217,7 +217,7 @@ impl Workspace for WorkspaceServer {
 
         for feature in params.feature {
             let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
-                rome_path: params.path.clone(),
+                biome_path: params.path.clone(),
                 feature: feature.clone(),
             })?;
 
@@ -234,7 +234,7 @@ impl Workspace for WorkspaceServer {
             .as_ref()
             .files
             .ignored_files
-            .matches_path(params.rome_path.as_path());
+            .matches_path(params.biome_path.as_path());
 
         Ok(match params.feature {
             FeatureName::Format => {
@@ -242,7 +242,7 @@ impl Workspace for WorkspaceServer {
                     .as_ref()
                     .formatter
                     .ignored_files
-                    .matches_path(params.rome_path.as_path());
+                    .matches_path(params.biome_path.as_path());
                 if section_ignored {
                     section_ignored
                 } else {
@@ -254,7 +254,7 @@ impl Workspace for WorkspaceServer {
                     .as_ref()
                     .linter
                     .ignored_files
-                    .matches_path(params.rome_path.as_path());
+                    .matches_path(params.biome_path.as_path());
 
                 if section_ignored {
                     section_ignored
@@ -267,7 +267,7 @@ impl Workspace for WorkspaceServer {
                     .as_ref()
                     .organize_imports
                     .ignored_files
-                    .matches_path(params.rome_path.as_path());
+                    .matches_path(params.biome_path.as_path());
 
                 if section_ignored {
                     section_ignored
@@ -538,7 +538,7 @@ impl Workspace for WorkspaceServer {
             fix_file_mode: params.fix_file_mode,
             settings: self.settings(),
             should_format: params.should_format,
-            rome_path: &params.path,
+            biome_path: &params.path,
         })
     }
 

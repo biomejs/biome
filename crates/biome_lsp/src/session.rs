@@ -6,7 +6,7 @@ use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
-use biome_fs::{FileSystem, OsFileSystem, RomePath};
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
@@ -241,7 +241,7 @@ impl Session {
         self.documents.write().unwrap().remove(url);
     }
 
-    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<RomePath> {
+    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<BiomePath> {
         let mut path_to_file = match url.to_file_path() {
             Err(_) => {
                 // If we can't create a path, it's probably because the file doesn't exist.
@@ -261,7 +261,7 @@ impl Session {
             path_to_file = relative_path.into();
         }
 
-        Ok(RomePath::new(path_to_file))
+        Ok(BiomePath::new(path_to_file))
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -269,14 +269,14 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "debug", skip_all, fields(url = display(&url), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<()> {
-        let rome_path = self.file_path(&url)?;
+        let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             feature: FeaturesBuilder::new()
                 .with_linter()
                 .with_organize_imports()
                 .build(),
-            path: rome_path.clone(),
+            path: biome_path.clone(),
         })?;
 
         let diagnostics = if self.is_linting_and_formatting_disabled() {
@@ -297,7 +297,7 @@ impl Session {
                 categories |= RuleCategories::ACTION
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
-                path: rome_path,
+                path: biome_path,
                 categories,
                 max_diagnostics: u64::MAX,
             })?;
