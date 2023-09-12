@@ -2,9 +2,9 @@ use crate::configuration::PlainIndentStyle;
 use crate::configuration::{deserialize_line_width, serialize_line_width};
 use crate::MergeWith;
 use biome_formatter::LineWidth;
+use biome_js_formatter::context::trailing_comma::TrailingComma;
+use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use bpaf::Bpaf;
-use rome_js_formatter::context::trailing_comma::TrailingComma;
-use rome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use serde::{Deserialize, Serialize};
 
 /// Formatting options specific to the JavaScript files

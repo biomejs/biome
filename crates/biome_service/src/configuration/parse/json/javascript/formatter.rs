@@ -3,10 +3,10 @@ use crate::configuration::PlainIndentStyle;
 use biome_deserialize::json::VisitJsonNode;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_formatter::LineWidth;
+use biome_js_formatter::context::trailing_comma::TrailingComma;
+use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, SyntaxNode};
-use rome_js_formatter::context::trailing_comma::TrailingComma;
-use rome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 
 impl VisitJsonNode for JavascriptFormatter {}
 impl VisitNode<JsonLanguage> for JavascriptFormatter {
