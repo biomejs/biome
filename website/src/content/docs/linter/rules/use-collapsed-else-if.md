@@ -1,5 +1,5 @@
 ---
-title: useCollapsedElseIf (since vnext)
+title: useCollapsedElseIf (since v1.1.0)
 ---
 
 

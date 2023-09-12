@@ -37,6 +37,10 @@ codegen-linter:
   just codegen-bindings
   cargo lintdoc
 
+# Generates code generated files for the website
+codegen-website:
+  cargo codegen-website
+
 # Generates the linter documentation and Rust documentation
 documentation:
   cargo lintdoc
