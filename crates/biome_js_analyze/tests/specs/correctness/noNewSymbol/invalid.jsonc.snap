@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```js
+var foo = new Symbol('foo');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var foo = new Symbol('foo');
+      │           ^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+    1 │ var·foo·=·new·Symbol('foo');
+      │           ----              
+
+```
+
+# Input
+```js
+var foo = new globalThis.Symbol('foo');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var foo = new globalThis.Symbol('foo');
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+    1 │ var·foo·=·new·globalThis.Symbol('foo');
+      │           ----                         
+
+```
+
+# Input
+```js
+var foo = new window.Symbol('foo');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var foo = new window.Symbol('foo');
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+    1 │ var·foo·=·new·window.Symbol('foo');
+      │           ----                     
+
+```
+
+# Input
+```js
+var foo2 = new Symbol();
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:12 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var foo2 = new Symbol();
+      │            ^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+    1 │ var·foo2·=·new·Symbol();
+      │            ----         
+
+```
+
+# Input
+```js
+var lorem = new Symbol() // comment
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:13 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var lorem = new Symbol() // comment
+      │             ^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+    1 │ var·lorem·=·new·Symbol()·//·comment
+      │             ----                   
+
+```
+
+# Input
+```js
+var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:26 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Symbol cannot be called as a constructor.
+  
+  > 1 │ var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove new.
+  
+  - var·s·=·/*·prefix_cmt·*/·new·/*·suffix_cmt·*/·Symbol()·//·comment
+  + var·s·=·/*·prefix_cmt·*/··/*·suffix_cmt·*/·Symbol()·//·comment
+  
+
+```
+
+

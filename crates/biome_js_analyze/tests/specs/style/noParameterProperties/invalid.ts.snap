@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.ts
+---
+# Input
+```js
+export class Foo1 {
+  constructor(readonly name: string) {}
+}
+
+export class Foo2 {
+  constructor(private name: string) {}
+}
+
+export class Foo3 {
+  constructor(protected name: string) {}
+}
+
+export class Foo4 {
+  constructor(public name: string) {}
+}
+
+export class Foo5 {
+  constructor(private readonly name: string) {}
+}
+
+export class Foo6 {
+  constructor(protected readonly name: string) {}
+}
+
+export class Foo7 {
+  constructor(public readonly name: string) {}
+}
+```
+
+# Diagnostics
+```
+invalid.ts:2:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    1 │ export class Foo1 {
+  > 2 │   constructor(readonly name: string) {}
+      │               ^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:6:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    5 │ export class Foo2 {
+  > 6 │   constructor(private name: string) {}
+      │               ^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:10:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+     9 │ export class Foo3 {
+  > 10 │   constructor(protected name: string) {}
+       │               ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:14:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    13 │ export class Foo4 {
+  > 14 │   constructor(public name: string) {}
+       │               ^^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:18:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    17 │ export class Foo5 {
+  > 18 │   constructor(private readonly name: string) {}
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:22:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    21 │ export class Foo6 {
+  > 22 │   constructor(protected readonly name: string) {}
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+```
+invalid.ts:26:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a more explicit class property instead of a parameter property.
+  
+    25 │ export class Foo7 {
+  > 26 │   constructor(public readonly name: string) {}
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
+  
+  i Parameter properties are less explicit than other ways of declaring and initializing class properties.
+  
+
+```
+
+

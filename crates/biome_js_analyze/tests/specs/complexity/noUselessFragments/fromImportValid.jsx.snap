@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: fromImportValid.jsx
+---
+# Input
+```js
+import React, {Fragment} from "notReact";
+
+<>
+    <Fragment></Fragment>
+    <React.Fragment></React.Fragment>
+</>
+
+```
+
+

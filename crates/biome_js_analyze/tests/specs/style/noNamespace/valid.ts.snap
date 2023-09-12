@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+export {};
+
+declare global {}
+
+declare module "foo" {}
+
+```
+
+

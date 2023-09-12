@@ -1,0 +1,208 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsTryFinallyStatement.js
+---
+# Input
+```js
+function JsTryFinallyStatement1() {
+    try {
+        tryBlock();
+    } catch (err) {
+        catchClause();
+    } finally {
+        finallyClause();
+        return;
+    }
+
+    afterFinallyReturn();
+}
+
+function JsTryFinallyStatement2() {
+    return;
+
+    try {
+        tryBlock();
+    } catch (err) {
+        catchClause();
+    } finally {
+        finallyClause();
+    }
+}
+
+function JsTryFinallyStatement3() {
+    try {
+        try {
+            tryBlock1();
+        } catch {
+        } finally {
+            return;
+        }
+
+        afterTryStatement1();
+    } catch (err) {
+        catchClause2();
+    }
+
+    afterTryStatement2();
+}
+
+function JsTryFinallyStatement4() {
+    try {
+        tryBlock1();
+        return;
+    } catch {
+        return;
+    } finally {
+        if (value) {
+            statement1();
+        } else {
+            statement2();
+        }
+
+        finallyClause();
+    }
+
+    afterTryStatement();
+}
+
+```
+
+# Diagnostics
+```
+JsTryFinallyStatement.js:11:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     9 │     }
+    10 │ 
+  > 11 │     afterFinallyReturn();
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+     6 │     } finally {
+     7 │         finallyClause();
+   > 8 │         return;
+       │         ^^^^^^^
+     9 │     }
+    10 │ 
+  
+
+```
+
+```
+JsTryFinallyStatement.js:17:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    15 │     return;
+    16 │ 
+  > 17 │     try {
+       │     ^^^^^
+  > 18 │         tryBlock();
+        ...
+  > 22 │         finallyClause();
+  > 23 │     }
+       │     ^
+    24 │ }
+    25 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    14 │ function JsTryFinallyStatement2() {
+  > 15 │     return;
+       │     ^^^^^^^
+    16 │ 
+    17 │     try {
+  
+
+```
+
+```
+JsTryFinallyStatement.js:35:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    33 │         }
+    34 │ 
+  > 35 │         afterTryStatement1();
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    36 │     } catch (err) {
+    37 │         catchClause2();
+  
+  i ... because this statement will return from the function beforehand
+  
+    30 │         } catch {
+    31 │         } finally {
+  > 32 │             return;
+       │             ^^^^^^^
+    33 │         }
+    34 │ 
+  
+
+```
+
+```
+JsTryFinallyStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    35 │         afterTryStatement1();
+  > 36 │     } catch (err) {
+       │                   ^
+  > 37 │         catchClause2();
+  > 38 │     }
+  > 39 │ 
+  > 40 │     afterTryStatement2();
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    30 │         } catch {
+    31 │         } finally {
+  > 32 │             return;
+       │             ^^^^^^^
+    33 │         }
+    34 │ 
+  
+
+```
+
+```
+JsTryFinallyStatement.js:59:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    57 │     }
+    58 │ 
+  > 59 │     afterTryStatement();
+       │     ^^^^^^^^^^^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i ... because either this statement ...
+  
+    44 │     try {
+    45 │         tryBlock1();
+  > 46 │         return;
+       │         ^^^^^^^
+    47 │     } catch {
+    48 │         return;
+  
+  i ... or this statement will return from the function beforehand
+  
+    46 │         return;
+    47 │     } catch {
+  > 48 │         return;
+       │         ^^^^^^^
+    49 │     } finally {
+    50 │         if (value) {
+  
+
+```
+
+

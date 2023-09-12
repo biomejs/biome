@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+var bar = Symbol('bar');
+
+function baz() {
+    function Symbol() { }
+    new Symbol();
+}
+```
+
+

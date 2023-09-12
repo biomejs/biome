@@ -1,0 +1,704 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+a["b"];
+a.b["c"];
+a.b["c"].d.e["f"];
+a.b[`c`];
+a.b[c["d"]];
+a["b"] = "something";
+a.b["c"] = "something";
+a.b["c"].d.e["f"] = "something";
+a.b[`c`] = "something";
+a.b[c["d"]] = "something";
+a = {
+	['b']: d
+};
+a = {
+	[`b`]: d
+};
+a = {
+	"b": d
+};
+a.b[`$c`];
+a.b["_d"];
+class C { ["a"] = 0 }
+class C { "a" = 0 }
+class C { ["a"](){} }
+class C { "a"(){} }
+class C { get ["a"](){} }
+class C { get "a"(){} }
+class C { set ["a"](x){} }
+class C { set "a"(x){} }
+a = {
+	["1+1"]: 2
+}
+a = {
+	[`1+1`]: 2
+}
+a = {
+	[""]: 2
+}
+
+// optional chain
+a?.["b"]?.['c']?.d?.e?.["f"]
+
+```
+
+# Diagnostics
+```
+invalid.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+  > 1 │ a["b"];
+      │   ^^^
+    2 │ a.b["c"];
+    3 │ a.b["c"].d.e["f"];
+  
+  i Suggested fix: Use a literal key instead.
+  
+     1    │ - a["b"];
+        1 │ + a.b;
+     2  2 │   a.b["c"];
+     3  3 │   a.b["c"].d.e["f"];
+  
+
+```
+
+```
+invalid.js:2:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    1 │ a["b"];
+  > 2 │ a.b["c"];
+      │     ^^^
+    3 │ a.b["c"].d.e["f"];
+    4 │ a.b[`c`];
+  
+  i Suggested fix: Use a literal key instead.
+  
+     1  1 │   a["b"];
+     2    │ - a.b["c"];
+        2 │ + a.b.c;
+     3  3 │   a.b["c"].d.e["f"];
+     4  4 │   a.b[`c`];
+  
+
+```
+
+```
+invalid.js:3:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    1 │ a["b"];
+    2 │ a.b["c"];
+  > 3 │ a.b["c"].d.e["f"];
+      │     ^^^
+    4 │ a.b[`c`];
+    5 │ a.b[c["d"]];
+  
+  i Suggested fix: Use a literal key instead.
+  
+     1  1 │   a["b"];
+     2  2 │   a.b["c"];
+     3    │ - a.b["c"].d.e["f"];
+        3 │ + a.b.c.d.e["f"];
+     4  4 │   a.b[`c`];
+     5  5 │   a.b[c["d"]];
+  
+
+```
+
+```
+invalid.js:3:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    1 │ a["b"];
+    2 │ a.b["c"];
+  > 3 │ a.b["c"].d.e["f"];
+      │              ^^^
+    4 │ a.b[`c`];
+    5 │ a.b[c["d"]];
+  
+  i Suggested fix: Use a literal key instead.
+  
+     1  1 │   a["b"];
+     2  2 │   a.b["c"];
+     3    │ - a.b["c"].d.e["f"];
+        3 │ + a.b["c"].d.e.f;
+     4  4 │   a.b[`c`];
+     5  5 │   a.b[c["d"]];
+  
+
+```
+
+```
+invalid.js:4:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    2 │ a.b["c"];
+    3 │ a.b["c"].d.e["f"];
+  > 4 │ a.b[`c`];
+      │     ^^^
+    5 │ a.b[c["d"]];
+    6 │ a["b"] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     2  2 │   a.b["c"];
+     3  3 │   a.b["c"].d.e["f"];
+     4    │ - a.b[`c`];
+        4 │ + a.b.c;
+     5  5 │   a.b[c["d"]];
+     6  6 │   a["b"] = "something";
+  
+
+```
+
+```
+invalid.js:5:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    3 │ a.b["c"].d.e["f"];
+    4 │ a.b[`c`];
+  > 5 │ a.b[c["d"]];
+      │       ^^^
+    6 │ a["b"] = "something";
+    7 │ a.b["c"] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     3  3 │   a.b["c"].d.e["f"];
+     4  4 │   a.b[`c`];
+     5    │ - a.b[c["d"]];
+        5 │ + a.b[c.d];
+     6  6 │   a["b"] = "something";
+     7  7 │   a.b["c"] = "something";
+  
+
+```
+
+```
+invalid.js:6:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    4 │ a.b[`c`];
+    5 │ a.b[c["d"]];
+  > 6 │ a["b"] = "something";
+      │   ^^^
+    7 │ a.b["c"] = "something";
+    8 │ a.b["c"].d.e["f"] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     4  4 │   a.b[`c`];
+     5  5 │   a.b[c["d"]];
+     6    │ - a["b"]·=·"something";
+        6 │ + a.b·=·"something";
+     7  7 │   a.b["c"] = "something";
+     8  8 │   a.b["c"].d.e["f"] = "something";
+  
+
+```
+
+```
+invalid.js:7:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    5 │ a.b[c["d"]];
+    6 │ a["b"] = "something";
+  > 7 │ a.b["c"] = "something";
+      │     ^^^
+    8 │ a.b["c"].d.e["f"] = "something";
+    9 │ a.b[`c`] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     5  5 │   a.b[c["d"]];
+     6  6 │   a["b"] = "something";
+     7    │ - a.b["c"]·=·"something";
+        7 │ + a.b.c·=·"something";
+     8  8 │   a.b["c"].d.e["f"] = "something";
+     9  9 │   a.b[`c`] = "something";
+  
+
+```
+
+```
+invalid.js:8:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+     6 │ a["b"] = "something";
+     7 │ a.b["c"] = "something";
+   > 8 │ a.b["c"].d.e["f"] = "something";
+       │     ^^^
+     9 │ a.b[`c`] = "something";
+    10 │ a.b[c["d"]] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     6  6 │   a["b"] = "something";
+     7  7 │   a.b["c"] = "something";
+     8    │ - a.b["c"].d.e["f"]·=·"something";
+        8 │ + a.b.c.d.e["f"]·=·"something";
+     9  9 │   a.b[`c`] = "something";
+    10 10 │   a.b[c["d"]] = "something";
+  
+
+```
+
+```
+invalid.js:8:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+     6 │ a["b"] = "something";
+     7 │ a.b["c"] = "something";
+   > 8 │ a.b["c"].d.e["f"] = "something";
+       │              ^^^
+     9 │ a.b[`c`] = "something";
+    10 │ a.b[c["d"]] = "something";
+  
+  i Suggested fix: Use a literal key instead.
+  
+     6  6 │   a["b"] = "something";
+     7  7 │   a.b["c"] = "something";
+     8    │ - a.b["c"].d.e["f"]·=·"something";
+        8 │ + a.b["c"].d.e.f·=·"something";
+     9  9 │   a.b[`c`] = "something";
+    10 10 │   a.b[c["d"]] = "something";
+  
+
+```
+
+```
+invalid.js:9:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+     7 │ a.b["c"] = "something";
+     8 │ a.b["c"].d.e["f"] = "something";
+   > 9 │ a.b[`c`] = "something";
+       │     ^^^
+    10 │ a.b[c["d"]] = "something";
+    11 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+     7  7 │   a.b["c"] = "something";
+     8  8 │   a.b["c"].d.e["f"] = "something";
+     9    │ - a.b[`c`]·=·"something";
+        9 │ + a.b.c·=·"something";
+    10 10 │   a.b[c["d"]] = "something";
+    11 11 │   a = {
+  
+
+```
+
+```
+invalid.js:10:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+     8 │ a.b["c"].d.e["f"] = "something";
+     9 │ a.b[`c`] = "something";
+  > 10 │ a.b[c["d"]] = "something";
+       │       ^^^
+    11 │ a = {
+    12 │ 	['b']: d
+  
+  i Suggested fix: Use a literal key instead.
+  
+     8  8 │   a.b["c"].d.e["f"] = "something";
+     9  9 │   a.b[`c`] = "something";
+    10    │ - a.b[c["d"]]·=·"something";
+       10 │ + a.b[c.d]·=·"something";
+    11 11 │   a = {
+    12 12 │   	['b']: d
+  
+
+```
+
+```
+invalid.js:12:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    10 │ a.b[c["d"]] = "something";
+    11 │ a = {
+  > 12 │ 	['b']: d
+       │ 	 ^^^
+    13 │ };
+    14 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+    12 │ → ['b']:·d
+       │   -- --   
+
+```
+
+```
+invalid.js:15:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    13 │ };
+    14 │ a = {
+  > 15 │ 	[`b`]: d
+       │ 	 ^^^
+    16 │ };
+    17 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+    15 │ → [`b`]:·d
+       │   -- --   
+
+```
+
+```
+invalid.js:18:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    16 │ };
+    17 │ a = {
+  > 18 │ 	"b": d
+       │ 	^^^
+    19 │ };
+    20 │ a.b[`$c`];
+  
+  i Suggested fix: Use a literal key instead.
+  
+    18 │ → "b":·d
+       │   - -   
+
+```
+
+```
+invalid.js:20:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    18 │ 	"b": d
+    19 │ };
+  > 20 │ a.b[`$c`];
+       │     ^^^^
+    21 │ a.b["_d"];
+    22 │ class C { ["a"] = 0 }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    18 18 │   	"b": d
+    19 19 │   };
+    20    │ - a.b[`$c`];
+       20 │ + a.b.$c;
+    21 21 │   a.b["_d"];
+    22 22 │   class C { ["a"] = 0 }
+  
+
+```
+
+```
+invalid.js:21:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    19 │ };
+    20 │ a.b[`$c`];
+  > 21 │ a.b["_d"];
+       │     ^^^^
+    22 │ class C { ["a"] = 0 }
+    23 │ class C { "a" = 0 }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    19 19 │   };
+    20 20 │   a.b[`$c`];
+    21    │ - a.b["_d"];
+       21 │ + a.b._d;
+    22 22 │   class C { ["a"] = 0 }
+    23 23 │   class C { "a" = 0 }
+  
+
+```
+
+```
+invalid.js:22:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    20 │ a.b[`$c`];
+    21 │ a.b["_d"];
+  > 22 │ class C { ["a"] = 0 }
+       │            ^^^
+    23 │ class C { "a" = 0 }
+    24 │ class C { ["a"](){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    22 │ class·C·{·["a"]·=·0·}
+       │           -- --      
+
+```
+
+```
+invalid.js:23:11 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    21 │ a.b["_d"];
+    22 │ class C { ["a"] = 0 }
+  > 23 │ class C { "a" = 0 }
+       │           ^^^
+    24 │ class C { ["a"](){} }
+    25 │ class C { "a"(){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    23 │ class·C·{·"a"·=·0·}
+       │           - -      
+
+```
+
+```
+invalid.js:24:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    22 │ class C { ["a"] = 0 }
+    23 │ class C { "a" = 0 }
+  > 24 │ class C { ["a"](){} }
+       │            ^^^
+    25 │ class C { "a"(){} }
+    26 │ class C { get ["a"](){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    24 │ class·C·{·["a"](){}·}
+       │           -- --      
+
+```
+
+```
+invalid.js:25:11 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    23 │ class C { "a" = 0 }
+    24 │ class C { ["a"](){} }
+  > 25 │ class C { "a"(){} }
+       │           ^^^
+    26 │ class C { get ["a"](){} }
+    27 │ class C { get "a"(){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    25 │ class·C·{·"a"(){}·}
+       │           - -      
+
+```
+
+```
+invalid.js:26:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    24 │ class C { ["a"](){} }
+    25 │ class C { "a"(){} }
+  > 26 │ class C { get ["a"](){} }
+       │                ^^^
+    27 │ class C { get "a"(){} }
+    28 │ class C { set ["a"](x){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    26 │ class·C·{·get·["a"](){}·}
+       │               -- --      
+
+```
+
+```
+invalid.js:27:15 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    25 │ class C { "a"(){} }
+    26 │ class C { get ["a"](){} }
+  > 27 │ class C { get "a"(){} }
+       │               ^^^
+    28 │ class C { set ["a"](x){} }
+    29 │ class C { set "a"(x){} }
+  
+  i Suggested fix: Use a literal key instead.
+  
+    27 │ class·C·{·get·"a"(){}·}
+       │               - -      
+
+```
+
+```
+invalid.js:28:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    26 │ class C { get ["a"](){} }
+    27 │ class C { get "a"(){} }
+  > 28 │ class C { set ["a"](x){} }
+       │                ^^^
+    29 │ class C { set "a"(x){} }
+    30 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+    28 │ class·C·{·set·["a"](x){}·}
+       │               -- --       
+
+```
+
+```
+invalid.js:29:15 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    27 │ class C { get "a"(){} }
+    28 │ class C { set ["a"](x){} }
+  > 29 │ class C { set "a"(x){} }
+       │               ^^^
+    30 │ a = {
+    31 │ 	["1+1"]: 2
+  
+  i Suggested fix: Use a literal key instead.
+  
+    29 │ class·C·{·set·"a"(x){}·}
+       │               - -       
+
+```
+
+```
+invalid.js:31:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    29 │ class C { set "a"(x){} }
+    30 │ a = {
+  > 31 │ 	["1+1"]: 2
+       │ 	 ^^^^^
+    32 │ }
+    33 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+    31 │ → ["1+1"]:·2
+       │   -     -   
+
+```
+
+```
+invalid.js:34:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    32 │ }
+    33 │ a = {
+  > 34 │ 	[`1+1`]: 2
+       │ 	 ^^^^^
+    35 │ }
+    36 │ a = {
+  
+  i Suggested fix: Use a literal key instead.
+  
+    32 32 │   }
+    33 33 │   a = {
+    34    │ - → [`1+1`]:·2
+       34 │ + → "1+1":·2
+    35 35 │   }
+    36 36 │   a = {
+  
+
+```
+
+```
+invalid.js:37:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    35 │ }
+    36 │ a = {
+  > 37 │ 	[""]: 2
+       │ 	 ^^
+    38 │ }
+    39 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    37 │ → [""]:·2
+       │   -  -   
+
+```
+
+```
+invalid.js:41:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │     ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │    -- --                    
+
+```
+
+```
+invalid.js:41:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │            ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │           -- --             
+
+```
+
+```
+invalid.js:41:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    40 │ // optional chain
+  > 41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │                         ^^^
+    42 │ 
+  
+  i Suggested fix: Use a literal key instead.
+  
+    41 │ a?.["b"]?.['c']?.d?.e?.["f"]
+       │                        -- --
+
+```
+
+

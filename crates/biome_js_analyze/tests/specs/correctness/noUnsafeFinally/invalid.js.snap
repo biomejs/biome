@@ -1,0 +1,290 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+{ var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
+{ var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+{ var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+{ var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+{ var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+{ var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+{ var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+{ var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+{ var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+{ var foo = function() { while (true) try {} finally { break; } } }
+{ var foo = function() { while (true) try {} finally { continue; } } }
+{ var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+{ var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+{ var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
+{ var foo = function() { a: switch (true) { case true: try {} finally { switch (true) { case true: break a; } } } } }
+```
+
+# Diagnostics
+```
+invalid.js:1:79 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+  > 1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
+      │                                                                               ^^^^^^^^^
+    2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+    3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:2:88 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
+  > 2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+      │                                                                                        ^^^^^^^^
+    3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+    4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:2:106 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
+  > 2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+      │                                                                                                          ^^^^^^^^
+    3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+    4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:3:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
+    2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+  > 3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+      │                                                                             ^^^^^^^^
+    4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+    5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:4:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
+    3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+  > 4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+      │                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+    6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:5:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
+    4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+  > 5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+      │                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+    7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:6:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'throw'.
+  
+    4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
+    5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+  > 6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+      │                                                                             ^^^^^^^^^^^^^^^^^
+    7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+    8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+  
+  i 'throw' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:7:76 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'return'.
+  
+    5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
+    6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+  > 7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+      │                                                                            ^^^^^^^
+    8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+    9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+  
+  i 'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:8:61 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+     6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
+     7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+   > 8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+       │                                                             ^^^^^^^^^^^^
+     9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+    10 │ { var foo = function() { while (true) try {} finally { break; } } }
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:9:82 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+     7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
+     8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+   > 9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+       │                                                                                  ^^^^^^^^
+    10 │ { var foo = function() { while (true) try {} finally { break; } } }
+    11 │ { var foo = function() { while (true) try {} finally { continue; } } }
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:10:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+     8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
+     9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+  > 10 │ { var foo = function() { while (true) try {} finally { break; } } }
+       │                                                        ^^^^^^
+    11 │ { var foo = function() { while (true) try {} finally { continue; } } }
+    12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:11:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'continue'.
+  
+     9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
+    10 │ { var foo = function() { while (true) try {} finally { break; } } }
+  > 11 │ { var foo = function() { while (true) try {} finally { continue; } } }
+       │                                                        ^^^^^^^^^
+    12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+    13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+  
+  i 'continue' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:12:70 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+    10 │ { var foo = function() { while (true) try {} finally { break; } } }
+    11 │ { var foo = function() { while (true) try {} finally { continue; } } }
+  > 12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+       │                                                                      ^^^^^^
+    13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+    14 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:13:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+    11 │ { var foo = function() { while (true) try {} finally { continue; } } }
+    12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+  > 13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+       │                                                                                      ^^^^^^^^
+    14 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
+    15 │ { var foo = function() { a: switch (true) { case true: try {} finally { switch (true) { case true: break a; } } } } }
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:14:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'continue'.
+  
+    12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
+    13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+  > 14 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
+       │                                                                                      ^^^^^^^^^
+    15 │ { var foo = function() { a: switch (true) { case true: try {} finally { switch (true) { case true: break a; } } } } }
+  
+  i 'continue' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+```
+invalid.js:15:100 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of 'break'.
+  
+    13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
+    14 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
+  > 15 │ { var foo = function() { a: switch (true) { case true: try {} finally { switch (true) { case true: break a; } } } } }
+       │                                                                                                    ^^^^^^^^
+  
+  i 'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.
+  
+
+```
+
+

@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```js
+var a = <span role="checkbox" aria-checked={checked} ></span>;
+var a = <span role="checkbox" aria-checked="true" ></span>;
+var a = <span role="checkbox" aria-checked={true} ></span>;
+var a = <span role="checkbox" aria-checked="false" ></span>;
+var a = <span role="checkbox" aria-checked="mixed" ></span>;
+var a = <span role="checkbox" aria-autocomplete="both" ></span>;
+var a = <span role="checkbox" aria-autocomplete="inline" ></span>;
+var a = <span role="checkbox" aria-autocomplete="list" ></span>;
+var a = <span role="checkbox" aria-autocomplete="none" ></span>;
+var a = <span aria-invalid="true"></span>;
+var a = <span aria-invalid="grammar"></span>;
+var a = <span aria-invalid="false"></span>;
+var a = <span aria-invalid={false}></span>;
+var a = <span role="checkbox" aria-errormessage="someid" ></span>;
+var a = <span role="checkbox" aria-relevant="additions" ></span>;
+var a = <span role="checkbox" aria-relevant="additions all" ></span>;
+var a = <span aria-labelledby="id" ></span>;
+var a = <span aria-labelledby="fooId barId" ></span>;
+var a = <span aria-details="someid" ></span>;
+
+```
+
+

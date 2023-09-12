@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+console.log("something")
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/suspicious/noConsoleLog ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.log
+  
+  > 1 │ console.log("something")
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i console.log is usually a tool for debugging and you don't want to have that in production.
+  
+
+```
+
+

@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeMethod.ts
+---
+# Input
+```js
+export interface X {
+    METHOD(): unknown
+
+    AMethod(): unknown
+
+    method_1(): unknown
+
+    Unknown_Style(): unknown
+}
+```
+
+# Diagnostics
+```
+invalidTypeMethod.ts:2:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This method name should be in camelCase.
+  
+    1 │ export interface X {
+  > 2 │     METHOD(): unknown
+      │     ^^^^^^
+    3 │ 
+    4 │     AMethod(): unknown
+  
+  i The name could be renamed to `method`.
+  
+
+```
+
+```
+invalidTypeMethod.ts:4:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This method name should be in camelCase.
+  
+    2 │     METHOD(): unknown
+    3 │ 
+  > 4 │     AMethod(): unknown
+      │     ^^^^^^^
+    5 │ 
+    6 │     method_1(): unknown
+  
+  i The name could be renamed to `aMethod`.
+  
+
+```
+
+```
+invalidTypeMethod.ts:6:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This method name should be in camelCase.
+  
+    4 │     AMethod(): unknown
+    5 │ 
+  > 6 │     method_1(): unknown
+      │     ^^^^^^^^
+    7 │ 
+    8 │     Unknown_Style(): unknown
+  
+  i The name could be renamed to `method1`.
+  
+
+```
+
+```
+invalidTypeMethod.ts:8:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This method name should be in camelCase.
+  
+    6 │     method_1(): unknown
+    7 │ 
+  > 8 │     Unknown_Style(): unknown
+      │     ^^^^^^^^^^^^^
+    9 │ }
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+

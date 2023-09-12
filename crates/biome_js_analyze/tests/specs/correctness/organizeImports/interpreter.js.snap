@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: interpreter.js
+---
+# Input
+```js
+#!/usr/bin/env node
+import d from 'd';
+import c from 'c';
+
+import b from 'b';
+import a from 'a';
+
+```
+
+# Actions
+```diff
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env node
++import c from 'c';
+ import d from 'd';
+-import c from 'c';
+ 
++import a from 'a';
+ import b from 'b';
+-import a from 'a';
+
+```
+
+

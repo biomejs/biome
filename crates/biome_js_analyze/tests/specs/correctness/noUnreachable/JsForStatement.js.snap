@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsForStatement.js
+---
+# Input
+```js
+function JsForStatement1() {
+    for (let i = 0; i < 10; ++i) {
+        break;
+    }
+}
+
+function JsForStatement2() {
+    for (;;) {}
+    afterLoop();
+}
+
+```
+
+# Diagnostics
+```
+JsForStatement.js:2:29 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    1 │ function JsForStatement1() {
+  > 2 │     for (let i = 0; i < 10; ++i) {
+      │                             ^^^
+    3 │         break;
+    4 │     }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    1 │ function JsForStatement1() {
+    2 │     for (let i = 0; i < 10; ++i) {
+  > 3 │         break;
+      │         ^^^^^^
+    4 │     }
+    5 │ }
+  
+
+```
+
+```
+JsForStatement.js:9:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code is unreachable
+  
+     7 │ function JsForStatement2() {
+     8 │     for (;;) {}
+   > 9 │     afterLoop();
+       │     ^^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+
+```
+
+

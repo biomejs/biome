@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withJsxElementInvalid.jsx
+---
+# Input
+```js
+<><Component /></>
+```
+
+# Diagnostics
+```
+withJsxElementInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+  > 1 │ <><Component /></>
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove the Fragment
+  
+    1 │ <><Component·/></>
+      │  --          ---  
+
+```
+
+

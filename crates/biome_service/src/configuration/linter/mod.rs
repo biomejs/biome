@@ -7,8 +7,8 @@ use crate::settings::LinterSettings;
 use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Severity;
+use biome_js_analyze::options::{possible_options, PossibleOptions};
 use bpaf::Bpaf;
-use rome_js_analyze::options::{possible_options, PossibleOptions};
 pub use rules::*;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;

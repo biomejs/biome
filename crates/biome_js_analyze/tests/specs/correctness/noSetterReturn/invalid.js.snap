@@ -1,0 +1,874 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+class Basic {
+	set foo(x) {
+		return x;
+	}
+}
+
+const BasicObject = {
+	set foo(x) {
+		return x;
+	},
+};
+
+class BlockReturn {
+	set foo(x) {
+		{
+			return x;
+		}
+	}
+}
+
+class DoWhile {
+	set foo(x) {
+		do {
+			return x;
+		} while (true)
+	}
+}
+
+class Else {
+	set foo(x) {
+		if (x) {
+		} else {
+			return x;
+		}
+	}
+}
+
+class ElseIf {
+	set foo(x) {
+		if (x) {
+		} else if (x) {
+			return x;
+		}
+	}
+}
+
+class If {
+	set foo(x) {
+		if (x) {
+			return x;
+		}
+	}
+}
+
+class Labelled {
+	set foo(x) {
+		label: return x
+	}
+}
+
+class ForOfBlock {
+	set foo(xs) {
+		for (x of xs) {
+			return x;
+		}
+	}
+}
+
+class ForOfSingleStatement {
+	set foo(xs) {
+		for (x of xs) return x;
+	}
+}
+
+class ForInBlock {
+	set foo(xs) {
+		for (x in xs) {
+			return x;
+		}
+	}
+}
+
+class ForInSingleStatement {
+	set foo(xs) {
+		for (x in xs) return x;
+	}
+}
+
+class ForBlock {
+	set foo(x) {
+		for (;;) {
+			return x;
+		}
+	}
+}
+
+class ForSingleStatement {
+	set foo(x) {
+		for (;;) return x;
+	}
+}
+
+class SwitchCaseReturn {
+	set foo(x) {
+		switch (x) {
+			case 1:
+				return x;
+			default:
+				break;
+		}
+	}
+}
+
+class SwitchDefaultReturn {
+	set foo(x) {
+		switch (x) {
+			case 1:
+				break;
+			default:
+				return x;
+		}
+	}
+}
+
+class TryReturnCatch {
+	set foo(x) {
+		try {
+			return x;
+		} catch {}
+	}
+}
+
+class TryCatchReturn {
+	set foo(x) {
+		try {
+		} catch {
+			return x;
+		}
+	}
+}
+
+class TryReturnCatchFinally {
+	set foo(x) {
+		try {
+			return x;
+		} catch {
+		} finally {
+		}
+	}
+}
+
+class TryCatchReturnFinally {
+	set foo(x) {
+		try {
+		} catch {
+			return x;
+		} finally {
+		}
+	}
+}
+
+class TryCatchFinallyReturn {
+	set foo(x) {
+		try {
+		} catch {
+		} finally {
+			return x;
+		}
+	}
+}
+
+class WhileBlock {
+	set foo(x) {
+		while (true) {
+			return x;
+		}
+	}
+}
+
+class WhileSingleStatement {
+	set foo(x) {
+		while (true) return x;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    1 │ class Basic {
+    2 │ 	set foo(x) {
+  > 3 │ 		return x;
+      │ 		^^^^^^^^^
+    4 │ 	}
+    5 │ }
+  
+  i The setter is here:
+  
+    1 │ class Basic {
+  > 2 │ 	set foo(x) {
+      │ 	^^^^^^^^^^^^
+  > 3 │ 		return x;
+  > 4 │ 	}
+      │ 	^
+    5 │ }
+    6 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:9:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+     7 │ const BasicObject = {
+     8 │ 	set foo(x) {
+   > 9 │ 		return x;
+       │ 		^^^^^^^^^
+    10 │ 	},
+    11 │ };
+  
+  i The setter is here:
+  
+     7 │ const BasicObject = {
+   > 8 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+   > 9 │ 		return x;
+  > 10 │ 	},
+       │ 	^
+    11 │ };
+    12 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:16:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    14 │ 	set foo(x) {
+    15 │ 		{
+  > 16 │ 			return x;
+       │ 			^^^^^^^^^
+    17 │ 		}
+    18 │ 	}
+  
+  i The setter is here:
+  
+    13 │ class BlockReturn {
+  > 14 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 15 │ 		{
+  > 16 │ 			return x;
+  > 17 │ 		}
+  > 18 │ 	}
+       │ 	^
+    19 │ }
+    20 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:24:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    22 │ 	set foo(x) {
+    23 │ 		do {
+  > 24 │ 			return x;
+       │ 			^^^^^^^^^
+    25 │ 		} while (true)
+    26 │ 	}
+  
+  i The setter is here:
+  
+    21 │ class DoWhile {
+  > 22 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 23 │ 		do {
+  > 24 │ 			return x;
+  > 25 │ 		} while (true)
+  > 26 │ 	}
+       │ 	^
+    27 │ }
+    28 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:33:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    31 │ 		if (x) {
+    32 │ 		} else {
+  > 33 │ 			return x;
+       │ 			^^^^^^^^^
+    34 │ 		}
+    35 │ 	}
+  
+  i The setter is here:
+  
+    29 │ class Else {
+  > 30 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 31 │ 		if (x) {
+  > 32 │ 		} else {
+  > 33 │ 			return x;
+  > 34 │ 		}
+  > 35 │ 	}
+       │ 	^
+    36 │ }
+    37 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:42:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    40 │ 		if (x) {
+    41 │ 		} else if (x) {
+  > 42 │ 			return x;
+       │ 			^^^^^^^^^
+    43 │ 		}
+    44 │ 	}
+  
+  i The setter is here:
+  
+    38 │ class ElseIf {
+  > 39 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 40 │ 		if (x) {
+  > 41 │ 		} else if (x) {
+  > 42 │ 			return x;
+  > 43 │ 		}
+  > 44 │ 	}
+       │ 	^
+    45 │ }
+    46 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:50:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    48 │ 	set foo(x) {
+    49 │ 		if (x) {
+  > 50 │ 			return x;
+       │ 			^^^^^^^^^
+    51 │ 		}
+    52 │ 	}
+  
+  i The setter is here:
+  
+    47 │ class If {
+  > 48 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 49 │ 		if (x) {
+  > 50 │ 			return x;
+  > 51 │ 		}
+  > 52 │ 	}
+       │ 	^
+    53 │ }
+    54 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:57:10 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    55 │ class Labelled {
+    56 │ 	set foo(x) {
+  > 57 │ 		label: return x
+       │ 		       ^^^^^^^^
+    58 │ 	}
+    59 │ }
+  
+  i The setter is here:
+  
+    55 │ class Labelled {
+  > 56 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 57 │ 		label: return x
+  > 58 │ 	}
+       │ 	^
+    59 │ }
+    60 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:64:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    62 │ 	set foo(xs) {
+    63 │ 		for (x of xs) {
+  > 64 │ 			return x;
+       │ 			^^^^^^^^^
+    65 │ 		}
+    66 │ 	}
+  
+  i The setter is here:
+  
+    61 │ class ForOfBlock {
+  > 62 │ 	set foo(xs) {
+       │ 	^^^^^^^^^^^^^
+  > 63 │ 		for (x of xs) {
+  > 64 │ 			return x;
+  > 65 │ 		}
+  > 66 │ 	}
+       │ 	^
+    67 │ }
+    68 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:71:17 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    69 │ class ForOfSingleStatement {
+    70 │ 	set foo(xs) {
+  > 71 │ 		for (x of xs) return x;
+       │ 		              ^^^^^^^^^
+    72 │ 	}
+    73 │ }
+  
+  i The setter is here:
+  
+    69 │ class ForOfSingleStatement {
+  > 70 │ 	set foo(xs) {
+       │ 	^^^^^^^^^^^^^
+  > 71 │ 		for (x of xs) return x;
+  > 72 │ 	}
+       │ 	^
+    73 │ }
+    74 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:78:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    76 │ 	set foo(xs) {
+    77 │ 		for (x in xs) {
+  > 78 │ 			return x;
+       │ 			^^^^^^^^^
+    79 │ 		}
+    80 │ 	}
+  
+  i The setter is here:
+  
+    75 │ class ForInBlock {
+  > 76 │ 	set foo(xs) {
+       │ 	^^^^^^^^^^^^^
+  > 77 │ 		for (x in xs) {
+  > 78 │ 			return x;
+  > 79 │ 		}
+  > 80 │ 	}
+       │ 	^
+    81 │ }
+    82 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:85:17 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    83 │ class ForInSingleStatement {
+    84 │ 	set foo(xs) {
+  > 85 │ 		for (x in xs) return x;
+       │ 		              ^^^^^^^^^
+    86 │ 	}
+    87 │ }
+  
+  i The setter is here:
+  
+    83 │ class ForInSingleStatement {
+  > 84 │ 	set foo(xs) {
+       │ 	^^^^^^^^^^^^^
+  > 85 │ 		for (x in xs) return x;
+  > 86 │ 	}
+       │ 	^
+    87 │ }
+    88 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:92:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    90 │ 	set foo(x) {
+    91 │ 		for (;;) {
+  > 92 │ 			return x;
+       │ 			^^^^^^^^^
+    93 │ 		}
+    94 │ 	}
+  
+  i The setter is here:
+  
+    89 │ class ForBlock {
+  > 90 │ 	set foo(x) {
+       │ 	^^^^^^^^^^^^
+  > 91 │ 		for (;;) {
+  > 92 │ 			return x;
+  > 93 │ 		}
+  > 94 │ 	}
+       │ 	^
+    95 │ }
+    96 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:99:12 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+     97 │ class ForSingleStatement {
+     98 │ 	set foo(x) {
+   > 99 │ 		for (;;) return x;
+        │ 		         ^^^^^^^^^
+    100 │ 	}
+    101 │ }
+  
+  i The setter is here:
+  
+     97 │ class ForSingleStatement {
+   > 98 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+   > 99 │ 		for (;;) return x;
+  > 100 │ 	}
+        │ 	^
+    101 │ }
+    102 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:107:5 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    105 │ 		switch (x) {
+    106 │ 			case 1:
+  > 107 │ 				return x;
+        │ 				^^^^^^^^^
+    108 │ 			default:
+    109 │ 				break;
+  
+  i The setter is here:
+  
+    103 │ class SwitchCaseReturn {
+  > 104 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 105 │ 		switch (x) {
+         ...
+  > 110 │ 		}
+  > 111 │ 	}
+        │ 	^
+    112 │ }
+    113 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:120:5 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    118 │ 				break;
+    119 │ 			default:
+  > 120 │ 				return x;
+        │ 				^^^^^^^^^
+    121 │ 		}
+    122 │ 	}
+  
+  i The setter is here:
+  
+    114 │ class SwitchDefaultReturn {
+  > 115 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 116 │ 		switch (x) {
+         ...
+  > 121 │ 		}
+  > 122 │ 	}
+        │ 	^
+    123 │ }
+    124 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:128:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    126 │ 	set foo(x) {
+    127 │ 		try {
+  > 128 │ 			return x;
+        │ 			^^^^^^^^^
+    129 │ 		} catch {}
+    130 │ 	}
+  
+  i The setter is here:
+  
+    125 │ class TryReturnCatch {
+  > 126 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 127 │ 		try {
+  > 128 │ 			return x;
+  > 129 │ 		} catch {}
+  > 130 │ 	}
+        │ 	^
+    131 │ }
+    132 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:137:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    135 │ 		try {
+    136 │ 		} catch {
+  > 137 │ 			return x;
+        │ 			^^^^^^^^^
+    138 │ 		}
+    139 │ 	}
+  
+  i The setter is here:
+  
+    133 │ class TryCatchReturn {
+  > 134 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 135 │ 		try {
+  > 136 │ 		} catch {
+  > 137 │ 			return x;
+  > 138 │ 		}
+  > 139 │ 	}
+        │ 	^
+    140 │ }
+    141 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:145:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    143 │ 	set foo(x) {
+    144 │ 		try {
+  > 145 │ 			return x;
+        │ 			^^^^^^^^^
+    146 │ 		} catch {
+    147 │ 		} finally {
+  
+  i The setter is here:
+  
+    142 │ class TryReturnCatchFinally {
+  > 143 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 144 │ 		try {
+         ...
+  > 148 │ 		}
+  > 149 │ 	}
+        │ 	^
+    150 │ }
+    151 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:156:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    154 │ 		try {
+    155 │ 		} catch {
+  > 156 │ 			return x;
+        │ 			^^^^^^^^^
+    157 │ 		} finally {
+    158 │ 		}
+  
+  i The setter is here:
+  
+    152 │ class TryCatchReturnFinally {
+  > 153 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 154 │ 		try {
+         ...
+  > 158 │ 		}
+  > 159 │ 	}
+        │ 	^
+    160 │ }
+    161 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:167:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    165 │ 		} catch {
+    166 │ 		} finally {
+  > 167 │ 			return x;
+        │ 			^^^^^^^^^
+    168 │ 		}
+    169 │ 	}
+  
+  i The setter is here:
+  
+    162 │ class TryCatchFinallyReturn {
+  > 163 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 164 │ 		try {
+         ...
+  > 168 │ 		}
+  > 169 │ 	}
+        │ 	^
+    170 │ }
+    171 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:175:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    173 │ 	set foo(x) {
+    174 │ 		while (true) {
+  > 175 │ 			return x;
+        │ 			^^^^^^^^^
+    176 │ 		}
+    177 │ 	}
+  
+  i The setter is here:
+  
+    172 │ class WhileBlock {
+  > 173 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 174 │ 		while (true) {
+  > 175 │ 			return x;
+  > 176 │ 		}
+  > 177 │ 	}
+        │ 	^
+    178 │ }
+    179 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:182:16 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The setter should not return a value.
+  
+    180 │ class WhileSingleStatement {
+    181 │ 	set foo(x) {
+  > 182 │ 		while (true) return x;
+        │ 		             ^^^^^^^^^
+    183 │ 	}
+    184 │ }
+  
+  i The setter is here:
+  
+    180 │ class WhileSingleStatement {
+  > 181 │ 	set foo(x) {
+        │ 	^^^^^^^^^^^^
+  > 182 │ 		while (true) return x;
+  > 183 │ 	}
+        │ 	^
+    184 │ }
+    185 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+

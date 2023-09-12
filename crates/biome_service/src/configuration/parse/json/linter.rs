@@ -4,9 +4,9 @@ use crate::{RuleConfiguration, Rules};
 use biome_console::markup;
 use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
+use biome_js_analyze::options::PossibleOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue, JsonSyntaxNode};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode};
-use rome_js_analyze::options::PossibleOptions;
 
 impl VisitJsonNode for LinterConfiguration {}
 

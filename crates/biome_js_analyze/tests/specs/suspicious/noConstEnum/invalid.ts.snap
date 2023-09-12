@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+/**
+ * Doc
+ */
+const enum /* enum */ Port {
+	In,
+	Out,
+}
+
+export /* const */ const /* enum */ enum Status {
+	Open,
+	Close,
+}
+
+export enum Direction {
+	Prev,
+	Next,
+}
+```
+
+# Diagnostics
+```
+invalid.ts:4:1 lint/suspicious/noConstEnum  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The enum declaration should not be const
+  
+    2 │  * Doc
+    3 │  */
+  > 4 │ const enum /* enum */ Port {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │ 	In,
+  > 6 │ 	Out,
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ export /* const */ const /* enum */ enum Status {
+  
+  i Const enums are not supported by bundlers and are incompatible with the 'isolatedModules' mode. Their use can lead to import inexistent values.
+  
+  i See TypeScript Docs for more details.
+  
+  i Safe fix: Turn the const enum into a regular enum.
+  
+    4 │ const·enum·/*·enum·*/·Port·{
+      │ ------                      
+
+```
+
+```
+invalid.ts:9:20 lint/suspicious/noConstEnum  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The enum declaration should not be const
+  
+     7 │ }
+     8 │ 
+   > 9 │ export /* const */ const /* enum */ enum Status {
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │ 	Open,
+  > 11 │ 	Close,
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ export enum Direction {
+  
+  i Const enums are not supported by bundlers and are incompatible with the 'isolatedModules' mode. Their use can lead to import inexistent values.
+  
+  i See TypeScript Docs for more details.
+  
+  i Safe fix: Turn the const enum into a regular enum.
+  
+    9 │ export·/*·const·*/·const·/*·enum·*/·enum·Status·{
+      │                    ------                        
+
+```
+
+

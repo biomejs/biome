@@ -8,7 +8,7 @@ static check.
 
 First, you need to identify the crate where you want to implement the rule.
 If the rule is going to be implemented for the JavaScript language (and its super languages),
-then the rule will be implemented inside the `rome_js_analyze` crate.
+then the rule will be implemented inside the `biome_js_analyze` crate.
 
 Rules are divided by capabilities:
 
@@ -77,7 +77,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 1. Run the command
 
    ```shell
-   just new-lintrule crates/rome_js_analyze/src/semantic_analyzers/nursery myRuleName
+   just new-lintrule crates/biome_js_analyze/src/semantic_analyzers/nursery myRuleName
    ```
 
    Rules go in different folders, and the folder depend on the type of query system your rule
@@ -289,7 +289,7 @@ Stage and commit your changes:
 
 ```shell
 > git add -A
-> git commit -m 'feat(rome_js_analyze): myRuleName'
+> git commit -m 'feat(biome_js_analyze): myRuleName'
 ```
 
 To test if everything is ready, run the following command:

@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: booleanOperators.js
+---
+# Input
+```js
+function booleanOperators() {
+    if (a                                     // +1 for `if`
+        && b && c                             // +1
+        || d || e                             // +1
+        && f) {                               // +1
+        return true;
+    }
+}
+
+```
+
+# Diagnostics
+```
+booleanOperators.js:1:10 lint/nursery/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Excessive complexity detected.
+  
+  > 1 │ function booleanOperators() {
+      │          ^^^^^^^^^^^^^^^^
+    2 │     if (a                                     // +1 for `if`
+    3 │         && b && c                             // +1
+  
+  i Please refactor this function to reduce its complexity score from 4 to the max allowed complexity 3.
+  
+
+```
+
+

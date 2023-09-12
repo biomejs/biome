@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+s.toUpperCase() === 'ABC';
+```
+
+# Input
+```js
+s.toLowerCase() === 'abc';
+```
+
+# Input
+```js
+s.toUpperCase() === '20';
+```
+
+# Input
+```js
+s.toLowerCase() === '20';
+```
+
+# Input
+```js
+s.toLowerCase() === `eFg${12}`;
+```
+
+# Input
+```js
+s.toLowerCase() == `eFg${12}`;
+```
+
+

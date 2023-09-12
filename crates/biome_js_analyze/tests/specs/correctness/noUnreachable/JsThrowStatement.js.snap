@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsThrowStatement.js
+---
+# Input
+```js
+function JsThrowStatement1() {
+    throw new Error();
+    afterThrow();
+}
+
+```
+
+# Diagnostics
+```
+JsThrowStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    1 │ function JsThrowStatement1() {
+    2 │     throw new Error();
+  > 3 │     afterThrow();
+      │     ^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i ... because this statement will throw an exception beforehand
+  
+    1 │ function JsThrowStatement1() {
+  > 2 │     throw new Error();
+      │     ^^^^^^^^^^^^^^^^^^
+    3 │     afterThrow();
+    4 │ }
+  
+
+```
+
+

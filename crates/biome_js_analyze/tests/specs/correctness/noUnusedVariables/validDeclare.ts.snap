@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validDeclare.ts
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+declare function a(a);
+declare const b = 1;
+```
+
+

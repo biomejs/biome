@@ -1,0 +1,135 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsVariableStatement.js
+---
+# Input
+```js
+function JsVariableStatement1() {
+    return;
+    var variable;
+}
+
+function JsVariableStatement2() {
+    return;
+    var variable = initializer();
+}
+
+function JsVariableStatement3() {
+    return;
+    let variable;
+}
+
+function JsVariableStatement4() {
+    return;
+    let variable = initializer();
+}
+
+function JsVariableStatement5() {
+    return;
+    const variable = initializer();
+}
+
+function JsVariableStatement6() {
+    return;
+    var variable1 = initializer(),
+        variable2 = initializer();
+}
+
+```
+
+# Diagnostics
+```
+JsVariableStatement.js:8:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     6 │ function JsVariableStatement2() {
+     7 │     return;
+   > 8 │     var variable = initializer();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    6 │ function JsVariableStatement2() {
+  > 7 │     return;
+      │     ^^^^^^^
+    8 │     var variable = initializer();
+    9 │ }
+  
+
+```
+
+```
+JsVariableStatement.js:18:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    16 │ function JsVariableStatement4() {
+    17 │     return;
+  > 18 │     let variable = initializer();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    16 │ function JsVariableStatement4() {
+  > 17 │     return;
+       │     ^^^^^^^
+    18 │     let variable = initializer();
+    19 │ }
+  
+
+```
+
+```
+JsVariableStatement.js:23:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    21 │ function JsVariableStatement5() {
+    22 │     return;
+  > 23 │     const variable = initializer();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    21 │ function JsVariableStatement5() {
+  > 22 │     return;
+       │     ^^^^^^^
+    23 │     const variable = initializer();
+    24 │ }
+  
+
+```
+
+```
+JsVariableStatement.js:28:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    26 │ function JsVariableStatement6() {
+    27 │     return;
+  > 28 │     var variable1 = initializer(),
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │         variable2 = initializer();
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    26 │ function JsVariableStatement6() {
+  > 27 │     return;
+       │     ^^^^^^^
+    28 │     var variable1 = initializer(),
+    29 │         variable2 = initializer();
+  
+
+```
+
+

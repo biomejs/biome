@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validObjectGetter.js
+---
+# Input
+```js
+export default {
+    get p() {},
+
+    get property() {},
+
+    get specialProperty() {},
+
+    get stream$() {},
+
+    get $stream() {},
+
+    get _special_() {},
+
+    get "custom-property"() {},
+
+    get "@"() {},
+}
+```
+
+

@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.ts
+---
+# Input
+```js
+module foo {}
+declare module foo {}
+
+namespace foo {}
+declare namespace foo {}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/style/noNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! TypeScript's namespaces are an oudated way to organize code.
+  
+  > 1 │ module foo {}
+      │ ^^^^^^^^^^^^^
+    2 │ declare module foo {}
+    3 │ 
+  
+  i Prefer the ES6 modules (import/export) over namespaces.
+  
+
+```
+
+```
+invalid.ts:2:9 lint/style/noNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! TypeScript's namespaces are an oudated way to organize code.
+  
+    1 │ module foo {}
+  > 2 │ declare module foo {}
+      │         ^^^^^^^^^^^^^
+    3 │ 
+    4 │ namespace foo {}
+  
+  i Prefer the ES6 modules (import/export) over namespaces.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/style/noNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! TypeScript's namespaces are an oudated way to organize code.
+  
+    2 │ declare module foo {}
+    3 │ 
+  > 4 │ namespace foo {}
+      │ ^^^^^^^^^^^^^^^^
+    5 │ declare namespace foo {}
+    6 │ 
+  
+  i Prefer the ES6 modules (import/export) over namespaces.
+  
+
+```
+
+```
+invalid.ts:5:9 lint/style/noNamespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! TypeScript's namespaces are an oudated way to organize code.
+  
+    4 │ namespace foo {}
+  > 5 │ declare namespace foo {}
+      │         ^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Prefer the ES6 modules (import/export) over namespaces.
+  
+
+```
+
+

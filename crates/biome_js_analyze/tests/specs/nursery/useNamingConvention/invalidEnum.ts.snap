@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEnum.ts
+---
+# Input
+```js
+enum specialStatus {}
+
+enum special_status {}
+
+enum SPECIAL_STATUS {}
+```
+
+# Diagnostics
+```
+invalidEnum.ts:1:6 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum name should be in PascalCase.
+  
+  > 1 │ enum specialStatus {}
+      │      ^^^^^^^^^^^^^
+    2 │ 
+    3 │ enum special_status {}
+  
+  i The name could be renamed to `SpecialStatus`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    1   │ - enum·specialStatus·{}
+      1 │ + enum·SpecialStatus·{}
+    2 2 │   
+    3 3 │   enum special_status {}
+  
+
+```
+
+```
+invalidEnum.ts:3:6 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum name should be in PascalCase.
+  
+    1 │ enum specialStatus {}
+    2 │ 
+  > 3 │ enum special_status {}
+      │      ^^^^^^^^^^^^^^
+    4 │ 
+    5 │ enum SPECIAL_STATUS {}
+  
+  i The name could be renamed to `SpecialStatus`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    1 1 │   enum specialStatus {}
+    2 2 │   
+    3   │ - enum·special_status·{}
+      3 │ + enum·SpecialStatus·{}
+    4 4 │   
+    5 5 │   enum SPECIAL_STATUS {}
+  
+
+```
+
+```
+invalidEnum.ts:5:6 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum name should be in PascalCase.
+  
+    3 │ enum special_status {}
+    4 │ 
+  > 5 │ enum SPECIAL_STATUS {}
+      │      ^^^^^^^^^^^^^^
+  
+  i The name could be renamed to `SpecialStatus`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    3 3 │   enum special_status {}
+    4 4 │   
+    5   │ - enum·SPECIAL_STATUS·{}
+      5 │ + enum·SpecialStatus·{}
+  
+
+```
+
+

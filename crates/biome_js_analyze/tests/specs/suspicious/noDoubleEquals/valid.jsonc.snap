@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+const isNull = a == null;
+```
+
+# Input
+```js
+const isNonNull = a != null;
+```
+
+

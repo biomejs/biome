@@ -1,0 +1,230 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.js
+---
+# Input
+```js
+function* foo() {
+	return 0;
+}
+
+(function* foo() {
+	return 0;
+})();
+
+const obj = {
+	*foo() {
+		return 0;
+	},
+};
+
+class A {
+	*foo() {
+		return 0;
+	}
+}
+
+function* foo() {
+	function* bar() {
+		yield 0;
+	}
+}
+
+function* foo() {
+	function* bar() {
+		return 0;
+	}
+	yield 0;
+}
+
+function* foo() {
+	function* bar() {
+		yield 0;
+	}
+	return 0;
+}
+
+function* foo() {
+	const obj = {
+		*bar() {
+			return 0;
+		},
+	};
+
+	class A {
+		*baz() {
+			return 0;
+		}
+	}
+
+	if (a === 'a') {
+		yield 0;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+  > 1 │ function* foo() {
+      │ ^^^^^^^^^^^^^^^^^
+  > 2 │ 	return 0;
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ (function* foo() {
+  
+
+```
+
+```
+invalid.js:5:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    3 │ }
+    4 │ 
+  > 5 │ (function* foo() {
+      │  ^^^^^^^^^^^^^^^^^
+  > 6 │ 	return 0;
+  > 7 │ })();
+      │ ^
+    8 │ 
+    9 │ const obj = {
+  
+
+```
+
+```
+invalid.js:10:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+     9 │ const obj = {
+  > 10 │ 	*foo() {
+       │ 	^^^^^^^^
+  > 11 │ 		return 0;
+  > 12 │ 	},
+       │ 	^
+    13 │ };
+    14 │ 
+  
+
+```
+
+```
+invalid.js:16:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    15 │ class A {
+  > 16 │ 	*foo() {
+       │ 	^^^^^^^^
+  > 17 │ 		return 0;
+  > 18 │ 	}
+       │ 	^
+    19 │ }
+    20 │ 
+  
+
+```
+
+```
+invalid.js:21:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    19 │ }
+    20 │ 
+  > 21 │ function* foo() {
+       │ ^^^^^^^^^^^^^^^^^
+  > 22 │ 	function* bar() {
+  > 23 │ 		yield 0;
+  > 24 │ 	}
+  > 25 │ }
+       │ ^
+    26 │ 
+    27 │ function* foo() {
+  
+
+```
+
+```
+invalid.js:28:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    27 │ function* foo() {
+  > 28 │ 	function* bar() {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 29 │ 		return 0;
+  > 30 │ 	}
+       │ 	^
+    31 │ 	yield 0;
+    32 │ }
+  
+
+```
+
+```
+invalid.js:34:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    32 │ }
+    33 │ 
+  > 34 │ function* foo() {
+       │ ^^^^^^^^^^^^^^^^^
+  > 35 │ 	function* bar() {
+  > 36 │ 		yield 0;
+  > 37 │ 	}
+  > 38 │ 	return 0;
+  > 39 │ }
+       │ ^
+    40 │ 
+    41 │ function* foo() {
+  
+
+```
+
+```
+invalid.js:43:3 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    41 │ function* foo() {
+    42 │ 	const obj = {
+  > 43 │ 		*bar() {
+       │ 		^^^^^^^^
+  > 44 │ 			return 0;
+  > 45 │ 		},
+       │ 		^
+    46 │ 	};
+    47 │ 
+  
+
+```
+
+```
+invalid.js:49:3 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This generator function doesn't contain yield.
+  
+    48 │ 	class A {
+  > 49 │ 		*baz() {
+       │ 		^^^^^^^^
+  > 50 │ 			return 0;
+  > 51 │ 		}
+       │ 		^
+    52 │ 	}
+    53 │ 
+  
+
+```
+
+

@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: valid.ts
+---
+# Input
+```js
+declare class A { constructor(options: any) }
+
+class B {
+    constructor(private name: string) {}
+}
+
+class C {
+    constructor(public name: string) {}
+}
+
+class D {
+    constructor(protected name: string) {}
+}
+
+class E {
+    private constructor() {}
+}
+
+class F {
+    protected constructor() {}
+}
+
+class G extends B {
+    private constructor(foo, bar) {
+      super(bar);
+    }
+}
+
+```
+
+

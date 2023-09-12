@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.ts
+---
+# Input
+```js
+/*before*/module/*after*/ foo {}
+
+declare module bar {}
+
+declare module outer {
+	export module inner {}
+}
+```
+
+# Diagnostics
+```
+invalid.ts:1:11 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the namespace keyword instead of the outdated module keyword.
+  
+  > 1 │ /*before*/module/*after*/ foo {}
+      │           ^^^^^^
+    2 │ 
+    3 │ declare module bar {}
+  
+  i The module keyword is deprecated to avoid any confusion with the ECMAScript modules which are often called modules.
+  
+  i Safe fix: Use namespace instead.
+  
+    1   │ - /*before*/module/*after*/·foo·{}
+      1 │ + /*before*/namespace/*after*/·foo·{}
+    2 2 │   
+    3 3 │   declare module bar {}
+  
+
+```
+
+```
+invalid.ts:3:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the namespace keyword instead of the outdated module keyword.
+  
+    1 │ /*before*/module/*after*/ foo {}
+    2 │ 
+  > 3 │ declare module bar {}
+      │         ^^^^^^
+    4 │ 
+    5 │ declare module outer {
+  
+  i The module keyword is deprecated to avoid any confusion with the ECMAScript modules which are often called modules.
+  
+  i Safe fix: Use namespace instead.
+  
+    1 1 │   /*before*/module/*after*/ foo {}
+    2 2 │   
+    3   │ - declare·module·bar·{}
+      3 │ + declare·namespace·bar·{}
+    4 4 │   
+    5 5 │   declare module outer {
+  
+
+```
+
+```
+invalid.ts:5:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the namespace keyword instead of the outdated module keyword.
+  
+    3 │ declare module bar {}
+    4 │ 
+  > 5 │ declare module outer {
+      │         ^^^^^^
+    6 │ 	export module inner {}
+    7 │ }
+  
+  i The module keyword is deprecated to avoid any confusion with the ECMAScript modules which are often called modules.
+  
+  i Safe fix: Use namespace instead.
+  
+    3 3 │   declare module bar {}
+    4 4 │   
+    5   │ - declare·module·outer·{
+      5 │ + declare·namespace·outer·{
+    6 6 │   	export module inner {}
+    7 7 │   }
+  
+
+```
+
+```
+invalid.ts:6:9 lint/suspicious/useNamespaceKeyword  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the namespace keyword instead of the outdated module keyword.
+  
+    5 │ declare module outer {
+  > 6 │ 	export module inner {}
+      │ 	       ^^^^^^
+    7 │ }
+  
+  i The module keyword is deprecated to avoid any confusion with the ECMAScript modules which are often called modules.
+  
+  i Safe fix: Use namespace instead.
+  
+    4 4 │   
+    5 5 │   declare module outer {
+    6   │ - → export·module·inner·{}
+      6 │ + → export·namespace·inner·{}
+    7 7 │   }
+  
+
+```
+
+

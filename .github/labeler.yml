@@ -6,7 +6,7 @@ A-Cli:
   - crates/biome_console/**
 
 A-Core:
-  - crates/rome_deserializer/**
+  - crates/biome_deserializer/**
   - crates/biome_fs/**
   - crates/biome_rowan/**
   - crates/biome_text_edit/**
@@ -19,12 +19,12 @@ A-Project:
 
 A-Linter:
   - crates/biome_analyze/**
-  - crates/rome_js_analyze/**
+  - crates/biome_js_analyze/**
   - crates/biome_json_analyze/**
 
 A-Parser:
   - crates/biome_parser/**
-  - crates/rome_js_parser/**
+  - crates/biome_js_parser/**
   - crates/biome_js_syntax/**
   - crates/biome_json_parser/**
   - crates/biome_json_syntax/**
@@ -36,7 +36,7 @@ A-Formatter:
   - crates/biome_formatter_test/**
   - crates/biome_js_formatter/**
   - crates/biome_json_formatter/**
-  - crates/rome_css_formatter/**
+  - crates/biome_css_formatter/**
 
 A-Editors:
   - crates/editors/**
@@ -59,10 +59,10 @@ A-Changelog:
   - CHANGELOG.md
 
 L-Javascript:
-  - crates/rome_js_*/**
+  - crates/biome_js_*/**
 
 L-Json:
-  - crates/rome_json_*/**
+  - crates/biome_json_*/**
 
 L-CSS:
-  - crates/rome_css_*/**
+  - crates/biome_css_*/**

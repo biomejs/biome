@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validImportSource.js
+---
+# Input
+```js
+// Don't apply naming convention on the import source
+import { Unknown_Style as u } from ""
+
+import { Unknown_Style } from ""
+```
+
+

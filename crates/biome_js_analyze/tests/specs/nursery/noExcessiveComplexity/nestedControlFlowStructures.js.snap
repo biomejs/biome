@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nestedControlFlowStructures.js
+---
+# Input
+```js
+function nestedControlFlowStructures(num) {
+    try {
+        if (condition1) {                        // +1
+            for (let i = 0; i < 10; i++) {       // +2 (nesting=1)
+                while (condition2) { /* ... */}  // +3 (nesting=2)
+            }
+        }
+    } catch (error) {                            // +1
+        if (condition2) { /* ... */}             // +2 (nesting=1)
+    }
+}
+
+```
+
+# Diagnostics
+```
+nestedControlFlowStructures.js:1:10 lint/nursery/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Excessive complexity detected.
+  
+  > 1 │ function nestedControlFlowStructures(num) {
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │     try {
+    3 │         if (condition1) {                        // +1
+  
+  i Please refactor this function to reduce its complexity score from 9 to the max allowed complexity 8.
+  
+
+```
+
+

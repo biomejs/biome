@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withBindingValid.js
+---
+# Input
+```js
+import React, { createElement } from "notReact";
+
+React.createElement('button');
+React.createElement('button', {
+    "type": "bar"
+});
+
+createElement('button', {
+    "type": "bar"
+});
+```
+
+

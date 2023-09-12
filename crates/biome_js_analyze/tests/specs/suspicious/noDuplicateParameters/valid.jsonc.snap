@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+function a(a, b, c) {}
+```
+
+# Input
+```js
+var j = function (j, b, c) {};
+```
+
+# Input
+```js
+function k({ k, b }, { c, d }) {}
+```
+
+# Input
+```js
+function l([, l]) {}
+```
+
+# Input
+```js
+function foo([[a, b], [c, d]]) {}
+```
+
+# Input
+```js
+function test(a = function (a) {}) {}
+```
+
+

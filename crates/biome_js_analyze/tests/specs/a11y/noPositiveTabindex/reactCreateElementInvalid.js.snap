@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reactCreateElementInvalid.js
+---
+# Input
+```js
+React.createElement("div", { tabIndex: '1' })
+React.createElement("div", { tabIndex: 1 })
+React.createElement("div", { tabIndex: +1 })
+React.createElement("div", { tabIndex: +01 })
+
+```
+
+# Diagnostics
+```
+reactCreateElementInvalid.js:1:40 lint/a11y/noPositiveTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid positive values for the tabIndex prop.
+  
+  > 1 │ React.createElement("div", { tabIndex: '1' })
+      │                                        ^^^
+    2 │ React.createElement("div", { tabIndex: 1 })
+    3 │ React.createElement("div", { tabIndex: +1 })
+  
+  i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+
+```
+
+```
+reactCreateElementInvalid.js:2:40 lint/a11y/noPositiveTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid positive values for the tabIndex prop.
+  
+    1 │ React.createElement("div", { tabIndex: '1' })
+  > 2 │ React.createElement("div", { tabIndex: 1 })
+      │                                        ^
+    3 │ React.createElement("div", { tabIndex: +1 })
+    4 │ React.createElement("div", { tabIndex: +01 })
+  
+  i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+
+```
+
+```
+reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid positive values for the tabIndex prop.
+  
+    1 │ React.createElement("div", { tabIndex: '1' })
+    2 │ React.createElement("div", { tabIndex: 1 })
+  > 3 │ React.createElement("div", { tabIndex: +1 })
+      │                                        ^^
+    4 │ React.createElement("div", { tabIndex: +01 })
+    5 │ 
+  
+  i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+
+```
+
+```
+reactCreateElementInvalid.js:4:40 lint/a11y/noPositiveTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid positive values for the tabIndex prop.
+  
+    2 │ React.createElement("div", { tabIndex: 1 })
+    3 │ React.createElement("div", { tabIndex: +1 })
+  > 4 │ React.createElement("div", { tabIndex: +01 })
+      │                                        ^^^
+    5 │ 
+  
+  i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+
+```
+
+

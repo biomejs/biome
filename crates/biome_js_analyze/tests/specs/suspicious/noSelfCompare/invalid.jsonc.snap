@@ -1,0 +1,278 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsonc
+---
+# Input
+```js
+if (x === x) { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ if (x === x) { }
+      │     ^^^^^^^
+  
+
+```
+
+# Input
+```js
+if (x !== x) { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ if (x !== x) { }
+      │     ^^^^^^^
+  
+
+```
+
+# Input
+```js
+if (x > x) { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ if (x > x) { }
+      │     ^^^^^
+  
+
+```
+
+# Input
+```js
+if ('x' > 'x') { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ if ('x' > 'x') { }
+      │     ^^^^^^^^^
+  
+
+```
+
+# Input
+```js
+if ('x' > 'x') { }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ if ('x' > 'x') { }
+      │     ^^^^^^^^^
+  
+
+```
+
+# Input
+```js
+do {} while (x === x)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:14 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ do {} while (x === x)
+      │              ^^^^^^^
+  
+
+```
+
+# Input
+```js
+x === x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x === x
+      │ ^^^^^^^
+  
+
+```
+
+# Input
+```js
+x !== x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x !== x
+      │ ^^^^^^^
+  
+
+```
+
+# Input
+```js
+x == x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x == x
+      │ ^^^^^^
+  
+
+```
+
+# Input
+```js
+x != x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x != x
+      │ ^^^^^^
+  
+
+```
+
+# Input
+```js
+x > x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x > x
+      │ ^^^^^
+  
+
+```
+
+# Input
+```js
+x < x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x < x
+      │ ^^^^^
+  
+
+```
+
+# Input
+```js
+x >= x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x >= x
+      │ ^^^^^^
+  
+
+```
+
+# Input
+```js
+x <= x
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ x <= x
+      │ ^^^^^^
+  
+
+```
+
+# Input
+```js
+foo.bar().baz.qux >= foo.bar ().baz .qux
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ foo.bar().baz.qux >= foo.bar ().baz .qux
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```
+
+# Input
+```js
+class C { #field; foo() { this.#field === this.#field; } }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Comparing to itself is potentially pointless.
+  
+  > 1 │ class C { #field; foo() { this.#field === this.#field; } }
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```
+
+

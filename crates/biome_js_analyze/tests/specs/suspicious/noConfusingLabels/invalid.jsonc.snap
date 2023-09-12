@@ -1,0 +1,206 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsonc
+---
+# Input
+```js
+label: foo();
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ label: foo();
+      │ ^^^^^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: const foo = 0;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: const foo = 0;
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: break A = 0;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: break A = 0;
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: let foo = 0;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: let foo = 0;
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: if (a) { if (foo()) { break A; } bar(); };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: if (a) { if (foo()) { break A; } bar(); };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: { if (foo()) { break A; } bar(); };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: { if (foo()) { break A; } bar(); };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: { if (foo()) { break A; } bar(); };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: { if (foo()) { break A; } bar(); };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: { if (foo()) { break A; } bar(); };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: { if (foo()) { break A; } bar(); };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: switch (a) { case 0: break A; default: break; };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: switch (a) { case 0: break A; default: break; };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+# Input
+```js
+A: switch (a) { case 0: break A; default: break; };
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ A: switch (a) { case 0: break A; default: break; };
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```
+
+

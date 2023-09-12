@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+class A { }
+```
+
+# Input
+```js
+class A { constructor(a, b = 0){ } }
+```
+
+# Diagnostics
+```
+valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor is unnecessary.
+  
+  > 1 │ class A { constructor(a, b = 0){ } }
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Remove the unnecessary constructor.
+  
+    1 │ class·A·{·constructor(a,·b·=·0){·}·}
+      │           ------------------------- 
+
+```
+
+# Input
+```js
+class A { constructor(){ doSomething(); } }
+```
+
+# Input
+```js
+class A extends B { constructor(){} }
+```
+
+# Input
+```js
+class A extends B { constructor(){ super('foo'); } }
+```
+
+# Input
+```js
+class A extends B { constructor(foo, bar){ super(foo, bar, 1); } }
+```
+
+# Input
+```js
+class A extends B { constructor(){ super(); doSomething(); } }
+```
+
+# Input
+```js
+class A extends B { constructor(...args){ super(...args); doSomething(); } }
+```
+
+# Input
+```js
+class A { dummyMethod(){ doSomething(); } }
+```
+
+# Input
+```js
+class A extends B.C { constructor() { super(foo); } }
+```
+
+# Input
+```js
+class A extends B { constructor(a, b, c) { super(a, b); } }
+```
+
+# Input
+```js
+class A extends B { constructor(foo, bar){ super(foo); } }
+```
+
+# Input
+```js
+class A extends B { constructor(test) { super(); } }
+```
+
+# Input
+```js
+class A extends B { constructor() { foo; } }
+```
+
+# Input
+```js
+class A extends B { constructor(foo, bar) { super(bar); } }
+```
+
+

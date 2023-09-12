@@ -1,0 +1,283 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBaseExpoentLowerPrecedence.js
+---
+# Input
+```js
+// base and exponent with a lower precedence
+Math.pow(a * b, c)
+Math.pow(a, b * c)
+Math.pow(a / b, c)
+Math.pow(a, b / c)
+Math.pow(a + b, 3)
+Math.pow(2, a - b)
+Math.pow(a + b, c + d)
+Math.pow(a = b, c = d)
+Math.pow(a += b, c -= d)
+Math.pow((a, b), (c, d))
+function *f() { Math.pow(yield, yield) }
+
+```
+
+# Diagnostics
+```
+invalidBaseExpoentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    1 │ // base and exponent with a lower precedence
+  > 2 │ Math.pow(a * b, c)
+      │ ^^^^^^^^^^^^^^^^^^
+    3 │ Math.pow(a, b * c)
+    4 │ Math.pow(a / b, c)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     1  1 │   // base and exponent with a lower precedence
+     2    │ - Math.pow(a·*·b,·c)
+        2 │ + (a·*·b)·**·c
+     3  3 │   Math.pow(a, b * c)
+     4  4 │   Math.pow(a / b, c)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    1 │ // base and exponent with a lower precedence
+    2 │ Math.pow(a * b, c)
+  > 3 │ Math.pow(a, b * c)
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ Math.pow(a / b, c)
+    5 │ Math.pow(a, b / c)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     1  1 │   // base and exponent with a lower precedence
+     2  2 │   Math.pow(a * b, c)
+     3    │ - Math.pow(a,·b·*·c)
+        3 │ + a·**·(b·*·c)
+     4  4 │   Math.pow(a / b, c)
+     5  5 │   Math.pow(a, b / c)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    2 │ Math.pow(a * b, c)
+    3 │ Math.pow(a, b * c)
+  > 4 │ Math.pow(a / b, c)
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ Math.pow(a, b / c)
+    6 │ Math.pow(a + b, 3)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     2  2 │   Math.pow(a * b, c)
+     3  3 │   Math.pow(a, b * c)
+     4    │ - Math.pow(a·/·b,·c)
+        4 │ + (a·/·b)·**·c
+     5  5 │   Math.pow(a, b / c)
+     6  6 │   Math.pow(a + b, 3)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    3 │ Math.pow(a, b * c)
+    4 │ Math.pow(a / b, c)
+  > 5 │ Math.pow(a, b / c)
+      │ ^^^^^^^^^^^^^^^^^^
+    6 │ Math.pow(a + b, 3)
+    7 │ Math.pow(2, a - b)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     3  3 │   Math.pow(a, b * c)
+     4  4 │   Math.pow(a / b, c)
+     5    │ - Math.pow(a,·b·/·c)
+        5 │ + a·**·(b·/·c)
+     6  6 │   Math.pow(a + b, 3)
+     7  7 │   Math.pow(2, a - b)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    4 │ Math.pow(a / b, c)
+    5 │ Math.pow(a, b / c)
+  > 6 │ Math.pow(a + b, 3)
+      │ ^^^^^^^^^^^^^^^^^^
+    7 │ Math.pow(2, a - b)
+    8 │ Math.pow(a + b, c + d)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     4  4 │   Math.pow(a / b, c)
+     5  5 │   Math.pow(a, b / c)
+     6    │ - Math.pow(a·+·b,·3)
+        6 │ + (a·+·b)·**·3
+     7  7 │   Math.pow(2, a - b)
+     8  8 │   Math.pow(a + b, c + d)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    5 │ Math.pow(a, b / c)
+    6 │ Math.pow(a + b, 3)
+  > 7 │ Math.pow(2, a - b)
+      │ ^^^^^^^^^^^^^^^^^^
+    8 │ Math.pow(a + b, c + d)
+    9 │ Math.pow(a = b, c = d)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     5  5 │   Math.pow(a, b / c)
+     6  6 │   Math.pow(a + b, 3)
+     7    │ - Math.pow(2,·a·-·b)
+        7 │ + 2·**·(a·-·b)
+     8  8 │   Math.pow(a + b, c + d)
+     9  9 │   Math.pow(a = b, c = d)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+     6 │ Math.pow(a + b, 3)
+     7 │ Math.pow(2, a - b)
+   > 8 │ Math.pow(a + b, c + d)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ Math.pow(a = b, c = d)
+    10 │ Math.pow(a += b, c -= d)
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     6  6 │   Math.pow(a + b, 3)
+     7  7 │   Math.pow(2, a - b)
+     8    │ - Math.pow(a·+·b,·c·+·d)
+        8 │ + (a·+·b)·**·(c·+·d)
+     9  9 │   Math.pow(a = b, c = d)
+    10 10 │   Math.pow(a += b, c -= d)
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+     7 │ Math.pow(2, a - b)
+     8 │ Math.pow(a + b, c + d)
+   > 9 │ Math.pow(a = b, c = d)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ Math.pow(a += b, c -= d)
+    11 │ Math.pow((a, b), (c, d))
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     7  7 │   Math.pow(2, a - b)
+     8  8 │   Math.pow(a + b, c + d)
+     9    │ - Math.pow(a·=·b,·c·=·d)
+        9 │ + (a·=·b)·**·(c·=·d)
+    10 10 │   Math.pow(a += b, c -= d)
+    11 11 │   Math.pow((a, b), (c, d))
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+     8 │ Math.pow(a + b, c + d)
+     9 │ Math.pow(a = b, c = d)
+  > 10 │ Math.pow(a += b, c -= d)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ Math.pow((a, b), (c, d))
+    12 │ function *f() { Math.pow(yield, yield) }
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     8  8 │   Math.pow(a + b, c + d)
+     9  9 │   Math.pow(a = b, c = d)
+    10    │ - Math.pow(a·+=·b,·c·-=·d)
+       10 │ + (a·+=·b)·**·(c·-=·d)
+    11 11 │   Math.pow((a, b), (c, d))
+    12 12 │   function *f() { Math.pow(yield, yield) }
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+     9 │ Math.pow(a = b, c = d)
+    10 │ Math.pow(a += b, c -= d)
+  > 11 │ Math.pow((a, b), (c, d))
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ function *f() { Math.pow(yield, yield) }
+    13 │ 
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+     9  9 │   Math.pow(a = b, c = d)
+    10 10 │   Math.pow(a += b, c -= d)
+    11    │ - Math.pow((a,·b),·(c,·d))
+       11 │ + (a,·b)·**·(c,·d)
+    12 12 │   function *f() { Math.pow(yield, yield) }
+    13 13 │   
+  
+
+```
+
+```
+invalidBaseExpoentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
+
+  ! Use the '**' operator instead of 'Math.pow'.
+  
+    10 │ Math.pow(a += b, c -= d)
+    11 │ Math.pow((a, b), (c, d))
+  > 12 │ function *f() { Math.pow(yield, yield) }
+       │                 ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  
+    10 10 │   Math.pow(a += b, c -= d)
+    11 11 │   Math.pow((a, b), (c, d))
+    12    │ - function·*f()·{·Math.pow(yield,·yield)·}
+       12 │ + function·*f()·{·(yield)·**·(yield)·}
+    13 13 │   
+  
+
+```
+
+

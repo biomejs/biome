@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+[0, [12], [[16]]].map(Number).flat(2);
+```
+
+# Input
+```js
+array.flat().map(Number);
+```
+
+# Input
+```js
+array.map(Number).flat(customFn);
+```
+
+# Input
+```js
+MyObject.map(one, two, tree).flat();
+```
+
+# Input
+```js
+MyObject.map().flat(1, 'test')
+```
+
+

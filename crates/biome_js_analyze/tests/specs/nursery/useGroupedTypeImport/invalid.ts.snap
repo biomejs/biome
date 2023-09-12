@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.ts
+---
+# Input
+```js
+import { type A } from 'mod';
+
+
+import { type A as AA } from 'mod';
+
+
+import { type A, type B } from 'mod';
+
+
+import { type default as A } from "mod"
+
+
+import { type A as AA, type B as BB } from 'mod';
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type qualifier can be moved just after import to completely remove the import at compile time.
+  
+  > 1 │ import { type A } from 'mod';
+      │        ^^^^^^^^^^
+    2 │ 
+  
+  i Only import type are removed at compile time.
+  
+  i Suggested fix: Use import type instead.
+  
+     1    │ - import·{·type·A·}·from·'mod';
+        1 │ + import·type·{·A·}·from·'mod';
+     2  2 │   
+     3  3 │   
+  
+
+```
+
+```
+invalid.ts:4:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type qualifier can be moved just after import to completely remove the import at compile time.
+  
+  > 4 │ import { type A as AA } from 'mod';
+      │        ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Only import type are removed at compile time.
+  
+  i Suggested fix: Use import type instead.
+  
+     2  2 │   
+     3  3 │   
+     4    │ - import·{·type·A·as·AA·}·from·'mod';
+        4 │ + import·type·{·A·as·AA·}·from·'mod';
+     5  5 │   
+     6  6 │   
+  
+
+```
+
+```
+invalid.ts:7:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type qualifier can be moved just after import to completely remove the import at compile time.
+  
+  > 7 │ import { type A, type B } from 'mod';
+      │        ^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Only import type are removed at compile time.
+  
+  i Suggested fix: Use import type instead.
+  
+     5  5 │   
+     6  6 │   
+     7    │ - import·{·type·A,·type·B·}·from·'mod';
+        7 │ + import·type·{·A,·B·}·from·'mod';
+     8  8 │   
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:10:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type qualifier can be moved just after import to completely remove the import at compile time.
+  
+  > 10 │ import { type default as A } from "mod"
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Only import type are removed at compile time.
+  
+  i Suggested fix: Use import type instead.
+  
+     8  8 │   
+     9  9 │   
+    10    │ - import·{·type·default·as·A·}·from·"mod"
+       10 │ + import·type·{·default·as·A·}·from·"mod"
+    11 11 │   
+    12 12 │   
+  
+
+```
+
+```
+invalid.ts:13:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type qualifier can be moved just after import to completely remove the import at compile time.
+  
+  > 13 │ import { type A as AA, type B as BB } from 'mod';
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Only import type are removed at compile time.
+  
+  i Suggested fix: Use import type instead.
+  
+    11 11 │   
+    12 12 │   
+    13    │ - import·{·type·A·as·AA,·type·B·as·BB·}·from·'mod';
+       13 │ + import·type·{·A·as·AA,·B·as·BB·}·from·'mod';
+    14 14 │   
+  
+
+```
+
+

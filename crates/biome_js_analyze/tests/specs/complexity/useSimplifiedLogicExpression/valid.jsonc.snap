@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+const boolExpr3 = true;
+```
+
+# Input
+```js
+const boolExpr4 = false;
+```
+
+# Input
+```js
+const r5 = !(boolExpr1 && boolExpr2);
+```
+
+# Input
+```js
+const boolExpr5 = true;
+```
+
+# Input
+```js
+const boolExpr6 = false;
+```
+
+# Input
+```js
+const r6 = !!boolExpr1 || !!boolExpr2;
+```
+
+# Input
+```js
+!!x
+```
+
+

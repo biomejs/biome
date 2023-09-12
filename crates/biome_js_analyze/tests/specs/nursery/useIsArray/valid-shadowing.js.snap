@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-shadowing.js
+---
+# Input
+```js
+import { b as Array } from "mod"
+const a = new Array();
+const arr = a instanceof Arrray;
+
+```
+
+

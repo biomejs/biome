@@ -1,0 +1,233 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: MergeRanges.js
+---
+# Input
+```js
+function MergeRanges1() {
+    return;
+
+    const var1 = statement1();
+    const var2 = statement2();
+
+    label: {
+        statement1();
+        statement2();
+    };
+
+    do {
+        statement1();
+        statement2();
+    } while (test);
+
+    for (const a of b) {
+        statement1();
+        statement2();
+    }
+
+    for (const a in b) {
+        statement1();
+        statement2();
+    }
+
+    for (let i = 0; i < 10; i++) {
+        statement1();
+        statement2();
+    }
+
+    if (a) {
+        statement1();
+        statement2();
+    } else if (b) {
+        statement1();
+        statement2();
+    } else {
+        statement1();
+        statement2();
+    }
+
+    switch (value) {
+        case 1:
+            statement1();
+            statement2();
+            break;
+        default:
+            statement1();
+            statement2();
+            break;
+    }
+
+    try {
+        statement1();
+        statement2();
+    } catch (err) {
+        statement1();
+        statement2();
+    }
+
+    try {
+        statement1();
+        statement2();
+    } catch (err) {
+        statement1();
+        statement2();
+    } finally {
+        statement1();
+        statement2();
+    }
+    
+    while (cond) {
+        statement1();
+        statement2();
+    }
+}
+
+function MergeRanges2() {
+    while (true) {
+        if (expr) {
+            return;
+            afterReturn();
+        } else {
+            continue;
+            afterContinue();
+        }
+        
+        const var1 = statement1();
+        const var2 = statement2();
+
+        if (a) {
+            statement1();
+            statement2();
+        } else if (b) {
+            statement1();
+            statement2();
+        } else {
+            statement1();
+            statement2();
+        }
+
+        label: {
+            statement1();
+            statement2();
+        };
+    }
+}
+
+```
+
+# Diagnostics
+```
+MergeRanges.js:4:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     2 │     return;
+     3 │ 
+   > 4 │     const var1 = statement1();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 5 │     const var2 = statement2();
+        ...
+  > 75 │         statement2();
+  > 76 │     }
+       │     ^
+    77 │ }
+    78 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    1 │ function MergeRanges1() {
+  > 2 │     return;
+      │     ^^^^^^^
+    3 │ 
+    4 │     const var1 = statement1();
+  
+
+```
+
+```
+MergeRanges.js:83:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    81 │         if (expr) {
+    82 │             return;
+  > 83 │             afterReturn();
+       │             ^^^^^^^^^^^^^^
+    84 │         } else {
+    85 │             continue;
+  
+  i ... because this statement will return from the function beforehand
+  
+    80 │     while (true) {
+    81 │         if (expr) {
+  > 82 │             return;
+       │             ^^^^^^^
+    83 │             afterReturn();
+    84 │         } else {
+  
+
+```
+
+```
+MergeRanges.js:86:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    84 │         } else {
+    85 │             continue;
+  > 86 │             afterContinue();
+       │             ^^^^^^^^^^^^^^^^
+    87 │         }
+    88 │         
+  
+  i ... because this statement will continue the loop beforehand
+  
+    83 │             afterReturn();
+    84 │         } else {
+  > 85 │             continue;
+       │             ^^^^^^^^^
+    86 │             afterContinue();
+    87 │         }
+  
+
+```
+
+```
+MergeRanges.js:89:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     87 │         }
+     88 │         
+   > 89 │         const var1 = statement1();
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 90 │         const var2 = statement2();
+         ...
+  > 105 │             statement2();
+  > 106 │         };
+        │         ^^
+    107 │     }
+    108 │ }
+  
+  i ... because either this statement will return from the function ...
+  
+    80 │     while (true) {
+    81 │         if (expr) {
+  > 82 │             return;
+       │             ^^^^^^^
+    83 │             afterReturn();
+    84 │         } else {
+  
+  i ... or this statement will continue the loop beforehand
+  
+    83 │             afterReturn();
+    84 │         } else {
+  > 85 │             continue;
+       │             ^^^^^^^^^
+    86 │             afterContinue();
+    87 │         }
+  
+
+```
+
+

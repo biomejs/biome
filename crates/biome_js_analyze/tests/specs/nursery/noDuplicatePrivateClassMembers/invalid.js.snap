@@ -1,0 +1,245 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+class A { #foo; #foo; }
+class A { #foo() {}; #foo; }
+class A { #foo; get #foo() {} }
+class A { #foo; set #foo(value) {} }
+class A { get #foo() {} get #foo() {} }
+class A { get #foo() {}; #foo; }
+class A { set #foo(value) {} #foo; }
+class A { get #foo() {} set #foo(value) {} #foo; }
+class A { #foo; #foo; #bar; #bar; }
+class A { #foo; get #foo() {} get #foo() {} }
+class A { foo; foo; #bar; #bar; }
+class A { #foo; static #foo; }
+class A { #foo; accessor #foo; }
+
+```
+
+# Diagnostics
+```
+invalid.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+  > 1 │ class A { #foo; #foo; }
+      │                 ^^^^^
+    2 │ class A { #foo() {}; #foo; }
+    3 │ class A { #foo; get #foo() {} }
+  
+
+```
+
+```
+invalid.js:2:22 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    1 │ class A { #foo; #foo; }
+  > 2 │ class A { #foo() {}; #foo; }
+      │                      ^^^^^
+    3 │ class A { #foo; get #foo() {} }
+    4 │ class A { #foo; set #foo(value) {} }
+  
+
+```
+
+```
+invalid.js:3:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    1 │ class A { #foo; #foo; }
+    2 │ class A { #foo() {}; #foo; }
+  > 3 │ class A { #foo; get #foo() {} }
+      │                 ^^^^^^^^^^^^^
+    4 │ class A { #foo; set #foo(value) {} }
+    5 │ class A { get #foo() {} get #foo() {} }
+  
+
+```
+
+```
+invalid.js:4:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    2 │ class A { #foo() {}; #foo; }
+    3 │ class A { #foo; get #foo() {} }
+  > 4 │ class A { #foo; set #foo(value) {} }
+      │                 ^^^^^^^^^^^^^^^^^^
+    5 │ class A { get #foo() {} get #foo() {} }
+    6 │ class A { get #foo() {}; #foo; }
+  
+
+```
+
+```
+invalid.js:5:25 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    3 │ class A { #foo; get #foo() {} }
+    4 │ class A { #foo; set #foo(value) {} }
+  > 5 │ class A { get #foo() {} get #foo() {} }
+      │                         ^^^^^^^^^^^^^
+    6 │ class A { get #foo() {}; #foo; }
+    7 │ class A { set #foo(value) {} #foo; }
+  
+
+```
+
+```
+invalid.js:6:26 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    4 │ class A { #foo; set #foo(value) {} }
+    5 │ class A { get #foo() {} get #foo() {} }
+  > 6 │ class A { get #foo() {}; #foo; }
+      │                          ^^^^^
+    7 │ class A { set #foo(value) {} #foo; }
+    8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+  
+
+```
+
+```
+invalid.js:7:30 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    5 │ class A { get #foo() {} get #foo() {} }
+    6 │ class A { get #foo() {}; #foo; }
+  > 7 │ class A { set #foo(value) {} #foo; }
+      │                              ^^^^^
+    8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+    9 │ class A { #foo; #foo; #bar; #bar; }
+  
+
+```
+
+```
+invalid.js:8:44 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+     6 │ class A { get #foo() {}; #foo; }
+     7 │ class A { set #foo(value) {} #foo; }
+   > 8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+       │                                            ^^^^^
+     9 │ class A { #foo; #foo; #bar; #bar; }
+    10 │ class A { #foo; get #foo() {} get #foo() {} }
+  
+
+```
+
+```
+invalid.js:9:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+     7 │ class A { set #foo(value) {} #foo; }
+     8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+   > 9 │ class A { #foo; #foo; #bar; #bar; }
+       │                 ^^^^^
+    10 │ class A { #foo; get #foo() {} get #foo() {} }
+    11 │ class A { foo; foo; #bar; #bar; }
+  
+
+```
+
+```
+invalid.js:9:29 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#bar"
+  
+     7 │ class A { set #foo(value) {} #foo; }
+     8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+   > 9 │ class A { #foo; #foo; #bar; #bar; }
+       │                             ^^^^^
+    10 │ class A { #foo; get #foo() {} get #foo() {} }
+    11 │ class A { foo; foo; #bar; #bar; }
+  
+
+```
+
+```
+invalid.js:10:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+     8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+     9 │ class A { #foo; #foo; #bar; #bar; }
+  > 10 │ class A { #foo; get #foo() {} get #foo() {} }
+       │                 ^^^^^^^^^^^^^
+    11 │ class A { foo; foo; #bar; #bar; }
+    12 │ class A { #foo; static #foo; }
+  
+
+```
+
+```
+invalid.js:10:31 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+     8 │ class A { get #foo() {} set #foo(value) {} #foo; }
+     9 │ class A { #foo; #foo; #bar; #bar; }
+  > 10 │ class A { #foo; get #foo() {} get #foo() {} }
+       │                               ^^^^^^^^^^^^^
+    11 │ class A { foo; foo; #bar; #bar; }
+    12 │ class A { #foo; static #foo; }
+  
+
+```
+
+```
+invalid.js:11:27 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#bar"
+  
+     9 │ class A { #foo; #foo; #bar; #bar; }
+    10 │ class A { #foo; get #foo() {} get #foo() {} }
+  > 11 │ class A { foo; foo; #bar; #bar; }
+       │                           ^^^^^
+    12 │ class A { #foo; static #foo; }
+    13 │ class A { #foo; accessor #foo; }
+  
+
+```
+
+```
+invalid.js:12:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    10 │ class A { #foo; get #foo() {} get #foo() {} }
+    11 │ class A { foo; foo; #bar; #bar; }
+  > 12 │ class A { #foo; static #foo; }
+       │                 ^^^^^^^^^^^^
+    13 │ class A { #foo; accessor #foo; }
+    14 │ 
+  
+
+```
+
+```
+invalid.js:13:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate private class member "#foo"
+  
+    11 │ class A { foo; foo; #bar; #bar; }
+    12 │ class A { #foo; static #foo; }
+  > 13 │ class A { #foo; accessor #foo; }
+       │                 ^^^^^^^^^^^^^^
+    14 │ 
+  
+
+```
+
+

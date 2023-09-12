@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```js
+<div>
+    <div />
+    <marquee />
+    <blink />
+</div>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the 'marquee' element.
+  
+    1 │ <div>
+    2 │     <div />
+  > 3 │     <marquee />
+      │     ^^^^^^^^^^^
+    4 │     <blink />
+    5 │ </div>
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Suggested fix: Remove the 'marquee' element.
+  
+    3 │ ····<marquee·/>
+      │     -----------
+
+```
+
+```
+invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use the 'blink' element.
+  
+    2 │     <div />
+    3 │     <marquee />
+  > 4 │     <blink />
+      │     ^^^^^^^^^
+    5 │ </div>
+    6 │ 
+  
+  i Visually distracting elements can cause accessibility issues and should be avoided.
+  
+  i Suggested fix: Remove the 'blink' element.
+  
+    4 │ ····<blink·/>
+      │     ---------
+
+```
+
+

@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: inJsx.jsx
+---
+# Input
+```js
+<>
+    <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+    <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+    <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+    <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+</>
+```
+
+# Diagnostics
+```
+inJsx.jsx:2:10 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  
+    1 │ <>
+  > 2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+  
+  i This is the source of the children prop
+  
+    1 │ <>
+  > 2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+      │                                                       ^^^^^^^^
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+  
+  i Setting HTML content will inadvertently override any passed children in React
+  
+
+```
+
+```
+inJsx.jsx:3:10 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  
+    1 │ <>
+    2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+  > 3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+  
+  i This is the source of the children prop
+  
+    1 │ <>
+    2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+  > 3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+      │                                                       ^^^^^^^^^^^^^^^^^^^^^
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+  
+  i Setting HTML content will inadvertently override any passed children in React
+  
+
+```
+
+```
+inJsx.jsx:4:10 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  
+    2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+  > 4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+    6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+  
+  i This is the source of the children prop
+  
+    2 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</div>
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+  > 4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+      │                                                       ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+    6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+  
+  i Setting HTML content will inadvertently override any passed children in React
+  
+
+```
+
+```
+inJsx.jsx:5:14 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+  > 5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    7 │ </>
+  
+  i This is the source of the children prop
+  
+    3 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+  > 5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+      │                                                           ^^^^^^^^
+    6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+    7 │ </>
+  
+  i Setting HTML content will inadvertently override any passed children in React
+  
+
+```
+
+```
+inJsx.jsx:6:14 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+  > 6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ </>
+  
+  i This is the source of the children prop
+  
+    4 │     <div dangerouslySetInnerHTML={{ __html: 'HTML' }} children={['children']} />
+    5 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }}>children</Invalid>
+  > 6 │     <Invalid dangerouslySetInnerHTML={{ __html: 'HTML' }} children={'children'} />
+      │                                                           ^^^^^^^^^^^^^^^^^^^^^
+    7 │ </>
+  
+  i Setting HTML content will inadvertently override any passed children in React
+  
+
+```
+
+

@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: createElement.js
+---
+# Input
+```js
+
+
+React.createElement('img', {
+    someProp: "bar"
+}, 'child')
+
+React.createElement('img', {
+    dangerouslySetInnerHTML: "text"
+})
+
+```
+
+# Diagnostics
+```
+createElement.js:3:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! img is a void element tag and must not have children.
+  
+  > 3 │ React.createElement('img', {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │     someProp: "bar"
+  > 5 │ }, 'child')
+      │ ^^^^^^^^^^^
+    6 │ 
+    7 │ React.createElement('img', {
+  
+  i Suggested fix: Remove the children.
+  
+    5 │ },·'child')
+      │    ------- 
+
+```
+
+```
+createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! img is a void element tag and must not have the dangerouslySetInnerHTML prop.
+  
+     5 │ }, 'child')
+     6 │ 
+   > 7 │ React.createElement('img', {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     dangerouslySetInnerHTML: "text"
+   > 9 │ })
+       │ ^^
+    10 │ 
+  
+  i Suggested fix: Remove the dangerouslySetInnerHTML prop.
+  
+     6 6 │   
+     7 7 │   React.createElement('img', {
+     8   │ - ····dangerouslySetInnerHTML:·"text"
+     9 8 │   })
+    10 9 │   
+  
+
+```
+
+

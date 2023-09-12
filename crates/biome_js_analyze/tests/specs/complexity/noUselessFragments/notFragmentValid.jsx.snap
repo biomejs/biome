@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 99
+expression: notFragmentValid.jsx
+---
+# Input
+```js
+import React, { StrictMode } from "react";
+
+<>
+    <StrictMode></StrictMode>
+    <React.StrictMode></React.StrictMode>
+</>
+
+```
+
+

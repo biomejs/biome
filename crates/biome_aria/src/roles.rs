@@ -891,7 +891,7 @@ impl<'a> AriaRoles {
     pub fn get_implicit_role(
         &self,
         element: &str,
-        // To generate `attributes`, you can use `rome_js_analyze::aria_services::AriaServices::extract_defined_attributes`
+        // To generate `attributes`, you can use `biome_js_analyze::aria_services::AriaServices::extract_defined_attributes`
         attributes: &HashMap<String, Vec<String>>,
     ) -> Option<&'static dyn AriaRoleDefinition> {
         let result = match element {

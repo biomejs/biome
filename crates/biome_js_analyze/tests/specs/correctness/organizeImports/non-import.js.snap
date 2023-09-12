@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: non-import.js
+---
+# Input
+```js
+import d from 'd';
+import c from 'c';
+export { d };
+import b from 'b';
+import a from 'a';
+
+```
+
+# Actions
+```diff
+@@ -1,5 +1,5 @@
++import c from 'c';
+ import d from 'd';
+-import c from 'c';
+ export { d };
++import a from 'a';
+ import b from 'b';
+-import a from 'a';
+
+```
+
+

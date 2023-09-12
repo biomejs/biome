@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```js
+interface FooAny0<T> {
+	field: T;
+}
+
+interface FooNotAny0<T extends string> {
+	field: T;
+}
+
+type Bar<T> = {};
+
+type Bar2<T extends string> = {};
+
+```
+
+
