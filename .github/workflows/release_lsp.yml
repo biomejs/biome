@@ -148,6 +148,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.4.0
+        with:
+          version: latest
+          run_install: true
 
       - name: Update package.json version
         if: needs.check.outputs.prerelease == 'true'
@@ -156,19 +162,19 @@ jobs:
           node ./scripts/update-nightly-version.mjs >> $GITHUB_ENV
 
       - name: Install VCSE
-        run: npm i -g @vscode/vsce
+        run: pnpm add -g @vscode/vsce
 
       - name: Package extension
         run: |
-          npm ci
-          npm run compile
+          pnpm install
+          pnpm run compile
           vsce package -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease != 'true'
       - name: Package extension (pre-release)
         run: |
-          npm ci
-          npm run compile
+          pnpm install
+          pnpm run compile
           vsce package --pre-release -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
         working-directory: editors/vscode
         if: needs.check.outputs.prerelease == 'true'
@@ -201,8 +207,14 @@ jobs:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.4.0
+        with:
+          version: latest
+          run_install: true
+        
       - name: Install VCSE
-        run: npm i -g @vscode/vsce
+        run: pnpm add -g @vscode/vsce
 
       - name: Publish extension to Microsoft Marketplace (pre-release)
         run: vsce publish --pre-release --packagePath biome_lsp-*.vsix
