@@ -156,5 +156,8 @@
 	"dependencies": {
 		"resolve": "^1.22.4",
 		"vscode-languageclient": "^8.1.0"
+	},
+	"vsce": {
+		"dependencies": false
 	}
 }
