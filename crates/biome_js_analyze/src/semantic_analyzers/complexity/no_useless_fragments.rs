@@ -8,7 +8,7 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::{ident, js_expression_statement, jsx_string, jsx_tag_expression};
 use biome_js_syntax::{
     AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
-    JsxChildList, JsxElement, JsxFragment, JsxTagExpression,
+    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -220,7 +220,12 @@ impl Rule for NoUselessFragments {
                 node.remove_node_from_list(&mut mutation);
             }
         } else if let Some(parent) = node.parent::<JsxTagExpression>() {
-            let parent = parent.syntax().parent()?;
+            // We need to remove {} if the fragment is inside an attribute value: <div x-some-prop={<>Foo</>} />
+            let parent = match parent.parent::<JsxExpressionAttributeValue>() {
+                Some(grand_parent) => grand_parent.into_syntax(),
+                None => parent.into_syntax(),
+            };
+
             let child = node.children().first();
             if let Some(child) = child {
                 let new_node = match child {

@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assigments.jsx
+---
+# Input
+```js
+arr = <>Error</>
+
+```
+
+# Diagnostics
+```
+assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+  > 1 │ arr = <>Error</>
+      │       ^^^^^^^^^^
+    2 │ 
+  
+  i Suggested fix: Remove the Fragment
+  
+    1   │ - arr·=·<>Error</>
+      1 │ + arr·=·"Error"
+    2 2 │   
+  
+
+```
+
+
