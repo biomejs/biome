@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+new Promise((resolve, reject) => {})
+```
+
+# Input
+```js
+new Promise((resolve, reject) => {}, async function unrelated() {})
+```
+
+# Input
+```js
+new Foo(async (resolve, reject) => {})
+```
+
+# Input
+```js
+new Foo((( (resolve, reject) => {} )))
+```
+
+

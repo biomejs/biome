@@ -1,0 +1,332 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+export enum Status {
+	Close,
+	MidClose = 1,
+	MidOpen = 10,
+	/* implicit */ Open /* 11 */,
+}
+
+export enum ComputedFlags {
+	Flag1 = 1,
+	Flag2 = 1 << 1,
+	Flag3,
+}
+
+export enum Direction {
+	Down,
+	Left,
+	Right,
+	Up,
+}
+
+export enum Color {
+	Red = "Red",
+	Green = "Green",
+	Blue,
+}
+
+export enum Exotic {
+	A = 0.1,
+	B,
+	C = "Special",
+	D,
+}
+
+export enum IndexedColor {
+	Red = "0",
+	Green = "1",
+	Blue,
+}
+
+export namespace A {
+    export namespace B {
+        export enum Enum {
+            A,
+            B,
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+  > 1 │ export enum Status {
+      │             ^^^^^^
+    2 │ 	Close,
+    3 │ 	MidClose = 1,
+  
+  i This enum member should be explicitly initialized.
+  
+    1 │ export enum Status {
+  > 2 │ 	Close,
+      │ 	^^^^^
+    3 │ 	MidClose = 1,
+    4 │ 	MidOpen = 10,
+  
+  i This enum member should be explicitly initialized.
+  
+    3 │ 	MidClose = 1,
+    4 │ 	MidOpen = 10,
+  > 5 │ 	/* implicit */ Open /* 11 */,
+      │ 	               ^^^^
+    6 │ }
+    7 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Suggested fix: Initialize all enum members.
+  
+     1  1 │   export enum Status {
+     2    │ - → Close,
+        2 │ + → Close·=·0,
+     3  3 │   	MidClose = 1,
+     4  4 │   	MidOpen = 10,
+     5    │ - → /*·implicit·*/·Open·/*·11·*/,
+        5 │ + → /*·implicit·*/·Open·/*·11·*/·=·11,
+     6  6 │   }
+     7  7 │   
+  
+
+```
+
+```
+invalid.ts:8:13 lint/style/useEnumInitializers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+     6 │ }
+     7 │ 
+   > 8 │ export enum ComputedFlags {
+       │             ^^^^^^^^^^^^^
+     9 │ 	Flag1 = 1,
+    10 │ 	Flag2 = 1 << 1,
+  
+  i This enum member should be explicitly initialized.
+  
+     9 │ 	Flag1 = 1,
+    10 │ 	Flag2 = 1 << 1,
+  > 11 │ 	Flag3,
+       │ 	^^^^^
+    12 │ }
+    13 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+
+```
+
+```
+invalid.ts:14:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    12 │ }
+    13 │ 
+  > 14 │ export enum Direction {
+       │             ^^^^^^^^^
+    15 │ 	Down,
+    16 │ 	Left,
+  
+  i This enum member should be explicitly initialized.
+  
+    14 │ export enum Direction {
+  > 15 │ 	Down,
+       │ 	^^^^
+    16 │ 	Left,
+    17 │ 	Right,
+  
+  i This enum member should be explicitly initialized.
+  
+    14 │ export enum Direction {
+    15 │ 	Down,
+  > 16 │ 	Left,
+       │ 	^^^^
+    17 │ 	Right,
+    18 │ 	Up,
+  
+  i This enum member should be explicitly initialized.
+  
+    15 │ 	Down,
+    16 │ 	Left,
+  > 17 │ 	Right,
+       │ 	^^^^^
+    18 │ 	Up,
+    19 │ }
+  
+  i This enum member should be explicitly initialized.
+  
+    16 │ 	Left,
+    17 │ 	Right,
+  > 18 │ 	Up,
+       │ 	^^
+    19 │ }
+    20 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Suggested fix: Initialize all enum members.
+  
+    13 13 │   
+    14 14 │   export enum Direction {
+    15    │ - → Down,
+    16    │ - → Left,
+    17    │ - → Right,
+    18    │ - → Up,
+       15 │ + → Down·=·0,
+       16 │ + → Left·=·1,
+       17 │ + → Right·=·2,
+       18 │ + → Up·=·3,
+    19 19 │   }
+    20 20 │   
+  
+
+```
+
+```
+invalid.ts:21:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    19 │ }
+    20 │ 
+  > 21 │ export enum Color {
+       │             ^^^^^
+    22 │ 	Red = "Red",
+    23 │ 	Green = "Green",
+  
+  i This enum member should be explicitly initialized.
+  
+    22 │ 	Red = "Red",
+    23 │ 	Green = "Green",
+  > 24 │ 	Blue,
+       │ 	^^^^
+    25 │ }
+    26 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Suggested fix: Initialize all enum members.
+  
+    24 │ → Blue·=·"Blue",
+       │       +++++++++ 
+
+```
+
+```
+invalid.ts:27:13 lint/style/useEnumInitializers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    25 │ }
+    26 │ 
+  > 27 │ export enum Exotic {
+       │             ^^^^^^
+    28 │ 	A = 0.1,
+    29 │ 	B,
+  
+  i This enum member should be explicitly initialized.
+  
+    27 │ export enum Exotic {
+    28 │ 	A = 0.1,
+  > 29 │ 	B,
+       │ 	^
+    30 │ 	C = "Special",
+    31 │ 	D,
+  
+  i This enum member should be explicitly initialized.
+  
+    29 │ 	B,
+    30 │ 	C = "Special",
+  > 31 │ 	D,
+       │ 	^
+    32 │ }
+    33 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+
+```
+
+```
+invalid.ts:34:13 lint/style/useEnumInitializers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    32 │ }
+    33 │ 
+  > 34 │ export enum IndexedColor {
+       │             ^^^^^^^^^^^^
+    35 │ 	Red = "0",
+    36 │ 	Green = "1",
+  
+  i This enum member should be explicitly initialized.
+  
+    35 │ 	Red = "0",
+    36 │ 	Green = "1",
+  > 37 │ 	Blue,
+       │ 	^^^^
+    38 │ }
+    39 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+
+```
+
+```
+invalid.ts:42:21 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    40 │ export namespace A {
+    41 │     export namespace B {
+  > 42 │         export enum Enum {
+       │                     ^^^^
+    43 │             A,
+    44 │             B,
+  
+  i This enum member should be explicitly initialized.
+  
+    41 │     export namespace B {
+    42 │         export enum Enum {
+  > 43 │             A,
+       │             ^
+    44 │             B,
+    45 │         }
+  
+  i This enum member should be explicitly initialized.
+  
+    42 │         export enum Enum {
+    43 │             A,
+  > 44 │             B,
+       │             ^
+    45 │         }
+    46 │     }
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Suggested fix: Initialize all enum members.
+  
+    41 41 │       export namespace B {
+    42 42 │           export enum Enum {
+    43    │ - ············A,
+    44    │ - ············B,
+       43 │ + ············A·=·0,
+       44 │ + ············B·=·1,
+    45 45 │           }
+    46 46 │       }
+  
+
+```
+
+

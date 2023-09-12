@@ -20,6 +20,10 @@ use biome_analyze::{
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, Printed};
 use biome_fs::RomePath;
+use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
+use biome_js_analyze::{
+    analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
+};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
@@ -28,10 +32,6 @@ use biome_js_syntax::{
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use indexmap::IndexSet;
-use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use rome_js_analyze::{
-    analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
-};
 use rome_js_formatter::context::trailing_comma::TrailingComma;
 use rome_js_formatter::context::ArrowParentheses;
 use rome_js_formatter::context::JsFormatOptions;

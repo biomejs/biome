@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/src/utils/rename.rs
+expression: content
+---
+example.js ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Can't find the declaration. Found node async
+  
+
+

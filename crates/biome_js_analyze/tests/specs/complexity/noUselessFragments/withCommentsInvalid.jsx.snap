@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withCommentsInvalid.jsx
+---
+# Input
+```js
+<>
+    </* test */>empty</>
+    <>empty</* comment */ />
+    <>empty</ /* comment */>
+</>
+
+```
+
+# Diagnostics
+```
+withCommentsInvalid.jsx:2:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ <>
+  > 2 │     </* test */>empty</>
+      │     ^^^^^^^^^^^^^^^^^^^^
+    3 │     <>empty</* comment */ />
+    4 │     <>empty</ /* comment */>
+  
+  i Suggested fix: Remove the Fragment
+  
+    2 │ ····</*·test·*/>empty</>
+      │     ------------     ---
+
+```
+
+```
+withCommentsInvalid.jsx:3:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ <>
+    2 │     </* test */>empty</>
+  > 3 │     <>empty</* comment */ />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     <>empty</ /* comment */>
+    5 │ </>
+  
+  i Suggested fix: Remove the Fragment
+  
+    3 │ ····<>empty</*·comment·*/·/>
+      │     --     -----------------
+
+```
+
+```
+withCommentsInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    2 │     </* test */>empty</>
+    3 │     <>empty</* comment */ />
+  > 4 │     <>empty</ /* comment */>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </>
+    6 │ 
+  
+  i Suggested fix: Remove the Fragment
+  
+    4 │ ····<>empty</·/*·comment·*/>
+      │     --     -----------------
+
+```
+
+

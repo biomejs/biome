@@ -1,0 +1,415 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+var x = 0;
+```
+
+# Input
+```js
+let x;
+```
+
+# Input
+```js
+let x; { x = 0; } foo(x);
+```
+
+# Input
+```js
+let x = 0; x = 1;
+```
+
+# Input
+```js
+const x = 0;
+```
+
+# Input
+```js
+for (let i = 0, end = 10; i < end; ++i) {}
+```
+
+# Input
+```js
+for (let i in [1,2,3]) { i = 0; }
+```
+
+# Input
+```js
+for (let x of [1,2,3]) { x = 0; }
+```
+
+# Input
+```js
+(function() { var x = 0; })();
+```
+
+# Input
+```js
+(function() { let x; })();
+```
+
+# Input
+```js
+(function() { let x; { x = 0; } foo(x); })();
+```
+
+# Input
+```js
+(function() { let x = 0; x = 1; })();
+```
+
+# Input
+```js
+(function() { const x = 0; })();
+```
+
+# Input
+```js
+(function() { for (let i = 0, end = 10; i < end; ++i) {} })();
+```
+
+# Input
+```js
+(function() { for (let i in [1,2,3]) { i = 0; } })();
+```
+
+# Input
+```js
+(function() { for (let x of [1,2,3]) { x = 0; } })();
+```
+
+# Input
+```js
+(function(x = 0) { })();
+```
+
+# Input
+```js
+let a; while (a = foo());
+```
+
+# Input
+```js
+let a; do {} while (a = foo());
+```
+
+# Input
+```js
+let a; for (; a = foo(); );
+```
+
+# Input
+```js
+let a; for (;; ++a);
+```
+
+# Input
+```js
+let a; for (const {b = ++a} in foo());
+```
+
+# Input
+```js
+let a; for (const {b = ++a} of foo());
+```
+
+# Input
+```js
+let a; for (const x of [1,2,3]) { if (a) {} a = foo(); }
+```
+
+# Input
+```js
+let a; for (const x of [1,2,3]) { a = a || foo(); bar(a); }
+```
+
+# Input
+```js
+let a; for (const x of [1,2,3]) { foo(++a); }
+```
+
+# Input
+```js
+let a; function foo() { if (a) {} a = bar(); }
+```
+
+# Input
+```js
+let a; function foo() { a = a || bar(); baz(a); }
+```
+
+# Input
+```js
+let a; function foo() { bar(++a); }
+```
+
+# Input
+```js
+{ let id; function foo() { if (typeof id !== 'undefined') { return; } id = setInterval(() => {}, 250); } foo()
+```
+
+# Input
+```js
+/*exported a*/ let a; function init() { a = foo(); }
+```
+
+# Input
+```js
+let a; if (true) a = 0; foo(a);
+```
+
+# Input
+```js
+(function (a) { let b; ({ a, b } = obj); })();
+```
+
+# Input
+```js
+(function (a) { let b; ([ a, b ] = obj); })();
+```
+
+# Input
+```js
+var a; { var b; ({ a, b } = obj); }
+```
+
+# Input
+```js
+let a; { let b; ({ a, b } = obj); }
+```
+
+# Input
+```js
+var a; { var b; ([ a, b ] = obj); }
+```
+
+# Input
+```js
+let a; { let b; ([ a, b ] = obj); }
+```
+
+# Input
+```js
+let x; { x = 0; foo(x); }
+```
+
+# Input
+```js
+(function() { let x; { x = 0; foo(x); } })();
+```
+
+# Input
+```js
+let x; for (const a of [1,2,3]) { x = foo(); bar(x); }
+```
+
+# Input
+```js
+(function() { let x; for (const a of [1,2,3]) { x = foo(); bar(x); } })();
+```
+
+# Input
+```js
+let x; for (x of array) { x; }
+```
+
+# Input
+```js
+let {a, b} = obj; b = 0;
+```
+
+# Input
+```js
+let a, b; ({a, b} = obj); b++;
+```
+
+# Input
+```js
+let { name, ...otherStuff } = obj; otherStuff = {};
+```
+
+# Input
+```js
+let predicate; [typeNode.returnType, predicate] = foo();
+```
+
+# Input
+```js
+let predicate; [typeNode.returnType, ...predicate] = foo();
+```
+
+# Input
+```js
+let predicate; [typeNode.returnType,, predicate] = foo();
+```
+
+# Input
+```js
+let predicate; [typeNode.returnType=5, predicate] = foo();
+```
+
+# Input
+```js
+let predicate; [[typeNode.returnType=5], predicate] = foo();
+```
+
+# Input
+```js
+let predicate; [[typeNode.returnType, predicate]] = foo();
+```
+
+# Input
+```js
+let predicate; [typeNode.returnType, [predicate]] = foo();
+```
+
+# Input
+```js
+let predicate; [, [typeNode.returnType, predicate]] = foo();
+```
+
+# Input
+```js
+let predicate; [, {foo:typeNode.returnType, predicate}] = foo();
+```
+
+# Input
+```js
+let predicate; [, {foo:typeNode.returnType, ...predicate}] = foo();
+```
+
+# Input
+```js
+let a; const b = {}; ({ a, c: b.c } = func());
+```
+
+# Input
+```js
+const x = [1,2]; let y; [,y] = x; y = 0;
+```
+
+# Input
+```js
+const x = [1,2,3]; let y, z; [y,,z] = x; y = 0; z = 0;
+```
+
+# Input
+```js
+class C { static { let a = 1; a = 2; } }
+```
+
+# Input
+```js
+class C { static { let a; a = 1; a = 2; } }
+```
+
+# Input
+```js
+let a; class C { static { a = 1; } }
+```
+
+# Input
+```js
+class C { static { let a; if (foo) { a = 1; } } }
+```
+
+# Input
+```js
+class C { static { let a; if (foo) a = 1; } }
+```
+
+# Input
+```js
+class C { static { let a, b; if (foo) { ({ a, b } = foo); } } }
+```
+
+# Input
+```js
+class C { static { let a, b; if (foo) ({ a, b } = foo); } }
+```
+
+# Input
+```js
+class C { static { a++; } foo() { a++ } } let a = 1; 
+```
+
+# Input
+```js
+let b; { let e; ({ a: { b, e } } = foo()); }
+```
+
+# Input
+```js
+let [x = -1, y] = [1,2]; y = 0;
+```
+
+# Input
+```js
+let {a: x = -1, b: y} = {a:1,b:2}; y = 0;
+```
+
+# Input
+```js
+(function() { let [x = -1, y] = [1,2]; y = 0; })();
+```
+
+# Input
+```js
+(function() { let {a: x = -1, b: y} = {a:1,b:2}; y = 0; })();
+```
+
+# Input
+```js
+let {a = 0, b} = obj; b = 0; foo(a, b);
+```
+
+# Input
+```js
+let {a: {b, c}} = {a: {b: 1, c: 2}}; b = 3;
+```
+
+# Input
+```js
+let a, b; ({a = 0, b} = obj); b = 0; foo(a, b);
+```
+
+# Input
+```js
+let {a = 0, b} = obj, c = a; b = a;
+```
+
+# Input
+```js
+let x = 'x', y = 'y'; x = 1
+```
+
+# Input
+```js
+let {a, b} = c, d;
+```
+
+# Input
+```js
+let {a, b, c} = {}, e, f;
+```
+
+# Input
+```js
+function a() { let foo = 0, bar = 1; foo = 1; } function b() { let foo = 0, bar = 2; foo = 2; }
+```
+
+# Input
+```js
+let { itemId, list } = {}, obj = [], total = 0; total = 9; console.log(itemId, list, obj, total);
+```
+
+# Input
+```js
+let [ itemId, list ] = [], total = 0; total = 9; console.log(itemId, list, total);
+```
+
+

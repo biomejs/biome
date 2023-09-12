@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: input.jsx
+---
+# Input
+```js
+// invalid
+<>
+  <input type="image" />
+  <input type="image" alt />
+  <input type="image" alt={undefined} />
+  <input type="image">Foo</input>
+  <input type="image" {...this.props} />
+  <input type="image" aria-label="" />
+  <input type="image" aria-label={undefined} />
+  <input type="image" aria-labelledby="" />
+  <input type="image" aria-labelledby={undefined} />
+</>;
+
+// valid
+
+<>
+  <input />
+  <input type="foo" />
+  <input type="image" aria-label="foo" />
+  <input type="image" aria-labelledby="id1" />
+  <input type="image" alt="" />
+  <input type="image" alt="This is descriptive!" />
+  <input type="image" alt={altText} />
+  <Input type="image" />
+</>;
+
+```
+
+# Diagnostics
+```
+input.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    1 │ // invalid
+    2 │ <>
+  > 3 │   <input type="image" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <input type="image" alt />
+    5 │   <input type="image" alt={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    2 │ <>
+    3 │   <input type="image" />
+  > 4 │   <input type="image" alt />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <input type="image" alt={undefined} />
+    6 │   <input type="image">Foo</input>
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    3 │   <input type="image" />
+    4 │   <input type="image" alt />
+  > 5 │   <input type="image" alt={undefined} />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <input type="image">Foo</input>
+    7 │   <input type="image" {...this.props} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    4 │   <input type="image" alt />
+    5 │   <input type="image" alt={undefined} />
+  > 6 │   <input type="image">Foo</input>
+      │   ^^^^^^^^^^^^^^^^^^^^
+    7 │   <input type="image" {...this.props} />
+    8 │   <input type="image" aria-label="" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    5 │   <input type="image" alt={undefined} />
+    6 │   <input type="image">Foo</input>
+  > 7 │   <input type="image" {...this.props} />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <input type="image" aria-label="" />
+    9 │   <input type="image" aria-label={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     6 │   <input type="image">Foo</input>
+     7 │   <input type="image" {...this.props} />
+   > 8 │   <input type="image" aria-label="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <input type="image" aria-label={undefined} />
+    10 │   <input type="image" aria-labelledby="" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     7 │   <input type="image" {...this.props} />
+     8 │   <input type="image" aria-label="" />
+   > 9 │   <input type="image" aria-label={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <input type="image" aria-labelledby="" />
+    11 │   <input type="image" aria-labelledby={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     8 │   <input type="image" aria-label="" />
+     9 │   <input type="image" aria-label={undefined} />
+  > 10 │   <input type="image" aria-labelledby="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │   <input type="image" aria-labelledby={undefined} />
+    12 │ </>;
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+input.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     9 │   <input type="image" aria-label={undefined} />
+    10 │   <input type="image" aria-labelledby="" />
+  > 11 │   <input type="image" aria-labelledby={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ </>;
+    13 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+

@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: namedSpecifiers.js
+---
+# Input
+```js
+import { a1, a3, a5, a2, a4 } from 'a';
+
+import { b1 /* comment 1 */, b3 /* comment 3 */, b5 /* comment 5 */, b2 /* comment 2 */, b4 /* comment 4 */, } from 'b';
+
+import { c1, /* comment 1 */ c3, /* comment 3 */ c5, /* comment 5 */ c2, /* comment 2 */ c4, /* comment 4 */ } from 'c';
+
+import { d1 /* comment 1 */, d3 /* comment 3 */, d5 /* comment 5 */, d2 /* comment 2 */, d4 /* comment 4 */ } from 'd';
+
+import {
+    e1,
+    e3,
+    e5,
+    e2,
+    e4,
+} from 'e';
+
+import {
+    f1,
+    f3,
+    f5,
+    f2,
+    f4
+} from 'f';
+
+import {
+    g1, // comment 1
+    g3, // comment 3
+    g5, // comment 5
+    g2, // comment 2
+    g4, // comment 4
+} from 'g';
+
+import {
+    h1, // comment 1
+    h3, // comment 3
+    h5, // comment 5
+    h2, // comment 2
+    h4 // comment 4
+} from 'h';
+
+import {
+    i5, i4, i6, // comment 6
+    i2, i1, i3, // comment 3
+} from 'i';
+
+import {
+    j1, /* comment 1 */ j3 /* comment 3 */,
+    j2, // comment 2
+} from 'j';
+
+import {
+    k1, /* comment 1 */
+    k3, // comment 3
+    k2, /* comment 2 */ } from 'k';
+
+```
+
+# Actions
+```diff
+@@ -1,54 +1,57 @@
+-import { a1, a3, a5, a2, a4 } from 'a';
++import { a1, a2, a3, a4, a5 } from 'a';
+ 
+-import { b1 /* comment 1 */, b3 /* comment 3 */, b5 /* comment 5 */, b2 /* comment 2 */, b4 /* comment 4 */, } from 'b';
++import { b1 /* comment 1 */, b2 /* comment 2 */, b3 /* comment 3 */, b4 /* comment 4 */, b5 /* comment 5 */, } from 'b';
+ 
+-import { c1, /* comment 1 */ c3, /* comment 3 */ c5, /* comment 5 */ c2, /* comment 2 */ c4, /* comment 4 */ } from 'c';
++import { c1, /* comment 1 */ c2, /* comment 2 */ c3, /* comment 3 */ c4, /* comment 4 */ c5, /* comment 5 */ } from 'c';
+ 
+-import { d1 /* comment 1 */, d3 /* comment 3 */, d5 /* comment 5 */, d2 /* comment 2 */, d4 /* comment 4 */ } from 'd';
++import { d1 /* comment 1 */, d2 /* comment 2 */, d3 /* comment 3 */, d4, /* comment 4 */ d5 /* comment 5 */ } from 'd';
+ 
+ import {
+     e1,
+-    e3,
+-    e5,
+     e2,
++    e3,
+     e4,
++    e5,
+ } from 'e';
+ 
+ import {
+     f1,
++    f2,
+     f3,
+-    f5,
+-    f2,
+-    f4
++    f4,
++    f5
+ } from 'f';
+ 
+ import {
+     g1, // comment 1
+-    g3, // comment 3
+-    g5, // comment 5
+     g2, // comment 2
++    g3, // comment 3
+     g4, // comment 4
++    g5, // comment 5
+ } from 'g';
+ 
+ import {
+     h1, // comment 1
++    h2, // comment 2
+     h3, // comment 3
+-    h5, // comment 5
+-    h2, // comment 2
+-    h4 // comment 4
++    h4, // comment 4
++    h5 // comment 5
+ } from 'h';
+ 
+-import {
+-    i5, i4, i6, // comment 6
+-    i2, i1, i3, // comment 3
++import {i1, 
++    i2, i3, // comment 3
++i4, 
++    i5, i6, // comment 6
+ } from 'i';
+ 
+ import {
+-    j1, /* comment 1 */ j3 /* comment 3 */,
++    j1, /* comment 1 */ 
+     j2, // comment 2
++j3 /* comment 3 */,
+ } from 'j';
+ 
+ import {
+     k1, /* comment 1 */
++    k2, /* comment 2 */ 
+     k3, // comment 3
+-    k2, /* comment 2 */ } from 'k';
++} from 'k';
+
+```
+
+

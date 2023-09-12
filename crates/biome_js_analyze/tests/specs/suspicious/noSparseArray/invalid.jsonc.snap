@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```js
+const b = [/**test*/,];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array contains an empty slot.
+  
+  > 1 │ const b = [/**test*/,];
+      │           ^^^^^^^^^^^^
+  
+  i Suggested fix: Replace hole with undefined
+  
+    1 │ const·b·=·[/**test*/undefined,];
+      │                     +++++++++   
+
+```
+
+# Input
+```js
+const c = [,,];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array contains an empty slot.
+  
+  > 1 │ const c = [,,];
+      │           ^^^^
+  
+  i Suggested fix: Replace hole with undefined
+  
+    1 │ const·c·=·[undefined,·undefined,];
+      │            +++++++++ ++++++++++   
+
+```
+
+# Input
+```js
+const d = [,2];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array contains an empty slot.
+  
+  > 1 │ const d = [,2];
+      │           ^^^^
+  
+  i Suggested fix: Replace hole with undefined
+  
+    1 │ const·d·=·[undefined,2];
+      │            +++++++++    
+
+```
+
+# Input
+```js
+const e = [1,,];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array contains an empty slot.
+  
+  > 1 │ const e = [1,,];
+      │           ^^^^^
+  
+  i Suggested fix: Replace hole with undefined
+  
+    1 │ const·e·=·[1,·undefined,];
+      │              ++++++++++   
+
+```
+
+# Input
+```js
+const f = [1,,2];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array contains an empty slot.
+  
+  > 1 │ const f = [1,,2];
+      │           ^^^^^^
+  
+  i Suggested fix: Replace hole with undefined
+  
+    1 │ const·f·=·[1,·undefined,2];
+      │              ++++++++++    
+
+```
+
+

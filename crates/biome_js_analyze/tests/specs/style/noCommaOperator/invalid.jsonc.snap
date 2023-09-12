@@ -1,0 +1,405 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsonc
+---
+# Input
+```js
+a = 1, 2
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ a = 1, 2
+      │      ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+do {} while (doSomething(), !!test);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ do {} while (doSomething(), !!test);
+      │                           ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+for (; doSomething(), !!test; );
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ for (; doSomething(), !!test; );
+      │                     ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+if (doSomething(), !!test);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:18 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ if (doSomething(), !!test);
+      │                  ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+switch (doSomething(), val) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ switch (doSomething(), val) {}
+      │                      ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+while (doSomething(), !!test);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ while (doSomething(), !!test);
+      │                     ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+with (doSomething(), val) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:20 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ with (doSomething(), val) {}
+      │                    ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+a => (doSomething(), a)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:20 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ a => (doSomething(), a)
+      │                    ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+(1), 2
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ (1), 2
+      │    ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+((1)) , (2)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:7 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ ((1)) , (2)
+      │       ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+while((1) , 2);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ while((1) , 2);
+      │           ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+var foo = (1, 2);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:13 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ var foo = (1, 2);
+      │             ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+(0,eval)("foo()");
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:3 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ (0,eval)("foo()");
+      │   ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+foo(a, (b, c), d);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:10 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ foo(a, (b, c), d);
+      │          ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+do {} while ((doSomething(), !!test));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:28 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ do {} while ((doSomething(), !!test));
+      │                            ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+for (; (doSomething(), !!test); );
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ for (; (doSomething(), !!test); );
+      │                      ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+if ((doSomething(), !!test));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:19 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ if ((doSomething(), !!test));
+      │                   ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+switch ((doSomething(), val)) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ switch ((doSomething(), val)) {}
+      │                       ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+while ((doSomething(), !!test));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ while ((doSomething(), !!test));
+      │                      ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+with ((doSomething(), val)) {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ with ((doSomething(), val)) {}
+      │                     ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+# Input
+```js
+a => ((doSomething(), a))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+  > 1 │ a => ((doSomething(), a))
+      │                     ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+

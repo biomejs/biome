@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: withJsxExpressionChildInvalid.jsx
+---
+# Input
+```js
+<>{foo}</>
+```
+
+# Diagnostics
+```
+withJsxExpressionChildInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+  > 1 │ <>{foo}</>
+      │ ^^^^^^^^^^
+  
+  i Suggested fix: Remove the Fragment
+  
+    1 │ <>{foo}</>
+      │ ---   ----
+
+```
+
+

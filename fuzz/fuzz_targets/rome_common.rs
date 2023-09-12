@@ -13,7 +13,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::JsonFormatLanguage;
 use biome_json_parser::parse_json;
 use libfuzzer_sys::Corpus;
-use rome_js_analyze::analyze;
+use biome_js_analyze::analyze;
 use rome_js_formatter::context::JsFormatOptions;
 use rome_js_formatter::JsFormatLanguage;
 use rome_service::Rules;

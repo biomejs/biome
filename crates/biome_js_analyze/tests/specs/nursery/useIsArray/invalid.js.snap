@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+
+if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
+
+const c = [1,2,3] instanceof globalThis.Array === b;
+
+const d = foo.bar[2] instanceof window.Array
+
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array.isArray() instead of instanceof Array.
+  
+  > 2 │ if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const c = [1,2,3] instanceof globalThis.Array === b;
+  
+  i instanceof Array returns false for array-like objects and arrays from other execution contexts.
+  
+  i Suggested fix: Use Array.isArray() instead.
+  
+    1 1 │   
+    2   │ - if·(/*a*/·arr·/*b*/·instanceof·/*c*/·Array·/*d*/)·{}
+      2 │ + if·(/*a*/·Array.isArray(/*c*/·arr·/*b*/)·/*d*/)·{}
+    3 3 │   
+    4 4 │   const c = [1,2,3] instanceof globalThis.Array === b;
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array.isArray() instead of instanceof Array.
+  
+    2 │ if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
+    3 │ 
+  > 4 │ const c = [1,2,3] instanceof globalThis.Array === b;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ const d = foo.bar[2] instanceof window.Array
+  
+  i instanceof Array returns false for array-like objects and arrays from other execution contexts.
+  
+  i Suggested fix: Use Array.isArray() instead.
+  
+    2 2 │   if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
+    3 3 │   
+    4   │ - const·c·=·[1,2,3]·instanceof·globalThis.Array·===·b;
+      4 │ + const·c·=·globalThis.Array.isArray([1,2,3])·===·b;
+    5 5 │   
+    6 6 │   const d = foo.bar[2] instanceof window.Array
+  
+
+```
+
+```
+invalid.js:6:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array.isArray() instead of instanceof Array.
+  
+    4 │ const c = [1,2,3] instanceof globalThis.Array === b;
+    5 │ 
+  > 6 │ const d = foo.bar[2] instanceof window.Array
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i instanceof Array returns false for array-like objects and arrays from other execution contexts.
+  
+  i Suggested fix: Use Array.isArray() instead.
+  
+    4 4 │   const c = [1,2,3] instanceof globalThis.Array === b;
+    5 5 │   
+    6   │ - const·d·=·foo.bar[2]·instanceof·window.Array
+      6 │ + const·d·=·window.Array.isArray(foo.bar[2])
+    7 7 │   
+  
+
+```
+
+

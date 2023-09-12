@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.js
+---
+# Input
+```js
+try {
+	doSomethingThatMightThrow();
+} catch (e) {
+	throw e;
+}
+
+try {
+	doSomethingThatMightThrow();
+} catch (e) {
+	throw e;
+} finally {
+	cleanUp();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:2 lint/complexity/noUselessCatch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The catch clause that only rethrows the original error is redundant.
+  
+    2 │ 	doSomethingThatMightThrow();
+    3 │ } catch (e) {
+  > 4 │ 	throw e;
+      │ 	^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i These unnecessary catch clauses can be confusing. It is recommended to remove them.
+  
+
+```
+
+```
+invalid.js:10:2 lint/complexity/noUselessCatch ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The catch clause that only rethrows the original error is redundant.
+  
+     8 │ 	doSomethingThatMightThrow();
+     9 │ } catch (e) {
+  > 10 │ 	throw e;
+       │ 	^^^^^^^^
+    11 │ } finally {
+    12 │ 	cleanUp();
+  
+  i These unnecessary catch clauses can be confusing. It is recommended to remove them.
+  
+
+```
+
+

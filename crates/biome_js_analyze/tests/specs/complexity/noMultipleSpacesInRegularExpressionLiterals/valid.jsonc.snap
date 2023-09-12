@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+/foo {2}bar/;
+```
+
+# Input
+```js
+/foo bar baz/;
+```
+
+# Input
+```js
+/foo bar	baz/;
+```
+
+# Input
+```js
+/foo /;
+```
+
+

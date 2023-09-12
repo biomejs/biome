@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+const console = {
+	log() {}
+};
+console.log();
+console.info("info");
+console.warn("warn");
+console.error("error");
+console.assert(true);
+
+```
+
+

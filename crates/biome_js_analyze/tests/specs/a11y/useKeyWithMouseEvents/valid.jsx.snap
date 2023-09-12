@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```js
+<div />;
+<div onFocus={() => {}} />;
+<div onMouseOver={() => {}} onFocus={() => {}} />;
+<div onMouseOver={() => {}} {...props} />;
+<div onMouseOver={() => {}} onFocus={() => {}} {...props} />;
+<div onMouseOver={handleMouseOver} onFocus={handleFocus} />;
+<div onMouseOver={handleMouseOver} onFocus={handleFocus} {...props} />;
+<div onBlur={() => {}} />;
+<div onMouseOut={() => {}} onBlur={() => {}} />;
+<div onMouseOut={() => {}} {...props} />;
+<div onMouseOut={() => {}} onBlur={() => {}} {...props} />;
+<div onMouseOut={handleMouseOut} onBlur={handleOnBlur} />;
+<div onMouseOut={handleMouseOut} onBlur={handleOnBlur} {...props} />;
+<MyComponent />;
+<MyComponent onMouseOver={() => {}} />;
+<MyComponent onMouseOut={() => {}} />;
+<MyComponent onBlur={() => {}} />;
+<MyComponent onFocus={() => {}} />;
+<MyComponent onMouseOver={() => {}} {...props} />;
+<MyComponent onMouseOut={() => {}} {...props} />;
+<MyComponent onBlur={() => {}} {...props} />;
+<MyComponent onFocus={() => {}} {...props} />;
+
+
+```
+
+

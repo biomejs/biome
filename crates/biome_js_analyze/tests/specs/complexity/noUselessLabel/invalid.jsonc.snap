@@ -1,0 +1,472 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsonc
+---
+# Input
+```js
+A: while (a) break A;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:20 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while (a) break A;
+      │                    ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while·(a)·break·A;
+      │                   -- 
+
+```
+
+# Input
+```js
+A: while (a) { B: { continue A; } }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while (a) { B: { continue A; } }
+      │                              ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while·(a)·{·B:·{·continue·A;·}·}
+      │                             --     
+
+```
+
+# Input
+```js
+X: while (x) { A: while (a) { B: { break A; break B; continue X; } } }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:42 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ X: while (x) { A: while (a) { B: { break A; break B; continue X; } } }
+      │                                          ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ X:·while·(x)·{·A:·while·(a)·{·B:·{·break·A;·break·B;·continue·X;·}·}·}
+      │                                         --                            
+
+```
+
+# Input
+```js
+A: do { break A; } while (a);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:15 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: do { break A; } while (a);
+      │               ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·do·{·break·A;·}·while·(a);
+      │              --              
+
+```
+
+# Input
+```js
+A: for (;;) { break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:21 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: for (;;) { break A; }
+      │                     ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·for·(;;)·{·break·A;·}
+      │                    --   
+
+```
+
+# Input
+```js
+A: for (a in obj) { break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: for (a in obj) { break A; }
+      │                           ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·for·(a·in·obj)·{·break·A;·}
+      │                          --   
+
+```
+
+# Input
+```js
+A: for (a of ary) { break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: for (a of ary) { break A; }
+      │                           ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·for·(a·of·ary)·{·break·A;·}
+      │                          --   
+
+```
+
+# Input
+```js
+A: switch (a) { case 0: break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:31 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: switch (a) { case 0: break A; }
+      │                               ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·switch·(a)·{·case·0:·break·A;·}
+      │                              --   
+
+```
+
+# Input
+```js
+X: while (x) { A: switch (a) { case 0: break A; } }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:46 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ X: while (x) { A: switch (a) { case 0: break A; } }
+      │                                              ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ X:·while·(x)·{·A:·switch·(a)·{·case·0:·break·A;·}·}
+      │                                             --     
+
+```
+
+# Input
+```js
+X: switch (a) { case 0: A: while (b) break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:44 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ X: switch (a) { case 0: A: while (b) break A; }
+      │                                            ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ X:·switch·(a)·{·case·0:·A:·while·(b)·break·A;·}
+      │                                           --   
+
+```
+
+# Input
+```js
+A: while (true) { break A; while (true) { break A; } }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while (true) { break A; while (true) { break A; } }
+      │                         ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while·(true)·{·break·A;·while·(true)·{·break·A;·}·}
+      │                        --                             
+
+```
+
+# Input
+```js
+A: while(true) { /*before*/break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:34 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { /*before*/break A; }
+      │                                  ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·/*before*/break·A;·}
+      │                                 --   
+
+```
+
+# Input
+```js
+A: while(true) { break/**/ A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { break/**/ A; }
+      │                            ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·break/**/·A;·}
+      │                           --   
+
+```
+
+# Input
+```js
+A: while(true) { continue /**/ A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:32 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { continue /**/ A; }
+      │                                ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·continue·/**/·A;·}
+      │                               --   
+
+```
+
+# Input
+```js
+A: while(true) { break /**/A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { break /**/A; }
+      │                            ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·break·/**/A;·}
+      │                            -   
+
+```
+
+# Input
+```js
+A: while(true) { continue/**/A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { continue/**/A; }
+      │                              ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·continue/**/A;·}
+      │                              -   
+
+```
+
+# Input
+```js
+A: while(true) { continue A/*after*/; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { continue A/*after*/; }
+      │                           ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·continue·A/*after*/;·}
+      │                          --            
+
+```
+
+# Input
+```js
+A: while(true) { break A //after
+ }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { break A //after
+      │                        ^
+    2 │  }
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·break·A·//after
+      │                        --       
+
+```
+
+# Input
+```js
+A: while(true) { break A /*after*/
+foo() }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { break A /*after*/
+      │                        ^
+    2 │ foo() }
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·break·A·/*after*/
+      │                        --         
+
+```
+
+# Input
+```js
+A: while(true) { while(true) { break A; } break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:49 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { while(true) { break A; } break A; }
+      │                                                 ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·while(true)·{·break·A;·}·break·A;·}
+      │                                                --   
+
+```
+
+# Input
+```js
+A: while(true) { (() => { A: while(true) {} } )(); break A; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:58 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary label.
+  
+  > 1 │ A: while(true) { (() => { A: while(true) {} } )(); break A; }
+      │                                                          ^
+  
+  i Suggested fix: Remove the unnecessary label.
+    You can achieve the same result without the label.
+  
+    1 │ A:·while(true)·{·(()·=>·{·A:·while(true)·{}·}·)();·break·A;·}
+      │                                                         --   
+
+```
+
+

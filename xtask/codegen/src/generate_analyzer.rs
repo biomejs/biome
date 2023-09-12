@@ -14,7 +14,7 @@ pub fn generate_analyzer() -> Result<()> {
 }
 
 fn generate_js_analyzer() -> Result<()> {
-    let base_path = project_root().join("crates/rome_js_analyze/src");
+    let base_path = project_root().join("crates/biome_js_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("analyzers", &mut analyzers, base_path.clone())?;
 
@@ -216,7 +216,7 @@ fn update_js_registry_builder(
     assists: BTreeMap<&'static str, TokenStream>,
     syntax: BTreeMap<&'static str, TokenStream>,
 ) -> Result<()> {
-    let path = project_root().join("crates/rome_js_analyze/src/registry.rs");
+    let path = project_root().join("crates/biome_js_analyze/src/registry.rs");
 
     let categories = analyzers
         .into_iter()

@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+void 0;
+function f() {
+	return void 0;
+}
+var foo = void 0;
+void(0);
+
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The use of void is not allowed.
+  
+  > 1 │ void 0;
+      │ ^^^^^^
+    2 │ function f() {
+    3 │ 	return void 0;
+  
+  i If you use void to alter the return type of a function or return `undefined`, use the global `undefined` instead.
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The use of void is not allowed.
+  
+    1 │ void 0;
+    2 │ function f() {
+  > 3 │ 	return void 0;
+      │ 	       ^^^^^^
+    4 │ }
+    5 │ var foo = void 0;
+  
+  i If you use void to alter the return type of a function or return `undefined`, use the global `undefined` instead.
+  
+
+```
+
+```
+invalid.js:5:11 lint/nursery/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The use of void is not allowed.
+  
+    3 │ 	return void 0;
+    4 │ }
+  > 5 │ var foo = void 0;
+      │           ^^^^^^
+    6 │ void(0);
+    7 │ 
+  
+  i If you use void to alter the return type of a function or return `undefined`, use the global `undefined` instead.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The use of void is not allowed.
+  
+    4 │ }
+    5 │ var foo = void 0;
+  > 6 │ void(0);
+      │ ^^^^^^^
+    7 │ 
+  
+  i If you use void to alter the return type of a function or return `undefined`, use the global `undefined` instead.
+  
+
+```
+
+

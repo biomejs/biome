@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: simple.js
+---
+# Input
+```js
+let c = !a || !b;
+```
+
+# Diagnostics
+```
+simple.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ let c = !a || !b;
+      │     ^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Safe fix: Suppress rule lint/correctness/noUnusedVariables
+  
+    1   │ - let·c·=·!a·||·!b;
+      1 │ + //·biome-ignore·lint/correctness/noUnusedVariables:·<explanation>
+      2 │ + let··c·=·!a·||·!b;
+  
+
+```
+
+

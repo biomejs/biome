@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: remaining-content.js
+---
+# Input
+```js
+import d from 'd';
+import c from 'c';
+
+import b from 'b';
+import a from 'a';
+
+function test() {}
+
+```
+
+# Actions
+```diff
+@@ -1,7 +1,7 @@
++import c from 'c';
+ import d from 'd';
+-import c from 'c';
+ 
++import a from 'a';
+ import b from 'b';
+-import a from 'a';
+ 
+ function test() {}
+
+```
+
+

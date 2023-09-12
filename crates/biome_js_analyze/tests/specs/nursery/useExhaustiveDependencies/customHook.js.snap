@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: customHook.js
+---
+# Input
+```js
+import { useEffect } from "react";
+
+function MyComponent() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    });
+    useMyEffect(() => {
+        console.log(a);
+    });
+}
+
+```
+
+# Diagnostics
+```
+customHook.js:5:5 lint/nursery/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook do not specify all of its dependencies.
+  
+    3 │ function MyComponent() {
+    4 │     let a = 1;
+  > 5 │     useEffect(() => {
+      │     ^^^^^^^^^
+    6 │         console.log(a);
+    7 │     });
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    4 │     let a = 1;
+    5 │     useEffect(() => {
+  > 6 │         console.log(a);
+      │                     ^
+    7 │     });
+    8 │     useMyEffect(() => {
+  
+
+```
+
+```
+customHook.js:8:5 lint/nursery/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook do not specify all of its dependencies.
+  
+     6 │         console.log(a);
+     7 │     });
+   > 8 │     useMyEffect(() => {
+       │     ^^^^^^^^^^^
+     9 │         console.log(a);
+    10 │     });
+  
+  i This dependency is not specified in the hook dependency list.
+  
+     7 │     });
+     8 │     useMyEffect(() => {
+   > 9 │         console.log(a);
+       │                     ^
+    10 │     });
+    11 │ }
+  
+
+```
+
+

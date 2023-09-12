@@ -1,0 +1,318 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: duplicateSuper.js
+---
+# Input
+```js
+// valid
+class B extends A {
+    constructor(cond) {
+        if (cond) {
+            super(true);
+        } else {
+            super(false);
+        }
+    }
+}
+
+// invalid
+class C extends A {
+    constructor() {
+        super(1);
+        super(2);
+    }
+}
+
+// invalid
+class D extends A {
+    constructor(cond) {
+        if (cond) {
+            super(true);
+        }
+        super();
+    }
+}
+
+// invalid
+class E extends A {
+    constructor(cond) {
+        do {
+            super();
+        } while (cond);
+    }
+}
+
+// invalid
+class F extends A {
+    constructor(condA, condB) {
+        if (condA) {
+            super(true);
+        }
+        if (condB) {
+            super(true);
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        while (condA) {
+            if (condB) {
+                super();
+            }
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super()
+        } catch {
+            super()
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super()
+        } finally {
+            super()
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+duplicateSuper.js:14:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths where `super()` is called more than once.
+  
+    12 │ // invalid
+    13 │ class C extends A {
+  > 14 │     constructor() {
+       │     ^^^^^^^^^^^^^^^
+  > 15 │         super(1);
+  > 16 │         super(2);
+  > 17 │     }
+       │     ^
+    18 │ }
+    19 │ 
+  
+  i `super()` is first called here:
+  
+    13 │ class C extends A {
+    14 │     constructor() {
+  > 15 │         super(1);
+       │         ^^^^^
+    16 │         super(2);
+    17 │     }
+  
+  i `super()` is then called again here:
+  
+    14 │     constructor() {
+    15 │         super(1);
+  > 16 │         super(2);
+       │         ^^^^^
+    17 │     }
+    18 │ }
+  
+
+```
+
+```
+duplicateSuper.js:22:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths where `super()` is called more than once.
+  
+    20 │ // invalid
+    21 │ class D extends A {
+  > 22 │     constructor(cond) {
+       │     ^^^^^^^^^^^^^^^^^^^
+  > 23 │         if (cond) {
+  > 24 │             super(true);
+  > 25 │         }
+  > 26 │         super();
+  > 27 │     }
+       │     ^
+    28 │ }
+    29 │ 
+  
+  i `super()` is first called here:
+  
+    22 │     constructor(cond) {
+    23 │         if (cond) {
+  > 24 │             super(true);
+       │             ^^^^^
+    25 │         }
+    26 │         super();
+  
+  i `super()` is then called again here:
+  
+    24 │             super(true);
+    25 │         }
+  > 26 │         super();
+       │         ^^^^^
+    27 │     }
+    28 │ }
+  
+
+```
+
+```
+duplicateSuper.js:32:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor calls `super()` in a loop.
+  
+    30 │ // invalid
+    31 │ class E extends A {
+  > 32 │     constructor(cond) {
+       │     ^^^^^^^^^^^^^^^^^^^
+  > 33 │         do {
+  > 34 │             super();
+  > 35 │         } while (cond);
+  > 36 │     }
+       │     ^
+    37 │ }
+    38 │ 
+  
+  i `super()` is called here:
+  
+    32 │     constructor(cond) {
+    33 │         do {
+  > 34 │             super();
+       │             ^^^^^
+    35 │         } while (cond);
+    36 │     }
+  
+
+```
+
+```
+duplicateSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths that return without calling `super()`.
+  
+    39 │ // invalid
+    40 │ class F extends A {
+  > 41 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 42 │         if (condA) {
+        ...
+  > 47 │         }
+  > 48 │     }
+       │     ^
+    49 │ }
+    50 │ 
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+duplicateSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths that return without calling `super()`.
+  
+    51 │ // invalid
+    52 │ class G extends A {
+  > 53 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 54 │         while (condA) {
+        ...
+  > 58 │         }
+  > 59 │     }
+       │     ^
+    60 │ }
+    61 │ 
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+duplicateSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths where `super()` is called more than once.
+  
+    62 │ // invalid
+    63 │ class G extends A {
+  > 64 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 65 │         try {
+        ...
+  > 69 │         }
+  > 70 │     }
+       │     ^
+    71 │ }
+    72 │ 
+  
+  i `super()` is first called here:
+  
+    64 │     constructor(condA, condB) {
+    65 │         try {
+  > 66 │             super()
+       │             ^^^^^
+    67 │         } catch {
+    68 │             super()
+  
+  i `super()` is then called again here:
+  
+    66 │             super()
+    67 │         } catch {
+  > 68 │             super()
+       │             ^^^^^
+    69 │         }
+    70 │     }
+  
+
+```
+
+```
+duplicateSuper.js:75:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths where `super()` is called more than once.
+  
+    73 │ // invalid
+    74 │ class G extends A {
+  > 75 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 76 │         try {
+        ...
+  > 80 │         }
+  > 81 │     }
+       │     ^
+    82 │ }
+    83 │ 
+  
+  i `super()` is first called here:
+  
+    75 │     constructor(condA, condB) {
+    76 │         try {
+  > 77 │             super()
+       │             ^^^^^
+    78 │         } finally {
+    79 │             super()
+  
+  i `super()` is then called again here:
+  
+    77 │             super()
+    78 │         } finally {
+  > 79 │             super()
+       │             ^^^^^
+    80 │         }
+    81 │     }
+  
+
+```
+
+

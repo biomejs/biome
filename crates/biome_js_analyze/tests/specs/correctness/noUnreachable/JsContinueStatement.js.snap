@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsContinueStatement.js
+---
+# Input
+```js
+function JsContinueStatement1() {
+    while (true) {
+        continue;
+        continue; // afterContinue
+    }
+}
+
+function JsContinueStatement2() {
+    while (true) {
+        continue;
+        break; // afterContinue
+    }
+}
+
+```
+
+# Diagnostics
+```
+JsContinueStatement.js:4:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    2 │     while (true) {
+    3 │         continue;
+  > 4 │         continue; // afterContinue
+      │         ^^^^^^^^^
+    5 │     }
+    6 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+    1 │ function JsContinueStatement1() {
+    2 │     while (true) {
+  > 3 │         continue;
+      │         ^^^^^^^^^
+    4 │         continue; // afterContinue
+    5 │     }
+  
+
+```
+
+```
+JsContinueStatement.js:11:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     9 │     while (true) {
+    10 │         continue;
+  > 11 │         break; // afterContinue
+       │         ^^^^^^
+    12 │     }
+    13 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+     8 │ function JsContinueStatement2() {
+     9 │     while (true) {
+  > 10 │         continue;
+       │         ^^^^^^^^^
+    11 │         break; // afterContinue
+    12 │     }
+  
+
+```
+
+

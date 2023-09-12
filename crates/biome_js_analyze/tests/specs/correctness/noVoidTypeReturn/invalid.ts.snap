@@ -1,0 +1,173 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+class A {
+	f(): void {
+		return undefined;
+	}
+}
+
+const a = {
+	f(): void {
+		return undefined;
+	}
+}
+
+function f(): void {
+	return undefined;
+}
+
+export default function(): void {
+	return undefined;
+}
+
+const g = (): void => {
+	return undefined;
+};
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function should not return a value because its return type is void.
+  
+    1 │ class A {
+    2 │ 	f(): void {
+  > 3 │ 		return undefined;
+      │ 		^^^^^^^^^^^^^^^^^
+    4 │ 	}
+    5 │ }
+  
+  i The function is here:
+  
+    1 │ class A {
+  > 2 │ 	f(): void {
+      │ 	^^^^^^^^^^^
+  > 3 │ 		return undefined;
+  > 4 │ 	}
+      │ 	^
+    5 │ }
+    6 │ 
+  
+  i 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
+  
+
+```
+
+```
+invalid.ts:9:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function should not return a value because its return type is void.
+  
+     7 │ const a = {
+     8 │ 	f(): void {
+   > 9 │ 		return undefined;
+       │ 		^^^^^^^^^^^^^^^^^
+    10 │ 	}
+    11 │ }
+  
+  i The function is here:
+  
+     7 │ const a = {
+   > 8 │ 	f(): void {
+       │ 	^^^^^^^^^^^
+   > 9 │ 		return undefined;
+  > 10 │ 	}
+       │ 	^
+    11 │ }
+    12 │ 
+  
+  i 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
+  
+
+```
+
+```
+invalid.ts:14:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function should not return a value because its return type is void.
+  
+    13 │ function f(): void {
+  > 14 │ 	return undefined;
+       │ 	^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i The function is here:
+  
+    11 │ }
+    12 │ 
+  > 13 │ function f(): void {
+       │ ^^^^^^^^^^^^^^^^^^^^
+  > 14 │ 	return undefined;
+  > 15 │ }
+       │ ^
+    16 │ 
+    17 │ export default function(): void {
+  
+  i 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
+  
+
+```
+
+```
+invalid.ts:18:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function should not return a value because its return type is void.
+  
+    17 │ export default function(): void {
+  > 18 │ 	return undefined;
+       │ 	^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i The function is here:
+  
+    15 │ }
+    16 │ 
+  > 17 │ export default function(): void {
+       │                ^^^^^^^^^^^^^^^^^^
+  > 18 │ 	return undefined;
+  > 19 │ }
+       │ ^
+    20 │ 
+    21 │ const g = (): void => {
+  
+  i 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
+  
+
+```
+
+```
+invalid.ts:22:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function should not return a value because its return type is void.
+  
+    21 │ const g = (): void => {
+  > 22 │ 	return undefined;
+       │ 	^^^^^^^^^^^^^^^^^
+    23 │ };
+    24 │ 
+  
+  i The function is here:
+  
+    19 │ }
+    20 │ 
+  > 21 │ const g = (): void => {
+       │           ^^^^^^^^^^^^^
+  > 22 │ 	return undefined;
+  > 23 │ };
+       │ ^
+    24 │ 
+  
+  i 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
+  
+
+```
+
+

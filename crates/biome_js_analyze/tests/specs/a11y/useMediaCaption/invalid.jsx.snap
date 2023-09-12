@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsx
+---
+# Input
+```js
+<>
+	<audio><track /></audio>
+	<audio><track kind="subtitles" /></audio>
+	<audio />
+	<video><track /></video>
+	<video><track kind="subtitles" /></video>
+	<video />
+	<audio>Foo</audio>
+	<video>Foo</video>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    1 │ <>
+  > 2 │ 	<audio><track /></audio>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<audio><track kind="subtitles" /></audio>
+    4 │ 	<audio />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:3:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    1 │ <>
+    2 │ 	<audio><track /></audio>
+  > 3 │ 	<audio><track kind="subtitles" /></audio>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<audio />
+    5 │ 	<video><track /></video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    2 │ 	<audio><track /></audio>
+    3 │ 	<audio><track kind="subtitles" /></audio>
+  > 4 │ 	<audio />
+      │ 	^^^^^^^^^
+    5 │ 	<video><track /></video>
+    6 │ 	<video><track kind="subtitles" /></video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:5:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    3 │ 	<audio><track kind="subtitles" /></audio>
+    4 │ 	<audio />
+  > 5 │ 	<video><track /></video>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<video><track kind="subtitles" /></video>
+    7 │ 	<video />
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:6:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    4 │ 	<audio />
+    5 │ 	<video><track /></video>
+  > 6 │ 	<video><track kind="subtitles" /></video>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	<video />
+    8 │ 	<audio>Foo</audio>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:7:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+    5 │ 	<video><track /></video>
+    6 │ 	<video><track kind="subtitles" /></video>
+  > 7 │ 	<video />
+      │ 	^^^^^^^^^
+    8 │ 	<audio>Foo</audio>
+    9 │ 	<video>Foo</video>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+     6 │ 	<video><track kind="subtitles" /></video>
+     7 │ 	<video />
+   > 8 │ 	<audio>Foo</audio>
+       │ 	^^^^^^^^^^^^^^^^^^
+     9 │ 	<video>Foo</video>
+    10 │ </>
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+```
+invalid.jsx:9:2 lint/a11y/useMediaCaption ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a track for captions when using audio or video elements.
+  
+     7 │ 	<video />
+     8 │ 	<audio>Foo</audio>
+   > 9 │ 	<video>Foo</video>
+       │ 	^^^^^^^^^^^^^^^^^^
+    10 │ </>
+    11 │ 
+  
+  i Captions support users with hearing-impairments. They should be a transcription or translation of the dialogue, sound effects, musical cues, and other relevant audio information.
+  
+
+```
+
+

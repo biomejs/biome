@@ -1,0 +1,293 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 92
+expression: invalidFunction.ts
+---
+# Input
+```js
+function generic(): any {}
+
+function generic2(): Array<any> {}
+
+function generic3(): any[] {}
+
+function generic4(param: Array<any>): number {}
+
+function generic5(param: any[]): number {}
+
+function generic6(param: Array<any>): Array<any> {}
+
+function generic7(): Array<Array<any>> {}
+
+function generic8(): Array<any[]> {}
+
+function test<T extends Partial<any>>() {}
+
+function foo(a: number, ...rest: any[]): void {
+	return;
+}
+
+function foo5(...args: any) {}
+
+function quux5(fn: (...args: any) => void): void {}
+
+function quuz5(): ((...args: any) => void) {}
+
+declare function waldo5(...args: any): void;
+
+```
+
+# Diagnostics
+```
+invalidFunction.ts:1:21 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+  > 1 │ function generic(): any {}
+      │                     ^^^
+    2 │ 
+    3 │ function generic2(): Array<any> {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:3:28 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    1 │ function generic(): any {}
+    2 │ 
+  > 3 │ function generic2(): Array<any> {}
+      │                            ^^^
+    4 │ 
+    5 │ function generic3(): any[] {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:5:22 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    3 │ function generic2(): Array<any> {}
+    4 │ 
+  > 5 │ function generic3(): any[] {}
+      │                      ^^^
+    6 │ 
+    7 │ function generic4(param: Array<any>): number {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:7:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    5 │ function generic3(): any[] {}
+    6 │ 
+  > 7 │ function generic4(param: Array<any>): number {}
+      │                                ^^^
+    8 │ 
+    9 │ function generic5(param: any[]): number {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:9:26 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     7 │ function generic4(param: Array<any>): number {}
+     8 │ 
+   > 9 │ function generic5(param: any[]): number {}
+       │                          ^^^
+    10 │ 
+    11 │ function generic6(param: Array<any>): Array<any> {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:11:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     9 │ function generic5(param: any[]): number {}
+    10 │ 
+  > 11 │ function generic6(param: Array<any>): Array<any> {}
+       │                                ^^^
+    12 │ 
+    13 │ function generic7(): Array<Array<any>> {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:11:45 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     9 │ function generic5(param: any[]): number {}
+    10 │ 
+  > 11 │ function generic6(param: Array<any>): Array<any> {}
+       │                                             ^^^
+    12 │ 
+    13 │ function generic7(): Array<Array<any>> {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:13:34 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    11 │ function generic6(param: Array<any>): Array<any> {}
+    12 │ 
+  > 13 │ function generic7(): Array<Array<any>> {}
+       │                                  ^^^
+    14 │ 
+    15 │ function generic8(): Array<any[]> {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:15:28 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    13 │ function generic7(): Array<Array<any>> {}
+    14 │ 
+  > 15 │ function generic8(): Array<any[]> {}
+       │                            ^^^
+    16 │ 
+    17 │ function test<T extends Partial<any>>() {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:17:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    15 │ function generic8(): Array<any[]> {}
+    16 │ 
+  > 17 │ function test<T extends Partial<any>>() {}
+       │                                 ^^^
+    18 │ 
+    19 │ function foo(a: number, ...rest: any[]): void {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:19:34 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    17 │ function test<T extends Partial<any>>() {}
+    18 │ 
+  > 19 │ function foo(a: number, ...rest: any[]): void {
+       │                                  ^^^
+    20 │ 	return;
+    21 │ }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:23:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    21 │ }
+    22 │ 
+  > 23 │ function foo5(...args: any) {}
+       │                        ^^^
+    24 │ 
+    25 │ function quux5(fn: (...args: any) => void): void {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:25:30 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    23 │ function foo5(...args: any) {}
+    24 │ 
+  > 25 │ function quux5(fn: (...args: any) => void): void {}
+       │                              ^^^
+    26 │ 
+    27 │ function quuz5(): ((...args: any) => void) {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:27:30 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    25 │ function quux5(fn: (...args: any) => void): void {}
+    26 │ 
+  > 27 │ function quuz5(): ((...args: any) => void) {}
+       │                              ^^^
+    28 │ 
+    29 │ declare function waldo5(...args: any): void;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidFunction.ts:29:34 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    27 │ function quuz5(): ((...args: any) => void) {}
+    28 │ 
+  > 29 │ declare function waldo5(...args: any): void;
+       │                                  ^^^
+    30 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+

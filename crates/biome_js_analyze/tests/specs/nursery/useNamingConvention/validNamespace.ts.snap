@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespace.ts
+---
+# Input
+```js
+export namespace X {}
+
+export namespace PascalCase {}
+
+export namespace camelCase {}
+
+export namespace _PascalCase {}
+
+export namespace _camelCase {}
+```
+
+

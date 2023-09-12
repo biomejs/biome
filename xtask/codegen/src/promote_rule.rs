@@ -16,9 +16,9 @@ const KNOWN_GROUPS: [&str; 7] = [
 ];
 
 const KNOWN_PATHS: [&str; 3] = [
-    "crates/rome_js_analyze/src/analyzers",
-    "crates/rome_js_analyze/src/semantic_analyzers",
-    "crates/rome_js_analyze/src/aria_analyzers",
+    "crates/biome_js_analyze/src/analyzers",
+    "crates/biome_js_analyze/src/semantic_analyzers",
+    "crates/biome_js_analyze/src/aria_analyzers",
 ];
 pub fn promote_rule(rule_name: &str, new_group: &str) {
     let current_dir = env::current_dir().ok().unwrap();
@@ -65,10 +65,10 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         std::fs::write(categories_path, categories).unwrap();
 
         let old_test_path = current_dir
-            .join("crates/rome_js_analyze/tests/specs/nursery")
+            .join("crates/biome_js_analyze/tests/specs/nursery")
             .join(rule_name);
         let new_test_path = current_dir
-            .join("crates/rome_js_analyze/tests/specs")
+            .join("crates/biome_js_analyze/tests/specs")
             .join(new_group)
             .join(rule_name);
 
@@ -76,7 +76,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         move_dir(
             old_test_path.display().to_string(),
             current_dir
-                .join("crates/rome_js_analyze/tests/specs")
+                .join("crates/biome_js_analyze/tests/specs")
                 .join(new_group)
                 .display()
                 .to_string(),

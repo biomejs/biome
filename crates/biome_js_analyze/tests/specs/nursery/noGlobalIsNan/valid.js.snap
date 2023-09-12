@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+Number.isNaN(Number.NaN);
+
+globalThis.Number.isNaN(Number.NaN);
+
+function localIsNaN(isNaN) {
+    isNaN({});
+}
+
+function localVar() {
+    var isNaN;
+    isNaN()
+}
+
+localIsNaN(Number.isNaN);
+
+```
+
+

@@ -1,0 +1,302 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: img.jsx
+---
+# Input
+```js
+// invalid
+<>
+  <img />
+  <img alt />
+  <img alt={undefined} />
+  <img src="xyz" />
+  <img role />
+  <img {...this.props} />
+  <img alt={undefined} role="presentation" />
+  <img alt role="presentation" />
+  <img role="presentation" />
+  <img role="none" />
+  <img aria-label={undefined} />
+  <img aria-labelledby={undefined} />
+  <img aria-label="" />
+  <img aria-labelledby="" />
+</>;
+
+// valid
+
+<>
+  <img alt="foo" />
+  <img alt={"foo"} />
+  <img alt={alt} />
+  <img alt="foo" salt={undefined} />
+  <img {...this.props} alt="foo" />
+  <a />
+  <div />
+  <img alt={function(e) {} } />
+  <div alt={function(e) {} } />
+  <img alt={() => void 0} />
+  <Img />
+  <Component>test</Compoennt>
+  <img alt={alt || "Alt text" } />
+  <img alt={photo.caption} />;
+  <img alt={bar()} />;
+  <img alt={foo.bar || ""} />
+  <img alt={bar() || ""} />
+  <img alt={foo.bar() || ""} />
+  <img alt="" />
+  <img alt={`${undefined}`} />
+  <img alt=" " />
+  <img alt="" role="presentation" />
+  <img alt="" role="none" />
+  <img alt="" role={`presentation`} />
+  <img alt="" role={"presentation"} />
+  <img alt="this is lit..." role="presentation" />
+  <img alt={error ? "not working": "working"} />
+  <img alt={undefined ? "working": "not working"} />
+  <img alt={plugin.name + " Logo"} />
+  <img aria-label="foo" />
+  <img aria-labelledby="id1" />
+</>;
+
+```
+
+# Diagnostics
+```
+img.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    1 │ // invalid
+    2 │ <>
+  > 3 │   <img />
+      │   ^^^^^^^
+    4 │   <img alt />
+    5 │   <img alt={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    2 │ <>
+    3 │   <img />
+  > 4 │   <img alt />
+      │   ^^^^^^^^^^^
+    5 │   <img alt={undefined} />
+    6 │   <img src="xyz" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    3 │   <img />
+    4 │   <img alt />
+  > 5 │   <img alt={undefined} />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <img src="xyz" />
+    7 │   <img role />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    4 │   <img alt />
+    5 │   <img alt={undefined} />
+  > 6 │   <img src="xyz" />
+      │   ^^^^^^^^^^^^^^^^^
+    7 │   <img role />
+    8 │   <img {...this.props} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    5 │   <img alt={undefined} />
+    6 │   <img src="xyz" />
+  > 7 │   <img role />
+      │   ^^^^^^^^^^^^
+    8 │   <img {...this.props} />
+    9 │   <img alt={undefined} role="presentation" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     6 │   <img src="xyz" />
+     7 │   <img role />
+   > 8 │   <img {...this.props} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <img alt={undefined} role="presentation" />
+    10 │   <img alt role="presentation" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     7 │   <img role />
+     8 │   <img {...this.props} />
+   > 9 │   <img alt={undefined} role="presentation" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <img alt role="presentation" />
+    11 │   <img role="presentation" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     8 │   <img {...this.props} />
+     9 │   <img alt={undefined} role="presentation" />
+  > 10 │   <img alt role="presentation" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │   <img role="presentation" />
+    12 │   <img role="none" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     9 │   <img alt={undefined} role="presentation" />
+    10 │   <img alt role="presentation" />
+  > 11 │   <img role="presentation" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   <img role="none" />
+    13 │   <img aria-label={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    10 │   <img alt role="presentation" />
+    11 │   <img role="presentation" />
+  > 12 │   <img role="none" />
+       │   ^^^^^^^^^^^^^^^^^^^
+    13 │   <img aria-label={undefined} />
+    14 │   <img aria-labelledby={undefined} />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    11 │   <img role="presentation" />
+    12 │   <img role="none" />
+  > 13 │   <img aria-label={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   <img aria-labelledby={undefined} />
+    15 │   <img aria-label="" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:14:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    12 │   <img role="none" />
+    13 │   <img aria-label={undefined} />
+  > 14 │   <img aria-labelledby={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │   <img aria-label="" />
+    16 │   <img aria-labelledby="" />
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:15:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    13 │   <img aria-label={undefined} />
+    14 │   <img aria-labelledby={undefined} />
+  > 15 │   <img aria-label="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    16 │   <img aria-labelledby="" />
+    17 │ </>;
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+```
+img.jsx:16:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    14 │   <img aria-labelledby={undefined} />
+    15 │   <img aria-label="" />
+  > 16 │   <img aria-labelledby="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ </>;
+    18 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+
+```
+
+

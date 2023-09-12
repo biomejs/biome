@@ -369,6 +369,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_js_analyze"
+version = "0.2.0"
+dependencies = [
+ "biome_analyze",
+ "biome_aria",
+ "biome_console",
+ "biome_control_flow",
+ "biome_deserialize",
+ "biome_diagnostics",
+ "biome_js_factory",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_js_unicode_table",
+ "biome_json_factory",
+ "biome_json_syntax",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_text_edit",
+ "bpaf",
+ "countme",
+ "insta",
+ "lazy_static",
+ "natord",
+ "roaring",
+ "rustc-hash",
+ "schemars",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_js_factory"
 version = "0.2.0"
 dependencies = [
@@ -2295,40 +2329,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rome_js_analyze"
-version = "0.2.0"
-dependencies = [
- "biome_analyze",
- "biome_aria",
- "biome_console",
- "biome_control_flow",
- "biome_deserialize",
- "biome_diagnostics",
- "biome_js_factory",
- "biome_js_parser",
- "biome_js_semantic",
- "biome_js_syntax",
- "biome_js_unicode_table",
- "biome_json_factory",
- "biome_json_syntax",
- "biome_rowan",
- "biome_test_utils",
- "biome_text_edit",
- "bpaf",
- "countme",
- "insta",
- "lazy_static",
- "natord",
- "roaring",
- "rustc-hash",
- "schemars",
- "serde",
- "serde_json",
- "smallvec",
- "tests_macros",
-]
-
-[[package]]
 name = "rome_js_formatter"
 version = "0.1.0"
 dependencies = [
@@ -2370,6 +2370,7 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_fs",
+ "biome_js_analyze",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_semantic",
@@ -2385,7 +2386,6 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
- "rome_js_analyze",
  "rome_js_formatter",
  "schemars",
  "serde",
@@ -3527,6 +3527,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_js_analyze",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_formatter",
@@ -3542,7 +3543,6 @@ dependencies = [
  "mimalloc",
  "pico-args",
  "regex",
- "rome_js_analyze",
  "rome_js_formatter",
  "tikv-jemallocator",
  "timing",
@@ -3560,6 +3560,7 @@ dependencies = [
  "biome_aria",
  "biome_cli",
  "biome_diagnostics",
+ "biome_js_analyze",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
@@ -3577,7 +3578,6 @@ dependencies = [
  "proc-macro2",
  "pulldown-cmark",
  "quote",
- "rome_js_analyze",
  "rome_js_formatter",
  "rome_service",
  "schemars",
@@ -3633,6 +3633,7 @@ dependencies = [
 name = "xtask_libs_bench"
 version = "0.0.0"
 dependencies = [
+ "biome_js_analyze",
  "case",
  "criterion 0.4.0",
  "fastbloom-rs",
@@ -3641,7 +3642,6 @@ dependencies = [
  "memchr",
  "qp-trie",
  "regex",
- "rome_js_analyze",
 ]
 
 [[package]]
@@ -3652,6 +3652,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_js_analyze",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
@@ -3659,7 +3660,6 @@ dependencies = [
  "biome_json_syntax",
  "convert_case",
  "pulldown-cmark",
- "rome_js_analyze",
  "rome_service",
  "xtask",
 ]

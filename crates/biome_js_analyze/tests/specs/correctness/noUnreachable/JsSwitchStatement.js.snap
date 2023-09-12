@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsSwitchStatement.js
+---
+# Input
+```js
+function JsSwitchStatement1() {
+    switch (value) {
+        case 0:
+            case0();
+            break;
+        default:
+            caseDefault();
+            break;
+        case 1: // afterDefault
+            afterDefault();
+    }
+}
+
+function JsSwitchStatement2() {
+    switch (value) {
+        case 0:
+            break;
+            afterBreak();
+    }
+}
+
+function JsSwitchStatement3() {
+    return;
+    switch (value) {}
+}
+
+```
+
+# Diagnostics
+```
+JsSwitchStatement.js:18:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    16 │         case 0:
+    17 │             break;
+  > 18 │             afterBreak();
+       │             ^^^^^^^^^^^^^
+    19 │     }
+    20 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    15 │     switch (value) {
+    16 │         case 0:
+  > 17 │             break;
+       │             ^^^^^^
+    18 │             afterBreak();
+    19 │     }
+  
+
+```
+
+```
+JsSwitchStatement.js:24:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    22 │ function JsSwitchStatement3() {
+    23 │     return;
+  > 24 │     switch (value) {}
+       │     ^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    22 │ function JsSwitchStatement3() {
+  > 23 │     return;
+       │     ^^^^^^^
+    24 │     switch (value) {}
+    25 │ }
+  
+
+```
+
+

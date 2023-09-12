@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noUndeclaredVariables.ts
+---
+# Input
+```js
+// valid
+export type EventHandler<T extends string> = `on${T}`
+export type EventHandlerDefault<T extends string = 'click'> = `on${T}`
+
+export type NestedContext<S extends NestedContext<''>> = '' | `(${S})`
+export type NestedContextDefault<S extends NestedContextDefault = ''> = '' | `(${S})`
+
+export type Whatever<S extends number> = `Hello ${S}`
+export type WhateverDefault<S extends number = 2> = `Hello ${S}`
+
+// Const assertions are valid
+const fruits = ["banana"] as const;
+
+class X {
+  f() {
+    this.g;
+    type T1 = typeof this.g;
+    type T2 = X['g'];
+  }
+
+  g() {
+  }
+}
+
+// Invalid
+export type Invalid<S extends number> = `Hello ${T}`
+
+```
+
+# Diagnostics
+```
+noUndeclaredVariables.ts:26:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The T variable is undeclared
+  
+    25 │ // Invalid
+  > 26 │ export type Invalid<S extends number> = `Hello ${T}`
+       │                                                  ^
+    27 │ 
+  
+
+```
+
+

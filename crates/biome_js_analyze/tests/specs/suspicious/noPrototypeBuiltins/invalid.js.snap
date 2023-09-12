@@ -1,0 +1,209 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.js
+---
+# Input
+```js
+foo.hasOwnProperty("bar");
+foo.isPrototypeOf(bar);
+foo.propertyIsEnumerable("bar");
+foo.bar.hasOwnProperty("bar");
+foo.bar.baz.isPrototypeOf("bar");
+foo["hasOwnProperty"]("bar");
+foo[`isPrototypeOf`]("bar").baz;
+foo?.hasOwnProperty(bar);
+(foo?.hasOwnProperty)("bar");
+foo?.["hasOwnProperty"]("bar");
+(foo?.[`hasOwnProperty`])("bar");
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+  > 1 │ foo.hasOwnProperty("bar");
+      │     ^^^^^^^^^^^^^^
+    2 │ foo.isPrototypeOf(bar);
+    3 │ foo.propertyIsEnumerable("bar");
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:2:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
+  
+    1 │ foo.hasOwnProperty("bar");
+  > 2 │ foo.isPrototypeOf(bar);
+      │     ^^^^^^^^^^^^^
+    3 │ foo.propertyIsEnumerable("bar");
+    4 │ foo.bar.hasOwnProperty("bar");
+  
+
+```
+
+```
+invalid.js:3:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'propertyIsEnumerable' from target object.
+  
+    1 │ foo.hasOwnProperty("bar");
+    2 │ foo.isPrototypeOf(bar);
+  > 3 │ foo.propertyIsEnumerable("bar");
+      │     ^^^^^^^^^^^^^^^^^^^^
+    4 │ foo.bar.hasOwnProperty("bar");
+    5 │ foo.bar.baz.isPrototypeOf("bar");
+  
+
+```
+
+```
+invalid.js:4:9 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+    2 │ foo.isPrototypeOf(bar);
+    3 │ foo.propertyIsEnumerable("bar");
+  > 4 │ foo.bar.hasOwnProperty("bar");
+      │         ^^^^^^^^^^^^^^
+    5 │ foo.bar.baz.isPrototypeOf("bar");
+    6 │ foo["hasOwnProperty"]("bar");
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:5:13 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
+  
+    3 │ foo.propertyIsEnumerable("bar");
+    4 │ foo.bar.hasOwnProperty("bar");
+  > 5 │ foo.bar.baz.isPrototypeOf("bar");
+      │             ^^^^^^^^^^^^^
+    6 │ foo["hasOwnProperty"]("bar");
+    7 │ foo[`isPrototypeOf`]("bar").baz;
+  
+
+```
+
+```
+invalid.js:6:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+    4 │ foo.bar.hasOwnProperty("bar");
+    5 │ foo.bar.baz.isPrototypeOf("bar");
+  > 6 │ foo["hasOwnProperty"]("bar");
+      │     ^^^^^^^^^^^^^^^^
+    7 │ foo[`isPrototypeOf`]("bar").baz;
+    8 │ foo?.hasOwnProperty(bar);
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:7:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
+  
+    5 │ foo.bar.baz.isPrototypeOf("bar");
+    6 │ foo["hasOwnProperty"]("bar");
+  > 7 │ foo[`isPrototypeOf`]("bar").baz;
+      │      ^^^^^^^^^^^^^
+    8 │ foo?.hasOwnProperty(bar);
+    9 │ (foo?.hasOwnProperty)("bar");
+  
+
+```
+
+```
+invalid.js:8:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+     6 │ foo["hasOwnProperty"]("bar");
+     7 │ foo[`isPrototypeOf`]("bar").baz;
+   > 8 │ foo?.hasOwnProperty(bar);
+       │      ^^^^^^^^^^^^^^
+     9 │ (foo?.hasOwnProperty)("bar");
+    10 │ foo?.["hasOwnProperty"]("bar");
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:9:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+     7 │ foo[`isPrototypeOf`]("bar").baz;
+     8 │ foo?.hasOwnProperty(bar);
+   > 9 │ (foo?.hasOwnProperty)("bar");
+       │       ^^^^^^^^^^^^^^
+    10 │ foo?.["hasOwnProperty"]("bar");
+    11 │ (foo?.[`hasOwnProperty`])("bar");
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:10:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+     8 │ foo?.hasOwnProperty(bar);
+     9 │ (foo?.hasOwnProperty)("bar");
+  > 10 │ foo?.["hasOwnProperty"]("bar");
+       │       ^^^^^^^^^^^^^^^^
+    11 │ (foo?.[`hasOwnProperty`])("bar");
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:11:9 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
+  
+     9 │ (foo?.hasOwnProperty)("bar");
+    10 │ foo?.["hasOwnProperty"]("bar");
+  > 11 │ (foo?.[`hasOwnProperty`])("bar");
+       │         ^^^^^^^^^^^^^^
+  
+  i It's recommended using Object.hasOwn() instead of using Object.hasOwnProperty().
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+

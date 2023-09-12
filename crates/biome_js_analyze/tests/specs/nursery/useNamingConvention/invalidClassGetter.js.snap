@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidClassGetter.js
+---
+# Input
+```js
+export default class {
+    get X() {}
+
+    get PROPERTY() {}
+
+    get SpecialProperty() {}
+
+    get special_property() {}
+
+    get Unknown_Style() {}
+
+    get #X() {}
+
+    get #PROPERTY() {}
+
+    get #SpecialProperty() {}
+
+    get #special_property() {}
+
+    get #Unknown_Style() {}
+}
+```
+
+# Diagnostics
+```
+invalidClassGetter.js:2:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    1 │ export default class {
+  > 2 │     get X() {}
+      │         ^
+    3 │ 
+    4 │     get PROPERTY() {}
+  
+  i The name could be renamed to `x`.
+  
+
+```
+
+```
+invalidClassGetter.js:4:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    2 │     get X() {}
+    3 │ 
+  > 4 │     get PROPERTY() {}
+      │         ^^^^^^^^
+    5 │ 
+    6 │     get SpecialProperty() {}
+  
+  i The name could be renamed to `property`.
+  
+
+```
+
+```
+invalidClassGetter.js:6:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    4 │     get PROPERTY() {}
+    5 │ 
+  > 6 │     get SpecialProperty() {}
+      │         ^^^^^^^^^^^^^^^
+    7 │ 
+    8 │     get special_property() {}
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidClassGetter.js:8:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+     6 │     get SpecialProperty() {}
+     7 │ 
+   > 8 │     get special_property() {}
+       │         ^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │     get Unknown_Style() {}
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidClassGetter.js:10:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+     8 │     get special_property() {}
+     9 │ 
+  > 10 │     get Unknown_Style() {}
+       │         ^^^^^^^^^^^^^
+    11 │ 
+    12 │     get #X() {}
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+```
+invalidClassGetter.js:12:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    10 │     get Unknown_Style() {}
+    11 │ 
+  > 12 │     get #X() {}
+       │         ^^
+    13 │ 
+    14 │     get #PROPERTY() {}
+  
+  i The name could be renamed to `x`.
+  
+
+```
+
+```
+invalidClassGetter.js:14:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    12 │     get #X() {}
+    13 │ 
+  > 14 │     get #PROPERTY() {}
+       │         ^^^^^^^^^
+    15 │ 
+    16 │     get #SpecialProperty() {}
+  
+  i The name could be renamed to `property`.
+  
+
+```
+
+```
+invalidClassGetter.js:16:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    14 │     get #PROPERTY() {}
+    15 │ 
+  > 16 │     get #SpecialProperty() {}
+       │         ^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │     get #special_property() {}
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidClassGetter.js:18:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    16 │     get #SpecialProperty() {}
+    17 │ 
+  > 18 │     get #special_property() {}
+       │         ^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │     get #Unknown_Style() {}
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidClassGetter.js:20:9 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class getter name should be in camelCase.
+  
+    18 │     get #special_property() {}
+    19 │ 
+  > 20 │     get #Unknown_Style() {}
+       │         ^^^^^^^^^^^^^^
+    21 │ }
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+

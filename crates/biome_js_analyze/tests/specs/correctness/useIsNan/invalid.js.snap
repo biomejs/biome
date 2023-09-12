@@ -1,0 +1,1341 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+123 == NaN;
+123 === NaN;
+NaN === "abc";
+NaN == "abc";
+123 != NaN;
+123 !== NaN;
+NaN !== "abc";
+NaN != "abc";
+NaN < "abc";
+"abc" < NaN;
+NaN > "abc";
+"abc" > NaN;
+NaN <= "abc";
+"abc" <= NaN;
+NaN >= "abc";
+"abc" >= NaN;
+123 == Number.NaN;
+123 === Number.NaN;
+Number.NaN === "abc";
+Number.NaN == "abc";
+123 != Number.NaN;
+123 !== Number.NaN;
+Number.NaN !== "abc";
+Number.NaN != "abc";
+Number.NaN < "abc";
+"abc" < Number.NaN;
+Number.NaN > "abc";
+"abc" > Number.NaN;
+Number.NaN <= "abc";
+"abc" <= Number.NaN;
+Number.NaN >= "abc";
+"abc" >= Number.NaN;
+x === Number?.NaN;
+x === Number['NaN'];
+
+123 == globalThis.NaN;
+123 == window.NaN;
+123 == globalThis.Number.NaN;
+
+// switch-case
+switch(NaN) { case foo: break; }
+switch(NaN) {}
+switch(foo) { case NaN: break; }
+switch(NaN) { default: break; }
+switch(NaN) { case foo: break; default: break; }
+switch(foo) { case NaN: }
+switch(foo) { case (NaN): break; }
+switch(foo) { case bar: break; case NaN: break; default: break; }
+switch(foo) { case bar: case NaN: default: break; }
+switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+switch(NaN) { case NaN: break; }
+switch(foo) { case Number.NaN: break; }
+switch(Number.NaN) { case foo: break; }
+switch(Number.NaN) {}
+switch(Number.NaN) { default: break; }
+switch(Number.NaN) { case foo: break; default: break; }
+switch(foo) { case Number.NaN: }
+switch(foo) { case (Number.NaN): break; }
+switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+switch(foo) { case bar: case Number.NaN: default: break; }
+switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+switch(Number.NaN) { case Number.NaN: break; }
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+  > 1 │ 123 == NaN;
+      │ ^^^^^^^^^^
+    2 │ 123 === NaN;
+    3 │ NaN === "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1    │ - 123·==·NaN;
+        1 │ + Number.isNaN(123);
+     2  2 │   123 === NaN;
+     3  3 │   NaN === "abc";
+  
+
+```
+
+```
+invalid.js:2:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    1 │ 123 == NaN;
+  > 2 │ 123 === NaN;
+      │ ^^^^^^^^^^^
+    3 │ NaN === "abc";
+    4 │ NaN == "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1  1 │   123 == NaN;
+     2    │ - 123·===·NaN;
+        2 │ + Number.isNaN(123);
+     3  3 │   NaN === "abc";
+     4  4 │   NaN == "abc";
+  
+
+```
+
+```
+invalid.js:3:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    1 │ 123 == NaN;
+    2 │ 123 === NaN;
+  > 3 │ NaN === "abc";
+      │ ^^^^^^^^^^^^^
+    4 │ NaN == "abc";
+    5 │ 123 != NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     1  1 │   123 == NaN;
+     2  2 │   123 === NaN;
+     3    │ - NaN·===·"abc";
+        3 │ + Number.isNaN("abc");
+     4  4 │   NaN == "abc";
+     5  5 │   123 != NaN;
+  
+
+```
+
+```
+invalid.js:4:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    2 │ 123 === NaN;
+    3 │ NaN === "abc";
+  > 4 │ NaN == "abc";
+      │ ^^^^^^^^^^^^
+    5 │ 123 != NaN;
+    6 │ 123 !== NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     2  2 │   123 === NaN;
+     3  3 │   NaN === "abc";
+     4    │ - NaN·==·"abc";
+        4 │ + Number.isNaN("abc");
+     5  5 │   123 != NaN;
+     6  6 │   123 !== NaN;
+  
+
+```
+
+```
+invalid.js:5:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    3 │ NaN === "abc";
+    4 │ NaN == "abc";
+  > 5 │ 123 != NaN;
+      │ ^^^^^^^^^^
+    6 │ 123 !== NaN;
+    7 │ NaN !== "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     3  3 │   NaN === "abc";
+     4  4 │   NaN == "abc";
+     5    │ - 123·!=·NaN;
+        5 │ + !Number.isNaN(123);
+     6  6 │   123 !== NaN;
+     7  7 │   NaN !== "abc";
+  
+
+```
+
+```
+invalid.js:6:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    4 │ NaN == "abc";
+    5 │ 123 != NaN;
+  > 6 │ 123 !== NaN;
+      │ ^^^^^^^^^^^
+    7 │ NaN !== "abc";
+    8 │ NaN != "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     4  4 │   NaN == "abc";
+     5  5 │   123 != NaN;
+     6    │ - 123·!==·NaN;
+        6 │ + !Number.isNaN(123);
+     7  7 │   NaN !== "abc";
+     8  8 │   NaN != "abc";
+  
+
+```
+
+```
+invalid.js:7:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    5 │ 123 != NaN;
+    6 │ 123 !== NaN;
+  > 7 │ NaN !== "abc";
+      │ ^^^^^^^^^^^^^
+    8 │ NaN != "abc";
+    9 │ NaN < "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     5  5 │   123 != NaN;
+     6  6 │   123 !== NaN;
+     7    │ - NaN·!==·"abc";
+        7 │ + !Number.isNaN("abc");
+     8  8 │   NaN != "abc";
+     9  9 │   NaN < "abc";
+  
+
+```
+
+```
+invalid.js:8:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+     6 │ 123 !== NaN;
+     7 │ NaN !== "abc";
+   > 8 │ NaN != "abc";
+       │ ^^^^^^^^^^^^
+     9 │ NaN < "abc";
+    10 │ "abc" < NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     6  6 │   123 !== NaN;
+     7  7 │   NaN !== "abc";
+     8    │ - NaN·!=·"abc";
+        8 │ + !Number.isNaN("abc");
+     9  9 │   NaN < "abc";
+    10 10 │   "abc" < NaN;
+  
+
+```
+
+```
+invalid.js:9:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+     7 │ NaN !== "abc";
+     8 │ NaN != "abc";
+   > 9 │ NaN < "abc";
+       │ ^^^^^^^^^^^
+    10 │ "abc" < NaN;
+    11 │ NaN > "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     7  7 │   NaN !== "abc";
+     8  8 │   NaN != "abc";
+     9    │ - NaN·<·"abc";
+        9 │ + Number.isNaN("abc");
+    10 10 │   "abc" < NaN;
+    11 11 │   NaN > "abc";
+  
+
+```
+
+```
+invalid.js:10:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+     8 │ NaN != "abc";
+     9 │ NaN < "abc";
+  > 10 │ "abc" < NaN;
+       │ ^^^^^^^^^^^
+    11 │ NaN > "abc";
+    12 │ "abc" > NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     8  8 │   NaN != "abc";
+     9  9 │   NaN < "abc";
+    10    │ - "abc"·<·NaN;
+       10 │ + Number.isNaN("abc");
+    11 11 │   NaN > "abc";
+    12 12 │   "abc" > NaN;
+  
+
+```
+
+```
+invalid.js:11:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+     9 │ NaN < "abc";
+    10 │ "abc" < NaN;
+  > 11 │ NaN > "abc";
+       │ ^^^^^^^^^^^
+    12 │ "abc" > NaN;
+    13 │ NaN <= "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+     9  9 │   NaN < "abc";
+    10 10 │   "abc" < NaN;
+    11    │ - NaN·>·"abc";
+       11 │ + Number.isNaN("abc");
+    12 12 │   "abc" > NaN;
+    13 13 │   NaN <= "abc";
+  
+
+```
+
+```
+invalid.js:12:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    10 │ "abc" < NaN;
+    11 │ NaN > "abc";
+  > 12 │ "abc" > NaN;
+       │ ^^^^^^^^^^^
+    13 │ NaN <= "abc";
+    14 │ "abc" <= NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    10 10 │   "abc" < NaN;
+    11 11 │   NaN > "abc";
+    12    │ - "abc"·>·NaN;
+       12 │ + Number.isNaN("abc");
+    13 13 │   NaN <= "abc";
+    14 14 │   "abc" <= NaN;
+  
+
+```
+
+```
+invalid.js:13:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    11 │ NaN > "abc";
+    12 │ "abc" > NaN;
+  > 13 │ NaN <= "abc";
+       │ ^^^^^^^^^^^^
+    14 │ "abc" <= NaN;
+    15 │ NaN >= "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    11 11 │   NaN > "abc";
+    12 12 │   "abc" > NaN;
+    13    │ - NaN·<=·"abc";
+       13 │ + Number.isNaN("abc");
+    14 14 │   "abc" <= NaN;
+    15 15 │   NaN >= "abc";
+  
+
+```
+
+```
+invalid.js:14:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    12 │ "abc" > NaN;
+    13 │ NaN <= "abc";
+  > 14 │ "abc" <= NaN;
+       │ ^^^^^^^^^^^^
+    15 │ NaN >= "abc";
+    16 │ "abc" >= NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    12 12 │   "abc" > NaN;
+    13 13 │   NaN <= "abc";
+    14    │ - "abc"·<=·NaN;
+       14 │ + Number.isNaN("abc");
+    15 15 │   NaN >= "abc";
+    16 16 │   "abc" >= NaN;
+  
+
+```
+
+```
+invalid.js:15:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    13 │ NaN <= "abc";
+    14 │ "abc" <= NaN;
+  > 15 │ NaN >= "abc";
+       │ ^^^^^^^^^^^^
+    16 │ "abc" >= NaN;
+    17 │ 123 == Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    13 13 │   NaN <= "abc";
+    14 14 │   "abc" <= NaN;
+    15    │ - NaN·>=·"abc";
+       15 │ + Number.isNaN("abc");
+    16 16 │   "abc" >= NaN;
+    17 17 │   123 == Number.NaN;
+  
+
+```
+
+```
+invalid.js:16:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    14 │ "abc" <= NaN;
+    15 │ NaN >= "abc";
+  > 16 │ "abc" >= NaN;
+       │ ^^^^^^^^^^^^
+    17 │ 123 == Number.NaN;
+    18 │ 123 === Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    14 14 │   "abc" <= NaN;
+    15 15 │   NaN >= "abc";
+    16    │ - "abc"·>=·NaN;
+       16 │ + Number.isNaN("abc");
+    17 17 │   123 == Number.NaN;
+    18 18 │   123 === Number.NaN;
+  
+
+```
+
+```
+invalid.js:17:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    15 │ NaN >= "abc";
+    16 │ "abc" >= NaN;
+  > 17 │ 123 == Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^
+    18 │ 123 === Number.NaN;
+    19 │ Number.NaN === "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    15 15 │   NaN >= "abc";
+    16 16 │   "abc" >= NaN;
+    17    │ - 123·==·Number.NaN;
+       17 │ + Number.isNaN(123);
+    18 18 │   123 === Number.NaN;
+    19 19 │   Number.NaN === "abc";
+  
+
+```
+
+```
+invalid.js:18:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    16 │ "abc" >= NaN;
+    17 │ 123 == Number.NaN;
+  > 18 │ 123 === Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^
+    19 │ Number.NaN === "abc";
+    20 │ Number.NaN == "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    16 16 │   "abc" >= NaN;
+    17 17 │   123 == Number.NaN;
+    18    │ - 123·===·Number.NaN;
+       18 │ + Number.isNaN(123);
+    19 19 │   Number.NaN === "abc";
+    20 20 │   Number.NaN == "abc";
+  
+
+```
+
+```
+invalid.js:19:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    17 │ 123 == Number.NaN;
+    18 │ 123 === Number.NaN;
+  > 19 │ Number.NaN === "abc";
+       │ ^^^^^^^^^^^^^^^^^^^^
+    20 │ Number.NaN == "abc";
+    21 │ 123 != Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    17 17 │   123 == Number.NaN;
+    18 18 │   123 === Number.NaN;
+    19    │ - Number.NaN·===·"abc";
+       19 │ + Number.isNaN("abc");
+    20 20 │   Number.NaN == "abc";
+    21 21 │   123 != Number.NaN;
+  
+
+```
+
+```
+invalid.js:20:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    18 │ 123 === Number.NaN;
+    19 │ Number.NaN === "abc";
+  > 20 │ Number.NaN == "abc";
+       │ ^^^^^^^^^^^^^^^^^^^
+    21 │ 123 != Number.NaN;
+    22 │ 123 !== Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    18 18 │   123 === Number.NaN;
+    19 19 │   Number.NaN === "abc";
+    20    │ - Number.NaN·==·"abc";
+       20 │ + Number.isNaN("abc");
+    21 21 │   123 != Number.NaN;
+    22 22 │   123 !== Number.NaN;
+  
+
+```
+
+```
+invalid.js:21:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    19 │ Number.NaN === "abc";
+    20 │ Number.NaN == "abc";
+  > 21 │ 123 != Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^
+    22 │ 123 !== Number.NaN;
+    23 │ Number.NaN !== "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    19 19 │   Number.NaN === "abc";
+    20 20 │   Number.NaN == "abc";
+    21    │ - 123·!=·Number.NaN;
+       21 │ + !Number.isNaN(123);
+    22 22 │   123 !== Number.NaN;
+    23 23 │   Number.NaN !== "abc";
+  
+
+```
+
+```
+invalid.js:22:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    20 │ Number.NaN == "abc";
+    21 │ 123 != Number.NaN;
+  > 22 │ 123 !== Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^
+    23 │ Number.NaN !== "abc";
+    24 │ Number.NaN != "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    20 20 │   Number.NaN == "abc";
+    21 21 │   123 != Number.NaN;
+    22    │ - 123·!==·Number.NaN;
+       22 │ + !Number.isNaN(123);
+    23 23 │   Number.NaN !== "abc";
+    24 24 │   Number.NaN != "abc";
+  
+
+```
+
+```
+invalid.js:23:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    21 │ 123 != Number.NaN;
+    22 │ 123 !== Number.NaN;
+  > 23 │ Number.NaN !== "abc";
+       │ ^^^^^^^^^^^^^^^^^^^^
+    24 │ Number.NaN != "abc";
+    25 │ Number.NaN < "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    21 21 │   123 != Number.NaN;
+    22 22 │   123 !== Number.NaN;
+    23    │ - Number.NaN·!==·"abc";
+       23 │ + !Number.isNaN("abc");
+    24 24 │   Number.NaN != "abc";
+    25 25 │   Number.NaN < "abc";
+  
+
+```
+
+```
+invalid.js:24:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    22 │ 123 !== Number.NaN;
+    23 │ Number.NaN !== "abc";
+  > 24 │ Number.NaN != "abc";
+       │ ^^^^^^^^^^^^^^^^^^^
+    25 │ Number.NaN < "abc";
+    26 │ "abc" < Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    22 22 │   123 !== Number.NaN;
+    23 23 │   Number.NaN !== "abc";
+    24    │ - Number.NaN·!=·"abc";
+       24 │ + !Number.isNaN("abc");
+    25 25 │   Number.NaN < "abc";
+    26 26 │   "abc" < Number.NaN;
+  
+
+```
+
+```
+invalid.js:25:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    23 │ Number.NaN !== "abc";
+    24 │ Number.NaN != "abc";
+  > 25 │ Number.NaN < "abc";
+       │ ^^^^^^^^^^^^^^^^^^
+    26 │ "abc" < Number.NaN;
+    27 │ Number.NaN > "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    23 23 │   Number.NaN !== "abc";
+    24 24 │   Number.NaN != "abc";
+    25    │ - Number.NaN·<·"abc";
+       25 │ + Number.isNaN("abc");
+    26 26 │   "abc" < Number.NaN;
+    27 27 │   Number.NaN > "abc";
+  
+
+```
+
+```
+invalid.js:26:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    24 │ Number.NaN != "abc";
+    25 │ Number.NaN < "abc";
+  > 26 │ "abc" < Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^
+    27 │ Number.NaN > "abc";
+    28 │ "abc" > Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    24 24 │   Number.NaN != "abc";
+    25 25 │   Number.NaN < "abc";
+    26    │ - "abc"·<·Number.NaN;
+       26 │ + Number.isNaN("abc");
+    27 27 │   Number.NaN > "abc";
+    28 28 │   "abc" > Number.NaN;
+  
+
+```
+
+```
+invalid.js:27:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    25 │ Number.NaN < "abc";
+    26 │ "abc" < Number.NaN;
+  > 27 │ Number.NaN > "abc";
+       │ ^^^^^^^^^^^^^^^^^^
+    28 │ "abc" > Number.NaN;
+    29 │ Number.NaN <= "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    25 25 │   Number.NaN < "abc";
+    26 26 │   "abc" < Number.NaN;
+    27    │ - Number.NaN·>·"abc";
+       27 │ + Number.isNaN("abc");
+    28 28 │   "abc" > Number.NaN;
+    29 29 │   Number.NaN <= "abc";
+  
+
+```
+
+```
+invalid.js:28:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    26 │ "abc" < Number.NaN;
+    27 │ Number.NaN > "abc";
+  > 28 │ "abc" > Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^
+    29 │ Number.NaN <= "abc";
+    30 │ "abc" <= Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    26 26 │   "abc" < Number.NaN;
+    27 27 │   Number.NaN > "abc";
+    28    │ - "abc"·>·Number.NaN;
+       28 │ + Number.isNaN("abc");
+    29 29 │   Number.NaN <= "abc";
+    30 30 │   "abc" <= Number.NaN;
+  
+
+```
+
+```
+invalid.js:29:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    27 │ Number.NaN > "abc";
+    28 │ "abc" > Number.NaN;
+  > 29 │ Number.NaN <= "abc";
+       │ ^^^^^^^^^^^^^^^^^^^
+    30 │ "abc" <= Number.NaN;
+    31 │ Number.NaN >= "abc";
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    27 27 │   Number.NaN > "abc";
+    28 28 │   "abc" > Number.NaN;
+    29    │ - Number.NaN·<=·"abc";
+       29 │ + Number.isNaN("abc");
+    30 30 │   "abc" <= Number.NaN;
+    31 31 │   Number.NaN >= "abc";
+  
+
+```
+
+```
+invalid.js:30:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    28 │ "abc" > Number.NaN;
+    29 │ Number.NaN <= "abc";
+  > 30 │ "abc" <= Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^^
+    31 │ Number.NaN >= "abc";
+    32 │ "abc" >= Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    28 28 │   "abc" > Number.NaN;
+    29 29 │   Number.NaN <= "abc";
+    30    │ - "abc"·<=·Number.NaN;
+       30 │ + Number.isNaN("abc");
+    31 31 │   Number.NaN >= "abc";
+    32 32 │   "abc" >= Number.NaN;
+  
+
+```
+
+```
+invalid.js:31:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    29 │ Number.NaN <= "abc";
+    30 │ "abc" <= Number.NaN;
+  > 31 │ Number.NaN >= "abc";
+       │ ^^^^^^^^^^^^^^^^^^^
+    32 │ "abc" >= Number.NaN;
+    33 │ x === Number?.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    29 29 │   Number.NaN <= "abc";
+    30 30 │   "abc" <= Number.NaN;
+    31    │ - Number.NaN·>=·"abc";
+       31 │ + Number.isNaN("abc");
+    32 32 │   "abc" >= Number.NaN;
+    33 33 │   x === Number?.NaN;
+  
+
+```
+
+```
+invalid.js:32:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    30 │ "abc" <= Number.NaN;
+    31 │ Number.NaN >= "abc";
+  > 32 │ "abc" >= Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^^
+    33 │ x === Number?.NaN;
+    34 │ x === Number['NaN'];
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    30 30 │   "abc" <= Number.NaN;
+    31 31 │   Number.NaN >= "abc";
+    32    │ - "abc"·>=·Number.NaN;
+       32 │ + Number.isNaN("abc");
+    33 33 │   x === Number?.NaN;
+    34 34 │   x === Number['NaN'];
+  
+
+```
+
+```
+invalid.js:33:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    31 │ Number.NaN >= "abc";
+    32 │ "abc" >= Number.NaN;
+  > 33 │ x === Number?.NaN;
+       │ ^^^^^^^^^^^^^^^^^
+    34 │ x === Number['NaN'];
+    35 │ 
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    31 31 │   Number.NaN >= "abc";
+    32 32 │   "abc" >= Number.NaN;
+    33    │ - x·===·Number?.NaN;
+       33 │ + Number?.isNaN(x);
+    34 34 │   x === Number['NaN'];
+    35 35 │   
+  
+
+```
+
+```
+invalid.js:34:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    32 │ "abc" >= Number.NaN;
+    33 │ x === Number?.NaN;
+  > 34 │ x === Number['NaN'];
+       │ ^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ 123 == globalThis.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    32 32 │   "abc" >= Number.NaN;
+    33 33 │   x === Number?.NaN;
+    34    │ - x·===·Number['NaN'];
+       34 │ + Number.isNaN(x);
+    35 35 │   
+    36 36 │   123 == globalThis.NaN;
+  
+
+```
+
+```
+invalid.js:36:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    34 │ x === Number['NaN'];
+    35 │ 
+  > 36 │ 123 == globalThis.NaN;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    37 │ 123 == window.NaN;
+    38 │ 123 == globalThis.Number.NaN;
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    34 34 │   x === Number['NaN'];
+    35 35 │   
+    36    │ - 123·==·globalThis.NaN;
+       36 │ + globalThis.Number.isNaN(123);
+    37 37 │   123 == window.NaN;
+    38 38 │   123 == globalThis.Number.NaN;
+  
+
+```
+
+```
+invalid.js:37:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    36 │ 123 == globalThis.NaN;
+  > 37 │ 123 == window.NaN;
+       │ ^^^^^^^^^^^^^^^^^
+    38 │ 123 == globalThis.Number.NaN;
+    39 │ 
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    35 35 │   
+    36 36 │   123 == globalThis.NaN;
+    37    │ - 123·==·window.NaN;
+       37 │ + window.Number.isNaN(123);
+    38 38 │   123 == globalThis.Number.NaN;
+    39 39 │   
+  
+
+```
+
+```
+invalid.js:38:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the Number.isNaN function to compare with NaN.
+  
+    36 │ 123 == globalThis.NaN;
+    37 │ 123 == window.NaN;
+  > 38 │ 123 == globalThis.Number.NaN;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ // switch-case
+  
+  i Suggested fix: Use Number.isNaN() instead.
+  
+    36 36 │   123 == globalThis.NaN;
+    37 37 │   123 == window.NaN;
+    38    │ - 123·==·globalThis.Number.NaN;
+       38 │ + globalThis.Number.isNaN(123);
+    39 39 │   
+    40 40 │   // switch-case
+  
+
+```
+
+```
+invalid.js:41:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    40 │ // switch-case
+  > 41 │ switch(NaN) { case foo: break; }
+       │        ^^^
+    42 │ switch(NaN) {}
+    43 │ switch(foo) { case NaN: break; }
+  
+
+```
+
+```
+invalid.js:42:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    40 │ // switch-case
+    41 │ switch(NaN) { case foo: break; }
+  > 42 │ switch(NaN) {}
+       │        ^^^
+    43 │ switch(foo) { case NaN: break; }
+    44 │ switch(NaN) { default: break; }
+  
+
+```
+
+```
+invalid.js:43:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    41 │ switch(NaN) { case foo: break; }
+    42 │ switch(NaN) {}
+  > 43 │ switch(foo) { case NaN: break; }
+       │                    ^^^
+    44 │ switch(NaN) { default: break; }
+    45 │ switch(NaN) { case foo: break; default: break; }
+  
+
+```
+
+```
+invalid.js:44:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    42 │ switch(NaN) {}
+    43 │ switch(foo) { case NaN: break; }
+  > 44 │ switch(NaN) { default: break; }
+       │        ^^^
+    45 │ switch(NaN) { case foo: break; default: break; }
+    46 │ switch(foo) { case NaN: }
+  
+
+```
+
+```
+invalid.js:45:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    43 │ switch(foo) { case NaN: break; }
+    44 │ switch(NaN) { default: break; }
+  > 45 │ switch(NaN) { case foo: break; default: break; }
+       │        ^^^
+    46 │ switch(foo) { case NaN: }
+    47 │ switch(foo) { case (NaN): break; }
+  
+
+```
+
+```
+invalid.js:46:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    44 │ switch(NaN) { default: break; }
+    45 │ switch(NaN) { case foo: break; default: break; }
+  > 46 │ switch(foo) { case NaN: }
+       │                    ^^^
+    47 │ switch(foo) { case (NaN): break; }
+    48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+  
+
+```
+
+```
+invalid.js:47:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    45 │ switch(NaN) { case foo: break; default: break; }
+    46 │ switch(foo) { case NaN: }
+  > 47 │ switch(foo) { case (NaN): break; }
+       │                    ^^^^^
+    48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+  
+
+```
+
+```
+invalid.js:48:37 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    46 │ switch(foo) { case NaN: }
+    47 │ switch(foo) { case (NaN): break; }
+  > 48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+       │                                     ^^^
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+    50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+  
+
+```
+
+```
+invalid.js:49:30 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    47 │ switch(foo) { case (NaN): break; }
+    48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+  > 49 │ switch(foo) { case bar: case NaN: default: break; }
+       │                              ^^^
+    50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+    51 │ switch(NaN) { case NaN: break; }
+  
+
+```
+
+```
+invalid.js:50:37 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+  > 50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+       │                                     ^^^
+    51 │ switch(NaN) { case NaN: break; }
+    52 │ switch(foo) { case Number.NaN: break; }
+  
+
+```
+
+```
+invalid.js:50:71 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+  > 50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+       │                                                                       ^^^
+    51 │ switch(NaN) { case NaN: break; }
+    52 │ switch(foo) { case Number.NaN: break; }
+  
+
+```
+
+```
+invalid.js:51:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+    50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+  > 51 │ switch(NaN) { case NaN: break; }
+       │        ^^^
+    52 │ switch(foo) { case Number.NaN: break; }
+    53 │ switch(Number.NaN) { case foo: break; }
+  
+
+```
+
+```
+invalid.js:51:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    49 │ switch(foo) { case bar: case NaN: default: break; }
+    50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+  > 51 │ switch(NaN) { case NaN: break; }
+       │                    ^^^
+    52 │ switch(foo) { case Number.NaN: break; }
+    53 │ switch(Number.NaN) { case foo: break; }
+  
+
+```
+
+```
+invalid.js:52:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+    51 │ switch(NaN) { case NaN: break; }
+  > 52 │ switch(foo) { case Number.NaN: break; }
+       │                    ^^^^^^^^^^
+    53 │ switch(Number.NaN) { case foo: break; }
+    54 │ switch(Number.NaN) {}
+  
+
+```
+
+```
+invalid.js:53:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    51 │ switch(NaN) { case NaN: break; }
+    52 │ switch(foo) { case Number.NaN: break; }
+  > 53 │ switch(Number.NaN) { case foo: break; }
+       │        ^^^^^^^^^^
+    54 │ switch(Number.NaN) {}
+    55 │ switch(Number.NaN) { default: break; }
+  
+
+```
+
+```
+invalid.js:54:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    52 │ switch(foo) { case Number.NaN: break; }
+    53 │ switch(Number.NaN) { case foo: break; }
+  > 54 │ switch(Number.NaN) {}
+       │        ^^^^^^^^^^
+    55 │ switch(Number.NaN) { default: break; }
+    56 │ switch(Number.NaN) { case foo: break; default: break; }
+  
+
+```
+
+```
+invalid.js:55:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    53 │ switch(Number.NaN) { case foo: break; }
+    54 │ switch(Number.NaN) {}
+  > 55 │ switch(Number.NaN) { default: break; }
+       │        ^^^^^^^^^^
+    56 │ switch(Number.NaN) { case foo: break; default: break; }
+    57 │ switch(foo) { case Number.NaN: }
+  
+
+```
+
+```
+invalid.js:56:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    54 │ switch(Number.NaN) {}
+    55 │ switch(Number.NaN) { default: break; }
+  > 56 │ switch(Number.NaN) { case foo: break; default: break; }
+       │        ^^^^^^^^^^
+    57 │ switch(foo) { case Number.NaN: }
+    58 │ switch(foo) { case (Number.NaN): break; }
+  
+
+```
+
+```
+invalid.js:57:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    55 │ switch(Number.NaN) { default: break; }
+    56 │ switch(Number.NaN) { case foo: break; default: break; }
+  > 57 │ switch(foo) { case Number.NaN: }
+       │                    ^^^^^^^^^^
+    58 │ switch(foo) { case (Number.NaN): break; }
+    59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+  
+
+```
+
+```
+invalid.js:58:20 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    56 │ switch(Number.NaN) { case foo: break; default: break; }
+    57 │ switch(foo) { case Number.NaN: }
+  > 58 │ switch(foo) { case (Number.NaN): break; }
+       │                    ^^^^^^^^^^^^
+    59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+  
+
+```
+
+```
+invalid.js:59:37 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    57 │ switch(foo) { case Number.NaN: }
+    58 │ switch(foo) { case (Number.NaN): break; }
+  > 59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+       │                                     ^^^^^^^^^^
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+    61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+  
+
+```
+
+```
+invalid.js:60:30 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    58 │ switch(foo) { case (Number.NaN): break; }
+    59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+  > 60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+       │                              ^^^^^^^^^^
+    61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+    62 │ switch(Number.NaN) { case Number.NaN: break; }
+  
+
+```
+
+```
+invalid.js:61:37 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+  > 61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+       │                                     ^^^
+    62 │ switch(Number.NaN) { case Number.NaN: break; }
+    63 │ 
+  
+
+```
+
+```
+invalid.js:61:71 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+  > 61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+       │                                                                       ^^^^^^^^^^
+    62 │ switch(Number.NaN) { case Number.NaN: break; }
+    63 │ 
+  
+
+```
+
+```
+invalid.js:62:8 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'switch(NaN)' can never match a case clause. Use Number.isNaN instead of the switch.
+  
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+    61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+  > 62 │ switch(Number.NaN) { case Number.NaN: break; }
+       │        ^^^^^^^^^^
+    63 │ 
+  
+
+```
+
+```
+invalid.js:62:27 lint/correctness/useIsNan ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'case NaN' can never match. Use Number.isNaN before the switch.
+  
+    60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+    61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
+  > 62 │ switch(Number.NaN) { case Number.NaN: break; }
+       │                           ^^^^^^^^^^
+    63 │ 
+  
+
+```
+
+

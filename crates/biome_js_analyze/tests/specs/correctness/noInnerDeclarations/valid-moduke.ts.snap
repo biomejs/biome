@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-moduke.ts
+---
+# Input
+```js
+declare var x;
+
+export declare var y;
+
+declare function f();
+
+export declare function g();
+
+```
+
+

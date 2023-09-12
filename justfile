@@ -53,7 +53,7 @@ promote-rule rulename group:
 	cargo run -p xtask_codegen -- promoterule --rule={{rulename}} --group={{group}}
 	just codegen-linter
 	just documentation
-	-cargo test -p rome_js_analyze -- {{snakecase(rulename)}}
+	-cargo test -p biome_js_analyze -- {{snakecase(rulename)}}
 	cargo insta accept
 
 
@@ -86,9 +86,9 @@ test-doc:
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:
-  just _touch crates/rome_js_analyze/tests/spec_tests.rs
+  just _touch crates/biome_js_analyze/tests/spec_tests.rs
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
-  cargo test -p rome_js_analyze -- {{snakecase(name)}}
+  cargo test -p biome_js_analyze -- {{snakecase(name)}}
   cargo test -p biome_json_analyze -- {{snakecase(name)}}
 
 # Tests a lint rule. The name of the rule needs to be camel case

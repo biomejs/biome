@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIndexParameter.ts
+---
+# Input
+```js
+export interface X {
+    [s: string]: unknown
+
+    [index: number]: unknown
+
+    [specialSymbol: symbol]: unknown
+}
+```
+
+

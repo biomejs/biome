@@ -1,0 +1,316 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidVariables.ts
+---
+# Input
+```js
+var a = 1;
+let b = 1;
+const c = 1;
+
+var { d } = { d: 1 };
+let { e } = { e: 1 };
+const { f } = { f: 1 };
+
+var [g] = [1];
+let [h] = [1];
+const [i] = [1];
+
+var [{ j }] = [{ j: 1 }]
+var { k: [l] } = { k: [1] } 
+
+let m, n;
+
+```
+
+# Diagnostics
+```
+invalidVariables.ts:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ var a = 1;
+      │     ^
+    2 │ let b = 1;
+    3 │ const c = 1;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend a with an underscore.
+  
+     1    │ - var·a·=·1;
+        1 │ + var·_a·=·1;
+     2  2 │   let b = 1;
+     3  3 │   const c = 1;
+  
+
+```
+
+```
+invalidVariables.ts:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ var a = 1;
+  > 2 │ let b = 1;
+      │     ^
+    3 │ const c = 1;
+    4 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend b with an underscore.
+  
+     1  1 │   var a = 1;
+     2    │ - let·b·=·1;
+        2 │ + let·_b·=·1;
+     3  3 │   const c = 1;
+     4  4 │   
+  
+
+```
+
+```
+invalidVariables.ts:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ var a = 1;
+    2 │ let b = 1;
+  > 3 │ const c = 1;
+      │       ^
+    4 │ 
+    5 │ var { d } = { d: 1 };
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend c with an underscore.
+  
+     1  1 │   var a = 1;
+     2  2 │   let b = 1;
+     3    │ - const·c·=·1;
+        3 │ + const·_c·=·1;
+     4  4 │   
+     5  5 │   var { d } = { d: 1 };
+  
+
+```
+
+```
+invalidVariables.ts:5:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    3 │ const c = 1;
+    4 │ 
+  > 5 │ var { d } = { d: 1 };
+      │       ^
+    6 │ let { e } = { e: 1 };
+    7 │ const { f } = { f: 1 };
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidVariables.ts:6:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    5 │ var { d } = { d: 1 };
+  > 6 │ let { e } = { e: 1 };
+      │       ^
+    7 │ const { f } = { f: 1 };
+    8 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidVariables.ts:7:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    5 │ var { d } = { d: 1 };
+    6 │ let { e } = { e: 1 };
+  > 7 │ const { f } = { f: 1 };
+      │         ^
+    8 │ 
+    9 │ var [g] = [1];
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidVariables.ts:9:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+     7 │ const { f } = { f: 1 };
+     8 │ 
+   > 9 │ var [g] = [1];
+       │      ^
+    10 │ let [h] = [1];
+    11 │ const [i] = [1];
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend g with an underscore.
+  
+     7  7 │   const { f } = { f: 1 };
+     8  8 │   
+     9    │ - var·[g]·=·[1];
+        9 │ + var·[_g]·=·[1];
+    10 10 │   let [h] = [1];
+    11 11 │   const [i] = [1];
+  
+
+```
+
+```
+invalidVariables.ts:10:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+     9 │ var [g] = [1];
+  > 10 │ let [h] = [1];
+       │      ^
+    11 │ const [i] = [1];
+    12 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend h with an underscore.
+  
+     8  8 │   
+     9  9 │   var [g] = [1];
+    10    │ - let·[h]·=·[1];
+       10 │ + let·[_h]·=·[1];
+    11 11 │   const [i] = [1];
+    12 12 │   
+  
+
+```
+
+```
+invalidVariables.ts:11:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+     9 │ var [g] = [1];
+    10 │ let [h] = [1];
+  > 11 │ const [i] = [1];
+       │        ^
+    12 │ 
+    13 │ var [{ j }] = [{ j: 1 }]
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend i with an underscore.
+  
+     9  9 │   var [g] = [1];
+    10 10 │   let [h] = [1];
+    11    │ - const·[i]·=·[1];
+       11 │ + const·[_i]·=·[1];
+    12 12 │   
+    13 13 │   var [{ j }] = [{ j: 1 }]
+  
+
+```
+
+```
+invalidVariables.ts:13:8 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    11 │ const [i] = [1];
+    12 │ 
+  > 13 │ var [{ j }] = [{ j: 1 }]
+       │        ^
+    14 │ var { k: [l] } = { k: [1] }·
+    15 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidVariables.ts:14:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    13 │ var [{ j }] = [{ j: 1 }]
+  > 14 │ var { k: [l] } = { k: [1] }·
+       │           ^
+    15 │ 
+    16 │ let m, n;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend l with an underscore.
+  
+    12 12 │   
+    13 13 │   var [{ j }] = [{ j: 1 }]
+    14    │ - var·{·k:·[l]·}·=·{·k:·[1]·}·
+       14 │ + var·{·k:·[_l]·}·=·{·k:·[1]·}·
+    15 15 │   
+    16 16 │   let m, n;
+  
+
+```
+
+```
+invalidVariables.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    14 │ var { k: [l] } = { k: [1] }·
+    15 │ 
+  > 16 │ let m, n;
+       │     ^
+    17 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend m with an underscore.
+  
+    14 14 │   var { k: [l] } = { k: [1] }·
+    15 15 │   
+    16    │ - let·m,·n;
+       16 │ + let·_m,·n;
+    17 17 │   
+  
+
+```
+
+```
+invalidVariables.ts:16:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    14 │ var { k: [l] } = { k: [1] }·
+    15 │ 
+  > 16 │ let m, n;
+       │        ^
+    17 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend n with an underscore.
+  
+    14 14 │   var { k: [l] } = { k: [1] }·
+    15 15 │   
+    16    │ - let·m,·n;
+       16 │ + let·m,·_n;
+    17 17 │   
+  
+
+```
+
+

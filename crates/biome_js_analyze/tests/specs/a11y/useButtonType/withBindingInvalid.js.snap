@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: withBindingInvalid.js
+---
+# Input
+```js
+import React, { createElement } from "react";
+
+React.createElement('button');
+React.createElement('button', {
+    "type": "bar"
+});
+
+createElement('button', {
+    "type": "bar"
+});
+
+createElement('button', {
+    "type": 1
+});
+```
+
+# Diagnostics
+```
+withBindingInvalid.js:3:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide an explicit type prop for the button element.
+  
+    1 │ import React, { createElement } from "react";
+    2 │ 
+  > 3 │ React.createElement('button');
+      │                     ^^^^^^^^
+    4 │ React.createElement('button', {
+    5 │     "type": "bar"
+  
+  i The default  type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withBindingInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a valid type prop for the button element.
+  
+    3 │ React.createElement('button');
+    4 │ React.createElement('button', {
+  > 5 │     "type": "bar"
+      │             ^^^^^
+    6 │ });
+    7 │ 
+  
+  i The default  type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withBindingInvalid.js:9:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a valid type prop for the button element.
+  
+     8 │ createElement('button', {
+   > 9 │     "type": "bar"
+       │             ^^^^^
+    10 │ });
+    11 │ 
+  
+  i The default  type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+```
+withBindingInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a valid type prop for the button element.
+  
+    12 │ createElement('button', {
+  > 13 │     "type": 1
+       │             ^
+    14 │ });
+  
+  i The default  type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+```
+
+

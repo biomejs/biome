@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```js
+foo.reduce((acc, bar) => {acc.push(bar); return acc;}, [])
+```
+
+# Input
+```js
+foo.reduceRight((acc, bar) => {acc.push(bar); return acc;}, [])
+```
+
+# Input
+```js
+foo.reduce((acc, bar) => {acc.push(...bar); return acc;}, [])
+```
+
+# Input
+```js
+foo.reduceRight((acc, bar) => {acc.push(...bar); return acc;}, [])
+```
+
+# Input
+```js
+foo.reduce((acc, bar) => {acc[bar.key] = bar.value; return acc;}, {})
+```
+
+# Input
+```js
+foo.reduceRight((acc, bar) => {acc[bar.key] = bar.value; return acc;}, {})
+```
+
+# Input
+```js
+foo.reduce((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
+```
+
+# Input
+```js
+foo.reduceRight((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
+```
+
+

@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsWhileStatement.js
+---
+# Input
+```js
+function JsWhileStatement1() {
+    while (true) {
+        break;
+        afterBreak();
+    }
+}
+
+```
+
+# Diagnostics
+```
+JsWhileStatement.js:4:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    2 │     while (true) {
+    3 │         break;
+  > 4 │         afterBreak();
+      │         ^^^^^^^^^^^^^
+    5 │     }
+    6 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    1 │ function JsWhileStatement1() {
+    2 │     while (true) {
+  > 3 │         break;
+      │         ^^^^^^
+    4 │         afterBreak();
+    5 │     }
+  
+
+```
+
+

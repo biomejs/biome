@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTsInJs.js
+---
+# Input
+```js
+ArrayLike;
+PromiseLike;
+
+```
+
+# Diagnostics
+```
+invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The ArrayLike variable is undeclared
+  
+  > 1 │ ArrayLike;
+      │ ^^^^^^^^^
+    2 │ PromiseLike;
+    3 │ 
+  
+
+```
+
+```
+invalidTsInJs.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The PromiseLike variable is undeclared
+  
+    1 │ ArrayLike;
+  > 2 │ PromiseLike;
+      │ ^^^^^^^^^^^
+    3 │ 
+  
+
+```
+
+

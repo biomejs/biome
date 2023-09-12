@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```js
+let a = <img alt="foo" />;
+let a = <img alt="picture of me taking a photo of an image" aria-hidden />;
+let a = <img aria-hidden alt="photo of image" />;
+let a = <img aria-hidden="true" alt="photo of image" />;
+let a = <img ALt="foo" />;
+let a = <img {...this.props} alt="foo" />;
+let a = <img {...this.props} alt={"foo"} />;
+let a = <img {...this.props} alt={alt} />;
+let a = <a />;
+let a = <img />;
+let a = <IMG />;
+let a = <img alt={undefined} />;
+let a = <img alt={`this should pass for ${now}`} />;
+let a = <img alt={`this should pass for ${photo}`} />;
+let a = <img alt={`this should pass for ${image}`} />;
+let a = <img alt={`this should pass for ${picture}`} />;
+let a = <img alt={`${photo}`} />;
+let a = <img alt={`${image}`} />;
+let a = <img alt={`${picture}`} />;
+let a = <img alt={"undefined"} />;
+let a = <img alt={() => {}} />;
+let a = <img alt={function (e) {}} />;
+let a = <img aria-hidden={false} alt="Doing cool things." />;
+let a = <UX.Layout>test</UX.Layout>;
+let a = <img alt />;
+let a = <img alt={imageAlt} />;
+let a = <img alt={imageAlt.name} />;
+let a = <img alt={imageAlt?.name} />;
+let a = <img alt="Doing cool things" aria-hidden={foo?.bar} />;
+let a = <img alt="Photography" />;
+let a = <img alt="ImageMagick" />;
+let a = <img alt="photo image picture" aria-hidden={foo?.bar} />;
+
+```
+
+

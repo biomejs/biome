@@ -1,0 +1,89 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: JsLabeledStatement.js
+---
+# Input
+```js
+function JsLabeledStatement1() {
+    label: while (true) {
+        if (true) {
+            continue label;
+        } else {
+            break label;
+        }
+
+        afterLabelJump();
+    }
+}
+
+function JsLabeledStatement2() {
+    label: {
+        beforeBreak();
+        break label;
+        afterBreak();
+    }
+
+    afterBlock();
+}
+
+```
+
+# Diagnostics
+```
+JsLabeledStatement.js:9:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+     7 │         }
+     8 │ 
+   > 9 │         afterLabelJump();
+       │         ^^^^^^^^^^^^^^^^^
+    10 │     }
+    11 │ }
+  
+  i ... because either this statement will continue the loop ...
+  
+    2 │     label: while (true) {
+    3 │         if (true) {
+  > 4 │             continue label;
+      │             ^^^^^^^^^^^^^^^
+    5 │         } else {
+    6 │             break label;
+  
+  i ... or this statement will break the flow of the code beforehand
+  
+    4 │             continue label;
+    5 │         } else {
+  > 6 │             break label;
+      │             ^^^^^^^^^^^^
+    7 │         }
+    8 │ 
+  
+
+```
+
+```
+JsLabeledStatement.js:17:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code will never be reached ...
+  
+    15 │         beforeBreak();
+    16 │         break label;
+  > 17 │         afterBreak();
+       │         ^^^^^^^^^^^^^
+    18 │     }
+    19 │ 
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    14 │     label: {
+    15 │         beforeBreak();
+  > 16 │         break label;
+       │         ^^^^^^^^^^^^
+    17 │         afterBreak();
+    18 │     }
+  
+
+```
+
+

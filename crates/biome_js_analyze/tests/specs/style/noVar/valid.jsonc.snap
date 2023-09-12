@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 73
+expression: valid.jsonc
+---
+# Input
+```js
+function f() { const x = 1; return x; }
+```
+
+# Input
+```js
+let x = 0;
+```
+
+# Input
+```js
+const x = 0;
+```
+
+# Input
+```js
+for (let x of xs) {}
+```
+
+# Input
+```js
+for (const x of xs) {}
+```
+
+

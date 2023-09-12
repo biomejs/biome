@@ -1,0 +1,196 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 92
+expression: invalidVariable.ts
+---
+# Input
+```js
+const number: any = 1
+
+const anyArray: any[] = []
+
+const anyMatrix: any[][] = []
+
+const anyArray2: Array<any> = []
+
+const anyMatrix2: Array<Array<any>> = []
+
+const anyGenerics: T<any, Array<any>> = []
+
+const bar5 = function (...args: any) {}
+
+const baz5 = (...args: any) => {}
+
+const test = <T extends Partial<any>>() => {};
+
+```
+
+# Diagnostics
+```
+invalidVariable.ts:1:15 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+  > 1 │ const number: any = 1
+      │               ^^^
+    2 │ 
+    3 │ const anyArray: any[] = []
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:3:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    1 │ const number: any = 1
+    2 │ 
+  > 3 │ const anyArray: any[] = []
+      │                 ^^^
+    4 │ 
+    5 │ const anyMatrix: any[][] = []
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:5:18 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    3 │ const anyArray: any[] = []
+    4 │ 
+  > 5 │ const anyMatrix: any[][] = []
+      │                  ^^^
+    6 │ 
+    7 │ const anyArray2: Array<any> = []
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:7:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    5 │ const anyMatrix: any[][] = []
+    6 │ 
+  > 7 │ const anyArray2: Array<any> = []
+      │                        ^^^
+    8 │ 
+    9 │ const anyMatrix2: Array<Array<any>> = []
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:9:31 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     7 │ const anyArray2: Array<any> = []
+     8 │ 
+   > 9 │ const anyMatrix2: Array<Array<any>> = []
+       │                               ^^^
+    10 │ 
+    11 │ const anyGenerics: T<any, Array<any>> = []
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:11:22 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     9 │ const anyMatrix2: Array<Array<any>> = []
+    10 │ 
+  > 11 │ const anyGenerics: T<any, Array<any>> = []
+       │                      ^^^
+    12 │ 
+    13 │ const bar5 = function (...args: any) {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:11:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+     9 │ const anyMatrix2: Array<Array<any>> = []
+    10 │ 
+  > 11 │ const anyGenerics: T<any, Array<any>> = []
+       │                                 ^^^
+    12 │ 
+    13 │ const bar5 = function (...args: any) {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:13:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    11 │ const anyGenerics: T<any, Array<any>> = []
+    12 │ 
+  > 13 │ const bar5 = function (...args: any) {}
+       │                                 ^^^
+    14 │ 
+    15 │ const baz5 = (...args: any) => {}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:15:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    13 │ const bar5 = function (...args: any) {}
+    14 │ 
+  > 15 │ const baz5 = (...args: any) => {}
+       │                        ^^^
+    16 │ 
+    17 │ const test = <T extends Partial<any>>() => {};
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```
+invalidVariable.ts:17:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    15 │ const baz5 = (...args: any) => {}
+    16 │ 
+  > 17 │ const test = <T extends Partial<any>>() => {};
+       │                                 ^^^
+    18 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+

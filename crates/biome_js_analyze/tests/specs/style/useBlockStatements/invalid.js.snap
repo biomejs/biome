@@ -1,0 +1,594 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+if (x) x;
+if (x) {
+  x;
+} else y;
+if (x) {
+  x;
+} else if (y) y;
+for (;;);
+for (p in obj);
+for (x of xs);
+do;
+while (x);
+while (x);
+
+if (x);
+
+if (test);
+else if (test);
+else;
+
+while (test)
+  bar
+
+  while (test)
+    bar
+
+if (test)
+  bar
+else if(test)
+  bar
+else
+  bar
+
+  if (test)
+    bar
+  else if(test)
+    bar
+  else
+    bar
+
+if (test) {
+  correct;
+} else console.log("false") // comment
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+  > 1 │ if (x) x;
+      │ ^^^^^^^^^
+    2 │ if (x) {
+    3 │   x;
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    1 │ if·(x)·{·x;·}
+      │        ++  ++
+
+```
+
+```
+invalid.js:4:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    2 │ if (x) {
+    3 │   x;
+  > 4 │ } else y;
+      │   ^^^^^^^
+    5 │ if (x) {
+    6 │   x;
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    4 │ }·else·{·y;·}
+      │        ++  ++
+
+```
+
+```
+invalid.js:7:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    5 │ if (x) {
+    6 │   x;
+  > 7 │ } else if (y) y;
+      │        ^^^^^^^^^
+    8 │ for (;;);
+    9 │ for (p in obj);
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    7 │ }·else·if·(y)·{·y;·}
+      │               ++  ++
+
+```
+
+```
+invalid.js:8:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+     6 │   x;
+     7 │ } else if (y) y;
+   > 8 │ for (;;);
+       │ ^^^^^^^^^
+     9 │ for (p in obj);
+    10 │ for (x of xs);
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+     6  6 │     x;
+     7  7 │   } else if (y) y;
+     8    │ - for·(;;);
+        8 │ + for·(;;)·{}
+     9  9 │   for (p in obj);
+    10 10 │   for (x of xs);
+  
+
+```
+
+```
+invalid.js:9:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+     7 │ } else if (y) y;
+     8 │ for (;;);
+   > 9 │ for (p in obj);
+       │ ^^^^^^^^^^^^^^^
+    10 │ for (x of xs);
+    11 │ do;
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+     7  7 │   } else if (y) y;
+     8  8 │   for (;;);
+     9    │ - for·(p·in·obj);
+        9 │ + for·(p·in·obj)·{}
+    10 10 │   for (x of xs);
+    11 11 │   do;
+  
+
+```
+
+```
+invalid.js:10:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+     8 │ for (;;);
+     9 │ for (p in obj);
+  > 10 │ for (x of xs);
+       │ ^^^^^^^^^^^^^^
+    11 │ do;
+    12 │ while (x);
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+     8  8 │   for (;;);
+     9  9 │   for (p in obj);
+    10    │ - for·(x·of·xs);
+       10 │ + for·(x·of·xs)·{}
+    11 11 │   do;
+    12 12 │   while (x);
+  
+
+```
+
+```
+invalid.js:11:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+     9 │ for (p in obj);
+    10 │ for (x of xs);
+  > 11 │ do;
+       │ ^^^
+  > 12 │ while (x);
+       │ ^^^^^^^^^^
+    13 │ while (x);
+    14 │ 
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+     9  9 │   for (p in obj);
+    10 10 │   for (x of xs);
+    11    │ - do;
+       11 │ + do·{}
+    12 12 │   while (x);
+    13 13 │   while (x);
+  
+
+```
+
+```
+invalid.js:13:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    11 │ do;
+    12 │ while (x);
+  > 13 │ while (x);
+       │ ^^^^^^^^^^
+    14 │ 
+    15 │ if (x);
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    11 11 │   do;
+    12 12 │   while (x);
+    13    │ - while·(x);
+       13 │ + while·(x)·{}
+    14 14 │   
+    15 15 │   if (x);
+  
+
+```
+
+```
+invalid.js:15:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    13 │ while (x);
+    14 │ 
+  > 15 │ if (x);
+       │ ^^^^^^^
+    16 │ 
+    17 │ if (test);
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    13 13 │   while (x);
+    14 14 │   
+    15    │ - if·(x);
+       15 │ + if·(x)·{}
+    16 16 │   
+    17 17 │   if (test);
+  
+
+```
+
+```
+invalid.js:17:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    15 │ if (x);
+    16 │ 
+  > 17 │ if (test);
+       │ ^^^^^^^^^^
+  > 18 │ else if (test);
+  > 19 │ else;
+       │ ^^^^^
+    20 │ 
+    21 │ while (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    15 15 │   if (x);
+    16 16 │   
+    17    │ - if·(test);
+       17 │ + if·(test)·{}
+    18 18 │   else if (test);
+    19 19 │   else;
+  
+
+```
+
+```
+invalid.js:18:6 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    17 │ if (test);
+  > 18 │ else if (test);
+       │      ^^^^^^^^^^
+  > 19 │ else;
+       │ ^^^^^
+    20 │ 
+    21 │ while (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    16 16 │   
+    17 17 │   if (test);
+    18    │ - else·if·(test);
+       18 │ + else·if·(test)·{}
+    19 19 │   else;
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    17 │ if (test);
+    18 │ else if (test);
+  > 19 │ else;
+       │ ^^^^^
+    20 │ 
+    21 │ while (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    17 17 │   if (test);
+    18 18 │   else if (test);
+    19    │ - else;
+       19 │ + else·{}
+    20 20 │   
+    21 21 │   while (test)
+  
+
+```
+
+```
+invalid.js:21:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    19 │ else;
+    20 │ 
+  > 21 │ while (test)
+       │ ^^^^^^^^^^^^
+  > 22 │   bar
+       │   ^^^
+    23 │ 
+    24 │   while (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    19 19 │   else;
+    20 20 │   
+    21    │ - while·(test)
+       21 │ + while·(test)·{
+    22 22 │     bar
+       23 │ + }
+    23 24 │   
+    24 25 │     while (test)
+  
+
+```
+
+```
+invalid.js:24:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    22 │   bar
+    23 │ 
+  > 24 │   while (test)
+       │   ^^^^^^^^^^^^
+  > 25 │     bar
+       │     ^^^
+    26 │ 
+    27 │ if (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    22 22 │     bar
+    23 23 │   
+    24    │ - ··while·(test)
+       24 │ + ··while·(test)·{
+    25 25 │       bar
+       26 │ + ··}
+    26 27 │   
+    27 28 │   if (test)
+  
+
+```
+
+```
+invalid.js:27:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    25 │     bar
+    26 │ 
+  > 27 │ if (test)
+       │ ^^^^^^^^^
+  > 28 │   bar
+  > 29 │ else if(test)
+  > 30 │   bar
+  > 31 │ else
+  > 32 │   bar
+       │   ^^^
+    33 │ 
+    34 │   if (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    25 25 │       bar
+    26 26 │   
+    27    │ - if·(test)
+       27 │ + if·(test)·{
+    28 28 │     bar
+       29 │ + }
+    29 30 │   else if(test)
+    30 31 │     bar
+  
+
+```
+
+```
+invalid.js:29:6 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    27 │ if (test)
+    28 │   bar
+  > 29 │ else if(test)
+       │      ^^^^^^^^
+  > 30 │   bar
+  > 31 │ else
+  > 32 │   bar
+       │   ^^^
+    33 │ 
+    34 │   if (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    27 27 │   if (test)
+    28 28 │     bar
+    29    │ - else·if(test)
+       29 │ + else·if(test)·{
+    30 30 │     bar
+       31 │ + }
+    31 32 │   else
+    32 33 │     bar
+  
+
+```
+
+```
+invalid.js:31:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    29 │ else if(test)
+    30 │   bar
+  > 31 │ else
+       │ ^^^^
+  > 32 │   bar
+       │   ^^^
+    33 │ 
+    34 │   if (test)
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    29 29 │   else if(test)
+    30 30 │     bar
+    31    │ - else
+       31 │ + else·{
+    32 32 │     bar
+       33 │ + }
+    33 34 │   
+    34 35 │     if (test)
+  
+
+```
+
+```
+invalid.js:34:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    32 │   bar
+    33 │ 
+  > 34 │   if (test)
+       │   ^^^^^^^^^
+  > 35 │     bar
+  > 36 │   else if(test)
+  > 37 │     bar
+  > 38 │   else
+  > 39 │     bar
+       │     ^^^
+    40 │ 
+    41 │ if (test) {
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    32 32 │     bar
+    33 33 │   
+    34    │ - ··if·(test)
+       34 │ + ··if·(test)·{
+    35 35 │       bar
+    36    │ - ··else·if(test)
+       36 │ + ··}
+       37 │ + ··else·if(test)
+    37 38 │       bar
+    38 39 │     else
+  
+
+```
+
+```
+invalid.js:36:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    34 │   if (test)
+    35 │     bar
+  > 36 │   else if(test)
+       │        ^^^^^^^^
+  > 37 │     bar
+  > 38 │   else
+  > 39 │     bar
+       │     ^^^
+    40 │ 
+    41 │ if (test) {
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    34 34 │     if (test)
+    35 35 │       bar
+    36    │ - ··else·if(test)
+       36 │ + ··else·if(test)·{
+    37 37 │       bar
+    38    │ - ··else
+       38 │ + ··}
+       39 │ + ··else
+    39 40 │       bar
+    40 41 │   
+  
+
+```
+
+```
+invalid.js:38:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    36 │   else if(test)
+    37 │     bar
+  > 38 │   else
+       │   ^^^^
+  > 39 │     bar
+       │     ^^^
+    40 │ 
+    41 │ if (test) {
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    36 36 │     else if(test)
+    37 37 │       bar
+    38    │ - ··else
+       38 │ + ··else·{
+    39 39 │       bar
+       40 │ + ··}
+    40 41 │   
+    41 42 │   if (test) {
+  
+
+```
+
+```
+invalid.js:43:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Block statements are preferred in this position.
+  
+    41 │ if (test) {
+    42 │   correct;
+  > 43 │ } else console.log("false") // comment
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+  
+  i Suggested fix: Wrap the statement with a `JsBlockStatement`
+  
+    41 41 │   if (test) {
+    42 42 │     correct;
+    43    │ - }·else·console.log("false")·//·comment
+       43 │ + }·else·{·console.log("false")·//·comment
+       44 │ + }
+    44 45 │   
+  
+
+```
+
+

@@ -1,0 +1,210 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```js
+<>
+    <a />
+		<a></a>
+		<a>   </a>
+		<a>{null}</a>
+		<a>{undefined}</a>
+		<a aria-hidden>content</a>
+		<a><span aria-hidden="true">content</span></a>
+		<a><span aria-hidden={true}>content</span></a>
+		<a><span aria-hidden={"true"}>content</span></a>
+		<a><span aria-hidden={`true`}>content</span></a>
+		<a><span aria-hidden={`${true}`}>content</span></a>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:5 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    1 │ <>
+  > 2 │     <a />
+      │     ^^^^^
+    3 │ 		<a></a>
+    4 │ 		<a>   </a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:3:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    1 │ <>
+    2 │     <a />
+  > 3 │ 		<a></a>
+      │ 		^^^^^^^
+    4 │ 		<a>   </a>
+    5 │ 		<a>{null}</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:4:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    2 │     <a />
+    3 │ 		<a></a>
+  > 4 │ 		<a>   </a>
+      │ 		^^^^^^^^^^
+    5 │ 		<a>{null}</a>
+    6 │ 		<a>{undefined}</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:5:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    3 │ 		<a></a>
+    4 │ 		<a>   </a>
+  > 5 │ 		<a>{null}</a>
+      │ 		^^^^^^^^^^^^^
+    6 │ 		<a>{undefined}</a>
+    7 │ 		<a aria-hidden>content</a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:6:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    4 │ 		<a>   </a>
+    5 │ 		<a>{null}</a>
+  > 6 │ 		<a>{undefined}</a>
+      │ 		^^^^^^^^^^^^^^^^^^
+    7 │ 		<a aria-hidden>content</a>
+    8 │ 		<a><span aria-hidden="true">content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:7:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    5 │ 		<a>{null}</a>
+    6 │ 		<a>{undefined}</a>
+  > 7 │ 		<a aria-hidden>content</a>
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 		<a><span aria-hidden="true">content</span></a>
+    9 │ 		<a><span aria-hidden={true}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:8:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+     6 │ 		<a>{undefined}</a>
+     7 │ 		<a aria-hidden>content</a>
+   > 8 │ 		<a><span aria-hidden="true">content</span></a>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 		<a><span aria-hidden={true}>content</span></a>
+    10 │ 		<a><span aria-hidden={"true"}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:9:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+     7 │ 		<a aria-hidden>content</a>
+     8 │ 		<a><span aria-hidden="true">content</span></a>
+   > 9 │ 		<a><span aria-hidden={true}>content</span></a>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 		<a><span aria-hidden={"true"}>content</span></a>
+    11 │ 		<a><span aria-hidden={`true`}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:10:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+     8 │ 		<a><span aria-hidden="true">content</span></a>
+     9 │ 		<a><span aria-hidden={true}>content</span></a>
+  > 10 │ 		<a><span aria-hidden={"true"}>content</span></a>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 		<a><span aria-hidden={`true`}>content</span></a>
+    12 │ 		<a><span aria-hidden={`${true}`}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:11:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+     9 │ 		<a><span aria-hidden={true}>content</span></a>
+    10 │ 		<a><span aria-hidden={"true"}>content</span></a>
+  > 11 │ 		<a><span aria-hidden={`true`}>content</span></a>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 		<a><span aria-hidden={`${true}`}>content</span></a>
+    13 │ </>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.jsx:12:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide screen reader accessible content when using `a` elements.
+  
+    10 │ 		<a><span aria-hidden={"true"}>content</span></a>
+    11 │ 		<a><span aria-hidden={`true`}>content</span></a>
+  > 12 │ 		<a><span aria-hidden={`${true}`}>content</span></a>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ </>
+    14 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+
+```
+
+
