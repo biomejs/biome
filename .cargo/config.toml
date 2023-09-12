@@ -13,7 +13,7 @@ contributors = "run -p xtask_contributors --"
 coverage = "run -p xtask_coverage --profile=release-with-debug --"
 documentation = """
     doc \
-    -p rome_*formatter \
+    -p biome_*formatter \
     -p biome_control_flow \
     -p biome_analyze \
     -p rome_*analyze \
