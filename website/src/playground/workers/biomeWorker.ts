@@ -1,19 +1,19 @@
 import init, {
 	Configuration,
 	DiagnosticPrinter,
-	RomePath,
+	RomePath as BiomePath,
 	RuleCategories,
 	Workspace,
 } from "@biomejs/wasm-web";
 import {
 	ArrowParentheses,
+	BiomeOutput,
 	IndentStyle,
 	LintRules,
 	LoadingState,
 	PlaygroundSettings,
 	QuoteProperties,
 	QuoteStyle,
-	RomeOutput,
 	Semicolons,
 } from "../types";
 import { isJsonFilename } from "../utils";
@@ -32,7 +32,7 @@ const files: Map<string, File> = new Map();
 
 let configuration: undefined | Configuration;
 
-function getPathForFile(file: File): RomePath {
+function getPathForFile(file: File): BiomePath {
 	return {
 		path: file.filename,
 	};
@@ -226,7 +226,7 @@ self.addEventListener("message", async (e) => {
 				path,
 			});
 
-			const biomeOutput: RomeOutput = {
+			const biomeOutput: BiomeOutput = {
 				syntax: {
 					// Replace 4 spaced indentation with 2
 					// TODO replace this in Biome itself
@@ -252,7 +252,7 @@ self.addEventListener("message", async (e) => {
 			self.postMessage({
 				type: "updated",
 				filename,
-				romeOutput: biomeOutput,
+				biomeOutput,
 			});
 			break;
 		}

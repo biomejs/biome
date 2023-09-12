@@ -4,7 +4,7 @@ import { EditorSelection } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
 import ImportSortingTab from "@src/playground/tabs/ImportSortingTab";
 import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import * as codeMirrorLangRomeAst from "codemirror-lang-rome-ast";
+import * as codeMirrorLangBiomeAst from "codemirror-lang-rome-ast";
 import {
 	createRef,
 	useCallback,
@@ -25,7 +25,7 @@ import FormatterCodeTab from "./tabs/FormatterCodeTab";
 import FormatterIrTab from "./tabs/FormatterIrTab";
 import SettingsTab from "./tabs/SettingsTab";
 import SyntaxTab from "./tabs/SyntaxTab";
-import type { PlaygroundProps, RomeAstSyntacticData } from "./types";
+import type { BiomeAstSyntacticData, PlaygroundProps } from "./types";
 import {
 	getCurrentCode,
 	getFileState,
@@ -45,7 +45,7 @@ export default function PlaygroundLoader({
 	>("normal");
 
 	const file = getFileState(playgroundState, playgroundState.currentFile);
-	const biomeOutput = file.rome;
+	const biomeOutput = file.biome;
 	const prettierOutput = file.prettier;
 
 	const codeMirrorExtensions = useMemo(() => {
@@ -61,7 +61,7 @@ export default function PlaygroundLoader({
 		}
 	}, [playgroundState.currentFile]);
 
-	const biomeAstSyntacticDataRef = useRef<RomeAstSyntacticData | null>(null);
+	const biomeAstSyntacticDataRef = useRef<BiomeAstSyntacticData | null>(null);
 
 	const astPanelCodeMirrorRef = useRef<null | ReactCodeMirrorRef>(null);
 
@@ -90,10 +90,10 @@ export default function PlaygroundLoader({
 		scrollAstNodeIntoView(playgroundState.cursorPosition);
 	}, [playgroundState.cursorPosition]);
 
-	// We update the syntactic data of `RomeJsAst` only AstSource(`Display` string of our original AstRepresentation) changed.
+	// We update the syntactic data of `BiomeJsAst` only AstSource(`Display` string of our original AstRepresentation) changed.
 	useEffect(() => {
 		const ast = biomeOutput.syntax.ast;
-		const tree = codeMirrorLangRomeAst.parser.parse(ast);
+		const tree = codeMirrorLangBiomeAst.parser.parse(ast);
 		const rangeMap = new Map();
 		biomeAstSyntacticDataRef.current = {
 			ast: tree,
@@ -192,7 +192,7 @@ export default function PlaygroundLoader({
 					title: "Formatter",
 					children: (
 						<FormatterCodeTab
-							rome={biomeOutput.formatter.code}
+							biome={biomeOutput.formatter.code}
 							prettier={prettierOutput}
 							extensions={codeMirrorExtensions}
 						/>
@@ -203,7 +203,7 @@ export default function PlaygroundLoader({
 					title: "Formatter IR",
 					children: (
 						<FormatterIrTab
-							rome={biomeOutput.formatter.ir}
+							biome={biomeOutput.formatter.ir}
 							prettier={prettierOutput}
 						/>
 					),

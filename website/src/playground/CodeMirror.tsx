@@ -1,4 +1,4 @@
-import type { Diagnostic as RomeDiagnostic } from "@biomejs/wasm-web";
+import type { Diagnostic as BiomeDiagnostic } from "@biomejs/wasm-web";
 import type { Diagnostic as CodeMirrorDiagnostic } from "@codemirror/lint";
 import { lintGutter, setDiagnostics } from "@codemirror/lint";
 import type { Extension } from "@codemirror/state";
@@ -11,13 +11,13 @@ import RealCodeMirror from "@uiw/react-codemirror";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { useTheme } from "./utils";
 
-export type RomeExtension = Extension;
+export type BiomeExtension = Extension;
 
 interface Props extends ReactCodeMirrorProps {
-	diagnostics?: RomeDiagnostic[];
+	diagnostics?: BiomeDiagnostic[];
 }
 
-function getDiagnosticMessage(diagnostic: RomeDiagnostic): string {
+function getDiagnosticMessage(diagnostic: BiomeDiagnostic): string {
 	let buf = "";
 	for (const elem of diagnostic.message) {
 		buf += elem.content;
@@ -26,7 +26,7 @@ function getDiagnosticMessage(diagnostic: RomeDiagnostic): string {
 }
 
 function biomeDiagnosticsToCodeMirror(
-	biome: RomeDiagnostic[],
+	biome: BiomeDiagnostic[],
 ): CodeMirrorDiagnostic[] {
 	const codeMirror: CodeMirrorDiagnostic[] = [];
 

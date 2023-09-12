@@ -1,23 +1,23 @@
-import { romeAst as RomeFormatterIr } from "lang-rome-formatter-ir";
+import { romeAst as BiomeFormatterIr } from "lang-rome-formatter-ir";
 import CodeMirror from "../CodeMirror";
 import Collapsible from "../Collapsible";
+import BiomeHeader from "../components/BiomeHeader";
 import PrettierHeader from "../components/PrettierHeader";
-import RomeHeader from "../components/RomeHeader";
 import type { PrettierOutput } from "../types";
 
 interface Props {
 	prettier: PrettierOutput;
-	rome: string;
+	biome: string;
 }
 
-const formatterIrCodeMirrorExtension = [RomeFormatterIr()];
+const formatterIrCodeMirrorExtension = [BiomeFormatterIr()];
 
-export default function FormatterIrTab({ rome, prettier }: Props) {
+export default function FormatterIrTab({ biome, prettier }: Props) {
 	return (
 		<>
-			<Collapsible className="rome" heading={<RomeHeader />}>
+			<Collapsible className="biome" heading={<BiomeHeader />}>
 				<CodeMirror
-					value={rome}
+					value={biome}
 					extensions={formatterIrCodeMirrorExtension}
 					readOnly={true}
 				/>

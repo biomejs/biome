@@ -13,8 +13,8 @@ import {
 	Semicolons,
 	TrailingComma,
 	defaultPlaygroundState,
+	emptyBiomeOutput,
 	emptyPrettierOutput,
-	emptyRomeOutput,
 } from "./types";
 import {
 	createLocalStorage,
@@ -47,7 +47,7 @@ function PlaygroundLoader() {
 	// biome-ignore lint/nursery/useExhaustiveDependencies: dependencies mismatch
 	useEffect(() => {
 		workerRef.current = new Worker(
-			new URL("./workers/romeWorker", import.meta.url),
+			new URL("./workers/biomeWorker", import.meta.url),
 			{ type: "module" },
 		);
 		prettierWorkerRef.current = new Worker(
@@ -64,14 +64,14 @@ function PlaygroundLoader() {
 				}
 
 				case "updated": {
-					const { filename, romeOutput } = event.data;
+					const { filename, biomeOutput } = event.data;
 					setPlaygroundState((state) => ({
 						...state,
 						files: {
 							...state.files,
 							[filename]: {
 								...getFileState(state, filename),
-								rome: romeOutput,
+								biome: biomeOutput,
 							},
 						},
 					}));
@@ -265,7 +265,7 @@ function initState(
 				const filename = normalizeFilename(match[1]!);
 				files[filename] = {
 					content: decodeCode(value),
-					rome: emptyRomeOutput,
+					biome: emptyBiomeOutput,
 					prettier: emptyPrettierOutput,
 				};
 				singleFileMode = false;
@@ -282,7 +282,7 @@ function initState(
 			});
 			files[`main.${ext}`] = {
 				content: decodeCode(searchParams.get("code") ?? ""),
-				rome: emptyRomeOutput,
+				biome: emptyBiomeOutput,
 				prettier: emptyPrettierOutput,
 			};
 			hasFiles = true;

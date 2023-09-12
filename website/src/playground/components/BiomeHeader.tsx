@@ -1,7 +1,6 @@
 import biomeIcon from "../../assets/svg/logomark.svg";
 
-export default function RomeHeader() {
-	console.log(biomeIcon);
+export default function BiomeHeader() {
 	return (
 		<>
 			<img alt="Biome logo" src={biomeIcon.src} />

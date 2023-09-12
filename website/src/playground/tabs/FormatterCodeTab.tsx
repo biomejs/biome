@@ -1,14 +1,14 @@
 import fastDiff from "fast-diff";
-import CodeMirror, { RomeExtension } from "../CodeMirror";
+import CodeMirror, { BiomeExtension } from "../CodeMirror";
 import Collapsible from "../Collapsible";
+import BiomeHeader from "../components/BiomeHeader";
 import PrettierHeader from "../components/PrettierHeader";
-import RomeHeader from "../components/RomeHeader";
 import type { PrettierOutput } from "../types";
 
 interface Props {
 	prettier: PrettierOutput;
-	rome: string;
-	extensions: RomeExtension[];
+	biome: string;
+	extensions: BiomeExtension[];
 }
 
 function removeWhitespace(str: string): string {
@@ -43,7 +43,7 @@ function calculateHint(a: string, b: string): string | JSX.Element {
 }
 
 export default function FormatterCodeTab({
-	rome: biome,
+	biome,
 	prettier,
 	extensions,
 }: Props) {
@@ -56,7 +56,7 @@ export default function FormatterCodeTab({
 
 	return (
 		<>
-			<Collapsible className="rome" heading={<RomeHeader />}>
+			<Collapsible className="biome" heading={<BiomeHeader />}>
 				<CodeMirror
 					value={biome}
 					extensions={extensions}
