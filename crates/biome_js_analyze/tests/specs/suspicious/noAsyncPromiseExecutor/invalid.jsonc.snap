@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```js
+new Promise(async function foo(resolve, reject) {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:13 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Promise executor functions should not be `async`.
+  
+  > 1 │ new Promise(async function foo(resolve, reject) {})
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```
+
+# Input
+```js
+new Promise(async (resolve, reject) => {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:13 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Promise executor functions should not be `async`.
+  
+  > 1 │ new Promise(async (resolve, reject) => {})
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```
+
+# Input
+```js
+new Promise(((((async () => {})))))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:17 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Promise executor functions should not be `async`.
+  
+  > 1 │ new Promise(((((async () => {})))))
+      │                 ^^^^^^^^^^^^^^
+  
+
+```
+
+

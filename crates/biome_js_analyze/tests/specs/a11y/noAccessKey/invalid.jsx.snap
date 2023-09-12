@@ -1,0 +1,227 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```js
+<input type="submit" accessKey="s" value="Submit" />;
+<button accessKey="n">Next</button>;
+<div accessKey="h" {...props} />;
+<div accessKey={"y"} />;
+<div accessKey={`${y}`} />;
+<div accessKey={`${undefined}y${undefined}`} />;
+<div accessKey={`This is ${bad}`} />;
+<div accessKey={accessKey} />;
+<div accessKey={`${undefined}`} />;
+<div accessKey={`${undefined}${undefined}`} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+  > 1 │ <input type="submit" accessKey="s" value="Submit" />;
+      │                      ^^^^^^^^^^^^^
+    2 │ <button accessKey="n">Next</button>;
+    3 │ <div accessKey="h" {...props} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    1 │ <input·type="submit"·accessKey="s"·value="Submit"·/>;
+      │                      --------------                  
+
+```
+
+```
+invalid.jsx:2:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    1 │ <input type="submit" accessKey="s" value="Submit" />;
+  > 2 │ <button accessKey="n">Next</button>;
+      │         ^^^^^^^^^^^^^
+    3 │ <div accessKey="h" {...props} />;
+    4 │ <div accessKey={"y"} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    2 │ <button·accessKey="n">Next</button>;
+      │         -------------               
+
+```
+
+```
+invalid.jsx:3:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    1 │ <input type="submit" accessKey="s" value="Submit" />;
+    2 │ <button accessKey="n">Next</button>;
+  > 3 │ <div accessKey="h" {...props} />;
+      │      ^^^^^^^^^^^^^
+    4 │ <div accessKey={"y"} />;
+    5 │ <div accessKey={`${y}`} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    3 │ <div·accessKey="h"·{...props}·/>;
+      │      --------------              
+
+```
+
+```
+invalid.jsx:4:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    2 │ <button accessKey="n">Next</button>;
+    3 │ <div accessKey="h" {...props} />;
+  > 4 │ <div accessKey={"y"} />;
+      │      ^^^^^^^^^^^^^^^
+    5 │ <div accessKey={`${y}`} />;
+    6 │ <div accessKey={`${undefined}y${undefined}`} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    4 │ <div·accessKey={"y"}·/>;
+      │      ----------------   
+
+```
+
+```
+invalid.jsx:5:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    3 │ <div accessKey="h" {...props} />;
+    4 │ <div accessKey={"y"} />;
+  > 5 │ <div accessKey={`${y}`} />;
+      │      ^^^^^^^^^^^^^^^^^^
+    6 │ <div accessKey={`${undefined}y${undefined}`} />;
+    7 │ <div accessKey={`This is ${bad}`} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    5 │ <div·accessKey={`${y}`}·/>;
+      │      -------------------   
+
+```
+
+```
+invalid.jsx:6:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    4 │ <div accessKey={"y"} />;
+    5 │ <div accessKey={`${y}`} />;
+  > 6 │ <div accessKey={`${undefined}y${undefined}`} />;
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div accessKey={`This is ${bad}`} />;
+    8 │ <div accessKey={accessKey} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    6 │ <div·accessKey={`${undefined}y${undefined}`}·/>;
+      │      ----------------------------------------   
+
+```
+
+```
+invalid.jsx:7:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+    5 │ <div accessKey={`${y}`} />;
+    6 │ <div accessKey={`${undefined}y${undefined}`} />;
+  > 7 │ <div accessKey={`This is ${bad}`} />;
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div accessKey={accessKey} />;
+    9 │ <div accessKey={`${undefined}`} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    7 │ <div·accessKey={`This·is·${bad}`}·/>;
+      │      -----------------------------   
+
+```
+
+```
+invalid.jsx:8:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+     6 │ <div accessKey={`${undefined}y${undefined}`} />;
+     7 │ <div accessKey={`This is ${bad}`} />;
+   > 8 │ <div accessKey={accessKey} />;
+       │      ^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div accessKey={`${undefined}`} />;
+    10 │ <div accessKey={`${undefined}${undefined}`} />;
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    8 │ <div·accessKey={accessKey}·/>;
+      │      ----------------------   
+
+```
+
+```
+invalid.jsx:9:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+     7 │ <div accessKey={`This is ${bad}`} />;
+     8 │ <div accessKey={accessKey} />;
+   > 9 │ <div accessKey={`${undefined}`} />;
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <div accessKey={`${undefined}${undefined}`} />;
+    11 │ 
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    9 │ <div·accessKey={`${undefined}`}·/>;
+      │      ---------------------------   
+
+```
+
+```
+invalid.jsx:10:6 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the accessKey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard comments.
+  
+     8 │ <div accessKey={accessKey} />;
+     9 │ <div accessKey={`${undefined}`} />;
+  > 10 │ <div accessKey={`${undefined}${undefined}`} />;
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Assigning keyboard shortcuts using the accessKey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Suggested fix: Remove the accessKey attribute.
+  
+    10 │ <div·accessKey={`${undefined}${undefined}`}·/>;
+       │      ---------------------------------------   
+
+```
+
+

@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImport.ts
+---
+# Input
+```js
+import A from 'A';
+import { B } from 'b';
+import c2 = c1;
+
+```
+
+# Diagnostics
+```
+invalidImport.ts:1:8 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ import A from 'A';
+      │        ^
+    2 │ import { B } from 'b';
+    3 │ import c2 = c1;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidImport.ts:2:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ import A from 'A';
+  > 2 │ import { B } from 'b';
+      │          ^
+    3 │ import c2 = c1;
+    4 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidImport.ts:3:8 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ import A from 'A';
+    2 │ import { B } from 'b';
+  > 3 │ import c2 = c1;
+      │        ^^
+    4 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+

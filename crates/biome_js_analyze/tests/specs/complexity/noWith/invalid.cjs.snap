@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.cjs
+---
+# Input
+```js
+function f() {
+  with (point) {
+    r = Math.sqrt(x * x + y * y); // is r a member of point?
+  }
+}
+```
+
+# Diagnostics
+```
+invalid.cjs:2:3 lint/complexity/noWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected use of with statement.
+  
+    1 │ function f() {
+  > 2 │   with (point) {
+      │   ^^^^^^^^^^^^^^
+  > 3 │     r = Math.sqrt(x * x + y * y); // is r a member of point?
+  > 4 │   }
+      │   ^
+    5 │ }
+  
+  i The with statement is potentially problematic because it adds members of an object to the current
+    scope, making it impossible to tell what a variable inside the block actually refers to.
+  
+
+```
+
+

@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.ts
+---
+# Input
+```js
+class C {
+	static {
+		var a;
+		var a;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  
+    2 │ 	static {
+    3 │ 		var a;
+  > 4 │ 		var a;
+      │ 		    ^
+    5 │ 	}
+    6 │ }
+  
+  i 'a' is defined here:
+  
+    1 │ class C {
+    2 │ 	static {
+  > 3 │ 		var a;
+      │ 		    ^
+    4 │ 		var a;
+    5 │ 	}
+  
+
+```
+
+

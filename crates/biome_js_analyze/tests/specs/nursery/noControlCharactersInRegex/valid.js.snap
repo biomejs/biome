@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+var regex = RegExp("x1f");
+var regex = RegExp("[");
+var regex = new RegExp("x1f");
+var regex = new RegExp("[");
+var regex = new RegExp("\\u{20}", "u");
+var regex = new RegExp("\\u{1F}");
+var regex = new RegExp("\\u{1F}", "g");
+var regex = new RegExp("\\u{1F}", uflags);
+var regex = new RegExp("\t");
+var regex = new RegExp("\n");
+var regex = /\t/;
+var regex = /\n/;
+var regex = /x1f/;
+var regex = /\\x1f/;
+var regex = /\u{20}/u;
+var regex = /\u{1F}/;
+var regex = /\u{1F}/g;
+var regex = /\t/;
+var regex = /\n/;
+new (function foo() {})("\\x1f");
+
+```
+
+

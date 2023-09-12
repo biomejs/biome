@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: createElementBindingValid.js
+---
+# Input
+```js
+import React, { createElement } from "noReact";
+
+React.createElement('div', {
+    dangerouslySetInnerHTML: { __html: 'child' }
+});
+
+createElement('div', {
+    dangerouslySetInnerHTML: { __html: 'child' }
+});
+```
+
+

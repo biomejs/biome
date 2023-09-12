@@ -109,7 +109,7 @@ fn main() -> Result<()> {
     }
 
     let mut visitor = LintRulesVisitor::default();
-    rome_js_analyze::visit_registry(&mut visitor);
+    biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor {
@@ -585,7 +585,7 @@ fn assert_lint(
                 };
 
                 let options = AnalyzerOptions::default();
-                let (_, diagnostics) = rome_js_analyze::analyze(
+                let (_, diagnostics) = biome_js_analyze::analyze(
                     &root,
                     filter,
                     &options,

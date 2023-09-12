@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reactCreateElement.js
+---
+# Input
+```js
+React.createElement('div', {
+    dangerouslySetInnerHTML: { __html: 'child' }
+});
+
+```
+
+# Diagnostics
+```
+reactCreateElement.js:2:5 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    1 │ React.createElement('div', {
+  > 2 │     dangerouslySetInnerHTML: { __html: 'child' }
+      │     ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ });
+    4 │ 
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+```
+
+

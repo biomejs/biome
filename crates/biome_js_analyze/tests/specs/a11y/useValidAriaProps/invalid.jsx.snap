@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsx
+---
+# Input
+```js
+var a = <input className="" aria-labell="" />;
+var a = <div aria-="foobar" />;
+var a = <div aria-labeledby="foobar" />;
+var a = <div aria-skldjfaria-klajsd="foobar" />;
+var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+  > 1 │ var a = <input className="" aria-labell="" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ var a = <div aria-="foobar" />;
+    3 │ var a = <div aria-labeledby="foobar" />;
+  
+  i aria-labell is not a valid ARIA attribute.
+  
+  > 1 │ var a = <input className="" aria-labell="" />;
+      │                             ^^^^^^^^^^^^^^
+    2 │ var a = <div aria-="foobar" />;
+    3 │ var a = <div aria-labeledby="foobar" />;
+  
+
+```
+
+```
+invalid.jsx:2:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+    1 │ var a = <input className="" aria-labell="" />;
+  > 2 │ var a = <div aria-="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+  
+  i aria- is not a valid ARIA attribute.
+  
+    1 │ var a = <input className="" aria-labell="" />;
+  > 2 │ var a = <div aria-="foobar" />;
+      │              ^^^^^^^^^^^^^^
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+  
+
+```
+
+```
+invalid.jsx:3:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+    1 │ var a = <input className="" aria-labell="" />;
+    2 │ var a = <div aria-="foobar" />;
+  > 3 │ var a = <div aria-labeledby="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+  
+  i aria-labeledby is not a valid ARIA attribute.
+  
+    1 │ var a = <input className="" aria-labell="" />;
+    2 │ var a = <div aria-="foobar" />;
+  > 3 │ var a = <div aria-labeledby="foobar" />;
+      │              ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+  
+
+```
+
+```
+invalid.jsx:4:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+    2 │ var a = <div aria-="foobar" />;
+    3 │ var a = <div aria-labeledby="foobar" />;
+  > 4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+    6 │ 
+  
+  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
+  
+    2 │ var a = <div aria-="foobar" />;
+    3 │ var a = <div aria-labeledby="foobar" />;
+  > 4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+    6 │ 
+  
+
+```
+
+```
+invalid.jsx:5:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
+  
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
+  
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+      │                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+
+```
+
+

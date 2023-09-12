@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noChildrenPropInvalid.jsx
+---
+# Input
+```js
+import { createElement as aliased } from "react";
+
+<>
+    <Component children={'foo'}></Component>
+</>
+
+createElement('div', {
+    children: 'foo'
+})
+
+React.createElement('div', {
+    children: 'foo'
+})
+
+
+aliased('div', {
+	children: 'foo'
+})
+
+```
+
+# Diagnostics
+```
+noChildrenPropInvalid.jsx:4:16 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing children using a prop
+  
+    3 │ <>
+  > 4 │     <Component children={'foo'}></Component>
+      │                ^^^^^^^^
+    5 │ </>
+    6 │ 
+  
+  i The canonical way to pass children in React is to use JSX elements
+  
+
+```
+
+```
+noChildrenPropInvalid.jsx:12:5 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing children using a prop
+  
+    11 │ React.createElement('div', {
+  > 12 │     children: 'foo'
+       │     ^^^^^^^^
+    13 │ })
+    14 │ 
+  
+  i The canonical way to pass children in React is to use additional arguments to React.createElement
+  
+
+```
+
+```
+noChildrenPropInvalid.jsx:17:2 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing children using a prop
+  
+    16 │ aliased('div', {
+  > 17 │ 	children: 'foo'
+       │ 	^^^^^^^^
+    18 │ })
+    19 │ 
+  
+  i The canonical way to pass children in React is to use additional arguments to React.createElement
+  
+
+```
+
+

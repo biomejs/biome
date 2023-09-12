@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTypeAlias.ts
+---
+# Input
+```js
+export type X = {}
+
+export type PascalCase = {}
+
+export type _PascalCase = {}
+
+export type _ = {}
+
+export type $ = {}
+```
+
+

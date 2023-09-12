@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```js
+// valid
+<div />;
+<div>child</div>;
+<Component />;
+<Component>child</Component>;
+<Foo.bar />;
+<Foo.bar>child</Foo.bar>;
+```
+
+

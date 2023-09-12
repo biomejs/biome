@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: additionalGlobal.js
+---
+# Input
+```js
+console.log($);
+
+```
+
+# Diagnostics
+```
+additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use the global variable $.
+  
+  > 1 │ console.log($);
+      │             ^
+    2 │ 
+  
+  i Use a local variable instead.
+  
+
+```
+
+

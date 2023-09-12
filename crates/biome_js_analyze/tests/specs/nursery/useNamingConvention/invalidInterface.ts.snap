@@ -1,0 +1,238 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInterface.ts
+---
+# Input
+```js
+export interface XXX {}
+
+export interface CONSTANT_CASE {}
+
+export interface camelCase {}
+
+export interface snake_case {}
+
+export interface Unknown_Style {}
+
+interface _XXX {}
+
+interface _CONSTANT_CASE {}
+
+interface _camelCase {}
+
+interface _snake_case {}
+
+interface _Unknown_Style {}
+```
+
+# Diagnostics
+```
+invalidInterface.ts:1:18 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+  > 1 │ export interface XXX {}
+      │                  ^^^
+    2 │ 
+    3 │ export interface CONSTANT_CASE {}
+  
+  i The name could be renamed to `Xxx`.
+  
+
+```
+
+```
+invalidInterface.ts:3:18 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+    1 │ export interface XXX {}
+    2 │ 
+  > 3 │ export interface CONSTANT_CASE {}
+      │                  ^^^^^^^^^^^^^
+    4 │ 
+    5 │ export interface camelCase {}
+  
+  i The name could be renamed to `ConstantCase`.
+  
+
+```
+
+```
+invalidInterface.ts:5:18 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+    3 │ export interface CONSTANT_CASE {}
+    4 │ 
+  > 5 │ export interface camelCase {}
+      │                  ^^^^^^^^^
+    6 │ 
+    7 │ export interface snake_case {}
+  
+  i The name could be renamed to `CamelCase`.
+  
+
+```
+
+```
+invalidInterface.ts:7:18 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+    5 │ export interface camelCase {}
+    6 │ 
+  > 7 │ export interface snake_case {}
+      │                  ^^^^^^^^^^
+    8 │ 
+    9 │ export interface Unknown_Style {}
+  
+  i The name could be renamed to `SnakeCase`.
+  
+
+```
+
+```
+invalidInterface.ts:9:18 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+     7 │ export interface snake_case {}
+     8 │ 
+   > 9 │ export interface Unknown_Style {}
+       │                  ^^^^^^^^^^^^^
+    10 │ 
+    11 │ interface _XXX {}
+  
+  i The name could be renamed to `UnknownStyle`.
+  
+
+```
+
+```
+invalidInterface.ts:11:11 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name trimmed as `XXX` should be in PascalCase.
+  
+     9 │ export interface Unknown_Style {}
+    10 │ 
+  > 11 │ interface _XXX {}
+       │           ^^^^
+    12 │ 
+    13 │ interface _CONSTANT_CASE {}
+  
+  i The name could be renamed to `_Xxx`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+     9  9 │   export interface Unknown_Style {}
+    10 10 │   
+    11    │ - interface·_XXX·{}
+       11 │ + interface·_Xxx·{}
+    12 12 │   
+    13 13 │   interface _CONSTANT_CASE {}
+  
+
+```
+
+```
+invalidInterface.ts:13:11 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name trimmed as `CONSTANT_CASE` should be in PascalCase.
+  
+    11 │ interface _XXX {}
+    12 │ 
+  > 13 │ interface _CONSTANT_CASE {}
+       │           ^^^^^^^^^^^^^^
+    14 │ 
+    15 │ interface _camelCase {}
+  
+  i The name could be renamed to `_ConstantCase`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    11 11 │   interface _XXX {}
+    12 12 │   
+    13    │ - interface·_CONSTANT_CASE·{}
+       13 │ + interface·_ConstantCase·{}
+    14 14 │   
+    15 15 │   interface _camelCase {}
+  
+
+```
+
+```
+invalidInterface.ts:15:11 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name trimmed as `camelCase` should be in PascalCase.
+  
+    13 │ interface _CONSTANT_CASE {}
+    14 │ 
+  > 15 │ interface _camelCase {}
+       │           ^^^^^^^^^^
+    16 │ 
+    17 │ interface _snake_case {}
+  
+  i The name could be renamed to `_CamelCase`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    13 13 │   interface _CONSTANT_CASE {}
+    14 14 │   
+    15    │ - interface·_camelCase·{}
+       15 │ + interface·_CamelCase·{}
+    16 16 │   
+    17 17 │   interface _snake_case {}
+  
+
+```
+
+```
+invalidInterface.ts:17:11 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name trimmed as `snake_case` should be in PascalCase.
+  
+    15 │ interface _camelCase {}
+    16 │ 
+  > 17 │ interface _snake_case {}
+       │           ^^^^^^^^^^^
+    18 │ 
+    19 │ interface _Unknown_Style {}
+  
+  i The name could be renamed to `_SnakeCase`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    15 15 │   interface _camelCase {}
+    16 16 │   
+    17    │ - interface·_snake_case·{}
+       17 │ + interface·_SnakeCase·{}
+    18 18 │   
+    19 19 │   interface _Unknown_Style {}
+  
+
+```
+
+```
+invalidInterface.ts:19:11 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name trimmed as `Unknown_Style` should be in PascalCase.
+  
+    17 │ interface _snake_case {}
+    18 │ 
+  > 19 │ interface _Unknown_Style {}
+       │           ^^^^^^^^^^^^^^
+  
+  i The name could be renamed to `_UnknownStyle`.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    17 17 │   interface _snake_case {}
+    18 18 │   
+    19    │ - interface·_Unknown_Style·{}
+       19 │ + interface·_UnknownStyle·{}
+  
+
+```
+
+

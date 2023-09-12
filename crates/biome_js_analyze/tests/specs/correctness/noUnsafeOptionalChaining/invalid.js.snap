@@ -1,0 +1,1599 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.js
+---
+# Input
+```js
+(obj?.foo)();
+(obj.foo ?? bar?.baz)();
+(obj.foo || bar?.baz)();
+(obj?.foo && bar)();
+(bar && obj?.foo)();
+(obj?.foo?.())();
+(obj?.foo).bar;
+(obj?.foo)[1];
+(obj?.foo)`template`
+new (obj?.foo)();
+new (obj?.foo?.())()
+new (obj?.foo?.() || obj?.bar)()
+async function foo() { (await obj?.foo)(); }
+async function foo() { (await obj?.foo).bar; }
+async function foo() { (bar?.baz ?? await obj?.foo)(); }
+async function foo() { (bar && await obj?.foo)(); }
+async function foo() { (await (bar && obj?.foo))(); }
+
+// spread
+[...obj?.foo];
+bar(...obj?.foo);
+new Bar(...obj?.foo);
+
+// destructuring
+const {foo} = obj?.bar;
+const {foo} = obj?.bar();
+const {foo: bar} = obj?.bar();
+const [foo] = obj?.bar;
+const [foo] = obj?.bar || obj?.foo;
+([foo] = obj?.bar);
+const [foo] = obj?.bar?.();
+[{ foo } = obj?.bar] = [];
+({bar: [ foo ] = obj?.prop} = {});
+[[ foo ] = obj?.bar] = [];
+async function foo() { const {foo} = await obj?.bar; }
+async function foo() { const {foo} = await obj?.bar(); }
+async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+async function foo() { ([foo] = await obj?.bar); }
+
+// class declaration
+class A extends obj?.foo {}
+async function foo() { class A extends (await obj?.foo) {}}
+
+// class expression
+var a = class A extends obj?.foo {}
+async function foo() { var a = class A extends (await obj?.foo) {}}
+
+// relational operations
+foo instanceof obj?.prop
+async function foo() { foo instanceof await obj?.prop }
+1 in foo?.bar;
+async function foo() { 1 in await foo?.bar; }
+
+// for...of
+for (foo of obj?.bar);
+async function foo() { for (foo of await obj?.bar);}
+
+// sequence expression
+(foo, obj?.foo)();
+(foo, obj?.foo)[1];
+async function foo() { (await (foo,  obj?.foo))(); }
+async function foo() { ((foo, await obj?.foo))(); }
+async function foo() { (foo, await obj?.foo)[1]; }
+async function foo() { (await (foo, obj?.foo)) [1]; }
+
+// conditional expression
+(a ? obj?.foo : b)();
+(a ? b : obj?.foo)();
+(a ? obj?.foo : b)[1];
+(a ? b : obj?.foo).bar;
+async function foo() { (await (a ? obj?.foo : b))(); }
+async function foo() { (a ? await obj?.foo : b)(); }
+async function foo() { (await (a ? b : obj?.foo))(); }
+async function foo() { (await (a ? obj?.foo : b))[1]; }
+async function foo() { (await (a ? b : obj?.foo)).bar; }
+async function foo() { (a ? b : await obj?.foo).bar; }
+
+(obj?.foo && obj?.baz).bar
+
+async function foo() { with ( await obj?.foo) {}; }
+(foo ? obj?.foo : obj?.bar).bar
+
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+  > 1 │ (obj?.foo)();
+      │     ^^
+    2 │ (obj.foo ?? bar?.baz)();
+    3 │ (obj.foo || bar?.baz)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+  > 1 │ (obj?.foo)();
+      │           ^^
+    2 │ (obj.foo ?? bar?.baz)();
+    3 │ (obj.foo || bar?.baz)();
+  
+
+```
+
+```
+invalid.js:2:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    1 │ (obj?.foo)();
+  > 2 │ (obj.foo ?? bar?.baz)();
+      │                ^^
+    3 │ (obj.foo || bar?.baz)();
+    4 │ (obj?.foo && bar)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    1 │ (obj?.foo)();
+  > 2 │ (obj.foo ?? bar?.baz)();
+      │                      ^^
+    3 │ (obj.foo || bar?.baz)();
+    4 │ (obj?.foo && bar)();
+  
+
+```
+
+```
+invalid.js:3:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    1 │ (obj?.foo)();
+    2 │ (obj.foo ?? bar?.baz)();
+  > 3 │ (obj.foo || bar?.baz)();
+      │                ^^
+    4 │ (obj?.foo && bar)();
+    5 │ (bar && obj?.foo)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    1 │ (obj?.foo)();
+    2 │ (obj.foo ?? bar?.baz)();
+  > 3 │ (obj.foo || bar?.baz)();
+      │                      ^^
+    4 │ (obj?.foo && bar)();
+    5 │ (bar && obj?.foo)();
+  
+
+```
+
+```
+invalid.js:4:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    2 │ (obj.foo ?? bar?.baz)();
+    3 │ (obj.foo || bar?.baz)();
+  > 4 │ (obj?.foo && bar)();
+      │     ^^
+    5 │ (bar && obj?.foo)();
+    6 │ (obj?.foo?.())();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    2 │ (obj.foo ?? bar?.baz)();
+    3 │ (obj.foo || bar?.baz)();
+  > 4 │ (obj?.foo && bar)();
+      │                  ^^
+    5 │ (bar && obj?.foo)();
+    6 │ (obj?.foo?.())();
+  
+
+```
+
+```
+invalid.js:5:12 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    3 │ (obj.foo || bar?.baz)();
+    4 │ (obj?.foo && bar)();
+  > 5 │ (bar && obj?.foo)();
+      │            ^^
+    6 │ (obj?.foo?.())();
+    7 │ (obj?.foo).bar;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    3 │ (obj.foo || bar?.baz)();
+    4 │ (obj?.foo && bar)();
+  > 5 │ (bar && obj?.foo)();
+      │                  ^^
+    6 │ (obj?.foo?.())();
+    7 │ (obj?.foo).bar;
+  
+
+```
+
+```
+invalid.js:6:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    4 │ (obj?.foo && bar)();
+    5 │ (bar && obj?.foo)();
+  > 6 │ (obj?.foo?.())();
+      │          ^^
+    7 │ (obj?.foo).bar;
+    8 │ (obj?.foo)[1];
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    4 │ (obj?.foo && bar)();
+    5 │ (bar && obj?.foo)();
+  > 6 │ (obj?.foo?.())();
+      │               ^^
+    7 │ (obj?.foo).bar;
+    8 │ (obj?.foo)[1];
+  
+
+```
+
+```
+invalid.js:7:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    5 │ (bar && obj?.foo)();
+    6 │ (obj?.foo?.())();
+  > 7 │ (obj?.foo).bar;
+      │     ^^
+    8 │ (obj?.foo)[1];
+    9 │ (obj?.foo)`template`
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    5 │ (bar && obj?.foo)();
+    6 │ (obj?.foo?.())();
+  > 7 │ (obj?.foo).bar;
+      │            ^^^
+    8 │ (obj?.foo)[1];
+    9 │ (obj?.foo)`template`
+  
+
+```
+
+```
+invalid.js:8:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+     6 │ (obj?.foo?.())();
+     7 │ (obj?.foo).bar;
+   > 8 │ (obj?.foo)[1];
+       │     ^^
+     9 │ (obj?.foo)`template`
+    10 │ new (obj?.foo)();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+     6 │ (obj?.foo?.())();
+     7 │ (obj?.foo).bar;
+   > 8 │ (obj?.foo)[1];
+       │           ^^^
+     9 │ (obj?.foo)`template`
+    10 │ new (obj?.foo)();
+  
+
+```
+
+```
+invalid.js:9:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+     7 │ (obj?.foo).bar;
+     8 │ (obj?.foo)[1];
+   > 9 │ (obj?.foo)`template`
+       │     ^^
+    10 │ new (obj?.foo)();
+    11 │ new (obj?.foo?.())()
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+     7 │ (obj?.foo).bar;
+     8 │ (obj?.foo)[1];
+   > 9 │ (obj?.foo)`template`
+       │           ^^^^^^^^^^
+    10 │ new (obj?.foo)();
+    11 │ new (obj?.foo?.())()
+  
+
+```
+
+```
+invalid.js:10:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+     8 │ (obj?.foo)[1];
+     9 │ (obj?.foo)`template`
+  > 10 │ new (obj?.foo)();
+       │         ^^
+    11 │ new (obj?.foo?.())()
+    12 │ new (obj?.foo?.() || obj?.bar)()
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+     8 │ (obj?.foo)[1];
+     9 │ (obj?.foo)`template`
+  > 10 │ new (obj?.foo)();
+       │ ^^^^^^^^^^^^^^^^
+    11 │ new (obj?.foo?.())()
+    12 │ new (obj?.foo?.() || obj?.bar)()
+  
+
+```
+
+```
+invalid.js:11:14 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+     9 │ (obj?.foo)`template`
+    10 │ new (obj?.foo)();
+  > 11 │ new (obj?.foo?.())()
+       │              ^^
+    12 │ new (obj?.foo?.() || obj?.bar)()
+    13 │ async function foo() { (await obj?.foo)(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+     9 │ (obj?.foo)`template`
+    10 │ new (obj?.foo)();
+  > 11 │ new (obj?.foo?.())()
+       │ ^^^^^^^^^^^^^^^^^^^^
+    12 │ new (obj?.foo?.() || obj?.bar)()
+    13 │ async function foo() { (await obj?.foo)(); }
+  
+
+```
+
+```
+invalid.js:12:25 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    10 │ new (obj?.foo)();
+    11 │ new (obj?.foo?.())()
+  > 12 │ new (obj?.foo?.() || obj?.bar)()
+       │                         ^^
+    13 │ async function foo() { (await obj?.foo)(); }
+    14 │ async function foo() { (await obj?.foo).bar; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    10 │ new (obj?.foo)();
+    11 │ new (obj?.foo?.())()
+  > 12 │ new (obj?.foo?.() || obj?.bar)()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ async function foo() { (await obj?.foo)(); }
+    14 │ async function foo() { (await obj?.foo).bar; }
+  
+
+```
+
+```
+invalid.js:13:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    11 │ new (obj?.foo?.())()
+    12 │ new (obj?.foo?.() || obj?.bar)()
+  > 13 │ async function foo() { (await obj?.foo)(); }
+       │                                  ^^
+    14 │ async function foo() { (await obj?.foo).bar; }
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    11 │ new (obj?.foo?.())()
+    12 │ new (obj?.foo?.() || obj?.bar)()
+  > 13 │ async function foo() { (await obj?.foo)(); }
+       │                                        ^^
+    14 │ async function foo() { (await obj?.foo).bar; }
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+  
+
+```
+
+```
+invalid.js:14:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    12 │ new (obj?.foo?.() || obj?.bar)()
+    13 │ async function foo() { (await obj?.foo)(); }
+  > 14 │ async function foo() { (await obj?.foo).bar; }
+       │                                  ^^
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    12 │ new (obj?.foo?.() || obj?.bar)()
+    13 │ async function foo() { (await obj?.foo)(); }
+  > 14 │ async function foo() { (await obj?.foo).bar; }
+       │                                         ^^^
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+  
+
+```
+
+```
+invalid.js:15:46 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    13 │ async function foo() { (await obj?.foo)(); }
+    14 │ async function foo() { (await obj?.foo).bar; }
+  > 15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+       │                                              ^^
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+    17 │ async function foo() { (await (bar && obj?.foo))(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    13 │ async function foo() { (await obj?.foo)(); }
+    14 │ async function foo() { (await obj?.foo).bar; }
+  > 15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+       │                                                    ^^
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+    17 │ async function foo() { (await (bar && obj?.foo))(); }
+  
+
+```
+
+```
+invalid.js:16:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    14 │ async function foo() { (await obj?.foo).bar; }
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+  > 16 │ async function foo() { (bar && await obj?.foo)(); }
+       │                                         ^^
+    17 │ async function foo() { (await (bar && obj?.foo))(); }
+    18 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    14 │ async function foo() { (await obj?.foo).bar; }
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+  > 16 │ async function foo() { (bar && await obj?.foo)(); }
+       │                                               ^^
+    17 │ async function foo() { (await (bar && obj?.foo))(); }
+    18 │ 
+  
+
+```
+
+```
+invalid.js:17:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+  > 17 │ async function foo() { (await (bar && obj?.foo))(); }
+       │                                          ^^
+    18 │ 
+    19 │ // spread
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
+    16 │ async function foo() { (bar && await obj?.foo)(); }
+  > 17 │ async function foo() { (await (bar && obj?.foo))(); }
+       │                                                 ^^
+    18 │ 
+    19 │ // spread
+  
+
+```
+
+```
+invalid.js:20:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    19 │ // spread
+  > 20 │ [...obj?.foo];
+       │        ^^
+    21 │ bar(...obj?.foo);
+    22 │ new Bar(...obj?.foo);
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    19 │ // spread
+  > 20 │ [...obj?.foo];
+       │  ^^^^^^^^^^^
+    21 │ bar(...obj?.foo);
+    22 │ new Bar(...obj?.foo);
+  
+
+```
+
+```
+invalid.js:21:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    19 │ // spread
+    20 │ [...obj?.foo];
+  > 21 │ bar(...obj?.foo);
+       │           ^^
+    22 │ new Bar(...obj?.foo);
+    23 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    19 │ // spread
+    20 │ [...obj?.foo];
+  > 21 │ bar(...obj?.foo);
+       │     ^^^^^^^^^^^
+    22 │ new Bar(...obj?.foo);
+    23 │ 
+  
+
+```
+
+```
+invalid.js:22:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    20 │ [...obj?.foo];
+    21 │ bar(...obj?.foo);
+  > 22 │ new Bar(...obj?.foo);
+       │               ^^
+    23 │ 
+    24 │ // destructuring
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    20 │ [...obj?.foo];
+    21 │ bar(...obj?.foo);
+  > 22 │ new Bar(...obj?.foo);
+       │         ^^^^^^^^^^^
+    23 │ 
+    24 │ // destructuring
+  
+
+```
+
+```
+invalid.js:25:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    24 │ // destructuring
+  > 25 │ const {foo} = obj?.bar;
+       │                  ^^
+    26 │ const {foo} = obj?.bar();
+    27 │ const {foo: bar} = obj?.bar();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    24 │ // destructuring
+  > 25 │ const {foo} = obj?.bar;
+       │       ^^^^^^^^^^^^^^^^
+    26 │ const {foo} = obj?.bar();
+    27 │ const {foo: bar} = obj?.bar();
+  
+
+```
+
+```
+invalid.js:26:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    24 │ // destructuring
+    25 │ const {foo} = obj?.bar;
+  > 26 │ const {foo} = obj?.bar();
+       │                  ^^
+    27 │ const {foo: bar} = obj?.bar();
+    28 │ const [foo] = obj?.bar;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    24 │ // destructuring
+    25 │ const {foo} = obj?.bar;
+  > 26 │ const {foo} = obj?.bar();
+       │       ^^^^^^^^^^^^^^^^^^
+    27 │ const {foo: bar} = obj?.bar();
+    28 │ const [foo] = obj?.bar;
+  
+
+```
+
+```
+invalid.js:27:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    25 │ const {foo} = obj?.bar;
+    26 │ const {foo} = obj?.bar();
+  > 27 │ const {foo: bar} = obj?.bar();
+       │                       ^^
+    28 │ const [foo] = obj?.bar;
+    29 │ const [foo] = obj?.bar || obj?.foo;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    25 │ const {foo} = obj?.bar;
+    26 │ const {foo} = obj?.bar();
+  > 27 │ const {foo: bar} = obj?.bar();
+       │       ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ const [foo] = obj?.bar;
+    29 │ const [foo] = obj?.bar || obj?.foo;
+  
+
+```
+
+```
+invalid.js:28:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    26 │ const {foo} = obj?.bar();
+    27 │ const {foo: bar} = obj?.bar();
+  > 28 │ const [foo] = obj?.bar;
+       │                  ^^
+    29 │ const [foo] = obj?.bar || obj?.foo;
+    30 │ ([foo] = obj?.bar);
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    26 │ const {foo} = obj?.bar();
+    27 │ const {foo: bar} = obj?.bar();
+  > 28 │ const [foo] = obj?.bar;
+       │       ^^^^^^^^^^^^^^^^
+    29 │ const [foo] = obj?.bar || obj?.foo;
+    30 │ ([foo] = obj?.bar);
+  
+
+```
+
+```
+invalid.js:29:30 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    27 │ const {foo: bar} = obj?.bar();
+    28 │ const [foo] = obj?.bar;
+  > 29 │ const [foo] = obj?.bar || obj?.foo;
+       │                              ^^
+    30 │ ([foo] = obj?.bar);
+    31 │ const [foo] = obj?.bar?.();
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    27 │ const {foo: bar} = obj?.bar();
+    28 │ const [foo] = obj?.bar;
+  > 29 │ const [foo] = obj?.bar || obj?.foo;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ ([foo] = obj?.bar);
+    31 │ const [foo] = obj?.bar?.();
+  
+
+```
+
+```
+invalid.js:30:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    28 │ const [foo] = obj?.bar;
+    29 │ const [foo] = obj?.bar || obj?.foo;
+  > 30 │ ([foo] = obj?.bar);
+       │             ^^
+    31 │ const [foo] = obj?.bar?.();
+    32 │ [{ foo } = obj?.bar] = [];
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    28 │ const [foo] = obj?.bar;
+    29 │ const [foo] = obj?.bar || obj?.foo;
+  > 30 │ ([foo] = obj?.bar);
+       │  ^^^^^^^^^^^^^^^^
+    31 │ const [foo] = obj?.bar?.();
+    32 │ [{ foo } = obj?.bar] = [];
+  
+
+```
+
+```
+invalid.js:31:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    29 │ const [foo] = obj?.bar || obj?.foo;
+    30 │ ([foo] = obj?.bar);
+  > 31 │ const [foo] = obj?.bar?.();
+       │                       ^^
+    32 │ [{ foo } = obj?.bar] = [];
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    29 │ const [foo] = obj?.bar || obj?.foo;
+    30 │ ([foo] = obj?.bar);
+  > 31 │ const [foo] = obj?.bar?.();
+       │       ^^^^^^^^^^^^^^^^^^^^
+    32 │ [{ foo } = obj?.bar] = [];
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+  
+
+```
+
+```
+invalid.js:32:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    30 │ ([foo] = obj?.bar);
+    31 │ const [foo] = obj?.bar?.();
+  > 32 │ [{ foo } = obj?.bar] = [];
+       │               ^^
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+    34 │ [[ foo ] = obj?.bar] = [];
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    30 │ ([foo] = obj?.bar);
+    31 │ const [foo] = obj?.bar?.();
+  > 32 │ [{ foo } = obj?.bar] = [];
+       │  ^^^^^^^^^^^^^^^^^^
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+    34 │ [[ foo ] = obj?.bar] = [];
+  
+
+```
+
+```
+invalid.js:33:21 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    31 │ const [foo] = obj?.bar?.();
+    32 │ [{ foo } = obj?.bar] = [];
+  > 33 │ ({bar: [ foo ] = obj?.prop} = {});
+       │                     ^^
+    34 │ [[ foo ] = obj?.bar] = [];
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    31 │ const [foo] = obj?.bar?.();
+    32 │ [{ foo } = obj?.bar] = [];
+  > 33 │ ({bar: [ foo ] = obj?.prop} = {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ [[ foo ] = obj?.bar] = [];
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+  
+
+```
+
+```
+invalid.js:34:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    32 │ [{ foo } = obj?.bar] = [];
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+  > 34 │ [[ foo ] = obj?.bar] = [];
+       │               ^^
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    32 │ [{ foo } = obj?.bar] = [];
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+  > 34 │ [[ foo ] = obj?.bar] = [];
+       │  ^^^^^^^^^^^^^^^^^^
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+  
+
+```
+
+```
+invalid.js:35:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+    34 │ [[ foo ] = obj?.bar] = [];
+  > 35 │ async function foo() { const {foo} = await obj?.bar; }
+       │                                               ^^
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    33 │ ({bar: [ foo ] = obj?.prop} = {});
+    34 │ [[ foo ] = obj?.bar] = [];
+  > 35 │ async function foo() { const {foo} = await obj?.bar; }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+  
+
+```
+
+```
+invalid.js:36:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    34 │ [[ foo ] = obj?.bar] = [];
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+  > 36 │ async function foo() { const {foo} = await obj?.bar(); }
+       │                                               ^^
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+    38 │ async function foo() { ([foo] = await obj?.bar); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    34 │ [[ foo ] = obj?.bar] = [];
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+  > 36 │ async function foo() { const {foo} = await obj?.bar(); }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+    38 │ async function foo() { ([foo] = await obj?.bar); }
+  
+
+```
+
+```
+invalid.js:37:65 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+  > 37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+       │                                                                 ^^
+    38 │ async function foo() { ([foo] = await obj?.bar); }
+    39 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    35 │ async function foo() { const {foo} = await obj?.bar; }
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+  > 37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ async function foo() { ([foo] = await obj?.bar); }
+    39 │ 
+  
+
+```
+
+```
+invalid.js:38:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+  > 38 │ async function foo() { ([foo] = await obj?.bar); }
+       │                                          ^^
+    39 │ 
+    40 │ // class declaration
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    36 │ async function foo() { const {foo} = await obj?.bar(); }
+    37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+  > 38 │ async function foo() { ([foo] = await obj?.bar); }
+       │                         ^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ // class declaration
+  
+
+```
+
+```
+invalid.js:41:20 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    40 │ // class declaration
+  > 41 │ class A extends obj?.foo {}
+       │                    ^^
+    42 │ async function foo() { class A extends (await obj?.foo) {}}
+    43 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    40 │ // class declaration
+  > 41 │ class A extends obj?.foo {}
+       │         ^^^^^^^^^^^^^^^^
+    42 │ async function foo() { class A extends (await obj?.foo) {}}
+    43 │ 
+  
+
+```
+
+```
+invalid.js:42:50 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    40 │ // class declaration
+    41 │ class A extends obj?.foo {}
+  > 42 │ async function foo() { class A extends (await obj?.foo) {}}
+       │                                                  ^^
+    43 │ 
+    44 │ // class expression
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    40 │ // class declaration
+    41 │ class A extends obj?.foo {}
+  > 42 │ async function foo() { class A extends (await obj?.foo) {}}
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │ // class expression
+  
+
+```
+
+```
+invalid.js:45:28 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    44 │ // class expression
+  > 45 │ var a = class A extends obj?.foo {}
+       │                            ^^
+    46 │ async function foo() { var a = class A extends (await obj?.foo) {}}
+    47 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    44 │ // class expression
+  > 45 │ var a = class A extends obj?.foo {}
+       │                 ^^^^^^^^^^^^^^^^
+    46 │ async function foo() { var a = class A extends (await obj?.foo) {}}
+    47 │ 
+  
+
+```
+
+```
+invalid.js:46:58 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    44 │ // class expression
+    45 │ var a = class A extends obj?.foo {}
+  > 46 │ async function foo() { var a = class A extends (await obj?.foo) {}}
+       │                                                          ^^
+    47 │ 
+    48 │ // relational operations
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    44 │ // class expression
+    45 │ var a = class A extends obj?.foo {}
+  > 46 │ async function foo() { var a = class A extends (await obj?.foo) {}}
+       │                                        ^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ // relational operations
+  
+
+```
+
+```
+invalid.js:49:19 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    48 │ // relational operations
+  > 49 │ foo instanceof obj?.prop
+       │                   ^^
+    50 │ async function foo() { foo instanceof await obj?.prop }
+    51 │ 1 in foo?.bar;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    48 │ // relational operations
+  > 49 │ foo instanceof obj?.prop
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ async function foo() { foo instanceof await obj?.prop }
+    51 │ 1 in foo?.bar;
+  
+
+```
+
+```
+invalid.js:50:48 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    48 │ // relational operations
+    49 │ foo instanceof obj?.prop
+  > 50 │ async function foo() { foo instanceof await obj?.prop }
+       │                                                ^^
+    51 │ 1 in foo?.bar;
+    52 │ async function foo() { 1 in await foo?.bar; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    48 │ // relational operations
+    49 │ foo instanceof obj?.prop
+  > 50 │ async function foo() { foo instanceof await obj?.prop }
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 1 in foo?.bar;
+    52 │ async function foo() { 1 in await foo?.bar; }
+  
+
+```
+
+```
+invalid.js:51:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    49 │ foo instanceof obj?.prop
+    50 │ async function foo() { foo instanceof await obj?.prop }
+  > 51 │ 1 in foo?.bar;
+       │         ^^
+    52 │ async function foo() { 1 in await foo?.bar; }
+    53 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    49 │ foo instanceof obj?.prop
+    50 │ async function foo() { foo instanceof await obj?.prop }
+  > 51 │ 1 in foo?.bar;
+       │ ^^^^^^^^^^^^^
+    52 │ async function foo() { 1 in await foo?.bar; }
+    53 │ 
+  
+
+```
+
+```
+invalid.js:52:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    50 │ async function foo() { foo instanceof await obj?.prop }
+    51 │ 1 in foo?.bar;
+  > 52 │ async function foo() { 1 in await foo?.bar; }
+       │                                      ^^
+    53 │ 
+    54 │ // for...of
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    50 │ async function foo() { foo instanceof await obj?.prop }
+    51 │ 1 in foo?.bar;
+  > 52 │ async function foo() { 1 in await foo?.bar; }
+       │                        ^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ // for...of
+  
+
+```
+
+```
+invalid.js:55:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    54 │ // for...of
+  > 55 │ for (foo of obj?.bar);
+       │                ^^
+    56 │ async function foo() { for (foo of await obj?.bar);}
+    57 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    54 │ // for...of
+  > 55 │ for (foo of obj?.bar);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    56 │ async function foo() { for (foo of await obj?.bar);}
+    57 │ 
+  
+
+```
+
+```
+invalid.js:56:45 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    54 │ // for...of
+    55 │ for (foo of obj?.bar);
+  > 56 │ async function foo() { for (foo of await obj?.bar);}
+       │                                             ^^
+    57 │ 
+    58 │ // sequence expression
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    54 │ // for...of
+    55 │ for (foo of obj?.bar);
+  > 56 │ async function foo() { for (foo of await obj?.bar);}
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ // sequence expression
+  
+
+```
+
+```
+invalid.js:59:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    58 │ // sequence expression
+  > 59 │ (foo, obj?.foo)();
+       │          ^^
+    60 │ (foo, obj?.foo)[1];
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    58 │ // sequence expression
+  > 59 │ (foo, obj?.foo)();
+       │                ^^
+    60 │ (foo, obj?.foo)[1];
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+  
+
+```
+
+```
+invalid.js:60:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    58 │ // sequence expression
+    59 │ (foo, obj?.foo)();
+  > 60 │ (foo, obj?.foo)[1];
+       │          ^^
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    58 │ // sequence expression
+    59 │ (foo, obj?.foo)();
+  > 60 │ (foo, obj?.foo)[1];
+       │                ^^^
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+  
+
+```
+
+```
+invalid.js:61:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    59 │ (foo, obj?.foo)();
+    60 │ (foo, obj?.foo)[1];
+  > 61 │ async function foo() { (await (foo,  obj?.foo))(); }
+       │                                         ^^
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    59 │ (foo, obj?.foo)();
+    60 │ (foo, obj?.foo)[1];
+  > 61 │ async function foo() { (await (foo,  obj?.foo))(); }
+       │                                                ^^
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+  
+
+```
+
+```
+invalid.js:62:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    60 │ (foo, obj?.foo)[1];
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+  > 62 │ async function foo() { ((foo, await obj?.foo))(); }
+       │                                        ^^
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+    64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    60 │ (foo, obj?.foo)[1];
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+  > 62 │ async function foo() { ((foo, await obj?.foo))(); }
+       │                                               ^^
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+    64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+  
+
+```
+
+```
+invalid.js:63:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+  > 63 │ async function foo() { (foo, await obj?.foo)[1]; }
+       │                                       ^^
+    64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+    65 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    61 │ async function foo() { (await (foo,  obj?.foo))(); }
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+  > 63 │ async function foo() { (foo, await obj?.foo)[1]; }
+       │                                             ^^^
+    64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+    65 │ 
+  
+
+```
+
+```
+invalid.js:64:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+  > 64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+       │                                        ^^
+    65 │ 
+    66 │ // conditional expression
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    62 │ async function foo() { ((foo, await obj?.foo))(); }
+    63 │ async function foo() { (foo, await obj?.foo)[1]; }
+  > 64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
+       │                                                ^^^
+    65 │ 
+    66 │ // conditional expression
+  
+
+```
+
+```
+invalid.js:67:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    66 │ // conditional expression
+  > 67 │ (a ? obj?.foo : b)();
+       │         ^^
+    68 │ (a ? b : obj?.foo)();
+    69 │ (a ? obj?.foo : b)[1];
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    66 │ // conditional expression
+  > 67 │ (a ? obj?.foo : b)();
+       │                   ^^
+    68 │ (a ? b : obj?.foo)();
+    69 │ (a ? obj?.foo : b)[1];
+  
+
+```
+
+```
+invalid.js:68:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    66 │ // conditional expression
+    67 │ (a ? obj?.foo : b)();
+  > 68 │ (a ? b : obj?.foo)();
+       │             ^^
+    69 │ (a ? obj?.foo : b)[1];
+    70 │ (a ? b : obj?.foo).bar;
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    66 │ // conditional expression
+    67 │ (a ? obj?.foo : b)();
+  > 68 │ (a ? b : obj?.foo)();
+       │                   ^^
+    69 │ (a ? obj?.foo : b)[1];
+    70 │ (a ? b : obj?.foo).bar;
+  
+
+```
+
+```
+invalid.js:69:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    67 │ (a ? obj?.foo : b)();
+    68 │ (a ? b : obj?.foo)();
+  > 69 │ (a ? obj?.foo : b)[1];
+       │         ^^
+    70 │ (a ? b : obj?.foo).bar;
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    67 │ (a ? obj?.foo : b)();
+    68 │ (a ? b : obj?.foo)();
+  > 69 │ (a ? obj?.foo : b)[1];
+       │                   ^^^
+    70 │ (a ? b : obj?.foo).bar;
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+  
+
+```
+
+```
+invalid.js:70:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    68 │ (a ? b : obj?.foo)();
+    69 │ (a ? obj?.foo : b)[1];
+  > 70 │ (a ? b : obj?.foo).bar;
+       │             ^^
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    68 │ (a ? b : obj?.foo)();
+    69 │ (a ? obj?.foo : b)[1];
+  > 70 │ (a ? b : obj?.foo).bar;
+       │                    ^^^
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+  
+
+```
+
+```
+invalid.js:71:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    69 │ (a ? obj?.foo : b)[1];
+    70 │ (a ? b : obj?.foo).bar;
+  > 71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+       │                                       ^^
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    69 │ (a ? obj?.foo : b)[1];
+    70 │ (a ? b : obj?.foo).bar;
+  > 71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+       │                                                  ^^
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+  
+
+```
+
+```
+invalid.js:72:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    70 │ (a ? b : obj?.foo).bar;
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+  > 72 │ async function foo() { (a ? await obj?.foo : b)(); }
+       │                                      ^^
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    70 │ (a ? b : obj?.foo).bar;
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+  > 72 │ async function foo() { (a ? await obj?.foo : b)(); }
+       │                                                ^^
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+  
+
+```
+
+```
+invalid.js:73:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+  > 73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+       │                                           ^^
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+  > 73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+       │                                                  ^^
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+  
+
+```
+
+```
+invalid.js:74:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+  > 74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+       │                                       ^^
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    72 │ async function foo() { (a ? await obj?.foo : b)(); }
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+  > 74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+       │                                                  ^^^
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+  
+
+```
+
+```
+invalid.js:75:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+  > 75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+       │                                           ^^
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+  > 75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+       │                                                   ^^^
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  
+
+```
+
+```
+invalid.js:76:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+  > 76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+       │                                          ^^
+    77 │ 
+    78 │ (obj?.foo && obj?.baz).bar
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
+    75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+  > 76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+       │                                                 ^^^
+    77 │ 
+    78 │ (obj?.foo && obj?.baz).bar
+  
+
+```
+
+```
+invalid.js:78:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  > 78 │ (obj?.foo && obj?.baz).bar
+       │     ^^
+    79 │ 
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  > 78 │ (obj?.foo && obj?.baz).bar
+       │                        ^^^
+    79 │ 
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  
+
+```
+
+```
+invalid.js:78:17 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  > 78 │ (obj?.foo && obj?.baz).bar
+       │                 ^^
+    79 │ 
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    76 │ async function foo() { (a ? b : await obj?.foo).bar; }
+    77 │ 
+  > 78 │ (obj?.foo && obj?.baz).bar
+       │                        ^^^
+    79 │ 
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  
+
+```
+
+```
+invalid.js:81:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  > 81 │ (foo ? obj?.foo : obj?.bar).bar
+       │           ^^
+    82 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  > 81 │ (foo ? obj?.foo : obj?.bar).bar
+       │                             ^^^
+    82 │ 
+  
+
+```
+
+```
+invalid.js:81:22 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe usage of optional chaining.
+  
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  > 81 │ (foo ? obj?.foo : obj?.bar).bar
+       │                      ^^
+    82 │ 
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    80 │ async function foo() { with ( await obj?.foo) {}; }
+  > 81 │ (foo ? obj?.foo : obj?.bar).bar
+       │                             ^^^
+    82 │ 
+  
+
+```
+
+

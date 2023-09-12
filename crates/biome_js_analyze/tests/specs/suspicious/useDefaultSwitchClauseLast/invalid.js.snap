@@ -1,0 +1,155 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+switch (foo) {
+	default:
+		break;
+	case 0:
+		break;
+}
+
+switch (foo) {
+	case 0:
+		break;
+	default:
+		break;
+	case 1:
+		break;
+}
+
+switch (foo) {
+	default:
+		f();
+	case 0:
+		break;
+}
+
+switch (foo) {
+	case 0:
+		break;
+	default:
+	case 1:
+		break;
+}
+```
+
+# Diagnostics
+```
+invalid.js:2:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default clause should be the last switch clause.
+  
+    1 │ switch (foo) {
+  > 2 │ 	default:
+      │ 	^^^^^^^^
+  > 3 │ 		break;
+      │ 		^^^^^^
+    4 │ 	case 0:
+    5 │ 		break;
+  
+  i The following case clause is here:
+  
+    2 │ 	default:
+    3 │ 		break;
+  > 4 │ 	case 0:
+      │ 	^^^^^^^
+  > 5 │ 		break;
+      │ 		^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Regardless its position, the default clause is always executed when there is no match. To avoid confusion, the default clause should be the last switch clause.
+  
+
+```
+
+```
+invalid.js:11:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default clause should be the last switch clause.
+  
+     9 │ 	case 0:
+    10 │ 		break;
+  > 11 │ 	default:
+       │ 	^^^^^^^^
+  > 12 │ 		break;
+       │ 		^^^^^^
+    13 │ 	case 1:
+    14 │ 		break;
+  
+  i The following case clause is here:
+  
+    11 │ 	default:
+    12 │ 		break;
+  > 13 │ 	case 1:
+       │ 	^^^^^^^
+  > 14 │ 		break;
+       │ 		^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Regardless its position, the default clause is always executed when there is no match. To avoid confusion, the default clause should be the last switch clause.
+  
+
+```
+
+```
+invalid.js:18:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default clause should be the last switch clause.
+  
+    17 │ switch (foo) {
+  > 18 │ 	default:
+       │ 	^^^^^^^^
+  > 19 │ 		f();
+       │ 		^^^^
+    20 │ 	case 0:
+    21 │ 		break;
+  
+  i The following case clause is here:
+  
+    18 │ 	default:
+    19 │ 		f();
+  > 20 │ 	case 0:
+       │ 	^^^^^^^
+  > 21 │ 		break;
+       │ 		^^^^^^
+    22 │ }
+    23 │ 
+  
+  i Regardless its position, the default clause is always executed when there is no match. To avoid confusion, the default clause should be the last switch clause.
+  
+
+```
+
+```
+invalid.js:27:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default clause should be the last switch clause.
+  
+    25 │ 	case 0:
+    26 │ 		break;
+  > 27 │ 	default:
+       │ 	^^^^^^^^
+    28 │ 	case 1:
+    29 │ 		break;
+  
+  i The following case clause is here:
+  
+    26 │ 		break;
+    27 │ 	default:
+  > 28 │ 	case 1:
+       │ 	^^^^^^^
+  > 29 │ 		break;
+       │ 		^^^^^^
+    30 │ }
+  
+  i Regardless its position, the default clause is always executed when there is no match. To avoid confusion, the default clause should be the last switch clause.
+  
+
+```
+
+

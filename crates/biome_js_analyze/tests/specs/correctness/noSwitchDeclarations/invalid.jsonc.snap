@@ -1,0 +1,222 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.jsonc
+---
+# Input
+```js
+switch (a) { case 1: let x = 1; break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { case 1: let x = 1; break; }
+      │                      ^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { case 1: let x = 1; break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·case·1:·{·let·x·=·1;·break;·}}
+      │                      ++                   +
+
+```
+
+# Input
+```js
+switch (a) { default: let x = 2; break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { default: let x = 2; break; }
+      │                       ^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { default: let x = 2; break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·default:·{·let·x·=·2;·break;·}}
+      │                       ++                   +
+
+```
+
+# Input
+```js
+switch (a) { case 1: const x = 1; break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { case 1: const x = 1; break; }
+      │                      ^^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { case 1: const x = 1; break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·case·1:·{·const·x·=·1;·break;·}}
+      │                      ++                     +
+
+```
+
+# Input
+```js
+switch (a) { default: const x = 2; break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { default: const x = 2; break; }
+      │                       ^^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { default: const x = 2; break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·default:·{·const·x·=·2;·break;·}}
+      │                       ++                     +
+
+```
+
+# Input
+```js
+switch (a) { case 1: function f() {} break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { case 1: function f() {} break; }
+      │                      ^^^^^^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { case 1: function f() {} break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·case·1:·{·function·f()·{}·break;·}}
+      │                      ++                        +
+
+```
+
+# Input
+```js
+switch (a) { default: function f() {} break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { default: function f() {} break; }
+      │                       ^^^^^^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { default: function f() {} break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·default:·{·function·f()·{}·break;·}}
+      │                       ++                        +
+
+```
+
+# Input
+```js
+switch (a) { case 1: class C {} break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { case 1: class C {} break; }
+      │                      ^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { case 1: class C {} break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·case·1:·{·class·C·{}·break;·}}
+      │                      ++                   +
+
+```
+
+# Input
+```js
+switch (a) { default: class C {} break; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Other switch clauses can erroneously access this declaration.
+    Wrap the declaration in a block to restrict its access to the switch clause.
+  
+  > 1 │ switch (a) { default: class C {} break; }
+      │                       ^^^^^^^^^^
+  
+  i The declaration is defined in this switch clause:
+  
+  > 1 │ switch (a) { default: class C {} break; }
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Wrap the declaration in a block.
+  
+    1 │ switch·(a)·{·default:·{·class·C·{}·break;·}}
+      │                       ++                   +
+
+```
+
+

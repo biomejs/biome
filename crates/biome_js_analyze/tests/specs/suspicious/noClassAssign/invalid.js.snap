@@ -1,0 +1,237 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 96
+expression: invalid.js
+---
+# Input
+```js
+function case12() {
+	class A { }
+	A = 0;
+}
+
+function case13() {
+	class B { }
+	({B} = 0);
+}
+
+function case14() {
+	class C { }
+	({b: C = 0} = {});
+}
+
+function case15() {
+	D = 0;
+	class D { }
+}
+
+function case16() {
+	class E {
+		b() {
+			E = 0;
+		}
+	}
+}
+
+function case17() {
+	let F = class F {
+		b() {
+			F = 0;
+		}
+	}
+}
+
+function case18() {
+	class G { }
+	G = 0;
+	G = 1;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'A' is a class.
+  
+    1 │ function case12() {
+    2 │ 	class A { }
+  > 3 │ 	A = 0;
+      │ 	^
+    4 │ }
+    5 │ 
+  
+  i 'A' is defined here.
+  
+    1 │ function case12() {
+  > 2 │ 	class A { }
+      │ 	      ^
+    3 │ 	A = 0;
+    4 │ }
+  
+
+```
+
+```
+invalid.js:8:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'B' is a class.
+  
+     6 │ function case13() {
+     7 │ 	class B { }
+   > 8 │ 	({B} = 0);
+       │ 	  ^
+     9 │ }
+    10 │ 
+  
+  i 'B' is defined here.
+  
+    6 │ function case13() {
+  > 7 │ 	class B { }
+      │ 	      ^
+    8 │ 	({B} = 0);
+    9 │ }
+  
+
+```
+
+```
+invalid.js:13:7 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'C' is a class.
+  
+    11 │ function case14() {
+    12 │ 	class C { }
+  > 13 │ 	({b: C = 0} = {});
+       │ 	     ^
+    14 │ }
+    15 │ 
+  
+  i 'C' is defined here.
+  
+    11 │ function case14() {
+  > 12 │ 	class C { }
+       │ 	      ^
+    13 │ 	({b: C = 0} = {});
+    14 │ }
+  
+
+```
+
+```
+invalid.js:17:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'D' is a class.
+  
+    16 │ function case15() {
+  > 17 │ 	D = 0;
+       │ 	^
+    18 │ 	class D { }
+    19 │ }
+  
+  i 'D' is defined here.
+  
+    16 │ function case15() {
+    17 │ 	D = 0;
+  > 18 │ 	class D { }
+       │ 	      ^
+    19 │ }
+    20 │ 
+  
+
+```
+
+```
+invalid.js:24:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'E' is a class.
+  
+    22 │ 	class E {
+    23 │ 		b() {
+  > 24 │ 			E = 0;
+       │ 			^
+    25 │ 		}
+    26 │ 	}
+  
+  i 'E' is defined here.
+  
+    21 │ function case16() {
+  > 22 │ 	class E {
+       │ 	      ^
+    23 │ 		b() {
+    24 │ 			E = 0;
+  
+
+```
+
+```
+invalid.js:32:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'F' is a class.
+  
+    30 │ 	let F = class F {
+    31 │ 		b() {
+  > 32 │ 			F = 0;
+       │ 			^
+    33 │ 		}
+    34 │ 	}
+  
+  i 'F' is defined here.
+  
+    29 │ function case17() {
+  > 30 │ 	let F = class F {
+       │ 	              ^
+    31 │ 		b() {
+    32 │ 			F = 0;
+  
+
+```
+
+```
+invalid.js:39:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'G' is a class.
+  
+    37 │ function case18() {
+    38 │ 	class G { }
+  > 39 │ 	G = 0;
+       │ 	^
+    40 │ 	G = 1;
+    41 │ }
+  
+  i 'G' is defined here.
+  
+    37 │ function case18() {
+  > 38 │ 	class G { }
+       │ 	      ^
+    39 │ 	G = 0;
+    40 │ 	G = 1;
+  
+
+```
+
+```
+invalid.js:40:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 'G' is a class.
+  
+    38 │ 	class G { }
+    39 │ 	G = 0;
+  > 40 │ 	G = 1;
+       │ 	^
+    41 │ }
+    42 │ 
+  
+  i 'G' is defined here.
+  
+    37 │ function case18() {
+  > 38 │ 	class G { }
+       │ 	      ^
+    39 │ 	G = 0;
+    40 │ 	G = 1;
+  
+
+```
+
+

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: insideJsx.jsx
+---
+# Input
+```js
+// invalid
+let a = <div dangerouslySetInnerHTML={{ __html: 'child' }} />
+
+// valid
+let b = <div foo="" />
+```
+
+# Diagnostics
+```
+insideJsx.jsx:2:14 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  
+    1 │ // invalid
+  > 2 │ let a = <div dangerouslySetInnerHTML={{ __html: 'child' }} />
+      │              ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // valid
+  
+  ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+
+```
+
+

@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+let inlinable = "value1";
+let notInlinable = "value2";
+
+if (inlinable) {
+    notInlinable = inlinable;
+}
+
+statement(notInlinable);
+
+let multipleDeclaratorsInlinable = "value3",
+    multipleDeclaratorsNotInlinable = "value4";
+
+if (multipleDeclaratorsInlinable) {
+    multipleDeclaratorsNotInlinable.memberWrite = multipleDeclaratorsInlinable;
+}
+
+statement(multipleDeclaratorsNotInlinable);
+
+let variable = expression();
+statement(variable);
+
+// Inline sequence expression
+
+const sequenceExpression = (1,2);
+console.log(sequenceExpression);
+
+```
+
+# Actions
+```diff
+@@ -1,8 +1,8 @@
+-let inlinable = "value1";
++
+ let notInlinable = "value2";
+ 
+-if (inlinable) {
+-    notInlinable = inlinable;
++if ("value1") {
++    notInlinable = "value1";
+ }
+ 
+ statement(notInlinable);
+
+```
+
+```diff
+@@ -7,11 +7,11 @@
+ 
+ statement(notInlinable);
+ 
+-let multipleDeclaratorsInlinable = "value3",
++let 
+     multipleDeclaratorsNotInlinable = "value4";
+ 
+-if (multipleDeclaratorsInlinable) {
+-    multipleDeclaratorsNotInlinable.memberWrite = multipleDeclaratorsInlinable;
++if ("value3") {
++    multipleDeclaratorsNotInlinable.memberWrite = "value3";
+ }
+ 
+ statement(multipleDeclaratorsNotInlinable);
+
+```
+
+```diff
+@@ -7,14 +7,13 @@
+ 
+ statement(notInlinable);
+ 
+-let multipleDeclaratorsInlinable = "value3",
+-    multipleDeclaratorsNotInlinable = "value4";
++let multipleDeclaratorsInlinable = "value3";
+ 
+ if (multipleDeclaratorsInlinable) {
+-    multipleDeclaratorsNotInlinable.memberWrite = multipleDeclaratorsInlinable;
++    "value4".memberWrite = multipleDeclaratorsInlinable;
+ }
+ 
+-statement(multipleDeclaratorsNotInlinable);
++statement("value4");
+ 
+ let variable = expression();
+ statement(variable);
+
+```
+
+```diff
+@@ -15,9 +15,7 @@
+ }
+ 
+ statement(multipleDeclaratorsNotInlinable);
+-
+-let variable = expression();
+-statement(variable);
++statement(expression());
+ 
+ // Inline sequence expression
+ 
+
+```
+
+```diff
+@@ -18,8 +18,4 @@
+ 
+ let variable = expression();
+ statement(variable);
+-
+-// Inline sequence expression
+-
+-const sequenceExpression = (1,2);
+-console.log(sequenceExpression);
++console.log((1,2));
+
+```
+
+

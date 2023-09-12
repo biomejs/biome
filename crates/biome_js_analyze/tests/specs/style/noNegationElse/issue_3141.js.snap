@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_3141.js
+---
+# Input
+```js
+// invalid
+function f() {
+    return !!specs.variables ? specs.variables(props) : {};
+}
+// valid
+!-a ? b : c
+```
+
+# Diagnostics
+```
+issue_3141.js:6:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Invert blocks when performing a negation test.
+  
+    4 │ }
+    5 │ // valid
+  > 6 │ !-a ? b : c
+      │ ^^^^^^^^^^^
+  
+  i Suggested fix: Exchange alternate and consequent of the node
+  
+    4 4 │   }
+    5 5 │   // valid
+    6   │ - !-a·?·b·:·c
+      6 │ + -a·?·c·:·b
+  
+
+```
+
+

@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```js
+/* does not generate diagnostics */
+
+const Component1 = () => {
+  useEffect() as [];
+};
+
+const Component2 = () => {
+  useEffect() satisfies [];
+};
+
+```
+
+

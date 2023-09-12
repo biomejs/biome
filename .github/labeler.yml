@@ -19,7 +19,7 @@ A-Project:
 
 A-Linter:
   - crates/biome_analyze/**
-  - crates/rome_js_analyze/**
+  - crates/biome_js_analyze/**
   - crates/biome_json_analyze/**
 
 A-Parser:

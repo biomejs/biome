@@ -1,0 +1,237 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: thisBeforeSuper.js
+---
+# Input
+```js
+// valid
+class B extends A {
+    constructor() {
+        super();
+        this.field = "value";
+    }
+}
+
+// valid
+class C extends A {
+    constructor(cond) {
+        if (cond) {
+            super(true);
+        } else {
+            super(false);
+        }
+        this.field = "value";
+    }
+}
+
+// invalid
+class D extends A {
+    constructor() {
+        this.field = "value";
+        super();
+    }
+}
+
+// invalid
+class E extends A {
+    constructor(cond) {
+        this.field = "value";
+        if (cond) {
+            super(true);
+        } else {
+            super(false);
+        }
+    }
+}
+
+// invalid
+class F extends A {
+    constructor(cond) {
+        if (cond) {
+            super(true);
+        }
+        this.field = "value";
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            super();
+        } catch {
+            this.prop = 0;
+        }
+    }
+}
+
+// invalid
+class G extends A {
+    constructor(condA, condB) {
+        try {
+            this.prop = 0;
+        } catch {
+            super();
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+thisBeforeSuper.js:23:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths accessing `this` without calling `super()` first.
+  
+    21 │ // invalid
+    22 │ class D extends A {
+  > 23 │     constructor() {
+       │     ^^^^^^^^^^^^^^^
+  > 24 │         this.field = "value";
+  > 25 │         super();
+  > 26 │     }
+       │     ^
+    27 │ }
+    28 │ 
+  
+  i `this` is accessed here:
+  
+    22 │ class D extends A {
+    23 │     constructor() {
+  > 24 │         this.field = "value";
+       │         ^^^^
+    25 │         super();
+    26 │     }
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+thisBeforeSuper.js:31:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths accessing `this` without calling `super()` first.
+  
+    29 │ // invalid
+    30 │ class E extends A {
+  > 31 │     constructor(cond) {
+       │     ^^^^^^^^^^^^^^^^^^^
+  > 32 │         this.field = "value";
+        ...
+  > 37 │         }
+  > 38 │     }
+       │     ^
+    39 │ }
+    40 │ 
+  
+  i `this` is accessed here:
+  
+    30 │ class E extends A {
+    31 │     constructor(cond) {
+  > 32 │         this.field = "value";
+       │         ^^^^
+    33 │         if (cond) {
+    34 │             super(true);
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+thisBeforeSuper.js:43:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths accessing `this` without calling `super()` first.
+  
+    41 │ // invalid
+    42 │ class F extends A {
+  > 43 │     constructor(cond) {
+       │     ^^^^^^^^^^^^^^^^^^^
+  > 44 │         if (cond) {
+  > 45 │             super(true);
+  > 46 │         }
+  > 47 │         this.field = "value";
+  > 48 │     }
+       │     ^
+    49 │ }
+    50 │ 
+  
+  i `this` is accessed here:
+  
+    45 │             super(true);
+    46 │         }
+  > 47 │         this.field = "value";
+       │         ^^^^
+    48 │     }
+    49 │ }
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+thisBeforeSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths accessing `this` without calling `super()` first.
+  
+    51 │ // invalid
+    52 │ class G extends A {
+  > 53 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 54 │         try {
+        ...
+  > 58 │         }
+  > 59 │     }
+       │     ^
+    60 │ }
+    61 │ 
+  
+  i `this` is accessed here:
+  
+    55 │             super();
+    56 │         } catch {
+  > 57 │             this.prop = 0;
+       │             ^^^^
+    58 │         }
+    59 │     }
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+```
+thisBeforeSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor has code paths accessing `this` without calling `super()` first.
+  
+    62 │ // invalid
+    63 │ class G extends A {
+  > 64 │     constructor(condA, condB) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 65 │         try {
+        ...
+  > 69 │         }
+  > 70 │     }
+       │     ^
+    71 │ }
+    72 │ 
+  
+  i `this` is accessed here:
+  
+    64 │     constructor(condA, condB) {
+    65 │         try {
+  > 66 │             this.prop = 0;
+       │             ^^^^
+    67 │         } catch {
+    68 │             super();
+  
+  i If this is intentional, add an explicit throw statement in unsupported paths.
+  
+
+```
+
+

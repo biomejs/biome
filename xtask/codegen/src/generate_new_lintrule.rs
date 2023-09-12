@@ -122,11 +122,11 @@ impl Rule for {rule_name_upper_camel} {{
     }
 
     // Generate test code
-    let tests_path = format!("crates/rome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}");
+    let tests_path = format!("crates/biome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}");
     let _ = std::fs::create_dir_all(tests_path);
 
     let test_file =
-        format!("crates/rome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}/valid.js");
+        format!("crates/biome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}/valid.js");
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(
             test_file,
@@ -135,7 +135,7 @@ impl Rule for {rule_name_upper_camel} {{
     }
 
     let test_file =
-        format!("crates/rome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}/invalid.js");
+        format!("crates/biome_js_analyze/tests/specs/nursery/{rule_name_lower_camel}/invalid.js");
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(test_file, "\n\n var a = 1;\na = 2;\n a = 3;");
     }

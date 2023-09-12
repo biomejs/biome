@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+Number.isFinite(Number.NaN);
+
+globalThis.Number.isFinite(Number.NaN);
+
+function localIsFinite(isFinite) {
+    isFinite({});
+}
+
+function localVar() {
+    var isFinite;
+    isFinite()
+}
+
+localIsFinite(Number.isFinite);
+
+```
+
+

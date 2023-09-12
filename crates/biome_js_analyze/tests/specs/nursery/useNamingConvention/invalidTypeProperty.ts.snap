@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeProperty.ts
+---
+# Input
+```js
+export interface X {
+    Initialized: unknown
+
+    SpecialProperty: unknown
+
+    special_property: unknown
+
+    Unknown_Style: unknown
+
+    Unknown_Init_Style: unknown
+
+    A_CONSTANT: unknown
+}
+```
+
+# Diagnostics
+```
+invalidTypeProperty.ts:2:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+    1 │ export interface X {
+  > 2 │     Initialized: unknown
+      │     ^^^^^^^^^^^
+    3 │ 
+    4 │     SpecialProperty: unknown
+  
+  i The name could be renamed to `initialized`.
+  
+
+```
+
+```
+invalidTypeProperty.ts:4:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+    2 │     Initialized: unknown
+    3 │ 
+  > 4 │     SpecialProperty: unknown
+      │     ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │     special_property: unknown
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidTypeProperty.ts:6:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+    4 │     SpecialProperty: unknown
+    5 │ 
+  > 6 │     special_property: unknown
+      │     ^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │     Unknown_Style: unknown
+  
+  i The name could be renamed to `specialProperty`.
+  
+
+```
+
+```
+invalidTypeProperty.ts:8:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+     6 │     special_property: unknown
+     7 │ 
+   > 8 │     Unknown_Style: unknown
+       │     ^^^^^^^^^^^^^
+     9 │ 
+    10 │     Unknown_Init_Style: unknown
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+```
+invalidTypeProperty.ts:10:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+     8 │     Unknown_Style: unknown
+     9 │ 
+  > 10 │     Unknown_Init_Style: unknown
+       │     ^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │     A_CONSTANT: unknown
+  
+  i The name could be renamed to `unknownInitStyle`.
+  
+
+```
+
+```
+invalidTypeProperty.ts:12:5 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This property name should be in camelCase.
+  
+    10 │     Unknown_Init_Style: unknown
+    11 │ 
+  > 12 │     A_CONSTANT: unknown
+       │     ^^^^^^^^^^
+    13 │ }
+  
+  i The name could be renamed to `aConstant`.
+  
+
+```
+
+

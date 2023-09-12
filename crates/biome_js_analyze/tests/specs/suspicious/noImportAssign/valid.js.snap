@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+import { g } from "y";
+k = 3;
+```
+
+

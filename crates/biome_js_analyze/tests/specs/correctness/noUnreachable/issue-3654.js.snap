@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 73
+expression: issue-3654.js
+---
+# Input
+```js
+function testFAIL() {
+  try {
+    return fn();
+  } catch {
+    log();
+  } finally {
+    log();
+  }
+  return null;
+}
+
+function testOK() {
+  try {
+    return fn();
+  } catch {
+    log();
+  }
+  return null;
+}
+
+function fn() {
+  throw new Error('nope!');
+}
+
+function log() {}
+
+```
+
+

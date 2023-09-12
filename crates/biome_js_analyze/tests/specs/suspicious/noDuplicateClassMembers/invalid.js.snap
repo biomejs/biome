@@ -1,0 +1,296 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+class A { foo() {} foo() {} }
+!class A { foo() {} foo() {} };
+class A { foo() {} foo() {} foo() {} }
+class A { static foo() {} static foo() {} }
+class A { foo() {} get foo() {} }
+class A { set foo(value) {} foo() {} }
+class A { foo; foo; }
+class A { 'foo'() {} 'foo'() {} }
+class A { foo() {} 'foo'() {} }
+class A { static constructor() {} static 'constructor'() {} }
+class A { foo; accessor foo; }
+class A { get foo () {} accessor foo; }
+class A { set foo (value) {} accessor foo; }
+class A { foo() {} foo() {} bar() {} bar() {} }
+class A { get foo() {} get foo() {} }
+class A { foo() {} "foo"() {} }
+
+// class A { #foo; #foo; } This is invalid syntax, parser should throw an error
+
+```
+
+# Diagnostics
+```
+invalid.js:1:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+  > 1 │ class A { foo() {} foo() {} }
+      │                    ^^^^^^^^
+    2 │ !class A { foo() {} foo() {} };
+    3 │ class A { foo() {} foo() {} foo() {} }
+  
+
+```
+
+```
+invalid.js:2:21 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    1 │ class A { foo() {} foo() {} }
+  > 2 │ !class A { foo() {} foo() {} };
+      │                     ^^^^^^^^
+    3 │ class A { foo() {} foo() {} foo() {} }
+    4 │ class A { static foo() {} static foo() {} }
+  
+
+```
+
+```
+invalid.js:3:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    1 │ class A { foo() {} foo() {} }
+    2 │ !class A { foo() {} foo() {} };
+  > 3 │ class A { foo() {} foo() {} foo() {} }
+      │                    ^^^^^^^^
+    4 │ class A { static foo() {} static foo() {} }
+    5 │ class A { foo() {} get foo() {} }
+  
+
+```
+
+```
+invalid.js:3:29 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    1 │ class A { foo() {} foo() {} }
+    2 │ !class A { foo() {} foo() {} };
+  > 3 │ class A { foo() {} foo() {} foo() {} }
+      │                             ^^^^^^^^
+    4 │ class A { static foo() {} static foo() {} }
+    5 │ class A { foo() {} get foo() {} }
+  
+
+```
+
+```
+invalid.js:4:27 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    2 │ !class A { foo() {} foo() {} };
+    3 │ class A { foo() {} foo() {} foo() {} }
+  > 4 │ class A { static foo() {} static foo() {} }
+      │                           ^^^^^^^^^^^^^^^
+    5 │ class A { foo() {} get foo() {} }
+    6 │ class A { set foo(value) {} foo() {} }
+  
+
+```
+
+```
+invalid.js:5:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    3 │ class A { foo() {} foo() {} foo() {} }
+    4 │ class A { static foo() {} static foo() {} }
+  > 5 │ class A { foo() {} get foo() {} }
+      │                    ^^^^^^^^^^^^
+    6 │ class A { set foo(value) {} foo() {} }
+    7 │ class A { foo; foo; }
+  
+
+```
+
+```
+invalid.js:6:29 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    4 │ class A { static foo() {} static foo() {} }
+    5 │ class A { foo() {} get foo() {} }
+  > 6 │ class A { set foo(value) {} foo() {} }
+      │                             ^^^^^^^^
+    7 │ class A { foo; foo; }
+    8 │ class A { 'foo'() {} 'foo'() {} }
+  
+
+```
+
+```
+invalid.js:7:16 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    5 │ class A { foo() {} get foo() {} }
+    6 │ class A { set foo(value) {} foo() {} }
+  > 7 │ class A { foo; foo; }
+      │                ^^^^
+    8 │ class A { 'foo'() {} 'foo'() {} }
+    9 │ class A { foo() {} 'foo'() {} }
+  
+
+```
+
+```
+invalid.js:8:22 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+     6 │ class A { set foo(value) {} foo() {} }
+     7 │ class A { foo; foo; }
+   > 8 │ class A { 'foo'() {} 'foo'() {} }
+       │                      ^^^^^^^^^^
+     9 │ class A { foo() {} 'foo'() {} }
+    10 │ class A { static constructor() {} static 'constructor'() {} }
+  
+
+```
+
+```
+invalid.js:9:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+     7 │ class A { foo; foo; }
+     8 │ class A { 'foo'() {} 'foo'() {} }
+   > 9 │ class A { foo() {} 'foo'() {} }
+       │                    ^^^^^^^^^^
+    10 │ class A { static constructor() {} static 'constructor'() {} }
+    11 │ class A { foo; accessor foo; }
+  
+
+```
+
+```
+invalid.js:10:35 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "constructor"
+  
+     8 │ class A { 'foo'() {} 'foo'() {} }
+     9 │ class A { foo() {} 'foo'() {} }
+  > 10 │ class A { static constructor() {} static 'constructor'() {} }
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ class A { foo; accessor foo; }
+    12 │ class A { get foo () {} accessor foo; }
+  
+
+```
+
+```
+invalid.js:11:16 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+     9 │ class A { foo() {} 'foo'() {} }
+    10 │ class A { static constructor() {} static 'constructor'() {} }
+  > 11 │ class A { foo; accessor foo; }
+       │                ^^^^^^^^^^^^^
+    12 │ class A { get foo () {} accessor foo; }
+    13 │ class A { set foo (value) {} accessor foo; }
+  
+
+```
+
+```
+invalid.js:12:25 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    10 │ class A { static constructor() {} static 'constructor'() {} }
+    11 │ class A { foo; accessor foo; }
+  > 12 │ class A { get foo () {} accessor foo; }
+       │                         ^^^^^^^^^^^^^
+    13 │ class A { set foo (value) {} accessor foo; }
+    14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+  
+
+```
+
+```
+invalid.js:13:30 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    11 │ class A { foo; accessor foo; }
+    12 │ class A { get foo () {} accessor foo; }
+  > 13 │ class A { set foo (value) {} accessor foo; }
+       │                              ^^^^^^^^^^^^^
+    14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+    15 │ class A { get foo() {} get foo() {} }
+  
+
+```
+
+```
+invalid.js:14:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    12 │ class A { get foo () {} accessor foo; }
+    13 │ class A { set foo (value) {} accessor foo; }
+  > 14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+       │                    ^^^^^^^^
+    15 │ class A { get foo() {} get foo() {} }
+    16 │ class A { foo() {} "foo"() {} }
+  
+
+```
+
+```
+invalid.js:14:38 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "bar"
+  
+    12 │ class A { get foo () {} accessor foo; }
+    13 │ class A { set foo (value) {} accessor foo; }
+  > 14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+       │                                      ^^^^^^^^
+    15 │ class A { get foo() {} get foo() {} }
+    16 │ class A { foo() {} "foo"() {} }
+  
+
+```
+
+```
+invalid.js:15:24 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    13 │ class A { set foo (value) {} accessor foo; }
+    14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+  > 15 │ class A { get foo() {} get foo() {} }
+       │                        ^^^^^^^^^^^^
+    16 │ class A { foo() {} "foo"() {} }
+    17 │ 
+  
+
+```
+
+```
+invalid.js:16:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate class member name "foo"
+  
+    14 │ class A { foo() {} foo() {} bar() {} bar() {} }
+    15 │ class A { get foo() {} get foo() {} }
+  > 16 │ class A { foo() {} "foo"() {} }
+       │                    ^^^^^^^^^^
+    17 │ 
+    18 │ // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
+  
+
+```
+
+

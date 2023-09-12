@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validInterface.ts
+---
+# Input
+```js
+export interface X {}
+
+export interface PascalCase {}
+
+export interface _PascalCase {}
+
+export interface _ {}
+
+export interface $ {}
+```
+
+

@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validClassMethod.js
+---
+# Input
+```js
+export default class {
+    m() {}
+
+    method() {}
+
+    aMethod() {}
+
+    method$() {}
+
+    $method() {}
+
+    _method_() {}
+
+    "custom-method"() {}
+
+    "%"() {}
+}
+```
+
+

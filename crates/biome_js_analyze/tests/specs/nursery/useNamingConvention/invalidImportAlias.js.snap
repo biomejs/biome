@@ -1,0 +1,225 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportAlias.js
+---
+# Input
+```js
+import { X as XxXX } from ""
+
+import { Y as snake_case  } from ""
+
+import { X as XxXX } from ""
+
+import { Y as snake_case  } from ""
+
+import XxXX from ""
+
+import snake_case from ""
+
+import XxXX from ""
+
+import snake_case from ""
+```
+
+# Diagnostics
+```
+invalidImportAlias.js:1:15 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+  > 1 │ import { X as XxXX } from ""
+      │               ^^^^
+    2 │ 
+    3 │ import { Y as snake_case  } from ""
+  
+  i The name could be renamed to `xxXx`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     1    │ - import·{·X·as·XxXX·}·from·""
+        1 │ + import·{·X·as·xxXx·}·from·""
+     2  2 │   
+     3  3 │   import { Y as snake_case  } from ""
+  
+
+```
+
+```
+invalidImportAlias.js:3:15 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    1 │ import { X as XxXX } from ""
+    2 │ 
+  > 3 │ import { Y as snake_case  } from ""
+      │               ^^^^^^^^^^
+    4 │ 
+    5 │ import { X as XxXX } from ""
+  
+  i The name could be renamed to `snakeCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     1  1 │   import { X as XxXX } from ""
+     2  2 │   
+     3    │ - import·{·Y·as·snake_case··}·from·""
+        3 │ + import·{·Y·as·snakeCase··}·from·""
+     4  4 │   
+     5  5 │   import { X as XxXX } from ""
+  
+
+```
+
+```
+invalidImportAlias.js:5:15 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    3 │ import { Y as snake_case  } from ""
+    4 │ 
+  > 5 │ import { X as XxXX } from ""
+      │               ^^^^
+    6 │ 
+    7 │ import { Y as snake_case  } from ""
+  
+  i The name could be renamed to `xxXx`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     3  3 │   import { Y as snake_case  } from ""
+     4  4 │   
+     5    │ - import·{·X·as·XxXX·}·from·""
+        5 │ + import·{·X·as·xxXx·}·from·""
+     6  6 │   
+     7  7 │   import { Y as snake_case  } from ""
+  
+
+```
+
+```
+invalidImportAlias.js:7:15 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    5 │ import { X as XxXX } from ""
+    6 │ 
+  > 7 │ import { Y as snake_case  } from ""
+      │               ^^^^^^^^^^
+    8 │ 
+    9 │ import XxXX from ""
+  
+  i The name could be renamed to `snakeCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     5  5 │   import { X as XxXX } from ""
+     6  6 │   
+     7    │ - import·{·Y·as·snake_case··}·from·""
+        7 │ + import·{·Y·as·snakeCase··}·from·""
+     8  8 │   
+     9  9 │   import XxXX from ""
+  
+
+```
+
+```
+invalidImportAlias.js:9:8 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+     7 │ import { Y as snake_case  } from ""
+     8 │ 
+   > 9 │ import XxXX from ""
+       │        ^^^^
+    10 │ 
+    11 │ import snake_case from ""
+  
+  i The name could be renamed to `xxXx`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     7  7 │   import { Y as snake_case  } from ""
+     8  8 │   
+     9    │ - import·XxXX·from·""
+        9 │ + import·xxXx·from·""
+    10 10 │   
+    11 11 │   import snake_case from ""
+  
+
+```
+
+```
+invalidImportAlias.js:11:8 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+     9 │ import XxXX from ""
+    10 │ 
+  > 11 │ import snake_case from ""
+       │        ^^^^^^^^^^
+    12 │ 
+    13 │ import XxXX from ""
+  
+  i The name could be renamed to `snakeCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     9  9 │   import XxXX from ""
+    10 10 │   
+    11    │ - import·snake_case·from·""
+       11 │ + import·snakeCase·from·""
+    12 12 │   
+    13 13 │   import XxXX from ""
+  
+
+```
+
+```
+invalidImportAlias.js:13:8 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    11 │ import snake_case from ""
+    12 │ 
+  > 13 │ import XxXX from ""
+       │        ^^^^
+    14 │ 
+    15 │ import snake_case from ""
+  
+  i The name could be renamed to `xxXx`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    11 11 │   import snake_case from ""
+    12 12 │   
+    13    │ - import·XxXX·from·""
+       13 │ + import·xxXx·from·""
+    14 14 │   
+    15 15 │   import snake_case from ""
+  
+
+```
+
+```
+invalidImportAlias.js:15:8 lint/nursery/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    13 │ import XxXX from ""
+    14 │ 
+  > 15 │ import snake_case from ""
+       │        ^^^^^^^^^^
+  
+  i The name could be renamed to `snakeCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    13 13 │   import XxXX from ""
+    14 14 │   
+    15    │ - import·snake_case·from·""
+       15 │ + import·snakeCase·from·""
+  
+
+```
+
+

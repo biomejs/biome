@@ -1,0 +1,205 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noDoubleEquals.js
+---
+# Input
+```js
+const foo = `
+text
+${a == b}
+`;
+
+// existing comment
+a == b;
+
+if (a == b) {
+    false;
+}
+
+if (/** some weird comment
+    **/ a == b) {
+
+    }
+
+let a = `Output of "biome rage":
+  formatter enabled: ${formatter == true}
+  linter: ${linter}
+`;
+```
+
+# Diagnostics
+```
+noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    1 │ const foo = `
+    2 │ text
+  > 3 │ ${a == b}
+      │     ^^
+    4 │ `;
+    5 │ 
+  
+  i == is only allowed when comparing against null
+  
+    1 │ const foo = `
+    2 │ text
+  > 3 │ ${a == b}
+      │     ^^
+    4 │ `;
+    5 │ 
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  
+     1  1 │   const foo = `
+     2  2 │   text
+     3    │ - ${a·==·b}
+        3 │ + ${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+        4 │ + a··==·b}
+     4  5 │   `;
+     5  6 │   
+  
+
+```
+
+```
+noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    6 │ // existing comment
+  > 7 │ a == b;
+      │   ^^
+    8 │ 
+    9 │ if (a == b) {
+  
+  i == is only allowed when comparing against null
+  
+    6 │ // existing comment
+  > 7 │ a == b;
+      │   ^^
+    8 │ 
+    9 │ if (a == b) {
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  
+     5  5 │   
+     6  6 │   // existing comment
+     7    │ - a·==·b;
+        7 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+        8 │ + a··==·b;
+     8  9 │   
+     9 10 │   if (a == b) {
+  
+
+```
+
+```
+noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+     7 │ a == b;
+     8 │ 
+   > 9 │ if (a == b) {
+       │       ^^
+    10 │     false;
+    11 │ }
+  
+  i == is only allowed when comparing against null
+  
+     7 │ a == b;
+     8 │ 
+   > 9 │ if (a == b) {
+       │       ^^
+    10 │     false;
+    11 │ }
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  
+     7  7 │   a == b;
+     8  8 │   
+     9    │ - if·(a·==·b)·{
+        9 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       10 │ + if··(a·==·b)·{
+    10 11 │       false;
+    11 12 │   }
+  
+
+```
+
+```
+noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    13 │ if (/** some weird comment
+  > 14 │     **/ a == b) {
+       │           ^^
+    15 │ 
+    16 │     }
+  
+  i == is only allowed when comparing against null
+  
+    13 │ if (/** some weird comment
+  > 14 │     **/ a == b) {
+       │           ^^
+    15 │ 
+    16 │     }
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  
+    12 12 │   
+    13 13 │   if (/** some weird comment
+    14    │ - ····**/·a·==·b)·{
+       14 │ + ····**/·//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       15 │ + a·==·b)·{
+    15 16 │   
+    16 17 │       }
+  
+
+```
+
+```
+noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    18 │ let a = `Output of "biome rage":
+  > 19 │   formatter enabled: ${formatter == true}
+       │                                  ^^
+    20 │   linter: ${linter}
+    21 │ `;
+  
+  i == is only allowed when comparing against null
+  
+    18 │ let a = `Output of "biome rage":
+  > 19 │   formatter enabled: ${formatter == true}
+       │                                  ^^
+    20 │   linter: ${linter}
+    21 │ `;
+  
+  i Using === may be unsafe if you are relying on type coercion
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  
+    17 17 │   
+    18 18 │   let a = `Output of "biome rage":
+    19    │ - ··formatter·enabled:·${formatter·==·true}
+       19 │ + ··formatter·enabled:·${//·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
+       20 │ + formatter··==·true}
+    20 21 │     linter: ${linter}
+    21 22 │   `;
+  
+
+```
+
+

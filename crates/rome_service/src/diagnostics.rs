@@ -7,8 +7,8 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::FileSystemDiagnostic;
-use rome_js_analyze::utils::rename::RenameError;
-use rome_js_analyze::RuleError;
+use biome_js_analyze::utils::rename::RenameError;
+use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt;

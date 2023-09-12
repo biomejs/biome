@@ -9,6 +9,7 @@ biome_analyze        = { path = "../../crates/biome_analyze" }
 biome_console        = { path = "../../crates/biome_console" }
 biome_diagnostics    = { path = "../../crates/biome_diagnostics" }
 biome_formatter      = { path = "../../crates/biome_formatter" }
+biome_js_analyze     = { path = "../../crates/biome_js_analyze" }
 biome_js_parser      = { path = "../../crates/biome_js_parser" }
 biome_js_syntax      = { path = "../../crates/biome_js_syntax" }
 biome_json_formatter = { path = "../../crates/biome_json_formatter" }
@@ -16,7 +17,6 @@ biome_json_parser    = { path = "../../crates/biome_json_parser" }
 biome_json_syntax    = { path = "../../crates/biome_json_syntax" }
 biome_parser         = { path = "../../crates/biome_parser" }
 biome_rowan          = { path = "../../crates/biome_rowan" }
-rome_js_analyze      = { path = "../../crates/rome_js_analyze" }
 rome_js_formatter    = { path = "../../crates/rome_js_formatter" }
 xtask                = { path = '../', version = "0.0" }
 

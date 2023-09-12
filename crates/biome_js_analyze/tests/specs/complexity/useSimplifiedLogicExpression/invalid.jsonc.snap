@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```js
+const boolExp = true;
+```
+
+# Input
+```js
+const r = true && boolExp;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Logical expression contains unnecessary complexity.
+  
+  > 1 │ const r = true && boolExp;
+      │           ^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Discard redundant terms from the logical expression.
+  
+    1 │ const·r·=·true·&&·boolExp;
+      │           --------        
+
+```
+
+# Input
+```js
+const boolExp2 = true;
+```
+
+# Input
+```js
+const r2 = boolExp || true;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Logical expression contains unnecessary complexity.
+  
+  > 1 │ const r2 = boolExp || true;
+      │            ^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Discard redundant terms from the logical expression.
+  
+    1 │ const·r2·=·boolExp·||·true;
+      │            -----------     
+
+```
+
+# Input
+```js
+const nonNullExp = 123;
+```
+
+# Input
+```js
+const r3 = null ?? nonNullExp;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Logical expression contains unnecessary complexity.
+  
+  > 1 │ const r3 = null ?? nonNullExp;
+      │            ^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Discard redundant terms from the logical expression.
+  
+    1 │ const·r3·=·null·??·nonNullExp;
+      │            --------           
+
+```
+
+# Input
+```js
+const boolExpr1 = true;
+```
+
+# Input
+```js
+const boolExpr2 = false;
+```
+
+# Input
+```js
+const r4 = !boolExpr1 || !boolExpr2;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Logical expression contains unnecessary complexity.
+  
+  > 1 │ const r4 = !boolExpr1 || !boolExpr2;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Suggested fix: Reduce the complexity of the logical expression.
+  
+  - const·r4·=·!boolExpr1·||·!boolExpr2;
+  + const·r4·=·!(boolExpr1·&&·boolExpr2);
+  
+
+```
+
+

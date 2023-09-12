@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+interface Baz extends Foo {}
+
+interface Foo {}
+
+interface Foo extends Array<number> {}
+
+interface Foo extends Array<number | {}> {}
+
+interface Foo<T> extends Bar<T> {}
+
+declare module FooBar {
+  export interface Bar extends Baz {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+  > 1 │ interface Baz extends Foo {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ interface Foo {}
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+     1    │ - interface·Baz·extends·Foo·{}
+        1 │ + type·Baz·=·Foo
+     2  2 │   
+     3  3 │   interface Foo {}
+  
+
+```
+
+```
+invalid.ts:3:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty interface is equivalent to '{}'.
+  
+    1 │ interface Baz extends Foo {}
+    2 │ 
+  > 3 │ interface Foo {}
+      │ ^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ interface Foo extends Array<number> {}
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+     1  1 │   interface Baz extends Foo {}
+     2  2 │   
+     3    │ - interface·Foo·{}
+        3 │ + type·Foo·=·{}
+     4  4 │   
+     5  5 │   interface Foo extends Array<number> {}
+  
+
+```
+
+```
+invalid.ts:5:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+    3 │ interface Foo {}
+    4 │ 
+  > 5 │ interface Foo extends Array<number> {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ interface Foo extends Array<number | {}> {}
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+     3  3 │   interface Foo {}
+     4  4 │   
+     5    │ - interface·Foo·extends·Array<number>·{}
+        5 │ + type·Foo·=·Array<number>
+     6  6 │   
+     7  7 │   interface Foo extends Array<number | {}> {}
+  
+
+```
+
+```
+invalid.ts:7:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+    5 │ interface Foo extends Array<number> {}
+    6 │ 
+  > 7 │ interface Foo extends Array<number | {}> {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ interface Foo<T> extends Bar<T> {}
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+     5  5 │   interface Foo extends Array<number> {}
+     6  6 │   
+     7    │ - interface·Foo·extends·Array<number·|·{}>·{}
+        7 │ + type·Foo·=·Array<number·|·{}>
+     8  8 │   
+     9  9 │   interface Foo<T> extends Bar<T> {}
+  
+
+```
+
+```
+invalid.ts:9:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+     7 │ interface Foo extends Array<number | {}> {}
+     8 │ 
+   > 9 │ interface Foo<T> extends Bar<T> {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ declare module FooBar {
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+     7  7 │   interface Foo extends Array<number | {}> {}
+     8  8 │   
+     9    │ - interface·Foo<T>·extends·Bar<T>·{}
+        9 │ + type·Foo<T>·=·Bar<T>
+    10 10 │   
+    11 11 │   declare module FooBar {
+  
+
+```
+
+```
+invalid.ts:12:10 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+    11 │ declare module FooBar {
+  > 12 │   export interface Bar extends Baz {}
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+    10 10 │   
+    11 11 │   declare module FooBar {
+    12    │ - ··export·interface·Bar·extends·Baz·{}
+       12 │ + ··export·type·Bar·=·Baz
+    13 13 │   }
+    14 14 │   
+  
+
+```
+
+

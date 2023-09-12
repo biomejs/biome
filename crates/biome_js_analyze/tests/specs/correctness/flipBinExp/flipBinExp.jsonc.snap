@@ -1,0 +1,235 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: flipBinExp.jsonc
+---
+# Input
+```js
+if (a < b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a < b) {}
+\ No newline at end of file
++if (b > a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a > b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a > b) {}
+\ No newline at end of file
++if (b < a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a <= b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a <= b) {}
+\ No newline at end of file
++if (b >= a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a >= b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a >= b) {}
+\ No newline at end of file
++if (b <= a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a == b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a == b) {}
+\ No newline at end of file
++if (b == a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a === b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a === b) {}
+\ No newline at end of file
++if (b === a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a != b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a != b) {}
+\ No newline at end of file
++if (b != a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+if (a !== b) {}
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-if (a !== b) {}
+\ No newline at end of file
++if (b !== a) {}
+\ No newline at end of file
+
+```
+
+# Input
+```js
+const a = b + c;
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-const a = b + c;
+\ No newline at end of file
++const a = c + b;
+\ No newline at end of file
+
+```
+
+# Input
+```js
+const a = b - c;
+```
+
+# Input
+```js
+const a = b * c;
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-const a = b * c;
+\ No newline at end of file
++const a = c * b;
+\ No newline at end of file
+
+```
+
+# Input
+```js
+const a = b / c;
+```
+
+# Input
+```js
+const a = b % c;
+```
+
+# Input
+```js
+const a = b ** c;
+```
+
+# Input
+```js
+const a = b << c;
+```
+
+# Input
+```js
+const a = b >> c;
+```
+
+# Input
+```js
+const a = b >>> c;
+```
+
+# Input
+```js
+const a = b & c;
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-const a = b & c;
+\ No newline at end of file
++const a = c & b;
+\ No newline at end of file
+
+```
+
+# Input
+```js
+const a = b | c;
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-const a = b | c;
+\ No newline at end of file
++const a = c | b;
+\ No newline at end of file
+
+```
+
+# Input
+```js
+const a = b ^ c;
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-const a = b ^ c;
+\ No newline at end of file
++const a = c ^ b;
+\ No newline at end of file
+
+```
+
+
