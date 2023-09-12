@@ -2,7 +2,7 @@
 authors.workspace    = true
 categories           = ["development-tools"]
 description          = "Rome's JSON formatter"
-documentation        = "https://docs.rs/rome_js_formatter"
+documentation        = "https://docs.rs/biome_js_formatter"
 edition.workspace    = true
 homepage.workspace   = true
 license.workspace    = true

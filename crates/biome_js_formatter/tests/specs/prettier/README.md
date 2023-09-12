@@ -5,12 +5,12 @@ These test snapshots were extracted from the
 
 # Usage
 
-These tests are run as part of the `rome_js_formatter` test suite but can be
-explicitely called with `cargo test -p rome_js_formatter --test prettier_tests`
+These tests are run as part of the `biome_js_formatter` test suite but can be
+explicitely called with `cargo test -p biome_js_formatter --test prettier_tests`
 
 Setting the `REPORT_PRETTIER=1` environment variable when running these tests
 will emit a `report.md` file containing an exhaustive difference between the
-output of `rome_js_formatter` and Prettier's own snapshots
+output of `biome_js_formatter` and Prettier's own snapshots
 
 # Updating
 
@@ -20,10 +20,10 @@ the snapshots:
 
 1. Clone the Prettier git repository locally
 2. Remove all the directories inside
-   `crates/rome_js_formatter/tests/specs/prettier` to ensure all obsolete tests are
+   `crates/biome_js_formatter/tests/specs/prettier` to ensure all obsolete tests are
    removed
 3. Go to `crates/biome_formatter_test/src/prettier` directory
 4. Install prettier ``pnpm install``
-5. Go to `crates/rome_js_formatter/tests/specs/prettier` directory
+5. Go to `crates/biome_js_formatter/tests/specs/prettier` directory
 6. Run
-   `node crates/rome_js_formatter/tests/specs/prettier/prepare_tests.js <prettier root directory>`
+   `node crates/biome_js_formatter/tests/specs/prettier/prepare_tests.js <prettier root directory>`

@@ -5,12 +5,12 @@ These test snapshots were extracted from the
 
 # Usage
 
-These tests are run as part of the `rome_js_formatter` test suite but can be
-explicitely called with `cargo test -p rome_js_formatter --test prettier_tests`
+These tests are run as part of the `biome_js_formatter` test suite but can be
+explicitely called with `cargo test -p biome_js_formatter --test prettier_tests`
 
 Setting the `REPORT_PRETTIER=1` environment variable when running these tests
 will emit a `report.md` file containing an exhaustive difference between the
-output of `rome_js_formatter` and Prettier's own snapshots
+output of `biome_js_formatter` and Prettier's own snapshots
 
 # Updating
 

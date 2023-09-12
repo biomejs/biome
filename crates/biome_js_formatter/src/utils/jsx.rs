@@ -18,7 +18,7 @@ pub(crate) static JSX_WHITESPACE_CHARS: [char; 4] = [' ', '\n', '\t', '\r'];
 /// whitespace.
 ///
 /// ```
-/// use rome_js_formatter::utils::jsx::is_meaningful_jsx_text;
+/// use biome_js_formatter::utils::jsx::is_meaningful_jsx_text;
 ///
 /// assert_eq!(is_meaningful_jsx_text("     \t\r   "), true);
 /// assert_eq!(is_meaningful_jsx_text("     \n\r   "), false);
@@ -498,7 +498,7 @@ impl FusedIterator for JsxSplitChunksIterator<'_> {}
 ///
 /// # Examples
 /// ```
-/// use rome_js_formatter::utils::jsx::JsxChildrenIterator;
+/// use biome_js_formatter::utils::jsx::JsxChildrenIterator;
 ///
 /// let buffer = vec![1, 2, 3, 4];
 ///

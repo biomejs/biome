@@ -25,6 +25,7 @@ biome_aria           = { path = "../../crates/biome_aria", optional = true }
 biome_cli            = { workspace = true, optional = true }
 biome_diagnostics    = { path = "../../crates/biome_diagnostics", optional = true }
 biome_js_factory     = { path = "../../crates/biome_js_factory", optional = true }
+biome_js_formatter   = { path = "../../crates/biome_js_formatter", optional = true }
 biome_js_parser      = { workspace = true, optional = true }
 biome_js_syntax      = { path = "../../crates/biome_js_syntax", optional = true }
 biome_json_analyze   = { workspace = true, optional = true }
@@ -32,9 +33,8 @@ biome_json_formatter = { path = "../../crates/biome_json_formatter", optional = 
 biome_json_parser    = { path = "../../crates/biome_json_parser", optional = true }
 biome_json_syntax    = { workspace = true, optional = true }
 biome_rowan          = { path = "../../crates/biome_rowan", optional = true }
+biome_service        = { path = "../../crates/biome_service", features = ["schema"], optional = true }
 rome_js_analyze      = { path = "../../crates/rome_js_analyze", optional = true }
-rome_js_formatter    = { path = "../../crates/rome_js_formatter", optional = true }
-biome_service         = { path = "../../crates/biome_service", features = ["schema"], optional = true }
 schemars             = { version = "0.8.10", optional = true }
 serde_json           = { version = "1.0.74", optional = true }
 
@@ -54,9 +54,9 @@ schema = [
   "biome_service",
   "biome_js_syntax",
   "biome_js_factory",
-  "rome_js_formatter",
+  "biome_js_formatter",
   "biome_json_formatter",
   "biome_json_parser",
   "biome_diagnostics",
 ]
-website = ["biome_service", "biome_cli/docgen", "biome_js_parser", "rome_js_formatter", "biome_js_syntax"]
+website = ["biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]

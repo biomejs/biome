@@ -5,10 +5,13 @@ expression: files_ignore_incorrect_type.json
 files_ignore_incorrect_type.json:3:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The value of key ignore is incorrect. Expected a array.
-
+  
     1 │ {
     2 │ 	"files": {
   > 3 │ 		"ignore": "something"
       │ 		          ^^^^^^^^^^^
     4 │ 	}
     5 │ }
+  
+
+

@@ -25,6 +25,7 @@ biome_json_syntax    = { workspace = true }
 biome_lsp            = { workspace = true }
 biome_migrate        = { workspace = true }
 biome_rowan          = { workspace = true }
+biome_service        = { workspace = true }
 biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true }
 bpaf                 = { workspace = true }
@@ -34,7 +35,6 @@ hdrhistogram         = { version = "7.5.0", default-features = false }
 indexmap             = { workspace = true }
 lazy_static          = { workspace = true }
 rayon                = "1.5.1"
-biome_service         = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tokio                = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
@@ -54,10 +54,10 @@ mimalloc = "0.1.29"
 tikv-jemallocator = "0.5.0"
 
 [dev-dependencies]
+biome_js_formatter   = { workspace = true }
 biome_json_formatter = { workspace = true }
 biome_json_parser    = { workspace = true }
 insta                = { workspace = true }
-rome_js_formatter    = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]

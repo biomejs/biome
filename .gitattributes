@@ -17,9 +17,9 @@ editors/vscode/configuration_schema.json linguist-generated=true text=auto eol=l
 crates/biome_service/src/configuration/parse/json/rules.rs linguist-generated=true text=auto eol=lf
 
 
-crates/rome_js_formatter/tests/**/*.ts.prettier-snap linguist-language=TypeScript
-crates/rome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
-crates/rome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
-crates/rome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
+crates/biome_js_formatter/tests/**/*.ts.prettier-snap linguist-language=TypeScript
+crates/biome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
+crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
+crates/biome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
 crates/biome_cli/tests/**/*.snap linguist-language=Markdown
 crates/rome_js_analyze/tests/specs/**/*.snap linguist-language=Markdown

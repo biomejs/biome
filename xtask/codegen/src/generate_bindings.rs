@@ -1,4 +1,5 @@
 use biome_js_factory::make;
+use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
@@ -9,7 +10,6 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
-use rome_js_formatter::{context::JsFormatOptions, format_node};
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::{to_camel_case, update};
 

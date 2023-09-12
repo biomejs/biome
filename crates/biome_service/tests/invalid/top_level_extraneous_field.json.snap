@@ -5,15 +5,15 @@ expression: top_level_extraneous_field.json
 top_level_extraneous_field.json:2:2 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Found an unknown key `foo_bar`.
-
+  
     1 │ {
   > 2 │ 	"foo_bar": {
       │ 	^^^^^^^^^
     3 │ 		"maxSize": 45000
     4 │ 	}
-
+  
   i Accepted keys
-
+  
   - vcs
   - files
   - linter
@@ -23,3 +23,6 @@ top_level_extraneous_field.json:2:2 deserialize ━━━━━━━━━━�
   - $schema
   - organizeImports
   - extends
+  
+
+

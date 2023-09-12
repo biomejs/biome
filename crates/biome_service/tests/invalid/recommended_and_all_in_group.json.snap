@@ -5,7 +5,7 @@ expression: recommended_and_all_in_group.json
 recommended_and_all_in_group.json:4:12 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'recommended' and 'all' can't be both 'true'. You should choose only one of them.
-
+  
     2 │ 	"linter": {
     3 │ 		"rules": {
   > 4 │ 			"a11y": {
@@ -16,5 +16,8 @@ recommended_and_all_in_group.json:4:12 deserialize ━━━━━━━━━�
       │ 			^
     8 │ 		}
     9 │ 	}
-
+  
   i Biome will fallback to its defaults for this section.
+  
+
+

@@ -34,7 +34,7 @@ A-Parser:
 A-Formatter:
   - crates/biome_formatter/**
   - crates/biome_formatter_test/**
-  - crates/rome_js_formatter/**
+  - crates/biome_js_formatter/**
   - crates/biome_json_formatter/**
   - crates/rome_css_formatter/**
 

@@ -1,7 +1,7 @@
 ## Internal installation
 
 ```toml
-rome_js_formatter = { version = "0.0.1", path = "../rome_js_formatter" }
+biome_js_formatter = { version = "0.0.1", path = "../biome_js_formatter" }
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ The foundation of the formatter relies on two pillars:
 Import the `FormatNode` trait and implement it for your Node.
 
 ```rust
-use rome_js_formatter::prelude::*;
+use biome_js_formatter::prelude::*;
 use biome_formatter::{write, format_args};
 
 struct Buzz {

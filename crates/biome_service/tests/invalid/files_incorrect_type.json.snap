@@ -5,9 +5,12 @@ expression: files_incorrect_type.json
 files_incorrect_type.json:2:11 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The value of key files is incorrect. Expected a object.
-
+  
     1 │ {
   > 2 │ 	"files": "wrong"
       │ 	         ^^^^^^^
     3 │ }
-    4 │
+    4 │ 
+  
+
+

@@ -5,21 +5,21 @@ expression: vcs_missing_client.json
 vcs_missing_client.json:4:20 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The value of key useIgnoreFile is incorrect. Expected a boolean.
-
+  
     2 │ 	"vcs": {
     3 │ 		"enabled": true,
   > 4 │ 		"useIgnoreFile": "false"
       │ 		                 ^^^^^^^
     5 │ 	}
     6 │ }
-
+  
 
 
 
 vcs_missing_client.json:2:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × You enabled the VCS integration, but you didn't specify a client.
-
+  
     1 │ {
   > 2 │ 	"vcs": {
       │ 	       ^
@@ -28,6 +28,9 @@ vcs_missing_client.json:2:9 deserialize ━━━━━━━━━━━━━�
   > 5 │ 	}
       │ 	^
     6 │ }
-    7 │
-
+    7 │ 
+  
   i Biome will disable the VCS integration until the issue is fixed.
+  
+
+

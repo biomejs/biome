@@ -1132,7 +1132,7 @@ pub(crate) mod tests {
     ///
     ///
     /// ```
-    /// # use rome_js_formatter::assert_needs_parentheses;
+    /// # use biome_js_formatter::assert_needs_parentheses;
     /// use biome_js_syntax::JsStaticMemberExpression;
     ///
     /// assert_needs_parentheses!("new (test().a)()", JsStaticMemberExpression);
@@ -1142,7 +1142,7 @@ pub(crate) mod tests {
     ///
     /// ```
     /// # use biome_js_syntax::JsStaticMemberExpression;
-    /// use rome_js_formatter::assert_needs_parentheses;
+    /// use biome_js_formatter::assert_needs_parentheses;
     ///
     /// assert_needs_parentheses!("new (test().a).b)()", JsStaticMemberExpression[1]);
     /// ```
@@ -1186,7 +1186,7 @@ pub(crate) mod tests {
     ///
     /// ```
     /// # use biome_js_syntax::JsStaticMemberExpression;
-    /// use rome_js_formatter::assert_not_needs_parentheses;
+    /// use biome_js_formatter::assert_not_needs_parentheses;
     ///
     /// assert_not_needs_parentheses!("a.b", JsStaticMemberExpression);
     /// ```
@@ -1195,7 +1195,7 @@ pub(crate) mod tests {
     ///
     /// ```
     /// # use biome_js_syntax::JsStaticMemberExpression;
-    /// use rome_js_formatter::assert_not_needs_parentheses;
+    /// use biome_js_formatter::assert_not_needs_parentheses;
     ///
     /// assert_not_needs_parentheses!("a.b.c", JsStaticMemberExpression[0]);
     /// ```

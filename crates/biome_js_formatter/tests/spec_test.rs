@@ -1,6 +1,6 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
+use biome_js_formatter::context::JsFormatOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};
-use rome_js_formatter::context::JsFormatOptions;
 use std::path::Path;
 
 mod language {
@@ -10,7 +10,7 @@ mod language {
 /// [insta.rs](https://insta.rs/docs) snapshot testing
 ///
 /// For better development workflow, run
-/// `cargo watch -i '*.new' -x 'test -p rome_js_formatter formatter'`
+/// `cargo watch -i '*.new' -x 'test -p biome_js_formatter formatter'`
 ///
 /// To review and commit the snapshots, `cargo install cargo-insta`, and run
 /// `cargo insta review` or `cargo insta accept`

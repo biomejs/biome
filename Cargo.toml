@@ -43,6 +43,7 @@ biome_formatter              = { version = "0.1.0", path = "./crates/biome_forma
 biome_formatter_test         = { path = "./crates/biome_formatter_test" }
 biome_fs                     = { path = "./crates/biome_fs" }
 biome_js_factory             = { version = "0.2.0", path = "./crates/biome_js_factory" }
+biome_js_formatter           = { path = "./crates/biome_js_formatter" }
 biome_js_parser              = { path = "./crates/biome_js_parser" }
 biome_js_semantic            = { path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.2.0", path = "./crates/biome_js_syntax" }
@@ -57,13 +58,12 @@ biome_markup                 = { version = "0.0.1", path = "./crates/biome_marku
 biome_migrate                = { path = "./crates/biome_migrate" }
 biome_parser                 = { version = "0.2.0", path = "./crates/biome_parser" }
 biome_rowan                  = { version = "0.2.0", path = "./crates/biome_rowan" }
+biome_service                = { path = "./crates/biome_service" }
 biome_suppression            = { version = "0.2.0", path = "./crates/biome_suppression" }
 biome_test_utils             = { path = "./crates/biome_test_utils" }
 biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_edit" }
 biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_size" }
 rome_js_analyze              = { path = "./crates/rome_js_analyze" }
-rome_js_formatter            = { path = "./crates/rome_js_formatter" }
-biome_service                 = { path = "./crates/biome_service" }
 tests_macros                 = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace

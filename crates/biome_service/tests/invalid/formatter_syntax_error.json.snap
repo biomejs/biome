@@ -5,12 +5,15 @@ expression: formatter_syntax_error.json
 formatter_syntax_error.json:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `}`
-
+  
     2 │ 	"formatter": {
     3 │ 		"enabled"
   > 4 │ 	}
       │ 	^
     5 │ }
-    6 │
-
+    6 │ 
+  
   i Remove }
+  
+
+

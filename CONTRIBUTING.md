@@ -334,7 +334,7 @@ documentation page](https://rustdocs.rome.tools/biome_js_parser/index.html)
 ### Formatter
 
 To know the technical details of how our formatter works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/rome_js_formatter/index.html)
+documentation page](https://rustdocs.rome.tools/biome_js_formatter/index.html)
 
 ### Versioning
 

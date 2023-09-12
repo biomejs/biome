@@ -1,9 +1,9 @@
 use crate::configuration::merge::MergeWith;
 use biome_deserialize::StringSet;
-use bpaf::Bpaf;
-use rome_js_formatter::context::{
+use biome_js_formatter::context::{
     trailing_comma::TrailingComma, ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons,
 };
+use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// A set of options applied to the JavaScript files

@@ -14,8 +14,8 @@ biome_js_syntax    = { path = "../../crates/biome_js_syntax" }
 biome_json_analyze = { path = "../../crates/biome_json_analyze" }
 biome_json_parser  = { path = "../../crates/biome_json_parser" }
 biome_json_syntax  = { path = "../../crates/biome_json_syntax" }
+biome_service      = { path = "../../crates/biome_service" }
 convert_case       = "0.6.0"
 pulldown-cmark     = { version = "0.9", default-features = false }
 rome_js_analyze    = { path = "../../crates/rome_js_analyze" }
-biome_service       = { path = "../../crates/biome_service" }
 xtask              = { path = '../', version = "0.0" }

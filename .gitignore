@@ -21,6 +21,6 @@ packages/@biomejs/cli-*
 # https://github.com/nnethercote/dhat-rs output file
 dhat-heap.json
 
-crates/rome_js_formatter/report.*
+crates/biome_js_formatter/report.*
 crates/biome_json_formatter/report.*
 .vercel

@@ -20,6 +20,12 @@ use biome_analyze::{
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, Printed};
 use biome_fs::RomePath;
+use biome_js_formatter::context::trailing_comma::TrailingComma;
+use biome_js_formatter::context::ArrowParentheses;
+use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::context::Semicolons;
+use biome_js_formatter::context::{QuoteProperties, QuoteStyle};
+use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
@@ -32,12 +38,6 @@ use rome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use rome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
 };
-use rome_js_formatter::context::trailing_comma::TrailingComma;
-use rome_js_formatter::context::ArrowParentheses;
-use rome_js_formatter::context::JsFormatOptions;
-use rome_js_formatter::context::Semicolons;
-use rome_js_formatter::context::{QuoteProperties, QuoteStyle};
-use rome_js_formatter::format_node;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -580,7 +580,7 @@ fn format_range(
     let options = settings.format_options::<JsLanguage>(rome_path);
 
     let tree = parse.syntax();
-    let printed = rome_js_formatter::format_range(options, &tree, range)?;
+    let printed = biome_js_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
 
@@ -616,7 +616,7 @@ fn format_on_type(
         None => panic!("found a token with no parent"),
     };
 
-    let printed = rome_js_formatter::format_sub_tree(options, &root_node)?;
+    let printed = biome_js_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
 }
 

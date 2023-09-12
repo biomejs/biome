@@ -17,6 +17,7 @@ biome_flags          = { workspace = true }
 biome_formatter      = { workspace = true, features = ["serde"] }
 biome_fs             = { workspace = true, features = ["serde"] }
 biome_js_factory     = { workspace = true, optional = true }
+biome_js_formatter   = { workspace = true, features = ["serde"] }
 biome_js_parser      = { workspace = true }
 biome_js_semantic    = { workspace = true }
 biome_js_syntax      = { workspace = true, features = ["serde"] }
@@ -31,7 +32,6 @@ bpaf                 = { workspace = true }
 dashmap              = { workspace = true }
 indexmap             = { workspace = true, features = ["serde"] }
 rome_js_analyze      = { workspace = true }
-rome_js_formatter    = { workspace = true, features = ["serde"] }
 schemars             = { workspace = true, features = ["indexmap1"], optional = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true, features = ["raw_value"] }

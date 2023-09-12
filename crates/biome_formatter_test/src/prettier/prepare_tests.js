@@ -47,7 +47,7 @@ async function traverseDir(dir, input_config) {
 			}
 
 			// Compute a relative path from the Prettier root directory
-			// to this file, then an absolute path using the rome_js_formatter
+			// to this file, then an absolute path using the biome_js_formatter
 			// specs directory as a root instead
 			const filePath = path.resolve(dir, file);
 			const relPath = path.relative(PRETTIER_ROOT, filePath);

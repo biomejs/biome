@@ -5,7 +5,7 @@ expression: hooks_missing_name.json
 hooks_missing_name.json:10:8 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The field name is mandatory
-
+  
      8 │ 					"options": {
      9 │ 						"hooks": [
   > 10 │ 							{
@@ -16,3 +16,6 @@ hooks_missing_name.json:10:8 deserialize ━━━━━━━━━━━━━
        │ 							^
     14 │ 						]
     15 │ 					}
+  
+
+

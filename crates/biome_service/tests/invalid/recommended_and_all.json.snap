@@ -5,7 +5,7 @@ expression: recommended_and_all.json
 recommended_and_all.json:3:12 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'recommended' and 'all' can't be both 'true'. You should choose only one of them.
-
+  
     1 │ {
     2 │ 	"linter": {
   > 3 │ 		"rules": {
@@ -16,5 +16,8 @@ recommended_and_all.json:3:12 deserialize ━━━━━━━━━━━━�
       │ 		^
     7 │ 	}
     8 │ }
-
+  
   i Biome will fallback to its defaults for this section.
+  
+
+
