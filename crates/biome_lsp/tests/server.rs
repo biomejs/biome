@@ -777,7 +777,7 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_quick_fixes_ignore_unsafe() -> Result<()> {
+async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -834,7 +834,7 @@ async fn pull_quick_fixes_ignore_unsafe() -> Result<()> {
                 },
                 context: lsp::CodeActionContext {
                     diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![lsp::CodeActionKind::QUICKFIX]),
+                    only: Some(vec![lsp::CodeActionKind::new("quickfix.biome")]),
                     ..Default::default()
                 },
                 work_done_progress_params: lsp::WorkDoneProgressParams {
@@ -848,44 +848,101 @@ async fn pull_quick_fixes_ignore_unsafe() -> Result<()> {
         .await?
         .context("codeAction returned None")?;
 
-    let mut suppression_changes = HashMap::default();
-    suppression_changes.insert(
+    assert_eq!(res, vec![]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_quick_fixes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a === -0) {}").await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: lsp::TextDocumentIdentifier {
+                    uri: url!("document.js"),
+                },
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: lsp::Position {
+                        line: 0,
+                        character: 10,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![lsp::CodeActionKind::new("quickfix.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: lsp::WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut changes = HashMap::default();
+    changes.insert(
         url!("document.js"),
         vec![lsp::TextEdit {
             range: lsp::Range {
                 start: lsp::Position {
                     line: 0,
-                    character: 0,
+                    character: 9,
                 },
                 end: lsp::Position {
                     line: 0,
-                    character: 0,
+                    character: 10,
                 },
             },
-            new_text: String::from(
-                "// biome-ignore lint/suspicious/noDoubleEquals: <explanation>\n",
-            ),
+            new_text: String::new(),
         }],
     );
 
-    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+    let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Replace -0 with 0"),
         kind: Some(lsp::CodeActionKind::new(
-            "quickfix.suppressRule.biome.suspicious.noDoubleEquals",
+            "quickfix.biome.suspicious.noCompareNegZero",
         )),
-        diagnostics: Some(vec![unsafe_fixable]),
+        diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
-            changes: Some(suppression_changes),
+            changes: Some(changes),
             document_changes: None,
             change_annotations: None,
         }),
         command: None,
-        is_preferred: None,
+        is_preferred: Some(true),
         disabled: None,
         data: None,
     });
 
-    assert_eq!(res, vec![expected_suppression_action]);
+    assert_eq!(res, vec![expected_code_action]);
 
     server.close_document().await?;
 

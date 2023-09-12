@@ -61,7 +61,7 @@ pub(crate) fn code_actions(
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            } else if ActionCategory::QuickFix.matches(kind) {
+            } else if ActionCategory::QuickFix.to_str() == kind {
                 // The action is a on-save quick-fixes
                 has_quick_fix = true;
             }
