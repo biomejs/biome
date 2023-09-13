@@ -25,6 +25,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - `--javascript-formatter-indent-size`
   - `--javascript-formatter-line-width`
 
+
+#### Bug fixes
+
+- Fix a bug where `--errors-on-warning` didn't work when running `biome ci` command.
+
 ### Configuration
 
 #### Features
