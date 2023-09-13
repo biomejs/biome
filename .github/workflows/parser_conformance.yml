@@ -21,29 +21,22 @@ jobs:
     permissions:
       pull-requests: write
     name: Parser conformance
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+        uses: actions/checkout@v4
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
 
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage
@@ -53,7 +46,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           clean: false
           ref: main
@@ -74,7 +67,6 @@ jobs:
           echo "comment<<EOF" >> $GITHUB_OUTPUT
           cat output >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
 
       - name: Get the PR number
         if: github.event_name == 'pull_request'

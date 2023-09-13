@@ -29,13 +29,12 @@ jobs:
             return response.data.head.sha;
 
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: false
           ref: ${{ steps.sha.outputs.result }}
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
 
       - name: Install hyperfine
         run: cargo install hyperfine
@@ -47,7 +46,7 @@ jobs:
           cp target/release/biome benchmark/target/biome_pr
 
       - name: Checkout Main Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           clean: false
           ref: main
@@ -58,17 +57,17 @@ jobs:
           cp target/release/biome benchmark/target/biome_main
 
       - name: Checkout webpack
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: webpack/webpack
           path: benchmark/target/webpack
       - name: Checkout prettier
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: prettier/prettier
           path: benchmark/target/prettier
       - name: Checkout eslint
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: eslint/eslint
           path: benchmark/target/eslint

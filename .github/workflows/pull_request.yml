@@ -13,19 +13,24 @@ on:
       - 'rust-toolchain.toml'
       - 'rustfmt.toml'
 
+# Cancel jobs when the PR is updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 env:
   RUST_LOG: info
   RUST_BACKTRACE: 1
 
 jobs:
   format:
-    name: Format Rust Files
+    name: Format and Lint Rust Files
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           components: rustfmt
           bins: taplo-cli
@@ -39,14 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           components: clippy
-      - name: Run cargo check
+      - name: Run clippy
         run: cargo lint
 
   check-dependencies:
@@ -54,32 +57,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+        uses: actions/checkout@v4
       - name: Install toolchain
         run:  rustup toolchain install nightly
       - name: Install udeps
         run: cargo install cargo-udeps --locked
-      - name: Run udeps
+      - name: Detect unused dependencies using udeps
         run: cargo +nightly udeps
 
-
   test:
+    name: Test
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: windows-latest
           - os: ubuntu-latest
-
-    name: Test
-    runs-on: ${{ matrix.os }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           bins: cargo-nextest
       - name: Run tests
@@ -90,12 +88,11 @@ jobs:
   fuzz-all:
     name: Build and init fuzzers
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
         with:
           bins: cargo-fuzz
       - name: Run init-fuzzer
@@ -104,16 +101,13 @@ jobs:
   test-node-api:
     name: Test node.js API
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Build main binary
         run: cargo build -p biome_cli --release
-
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -150,22 +144,21 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Run doc command
         run: cargo documentation
 
   codegen:
     name: Codegen
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Run the grammar codegen
         run: cargo codegen grammar
       - name: Run the analyzer codegen

@@ -1,5 +1,5 @@
 # Parser benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench`, a new result will be commented at the bottom of this PR.
+# Comment with text containing `!bench_parser`, a new result will be commented at the bottom of this PR.
 
 name: Parser Benchmark
 
@@ -28,13 +28,12 @@ jobs:
             const response = await github.request(context.payload.issue.pull_request.url);
             return response.data.head.sha;
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: false
           ref: ${{ steps.sha.outputs.result }}
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
 
       - name: Install critcmp
         run: cargo install critcmp
@@ -46,7 +45,7 @@ jobs:
         run: cargo bench_parser --save-baseline pr
 
       - name: Checkout Main Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           clean: false
           ref: main

@@ -24,9 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@v3
-        with:
-          submodules: false
+        uses: actions/checkout@v4
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
@@ -42,7 +40,7 @@ jobs:
         with:
           version: 8
       - name: Install toolchain
-        uses: moonrepo/setup-rust@v0
+        uses: moonrepo/setup-rust@v1
       - name: Install libraries
         working-directory: packages/@biomejs/js-api
         run: pnpm i
