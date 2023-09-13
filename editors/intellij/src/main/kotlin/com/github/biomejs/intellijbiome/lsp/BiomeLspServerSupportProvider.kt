@@ -43,19 +43,4 @@ private class BiomeLspServerDescriptor(project: Project, val executable: String)
 
     override val lspGoToDefinitionSupport = false
     override val lspCompletionSupport = null
-    override val lspDiagnosticsSupport: LspDiagnosticsSupport
-        get() = BiomeLspDiagnosticsSupport()
-    override val lspCodeActionsSupport: LspCodeActionsSupport
-        get() = BiomeLspCodeActionsSupport()
-
-    override val clientCapabilities: ClientCapabilities
-        get() = super.clientCapabilities.apply {
-            textDocument = TextDocumentClientCapabilities().apply {
-                codeAction = CodeActionCapabilities().apply {
-                    codeActionLiteralSupport = CodeActionLiteralSupportCapabilities().apply {
-                        codeActionKind = CodeActionKindCapabilities(listOf(CodeActionKind.Empty))
-                    }
-                }
-            }
-        }
 }
