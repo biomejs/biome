@@ -35,6 +35,22 @@ The configuration that is contained inside the file `biome.json`
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
                               Defaults to "always".
+        --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its super
+                              languages) files.
+        --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
+                              its super languages) files.
+        --javascript-formatter-indent-size=NUMBER  The size of the indentation applied to JavaScript
+                              (and its super languages) files. Default to 2.
+        --javascript-formatter-line-width=NUMBER  What's the max width of a line, applied to JavaScript
+                              (and its super languages) files. Defaults to 80.
+        --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
+                              files.
+        --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
+                              files.
+        --json-formatter-indent-size=NUMBER  The size of the indentation applied to JSON (and its super
+                              languages) files. Default to 2.
+        --json-formatter-line-width=NUMBER  What's the max width of a line, applied to JSON (and its
+                              super languages) files. Defaults to 80.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,

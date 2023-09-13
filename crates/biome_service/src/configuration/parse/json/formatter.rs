@@ -6,8 +6,6 @@ use biome_formatter::LineWidth;
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitJsonNode for FormatterConfiguration {}
-
 impl VisitNode<JsonLanguage> for FormatterConfiguration {
     fn visit_member_name(
         &mut self,
@@ -25,10 +23,8 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
     ) -> Option<()> {
         let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
         let name_text = name.text();
+
         match name_text {
-            "formatWithErrors" => {
-                self.format_with_errors = self.map_to_boolean(&value, name_text, diagnostics);
-            }
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
             }
@@ -37,6 +33,7 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }
+
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
                 self.map_to_known_string(&value, name_text, &mut indent_style, diagnostics)?;
@@ -61,6 +58,9 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                         LineWidth::default()
                     }
                 });
+            }
+            "formatWithErrors" => {
+                self.format_with_errors = self.map_to_boolean(&value, name_text, diagnostics);
             }
             _ => {}
         }

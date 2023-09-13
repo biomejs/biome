@@ -12,7 +12,33 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 ### CLI
+
+#### Features
+
+- Add new options to customize the behaviour the formatter based on the language of the file
+  - `--json-formatter-enabled`
+  - `--json-formatter-indent-style`
+  - `--json-formatter-indent-size`
+  - `--json-formatter-line-width`
+  - `--javascript-formatter-enabled`
+  - `--javascript-formatter-indent-style`
+  - `--javascript-formatter-indent-size`
+  - `--javascript-formatter-line-width`
+
 ### Configuration
+
+#### Features
+
+- Add new options to customize the behaviour of the formatter based on the language of the file
+  - `json.formatter.enabled`
+  - `json.formatter.indentStyle`
+  - `json.formatter.indentSize`
+  - `json.formatter.lineWidth`
+  - `javascript.formatter.enabled`
+  - `javascript.formatter.indentStyle`
+  - `javascript.formatter.indentSize`
+  - `javascript.formatter.lineWidth`
+
 ### Editors
 ### Formatter
 ### JavaScript APIs

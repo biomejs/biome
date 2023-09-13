@@ -1,9 +1,11 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::VERSION;
+use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
     configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
-    vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
+    json::json_formatter, vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration,
+    JavascriptFormatter,
 };
 use biome_service::Configuration;
 use bpaf::Bpaf;
@@ -105,6 +107,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external, optional, hide_usage)]
         javascript_formatter: Option<JavascriptFormatter>,
+
+        #[bpaf(external, optional, hide_usage)]
+        json_formatter: Option<JsonFormatter>,
 
         #[bpaf(external, optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,

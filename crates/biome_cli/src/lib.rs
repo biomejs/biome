@@ -143,6 +143,7 @@ impl<'app> CliSession<'app> {
                 paths,
                 vcs_configuration,
                 files_configuration,
+                json_formatter,
             } => commands::format::format(
                 self,
                 FormatCommandPayload {
@@ -154,6 +155,7 @@ impl<'app> CliSession<'app> {
                     paths,
                     vcs_configuration,
                     files_configuration,
+                    json_formatter,
                 },
             ),
             BiomeCommand::Init => commands::init::init(self),

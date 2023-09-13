@@ -89,7 +89,6 @@ impl FromStr for RestrictedGlobalsOptions {
     }
 }
 
-impl VisitJsonNode for RestrictedGlobalsOptions {}
 impl VisitNode<JsonLanguage> for RestrictedGlobalsOptions {
     fn visit_member_name(
         &mut self,

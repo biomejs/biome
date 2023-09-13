@@ -5,8 +5,6 @@ use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_json_syntax::{AnyJsonValue, JsonLanguage};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitJsonNode for VcsConfiguration {}
-
 impl VisitNode<JsonLanguage> for VcsConfiguration {
     fn visit_member_name(
         &mut self,
@@ -45,8 +43,6 @@ impl VisitNode<JsonLanguage> for VcsConfiguration {
         Some(())
     }
 }
-
-impl VisitJsonNode for VcsClientKind {}
 
 impl VisitNode<JsonLanguage> for VcsClientKind {
     fn visit_member_value(

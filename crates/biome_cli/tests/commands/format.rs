@@ -1955,3 +1955,289 @@ fn treat_known_json_files_as_jsonc_files() {
         result,
     ));
 }
+
+#[test]
+fn should_apply_different_formatting() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        },
+        "javascript": {
+            "formatter": {
+                "lineWidth": 320,
+                "indentSize": 8
+            }
+        },
+        "json": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentSize": 2
+            }
+        }
+    }"#,
+    );
+
+    let code = r#"
+{
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), code.as_bytes());
+
+    let code = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), code.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                json_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_different_formatting",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_different_formatting_with_cli() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        }
+    }"#,
+    );
+
+    let json_file_content = r#"
+{
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), json_file_content.as_bytes());
+
+    let js_file_content = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                "--javascript-formatter-line-width=320",
+                "--javascript-formatter-indent-size=8",
+                "--json-formatter-line-width=20",
+                "--json-formatter-indent-size=2",
+                json_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_different_formatting_with_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_format_json_files_if_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        },
+        "javascript": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentSize": 4
+            }
+        },
+        "json": {
+            "formatter": {
+                "enabled": false
+            }
+        }
+    }"#,
+    );
+
+    let json_file_content = r#"
+{
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), json_file_content.as_bytes());
+
+    let js_file_content = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                json_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut file = fs
+        .open(json_file)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, json_file_content);
+
+    drop(file);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_json_files_if_disabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_format_js_files_if_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        },
+        "javascript": {
+            "formatter": {
+                "enabled": false
+            }
+        },
+        "json": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentSize": 2
+            }
+        }
+    }"#,
+    );
+
+    let json_file_content = r#"
+{
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), json_file_content.as_bytes());
+
+    let js_file_content = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                json_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut file = fs
+        .open(js_file)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, js_file_content);
+
+    drop(file);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_js_files_if_disabled",
+        fs,
+        console,
+        result,
+    ));
+}

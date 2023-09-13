@@ -716,9 +716,31 @@
 						{ "type": "null" }
 					]
 				},
+				"enabled": {
+					"description": "Control the formatter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to JavaScript (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
 				"jsxQuoteStyle": {
 					"description": "The type of quotes used in JSX. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.",
+					"default": 80,
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
@@ -764,9 +786,44 @@
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonFormatter" },
+						{ "type": "null" }
+					]
+				},
 				"parser": {
 					"description": "Parsing options",
 					"anyOf": [{ "$ref": "#/definitions/JsonParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indent_size": {
+					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indent_style": {
+					"description": "The indent style applied to JSON (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"line_width": {
+					"description": "What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.",
+					"default": 80,
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

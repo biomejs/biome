@@ -271,8 +271,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_rowan::{AstNode, SyntaxNode};
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 
-        impl VisitJsonNode for Rules {}
-
         impl VisitNode<JsonLanguage> for Rules {
             fn visit_member_name(
                 &mut self,
@@ -625,8 +623,6 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
     }
 
     quote! {
-        impl VisitJsonNode for #group_struct_name {}
-
         impl VisitNode<JsonLanguage> for #group_struct_name {
             fn visit_member_name(
                 &mut self,

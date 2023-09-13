@@ -121,8 +121,21 @@ impl FileFeaturesResult {
         self
     }
 
-    pub fn with_settings(mut self, settings: &WorkspaceSettings) -> Self {
-        if !settings.formatter().enabled {
+    pub fn with_settings_and_language(
+        mut self,
+        settings: &WorkspaceSettings,
+        language: &Language,
+    ) -> Self {
+        let formatter_disabled = {
+            if language.is_javascript_like() {
+                !settings.formatter().enabled || settings.javascript_formatter_disabled()
+            } else if language.is_json_like() {
+                !settings.formatter().enabled || settings.json_formatter_disabled()
+            } else {
+                !settings.formatter().enabled
+            }
+        };
+        if formatter_disabled {
             self.features_supported
                 .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
         }

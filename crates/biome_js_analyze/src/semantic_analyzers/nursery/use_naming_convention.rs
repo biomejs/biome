@@ -487,7 +487,6 @@ impl FromStr for NamingConventionOptions {
     }
 }
 
-impl VisitJsonNode for NamingConventionOptions {}
 impl VisitNode<JsonLanguage> for NamingConventionOptions {
     fn visit_member_name(
         &mut self,

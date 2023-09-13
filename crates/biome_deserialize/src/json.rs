@@ -425,7 +425,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     }
 
     fn map_to_array<V>(
-        &mut self,
+        &self,
         value: &AnyJsonValue,
         name: &str,
         visitor: &mut V,
@@ -454,7 +454,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     }
 }
 
-impl VisitJsonNode for () {}
+impl<V: VisitNode<JsonLanguage>> VisitJsonNode for V {}
 
 fn emit_diagnostic_form_number(
     parse_error: ParseIntError,
@@ -542,8 +542,6 @@ pub fn with_only_known_variants(
 /// struct NewConfiguration {
 ///     lorem: bool
 /// }
-///
-/// impl VisitJsonNode for NewConfiguration {}
 ///
 /// impl VisitNode<JsonLanguage> for NewConfiguration {
 ///     fn visit_member_name(&mut self, node: &JsonSyntaxNode, diagnostics: &mut Vec<DeserializationDiagnostic>) -> Option<()> {

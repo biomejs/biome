@@ -8,8 +8,6 @@ use biome_js_analyze::options::PossibleOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue, JsonSyntaxNode};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode};
 
-impl VisitJsonNode for LinterConfiguration {}
-
 impl VisitNode<JsonLanguage> for LinterConfiguration {
     fn visit_member_name(
         &mut self,
@@ -108,8 +106,6 @@ impl RuleConfiguration {
     }
 }
 
-impl VisitJsonNode for RuleConfiguration {}
-
 impl VisitNode<JsonLanguage> for RuleConfiguration {
     fn visit_member_name(
         &mut self,
@@ -141,8 +137,6 @@ impl VisitNode<JsonLanguage> for RuleConfiguration {
     }
 }
 
-impl VisitJsonNode for RulePlainConfiguration {}
-
 impl VisitNode<JsonLanguage> for RulePlainConfiguration {
     fn visit_member_value(
         &mut self,
@@ -165,8 +159,6 @@ impl VisitNode<JsonLanguage> for RulePlainConfiguration {
         Some(())
     }
 }
-
-impl VisitJsonNode for RuleWithOptions {}
 
 impl VisitNode<JsonLanguage> for RuleWithOptions {
     fn visit_member_name(

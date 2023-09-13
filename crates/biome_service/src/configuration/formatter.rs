@@ -73,6 +73,14 @@ impl Default for FormatterConfiguration {
     }
 }
 
+impl FromStr for FormatterConfiguration {
+    type Err = String;
+
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::default())
+    }
+}
+
 impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
     fn merge_with(&mut self, other: FormatterConfiguration) {
         if let Some(enabled) = other.enabled {
@@ -113,6 +121,7 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             require_literal_leading_dot: false,
             require_literal_separator: false,
         });
+
         if let Some(ignore) = conf.ignore {
             for pattern in ignore.index_set() {
                 matcher.add_pattern(pattern).map_err(|err| {
@@ -136,7 +145,16 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
     }
 }
 
-fn deserialize_line_width<'de, D>(deserializer: D) -> Result<Option<LineWidth>, D::Error>
+impl From<PlainIndentStyle> for IndentStyle {
+    fn from(value: PlainIndentStyle) -> Self {
+        match value {
+            PlainIndentStyle::Tab => IndentStyle::Tab,
+            PlainIndentStyle::Space => IndentStyle::Space,
+        }
+    }
+}
+
+pub fn deserialize_line_width<'de, D>(deserializer: D) -> Result<Option<LineWidth>, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {

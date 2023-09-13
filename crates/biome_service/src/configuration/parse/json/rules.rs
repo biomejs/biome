@@ -7,7 +7,6 @@ use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_json_syntax::{AnyJsonValue, JsonLanguage};
 use biome_rowan::{AstNode, SyntaxNode};
-impl VisitJsonNode for Rules {}
 impl VisitNode<JsonLanguage> for Rules {
     fn visit_member_name(
         &mut self,
@@ -107,7 +106,6 @@ impl VisitNode<JsonLanguage> for Rules {
         Some(())
     }
 }
-impl VisitJsonNode for A11y {}
 impl VisitNode<JsonLanguage> for A11y {
     fn visit_member_name(
         &mut self,
@@ -671,7 +669,6 @@ impl VisitNode<JsonLanguage> for A11y {
         Some(())
     }
 }
-impl VisitJsonNode for Complexity {}
 impl VisitNode<JsonLanguage> for Complexity {
     fn visit_member_name(
         &mut self,
@@ -1092,7 +1089,6 @@ impl VisitNode<JsonLanguage> for Complexity {
         Some(())
     }
 }
-impl VisitJsonNode for Correctness {}
 impl VisitNode<JsonLanguage> for Correctness {
     fn visit_member_name(
         &mut self,
@@ -1752,7 +1748,6 @@ impl VisitNode<JsonLanguage> for Correctness {
         Some(())
     }
 }
-impl VisitJsonNode for Nursery {}
 impl VisitNode<JsonLanguage> for Nursery {
     fn visit_member_name(
         &mut self,
@@ -2556,7 +2551,6 @@ impl VisitNode<JsonLanguage> for Nursery {
         Some(())
     }
 }
-impl VisitJsonNode for Performance {}
 impl VisitNode<JsonLanguage> for Performance {
     fn visit_member_name(
         &mut self,
@@ -2608,7 +2602,6 @@ impl VisitNode<JsonLanguage> for Performance {
         Some(())
     }
 }
-impl VisitJsonNode for Security {}
 impl VisitNode<JsonLanguage> for Security {
     fn visit_member_name(
         &mut self,
@@ -2692,7 +2685,6 @@ impl VisitNode<JsonLanguage> for Security {
         Some(())
     }
 }
-impl VisitJsonNode for Style {}
 impl VisitNode<JsonLanguage> for Style {
     fn visit_member_name(
         &mut self,
@@ -3352,7 +3344,6 @@ impl VisitNode<JsonLanguage> for Style {
         Some(())
     }
 }
-impl VisitJsonNode for Suspicious {}
 impl VisitNode<JsonLanguage> for Suspicious {
     fn visit_member_name(
         &mut self,

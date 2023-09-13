@@ -1,13 +1,11 @@
+mod formatter;
+
 use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptParser};
 use crate::configuration::{JavascriptConfiguration, JavascriptFormatter};
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_js_formatter::context::trailing_comma::TrailingComma;
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::SyntaxNode;
-
-impl VisitJsonNode for JavascriptConfiguration {}
 
 impl VisitNode<JsonLanguage> for JavascriptConfiguration {
     fn visit_member_name(
@@ -62,63 +60,6 @@ impl VisitNode<JsonLanguage> for JavascriptConfiguration {
     }
 }
 
-impl VisitJsonNode for JavascriptFormatter {}
-impl VisitNode<JsonLanguage> for JavascriptFormatter {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, JavascriptFormatter::KNOWN_KEYS, diagnostics)
-    }
-
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
-        match name_text {
-            "jsxQuoteStyle" => {
-                let mut jsx_quote_style = QuoteStyle::default();
-                self.map_to_known_string(&value, name_text, &mut jsx_quote_style, diagnostics)?;
-                self.jsx_quote_style = Some(jsx_quote_style);
-            }
-            "quoteStyle" => {
-                let mut quote_style = QuoteStyle::default();
-                self.map_to_known_string(&value, name_text, &mut quote_style, diagnostics)?;
-                self.quote_style = Some(quote_style);
-            }
-            "trailingComma" => {
-                let mut trailing_comma = TrailingComma::default();
-                self.map_to_known_string(&value, name_text, &mut trailing_comma, diagnostics)?;
-                self.trailing_comma = Some(trailing_comma);
-            }
-            "quoteProperties" => {
-                let mut quote_properties = QuoteProperties::default();
-                self.map_to_known_string(&value, name_text, &mut quote_properties, diagnostics)?;
-                self.quote_properties = Some(quote_properties);
-            }
-            "semicolons" => {
-                let mut semicolons = Semicolons::default();
-                self.map_to_known_string(&value, name_text, &mut semicolons, diagnostics)?;
-                self.semicolons = Some(semicolons);
-            }
-            "arrowParentheses" => {
-                let mut arrow_parentheses = ArrowParentheses::default();
-                self.map_to_known_string(&value, name_text, &mut arrow_parentheses, diagnostics)?;
-                self.arrow_parentheses = Some(arrow_parentheses);
-            }
-            _ => {}
-        }
-
-        Some(())
-    }
-}
-
-impl VisitJsonNode for JavascriptOrganizeImports {}
 impl VisitNode<JsonLanguage> for JavascriptOrganizeImports {
     fn visit_map(
         &mut self,
@@ -130,7 +71,6 @@ impl VisitNode<JsonLanguage> for JavascriptOrganizeImports {
     }
 }
 
-impl VisitJsonNode for JavascriptParser {}
 impl VisitNode<JsonLanguage> for JavascriptParser {
     fn visit_member_name(
         &mut self,

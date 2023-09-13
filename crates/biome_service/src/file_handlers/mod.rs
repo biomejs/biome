@@ -139,6 +139,20 @@ impl Language {
             other
         }
     }
+
+    pub const fn is_javascript_like(&self) -> bool {
+        matches!(
+            self,
+            Language::JavaScript
+                | Language::TypeScript
+                | Language::JavaScriptReact
+                | Language::TypeScriptReact
+        )
+    }
+
+    pub const fn is_json_like(&self) -> bool {
+        matches!(self, Language::Json | Language::Jsonc)
+    }
 }
 
 impl biome_console::fmt::Display for Language {
