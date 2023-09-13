@@ -1125,7 +1125,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
         }
     }"#;
     server
-        .open_named_document(incorrect_config, url!("rome.json"), "json")
+        .open_named_document(incorrect_config, url!("biome.json"), "json")
         .await?;
 
     let notification = tokio::select! {
@@ -1139,7 +1139,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
         notification,
         Some(ServerNotification::PublishDiagnostics(
             PublishDiagnosticsParams {
-                uri: url!("rome.json"),
+                uri: url!("biome.json"),
                 version: Some(0),
                 diagnostics: vec![lsp::Diagnostic {
                     range: lsp::Range {
@@ -1248,6 +1248,187 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
         .context("codeAction returned None")?;
 
     assert_eq!(res, vec![]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_code_actions_with_import_sorting() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document(
+            r#"
+import z from "zod";
+import { test } from "./test";
+import { describe } from "node:test";
+
+if(a === -0) {}
+"#,
+        )
+        .await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: lsp::TextDocumentIdentifier {
+                    uri: url!("document.js"),
+                },
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: lsp::Position {
+                        line: 0,
+                        character: 10,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    ..Default::default()
+                },
+                work_done_progress_params: lsp::WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let mut changes = HashMap::default();
+    changes.insert(
+        url!("document.js"),
+        vec![
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 1,
+                        character: 7,
+                    },
+                    end: lsp::Position {
+                        line: 1,
+                        character: 8,
+                    },
+                },
+                new_text: String::from("{ describe }"),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 1,
+                        character: 15,
+                    },
+                    end: lsp::Position {
+                        line: 1,
+                        character: 18,
+                    },
+                },
+                new_text: String::from("node:test"),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 2,
+                        character: 7,
+                    },
+                    end: lsp::Position {
+                        line: 2,
+                        character: 13,
+                    },
+                },
+                new_text: String::from("z"),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 2,
+                        character: 14,
+                    },
+                    end: lsp::Position {
+                        line: 2,
+                        character: 16,
+                    },
+                },
+                new_text: String::from(""),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 2,
+                        character: 22,
+                    },
+                    end: lsp::Position {
+                        line: 2,
+                        character: 28,
+                    },
+                },
+                new_text: String::from("zod"),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 3,
+                        character: 9,
+                    },
+                    end: lsp::Position {
+                        line: 3,
+                        character: 17,
+                    },
+                },
+                new_text: String::from("test"),
+            },
+            lsp::TextEdit {
+                range: lsp::Range {
+                    start: lsp::Position {
+                        line: 3,
+                        character: 26,
+                    },
+                    end: lsp::Position {
+                        line: 3,
+                        character: 35,
+                    },
+                },
+                new_text: String::from("./test"),
+            },
+        ],
+    );
+
+    let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Organize Imports (Biome)"),
+        kind: Some(lsp::CodeActionKind::new("source.organizeImports.biome")),
+        diagnostics: None,
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_code_action]);
 
     server.close_document().await?;
 

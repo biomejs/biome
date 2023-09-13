@@ -11,6 +11,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ## Unreleased
 
 ### Analyzer
+
+#### Enhancements
+
+- Import sorting is safe to apply now, and it will be applied when running `check --apply` instead of `check --apply-unsafe`.
+
 ### CLI
 ### Configuration
 ### Editors

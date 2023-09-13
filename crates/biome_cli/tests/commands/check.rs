@@ -1552,7 +1552,7 @@ import * as something from "../something";
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                ("--apply"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1586,11 +1586,6 @@ import * as something from "../something";
 fn shows_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-
-    let rome_json = r#"{ "organizeImports": { "enabled": true } }"#;
-
-    let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
 
     let file_path = Path::new("check.js");
     let content = r#"import { lorem, foom, bar } from "foo";
@@ -1631,11 +1626,6 @@ import * as something from "../something";
 fn should_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-
-    let rome_json = r#"{ "organizeImports": { "enabled": true } }"#;
-
-    let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
 
     let file_path = Path::new("check.js");
     let content = r#"import { lorem, foom, bar } from "foo";
@@ -1752,7 +1742,7 @@ import * as something from "../something";
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                ("--apply"),
                 ("--formatter-enabled=false"),
                 ("--linter-enabled=false"),
                 ("--organize-imports-enabled=true"),

@@ -32,11 +32,11 @@ impl Default for OrganizeImports {
 
 impl OrganizeImports {
     pub const fn is_disabled(&self) -> bool {
-        !self.is_enabled()
+        matches!(self.enabled, Some(false))
     }
 
     pub const fn is_enabled(&self) -> bool {
-        matches!(self.enabled, Some(true))
+        !self.is_disabled()
     }
 }
 

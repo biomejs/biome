@@ -222,8 +222,7 @@ pub struct OrganizeImportsSettings {
 impl Default for OrganizeImportsSettings {
     fn default() -> Self {
         Self {
-            // currently experimental
-            enabled: false,
+            enabled: true,
             ignored_files: Matcher::new(MatchOptions {
                 case_sensitive: true,
                 require_literal_leading_dot: false,
