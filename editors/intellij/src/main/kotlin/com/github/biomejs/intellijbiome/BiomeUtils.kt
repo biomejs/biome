@@ -5,14 +5,14 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.util.ExecUtil
 import com.intellij.javascript.nodejs.library.node_modules.NodeModulesDirectoryManager
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.SmartList
 import java.io.File
 
 
 object BiomeUtils {
-    fun isSupportedFileType(fileType: FileType): Boolean = when (fileType.defaultExtension) {
+    fun isSupportedFileType(file: VirtualFile): Boolean = when (file.extension) {
         "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx" -> true
         else -> false
     }

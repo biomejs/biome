@@ -20,7 +20,7 @@ import com.intellij.execution.ExecutionException
 class BiomeFormatterProvider: AsyncDocumentFormattingService() {
     override fun getFeatures(): MutableSet<Feature> = EnumSet.noneOf(Feature::class.java)
 
-    override fun canFormat(file: PsiFile): Boolean = BiomeUtils.isSupportedFileType(file.fileType)
+    override fun canFormat(file: PsiFile): Boolean = file.virtualFile?.let {  BiomeUtils.isSupportedFileType(it) } ?: false
 
     override fun getNotificationGroupId(): String = "Biome"
 

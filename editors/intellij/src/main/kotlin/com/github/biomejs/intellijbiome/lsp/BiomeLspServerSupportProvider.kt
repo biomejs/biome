@@ -16,8 +16,9 @@ import org.eclipse.lsp4j.*
 
 @Suppress("UnstableApiUsage")
 class BiomeLspServerSupportProvider : LspServerSupportProvider {
+
     override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
-        if (BiomeUtils.isSupportedFileType(file.fileType)) {
+        if (BiomeUtils.isSupportedFileType(file)) {
             val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
 
             serverStarter.ensureServerStarted(BiomeLspServerDescriptor(project, executable))
@@ -27,7 +28,7 @@ class BiomeLspServerSupportProvider : LspServerSupportProvider {
 
 @Suppress("UnstableApiUsage")
 private class BiomeLspServerDescriptor(project: Project, val executable: String) : ProjectWideLspServerDescriptor(project, "Biome") {
-    override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file.fileType)
+    override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
     override fun createCommandLine(): GeneralCommandLine {
         val params = SmartList("lsp-proxy")
         BiomeUtils.attachConfigPath(params, project, thisLogger())
