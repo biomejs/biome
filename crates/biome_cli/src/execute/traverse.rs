@@ -430,8 +430,12 @@ fn process_messages(options: ProcessMessagesOptions) {
                 // is CI mode we want to print all the diagnostics
                 if mode.is_ci() {
                     for diag in diagnostics {
-                        if diag.severity() == Severity::Error {
+                        let severity = diag.severity();
+                        if severity == Severity::Error {
                             *errors += 1;
+                        }
+                        if severity == Severity::Warning {
+                            *warnings += 1;
                         }
 
                         let diag = diag.with_file_path(&name).with_file_source_code(&content);
