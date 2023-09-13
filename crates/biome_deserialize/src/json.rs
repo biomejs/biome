@@ -543,8 +543,6 @@ pub fn with_only_known_variants(
 ///     lorem: bool
 /// }
 ///
-/// impl VisitJsonNode for NewConfiguration {}
-///
 /// impl VisitNode<JsonLanguage> for NewConfiguration {
 ///     fn visit_member_name(&mut self, node: &JsonSyntaxNode, diagnostics: &mut Vec<DeserializationDiagnostic>) -> Option<()> {
 ///         has_only_known_keys(node, &["lorem"], diagnostics)
