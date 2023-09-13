@@ -454,7 +454,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     }
 }
 
-impl VisitJsonNode for () {}
+impl<V: VisitNode<JsonLanguage>> VisitJsonNode for V {}
 
 fn emit_diagnostic_form_number(
     parse_error: ParseIntError,

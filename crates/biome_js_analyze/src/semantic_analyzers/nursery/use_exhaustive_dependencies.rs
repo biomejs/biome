@@ -233,7 +233,6 @@ impl Hooks {
     const KNOWN_KEYS: &'static [&'static str] = &["name", "closureIndex", "dependenciesIndex"];
 }
 
-impl VisitJsonNode for Hooks {}
 impl VisitNode<JsonLanguage> for Hooks {
     fn visit_member_name(
         &mut self,
@@ -277,7 +276,6 @@ impl FromStr for Hooks {
     }
 }
 
-impl VisitJsonNode for HooksOptions {}
 impl VisitNode<JsonLanguage> for HooksOptions {
     fn visit_member_name(
         &mut self,

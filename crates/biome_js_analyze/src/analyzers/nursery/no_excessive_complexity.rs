@@ -392,7 +392,6 @@ impl FromStr for ComplexityOptions {
     }
 }
 
-impl VisitJsonNode for ComplexityOptions {}
 impl VisitNode<JsonLanguage> for ComplexityOptions {
     fn visit_member_name(
         &mut self,

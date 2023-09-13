@@ -5,8 +5,6 @@ use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
 use std::num::NonZeroU64;
 
-impl VisitJsonNode for FilesConfiguration {}
-
 impl VisitNode<JsonLanguage> for FilesConfiguration {
     fn visit_member_name(
         &mut self,

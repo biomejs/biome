@@ -6,8 +6,6 @@ use biome_formatter::LineWidth;
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitJsonNode for FormatterConfiguration {}
-
 impl VisitNode<JsonLanguage> for FormatterConfiguration {
     fn visit_member_name(
         &mut self,

@@ -8,7 +8,6 @@ use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle,
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitJsonNode for JavascriptFormatter {}
 impl VisitNode<JsonLanguage> for JavascriptFormatter {
     fn visit_member_name(
         &mut self,

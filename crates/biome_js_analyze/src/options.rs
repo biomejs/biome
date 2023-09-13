@@ -194,5 +194,4 @@ impl PossibleOptions {
     }
 }
 
-impl VisitJsonNode for PossibleOptions {}
 impl VisitNode<JsonLanguage> for PossibleOptions {}

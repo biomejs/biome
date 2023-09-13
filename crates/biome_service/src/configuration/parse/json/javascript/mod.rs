@@ -7,8 +7,6 @@ use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::SyntaxNode;
 
-impl VisitJsonNode for JavascriptConfiguration {}
-
 impl VisitNode<JsonLanguage> for JavascriptConfiguration {
     fn visit_member_name(
         &mut self,
@@ -62,7 +60,6 @@ impl VisitNode<JsonLanguage> for JavascriptConfiguration {
     }
 }
 
-impl VisitJsonNode for JavascriptOrganizeImports {}
 impl VisitNode<JsonLanguage> for JavascriptOrganizeImports {
     fn visit_map(
         &mut self,
@@ -74,7 +71,6 @@ impl VisitNode<JsonLanguage> for JavascriptOrganizeImports {
     }
 }
 
-impl VisitJsonNode for JavascriptParser {}
 impl VisitNode<JsonLanguage> for JavascriptParser {
     fn visit_member_name(
         &mut self,

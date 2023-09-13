@@ -4,8 +4,6 @@ use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::SyntaxNode;
 
-impl VisitJsonNode for OrganizeImports {}
-
 impl VisitNode<JsonLanguage> for OrganizeImports {
     fn visit_member_name(
         &mut self,
