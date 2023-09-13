@@ -2842,3 +2842,40 @@ A = 0;
         result,
     ));
 }
+
+#[test]
+fn use_literal_keys_should_emit_correct_ast_issue_266() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(
+        file_path.into(),
+        r#"
+	value['optimizelyService'] = optimizelyService;
+		"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--apply-unsafe",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_literal_keys_should_emit_correct_ast_issue_266",
+        fs,
+        console,
+        result,
+    ));
+}
