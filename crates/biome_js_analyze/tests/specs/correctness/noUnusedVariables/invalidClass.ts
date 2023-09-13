@@ -1,6 +1,5 @@
 class D {
-	constructor(a: number) {}
-	f(a: number) {}
-	set a(a: number) {}
+	f(a: D): D | undefined { return; }
 }
-console.log(new D());
+
+export {}

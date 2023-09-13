@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validEnum.ts
+---
+# Input
+```js
+export enum Status {
+    Open = 0,
+    Close = 1,
+}
+
+enum Flags {
+    One = 1,
+    Two = f(Flags.One),
+}
+
+```
+
+

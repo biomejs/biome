@@ -17,7 +17,7 @@ impl JsClassDeclaration {
 }
 
 /// Returns `true` if `syntax` is in an ambient context.
-fn is_in_ambient_context(syntax: &JsSyntaxNode) -> bool {
+pub fn is_in_ambient_context(syntax: &JsSyntaxNode) -> bool {
     syntax.ancestors().any(|x| {
         matches!(
             x.kind(),

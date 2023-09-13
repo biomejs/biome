@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRecursiveFunctions.js
+---
+# Input
+```js
+function f() {
+    f();
+}
+
+const g = () => {
+    g();
+}
+
+const h = function() {
+    h();
+}
+
+```
+
+# Diagnostics
+```
+invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+  > 1 │ function f() {
+      │          ^
+    2 │     f();
+    3 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```
+invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const g = () => {
+      │       ^
+    6 │     g();
+    7 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend g with an underscore.
+  
+     3  3 │   }
+     4  4 │   
+     5    │ - const·g·=·()·=>·{
+     6    │ - ····g();
+        5 │ + const·_g·=·()·=>·{
+        6 │ + ····_g();
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+     7 │ }
+     8 │ 
+   > 9 │ const h = function() {
+       │       ^
+    10 │     h();
+    11 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Suggested fix: If this is intentional, prepend h with an underscore.
+  
+     7  7 │   }
+     8  8 │   
+     9    │ - const·h·=·function()·{
+    10    │ - ····h();
+        9 │ + const·_h·=·function()·{
+       10 │ + ····_h();
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+

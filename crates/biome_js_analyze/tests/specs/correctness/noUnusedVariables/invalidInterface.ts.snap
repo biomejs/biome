@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidInterface.ts
+---
+# Input
+```js
+interface I {
+    f(): I
+    g(i: I): void
+}
+
+export {};
+
+```
+
+# Diagnostics
+```
+invalidInterface.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface is unused.
+  
+  > 1 │ interface I {
+      │           ^
+    2 │     f(): I
+    3 │     g(i: I): void
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+

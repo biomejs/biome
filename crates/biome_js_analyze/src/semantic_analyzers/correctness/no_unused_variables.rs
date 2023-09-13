@@ -3,13 +3,18 @@ use crate::{semantic_services::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_semantic::{ReferencesExtensions, SemanticScopeExtensions};
-use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction},
-    JsClassExpression, JsFunctionDeclaration, JsFunctionExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator,
+use biome_js_semantic::ReferencesExtensions;
+use biome_js_syntax::binding_ext::{
+    AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_js_syntax::declaration_ext::is_in_ambient_context;
+use biome_js_syntax::{
+    AnyJsExpression, JsAssignmentExpression, JsClassExpression, JsExpressionStatement,
+    JsFileSource, JsForStatement, JsFunctionExpression, JsIdentifierExpression,
+    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsSequenceExpression,
+    JsSyntaxKind, JsSyntaxNode,
+};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 
 declare_rule! {
     /// Disallow unused variables.
@@ -30,28 +35,18 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// const a = 4;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
     /// let a = 4;
+    /// a++;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function foo() {
-    /// };
+    /// function foo() {}
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function foo(myVar) {
+    /// export function foo(myVar) {
     ///     console.log('foo');
     /// }
-    /// foo();
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const foo = () => {
-    /// };
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -63,7 +58,6 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// const foo = () => {
     ///     foo();
-    ///     console.log(this);
     /// };
     /// ```
     ///
@@ -77,9 +71,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js
-    /// function foo(_unused) {
-    /// };
-    /// foo();
+    /// export function foo(_unused) {}
     /// ```
     ///
     /// ```jsx
@@ -106,7 +98,7 @@ declare_rule! {
 }
 
 /// Suggestion if the bindnig is unused
-#[derive(Copy, Clone)]
+#[derive(Debug)]
 pub enum SuggestedFix {
     /// No suggestion will be given
     NoSuggestion,
@@ -136,11 +128,6 @@ fn is_function_that_is_ok_parameter_not_be_used(
     )
 }
 
-fn is_ambient_context(node: &JsSyntaxNode) -> bool {
-    node.ancestors()
-        .any(|x| x.kind() == JsSyntaxKind::TS_DECLARE_STATEMENT)
-}
-
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -162,31 +149,26 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
         AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-            let is_binding_ok =
-                is_function_that_is_ok_parameter_not_be_used(parameter.parent_function());
-            if !is_binding_ok {
-                suggestion_for_binding(binding)
-            } else {
+            if is_function_that_is_ok_parameter_not_be_used(parameter.parent_function()) {
                 None
+            } else {
+                suggestion_for_binding(binding)
             }
         }
         AnyJsBindingDeclaration::JsRestParameter(parameter) => {
-            let is_binding_ok =
-                is_function_that_is_ok_parameter_not_be_used(parameter.parent_function());
-            if !is_binding_ok {
-                suggestion_for_binding(binding)
-            } else {
+            if is_function_that_is_ok_parameter_not_be_used(parameter.parent_function()) {
                 None
+            } else {
+                suggestion_for_binding(binding)
             }
         }
 
         // declarations need to be check if they are under `declare`
         node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-            let is_binding_ok = is_ambient_context(node.syntax());
-            if !is_binding_ok {
-                suggestion_for_binding(binding)
-            } else {
+            if is_in_ambient_context(node.syntax()) {
                 None
+            } else {
+                suggestion_for_binding(binding)
             }
         }
         node @ AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
@@ -196,32 +178,28 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | node @ AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | node @ AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | node @ AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
-            if is_ambient_context(node.syntax()) {
+            if is_in_ambient_context(node.syntax()) {
                 None
             } else {
                 Some(SuggestedFix::NoSuggestion)
             }
         }
 
-        // Bindings under unknown parameter are never ok to be unused
-        AnyJsBindingDeclaration::JsBogusParameter(_) => Some(SuggestedFix::NoSuggestion),
-
         // Bindings under catch are never ok to be unused
         AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
 
+        // Bindings under unknown parameter are never ok to be unused
+        AnyJsBindingDeclaration::JsBogusParameter(_)
         // Imports are never ok to be unused
-        AnyJsBindingDeclaration::JsImportDefaultClause(_)
+        | AnyJsBindingDeclaration::JsImportDefaultClause(_)
         | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
         | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-            Some(SuggestedFix::NoSuggestion)
-        }
-
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
         // exports with binding are ok to be unused
-        AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
             Some(SuggestedFix::NoSuggestion)
@@ -236,16 +214,20 @@ impl Rule for NoUnusedVariables {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        if ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file()
+        {
+            // Ignore TypeScript declaration files
+            // This allows ignoring declaration files without any `export`
+            // that implicitly export their members.
+            return None;
+        }
+
         let binding = ctx.query();
-
-        let name = match binding {
-            AnyJsIdentifierBinding::JsIdentifierBinding(binding) => binding.name_token().ok()?,
-            AnyJsIdentifierBinding::TsIdentifierBinding(binding) => binding.name_token().ok()?,
-            AnyJsIdentifierBinding::TsTypeParameterName(binding) => binding.ident_token().ok()?,
-        };
-
-        let name = name.token_text_trimmed();
-        let name = name.text();
+        let name = binding.name_token().ok()?;
+        let name = name.text_trimmed();
 
         // Old code import React but do not used directly
         // only indirectly after transpiling JSX.
@@ -269,50 +251,64 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        let all_references = binding.all_references(model);
-        if all_references.count() == 0 {
-            Some(suggestion)
-        } else {
-            // We need to check if all uses of this binding are somehow recursive
-
-            let function_declaration_scope = binding
-                .parent::<JsFunctionDeclaration>()
-                .map(|declaration| declaration.scope(model));
-
-            let declarator = binding.parent::<JsVariableDeclarator>();
-
-            let mut references_outside = 0;
-            for r in binding.all_references(model) {
-                let reference_scope = r.scope();
-
-                // If this binding is a function, and all its references are "inside" this
-                // function, we can safely say that this function is not used
-                if function_declaration_scope
-                    .as_ref()
-                    .map(|s| s.is_ancestor_of(&reference_scope))
-                    .unwrap_or(false)
-                {
-                    continue;
-                }
-
-                // Another possibility is if all its references are "inside" the same declaration
-                if let Some(declarator) = declarator.as_ref() {
-                    let node = declarator.syntax();
-                    if r.syntax().ancestors().any(|n| n == *node) {
-                        continue;
+        // We need to check if all uses of this binding are somehow recursive or unused
+        let declaration = binding.declaration()?;
+        let declaration = declaration.syntax();
+        binding
+            .all_references(model)
+            .filter_map(|reference| {
+                let ref_parent = reference.syntax().parent()?;
+                if reference.is_write() {
+                    // Skip self assignment such as `a += 1` and `a++`.
+                    // Ensure that the assignment is not used in an used expression.
+                    let is_statement_like = ref_parent
+                        .ancestors()
+                        .find(|x| {
+                            JsAssignmentExpression::can_cast(x.kind())
+                                || JsPostUpdateExpression::can_cast(x.kind())
+                                || JsPreUpdateExpression::can_cast(x.kind())
+                        })
+                        .and_then(|x| is_unused_expression(&x).ok())
+                        .unwrap_or(false);
+                    if is_statement_like {
+                        return None;
                     }
+                } else if JsIdentifierExpression::can_cast(ref_parent.kind())
+                    && is_unused_expression(&ref_parent).ok()?
+                {
+                    // The reference is in an unused expression
+                    return None;
                 }
-
-                references_outside += 1;
-                break;
-            }
-
-            if references_outside == 0 {
-                Some(suggestion)
-            } else {
-                None
-            }
-        }
+                Some(ref_parent)
+            })
+            .all(|ref_parent| {
+                let mut is_unused = true;
+                for ref ancestor in ref_parent.ancestors() {
+                    if ancestor == declaration {
+                        // inside the declaration
+                        return is_unused;
+                    }
+                    match ancestor.kind() {
+                            JsSyntaxKind::JS_FUNCTION_BODY => {
+                                // reset because we are inside a function
+                                is_unused = true;
+                            }
+                            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                            | JsSyntaxKind::JS_CALL_EXPRESSION
+                            | JsSyntaxKind::JS_NEW_EXPRESSION
+                            // These can call a getter
+                            | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                            | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                                // The ref can be leaked or code can be executed
+                                is_unused = false;
+                            }
+                            _ => {}
+                        }
+                }
+                // Always false when teh ref is outside the declaration
+                false
+            })
+            .then_some(suggestion)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -376,4 +372,36 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if `expr` is unused.
+fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
+    debug_assert!(AnyJsExpression::can_cast(expr.kind()));
+    // We use range as a way to identify nodes without owning them.
+    let mut previous = expr.text_trimmed_range();
+    for parent in expr.ancestors().skip(1) {
+        if JsExpressionStatement::can_cast(parent.kind()) {
+            return Ok(true);
+        }
+        if JsParenthesizedExpression::can_cast(parent.kind()) {
+            previous = parent.text_trimmed_range();
+            continue;
+        }
+        if let Some(seq_expr) = JsSequenceExpression::cast_ref(&parent) {
+            // If the expression is not the righmost node in a comma sequence
+            if seq_expr.left()?.range() == previous {
+                return Ok(true);
+            }
+            previous = seq_expr.range();
+            continue;
+        }
+        if let Some(for_stmt) = JsForStatement::cast(parent) {
+            if let Some(for_test) = for_stmt.test() {
+                return Ok(for_test.range() != previous);
+            }
+            return Ok(true);
+        }
+        break;
+    }
+    Ok(false)
 }

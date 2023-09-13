@@ -18,3 +18,34 @@ class C {
 	constructor(private a, public b, protected c, readonly d) {}
 }
 console.log(new C(1, 2, 3, 4));
+
+export let Outside;
+class D {
+    static {
+        Outside = D;
+    }
+}
+
+class D {
+    static {
+        new D();
+    }
+
+    constructor() { console.log("Built") }
+}
+
+class D {
+    static {
+        D.p;
+    }
+
+    static get p() { console.log("access"); return; }
+}
+
+class D {
+    static {
+        D["p"];
+    }
+
+    static get p() { console.log("access"); return; }
+}

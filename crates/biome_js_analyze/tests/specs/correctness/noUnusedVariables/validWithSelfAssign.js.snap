@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validWithSelfAssign.js
+---
+# Input
+```js
+let a = 1;
+
+(a += 1);
+export const e = (0, a++)
+
+```
+
+
