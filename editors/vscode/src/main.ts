@@ -243,14 +243,6 @@ async function getWorkspaceRelativePath(path: string) {
 async function getWorkspaceDependency(
 	outputChannel: OutputChannel,
 ): Promise<string | undefined> {
-	const packageName = PLATFORMS[process.platform]?.[process.arch]?.package;
-
-	const manifestName = `${packageName}/package.json`;
-	const binaryName =
-		process.platform === "win32"
-			? `${packageName}/biome.exe`
-			: `${packageName}/biome`;
-
 	for (const workspaceFolder of workspace.workspaceFolders) {
 		const path = Uri.joinPath(
 			workspaceFolder.uri,
