@@ -90,6 +90,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by [@Conaclos](https://github.com/Conaclos)
 
+- Remove [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/).
+
+  Code formatters, such as prettier and Biome, always adds parentheses around the parameter or the body of an arrow function.
+  This makes the rule useless.
+
+  Contributed by [@Conaclos](https://github.com/Conaclos)
+
 #### Bug fixes
 
 - Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining. Contributed by [@denbezrukov](https://github.com/denbezrukov)

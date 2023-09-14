@@ -618,10 +618,6 @@ export interface Nursery {
 	 */
 	noBannedTypes?: RuleConfiguration;
 	/**
-	 * Disallow arrow functions where they could be confused with comparisons.
-	 */
-	noConfusingArrow?: RuleConfiguration;
-	/**
 	 * Disallow void type outside of generic or return types.
 	 */
 	noConfusingVoidType?: RuleConfiguration;
@@ -1260,7 +1256,6 @@ export type Category =
 	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noAriaUnsupportedElements"
 	| "lint/nursery/noBannedTypes"
-	| "lint/nursery/noConfusingArrow"
 	| "lint/nursery/noConstantCondition"
 	| "lint/nursery/noControlCharactersInRegex"
 	| "lint/nursery/noDuplicateJsonKeys"
