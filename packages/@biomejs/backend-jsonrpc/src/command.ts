@@ -14,16 +14,16 @@ export function getCommand(): string | null {
 
 	const PLATFORMS: PlatformPaths = {
 		win32: {
-			x64: "@biomejs/cli-win32-x64/rome.exe",
-			arm64: "@biomejs/cli-win32-arm64/rome.exe",
+			x64: "@biomejs/cli-win32-x64/biome.exe",
+			arm64: "@biomejs/cli-win32-arm64/biome.exe",
 		},
 		darwin: {
-			x64: "@biomejs/cli-darwin-x64/rome",
-			arm64: "@biomejs/cli-darwin-arm64/rome",
+			x64: "@biomejs/cli-darwin-x64/biome",
+			arm64: "@biomejs/cli-darwin-arm64/biome",
 		},
 		linux: {
-			x64: "@biomejs/cli-linux-x64/rome",
-			arm64: "@biomejs/cli-linux-arm64/rome",
+			x64: "@biomejs/cli-linux-x64/biome",
+			arm64: "@biomejs/cli-linux-arm64/biome",
 		},
 	};
 
