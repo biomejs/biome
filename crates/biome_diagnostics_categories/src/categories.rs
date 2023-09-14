@@ -84,7 +84,6 @@ define_categories! {
     "lint/nursery/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/nursery/noAriaUnsupportedElements": "https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
     "lint/nursery/noBannedTypes": "https://biomejs.dev/linter/rules/no-banned-types",
-    "lint/nursery/noConfusingArrow": "https://biomejs.dev/linter/rules/no-confusing-arrow",
     "lint/nursery/noConstantCondition": "https://biomejs.dev/linter/rules/no-constant-condition",
     "lint/nursery/noControlCharactersInRegex": "https://biomejs.dev/linter/rules/no-control-characters-in-regex",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",

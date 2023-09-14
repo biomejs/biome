@@ -909,13 +909,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noConfusingArrow": {
-					"description": "Disallow arrow functions where they could be confused with comparisons.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConfusingVoidType": {
 					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
