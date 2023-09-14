@@ -344,18 +344,11 @@ When adding new features, the documentation should be part of a new PR, which wi
 
 ### Analyzers and lint rules
 
-To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal
-documentation page](https://rustdocs.rome.tools/biome_analyze/index.html)
-
-### JavaScript Parser
-
-To know the technical details of how our JavaScript works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/biome_js_parser/index.html)
+To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [contribution page](https://github.com/biomejs/biome/blob/main/crates/biome_analyze/CONTRIBUTING.md)
 
 ### Formatter
 
-To know the technical details of how our formatter works and how to write test, please check our [internal
-documentation page](https://rustdocs.rome.tools/biome_js_formatter/index.html)
+To know the technical details of how our formatter works and how to write test, please check our [contribution page](https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/CONTRIBUTING.md)
 
 ### Versioning
 
