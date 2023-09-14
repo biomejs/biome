@@ -135,7 +135,7 @@
 	"license": "MIT",
 	"scripts": {
 		"compile": "esbuild src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node14",
-		"watch": "pnpm run compile -- --sourcemap --watch",
+		"watch": "pnpm run compile --sourcemap --watch",
 		"package": "vsce package --no-dependencies -o biome_lsp.vsix",
 		"build": "pnpm run compile --minify && pnpm run package",
 		"install-extension": "code --install-extension biome_lsp.vsix --force",
