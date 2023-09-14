@@ -363,6 +363,7 @@ async function getSocket(
 ): Promise<string> {
 	const process = spawn(command, ["__print_socket"], {
 		stdio: [null, "pipe", "pipe"],
+		shell: true,
 	});
 
 	const stdout = { content: "" };
