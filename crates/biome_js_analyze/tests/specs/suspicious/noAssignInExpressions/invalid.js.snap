@@ -114,7 +114,7 @@ invalid.js:3:3 lint/suspicious/noAssignInExpressions ━━━━━━━━━
 ```
 
 ```
-invalid.js:8:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -128,15 +128,11 @@ invalid.js:8:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    8 │ → a·=·(b·/*before*/·===·/*after*/·1)·+·1;
-      │                      ++                  
 
 ```
 
 ```
-invalid.js:13:8 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:8 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -150,15 +146,11 @@ invalid.js:13:8 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    13 │ → a·=·((b·===·1),·a);
-       │            ++        
 
 ```
 
 ```
-invalid.js:18:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -172,15 +164,11 @@ invalid.js:18:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    18 │ → a·=·(b·===·1,·b·=·2);
-       │           ++           
 
 ```
 
 ```
-invalid.js:18:14 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:14 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -194,15 +182,11 @@ invalid.js:18:14 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    18 │ → a·=·(b·=·1,·b·===·2);
-       │                  ++    
 
 ```
 
 ```
-invalid.js:23:17 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:17 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -216,15 +200,11 @@ invalid.js:23:17 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    23 │ → a·=·(class·{},·b·===·2,·function()·{});
-       │                     ++                   
 
 ```
 
 ```
-invalid.js:28:13 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:13 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -238,15 +218,11 @@ invalid.js:28:13 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    28 │ → const·b·=·(a·===·0)·?·1·:·0;
-       │                 ++            
 
 ```
 
 ```
-invalid.js:33:18 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:18 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -260,15 +236,11 @@ invalid.js:33:18 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    33 │ → const·c·=·a·&&·(b·===·0)·?·1·:·0;
-       │                      ++            
 
 ```
 
 ```
-invalid.js:37:10 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:10 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -281,15 +253,11 @@ invalid.js:37:10 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    37 │ → return·(a·===·5·+·1);
-       │              ++        
 
 ```
 
 ```
-invalid.js:40:5 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:5 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -303,15 +271,11 @@ invalid.js:40:5 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    40 │ if·(a·===·0)·{
-       │        ++     
 
 ```
 
 ```
-invalid.js:43:11 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:11 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -325,10 +289,6 @@ invalid.js:43:11 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    43 │ if·(a·||·(a·===·b))·{
-       │              ++      
 
 ```
 
@@ -351,7 +311,7 @@ invalid.js:46:5 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 
 ```
-invalid.js:49:9 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:9 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -365,10 +325,6 @@ invalid.js:49:9 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    49 │ while·((a·===·0))·{}
-       │            ++       
 
 ```
 
@@ -391,7 +347,7 @@ invalid.js:51:8 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 
 ```
-invalid.js:53:15 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:15 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -405,10 +361,6 @@ invalid.js:53:15 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    53 │ do·{}·while·((a·===·a·+·1));
-       │                  ++         
 
 ```
 
@@ -431,7 +383,7 @@ invalid.js:55:16 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 
 ```
-invalid.js:57:16 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:57:16 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -445,15 +397,11 @@ invalid.js:57:16 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    57 │ do·{}·while·(((a·===·a·+·1),·a));
-       │                   ++             
 
 ```
 
 ```
-invalid.js:59:20 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:59:20 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -467,15 +415,11 @@ invalid.js:59:20 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    59 │ do·{}·while·(a·||·(a·===·b));
-       │                       ++     
 
 ```
 
 ```
-invalid.js:61:18 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:18 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -489,10 +433,6 @@ invalid.js:61:18 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    61 │ for·(let·a·=·5;·(a·===·0);·i--)·{}
-       │                     ++            
 
 ```
 
@@ -515,7 +455,7 @@ invalid.js:63:18 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 
 ```
-invalid.js:65:41 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:65:41 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -529,15 +469,11 @@ invalid.js:65:41 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    65 │ for·(let·l;·typeof·l·===·"undefined"·?·(l·===·0)·:·l;·i++)·{}
-       │                                            ++                
 
 ```
 
 ```
-invalid.js:67:9 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:67:9 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -551,15 +487,11 @@ invalid.js:67:9 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    67 │ for·(;·(a·===·y);·)·{}
-       │            ++         
 
 ```
 
 ```
-invalid.js:69:15 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:69:15 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -573,15 +505,11 @@ invalid.js:69:15 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    69 │ for·(let·a·=·(b·===·1);·a·<·5;·)·{}
-       │                  ++                
 
 ```
 
 ```
-invalid.js:72:8 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:72:8 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -594,15 +522,11 @@ invalid.js:72:8 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    72 │ → case·(a·===·b):
-       │            ++    
 
 ```
 
 ```
-invalid.js:77:14 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:77:14 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -615,15 +539,11 @@ invalid.js:77:14 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    77 │ → case·baz·+·(a·===·b):
-       │                  ++    
 
 ```
 
 ```
-invalid.js:81:2 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:81:2 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -637,15 +557,11 @@ invalid.js:81:2 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    81 │ ((3496.29/*1*/)/*2*/.bkufyydt/*3*/·===·/*4*/2e308/*5*/)/*6*/·?·foo·:·bar;
-       │                                     ++                                   
 
 ```
 
 ```
-invalid.js:83:32 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:83:32 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -658,15 +574,11 @@ invalid.js:83:32 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    83 │ res.onAborted(()·=>·/*0*/(/*1*/(/*2*/a/*3*/./*4*/b/*5*/)/*6*/·/*7*/·===·/*8*/·/*9*/true/*10*/));
-       │                                                                      ++                         
 
 ```
 
 ```
-invalid.js:86:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:86:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -678,15 +590,11 @@ invalid.js:86:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    86 │ (/*1*/[/*2*/a/*3*/,/*4*/b/*5*/,·/*6*/c/*7*/]/*8*//*9*/===/*10*/·2e308)·?·foo·:·bar;
-       │                                                        ++                          
 
 ```
 
 ```
-invalid.js:87:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:87:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assignment should not be in an expression.
   
@@ -698,10 +606,6 @@ invalid.js:87:7 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    87 │ (/*1*/{/*2*/a/*3*/,/*4*/b/*5*/,·/*6*/c/*7*/}/*8*//*9*/===/*10*/·2e308)·?·foo·:·bar;
-       │                                                        ++                          
 
 ```
 

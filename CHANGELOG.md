@@ -56,6 +56,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause/) now relies on control flow analysis to report most of switch clause fallthrough. Contributed by [@Conaclos](https://github.com/Conaclos)
 
+- [noAssignInExpressions](https://biomejs.dev/linter/rules/no-assign-in-expressions/) no longer suggest code fixes. Most of the time the suggestion didn't match users' expectations. Contributed by [@Conaclos](https://github.com/Conaclos)
+
 - [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) no longer emits safe code fixes. Contributed by [@Conaclos](https://github.com/Conaclos)
 
   All code fixes are now emitted as unsafe code fixes.

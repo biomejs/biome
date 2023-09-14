@@ -22,7 +22,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:4 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:4 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The assignment should not be in an expression.
   
@@ -32,10 +32,6 @@ check.js:1:4 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━�
   i The use of assignments in expressions is confusing.
     Expressions are often considered as side-effect free.
   
-  i Suggested fix: Did you mean '==='?
-  
-    1 │ if(a·===·b)·{}
-      │       ++      
 
 ```
 
