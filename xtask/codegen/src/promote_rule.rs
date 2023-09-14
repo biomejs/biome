@@ -56,10 +56,23 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
         let categories = std::fs::read_to_string(categories_path).unwrap();
 
-        let categories = categories.replace(
+        let mut categories = categories.replace(
             &format!("lint/nursery/{}", rule_name),
             &format!("lint/{}/{}", new_group, rule_name),
         );
+
+        // We sort rules to reduce conflicts between contributions made in parallel.
+        let lint_start = "define_categories! {\n";
+        let lint_end = "\n    ;\n";
+        debug_assert!(categories.contains(lint_start));
+        debug_assert!(categories.contains(lint_end));
+        let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
+        let lint_end_index = categories.find(lint_end).unwrap();
+        let lint_rule_text = &categories[lint_start_index..lint_end_index];
+        let mut lint_rules: Vec<_> = lint_rule_text.lines().collect();
+        lint_rules.sort();
+        let new_lint_rule_text = lint_rules.join("\n");
+        categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
 
         move_file(rule_path, new_rule_path, &file::CopyOptions::default()).unwrap();
         std::fs::write(categories_path, categories).unwrap();

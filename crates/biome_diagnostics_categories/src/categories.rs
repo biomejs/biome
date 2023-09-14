@@ -7,9 +7,12 @@
 // associated hyperlink, then a list of string literals defining the remaining
 // categories without a link.
 
+// PLEASE, DON'T EDIT THIS FILE BY HAND.
+// Use `just new-lintrule` to create a new rule.
+// lint rules are lexicographically sorted and
+// must be between `define_categories! {\n` and `\n    ;\n`.
+
 define_categories! {
-    // Lint categories
-    // a11y
     "lint/a11y/noAccessKey": "https://biomejs.dev/linter/rules/no-access-key",
     "lint/a11y/noAutofocus": "https://biomejs.dev/linter/rules/no-autofocus",
     "lint/a11y/noBlankTarget": "https://biomejs.dev/linter/rules/no-blank-target",
@@ -32,8 +35,6 @@ define_categories! {
     "lint/a11y/useValidAnchor": "https://biomejs.dev/linter/rules/use-valid-anchor",
     "lint/a11y/useValidAriaProps": "https://biomejs.dev/linter/rules/use-valid-aria-props",
     "lint/a11y/useValidLang": "https://biomejs.dev/linter/rules/use-valid-lang",
-
-    // complexity
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
     "lint/complexity/noMultipleSpacesInRegularExpressionLiterals": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals",
@@ -50,8 +51,6 @@ define_categories! {
     "lint/complexity/useOptionalChain": "https://biomejs.dev/linter/rules/use-optional-chain",
     "lint/complexity/useSimpleNumberKeys": "https://biomejs.dev/linter/rules/use-simple-number-keys",
     "lint/complexity/useSimplifiedLogicExpression": "https://biomejs.dev/linter/rules/use-simplified-logic-expression",
-
-    // correctness
     "lint/correctness/noChildrenProp": "https://biomejs.dev/linter/rules/no-children-prop",
     "lint/correctness/noConstAssign": "https://biomejs.dev/linter/rules/no-const-assign",
     "lint/correctness/noConstructorReturn": "https://biomejs.dev/linter/rules/no-constructor-return",
@@ -59,7 +58,6 @@ define_categories! {
     "lint/correctness/noGlobalObjectCalls": "https://biomejs.dev/linter/rules/no-global-object-calls",
     "lint/correctness/noInnerDeclarations": "https://biomejs.dev/linter/rules/no-inner-declarations",
     "lint/correctness/noInvalidConstructorSuper": "https://biomejs.dev/linter/rules/no-invalid-constructor-super",
-    "lint/correctness/useIsNan": "https://biomejs.dev/linter/rules/use-is-nan",
     "lint/correctness/noNewSymbol": "https://biomejs.dev/linter/rules/no-new-symbol",
     "lint/correctness/noPrecisionLoss": "https://biomejs.dev/linter/rules/no-precision-loss",
     "lint/correctness/noRenderReturnValue": "https://biomejs.dev/linter/rules/no-render-return-value",
@@ -76,14 +74,13 @@ define_categories! {
     "lint/correctness/noUnusedVariables": "https://biomejs.dev/linter/rules/no-unused-variables",
     "lint/correctness/noVoidElementsWithChildren": "https://biomejs.dev/linter/rules/no-void-elements-with-children",
     "lint/correctness/noVoidTypeReturn": "https://biomejs.dev/linter/rules/no-void-type-return",
+    "lint/correctness/useIsNan": "https://biomejs.dev/linter/rules/use-is-nan",
     "lint/correctness/useValidForDirection": "https://biomejs.dev/linter/rules/use-valid-for-direction",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
-
-    // nursery
-    "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/nursery/noAriaUnsupportedElements": "https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
     "lint/nursery/noBannedTypes": "https://biomejs.dev/linter/rules/no-banned-types",
+    "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noConstantCondition": "https://biomejs.dev/linter/rules/no-constant-condition",
     "lint/nursery/noControlCharactersInRegex": "https://biomejs.dev/linter/rules/no-control-characters-in-regex",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
@@ -112,16 +109,9 @@ define_categories! {
     "lint/nursery/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/nursery/useLiteralEnumMembers": "https://biomejs.dev/linter/rules/use-literal-enum-members",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
-    // nursery end
-
-    // performance
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
-
-    // security
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
     "lint/security/noDangerouslySetInnerHtmlWithChildren": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children",
-
-    // style
     "lint/style/noArguments": "https://biomejs.dev/linter/rules/no-arguments",
     "lint/style/noCommaOperator": "https://biomejs.dev/linter/rules/no-comma-operator",
     "lint/style/noImplicitBoolean": "https://biomejs.dev/linter/rules/no-implicit-boolean",
@@ -148,8 +138,6 @@ define_categories! {
     "lint/style/useSingleVarDeclarator": "https://biomejs.dev/linter/rules/use-single-var-declarator",
     "lint/style/useTemplate": "https://biomejs.dev/linter/rules/use-template",
     "lint/style/useWhile": "https://biomejs.dev/linter/rules/use-while",
-
-    // suspicious
     "lint/suspicious/noArrayIndexKey": "https://biomejs.dev/linter/rules/no-array-index-key",
     "lint/suspicious/noAssignInExpressions": "https://biomejs.dev/linter/rules/no-assign-in-expressions",
     "lint/suspicious/noAsyncPromiseExecutor": "https://biomejs.dev/linter/rules/no-async-promise-executor",
@@ -183,9 +171,7 @@ define_categories! {
     "lint/suspicious/useDefaultSwitchClauseLast": "https://biomejs.dev/linter/rules/use-default-switch-clause-last",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
-
     ;
-
     // General categories
     "files/missingHandler",
     "format",
