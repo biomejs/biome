@@ -265,7 +265,7 @@ async function getWorkspaceDependency(
 	}
 
 	window.showWarningMessage(
-		"Unable to resolve the biome server from your dependencies.",
+		"Unable to resolve the biome server from your dependencies. Make sure it's correctly installed, or untick the `requireConfiguration` setting to use the bundled binary.",
 	);
 
 	return undefined;
