@@ -75,7 +75,7 @@ The following rules are promoted:
 
 #### New rules
 
-- Add [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) rule. The rule reports the unusual use of the `void` type. Contributed by [@shulandmimi](https://github.com/shulandmimi)
+- Add [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) rule. The rule reports the unusual use of the `void` type. Contributed by @shulandmimi
 
 #### Removed rules
 
@@ -84,20 +84,20 @@ The following rules are promoted:
   Code formatters, such as prettier and Biome, always adds parentheses around the parameter or the body of an arrow function.
   This makes the rule useless.
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 #### Enhancements
 
-- [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause/) now relies on control flow analysis to report most of switch clause fallthrough. Contributed by [@Conaclos](https://github.com/Conaclos)
+- [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause/) now relies on control flow analysis to report most of switch clause fallthrough. Contributed by @Conaclos
 
-- [noAssignInExpressions](https://biomejs.dev/linter/rules/no-assign-in-expressions/) no longer suggest code fixes. Most of the time the suggestion didn't match users' expectations. Contributed by [@Conaclos](https://github.com/Conaclos)
+- [noAssignInExpressions](https://biomejs.dev/linter/rules/no-assign-in-expressions/) no longer suggest code fixes. Most of the time the suggestion didn't match users' expectations. Contributed by @Conaclos
 
-- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) no longer emits safe code fixes. Contributed by [@Conaclos](https://github.com/Conaclos)
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) no longer emits safe code fixes. Contributed by @Conaclos
 
   All code fixes are now emitted as unsafe code fixes.
   Removing a constructor can change the behavior of a program.
 
-- [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) now only provides safe code fixes. Contributed by [@Conaclos](https://github.com/Conaclos)
+- [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) now only provides safe code fixes. Contributed by @Conaclos
 
 - [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) now reports more cases.
 
@@ -122,13 +122,13 @@ The following rules are promoted:
   Finally, the rule now ignores all _TypeScript_ declaration files,
   including [global declaration files](https://www.typescriptlang.org/docs/handbook/declaration-files/templates/global-d-ts.html).
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 #### Bug fixes
 
-- Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining. Contributed by [@denbezrukov](https://github.com/denbezrukov)
+- Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining. Contributed by @denbezrukov
 
-- Fix [#168](https://github.com/biomejs/biome/issues/168), fix [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) false positive case when stable hook is on a new line. Contributed by [@denbezrukov](https://github.com/denbezrukov)
+- Fix [#168](https://github.com/biomejs/biome/issues/168), fix [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) false positive case when stable hook is on a new line. Contributed by @denbezrukov
 
 - Fix [#137](https://github.com/biomejs/biome/issues/137), fix [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) false positive case with TypeScript module declaration:
 
@@ -141,10 +141,10 @@ The following rules are promoted:
       const src: string;
   }
   ```
-  Contributed by [@denbezrukov](https://github.com/denbezrukov)
+  Contributed by @denbezrukov
 
-- Fix [#258](https://github.com/biomejs/biome/issues/258), fix [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) the case where the rule removing an assignment. Contributed by [@denbezrukov](https://github.com/denbezrukov)
-- Fix [#266](https://github.com/biomejs/biome/issues/266), where `complexity/useLiteralKeys` emitted a code action with an invalid AST. Contributed by [@ematipico](https://github.com/ematipico)
+- Fix [#258](https://github.com/biomejs/biome/issues/258), fix [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) the case where the rule removing an assignment. Contributed by @denbezrukov
+- Fix [#266](https://github.com/biomejs/biome/issues/266), where `complexity/useLiteralKeys` emitted a code action with an invalid AST. Contributed by @ematipico
 
 
 - Fix [#105](https://github.com/biomejs/biome/issues/105), removing false positives reported by [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/).
@@ -155,7 +155,7 @@ The following rules are promoted:
   const a = f(() => a);
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 ### VSCode
 
@@ -172,7 +172,7 @@ The following rules are promoted:
 
 #### Bug fixes
 
-- Fix a case where an empty JSON file would cause the LSP server to crash. Contributed by [@ematipico](https://github.com/ematipico)
+- Fix a case where an empty JSON file would cause the LSP server to crash. Contributed by @ematipico
 
 ### Linter
 
@@ -192,9 +192,9 @@ The following rules are promoted:
   export * as MY_NAMESPACE from "./lib.js";
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
-- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters. The rule now gives suggestions instead of safe fixes when parameters are annotated with types. Contributed by [@Conaclos](https://github.com/Conaclos)
+- [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) now ignores decorated classes and decorated parameters. The rule now gives suggestions instead of safe fixes when parameters are annotated with types. Contributed by @Conaclos
 
 ## 1.1.1 (2023-09-07)
 
@@ -202,7 +202,7 @@ The following rules are promoted:
 
 #### Bug fixes
 
-- The diagnostic for `// rome-ignore` suppression comment should not be a warning. A warning could block the CI, marking a gradual migration difficult. The code action that changes `// rome-ignore` to `// biome-ignore` is disabled as consequence. Contributed by [@ematipico](https://github.com/ematipico).
+- The diagnostic for `// rome-ignore` suppression comment should not be a warning. A warning could block the CI, marking a gradual migration difficult. The code action that changes `// rome-ignore` to `// biome-ignore` is disabled as consequence. Contributed by @ematipico
 
 ## 1.1.0 (2023-09-06)
 
@@ -210,7 +210,7 @@ The following rules are promoted:
 
 #### Enhancements
 
-- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `biome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action. Contributed by [@ematipico](https://github.com/ematipico)
+- Add a code action to replace `rome-ignore` with `biome-ignore`. Use `biome check --apply-unsafe` to update all the comments. The action is not bulletproof, and it might generate unwanted code, that's why it's unsafe action. Contributed by @ematipico
 
 
 ### CLI
@@ -218,12 +218,12 @@ The following rules are promoted:
 #### Enhancements
 
 - Biome now reports a diagnostics when a `rome.json` file is found.
-- `biome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file. Contributed by [@ematipico](https://github.com/ematipico)
+- `biome migrate --write` creates `biome.json` from `rome.json`, but it won't delete the `rome.json` file. Contributed by @ematipico
 
 #### Bug fixes
 
 - Biome uses `biome.json` first, then it attempts to use `rome.json`.
-- Fix a case where Biome couldn't compute correctly the ignored files when the VSC integration is enabled. Contributed by [@ematipico](https://github.com/ematipico)
+- Fix a case where Biome couldn't compute correctly the ignored files when the VSC integration is enabled. Contributed by @ematipico
 
 ### Configuration
 ### Editors
@@ -244,7 +244,7 @@ The following rules are promoted:
 
 #### New features
 
-- Add [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) rule. This new rule requires merging an `else` and an `if`, if the `if` statement is the only statement in the `else` block. Contributed by [@n-gude](https://github.com/n-gude)
+- Add [useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if/) rule. This new rule requires merging an `else` and an `if`, if the `if` statement is the only statement in the `else` block. Contributed by @n-gude
 
 #### Enhancements
 
@@ -267,7 +267,7 @@ The following rules are promoted:
   + `\`${v}\``;
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator/) suggests better code fixes.
 
@@ -281,7 +281,7 @@ The following rules are promoted:
   + (a++) ** /**/ (2)
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - You can use `// biome-ignore` as suppression comment.
 
@@ -298,7 +298,7 @@ The following rules are promoted:
   <TextField inputLabelProps="" InputLabelProps=""></TextField>
   ```
 
-   Contributed by [@Conaclos](https://github.com/Conaclos)
+   Contributed by @Conaclos
 
 - Fix [#138](https://github.com/biomejs/biome/issues/138)
 
@@ -313,7 +313,7 @@ The following rules are promoted:
   ) {}
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - Fix [rome#4713](https://github.com/rome/tools/issues/4713).
 
@@ -333,7 +333,7 @@ The following rules are promoted:
   + `${a + b}px`
    ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - Fix [rome#4109](https://github.com/rome/tools/issues/4109)
 
@@ -356,7 +356,7 @@ The following rules are promoted:
 
   As a sideeffect, the rule also suggests the removal of any inner comments.
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - Fix [rome#3850](https://github.com/rome/tools/issues/3850)
 
@@ -374,19 +374,19 @@ The following rules are promoted:
   + 1 +(++a) ** 2
   ```
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - Fix [#106](https://github.com/biomejs/biome/issues/106)
 
   [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now correctly recognizes some TypeScript types such as `Uppercase`.
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 - Fix [rome#4616](https://github.com/rome/tools/issues/4616)
 
   Previously [noUnreachableSuper](https://biomejs.dev/linter/rules/no-unreacheable-super/) reported valid codes with complex nesting of control flow structures.
 
-  Contributed by [@Conaclos](https://github.com/Conaclos)
+  Contributed by @Conaclos
 
 ## 1.0.0 (2023-08-28)
 
