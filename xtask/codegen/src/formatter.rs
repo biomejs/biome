@@ -484,6 +484,7 @@ impl BoilerplateImpls {
                 type Format<'a> = FormatRefWithRule<'a, #syntax_crate_ident::#node_id, #format_id>;
 
                 fn format(&self) -> Self::Format<'_> {
+                    #![allow(clippy::default_constructed_unit_structs)]
                     FormatRefWithRule::new(self, #format_id::default())
                 }
             }
@@ -492,6 +493,7 @@ impl BoilerplateImpls {
                 type Format = FormatOwnedWithRule<#syntax_crate_ident::#node_id, #format_id>;
 
                 fn into_format(self) -> Self::Format {
+                    #![allow(clippy::default_constructed_unit_structs)]
                     FormatOwnedWithRule::new(self, #format_id::default())
                 }
             }
@@ -505,8 +507,8 @@ impl BoilerplateImpls {
         let formatter_context_ident = self.language.format_context_ident();
 
         let tokens = quote! {
-            use biome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
             use crate::{AsFormat, IntoFormat, FormatNodeRule, FormatBogusNodeRule, #formatter_ident, #formatter_context_ident};
+            use biome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
 
             #( #impls )*
         };
