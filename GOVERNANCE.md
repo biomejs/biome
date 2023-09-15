@@ -73,7 +73,6 @@ When nominating a new maintainer, the person has to create a new thread in the `
 The voting period will follow the [voting rules](#voting-rules). An individual becomes a [maintainer](#maintainer) if:
 - reaches more than 50% of positive votes among the people who have voting rights;
 - if the voting session ends with 50%, the Lead maintainers will take the decision;
--
 
 A maintainer can be self-nominated. They will have to message a [lead maintainer](#lead) privately with links to their contributions to the project. Then, the lead can:
 - reject the nomination in place, provide reasons why and possibly some suggestions for the future;
