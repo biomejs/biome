@@ -93,7 +93,7 @@ impl Rule for {rule_name_upper_camel} {{
     std::fs::write(file_name, code).unwrap();
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
-    let categories = std::fs::read_to_string(categories_path).unwrap();
+    let mut categories = std::fs::read_to_string(categories_path).unwrap();
 
     if !categories.contains(&rule_name_lower_camel) {
         let kebab_case_rule = rule_name_lower_camel.to_case(Case::Kebab);
@@ -101,23 +101,17 @@ impl Rule for {rule_name_upper_camel} {{
         let rule_line = format!(
             r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/lint/rules/{kebab_case_rule}","#
         );
-        let nursery_start = "    // nursery\n";
-        let nursery_end = "\n    // nursery end";
-        debug_assert!(categories.contains(nursery_start));
-        debug_assert!(categories.contains(nursery_end));
-        let nursery_start_index = categories.find(nursery_start).unwrap() + nursery_start.len();
-        let nursery_end_index = categories.find(nursery_end).unwrap();
-        let nursery_category = &categories[nursery_start_index..nursery_end_index];
-        let mut nursery_rules: Vec<&str> = nursery_category
-            .split('\n')
-            .chain(Some(&rule_line[..]))
-            .collect();
-        nursery_rules.sort();
-        let new_nursery_category = nursery_rules.join("\n");
-
-        let categories = categories.replace(nursery_category, &new_nursery_category);
-        debug_assert!(categories.contains(&rule_name_lower_camel));
-
+        let lint_start = "define_categories! {\n";
+        let lint_end = "\n    ;\n";
+        debug_assert!(categories.contains(lint_start));
+        debug_assert!(categories.contains(lint_end));
+        let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
+        let lint_end_index = categories.find(lint_end).unwrap();
+        let lint_rule_text = &categories[lint_start_index..lint_end_index];
+        let mut lint_rules: Vec<_> = lint_rule_text.lines().chain(Some(&rule_line[..])).collect();
+        lint_rules.sort();
+        let new_lint_rule_text = lint_rules.join("\n");
+        categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
         std::fs::write(categories_path, categories).unwrap();
     }
 
