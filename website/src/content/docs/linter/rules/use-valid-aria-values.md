@@ -1,5 +1,5 @@
 ---
-title: useAriaPropTypes (since v1.0.0)
+title: useValidAriaValues (since v1.0.0)
 ---
 
 
@@ -17,7 +17,7 @@ Enforce that ARIA state and property values are valid.
 <span role="checkbox" aria-checked="test">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:23 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaValues.js:1:23 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useValidAriaValues</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-checked</strong></span><span style="color: Tomato;"> is not correct.</span>
   
@@ -37,7 +37,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-labelledby="">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaValues.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useValidAriaValues</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-labelledby</strong></span><span style="color: Tomato;"> is not correct.</span>
   
@@ -53,7 +53,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-valuemax="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaValues.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useValidAriaValues</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-valuemax</strong></span><span style="color: Tomato;"> is not correct.</span>
   
@@ -69,7 +69,7 @@ Enforce that ARIA state and property values are valid.
 <span aria-orientation="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaValues.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useValidAriaValues</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-orientation</strong></span><span style="color: Tomato;"> is not correct.</span>
   

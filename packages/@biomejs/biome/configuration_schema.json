@@ -171,13 +171,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useAriaPropTypes": {
-					"description": "Enforce that ARIA state and property values are valid.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useAriaPropsForRole": {
 					"description": "Enforce that elements with ARIA roles must have all required ARIA attributes for that role.",
 					"anyOf": [
@@ -243,6 +236,13 @@
 				},
 				"useValidAriaProps": {
 					"description": "Ensures that ARIA properties aria-* are all valid.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAriaValues": {
+					"description": "Enforce that ARIA state and property values are valid.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

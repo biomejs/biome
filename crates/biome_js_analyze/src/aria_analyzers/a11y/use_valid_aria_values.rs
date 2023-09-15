@@ -46,23 +46,23 @@ declare_rule! {
     /// ### Resources
     /// - [ARIA Spec, States and Properties](https://www.w3.org/TR/wai-aria/#states_and_properties)
     /// - [Chrome Audit Rules, AX_ARIA_04](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_04)
-    pub(crate) UseAriaPropTypes {
+    pub(crate) UseValidAriaValues {
         version: "1.0.0",
-        name: "useAriaPropTypes",
+        name: "useValidAriaValues",
         recommended: true,
     }
 }
 
-pub(crate) struct UseAriaProptypesState {
+pub(crate) struct UseValidAriaValuesState {
     attribute_value_range: TextRange,
     allowed_values: Iter<'static, &'static str>,
     attribute_name: JsSyntaxToken,
     property_type: AriaPropertyTypeEnum,
 }
 
-impl Rule for UseAriaPropTypes {
+impl Rule for UseValidAriaValues {
     type Query = Aria<JsxAttribute>;
-    type State = UseAriaProptypesState;
+    type State = UseValidAriaValuesState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -77,7 +77,7 @@ impl Rule for UseAriaPropTypes {
             let attribute_static_value = node.as_static_value()?;
             let attribute_text = attribute_static_value.text();
             if !aria_property.contains_correct_value(attribute_text) {
-                return Some(UseAriaProptypesState {
+                return Some(UseValidAriaValuesState {
                     attribute_value_range,
                     allowed_values: aria_property.values(),
                     attribute_name,

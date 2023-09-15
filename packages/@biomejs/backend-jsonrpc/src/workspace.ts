@@ -371,10 +371,6 @@ export interface A11y {
 	 */
 	useAnchorContent?: RuleConfiguration;
 	/**
-	 * Enforce that ARIA state and property values are valid.
-	 */
-	useAriaPropTypes?: RuleConfiguration;
-	/**
 	 * Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 	 */
 	useAriaPropsForRole?: RuleConfiguration;
@@ -414,6 +410,10 @@ export interface A11y {
 	 * Ensures that ARIA properties aria-* are all valid.
 	 */
 	useValidAriaProps?: RuleConfiguration;
+	/**
+	 * Enforce that ARIA state and property values are valid.
+	 */
+	useValidAriaValues?: RuleConfiguration;
 	/**
 	 * Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.
 	 */
@@ -1202,7 +1202,7 @@ export type Category =
 	| "lint/a11y/noSvgWithoutTitle"
 	| "lint/a11y/useAltText"
 	| "lint/a11y/useAnchorContent"
-	| "lint/a11y/useAriaPropTypes"
+	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
 	| "lint/a11y/useHeadingContent"

@@ -131,7 +131,6 @@ impl VisitNode<JsonLanguage> for A11y {
                 "noSvgWithoutTitle",
                 "useAltText",
                 "useAnchorContent",
-                "useAriaPropTypes",
                 "useAriaPropsForRole",
                 "useButtonType",
                 "useHeadingContent",
@@ -142,6 +141,7 @@ impl VisitNode<JsonLanguage> for A11y {
                 "useMediaCaption",
                 "useValidAnchor",
                 "useValidAriaProps",
+                "useValidAriaValues",
                 "useValidLang",
             ],
             diagnostics,
@@ -484,29 +484,6 @@ impl VisitNode<JsonLanguage> for A11y {
                     ));
                 }
             },
-            "useAriaPropTypes" => match value {
-                AnyJsonValue::JsonStringValue(_) => {
-                    let mut configuration = RuleConfiguration::default();
-                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.use_aria_prop_types = Some(configuration);
-                }
-                AnyJsonValue::JsonObjectValue(_) => {
-                    let mut rule_configuration = RuleConfiguration::default();
-                    rule_configuration.map_rule_configuration(
-                        &value,
-                        name_text,
-                        "useAriaPropTypes",
-                        diagnostics,
-                    )?;
-                    self.use_aria_prop_types = Some(rule_configuration);
-                }
-                _ => {
-                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-                        "object or string",
-                        value.range(),
-                    ));
-                }
-            },
             "useAriaPropsForRole" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
@@ -729,6 +706,29 @@ impl VisitNode<JsonLanguage> for A11y {
                         diagnostics,
                     )?;
                     self.use_valid_aria_props = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "useValidAriaValues" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.use_valid_aria_values = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "useValidAriaValues",
+                        diagnostics,
+                    )?;
+                    self.use_valid_aria_values = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
