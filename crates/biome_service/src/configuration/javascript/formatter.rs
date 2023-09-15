@@ -61,6 +61,7 @@ pub struct JavascriptFormatter {
         deserialize_with = "deserialize_line_width",
         serialize_with = "serialize_line_width"
     )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("javascript-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 }

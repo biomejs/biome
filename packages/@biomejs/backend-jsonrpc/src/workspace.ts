@@ -256,15 +256,15 @@ export interface JsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indent_size?: number;
+	indentSize?: number;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
-	indent_style?: PlainIndentStyle;
+	indentStyle?: PlainIndentStyle;
 	/**
 	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
 	 */
-	line_width?: LineWidth;
+	lineWidth?: LineWidth;
 }
 /**
  * Options that changes how the JSON parser behaves
