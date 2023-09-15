@@ -95,7 +95,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
+            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
         )
     }
 }
@@ -108,7 +108,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped::default(),
+            crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
         )
     }
 }
@@ -171,7 +171,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBlockStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::block_statement::FormatJsBlockStatement::default(),
+            crate::js::statements::block_statement::FormatJsBlockStatement,
         )
     }
 }
@@ -184,7 +184,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBlockStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::block_statement::FormatJsBlockStatement::default(),
+            crate::js::statements::block_statement::FormatJsBlockStatement,
         )
     }
 }
@@ -211,7 +211,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBreakStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::break_statement::FormatJsBreakStatement::default(),
+            crate::js::statements::break_statement::FormatJsBreakStatement,
         )
     }
 }
@@ -224,7 +224,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBreakStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::break_statement::FormatJsBreakStatement::default(),
+            crate::js::statements::break_statement::FormatJsBreakStatement,
         )
     }
 }
@@ -251,7 +251,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::declarations::class_declaration::FormatJsClassDeclaration::default(),
+            crate::js::declarations::class_declaration::FormatJsClassDeclaration,
         )
     }
 }
@@ -264,7 +264,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::declarations::class_declaration::FormatJsClassDeclaration::default(),
+            crate::js::declarations::class_declaration::FormatJsClassDeclaration,
         )
     }
 }
@@ -291,7 +291,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsContinueStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::continue_statement::FormatJsContinueStatement::default(),
+            crate::js::statements::continue_statement::FormatJsContinueStatement,
         )
     }
 }
@@ -304,7 +304,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsContinueStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::continue_statement::FormatJsContinueStatement::default(),
+            crate::js::statements::continue_statement::FormatJsContinueStatement,
         )
     }
 }
@@ -331,7 +331,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDebuggerStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::debugger_statement::FormatJsDebuggerStatement::default(),
+            crate::js::statements::debugger_statement::FormatJsDebuggerStatement,
         )
     }
 }
@@ -344,7 +344,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDebuggerStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::debugger_statement::FormatJsDebuggerStatement::default(),
+            crate::js::statements::debugger_statement::FormatJsDebuggerStatement,
         )
     }
 }
@@ -371,7 +371,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDoWhileStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::do_while_statement::FormatJsDoWhileStatement::default(),
+            crate::js::statements::do_while_statement::FormatJsDoWhileStatement,
         )
     }
 }
@@ -384,7 +384,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDoWhileStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::do_while_statement::FormatJsDoWhileStatement::default(),
+            crate::js::statements::do_while_statement::FormatJsDoWhileStatement,
         )
     }
 }
@@ -411,7 +411,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::empty_statement::FormatJsEmptyStatement::default(),
+            crate::js::statements::empty_statement::FormatJsEmptyStatement,
         )
     }
 }
@@ -424,7 +424,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsEmptyStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::empty_statement::FormatJsEmptyStatement::default(),
+            crate::js::statements::empty_statement::FormatJsEmptyStatement,
         )
     }
 }
@@ -451,7 +451,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::expression_statement::FormatJsExpressionStatement::default(),
+            crate::js::statements::expression_statement::FormatJsExpressionStatement,
         )
     }
 }
@@ -464,7 +464,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::expression_statement::FormatJsExpressionStatement::default(),
+            crate::js::statements::expression_statement::FormatJsExpressionStatement,
         )
     }
 }
@@ -491,7 +491,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForInStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::for_in_statement::FormatJsForInStatement::default(),
+            crate::js::statements::for_in_statement::FormatJsForInStatement,
         )
     }
 }
@@ -504,7 +504,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForInStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::for_in_statement::FormatJsForInStatement::default(),
+            crate::js::statements::for_in_statement::FormatJsForInStatement,
         )
     }
 }
@@ -531,7 +531,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForOfStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::for_of_statement::FormatJsForOfStatement::default(),
+            crate::js::statements::for_of_statement::FormatJsForOfStatement,
         )
     }
 }
@@ -544,7 +544,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForOfStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::for_of_statement::FormatJsForOfStatement::default(),
+            crate::js::statements::for_of_statement::FormatJsForOfStatement,
         )
     }
 }
@@ -567,7 +567,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::for_statement::FormatJsForStatement::default(),
+            crate::js::statements::for_statement::FormatJsForStatement,
         )
     }
 }
@@ -580,7 +580,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::for_statement::FormatJsForStatement::default(),
+            crate::js::statements::for_statement::FormatJsForStatement,
         )
     }
 }
@@ -603,7 +603,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIfStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::if_statement::FormatJsIfStatement::default(),
+            crate::js::statements::if_statement::FormatJsIfStatement,
         )
     }
 }
@@ -616,7 +616,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIfStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::if_statement::FormatJsIfStatement::default(),
+            crate::js::statements::if_statement::FormatJsIfStatement,
         )
     }
 }
@@ -643,7 +643,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabeledStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::labeled_statement::FormatJsLabeledStatement::default(),
+            crate::js::statements::labeled_statement::FormatJsLabeledStatement,
         )
     }
 }
@@ -656,7 +656,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLabeledStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::labeled_statement::FormatJsLabeledStatement::default(),
+            crate::js::statements::labeled_statement::FormatJsLabeledStatement,
         )
     }
 }
@@ -683,7 +683,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsReturnStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::return_statement::FormatJsReturnStatement::default(),
+            crate::js::statements::return_statement::FormatJsReturnStatement,
         )
     }
 }
@@ -696,7 +696,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsReturnStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::return_statement::FormatJsReturnStatement::default(),
+            crate::js::statements::return_statement::FormatJsReturnStatement,
         )
     }
 }
@@ -723,7 +723,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::switch_statement::FormatJsSwitchStatement::default(),
+            crate::js::statements::switch_statement::FormatJsSwitchStatement,
         )
     }
 }
@@ -736,7 +736,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSwitchStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::switch_statement::FormatJsSwitchStatement::default(),
+            crate::js::statements::switch_statement::FormatJsSwitchStatement,
         )
     }
 }
@@ -763,7 +763,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsThrowStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::throw_statement::FormatJsThrowStatement::default(),
+            crate::js::statements::throw_statement::FormatJsThrowStatement,
         )
     }
 }
@@ -776,7 +776,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsThrowStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::throw_statement::FormatJsThrowStatement::default(),
+            crate::js::statements::throw_statement::FormatJsThrowStatement,
         )
     }
 }
@@ -803,7 +803,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryFinallyStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement::default(),
+            crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement,
         )
     }
 }
@@ -816,7 +816,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTryFinallyStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement::default(),
+            crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement,
         )
     }
 }
@@ -839,7 +839,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::try_statement::FormatJsTryStatement::default(),
+            crate::js::statements::try_statement::FormatJsTryStatement,
         )
     }
 }
@@ -852,7 +852,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTryStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::try_statement::FormatJsTryStatement::default(),
+            crate::js::statements::try_statement::FormatJsTryStatement,
         )
     }
 }
@@ -879,7 +879,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::variable_statement::FormatJsVariableStatement::default(),
+            crate::js::statements::variable_statement::FormatJsVariableStatement,
         )
     }
 }
@@ -892,7 +892,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::variable_statement::FormatJsVariableStatement::default(),
+            crate::js::statements::variable_statement::FormatJsVariableStatement,
         )
     }
 }
@@ -919,7 +919,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsWhileStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::while_statement::FormatJsWhileStatement::default(),
+            crate::js::statements::while_statement::FormatJsWhileStatement,
         )
     }
 }
@@ -932,7 +932,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsWhileStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::while_statement::FormatJsWhileStatement::default(),
+            crate::js::statements::while_statement::FormatJsWhileStatement,
         )
     }
 }
@@ -959,7 +959,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsWithStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::statements::with_statement::FormatJsWithStatement::default(),
+            crate::js::statements::with_statement::FormatJsWithStatement,
         )
     }
 }
@@ -972,7 +972,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsWithStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::statements::with_statement::FormatJsWithStatement::default(),
+            crate::js::statements::with_statement::FormatJsWithStatement,
         )
     }
 }
@@ -999,7 +999,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::declarations::function_declaration::FormatJsFunctionDeclaration::default(),
+            crate::js::declarations::function_declaration::FormatJsFunctionDeclaration,
         )
     }
 }
@@ -1012,7 +1012,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::declarations::function_declaration::FormatJsFunctionDeclaration::default(),
+            crate::js::declarations::function_declaration::FormatJsFunctionDeclaration,
         )
     }
 }
@@ -1039,7 +1039,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration::default(),
+            crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration,
         )
     }
 }
@@ -1052,7 +1052,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration::default(),
+            crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration,
         )
     }
 }
@@ -1079,8 +1079,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAliasDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration::default(
-            ),
+            crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration,
         )
     }
 }
@@ -1093,8 +1092,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAliasDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration::default(
-            ),
+            crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration,
         )
     }
 }
@@ -1121,7 +1119,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsInterfaceDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration::default(),
+            crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration,
         )
     }
 }
@@ -1134,7 +1132,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInterfaceDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration::default(),
+            crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration,
         )
     }
 }
@@ -1195,7 +1193,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::statements::declare_statement::FormatTsDeclareStatement::default(),
+            crate::ts::statements::declare_statement::FormatTsDeclareStatement,
         )
     }
 }
@@ -1208,7 +1206,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::statements::declare_statement::FormatTsDeclareStatement::default(),
+            crate::ts::statements::declare_statement::FormatTsDeclareStatement,
         )
     }
 }
@@ -1235,7 +1233,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::declarations::module_declaration::FormatTsModuleDeclaration::default(),
+            crate::ts::declarations::module_declaration::FormatTsModuleDeclaration,
         )
     }
 }
@@ -1248,7 +1246,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::declarations::module_declaration::FormatTsModuleDeclaration::default(),
+            crate::ts::declarations::module_declaration::FormatTsModuleDeclaration,
         )
     }
 }
@@ -1309,7 +1307,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsGlobalDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration::default(),
+            crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration,
         )
     }
 }
@@ -1322,7 +1320,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsGlobalDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration::default(),
+            crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration,
         )
     }
 }
@@ -1419,7 +1417,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::declarations::variable_declaration::FormatJsVariableDeclaration::default(),
+            crate::js::declarations::variable_declaration::FormatJsVariableDeclaration,
         )
     }
 }
@@ -1432,7 +1430,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::declarations::variable_declaration::FormatJsVariableDeclaration::default(),
+            crate::js::declarations::variable_declaration::FormatJsVariableDeclaration,
         )
     }
 }
@@ -1493,7 +1491,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator::default(),
+            crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator,
         )
     }
 }
@@ -1506,7 +1504,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator::default(),
+            crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator,
         )
     }
 }
@@ -1569,7 +1567,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::default_clause::FormatJsDefaultClause::default(),
+            crate::js::auxiliary::default_clause::FormatJsDefaultClause,
         )
     }
 }
@@ -1582,7 +1580,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDefaultClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::default_clause::FormatJsDefaultClause::default(),
+            crate::js::auxiliary::default_clause::FormatJsDefaultClause,
         )
     }
 }
@@ -1605,7 +1603,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::catch_clause::FormatJsCatchClause::default(),
+            crate::js::auxiliary::catch_clause::FormatJsCatchClause,
         )
     }
 }
@@ -1618,7 +1616,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCatchClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::catch_clause::FormatJsCatchClause::default(),
+            crate::js::auxiliary::catch_clause::FormatJsCatchClause,
         )
     }
 }
@@ -1645,7 +1643,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFinallyClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::finally_clause::FormatJsFinallyClause::default(),
+            crate::js::auxiliary::finally_clause::FormatJsFinallyClause,
         )
     }
 }
@@ -1658,7 +1656,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFinallyClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::finally_clause::FormatJsFinallyClause::default(),
+            crate::js::auxiliary::finally_clause::FormatJsFinallyClause,
         )
     }
 }
@@ -1685,7 +1683,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::declarations::catch_declaration::FormatJsCatchDeclaration::default(),
+            crate::js::declarations::catch_declaration::FormatJsCatchDeclaration,
         )
     }
 }
@@ -1698,7 +1696,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCatchDeclaration {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::declarations::catch_declaration::FormatJsCatchDeclaration::default(),
+            crate::js::declarations::catch_declaration::FormatJsCatchDeclaration,
         )
     }
 }
@@ -1725,7 +1723,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation::default(),
+            crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation,
         )
     }
 }
@@ -1738,7 +1736,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation::default(),
+            crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation,
         )
     }
 }
@@ -1765,7 +1763,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportMetaExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression::default(),
+            crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression,
         )
     }
 }
@@ -1778,7 +1776,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportMetaExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression::default(),
+            crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression,
         )
     }
 }
@@ -1879,7 +1877,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAssignmentExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::assignment_expression::FormatJsAssignmentExpression::default(),
+            crate::js::expressions::assignment_expression::FormatJsAssignmentExpression,
         )
     }
 }
@@ -1892,7 +1890,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAssignmentExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::assignment_expression::FormatJsAssignmentExpression::default(),
+            crate::js::expressions::assignment_expression::FormatJsAssignmentExpression,
         )
     }
 }
@@ -1919,7 +1917,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAwaitExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::await_expression::FormatJsAwaitExpression::default(),
+            crate::js::expressions::await_expression::FormatJsAwaitExpression,
         )
     }
 }
@@ -1932,7 +1930,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAwaitExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::await_expression::FormatJsAwaitExpression::default(),
+            crate::js::expressions::await_expression::FormatJsAwaitExpression,
         )
     }
 }
@@ -1959,7 +1957,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBinaryExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::binary_expression::FormatJsBinaryExpression::default(),
+            crate::js::expressions::binary_expression::FormatJsBinaryExpression,
         )
     }
 }
@@ -1972,7 +1970,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBinaryExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::binary_expression::FormatJsBinaryExpression::default(),
+            crate::js::expressions::binary_expression::FormatJsBinaryExpression,
         )
     }
 }
@@ -1999,7 +1997,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::call_expression::FormatJsCallExpression::default(),
+            crate::js::expressions::call_expression::FormatJsCallExpression,
         )
     }
 }
@@ -2012,7 +2010,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::call_expression::FormatJsCallExpression::default(),
+            crate::js::expressions::call_expression::FormatJsCallExpression,
         )
     }
 }
@@ -2039,7 +2037,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::class_expression::FormatJsClassExpression::default(),
+            crate::js::expressions::class_expression::FormatJsClassExpression,
         )
     }
 }
@@ -2052,7 +2050,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::class_expression::FormatJsClassExpression::default(),
+            crate::js::expressions::class_expression::FormatJsClassExpression,
         )
     }
 }
@@ -2195,7 +2193,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::identifier_expression::FormatJsIdentifierExpression::default(),
+            crate::js::expressions::identifier_expression::FormatJsIdentifierExpression,
         )
     }
 }
@@ -2208,7 +2206,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::identifier_expression::FormatJsIdentifierExpression::default(),
+            crate::js::expressions::identifier_expression::FormatJsIdentifierExpression,
         )
     }
 }
@@ -2235,7 +2233,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::import_call_expression::FormatJsImportCallExpression::default(),
+            crate::js::expressions::import_call_expression::FormatJsImportCallExpression,
         )
     }
 }
@@ -2248,7 +2246,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCallExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::import_call_expression::FormatJsImportCallExpression::default(),
+            crate::js::expressions::import_call_expression::FormatJsImportCallExpression,
         )
     }
 }
@@ -2271,7 +2269,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsInExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::in_expression::FormatJsInExpression::default(),
+            crate::js::expressions::in_expression::FormatJsInExpression,
         )
     }
 }
@@ -2284,7 +2282,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsInExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::in_expression::FormatJsInExpression::default(),
+            crate::js::expressions::in_expression::FormatJsInExpression,
         )
     }
 }
@@ -2311,7 +2309,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsInstanceofExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression::default(),
+            crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression,
         )
     }
 }
@@ -2324,7 +2322,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsInstanceofExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression::default(),
+            crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression,
         )
     }
 }
@@ -2351,7 +2349,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::logical_expression::FormatJsLogicalExpression::default(),
+            crate::js::expressions::logical_expression::FormatJsLogicalExpression,
         )
     }
 }
@@ -2364,7 +2362,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::logical_expression::FormatJsLogicalExpression::default(),
+            crate::js::expressions::logical_expression::FormatJsLogicalExpression,
         )
     }
 }
@@ -2391,7 +2389,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::new_expression::FormatJsNewExpression::default(),
+            crate::js::expressions::new_expression::FormatJsNewExpression,
         )
     }
 }
@@ -2404,7 +2402,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNewExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::new_expression::FormatJsNewExpression::default(),
+            crate::js::expressions::new_expression::FormatJsNewExpression,
         )
     }
 }
@@ -2431,7 +2429,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::object_expression::FormatJsObjectExpression::default(),
+            crate::js::expressions::object_expression::FormatJsObjectExpression,
         )
     }
 }
@@ -2444,7 +2442,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::object_expression::FormatJsObjectExpression::default(),
+            crate::js::expressions::object_expression::FormatJsObjectExpression,
         )
     }
 }
@@ -2505,7 +2503,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPostUpdateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression::default(),
+            crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression,
         )
     }
 }
@@ -2518,7 +2516,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPostUpdateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression::default(),
+            crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression,
         )
     }
 }
@@ -2545,7 +2543,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPreUpdateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression::default(),
+            crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression,
         )
     }
 }
@@ -2558,7 +2556,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPreUpdateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression::default(),
+            crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression,
         )
     }
 }
@@ -2585,7 +2583,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSequenceExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::sequence_expression::FormatJsSequenceExpression::default(),
+            crate::js::expressions::sequence_expression::FormatJsSequenceExpression,
         )
     }
 }
@@ -2598,7 +2596,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSequenceExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::sequence_expression::FormatJsSequenceExpression::default(),
+            crate::js::expressions::sequence_expression::FormatJsSequenceExpression,
         )
     }
 }
@@ -2659,7 +2657,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::super_expression::FormatJsSuperExpression::default(),
+            crate::js::expressions::super_expression::FormatJsSuperExpression,
         )
     }
 }
@@ -2672,7 +2670,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::super_expression::FormatJsSuperExpression::default(),
+            crate::js::expressions::super_expression::FormatJsSuperExpression,
         )
     }
 }
@@ -2699,7 +2697,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsThisExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::this_expression::FormatJsThisExpression::default(),
+            crate::js::expressions::this_expression::FormatJsThisExpression,
         )
     }
 }
@@ -2712,7 +2710,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsThisExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::this_expression::FormatJsThisExpression::default(),
+            crate::js::expressions::this_expression::FormatJsThisExpression,
         )
     }
 }
@@ -2739,7 +2737,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsUnaryExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::unary_expression::FormatJsUnaryExpression::default(),
+            crate::js::expressions::unary_expression::FormatJsUnaryExpression,
         )
     }
 }
@@ -2752,7 +2750,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsUnaryExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::unary_expression::FormatJsUnaryExpression::default(),
+            crate::js::expressions::unary_expression::FormatJsUnaryExpression,
         )
     }
 }
@@ -2779,7 +2777,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::yield_expression::FormatJsYieldExpression::default(),
+            crate::js::expressions::yield_expression::FormatJsYieldExpression,
         )
     }
 }
@@ -2792,7 +2790,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsYieldExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::yield_expression::FormatJsYieldExpression::default(),
+            crate::js::expressions::yield_expression::FormatJsYieldExpression,
         )
     }
 }
@@ -2819,7 +2817,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewTargetExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::new_target_expression::FormatJsNewTargetExpression::default(),
+            crate::js::expressions::new_target_expression::FormatJsNewTargetExpression,
         )
     }
 }
@@ -2832,7 +2830,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNewTargetExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::new_target_expression::FormatJsNewTargetExpression::default(),
+            crate::js::expressions::new_target_expression::FormatJsNewTargetExpression,
         )
     }
 }
@@ -2859,7 +2857,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::template_expression::FormatJsTemplateExpression::default(),
+            crate::js::expressions::template_expression::FormatJsTemplateExpression,
         )
     }
 }
@@ -2872,7 +2870,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::template_expression::FormatJsTemplateExpression::default(),
+            crate::js::expressions::template_expression::FormatJsTemplateExpression,
         )
     }
 }
@@ -2929,7 +2927,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::expressions::as_expression::FormatTsAsExpression::default(),
+            crate::ts::expressions::as_expression::FormatTsAsExpression,
         )
     }
 }
@@ -2942,7 +2940,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAsExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::expressions::as_expression::FormatTsAsExpression::default(),
+            crate::ts::expressions::as_expression::FormatTsAsExpression,
         )
     }
 }
@@ -2969,7 +2967,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression::default(),
+            crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression,
         )
     }
 }
@@ -2982,7 +2980,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression::default(),
+            crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression,
         )
     }
 }
@@ -3077,7 +3075,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxTagExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::expressions::tag_expression::FormatJsxTagExpression::default(),
+            crate::jsx::expressions::tag_expression::FormatJsxTagExpression,
         )
     }
 }
@@ -3090,7 +3088,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxTagExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::expressions::tag_expression::FormatJsxTagExpression::default(),
+            crate::jsx::expressions::tag_expression::FormatJsxTagExpression,
         )
     }
 }
@@ -3117,7 +3115,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArguments {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::expressions::type_arguments::FormatTsTypeArguments::default(),
+            crate::ts::expressions::type_arguments::FormatTsTypeArguments,
         )
     }
 }
@@ -3130,7 +3128,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeArguments {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::expressions::type_arguments::FormatTsTypeArguments::default(),
+            crate::ts::expressions::type_arguments::FormatTsTypeArguments,
         )
     }
 }
@@ -3157,7 +3155,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateChunkElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement::default(),
+            crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement,
         )
     }
 }
@@ -3170,7 +3168,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateChunkElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement::default(),
+            crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement,
         )
     }
 }
@@ -3237,7 +3235,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArguments {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::call_arguments::FormatJsCallArguments::default(),
+            crate::js::expressions::call_arguments::FormatJsCallArguments,
         )
     }
 }
@@ -3250,7 +3248,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallArguments {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::call_arguments::FormatJsCallArguments::default(),
+            crate::js::expressions::call_arguments::FormatJsCallArguments,
         )
     }
 }
@@ -3277,7 +3275,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldArgument {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::yield_argument::FormatJsYieldArgument::default(),
+            crate::js::expressions::yield_argument::FormatJsYieldArgument,
         )
     }
 }
@@ -3290,7 +3288,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsYieldArgument {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::yield_argument::FormatJsYieldArgument::default(),
+            crate::js::expressions::yield_argument::FormatJsYieldArgument,
         )
     }
 }
@@ -3393,7 +3391,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReturnTypeAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation::default(),
+            crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation,
         )
     }
 }
@@ -3406,7 +3404,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReturnTypeAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation::default(),
+            crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation,
         )
     }
 }
@@ -3429,7 +3427,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionBody {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::function_body::FormatJsFunctionBody::default(),
+            crate::js::auxiliary::function_body::FormatJsFunctionBody,
         )
     }
 }
@@ -3442,7 +3440,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionBody {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::function_body::FormatJsFunctionBody::default(),
+            crate::js::auxiliary::function_body::FormatJsFunctionBody,
         )
     }
 }
@@ -3539,7 +3537,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsReferenceIdentifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier::default(),
+            crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier,
         )
     }
 }
@@ -3552,7 +3550,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsReferenceIdentifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier::default(),
+            crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier,
         )
     }
 }
@@ -3575,7 +3573,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::private_name::FormatJsPrivateName::default(),
+            crate::js::auxiliary::private_name::FormatJsPrivateName,
         )
     }
 }
@@ -3588,7 +3586,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPrivateName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::private_name::FormatJsPrivateName::default(),
+            crate::js::auxiliary::private_name::FormatJsPrivateName,
         )
     }
 }
@@ -3615,7 +3613,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::literal_member_name::FormatJsLiteralMemberName::default(),
+            crate::js::objects::literal_member_name::FormatJsLiteralMemberName,
         )
     }
 }
@@ -3628,7 +3626,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLiteralMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::literal_member_name::FormatJsLiteralMemberName::default(),
+            crate::js::objects::literal_member_name::FormatJsLiteralMemberName,
         )
     }
 }
@@ -3655,7 +3653,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::computed_member_name::FormatJsComputedMemberName::default(),
+            crate::js::objects::computed_member_name::FormatJsComputedMemberName,
         )
     }
 }
@@ -3668,7 +3666,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::computed_member_name::FormatJsComputedMemberName::default(),
+            crate::js::objects::computed_member_name::FormatJsComputedMemberName,
         )
     }
 }
@@ -3695,7 +3693,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::property_object_member::FormatJsPropertyObjectMember::default(),
+            crate::js::objects::property_object_member::FormatJsPropertyObjectMember,
         )
     }
 }
@@ -3708,7 +3706,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::property_object_member::FormatJsPropertyObjectMember::default(),
+            crate::js::objects::property_object_member::FormatJsPropertyObjectMember,
         )
     }
 }
@@ -3735,7 +3733,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::method_object_member::FormatJsMethodObjectMember::default(),
+            crate::js::objects::method_object_member::FormatJsMethodObjectMember,
         )
     }
 }
@@ -3748,7 +3746,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::method_object_member::FormatJsMethodObjectMember::default(),
+            crate::js::objects::method_object_member::FormatJsMethodObjectMember,
         )
     }
 }
@@ -3775,7 +3773,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::getter_object_member::FormatJsGetterObjectMember::default(),
+            crate::js::objects::getter_object_member::FormatJsGetterObjectMember,
         )
     }
 }
@@ -3788,7 +3786,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::getter_object_member::FormatJsGetterObjectMember::default(),
+            crate::js::objects::getter_object_member::FormatJsGetterObjectMember,
         )
     }
 }
@@ -3815,7 +3813,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::setter_object_member::FormatJsSetterObjectMember::default(),
+            crate::js::objects::setter_object_member::FormatJsSetterObjectMember,
         )
     }
 }
@@ -3828,7 +3826,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSetterObjectMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::setter_object_member::FormatJsSetterObjectMember::default(),
+            crate::js::objects::setter_object_member::FormatJsSetterObjectMember,
         )
     }
 }
@@ -3889,7 +3887,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExtendsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::extends_clause::FormatJsExtendsClause::default(),
+            crate::js::classes::extends_clause::FormatJsExtendsClause,
         )
     }
 }
@@ -3902,7 +3900,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExtendsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::extends_clause::FormatJsExtendsClause::default(),
+            crate::js::classes::extends_clause::FormatJsExtendsClause,
         )
     }
 }
@@ -3929,7 +3927,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImplementsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::implements_clause::FormatTsImplementsClause::default(),
+            crate::ts::auxiliary::implements_clause::FormatTsImplementsClause,
         )
     }
 }
@@ -3942,7 +3940,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImplementsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::implements_clause::FormatTsImplementsClause::default(),
+            crate::ts::auxiliary::implements_clause::FormatTsImplementsClause,
         )
     }
 }
@@ -3984,8 +3982,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateClassMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName::default(
-            ),
+            crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName,
         )
     }
 }
@@ -3998,8 +3995,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPrivateClassMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName::default(
-            ),
+            crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName,
         )
     }
 }
@@ -4026,7 +4022,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::constructor_class_member::FormatJsConstructorClassMember::default(),
+            crate::js::classes::constructor_class_member::FormatJsConstructorClassMember,
         )
     }
 }
@@ -4039,7 +4035,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::constructor_class_member::FormatJsConstructorClassMember::default(),
+            crate::js::classes::constructor_class_member::FormatJsConstructorClassMember,
         )
     }
 }
@@ -4081,7 +4077,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::property_class_member::FormatJsPropertyClassMember::default(),
+            crate::js::classes::property_class_member::FormatJsPropertyClassMember,
         )
     }
 }
@@ -4094,7 +4090,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::property_class_member::FormatJsPropertyClassMember::default(),
+            crate::js::classes::property_class_member::FormatJsPropertyClassMember,
         )
     }
 }
@@ -4121,7 +4117,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::method_class_member::FormatJsMethodClassMember::default(),
+            crate::js::classes::method_class_member::FormatJsMethodClassMember,
         )
     }
 }
@@ -4134,7 +4130,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::method_class_member::FormatJsMethodClassMember::default(),
+            crate::js::classes::method_class_member::FormatJsMethodClassMember,
         )
     }
 }
@@ -4161,7 +4157,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::getter_class_member::FormatJsGetterClassMember::default(),
+            crate::js::classes::getter_class_member::FormatJsGetterClassMember,
         )
     }
 }
@@ -4174,7 +4170,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::getter_class_member::FormatJsGetterClassMember::default(),
+            crate::js::classes::getter_class_member::FormatJsGetterClassMember,
         )
     }
 }
@@ -4201,7 +4197,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::setter_class_member::FormatJsSetterClassMember::default(),
+            crate::js::classes::setter_class_member::FormatJsSetterClassMember,
         )
     }
 }
@@ -4214,7 +4210,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSetterClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::setter_class_member::FormatJsSetterClassMember::default(),
+            crate::js::classes::setter_class_member::FormatJsSetterClassMember,
         )
     }
 }
@@ -4441,7 +4437,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::classes::empty_class_member::FormatJsEmptyClassMember::default(),
+            crate::js::classes::empty_class_member::FormatJsEmptyClassMember,
         )
     }
 }
@@ -4454,7 +4450,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsEmptyClassMember {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::classes::empty_class_member::FormatJsEmptyClassMember::default(),
+            crate::js::classes::empty_class_member::FormatJsEmptyClassMember,
         )
     }
 }
@@ -4481,7 +4477,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::static_modifier::FormatJsStaticModifier::default(),
+            crate::js::auxiliary::static_modifier::FormatJsStaticModifier,
         )
     }
 }
@@ -4494,7 +4490,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStaticModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::static_modifier::FormatJsStaticModifier::default(),
+            crate::js::auxiliary::static_modifier::FormatJsStaticModifier,
         )
     }
 }
@@ -4521,7 +4517,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAccessorModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier::default(),
+            crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier,
         )
     }
 }
@@ -4534,7 +4530,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAccessorModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier::default(),
+            crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier,
         )
     }
 }
@@ -4561,7 +4557,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier::default(),
+            crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier,
         )
     }
 }
@@ -4574,7 +4570,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier::default(),
+            crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier,
         )
     }
 }
@@ -4601,7 +4597,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReadonlyModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier::default(),
+            crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier,
         )
     }
 }
@@ -4614,7 +4610,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReadonlyModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier::default(),
+            crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier,
         )
     }
 }
@@ -4641,7 +4637,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAbstractModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier::default(),
+            crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier,
         )
     }
 }
@@ -4654,7 +4650,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAbstractModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier::default(),
+            crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier,
         )
     }
 }
@@ -4681,7 +4677,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOverrideModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier::default(),
+            crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier,
         )
     }
 }
@@ -4694,7 +4690,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOverrideModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier::default(),
+            crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier,
         )
     }
 }
@@ -4721,7 +4717,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAccessibilityModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier::default(),
+            crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier,
         )
     }
 }
@@ -4734,7 +4730,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAccessibilityModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier::default(),
+            crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier,
         )
     }
 }
@@ -4761,7 +4757,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::const_modifier::FormatTsConstModifier::default(),
+            crate::ts::auxiliary::const_modifier::FormatTsConstModifier,
         )
     }
 }
@@ -4774,7 +4770,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::const_modifier::FormatTsConstModifier::default(),
+            crate::ts::auxiliary::const_modifier::FormatTsConstModifier,
         )
     }
 }
@@ -4833,7 +4829,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOutModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::out_modifier::FormatTsOutModifier::default(),
+            crate::ts::auxiliary::out_modifier::FormatTsOutModifier,
         )
     }
 }
@@ -4846,7 +4842,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOutModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::out_modifier::FormatTsOutModifier::default(),
+            crate::ts::auxiliary::out_modifier::FormatTsOutModifier,
         )
     }
 }
@@ -4873,7 +4869,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameters {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::constructor_parameters::FormatJsConstructorParameters::default(),
+            crate::js::bindings::constructor_parameters::FormatJsConstructorParameters,
         )
     }
 }
@@ -4886,7 +4882,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameters {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::constructor_parameters::FormatJsConstructorParameters::default(),
+            crate::js::bindings::constructor_parameters::FormatJsConstructorParameters,
         )
     }
 }
@@ -4913,7 +4909,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsRestParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::rest_parameter::FormatJsRestParameter::default(),
+            crate::js::bindings::rest_parameter::FormatJsRestParameter,
         )
     }
 }
@@ -4926,7 +4922,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsRestParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::rest_parameter::FormatJsRestParameter::default(),
+            crate::js::bindings::rest_parameter::FormatJsRestParameter,
         )
     }
 }
@@ -4953,7 +4949,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::bindings::property_parameter::FormatTsPropertyParameter::default(),
+            crate::ts::bindings::property_parameter::FormatTsPropertyParameter,
         )
     }
 }
@@ -4966,7 +4962,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::bindings::property_parameter::FormatTsPropertyParameter::default(),
+            crate::ts::bindings::property_parameter::FormatTsPropertyParameter,
         )
     }
 }
@@ -5171,7 +5167,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment::default(),
+            crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment,
         )
     }
 }
@@ -5184,7 +5180,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment::default(),
+            crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment,
         )
     }
 }
@@ -5343,7 +5339,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::assignments::as_assignment::FormatTsAsAssignment::default(),
+            crate::ts::assignments::as_assignment::FormatTsAsAssignment,
         )
     }
 }
@@ -5356,7 +5352,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAsAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::assignments::as_assignment::FormatTsAsAssignment::default(),
+            crate::ts::assignments::as_assignment::FormatTsAsAssignment,
         )
     }
 }
@@ -5383,7 +5379,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment::default(),
+            crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment,
         )
     }
 }
@@ -5396,7 +5392,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment::default(),
+            crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment,
         )
     }
 }
@@ -5457,8 +5453,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAssignmentWithDefault {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
-            ),
+            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault,
         )
     }
 }
@@ -5471,8 +5466,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAssignmentWithDefault {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault::default(
-            ),
+            crate::js::assignments::assignment_with_default::FormatJsAssignmentWithDefault,
         )
     }
 }
@@ -5646,7 +5640,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::identifier_binding::FormatJsIdentifierBinding::default(),
+            crate::js::bindings::identifier_binding::FormatJsIdentifierBinding,
         )
     }
 }
@@ -5659,7 +5653,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::identifier_binding::FormatJsIdentifierBinding::default(),
+            crate::js::bindings::identifier_binding::FormatJsIdentifierBinding,
         )
     }
 }
@@ -5720,7 +5714,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern::default(),
+            crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern,
         )
     }
 }
@@ -5733,7 +5727,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern::default(),
+            crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern,
         )
     }
 }
@@ -5760,7 +5754,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern::default(),
+            crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern,
         )
     }
 }
@@ -5773,7 +5767,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern::default(),
+            crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern,
         )
     }
 }
@@ -6034,8 +6028,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNullLiteralExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression::default(
-            ),
+            crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression,
         )
     }
 }
@@ -6048,8 +6041,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNullLiteralExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression::default(
-            ),
+            crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression,
         )
     }
 }
@@ -6224,7 +6216,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_bare_clause::FormatJsImportBareClause::default(),
+            crate::js::module::import_bare_clause::FormatJsImportBareClause,
         )
     }
 }
@@ -6237,7 +6229,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_bare_clause::FormatJsImportBareClause::default(),
+            crate::js::module::import_bare_clause::FormatJsImportBareClause,
         )
     }
 }
@@ -6264,7 +6256,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamedClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_named_clause::FormatJsImportNamedClause::default(),
+            crate::js::module::import_named_clause::FormatJsImportNamedClause,
         )
     }
 }
@@ -6277,7 +6269,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamedClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_named_clause::FormatJsImportNamedClause::default(),
+            crate::js::module::import_named_clause::FormatJsImportNamedClause,
         )
     }
 }
@@ -6304,7 +6296,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_default_clause::FormatJsImportDefaultClause::default(),
+            crate::js::module::import_default_clause::FormatJsImportDefaultClause,
         )
     }
 }
@@ -6317,7 +6309,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_default_clause::FormatJsImportDefaultClause::default(),
+            crate::js::module::import_default_clause::FormatJsImportDefaultClause,
         )
     }
 }
@@ -6344,7 +6336,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
+            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
         )
     }
 }
@@ -6357,7 +6349,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
+            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
         )
     }
 }
@@ -6420,7 +6412,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_assertion::FormatJsImportAssertion::default(),
+            crate::js::module::import_assertion::FormatJsImportAssertion,
         )
     }
 }
@@ -6433,7 +6425,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_assertion::FormatJsImportAssertion::default(),
+            crate::js::module::import_assertion::FormatJsImportAssertion,
         )
     }
 }
@@ -6460,7 +6452,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier::default(),
+            crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier,
         )
     }
 }
@@ -6473,7 +6465,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier::default(),
+            crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier,
         )
     }
 }
@@ -6500,7 +6492,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers::default(),
+            crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers,
         )
     }
 }
@@ -6513,7 +6505,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers::default(),
+            crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers,
         )
     }
 }
@@ -6608,7 +6600,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier::default(),
+            crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier,
         )
     }
 }
@@ -6621,7 +6613,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier::default(),
+            crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier,
         )
     }
 }
@@ -6648,7 +6640,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralExportName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::literal_export_name::FormatJsLiteralExportName::default(),
+            crate::js::module::literal_export_name::FormatJsLiteralExportName,
         )
     }
 }
@@ -6661,7 +6653,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLiteralExportName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::literal_export_name::FormatJsLiteralExportName::default(),
+            crate::js::module::literal_export_name::FormatJsLiteralExportName,
         )
     }
 }
@@ -6688,7 +6680,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
+            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
         )
     }
 }
@@ -6701,7 +6693,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
+            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
         )
     }
 }
@@ -6789,7 +6781,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::export_named_clause::FormatJsExportNamedClause::default(),
+            crate::js::module::export_named_clause::FormatJsExportNamedClause,
         )
     }
 }
@@ -6802,7 +6794,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::export_named_clause::FormatJsExportNamedClause::default(),
+            crate::js::module::export_named_clause::FormatJsExportNamedClause,
         )
     }
 }
@@ -6829,7 +6821,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportFromClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::export_from_clause::FormatJsExportFromClause::default(),
+            crate::js::module::export_from_clause::FormatJsExportFromClause,
         )
     }
 }
@@ -6842,7 +6834,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportFromClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::export_from_clause::FormatJsExportFromClause::default(),
+            crate::js::module::export_from_clause::FormatJsExportFromClause,
         )
     }
 }
@@ -6869,7 +6861,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause::default(),
+            crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause,
         )
     }
 }
@@ -6882,7 +6874,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause::default(),
+            crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause,
         )
     }
 }
@@ -6909,8 +6901,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAsNamespaceClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause::default(
-            ),
+            crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause,
         )
     }
 }
@@ -6923,8 +6914,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportAsNamespaceClause 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause::default(
-            ),
+            crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause,
         )
     }
 }
@@ -6951,7 +6941,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAssignmentClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause::default(),
+            crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause,
         )
     }
 }
@@ -6964,7 +6954,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportAssignmentClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause::default(),
+            crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause,
         )
     }
 }
@@ -6991,7 +6981,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportDeclareClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::module::export_declare_clause::FormatTsExportDeclareClause::default(),
+            crate::ts::module::export_declare_clause::FormatTsExportDeclareClause,
         )
     }
 }
@@ -7004,7 +6994,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportDeclareClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::module::export_declare_clause::FormatTsExportDeclareClause::default(),
+            crate::ts::module::export_declare_clause::FormatTsExportDeclareClause,
         )
     }
 }
@@ -7095,7 +7085,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier::default(),
+            crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier,
         )
     }
 }
@@ -7108,7 +7098,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier::default(),
+            crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier,
         )
     }
 }
@@ -7135,7 +7125,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportAsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::export_as_clause::FormatJsExportAsClause::default(),
+            crate::js::module::export_as_clause::FormatJsExportAsClause,
         )
     }
 }
@@ -7148,7 +7138,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportAsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::export_as_clause::FormatJsExportAsClause::default(),
+            crate::js::module::export_as_clause::FormatJsExportAsClause,
         )
     }
 }
@@ -7232,7 +7222,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFormalParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bindings::formal_parameter::FormatJsFormalParameter::default(),
+            crate::js::bindings::formal_parameter::FormatJsFormalParameter,
         )
     }
 }
@@ -7245,7 +7235,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFormalParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bindings::formal_parameter::FormatJsFormalParameter::default(),
+            crate::js::bindings::formal_parameter::FormatJsFormalParameter,
         )
     }
 }
@@ -7272,7 +7262,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsThisParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::bindings::this_parameter::FormatTsThisParameter::default(),
+            crate::ts::bindings::this_parameter::FormatTsThisParameter,
         )
     }
 }
@@ -7285,7 +7275,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsThisParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::bindings::this_parameter::FormatTsThisParameter::default(),
+            crate::ts::bindings::this_parameter::FormatTsThisParameter,
         )
     }
 }
@@ -7590,7 +7580,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsUndefinedType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::undefined_type::FormatTsUndefinedType::default(),
+            crate::ts::types::undefined_type::FormatTsUndefinedType,
         )
     }
 }
@@ -7603,7 +7593,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsUndefinedType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::undefined_type::FormatTsUndefinedType::default(),
+            crate::ts::types::undefined_type::FormatTsUndefinedType,
         )
     }
 }
@@ -7664,7 +7654,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsParenthesizedType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::parenthesized_type::FormatTsParenthesizedType::default(),
+            crate::ts::types::parenthesized_type::FormatTsParenthesizedType,
         )
     }
 }
@@ -7677,7 +7667,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsParenthesizedType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::parenthesized_type::FormatTsParenthesizedType::default(),
+            crate::ts::types::parenthesized_type::FormatTsParenthesizedType,
         )
     }
 }
@@ -7704,7 +7694,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReferenceType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::reference_type::FormatTsReferenceType::default(),
+            crate::ts::types::reference_type::FormatTsReferenceType,
         )
     }
 }
@@ -7717,7 +7707,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReferenceType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::reference_type::FormatTsReferenceType::default(),
+            crate::ts::types::reference_type::FormatTsReferenceType,
         )
     }
 }
@@ -7884,7 +7874,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeOperatorType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::type_operator_type::FormatTsTypeOperatorType::default(),
+            crate::ts::types::type_operator_type::FormatTsTypeOperatorType,
         )
     }
 }
@@ -7897,7 +7887,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeOperatorType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::type_operator_type::FormatTsTypeOperatorType::default(),
+            crate::ts::types::type_operator_type::FormatTsTypeOperatorType,
         )
     }
 }
@@ -7924,7 +7914,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexedAccessType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::indexed_access_type::FormatTsIndexedAccessType::default(),
+            crate::ts::types::indexed_access_type::FormatTsIndexedAccessType,
         )
     }
 }
@@ -7937,7 +7927,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexedAccessType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::indexed_access_type::FormatTsIndexedAccessType::default(),
+            crate::ts::types::indexed_access_type::FormatTsIndexedAccessType,
         )
     }
 }
@@ -8036,7 +8026,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonPrimitiveType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType::default(),
+            crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType,
         )
     }
 }
@@ -8049,7 +8039,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNonPrimitiveType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType::default(),
+            crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType,
         )
     }
 }
@@ -8110,7 +8100,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNumberLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::number_literal_type::FormatTsNumberLiteralType::default(),
+            crate::ts::types::number_literal_type::FormatTsNumberLiteralType,
         )
     }
 }
@@ -8123,7 +8113,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNumberLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::number_literal_type::FormatTsNumberLiteralType::default(),
+            crate::ts::types::number_literal_type::FormatTsNumberLiteralType,
         )
     }
 }
@@ -8150,7 +8140,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBigintLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType::default(),
+            crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType,
         )
     }
 }
@@ -8163,7 +8153,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBigintLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType::default(),
+            crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType,
         )
     }
 }
@@ -8190,7 +8180,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsStringLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::string_literal_type::FormatTsStringLiteralType::default(),
+            crate::ts::types::string_literal_type::FormatTsStringLiteralType,
         )
     }
 }
@@ -8203,7 +8193,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsStringLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::string_literal_type::FormatTsStringLiteralType::default(),
+            crate::ts::types::string_literal_type::FormatTsStringLiteralType,
         )
     }
 }
@@ -8230,7 +8220,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNullLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::null_literal_type::FormatTsNullLiteralType::default(),
+            crate::ts::types::null_literal_type::FormatTsNullLiteralType,
         )
     }
 }
@@ -8243,7 +8233,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNullLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::null_literal_type::FormatTsNullLiteralType::default(),
+            crate::ts::types::null_literal_type::FormatTsNullLiteralType,
         )
     }
 }
@@ -8270,7 +8260,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBooleanLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType::default(),
+            crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType,
         )
     }
 }
@@ -8283,7 +8273,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBooleanLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType::default(),
+            crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType,
         )
     }
 }
@@ -8310,7 +8300,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::template_literal_type::FormatTsTemplateLiteralType::default(),
+            crate::ts::types::template_literal_type::FormatTsTemplateLiteralType,
         )
     }
 }
@@ -8323,7 +8313,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateLiteralType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::template_literal_type::FormatTsTemplateLiteralType::default(),
+            crate::ts::types::template_literal_type::FormatTsTemplateLiteralType,
         )
     }
 }
@@ -8384,7 +8374,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::intersection_type::FormatTsIntersectionType::default(),
+            crate::ts::types::intersection_type::FormatTsIntersectionType,
         )
     }
 }
@@ -8397,7 +8387,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::intersection_type::FormatTsIntersectionType::default(),
+            crate::ts::types::intersection_type::FormatTsIntersectionType,
         )
     }
 }
@@ -8494,7 +8484,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::constructor_type::FormatTsConstructorType::default(),
+            crate::ts::types::constructor_type::FormatTsConstructorType,
         )
     }
 }
@@ -8507,7 +8497,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::constructor_type::FormatTsConstructorType::default(),
+            crate::ts::types::constructor_type::FormatTsConstructorType,
         )
     }
 }
@@ -8534,7 +8524,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConditionalType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::conditional_type::FormatTsConditionalType::default(),
+            crate::ts::types::conditional_type::FormatTsConditionalType,
         )
     }
 }
@@ -8547,7 +8537,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConditionalType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::conditional_type::FormatTsConditionalType::default(),
+            crate::ts::types::conditional_type::FormatTsConditionalType,
         )
     }
 }
@@ -8574,7 +8564,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding::default(),
+            crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding,
         )
     }
 }
@@ -8587,7 +8577,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding::default(),
+            crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding,
         )
     }
 }
@@ -8680,7 +8670,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleBlock {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::module_block::FormatTsModuleBlock::default(),
+            crate::ts::auxiliary::module_block::FormatTsModuleBlock,
         )
     }
 }
@@ -8693,7 +8683,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsModuleBlock {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::module_block::FormatTsModuleBlock::default(),
+            crate::ts::auxiliary::module_block::FormatTsModuleBlock,
         )
     }
 }
@@ -8720,7 +8710,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedModuleName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName::default(),
+            crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName,
         )
     }
 }
@@ -8733,7 +8723,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsQualifiedModuleName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName::default(),
+            crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName,
         )
     }
 }
@@ -8775,7 +8765,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName::default(),
+            crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName,
         )
     }
 }
@@ -8788,7 +8778,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName::default(),
+            crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName,
         )
     }
 }
@@ -8815,7 +8805,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeConstraintClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause::default(),
+            crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause,
         )
     }
 }
@@ -8828,7 +8818,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeConstraintClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause::default(),
+            crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause,
         )
     }
 }
@@ -8855,7 +8845,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPredicateReturnType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::predicate_return_type::FormatTsPredicateReturnType::default(),
+            crate::ts::types::predicate_return_type::FormatTsPredicateReturnType,
         )
     }
 }
@@ -8868,7 +8858,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPredicateReturnType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::predicate_return_type::FormatTsPredicateReturnType::default(),
+            crate::ts::types::predicate_return_type::FormatTsPredicateReturnType,
         )
     }
 }
@@ -8895,7 +8885,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsReturnType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::types::asserts_return_type::FormatTsAssertsReturnType::default(),
+            crate::ts::types::asserts_return_type::FormatTsAssertsReturnType,
         )
     }
 }
@@ -8908,7 +8898,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAssertsReturnType {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::types::asserts_return_type::FormatTsAssertsReturnType::default(),
+            crate::ts::types::asserts_return_type::FormatTsAssertsReturnType,
         )
     }
 }
@@ -8935,7 +8925,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsCondition {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition::default(),
+            crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition,
         )
     }
 }
@@ -8948,7 +8938,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAssertsCondition {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition::default(),
+            crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition,
         )
     }
 }
@@ -8975,7 +8965,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::bindings::type_parameter::FormatTsTypeParameter::default(),
+            crate::ts::bindings::type_parameter::FormatTsTypeParameter,
         )
     }
 }
@@ -8988,7 +8978,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::bindings::type_parameter::FormatTsTypeParameter::default(),
+            crate::ts::bindings::type_parameter::FormatTsTypeParameter,
         )
     }
 }
@@ -9015,7 +9005,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefaultTypeClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause::default(),
+            crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause,
         )
     }
 }
@@ -9028,7 +9018,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDefaultTypeClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause::default(),
+            crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause,
         )
     }
 }
@@ -9055,7 +9045,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExtendsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::classes::extends_clause::FormatTsExtendsClause::default(),
+            crate::ts::classes::extends_clause::FormatTsExtendsClause,
         )
     }
 }
@@ -9068,7 +9058,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExtendsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::classes::extends_clause::FormatTsExtendsClause::default(),
+            crate::ts::classes::extends_clause::FormatTsExtendsClause,
         )
     }
 }
@@ -9382,7 +9372,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause::default(),
+            crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause,
         )
     }
 }
@@ -9395,7 +9385,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause::default(),
+            crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause,
         )
     }
 }
@@ -9437,7 +9427,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeQualifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier::default(),
+            crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier,
         )
     }
 }
@@ -9450,7 +9440,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportTypeQualifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier::default(),
+            crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier,
         )
     }
 }
@@ -9477,8 +9467,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNamedTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement::default(
-            ),
+            crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement,
         )
     }
 }
@@ -9491,8 +9480,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNamedTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement::default(
-            ),
+            crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement,
         )
     }
 }
@@ -9519,7 +9507,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsRestTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement::default(),
+            crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement,
         )
     }
 }
@@ -9532,7 +9520,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsRestTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement::default(),
+            crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement,
         )
     }
 }
@@ -9593,7 +9581,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateChunkElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement::default(),
+            crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement,
         )
     }
 }
@@ -9606,7 +9594,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateChunkElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement::default(),
+            crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement,
         )
     }
 }
@@ -9673,7 +9661,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::auxiliary::qualified_name::FormatTsQualifiedName::default(),
+            crate::ts::auxiliary::qualified_name::FormatTsQualifiedName,
         )
     }
 }
@@ -9686,7 +9674,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsQualifiedName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::auxiliary::qualified_name::FormatTsQualifiedName::default(),
+            crate::ts::auxiliary::qualified_name::FormatTsQualifiedName,
         )
     }
 }
@@ -9741,7 +9729,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement::default(),
+            crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement,
         )
     }
 }
@@ -9754,7 +9742,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement::default(),
+            crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement,
         )
     }
 }
@@ -9815,7 +9803,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::tag::opening_element::FormatJsxOpeningElement::default(),
+            crate::jsx::tag::opening_element::FormatJsxOpeningElement,
         )
     }
 }
@@ -9828,7 +9816,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxOpeningElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::tag::opening_element::FormatJsxOpeningElement::default(),
+            crate::jsx::tag::opening_element::FormatJsxOpeningElement,
         )
     }
 }
@@ -9855,7 +9843,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::tag::closing_element::FormatJsxClosingElement::default(),
+            crate::jsx::tag::closing_element::FormatJsxClosingElement,
         )
     }
 }
@@ -9868,7 +9856,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxClosingElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::tag::closing_element::FormatJsxClosingElement::default(),
+            crate::jsx::tag::closing_element::FormatJsxClosingElement,
         )
     }
 }
@@ -9895,7 +9883,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningFragment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment::default(),
+            crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment,
         )
     }
 }
@@ -9908,7 +9896,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxOpeningFragment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment::default(),
+            crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment,
         )
     }
 }
@@ -9935,7 +9923,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingFragment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::tag::closing_fragment::FormatJsxClosingFragment::default(),
+            crate::jsx::tag::closing_fragment::FormatJsxClosingFragment,
         )
     }
 }
@@ -9948,7 +9936,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxClosingFragment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::tag::closing_fragment::FormatJsxClosingFragment::default(),
+            crate::jsx::tag::closing_fragment::FormatJsxClosingFragment,
         )
     }
 }
@@ -9998,7 +9986,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxReferenceIdentifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier::default(),
+            crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier,
         )
     }
 }
@@ -10011,7 +9999,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxReferenceIdentifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier::default(),
+            crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier,
         )
     }
 }
@@ -10038,7 +10026,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxNamespaceName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName::default(),
+            crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName,
         )
     }
 }
@@ -10051,7 +10039,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxNamespaceName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName::default(),
+            crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName,
         )
     }
 }
@@ -10150,7 +10138,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadAttribute {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute::default(),
+            crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute,
         )
     }
 }
@@ -10163,7 +10151,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSpreadAttribute {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute::default(),
+            crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute,
         )
     }
 }
@@ -10315,7 +10303,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxExpressionChild {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild::default(),
+            crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild,
         )
     }
 }
@@ -10328,7 +10316,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxExpressionChild {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild::default(),
+            crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild,
         )
     }
 }
@@ -10351,7 +10339,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadChild {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild::default(),
+            crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild,
         )
     }
 }
@@ -10364,7 +10352,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSpreadChild {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild::default(),
+            crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild,
         )
     }
 }
@@ -10433,7 +10421,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::call_argument_list::FormatJsCallArgumentList::default(),
+            crate::js::lists::call_argument_list::FormatJsCallArgumentList,
         )
     }
 }
@@ -10446,7 +10434,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::call_argument_list::FormatJsCallArgumentList::default(),
+            crate::js::lists::call_argument_list::FormatJsCallArgumentList,
         )
     }
 }
@@ -10460,7 +10448,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::class_member_list::FormatJsClassMemberList::default(),
+            crate::js::lists::class_member_list::FormatJsClassMemberList,
         )
     }
 }
@@ -10473,7 +10461,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::class_member_list::FormatJsClassMemberList::default(),
+            crate::js::lists::class_member_list::FormatJsClassMemberList,
         )
     }
 }
@@ -10487,7 +10475,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList::default(),
+            crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList,
         )
     }
 }
@@ -10500,7 +10488,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList::default(),
+            crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList,
         )
     }
 }
@@ -10514,8 +10502,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList::default(
-            ),
+            crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList,
         )
     }
 }
@@ -10528,8 +10515,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList::default(
-            ),
+            crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList,
         )
     }
 }
@@ -10543,7 +10529,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::decorator_list::FormatJsDecoratorList::default(),
+            crate::js::lists::decorator_list::FormatJsDecoratorList,
         )
     }
 }
@@ -10556,7 +10542,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::decorator_list::FormatJsDecoratorList::default(),
+            crate::js::lists::decorator_list::FormatJsDecoratorList,
         )
     }
 }
@@ -10570,7 +10556,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::directive_list::FormatJsDirectiveList::default(),
+            crate::js::lists::directive_list::FormatJsDirectiveList,
         )
     }
 }
@@ -10583,7 +10569,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::directive_list::FormatJsDirectiveList::default(),
+            crate::js::lists::directive_list::FormatJsDirectiveList,
         )
     }
 }
@@ -10660,7 +10646,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::method_modifier_list::FormatJsMethodModifierList::default(),
+            crate::js::lists::method_modifier_list::FormatJsMethodModifierList,
         )
     }
 }
@@ -10673,7 +10659,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::method_modifier_list::FormatJsMethodModifierList::default(),
+            crate::js::lists::method_modifier_list::FormatJsMethodModifierList,
         )
     }
 }
@@ -10687,7 +10673,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::module_item_list::FormatJsModuleItemList::default(),
+            crate::js::lists::module_item_list::FormatJsModuleItemList,
         )
     }
 }
@@ -10700,7 +10686,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::module_item_list::FormatJsModuleItemList::default(),
+            crate::js::lists::module_item_list::FormatJsModuleItemList,
         )
     }
 }
@@ -10763,7 +10749,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::object_member_list::FormatJsObjectMemberList::default(),
+            crate::js::lists::object_member_list::FormatJsObjectMemberList,
         )
     }
 }
@@ -10776,7 +10762,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::object_member_list::FormatJsObjectMemberList::default(),
+            crate::js::lists::object_member_list::FormatJsObjectMemberList,
         )
     }
 }
@@ -10790,7 +10776,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::parameter_list::FormatJsParameterList::default(),
+            crate::js::lists::parameter_list::FormatJsParameterList,
         )
     }
 }
@@ -10803,7 +10789,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::parameter_list::FormatJsParameterList::default(),
+            crate::js::lists::parameter_list::FormatJsParameterList,
         )
     }
 }
@@ -10817,7 +10803,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::property_modifier_list::FormatJsPropertyModifierList::default(),
+            crate::js::lists::property_modifier_list::FormatJsPropertyModifierList,
         )
     }
 }
@@ -10830,7 +10816,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::property_modifier_list::FormatJsPropertyModifierList::default(),
+            crate::js::lists::property_modifier_list::FormatJsPropertyModifierList,
         )
     }
 }
@@ -10844,7 +10830,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::statement_list::FormatJsStatementList::default(),
+            crate::js::lists::statement_list::FormatJsStatementList,
         )
     }
 }
@@ -10857,7 +10843,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::statement_list::FormatJsStatementList::default(),
+            crate::js::lists::statement_list::FormatJsStatementList,
         )
     }
 }
@@ -10871,7 +10857,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::switch_case_list::FormatJsSwitchCaseList::default(),
+            crate::js::lists::switch_case_list::FormatJsSwitchCaseList,
         )
     }
 }
@@ -10884,7 +10870,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::switch_case_list::FormatJsSwitchCaseList::default(),
+            crate::js::lists::switch_case_list::FormatJsSwitchCaseList,
         )
     }
 }
@@ -10925,7 +10911,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList::default(),
+            crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList,
         )
     }
 }
@@ -10938,7 +10924,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList::default(),
+            crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList,
         )
     }
 }
@@ -10952,7 +10938,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::lists::attribute_list::FormatJsxAttributeList::default(),
+            crate::jsx::lists::attribute_list::FormatJsxAttributeList,
         )
     }
 }
@@ -10965,7 +10951,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::lists::attribute_list::FormatJsxAttributeList::default(),
+            crate::jsx::lists::attribute_list::FormatJsxAttributeList,
         )
     }
 }
@@ -11006,7 +10992,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::enum_member_list::FormatTsEnumMemberList::default(),
+            crate::ts::lists::enum_member_list::FormatTsEnumMemberList,
         )
     }
 }
@@ -11019,7 +11005,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::enum_member_list::FormatTsEnumMemberList::default(),
+            crate::ts::lists::enum_member_list::FormatTsEnumMemberList,
         )
     }
 }
@@ -11138,7 +11124,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::template_element_list::FormatTsTemplateElementList::default(),
+            crate::ts::lists::template_element_list::FormatTsTemplateElementList,
         )
     }
 }
@@ -11151,7 +11137,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::template_element_list::FormatTsTemplateElementList::default(),
+            crate::ts::lists::template_element_list::FormatTsTemplateElementList,
         )
     }
 }
@@ -11165,7 +11151,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList::default(),
+            crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList,
         )
     }
 }
@@ -11178,7 +11164,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList::default(),
+            crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList,
         )
     }
 }
@@ -11192,7 +11178,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::type_argument_list::FormatTsTypeArgumentList::default(),
+            crate::ts::lists::type_argument_list::FormatTsTypeArgumentList,
         )
     }
 }
@@ -11205,7 +11191,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::type_argument_list::FormatTsTypeArgumentList::default(),
+            crate::ts::lists::type_argument_list::FormatTsTypeArgumentList,
         )
     }
 }
@@ -11246,7 +11232,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::type_member_list::FormatTsTypeMemberList::default(),
+            crate::ts::lists::type_member_list::FormatTsTypeMemberList,
         )
     }
 }
@@ -11259,7 +11245,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::type_member_list::FormatTsTypeMemberList::default(),
+            crate::ts::lists::type_member_list::FormatTsTypeMemberList,
         )
     }
 }
@@ -11273,7 +11259,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::lists::type_parameter_list::FormatTsTypeParameterList::default(),
+            crate::ts::lists::type_parameter_list::FormatTsTypeParameterList,
         )
     }
 }
@@ -11286,7 +11272,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::lists::type_parameter_list::FormatTsTypeParameterList::default(),
+            crate::ts::lists::type_parameter_list::FormatTsTypeParameterList,
         )
     }
 }
@@ -11384,7 +11370,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bogus::bogus_statement::FormatJsBogusStatement::default(),
+            crate::js::bogus::bogus_statement::FormatJsBogusStatement,
         )
     }
 }
@@ -11397,7 +11383,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bogus::bogus_statement::FormatJsBogusStatement::default(),
+            crate::js::bogus::bogus_statement::FormatJsBogusStatement,
         )
     }
 }
@@ -11424,7 +11410,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bogus::bogus_expression::FormatJsBogusExpression::default(),
+            crate::js::bogus::bogus_expression::FormatJsBogusExpression,
         )
     }
 }
@@ -11437,7 +11423,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bogus::bogus_expression::FormatJsBogusExpression::default(),
+            crate::js::bogus::bogus_expression::FormatJsBogusExpression,
         )
     }
 }
@@ -11536,7 +11522,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bogus::bogus_assignment::FormatJsBogusAssignment::default(),
+            crate::js::bogus::bogus_assignment::FormatJsBogusAssignment,
         )
     }
 }
@@ -11549,7 +11535,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusAssignment {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bogus::bogus_assignment::FormatJsBogusAssignment::default(),
+            crate::js::bogus::bogus_assignment::FormatJsBogusAssignment,
         )
     }
 }
@@ -11576,7 +11562,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::bogus::bogus_parameter::FormatJsBogusParameter::default(),
+            crate::js::bogus::bogus_parameter::FormatJsBogusParameter,
         )
     }
 }
@@ -11589,7 +11575,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::bogus::bogus_parameter::FormatJsBogusParameter::default(),
+            crate::js::bogus::bogus_parameter::FormatJsBogusParameter,
         )
     }
 }
@@ -11775,7 +11761,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::for_initializer::FormatAnyJsForInitializer::default(),
+            crate::js::any::for_initializer::FormatAnyJsForInitializer,
         )
     }
 }
@@ -11788,7 +11774,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::for_initializer::FormatAnyJsForInitializer::default(),
+            crate::js::any::for_initializer::FormatAnyJsForInitializer,
         )
     }
 }
@@ -11802,7 +11788,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer::default(),
+            crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer,
         )
     }
 }
@@ -11815,7 +11801,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer::default(),
+            crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer,
         )
     }
 }
@@ -11829,7 +11815,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern::default(),
+            crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern,
         )
     }
 }
@@ -11842,7 +11828,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern::default(),
+            crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern,
         )
     }
 }
@@ -11883,7 +11869,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::binding_pattern::FormatAnyJsBindingPattern::default(),
+            crate::js::any::binding_pattern::FormatAnyJsBindingPattern,
         )
     }
 }
@@ -11896,7 +11882,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::binding_pattern::FormatAnyJsBindingPattern::default(),
+            crate::js::any::binding_pattern::FormatAnyJsBindingPattern,
         )
     }
 }
@@ -11910,7 +11896,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::declaration_clause::FormatAnyJsDeclarationClause::default(),
+            crate::js::any::declaration_clause::FormatAnyJsDeclarationClause,
         )
     }
 }
@@ -11923,7 +11909,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::declaration_clause::FormatAnyJsDeclarationClause::default(),
+            crate::js::any::declaration_clause::FormatAnyJsDeclarationClause,
         )
     }
 }
@@ -11937,7 +11923,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::literal_expression::FormatAnyJsLiteralExpression::default(),
+            crate::js::any::literal_expression::FormatAnyJsLiteralExpression,
         )
     }
 }
@@ -11950,7 +11936,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::literal_expression::FormatAnyJsLiteralExpression::default(),
+            crate::js::any::literal_expression::FormatAnyJsLiteralExpression,
         )
     }
 }
@@ -11964,7 +11950,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::template_element::FormatAnyJsTemplateElement::default(),
+            crate::js::any::template_element::FormatAnyJsTemplateElement,
         )
     }
 }
@@ -11977,7 +11963,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::template_element::FormatAnyJsTemplateElement::default(),
+            crate::js::any::template_element::FormatAnyJsTemplateElement,
         )
     }
 }
@@ -12012,8 +11998,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParameters
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters::default(
-            ),
+            crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters,
         )
     }
 }
@@ -12026,8 +12011,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParamete
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters::default(
-            ),
+            crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters,
         )
     }
 }
@@ -12165,7 +12149,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::object_member_name::FormatAnyJsObjectMemberName::default(),
+            crate::js::any::object_member_name::FormatAnyJsObjectMemberName,
         )
     }
 }
@@ -12178,7 +12162,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::object_member_name::FormatAnyJsObjectMemberName::default(),
+            crate::js::any::object_member_name::FormatAnyJsObjectMemberName,
         )
     }
 }
@@ -12219,7 +12203,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::formal_parameter::FormatAnyJsFormalParameter::default(),
+            crate::js::any::formal_parameter::FormatAnyJsFormalParameter,
         )
     }
 }
@@ -12232,7 +12216,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::formal_parameter::FormatAnyJsFormalParameter::default(),
+            crate::js::any::formal_parameter::FormatAnyJsFormalParameter,
         )
     }
 }
@@ -12289,7 +12273,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::class_member_name::FormatAnyJsClassMemberName::default(),
+            crate::js::any::class_member_name::FormatAnyJsClassMemberName,
         )
     }
 }
@@ -12302,7 +12286,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::class_member_name::FormatAnyJsClassMemberName::default(),
+            crate::js::any::class_member_name::FormatAnyJsClassMemberName,
         )
     }
 }
@@ -12316,7 +12300,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter::default(),
+            crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter,
         )
     }
 }
@@ -12329,7 +12313,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter::default(),
+            crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter,
         )
     }
 }
@@ -12364,7 +12348,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation::default(),
+            crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation,
         )
     }
 }
@@ -12377,7 +12361,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation::default(),
+            crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation,
         )
     }
 }
@@ -12391,7 +12375,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::property_modifier::FormatAnyJsPropertyModifier::default(),
+            crate::js::any::property_modifier::FormatAnyJsPropertyModifier,
         )
     }
 }
@@ -12404,7 +12388,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::property_modifier::FormatAnyJsPropertyModifier::default(),
+            crate::js::any::property_modifier::FormatAnyJsPropertyModifier,
         )
     }
 }
@@ -12460,7 +12444,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::method_modifier::FormatAnyJsMethodModifier::default(),
+            crate::js::any::method_modifier::FormatAnyJsMethodModifier,
         )
     }
 }
@@ -12473,7 +12457,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::method_modifier::FormatAnyJsMethodModifier::default(),
+            crate::js::any::method_modifier::FormatAnyJsMethodModifier,
         )
     }
 }
@@ -12487,8 +12471,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifier
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier::default(
-            ),
+            crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier,
         )
     }
 }
@@ -12501,8 +12484,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifi
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier::default(
-            ),
+            crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier,
         )
     }
 }
@@ -12516,7 +12498,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifier 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier::default(),
+            crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier,
         )
     }
 }
@@ -12529,7 +12511,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifie
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier::default(),
+            crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier,
         )
     }
 }
@@ -12697,7 +12679,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsVariableAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation::default(),
+            crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation,
         )
     }
 }
@@ -12710,7 +12692,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsVariableAnnotation {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation::default(),
+            crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation,
         )
     }
 }
@@ -12805,7 +12787,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier::default(),
+            crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier,
         )
     }
 }
@@ -12818,7 +12800,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier::default(),
+            crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier,
         )
     }
 }
@@ -12832,7 +12814,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
+            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
         )
     }
 }
@@ -12845,7 +12827,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
+            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
         )
     }
 }
@@ -12907,7 +12889,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier::default(),
+            crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier,
         )
     }
 }
@@ -12920,7 +12902,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier 
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier::default(),
+            crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier,
         )
     }
 }
@@ -13058,7 +13040,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::module_reference::FormatAnyTsModuleReference::default(),
+            crate::ts::any::module_reference::FormatAnyTsModuleReference,
         )
     }
 }
@@ -13071,7 +13053,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::module_reference::FormatAnyTsModuleReference::default(),
+            crate::ts::any::module_reference::FormatAnyTsModuleReference,
         )
     }
 }
@@ -13154,7 +13136,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier::default(),
+            crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier,
         )
     }
 }
@@ -13167,7 +13149,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier::default(),
+            crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier,
         )
     }
 }
@@ -13208,7 +13190,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement::default(),
+            crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement,
         )
     }
 }
@@ -13221,7 +13203,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement::default(),
+            crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement,
         )
     }
 }
@@ -13235,7 +13217,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::ts::any::template_element::FormatAnyTsTemplateElement::default(),
+            crate::ts::any::template_element::FormatAnyTsTemplateElement,
         )
     }
 }
@@ -13248,7 +13230,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::ts::any::template_element::FormatAnyTsTemplateElement::default(),
+            crate::ts::any::template_element::FormatAnyTsTemplateElement,
         )
     }
 }
@@ -13375,7 +13357,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::any::attribute_name::FormatAnyJsxAttributeName::default(),
+            crate::jsx::any::attribute_name::FormatAnyJsxAttributeName,
         )
     }
 }
@@ -13388,7 +13370,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::any::attribute_name::FormatAnyJsxAttributeName::default(),
+            crate::jsx::any::attribute_name::FormatAnyJsxAttributeName,
         )
     }
 }
@@ -13402,7 +13384,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue::default(),
+            crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue,
         )
     }
 }
@@ -13415,7 +13397,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue::default(),
+            crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue,
         )
     }
 }
