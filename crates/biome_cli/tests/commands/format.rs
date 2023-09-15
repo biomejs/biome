@@ -2241,3 +2241,97 @@ const a = {
         result,
     ));
 }
+
+#[test]
+fn should_apply_different_indent_style() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        },
+        "javascript": {
+            "formatter": {
+                "lineWidth": 320,
+                "indentSize": 8,
+                "indentStyle": "tab"
+            }
+        },
+        "json": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentSize": 2,
+                "indentStyle": "tab"
+            }
+        }
+    }"#,
+    );
+
+    let json_file_content = r#"
+{
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), json_file_content.as_bytes());
+
+    let js_file_content = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                json_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut file = fs
+        .open(js_file)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert!(content.contains('\t'), "should not contain tabs");
+
+    drop(file);
+
+    let mut file = fs
+        .open(json_file)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert!(content.contains('\t'), "should not contain tabs");
+
+    drop(file);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_different_indent_style",
+        fs,
+        console,
+        result,
+    ));
+}

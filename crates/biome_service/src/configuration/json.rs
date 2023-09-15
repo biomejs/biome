@@ -62,7 +62,7 @@ impl MergeWith<JsonParser> for JsonParser {
 
 #[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(default, deny_unknown_fields)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonFormatter {
     /// Control the formatter for JSON (and its super languages) files.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -84,6 +84,7 @@ pub struct JsonFormatter {
         deserialize_with = "deserialize_line_width",
         serialize_with = "serialize_line_width"
     )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 }

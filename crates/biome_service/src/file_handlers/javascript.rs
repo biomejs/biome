@@ -97,29 +97,20 @@ impl Language for JsLanguage {
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        let indent_style = {
-            let indent_style = language.indent_style.unwrap_or_default();
-            if indent_style != IndentStyle::default() {
-                indent_style
-            } else {
-                global.indent_style.unwrap_or_default()
-            }
+        let indent_style = if let Some(indent_style) = language.indent_style {
+            indent_style
+        } else {
+            global.indent_style.unwrap_or_default()
         };
-        let line_width = {
-            let line_width = language.line_width.unwrap_or_default();
-            if line_width != LineWidth::default() {
-                line_width
-            } else {
-                global.line_width.unwrap_or_default()
-            }
+        let line_width = if let Some(line_width) = language.line_width {
+            line_width
+        } else {
+            global.line_width.unwrap_or_default()
         };
-        let indent_width = {
-            let indent_width = language.indent_width.unwrap_or_default();
-            if indent_width != IndentWidth::default() {
-                indent_width
-            } else {
-                global.indent_size.unwrap_or_default()
-            }
+        let indent_width = if let Some(indent_width) = language.indent_width {
+            indent_width
+        } else {
+            global.indent_size.unwrap_or_default()
         };
         JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(indent_style)
