@@ -5,6 +5,7 @@ use biome_analyze::declare_group;
 pub(crate) mod no_confusing_void_type;
 pub(crate) mod no_excessive_complexity;
 pub(crate) mod no_fallthrough_switch_clause;
+pub(crate) mod no_misleading_instantiator;
 pub(crate) mod no_void;
 pub(crate) mod use_arrow_function;
 pub(crate) mod use_collapsed_else_if;
@@ -18,6 +19,7 @@ declare_group! {
             self :: no_confusing_void_type :: NoConfusingVoidType ,
             self :: no_excessive_complexity :: NoExcessiveComplexity ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
+            self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
             self :: no_void :: NoVoid ,
             self :: use_arrow_function :: UseArrowFunction ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,

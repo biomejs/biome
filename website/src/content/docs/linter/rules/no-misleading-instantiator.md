@@ -21,45 +21,13 @@ Source: https://typescript-eslint.io/rules/no-misused-new/
 ### Invalid
 
 ```ts
-declare class C {
-  new(): C;
-}
-```
-
-<pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/lint/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in classes.</span>
-  
-    <strong>1 │ </strong>declare class C {
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  new(): C;
-   <strong>   │ </strong>  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>}
-    <strong>4 │ </strong>
-  
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> is typically used to instantiate objects. In classes, its usage can be misleading.</span>
-  
-nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/lint/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in classes.</span>
-  
-    <strong>1 │ </strong>declare class C {
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  new(): C;
-   <strong>   │ </strong>  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>}
-    <strong>4 │ </strong>
-  
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> is typically used to instantiate objects. In classes, its usage can be misleading.</span>
-  
-</code></pre>
-
-```ts
 interface I {
   new (): I;
   constructor(): void;
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/lint/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/linter/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in interfaces.</span>
   
@@ -70,6 +38,26 @@ interface I {
     <strong>4 │ </strong>}
   
 <strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type.</span>
+  
+</code></pre>
+
+```ts
+class C {
+  new(): C;
+}
+```
+
+<pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/linter/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in classes.</span>
+  
+    <strong>1 │ </strong>class C {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  new(): C;
+   <strong>   │ </strong>  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>}
+    <strong>4 │ </strong>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> is typically used to instantiate objects. In classes, its usage can be misleading.</span>
   
 </code></pre>
 

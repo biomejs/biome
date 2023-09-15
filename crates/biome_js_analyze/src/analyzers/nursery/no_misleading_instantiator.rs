@@ -24,15 +24,15 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```ts,expect_diagnostic
-    /// declare class C {
-    ///   new(): C;
+    /// interface I {
+    ///   new (): I;
+    ///   constructor(): void;
     /// }
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// interface I {
-    ///   new (): I;
-    ///   constructor(): void;
+    /// class C {
+    ///   new(): C;
     /// }
     /// ```
     ///

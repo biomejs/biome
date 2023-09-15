@@ -1012,65 +1012,6 @@
 						{ "type": "null" }
 					]
 				},
-<<<<<<< HEAD
-||||||| parent of 059b99ab88 (feat(lint): noMisusedNew)
-				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNonoctalDecimalEscape": {
-					"description": "Disallow \\8 and \\9 escape sequences in string literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRedundantRoles": {
-					"description": "Enforce explicit role property is not the same as implicit/default role property on an element.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSelfAssign": {
-					"description": "Disallow assignments where both sides are exactly the same.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noStaticOnlyClass": {
-					"description": "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnsafeDeclarationMerging": {
-					"description": "Disallow unsafe declaration merging between interfaces and classes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessEmptyExport": {
-					"description": "Disallow empty exports that don't change anything in a module file.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessThisAlias": {
-					"description": "Disallow useless this aliasing.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-=======
 				"noMisleadingInstantiator": {
 					"description": "Enforce proper usage of new and constructor.",
 					"anyOf": [
@@ -1078,63 +1019,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNonoctalDecimalEscape": {
-					"description": "Disallow \\8 and \\9 escape sequences in string literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRedundantRoles": {
-					"description": "Enforce explicit role property is not the same as implicit/default role property on an element.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSelfAssign": {
-					"description": "Disallow assignments where both sides are exactly the same.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noStaticOnlyClass": {
-					"description": "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnsafeDeclarationMerging": {
-					"description": "Disallow unsafe declaration merging between interfaces and classes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessEmptyExport": {
-					"description": "Disallow empty exports that don't change anything in a module file.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessThisAlias": {
-					"description": "Disallow useless this aliasing.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
->>>>>>> 059b99ab88 (feat(lint): noMisusedNew)
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
