@@ -24,13 +24,7 @@ expression: content
 ## `fix.ts`
 
 ```ts
-const bannedType: Boolean = true;
-
-if (true) {
-	const obj = {};
-	obj["useLiteralKey"];
-}
-		
+let confusingVoidType: void;
 ```
 
 # Termination Message
@@ -47,44 +41,14 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.ts:5:6 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The computed expression can be simplified without the use of a string literal.
-  
-    3 │ if (true) {
-    4 │ 	const obj = {};
-  > 5 │ 	obj["useLiteralKey"];
-      │ 	    ^^^^^^^^^^^^^^^
-    6 │ }
-    7 │ 		
-  
-  i Suggested fix: Use a literal key instead.
-  
-    3 3 │   if (true) {
-    4 4 │   	const obj = {};
-    5   │ - → obj["useLiteralKey"];
-      5 │ + → obj.useLiteralKey;
-    6 6 │   }
-    7 7 │   		
-  
-
-```
-
-```block
-fix.ts lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
-
-```
-
-```block
 fix.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Formatter would have printed the following content:
   
-    7 │ → → 
-      │ ----
+    1   │ - let·confusingVoidType:·void;
+      1 │ + let·confusingVoidType:·void;
+      2 │ + 
+  
 
 ```
 

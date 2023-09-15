@@ -3,6 +3,10 @@ title: noRedundantRoles (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Enforce explicit `role` property is not the same as implicit/default role property on an element.
 
 ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md)
@@ -15,7 +19,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <article role='article'></article>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:15 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:15 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'article' on the 'article' element is redundant.</span>
   
@@ -33,7 +37,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <button role='button'></button>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:14 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:14 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'button' on the 'button' element is redundant.</span>
   
@@ -51,7 +55,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 <h1 role='heading' aria-level='1'>title</h1>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noRedundantRoles.js:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/nursery/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'heading' on the 'h1' element is redundant.</span>
   

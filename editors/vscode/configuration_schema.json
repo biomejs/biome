@@ -76,6 +76,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAriaUnsupportedElements": {
+					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAutofocus": {
 					"description": "Enforce that autoFocus prop is not used on elements.",
 					"anyOf": [
@@ -111,6 +118,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNoninteractiveTabindex": {
+					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPositiveTabindex": {
 					"description": "Prevent the usage of positive integers on tabIndex property",
 					"anyOf": [
@@ -120,6 +134,13 @@
 				},
 				"noRedundantAlt": {
 					"description": "Enforce img alt prop does not contain the word \"image\", \"picture\", or \"photo\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRedundantRoles": {
+					"description": "Enforce explicit role property is not the same as implicit/default role property on an element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -220,6 +241,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useValidAriaValues": {
+					"description": "Enforce that ARIA state and property values are valid.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidLang": {
 					"description": "Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.",
 					"anyOf": [
@@ -237,6 +265,13 @@
 				"all": {
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
+				},
+				"noBannedTypes": {
+					"description": "Disallow primitive type aliases and misleading types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
@@ -259,6 +294,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noStaticOnlyClass": {
+					"description": "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessCatch": {
 					"description": "Disallow unnecessary catch clauses.",
 					"anyOf": [
@@ -268,6 +310,13 @@
 				},
 				"noUselessConstructor": {
 					"description": "Disallow unnecessary constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessEmptyExport": {
+					"description": "Disallow empty exports that don't change anything in a module file.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -296,6 +345,13 @@
 				},
 				"noUselessSwitchCase": {
 					"description": "Disallow useless case in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessThisAlias": {
+					"description": "Disallow useless this aliasing.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -392,6 +448,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConstantCondition": {
+					"description": "Disallow constant expressions in conditions",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConstructorReturn": {
 					"description": "Disallow returning a value from a constructor.",
 					"anyOf": [
@@ -434,6 +497,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonoctalDecimalEscape": {
+					"description": "Disallow \\8 and \\9 escape sequences in string literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPrecisionLoss": {
 					"description": "Disallow literal numbers that lose precision",
 					"anyOf": [
@@ -443,6 +513,13 @@
 				},
 				"noRenderReturnValue": {
 					"description": "Prevent the usage of the return value of React.render.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSelfAssign": {
+					"description": "Disallow assignments where both sides are exactly the same.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -895,36 +972,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noAriaUnsupportedElements": {
-					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noBannedTypes": {
-					"description": "Disallow primitive type aliases and misleading types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConfusingVoidType": {
 					"description": "Disallow void type outside of generic or return types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noConstantCondition": {
-					"description": "Disallow constant expressions in conditions",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noControlCharactersInRegex": {
-					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expressions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -965,62 +1014,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNonoctalDecimalEscape": {
-					"description": "Disallow \\8 and \\9 escape sequences in string literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRedundantRoles": {
-					"description": "Enforce explicit role property is not the same as implicit/default role property on an element.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSelfAssign": {
-					"description": "Disallow assignments where both sides are exactly the same.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noStaticOnlyClass": {
-					"description": "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnsafeDeclarationMerging": {
-					"description": "Disallow unsafe declaration merging between interfaces and classes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessEmptyExport": {
-					"description": "Disallow empty exports that don't change anything in a module file.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessThisAlias": {
-					"description": "Disallow useless this aliasing.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
@@ -1031,13 +1024,6 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
-				},
-				"useAriaPropTypes": {
-					"description": "Enforce that ARIA state and property values are valid.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
 				},
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.",
@@ -1055,13 +1041,6 @@
 				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGetterReturn": {
-					"description": "Enforce get methods to always return a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1090,20 +1069,6 @@
 				},
 				"useIsArray": {
 					"description": "Use Array.isArray() instead of instanceof Array.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useLiteralEnumMembers": {
-					"description": "Require all enum members to be literal values.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNamingConvention": {
-					"description": "Enforce naming conventions for everything across a codebase.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1429,6 +1394,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useLiteralEnumMembers": {
+					"description": "Require all enum members to be literal values.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamingConvention": {
+					"description": "Enforce naming conventions for everything across a codebase.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNumericLiterals": {
 					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
@@ -1553,6 +1532,13 @@
 				},
 				"noConstEnum": {
 					"description": "Disallow TypeScript const enum",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noControlCharactersInRegex": {
+					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expressions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1691,6 +1677,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnsafeDeclarationMerging": {
+					"description": "Disallow unsafe declaration merging between interfaces and classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafeNegation": {
 					"description": "Disallow using unsafe negation.",
 					"anyOf": [
@@ -1704,6 +1697,13 @@
 				},
 				"useDefaultSwitchClauseLast": {
 					"description": "Enforce default clauses in switch statements to be last",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGetterReturn": {
+					"description": "Enforce get methods to always return a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

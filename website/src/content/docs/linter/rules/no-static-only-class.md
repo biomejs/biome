@@ -3,6 +3,10 @@ title: noStaticOnlyClass (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 
 Users who come from a [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming) paradigm may wrap their utility functions in an extra class,
@@ -28,7 +32,7 @@ class X {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   
@@ -54,7 +58,7 @@ class StaticConstants {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'readonly' modifier can only be used in TypeScript files</span>
   
@@ -106,7 +110,7 @@ export class Utilities {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noStaticOnlyClass.js:1:8 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/nursery/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noStaticOnlyClass.js:1:8 <a href="https://biomejs.dev/linter/rules/no-static-only-class">lint/complexity/noStaticOnlyClass</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid classes that contain only static members.</span>
   

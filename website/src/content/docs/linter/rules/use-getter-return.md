@@ -3,6 +3,10 @@ title: useGetterReturn (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Enforce `get` methods to always return a value.
 
 Source: https://eslint.org/docs/latest/rules/getter-return
@@ -17,7 +21,7 @@ class Person {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useGetterReturn.js:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/nursery/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>getter</strong></span><span style="color: Tomato;"> should </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   
@@ -37,7 +41,7 @@ const obj = {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useGetterReturn.js:3:9 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/nursery/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:3:9 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> should return a value because it is located in a </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;">.</span>
   
@@ -62,7 +66,7 @@ class Option {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useGetterReturn.js:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found ','</span>
   

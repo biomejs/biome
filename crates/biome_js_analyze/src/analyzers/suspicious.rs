@@ -8,6 +8,7 @@ pub(crate) mod no_comment_text;
 pub(crate) mod no_compare_neg_zero;
 pub(crate) mod no_confusing_labels;
 pub(crate) mod no_const_enum;
+pub(crate) mod no_control_characters_in_regex;
 pub(crate) mod no_debugger;
 pub(crate) mod no_double_equals;
 pub(crate) mod no_duplicate_case;
@@ -24,6 +25,7 @@ pub(crate) mod no_shadow_restricted_names;
 pub(crate) mod no_sparse_array;
 pub(crate) mod no_unsafe_negation;
 pub(crate) mod use_default_switch_clause_last;
+pub(crate) mod use_getter_return;
 pub(crate) mod use_namespace_keyword;
 pub(crate) mod use_valid_typeof;
 
@@ -37,6 +39,7 @@ declare_group! {
             self :: no_compare_neg_zero :: NoCompareNegZero ,
             self :: no_confusing_labels :: NoConfusingLabels ,
             self :: no_const_enum :: NoConstEnum ,
+            self :: no_control_characters_in_regex :: NoControlCharactersInRegex ,
             self :: no_debugger :: NoDebugger ,
             self :: no_double_equals :: NoDoubleEquals ,
             self :: no_duplicate_case :: NoDuplicateCase ,
@@ -53,6 +56,7 @@ declare_group! {
             self :: no_sparse_array :: NoSparseArray ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
+            self :: use_getter_return :: UseGetterReturn ,
             self :: use_namespace_keyword :: UseNamespaceKeyword ,
             self :: use_valid_typeof :: UseValidTypeof ,
         ]

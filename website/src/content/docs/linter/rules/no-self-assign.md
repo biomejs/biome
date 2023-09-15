@@ -3,6 +3,10 @@ title: noSelfAssign (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Disallow assignments where both sides are exactly the same.
 
 Self assignments have no effect, so probably those are an error due to incomplete refactoring.
@@ -17,7 +21,7 @@ Source: https://eslint.org/docs/latest/rules/no-self-assign
 a = a;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:5 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:5 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">a is assigned to itself.</span>
   
@@ -37,7 +41,7 @@ a = a;
 [a] = [a];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:8 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:8 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">a is assigned to itself.</span>
   
@@ -57,7 +61,7 @@ a = a;
 ({a: b} = {a: b});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:15 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:15 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">b is assigned to itself.</span>
   
@@ -77,7 +81,7 @@ a = a;
 a.b = a.b;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:9 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:9 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">b is assigned to itself.</span>
   
@@ -97,7 +101,7 @@ a.b = a.b;
 a[b] = a[b];
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:10 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:10 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">b is assigned to itself.</span>
   
@@ -117,7 +121,7 @@ a[b] = a[b];
 a[b].foo = a[b].foo;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:17 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:17 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">foo is assigned to itself.</span>
   
@@ -137,7 +141,7 @@ a[b].foo = a[b].foo;
 a['b'].foo = a['b'].foo;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noSelfAssign.js:1:21 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/nursery/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">correctness/noSelfAssign.js:1:21 <a href="https://biomejs.dev/linter/rules/no-self-assign">lint/correctness/noSelfAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">foo is assigned to itself.</span>
   

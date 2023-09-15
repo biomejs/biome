@@ -2133,7 +2133,7 @@ fn should_not_enable_nursery_rules() {
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
     let file_path = Path::new("fix.ts");
-    fs.insert(file_path.into(), r#"const bannedType: Boolean = true;"#);
+    fs.insert(file_path.into(), r#"let confusingVoidType: void;"#);
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),

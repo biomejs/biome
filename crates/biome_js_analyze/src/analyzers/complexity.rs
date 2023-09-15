@@ -5,8 +5,10 @@ use biome_analyze::declare_group;
 pub(crate) mod no_extra_boolean_cast;
 pub(crate) mod no_for_each;
 pub(crate) mod no_multiple_spaces_in_regular_expression_literals;
+pub(crate) mod no_static_only_class;
 pub(crate) mod no_useless_catch;
 pub(crate) mod no_useless_constructor;
+pub(crate) mod no_useless_empty_export;
 pub(crate) mod no_useless_label;
 pub(crate) mod no_useless_rename;
 pub(crate) mod no_useless_switch_case;
@@ -25,8 +27,10 @@ declare_group! {
             self :: no_extra_boolean_cast :: NoExtraBooleanCast ,
             self :: no_for_each :: NoForEach ,
             self :: no_multiple_spaces_in_regular_expression_literals :: NoMultipleSpacesInRegularExpressionLiterals ,
+            self :: no_static_only_class :: NoStaticOnlyClass ,
             self :: no_useless_catch :: NoUselessCatch ,
             self :: no_useless_constructor :: NoUselessConstructor ,
+            self :: no_useless_empty_export :: NoUselessEmptyExport ,
             self :: no_useless_label :: NoUselessLabel ,
             self :: no_useless_rename :: NoUselessRename ,
             self :: no_useless_switch_case :: NoUselessSwitchCase ,

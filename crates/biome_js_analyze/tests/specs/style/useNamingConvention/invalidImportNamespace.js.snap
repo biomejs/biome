@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportNamespace.js
+---
+# Input
+```js
+import * as X from ""
+
+import * as PascalCase from ""
+
+import * as CONSTANT_CASE from ""
+
+import * as snake_case from ""
+
+import * as Unknown_Style from ""
+
+```
+
+# Diagnostics
+```
+invalidImportNamespace.js:5:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import namespace name should be in camelCase or PascalCase.
+  
+    3 │ import * as PascalCase from ""
+    4 │ 
+  > 5 │ import * as CONSTANT_CASE from ""
+      │             ^^^^^^^^^^^^^
+    6 │ 
+    7 │ import * as snake_case from ""
+  
+  i The name could be renamed to `constantCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     3  3 │   import * as PascalCase from ""
+     4  4 │   
+     5    │ - import·*·as·CONSTANT_CASE·from·""
+        5 │ + import·*·as·constantCase·from·""
+     6  6 │   
+     7  7 │   import * as snake_case from ""
+  
+
+```
+
+```
+invalidImportNamespace.js:7:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import namespace name should be in camelCase or PascalCase.
+  
+    5 │ import * as CONSTANT_CASE from ""
+    6 │ 
+  > 7 │ import * as snake_case from ""
+      │             ^^^^^^^^^^
+    8 │ 
+    9 │ import * as Unknown_Style from ""
+  
+  i The name could be renamed to `snakeCase`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     5  5 │   import * as CONSTANT_CASE from ""
+     6  6 │   
+     7    │ - import·*·as·snake_case·from·""
+        7 │ + import·*·as·snakeCase·from·""
+     8  8 │   
+     9  9 │   import * as Unknown_Style from ""
+  
+
+```
+
+```
+invalidImportNamespace.js:9:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import namespace name should be in camelCase or PascalCase.
+  
+     7 │ import * as snake_case from ""
+     8 │ 
+   > 9 │ import * as Unknown_Style from ""
+       │             ^^^^^^^^^^^^^
+    10 │ 
+  
+  i The name could be renamed to `unknownStyle`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     7  7 │   import * as snake_case from ""
+     8  8 │   
+     9    │ - import·*·as·Unknown_Style·from·""
+        9 │ + import·*·as·unknownStyle·from·""
+    10 10 │   
+  
+
+```
+
+

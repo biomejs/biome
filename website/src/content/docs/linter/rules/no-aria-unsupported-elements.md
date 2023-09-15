@@ -3,6 +3,10 @@ title: noAriaUnsupportedElements (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
 
 Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-unsupported-elements.md
@@ -15,7 +19,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <meta charset="UTF-8" role="meta" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAriaUnsupportedElements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-unsupported-elements">lint/nursery/noAriaUnsupportedElements</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noAriaUnsupportedElements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-unsupported-elements">lint/a11y/noAriaUnsupportedElements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the </span><span style="color: Tomato;"><strong>role</strong></span><span style="color: Tomato;"> attribute and </span><span style="color: Tomato;"><strong>aria-*</strong></span><span style="color: Tomato;"> attributes when using </span><span style="color: Tomato;"><strong>meta</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>script</strong></span><span style="color: Tomato;">, and </span><span style="color: Tomato;"><strong>style</strong></span><span style="color: Tomato;"> elements.</span>
   
@@ -31,7 +35,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <html aria-required="true" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAriaUnsupportedElements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-unsupported-elements">lint/nursery/noAriaUnsupportedElements</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noAriaUnsupportedElements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-unsupported-elements">lint/a11y/noAriaUnsupportedElements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid the </span><span style="color: Tomato;"><strong>role</strong></span><span style="color: Tomato;"> attribute and </span><span style="color: Tomato;"><strong>aria-*</strong></span><span style="color: Tomato;"> attributes when using </span><span style="color: Tomato;"><strong>meta</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>html</strong></span><span style="color: Tomato;">, </span><span style="color: Tomato;"><strong>script</strong></span><span style="color: Tomato;">, and </span><span style="color: Tomato;"><strong>style</strong></span><span style="color: Tomato;"> elements.</span>
   

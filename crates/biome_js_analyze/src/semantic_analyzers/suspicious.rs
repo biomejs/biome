@@ -11,6 +11,7 @@ pub(crate) mod no_function_assign;
 pub(crate) mod no_import_assign;
 pub(crate) mod no_label_var;
 pub(crate) mod no_redeclare;
+pub(crate) mod no_unsafe_declaration_merging;
 
 declare_group! {
     pub (crate) Suspicious {
@@ -25,6 +26,7 @@ declare_group! {
             self :: no_import_assign :: NoImportAssign ,
             self :: no_label_var :: NoLabelVar ,
             self :: no_redeclare :: NoRedeclare ,
+            self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
         ]
      }
 }

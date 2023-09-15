@@ -14,6 +14,7 @@ pub(crate) mod use_block_statements;
 pub(crate) mod use_default_parameter_last;
 pub(crate) mod use_enum_initializers;
 pub(crate) mod use_exponentiation_operator;
+pub(crate) mod use_literal_enum_members;
 pub(crate) mod use_numeric_literals;
 pub(crate) mod use_self_closing_elements;
 pub(crate) mod use_shorthand_array_type;
@@ -38,6 +39,7 @@ declare_group! {
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,
+            self :: use_literal_enum_members :: UseLiteralEnumMembers ,
             self :: use_numeric_literals :: UseNumericLiterals ,
             self :: use_self_closing_elements :: UseSelfClosingElements ,
             self :: use_shorthand_array_type :: UseShorthandArrayType ,

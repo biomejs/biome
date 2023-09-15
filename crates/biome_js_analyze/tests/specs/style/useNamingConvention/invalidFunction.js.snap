@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunction.js
+---
+# Input
+```js
+function PERSON() {}
+
+function special_function() {}
+
+function Unknown_Style() {}
+
+const g = function SPECIAL_FUNCTION() {}
+```
+
+# Diagnostics
+```
+invalidFunction.js:1:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name should be in camelCase or PascalCase.
+  
+  > 1 │ function PERSON() {}
+      │          ^^^^^^
+    2 │ 
+    3 │ function special_function() {}
+  
+  i The name could be renamed to `person`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    1   │ - function·PERSON()·{}
+      1 │ + function·person()·{}
+    2 2 │   
+    3 3 │   function special_function() {}
+  
+
+```
+
+```
+invalidFunction.js:3:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name should be in camelCase or PascalCase.
+  
+    1 │ function PERSON() {}
+    2 │ 
+  > 3 │ function special_function() {}
+      │          ^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ function Unknown_Style() {}
+  
+  i The name could be renamed to `specialFunction`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    1 1 │   function PERSON() {}
+    2 2 │   
+    3   │ - function·special_function()·{}
+      3 │ + function·specialFunction()·{}
+    4 4 │   
+    5 5 │   function Unknown_Style() {}
+  
+
+```
+
+```
+invalidFunction.js:5:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name should be in camelCase or PascalCase.
+  
+    3 │ function special_function() {}
+    4 │ 
+  > 5 │ function Unknown_Style() {}
+      │          ^^^^^^^^^^^^^
+    6 │ 
+    7 │ const g = function SPECIAL_FUNCTION() {}
+  
+  i The name could be renamed to `unknownStyle`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    3 3 │   function special_function() {}
+    4 4 │   
+    5   │ - function·Unknown_Style()·{}
+      5 │ + function·unknownStyle()·{}
+    6 6 │   
+    7 7 │   const g = function SPECIAL_FUNCTION() {}
+  
+
+```
+
+```
+invalidFunction.js:7:20 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name should be in camelCase or PascalCase.
+  
+    5 │ function Unknown_Style() {}
+    6 │ 
+  > 7 │ const g = function SPECIAL_FUNCTION() {}
+      │                    ^^^^^^^^^^^^^^^^
+  
+  i The name could be renamed to `specialFunction`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    5 5 │   function Unknown_Style() {}
+    6 6 │   
+    7   │ - const·g·=·function·SPECIAL_FUNCTION()·{}
+      7 │ + const·g·=·function·specialFunction()·{}
+  
+
+```
+
+

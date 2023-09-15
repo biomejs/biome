@@ -1,0 +1,241 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLocalVariable.js
+---
+# Input
+```js
+export default function () {
+    const X = 0
+
+    const PascalCaseConst = 0
+
+    let PascalCaseLet
+
+    var PascalCaseVar
+
+    const CONSTANT_CASE_CONST = 0
+
+    let CONSTANT_CASE_LET
+
+    var CONSTANT_CASE_VAR
+}
+
+export function f() {
+    const a_var = 0;
+    console.log(a_var);
+    return a_var;
+}
+
+```
+
+# Diagnostics
+```
+invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase.
+  
+    1 │ export default function () {
+  > 2 │     const X = 0
+      │           ^
+    3 │ 
+    4 │     const PascalCaseConst = 0
+  
+  i The name could be renamed to `x`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     1  1 │   export default function () {
+     2    │ - ····const·X·=·0
+        2 │ + ····const·x·=·0
+     3  3 │   
+     4  4 │       const PascalCaseConst = 0
+  
+
+```
+
+```
+invalidLocalVariable.js:4:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase.
+  
+    2 │     const X = 0
+    3 │ 
+  > 4 │     const PascalCaseConst = 0
+      │           ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │     let PascalCaseLet
+  
+  i The name could be renamed to `pascalCaseConst`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     2  2 │       const X = 0
+     3  3 │   
+     4    │ - ····const·PascalCaseConst·=·0
+        4 │ + ····const·pascalCaseConst·=·0
+     5  5 │   
+     6  6 │       let PascalCaseLet
+  
+
+```
+
+```
+invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local let name should be in camelCase.
+  
+    4 │     const PascalCaseConst = 0
+    5 │ 
+  > 6 │     let PascalCaseLet
+      │         ^^^^^^^^^^^^^
+    7 │ 
+    8 │     var PascalCaseVar
+  
+  i The name could be renamed to `pascalCaseLet`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     4  4 │       const PascalCaseConst = 0
+     5  5 │   
+     6    │ - ····let·PascalCaseLet
+        6 │ + ····let·pascalCaseLet
+     7  7 │   
+     8  8 │       var PascalCaseVar
+  
+
+```
+
+```
+invalidLocalVariable.js:8:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local var name should be in camelCase.
+  
+     6 │     let PascalCaseLet
+     7 │ 
+   > 8 │     var PascalCaseVar
+       │         ^^^^^^^^^^^^^
+     9 │ 
+    10 │     const CONSTANT_CASE_CONST = 0
+  
+  i The name could be renamed to `pascalCaseVar`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     6  6 │       let PascalCaseLet
+     7  7 │   
+     8    │ - ····var·PascalCaseVar
+        8 │ + ····var·pascalCaseVar
+     9  9 │   
+    10 10 │       const CONSTANT_CASE_CONST = 0
+  
+
+```
+
+```
+invalidLocalVariable.js:10:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase.
+  
+     8 │     var PascalCaseVar
+     9 │ 
+  > 10 │     const CONSTANT_CASE_CONST = 0
+       │           ^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │     let CONSTANT_CASE_LET
+  
+  i The name could be renamed to `constantCaseConst`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     8  8 │       var PascalCaseVar
+     9  9 │   
+    10    │ - ····const·CONSTANT_CASE_CONST·=·0
+       10 │ + ····const·constantCaseConst·=·0
+    11 11 │   
+    12 12 │       let CONSTANT_CASE_LET
+  
+
+```
+
+```
+invalidLocalVariable.js:12:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local let name should be in camelCase.
+  
+    10 │     const CONSTANT_CASE_CONST = 0
+    11 │ 
+  > 12 │     let CONSTANT_CASE_LET
+       │         ^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │     var CONSTANT_CASE_VAR
+  
+  i The name could be renamed to `constantCaseLet`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    10 10 │       const CONSTANT_CASE_CONST = 0
+    11 11 │   
+    12    │ - ····let·CONSTANT_CASE_LET
+       12 │ + ····let·constantCaseLet
+    13 13 │   
+    14 14 │       var CONSTANT_CASE_VAR
+  
+
+```
+
+```
+invalidLocalVariable.js:14:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local var name should be in camelCase.
+  
+    12 │     let CONSTANT_CASE_LET
+    13 │ 
+  > 14 │     var CONSTANT_CASE_VAR
+       │         ^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i The name could be renamed to `constantCaseVar`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    12 12 │       let CONSTANT_CASE_LET
+    13 13 │   
+    14    │ - ····var·CONSTANT_CASE_VAR
+       14 │ + ····var·constantCaseVar
+    15 15 │   }
+    16 16 │   
+  
+
+```
+
+```
+invalidLocalVariable.js:18:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This local const name should be in camelCase.
+  
+    17 │ export function f() {
+  > 18 │     const a_var = 0;
+       │           ^^^^^
+    19 │     console.log(a_var);
+    20 │     return a_var;
+  
+  i The name could be renamed to `aVar`.
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    16 16 │   
+    17 17 │   export function f() {
+    18    │ - ····const·a_var·=·0;
+    19    │ - ····console.log(a_var);
+    20    │ - ····return·a_var;
+       18 │ + ····const·aVar·=·0;
+       19 │ + ····console.log(aVar);
+       20 │ + ····return·aVar;
+    21 21 │   }
+    22 22 │   
+  
+
+```
+
+
