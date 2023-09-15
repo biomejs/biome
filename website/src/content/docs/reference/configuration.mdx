@@ -377,8 +377,6 @@ The style of the indentation. It can be `"tab"` or `"space"`.
 
 > Default: `tab`
 
-Biome's default is `"tab"`.
-
 ### `formatter.indentSize`
 
 How big the indentation should be.
@@ -474,14 +472,6 @@ It configures where the formatter prints semicolons:
 
 > Default: `always`
 
-### `javascript.formatter.arrowParentheses`
-
-Whether to add non-necessary parentheses to arrow functions:
-- `always`, the parentheses are always added;
-- `asNeeded`, the parentheses are added only when they are needed;
-
-> Default: `always`
-
 Example:
 
 <CodeBlockHeader filename="biome.json" />
@@ -495,6 +485,40 @@ Example:
   }
 }
 ```
+
+### `javascript.formatter.arrowParentheses`
+
+Whether to add non-necessary parentheses to arrow functions:
+- `always`, the parentheses are always added;
+- `asNeeded`, the parentheses are added only when they are needed;
+
+> Default: `always`
+
+### `javascript.formatter.enabled`
+
+Enables Biome's formatter for JavaScript (and its super languages) files.
+
+> Default: `true`
+
+### `javascript.formatter.indentStyle`
+
+The style of the indentation for JavaScript (and its super languages) files. It can be `"tab"` or `"space"`.
+
+> Default: `tab`
+
+### `javascript.formatter.indentSize`
+
+How big the indentation should be for JavaScript (and its super languages) files.
+
+> Default: `2`
+
+### `javascript.formatter.lineWidth`
+
+How many characters can be written on a single line in JavaScript (and its super languages) files.
+
+> Default: `80`
+
+
 ### `javascript.globals`
 
 A list of global names that Biome should ignore (analyzer, linter, etc.)
@@ -528,3 +552,29 @@ Enables the parsing of comments in JSON files.
   }
 }
 ```
+
+### `json.formatter.enabled`
+
+Enables Biome's formatter for JSON (and its super languages) files.
+
+> Default: `true`
+
+### `json.formatter.indentStyle`
+
+
+The style of the indentation for JSON (and its super languages) files. It can be `"tab"` or `"space"`.
+
+> Default: `tab`
+
+
+### `json.formatter.indentSize`
+
+How big the indentation should be for JSON (and its super languages) files.
+
+> Default: `2`
+
+### `json.formatter.lineWidth`
+
+How many characters can be written on a single line in JSON (and its super languages) files.
+
+> Default: `80`
