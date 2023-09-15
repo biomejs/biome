@@ -51,14 +51,17 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - all
   - noChildrenProp
   - noConstAssign
+  - noConstantCondition
   - noConstructorReturn
   - noEmptyPattern
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidConstructorSuper
   - noNewSymbol
+  - noNonoctalDecimalEscape
   - noPrecisionLoss
   - noRenderReturnValue
+  - noSelfAssign
   - noSetterReturn
   - noStringCaseMismatch
   - noSwitchDeclarations

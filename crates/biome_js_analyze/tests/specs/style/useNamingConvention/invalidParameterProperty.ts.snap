@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidParameterProperty.ts
+---
+# Input
+```js
+export default class {
+    constructor(
+        readonly PascalCase: unknown,
+
+        protected CONSTANT_CASE: unknown,
+
+        public Unknown_Style: unknown,
+    ) {}
+}
+```
+
+# Diagnostics
+```
+invalidParameterProperty.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter property name should be in camelCase.
+  
+    1 │ export default class {
+    2 │     constructor(
+  > 3 │         readonly PascalCase: unknown,
+      │                  ^^^^^^^^^^
+    4 │ 
+    5 │         protected CONSTANT_CASE: unknown,
+  
+  i The name could be renamed to `pascalCase`.
+  
+
+```
+
+```
+invalidParameterProperty.ts:5:19 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter property name should be in camelCase.
+  
+    3 │         readonly PascalCase: unknown,
+    4 │ 
+  > 5 │         protected CONSTANT_CASE: unknown,
+      │                   ^^^^^^^^^^^^^
+    6 │ 
+    7 │         public Unknown_Style: unknown,
+  
+  i The name could be renamed to `constantCase`.
+  
+
+```
+
+```
+invalidParameterProperty.ts:7:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter property name should be in camelCase.
+  
+    5 │         protected CONSTANT_CASE: unknown,
+    6 │ 
+  > 7 │         public Unknown_Style: unknown,
+      │                ^^^^^^^^^^^^^
+    8 │     ) {}
+    9 │ }
+  
+  i The name could be renamed to `unknownStyle`.
+  
+
+```
+
+

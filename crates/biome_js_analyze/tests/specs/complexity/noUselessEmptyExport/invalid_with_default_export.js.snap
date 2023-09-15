@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_with_default_export.js
+---
+# Input
+```js
+export default {};
+export {}
+```
+
+# Diagnostics
+```
+invalid_with_default_export.js:2:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This empty export is useless because there's another export or import.
+  
+    1 │ export default {};
+  > 2 │ export {}
+      │ ^^^^^^^^^
+  
+  i This export makes useless the empty export.
+  
+  > 1 │ export default {};
+      │ ^^^^^^
+    2 │ export {}
+  
+  i Safe fix: Remove this useless empty export.
+  
+    1 1 │   export default {};
+    2   │ - export·{}
+  
+
+```
+
+

@@ -8,12 +8,11 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.2.0 (2023-09-16)
 
-### Analyzer
 ### CLI
 
-#### Features
+#### New features
 
 - Add new options to customize the behaviour the formatter based on the language of the file
   - `--json-formatter-enabled`
@@ -25,14 +24,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - `--javascript-formatter-indent-size`
   - `--javascript-formatter-line-width`
 
-
 #### Bug fixes
 
 - Fix a bug where `--errors-on-warning` didn't work when running `biome ci` command.
 
 ### Configuration
 
-#### Features
+#### New features
 
 - Add new options to customize the behaviour of the formatter based on the language of the file
   - `json.formatter.enabled`
@@ -44,13 +42,43 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - `javascript.formatter.indentSize`
   - `javascript.formatter.lineWidth`
 
-### Editors
-### Formatter
-### JavaScript APIs
 ### Linter
-#### New features
+
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [a11y/noAriaUnsupportedElements](https://www.biomejs.dev/linter/rules/no-aria-unsupported-elements/)
+- [a11y/noNoninteractiveTabindex](https://www.biomejs.dev/linter/rules/no-noninteractive-tabindex/)
+- [a11y/noRedundantRoles](https://www.biomejs.dev/linter/rules/no-redundant-roles/)
+- [a11y/useValidAriaValues](https://www.biomejs.dev/linter/rules/use-valid-aria-values/)
+- [complexity/noBannedTypes](https://www.biomejs.dev/linter/rules/no-banned-types)
+- [complexity/noStaticOnlyClass](https://www.biomejs.dev/linter/rules/no-static-only-class)
+- [complexity/noUselessEmptyExport](https://www.biomejs.dev/linter/rules/no-useless-empty-export)
+- [complexity/noUselessThisAlias](https://www.biomejs.dev/linter/rules/no-useless-this-alias)
+- [correctness/noConstantCondition](https://www.biomejs.dev/linter/rules/no-constant-condition)
+- [correctness/noNonoctalDecimalEscape](https://www.biomejs.dev/linter/rules/no-nonoctal-decimal-escape)
+- [correctness/noSelfAssign](https://www.biomejs.dev/linter/rules/no-self-assign)
+- [style/useLiteralEnumMembers](https://www.biomejs.dev/linter/rules/use-literal-enum-members)
+- [style/useNamingConvention](https://www.biomejs.dev/linter/rules/use-naming-convention)
+- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex)
+- [suspicious/noUnsafeDeclarationMerging](https://www.biomejs.dev/linter/rules/no-unsafe-declaration-merging)
+- [suspicious/useGetterReturn](https://www.biomejs.dev/linter/rules/use-getter-return)
+
+#### New rules
 
 - Add [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) rule. The rule reports the unusual use of the `void` type. Contributed by [@shulandmimi](https://github.com/shulandmimi)
+
+#### Removed rules
+
+- Remove [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/).
+
+  Code formatters, such as prettier and Biome, always adds parentheses around the parameter or the body of an arrow function.
+  This makes the rule useless.
+
+  Contributed by [@Conaclos](https://github.com/Conaclos)
 
 #### Enhancements
 
@@ -90,13 +118,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by [@Conaclos](https://github.com/Conaclos)
 
-- Remove [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/).
-
-  Code formatters, such as prettier and Biome, always adds parentheses around the parameter or the body of an arrow function.
-  This makes the rule useless.
-
-  Contributed by [@Conaclos](https://github.com/Conaclos)
-
 #### Bug fixes
 
 - Fix [#182](https://github.com/biomejs/biome/issues/182), making [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) retains optional chaining. Contributed by [@denbezrukov](https://github.com/denbezrukov)
@@ -130,8 +151,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Contributed by [@Conaclos](https://github.com/Conaclos)
 
-### Parser
 ### VSCode
+
+#### Enhancements
+
+- Improve server binary resolution when using certain package managers, notably pnpm.
+
+  The new strategy is to point to `node_modules/.bin/biome`` path,
+  which is consistent for all package managers.
 
 ## 1.1.2 (2023-09-07)
 

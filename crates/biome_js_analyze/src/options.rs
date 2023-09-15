@@ -4,7 +4,7 @@ use crate::analyzers::nursery::no_excessive_complexity::{complexity_options, Com
 use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
 };
-use crate::semantic_analyzers::nursery::use_naming_convention::{
+use crate::semantic_analyzers::style::use_naming_convention::{
     naming_convention_options, NamingConventionOptions,
 };
 use crate::semantic_analyzers::style::no_restricted_globals::{

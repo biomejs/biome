@@ -24,7 +24,7 @@ expression: content
 ## `fix.ts`
 
 ```ts
-const bannedType: Boolean = true;
+let confusingVoidType: void;
 ```
 
 # Emitted Messages

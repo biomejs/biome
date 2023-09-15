@@ -1,0 +1,557 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```js
+<>
+	<article role="article"></article>
+	<button role="button"></button>
+	<h1 role="heading" aria-level="1">
+		title
+	</h1>
+	<h1 role="heading">title</h1>
+	<h2 role={`heading`}></h2>
+	<dialog role="dialog"></dialog>
+	<input type="checkbox" role="checkbox" />
+	<figure role="figure"></figure>
+	<form role="form"></form>
+	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
+	<fieldset role="group"></fieldset>
+	<img src="foo" alt="bar" role="img" />
+	<img alt="" role="presentation"></img>
+	<a href="#" role="link"></a>
+	<ol role="list"></ol>
+	<ul role="list"></ul>
+	<select name="name" role="combobox"></select>
+	<select name="name" multiple size="4" role="listbox"></select>
+	<li role="listitem"></li>
+	<nav role="navigation"></nav>
+	{/* Needs to check the ancestors: <option role="option"></option> */}
+	<tr role="row"></tr>
+	<tbody role="rowgroup"></tbody>
+	<tfoot role="rowgroup"></tfoot>
+	<thead role="rowgroup"></thead>
+	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
+	<input type="search" role="searchbox" />
+	<table role="table"></table>
+	<textarea role="textbox"></textarea>
+	<input type="text" role="textbox" />
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'article' on the 'article' element is redundant.
+  
+    1 │ <>
+  > 2 │ 	<article role="article"></article>
+      │ 	              ^^^^^^^^^
+    3 │ 	<button role="button"></button>
+    4 │ 	<h1 role="heading" aria-level="1">
+  
+  i Suggested fix: Remove the role attribute.
+  
+    2 │ → <article·role="article"></article>
+      │            --------------           
+
+```
+
+```
+invalid.jsx:3:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'button' on the 'button' element is redundant.
+  
+    1 │ <>
+    2 │ 	<article role="article"></article>
+  > 3 │ 	<button role="button"></button>
+      │ 	             ^^^^^^^^
+    4 │ 	<h1 role="heading" aria-level="1">
+    5 │ 		title
+  
+  i Suggested fix: Remove the role attribute.
+  
+    3 │ → <button·role="button"></button>
+      │           -------------          
+
+```
+
+```
+invalid.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'heading' on the 'h1' element is redundant.
+  
+    2 │ 	<article role="article"></article>
+    3 │ 	<button role="button"></button>
+  > 4 │ 	<h1 role="heading" aria-level="1">
+      │ 	         ^^^^^^^^^
+    5 │ 		title
+    6 │ 	</h1>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    4 │ → <h1·role="heading"·aria-level="1">
+      │       ---------------               
+
+```
+
+```
+invalid.jsx:7:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'heading' on the 'h1' element is redundant.
+  
+    5 │ 		title
+    6 │ 	</h1>
+  > 7 │ 	<h1 role="heading">title</h1>
+      │ 	         ^^^^^^^^^
+    8 │ 	<h2 role={`heading`}></h2>
+    9 │ 	<dialog role="dialog"></dialog>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    7 │ → <h1·role="heading">title</h1>
+      │       --------------           
+
+```
+
+```
+invalid.jsx:8:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'heading' on the 'h2' element is redundant.
+  
+     6 │ 	</h1>
+     7 │ 	<h1 role="heading">title</h1>
+   > 8 │ 	<h2 role={`heading`}></h2>
+       │ 	         ^^^^^^^^^^^
+     9 │ 	<dialog role="dialog"></dialog>
+    10 │ 	<input type="checkbox" role="checkbox" />
+  
+  i Suggested fix: Remove the role attribute.
+  
+    8 │ → <h2·role={`heading`}></h2>
+      │       ----------------      
+
+```
+
+```
+invalid.jsx:9:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'dialog' on the 'dialog' element is redundant.
+  
+     7 │ 	<h1 role="heading">title</h1>
+     8 │ 	<h2 role={`heading`}></h2>
+   > 9 │ 	<dialog role="dialog"></dialog>
+       │ 	             ^^^^^^^^
+    10 │ 	<input type="checkbox" role="checkbox" />
+    11 │ 	<figure role="figure"></figure>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    9 │ → <dialog·role="dialog"></dialog>
+      │           -------------          
+
+```
+
+```
+invalid.jsx:10:30 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'checkbox' on the 'input' element is redundant.
+  
+     8 │ 	<h2 role={`heading`}></h2>
+     9 │ 	<dialog role="dialog"></dialog>
+  > 10 │ 	<input type="checkbox" role="checkbox" />
+       │ 	                            ^^^^^^^^^^
+    11 │ 	<figure role="figure"></figure>
+    12 │ 	<form role="form"></form>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    10 │ → <input·type="checkbox"·role="checkbox"·/>
+       │                          ----------------  
+
+```
+
+```
+invalid.jsx:11:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'figure' on the 'figure' element is redundant.
+  
+     9 │ 	<dialog role="dialog"></dialog>
+    10 │ 	<input type="checkbox" role="checkbox" />
+  > 11 │ 	<figure role="figure"></figure>
+       │ 	             ^^^^^^^^
+    12 │ 	<form role="form"></form>
+    13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
+  
+  i Suggested fix: Remove the role attribute.
+  
+    11 │ → <figure·role="figure"></figure>
+       │           -------------          
+
+```
+
+```
+invalid.jsx:12:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'form' on the 'form' element is redundant.
+  
+    10 │ 	<input type="checkbox" role="checkbox" />
+    11 │ 	<figure role="figure"></figure>
+  > 12 │ 	<form role="form"></form>
+       │ 	           ^^^^^^
+    13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
+    14 │ 	<fieldset role="group"></fieldset>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    12 │ → <form·role="form"></form>
+       │         -----------        
+
+```
+
+```
+invalid.jsx:14:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'group' on the 'fieldset' element is redundant.
+  
+    12 │ 	<form role="form"></form>
+    13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
+  > 14 │ 	<fieldset role="group"></fieldset>
+       │ 	               ^^^^^^^
+    15 │ 	<img src="foo" alt="bar" role="img" />
+    16 │ 	<img alt="" role="presentation"></img>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    14 │ → <fieldset·role="group"></fieldset>
+       │             ------------            
+
+```
+
+```
+invalid.jsx:15:32 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'img' on the 'img' element is redundant.
+  
+    13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
+    14 │ 	<fieldset role="group"></fieldset>
+  > 15 │ 	<img src="foo" alt="bar" role="img" />
+       │ 	                              ^^^^^
+    16 │ 	<img alt="" role="presentation"></img>
+    17 │ 	<a href="#" role="link"></a>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    15 │ → <img·src="foo"·alt="bar"·role="img"·/>
+       │                            -----------  
+
+```
+
+```
+invalid.jsx:16:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'presentation' on the 'img' element is redundant.
+  
+    14 │ 	<fieldset role="group"></fieldset>
+    15 │ 	<img src="foo" alt="bar" role="img" />
+  > 16 │ 	<img alt="" role="presentation"></img>
+       │ 	                 ^^^^^^^^^^^^^^
+    17 │ 	<a href="#" role="link"></a>
+    18 │ 	<ol role="list"></ol>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    16 │ → <img·alt=""·role="presentation"></img>
+       │               -------------------       
+
+```
+
+```
+invalid.jsx:17:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'link' on the 'a' element is redundant.
+  
+    15 │ 	<img src="foo" alt="bar" role="img" />
+    16 │ 	<img alt="" role="presentation"></img>
+  > 17 │ 	<a href="#" role="link"></a>
+       │ 	                 ^^^^^^
+    18 │ 	<ol role="list"></ol>
+    19 │ 	<ul role="list"></ul>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    17 │ → <a·href="#"·role="link"></a>
+       │               -----------     
+
+```
+
+```
+invalid.jsx:18:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'list' on the 'ol' element is redundant.
+  
+    16 │ 	<img alt="" role="presentation"></img>
+    17 │ 	<a href="#" role="link"></a>
+  > 18 │ 	<ol role="list"></ol>
+       │ 	         ^^^^^^
+    19 │ 	<ul role="list"></ul>
+    20 │ 	<select name="name" role="combobox"></select>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    18 │ → <ol·role="list"></ol>
+       │       -----------      
+
+```
+
+```
+invalid.jsx:19:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'list' on the 'ul' element is redundant.
+  
+    17 │ 	<a href="#" role="link"></a>
+    18 │ 	<ol role="list"></ol>
+  > 19 │ 	<ul role="list"></ul>
+       │ 	         ^^^^^^
+    20 │ 	<select name="name" role="combobox"></select>
+    21 │ 	<select name="name" multiple size="4" role="listbox"></select>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    19 │ → <ul·role="list"></ul>
+       │       -----------      
+
+```
+
+```
+invalid.jsx:20:27 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'combobox' on the 'select' element is redundant.
+  
+    18 │ 	<ol role="list"></ol>
+    19 │ 	<ul role="list"></ul>
+  > 20 │ 	<select name="name" role="combobox"></select>
+       │ 	                         ^^^^^^^^^^
+    21 │ 	<select name="name" multiple size="4" role="listbox"></select>
+    22 │ 	<li role="listitem"></li>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    20 │ → <select·name="name"·role="combobox"></select>
+       │                       ---------------          
+
+```
+
+```
+invalid.jsx:21:45 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'listbox' on the 'select' element is redundant.
+  
+    19 │ 	<ul role="list"></ul>
+    20 │ 	<select name="name" role="combobox"></select>
+  > 21 │ 	<select name="name" multiple size="4" role="listbox"></select>
+       │ 	                                           ^^^^^^^^^
+    22 │ 	<li role="listitem"></li>
+    23 │ 	<nav role="navigation"></nav>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    21 │ → <select·name="name"·multiple·size="4"·role="listbox"></select>
+       │                                         --------------          
+
+```
+
+```
+invalid.jsx:22:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'listitem' on the 'li' element is redundant.
+  
+    20 │ 	<select name="name" role="combobox"></select>
+    21 │ 	<select name="name" multiple size="4" role="listbox"></select>
+  > 22 │ 	<li role="listitem"></li>
+       │ 	         ^^^^^^^^^^
+    23 │ 	<nav role="navigation"></nav>
+    24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
+  
+  i Suggested fix: Remove the role attribute.
+  
+    22 │ → <li·role="listitem"></li>
+       │       ---------------      
+
+```
+
+```
+invalid.jsx:23:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'navigation' on the 'nav' element is redundant.
+  
+    21 │ 	<select name="name" multiple size="4" role="listbox"></select>
+    22 │ 	<li role="listitem"></li>
+  > 23 │ 	<nav role="navigation"></nav>
+       │ 	          ^^^^^^^^^^^^
+    24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
+    25 │ 	<tr role="row"></tr>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    23 │ → <nav·role="navigation"></nav>
+       │        -----------------       
+
+```
+
+```
+invalid.jsx:25:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'row' on the 'tr' element is redundant.
+  
+    23 │ 	<nav role="navigation"></nav>
+    24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
+  > 25 │ 	<tr role="row"></tr>
+       │ 	         ^^^^^
+    26 │ 	<tbody role="rowgroup"></tbody>
+    27 │ 	<tfoot role="rowgroup"></tfoot>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    25 │ → <tr·role="row"></tr>
+       │       ----------      
+
+```
+
+```
+invalid.jsx:26:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'rowgroup' on the 'tbody' element is redundant.
+  
+    24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
+    25 │ 	<tr role="row"></tr>
+  > 26 │ 	<tbody role="rowgroup"></tbody>
+       │ 	            ^^^^^^^^^^
+    27 │ 	<tfoot role="rowgroup"></tfoot>
+    28 │ 	<thead role="rowgroup"></thead>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    26 │ → <tbody·role="rowgroup"></tbody>
+       │          ---------------         
+
+```
+
+```
+invalid.jsx:27:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'rowgroup' on the 'tfoot' element is redundant.
+  
+    25 │ 	<tr role="row"></tr>
+    26 │ 	<tbody role="rowgroup"></tbody>
+  > 27 │ 	<tfoot role="rowgroup"></tfoot>
+       │ 	            ^^^^^^^^^^
+    28 │ 	<thead role="rowgroup"></thead>
+    29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
+  
+  i Suggested fix: Remove the role attribute.
+  
+    27 │ → <tfoot·role="rowgroup"></tfoot>
+       │          ---------------         
+
+```
+
+```
+invalid.jsx:28:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'rowgroup' on the 'thead' element is redundant.
+  
+    26 │ 	<tbody role="rowgroup"></tbody>
+    27 │ 	<tfoot role="rowgroup"></tfoot>
+  > 28 │ 	<thead role="rowgroup"></thead>
+       │ 	            ^^^^^^^^^^
+    29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
+    30 │ 	<input type="search" role="searchbox" />
+  
+  i Suggested fix: Remove the role attribute.
+  
+    28 │ → <thead·role="rowgroup"></thead>
+       │          ---------------         
+
+```
+
+```
+invalid.jsx:30:28 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'searchbox' on the 'input' element is redundant.
+  
+    28 │ 	<thead role="rowgroup"></thead>
+    29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
+  > 30 │ 	<input type="search" role="searchbox" />
+       │ 	                          ^^^^^^^^^^^
+    31 │ 	<table role="table"></table>
+    32 │ 	<textarea role="textbox"></textarea>
+  
+  i Suggested fix: Remove the role attribute.
+  
+    30 │ → <input·type="search"·role="searchbox"·/>
+       │                        -----------------  
+
+```
+
+```
+invalid.jsx:31:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'table' on the 'table' element is redundant.
+  
+    29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
+    30 │ 	<input type="search" role="searchbox" />
+  > 31 │ 	<table role="table"></table>
+       │ 	            ^^^^^^^
+    32 │ 	<textarea role="textbox"></textarea>
+    33 │ 	<input type="text" role="textbox" />
+  
+  i Suggested fix: Remove the role attribute.
+  
+    31 │ → <table·role="table"></table>
+       │          ------------         
+
+```
+
+```
+invalid.jsx:32:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'textbox' on the 'textarea' element is redundant.
+  
+    30 │ 	<input type="search" role="searchbox" />
+    31 │ 	<table role="table"></table>
+  > 32 │ 	<textarea role="textbox"></textarea>
+       │ 	               ^^^^^^^^^
+    33 │ 	<input type="text" role="textbox" />
+    34 │ </>;
+  
+  i Suggested fix: Remove the role attribute.
+  
+    32 │ → <textarea·role="textbox"></textarea>
+       │             --------------            
+
+```
+
+```
+invalid.jsx:33:26 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using the role attribute 'textbox' on the 'input' element is redundant.
+  
+    31 │ 	<table role="table"></table>
+    32 │ 	<textarea role="textbox"></textarea>
+  > 33 │ 	<input type="text" role="textbox" />
+       │ 	                        ^^^^^^^^^
+    34 │ </>;
+    35 │ 
+  
+  i Suggested fix: Remove the role attribute.
+  
+    33 │ → <input·type="text"·role="textbox"·/>
+       │                      ---------------  
+
+```
+
+

@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExportAlias.js
+---
+# Input
+```js
+export { X as XxXX }
+
+export { Y as snake_case  }
+
+export { X as XxXX } from ""
+
+export { Y as snake_case  } from ""
+```
+
+# Diagnostics
+```
+invalidExportAlias.js:1:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+  > 1 │ export { X as XxXX }
+      │               ^^^^
+    2 │ 
+    3 │ export { Y as snake_case  }
+  
+  i The name could be renamed to `xxXx`.
+  
+
+```
+
+```
+invalidExportAlias.js:3:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    1 │ export { X as XxXX }
+    2 │ 
+  > 3 │ export { Y as snake_case  }
+      │               ^^^^^^^^^^
+    4 │ 
+    5 │ export { X as XxXX } from ""
+  
+  i The name could be renamed to `snakeCase`.
+  
+
+```
+
+```
+invalidExportAlias.js:5:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    3 │ export { Y as snake_case  }
+    4 │ 
+  > 5 │ export { X as XxXX } from ""
+      │               ^^^^
+    6 │ 
+    7 │ export { Y as snake_case  } from ""
+  
+  i The name could be renamed to `xxXx`.
+  
+
+```
+
+```
+invalidExportAlias.js:7:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    5 │ export { X as XxXX } from ""
+    6 │ 
+  > 7 │ export { Y as snake_case  } from ""
+      │               ^^^^^^^^^^
+  
+  i The name could be renamed to `snakeCase`.
+  
+
+```
+
+

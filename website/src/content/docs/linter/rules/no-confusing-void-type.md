@@ -1,5 +1,5 @@
 ---
-title: noConfusingVoidType (since vnext)
+title: noConfusingVoidType (since v1.2)
 ---
 
 

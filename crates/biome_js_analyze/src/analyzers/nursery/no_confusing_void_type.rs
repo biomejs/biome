@@ -47,7 +47,7 @@ declare_rule! {
     /// printArg<void>(undefined);
     /// ```
     pub(crate) NoConfusingVoidType {
-        version: "next",
+        version: "1.2",
         name: "noConfusingVoidType",
         recommended: false,
     }

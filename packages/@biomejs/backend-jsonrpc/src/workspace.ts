@@ -315,6 +315,10 @@ export interface A11y {
 	 */
 	noAccessKey?: RuleConfiguration;
 	/**
+	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
+	 */
+	noAriaUnsupportedElements?: RuleConfiguration;
+	/**
 	 * Enforce that autoFocus prop is not used on elements.
 	 */
 	noAutofocus?: RuleConfiguration;
@@ -335,6 +339,10 @@ export interface A11y {
 	 */
 	noNoninteractiveElementToInteractiveRole?: RuleConfiguration;
 	/**
+	 * Enforce that tabIndex is not assigned to non-interactive HTML elements.
+	 */
+	noNoninteractiveTabindex?: RuleConfiguration;
+	/**
 	 * Prevent the usage of positive integers on tabIndex property
 	 */
 	noPositiveTabindex?: RuleConfiguration;
@@ -342,6 +350,10 @@ export interface A11y {
 	 * Enforce img alt prop does not contain the word "image", "picture", or "photo".
 	 */
 	noRedundantAlt?: RuleConfiguration;
+	/**
+	 * Enforce explicit role property is not the same as implicit/default role property on an element.
+	 */
+	noRedundantRoles?: RuleConfiguration;
 	/**
 	 * Enforces the usage of the title element for the svg element.
 	 */
@@ -358,6 +370,10 @@ export interface A11y {
 	 * Enforce that anchors have content and that the content is accessible to screen readers.
 	 */
 	useAnchorContent?: RuleConfiguration;
+	/**
+	 * Enforce that ARIA state and property values are valid.
+	 */
+	useAriaPropTypes?: RuleConfiguration;
 	/**
 	 * Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 	 */
@@ -412,6 +428,10 @@ export interface Complexity {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow primitive type aliases and misleading types.
+	 */
+	noBannedTypes?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration;
@@ -424,6 +444,10 @@ export interface Complexity {
 	 */
 	noMultipleSpacesInRegularExpressionLiterals?: RuleConfiguration;
 	/**
+	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
+	 */
+	noStaticOnlyClass?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary catch clauses.
 	 */
 	noUselessCatch?: RuleConfiguration;
@@ -431,6 +455,10 @@ export interface Complexity {
 	 * Disallow unnecessary constructors.
 	 */
 	noUselessConstructor?: RuleConfiguration;
+	/**
+	 * Disallow empty exports that don't change anything in a module file.
+	 */
+	noUselessEmptyExport?: RuleConfiguration;
 	/**
 	 * Disallow unnecessary fragments
 	 */
@@ -447,6 +475,10 @@ export interface Complexity {
 	 * Disallow useless case in switch statements.
 	 */
 	noUselessSwitchCase?: RuleConfiguration;
+	/**
+	 * Disallow useless this aliasing.
+	 */
+	noUselessThisAlias?: RuleConfiguration;
 	/**
 	 * Disallow using any or unknown as type constraint.
 	 */
@@ -497,6 +529,10 @@ export interface Correctness {
 	 */
 	noConstAssign?: RuleConfiguration;
 	/**
+	 * Disallow constant expressions in conditions
+	 */
+	noConstantCondition?: RuleConfiguration;
+	/**
 	 * Disallow returning a value from a constructor.
 	 */
 	noConstructorReturn?: RuleConfiguration;
@@ -521,6 +557,10 @@ export interface Correctness {
 	 */
 	noNewSymbol?: RuleConfiguration;
 	/**
+	 * Disallow \8 and \9 escape sequences in string literals.
+	 */
+	noNonoctalDecimalEscape?: RuleConfiguration;
+	/**
 	 * Disallow literal numbers that lose precision
 	 */
 	noPrecisionLoss?: RuleConfiguration;
@@ -528,6 +568,10 @@ export interface Correctness {
 	 * Prevent the usage of the return value of React.render.
 	 */
 	noRenderReturnValue?: RuleConfiguration;
+	/**
+	 * Disallow assignments where both sides are exactly the same.
+	 */
+	noSelfAssign?: RuleConfiguration;
 	/**
 	 * Disallow returning a value from a setter
 	 */
@@ -610,25 +654,9 @@ export interface Nursery {
 	 */
 	noAccumulatingSpread?: RuleConfiguration;
 	/**
-	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
-	 */
-	noAriaUnsupportedElements?: RuleConfiguration;
-	/**
-	 * Disallow primitive type aliases and misleading types.
-	 */
-	noBannedTypes?: RuleConfiguration;
-	/**
 	 * Disallow void type outside of generic or return types.
 	 */
 	noConfusingVoidType?: RuleConfiguration;
-	/**
-	 * Disallow constant expressions in conditions
-	 */
-	noConstantCondition?: RuleConfiguration;
-	/**
-	 * Prevents from having control characters and some escape sequences that match control characters in regular expressions.
-	 */
-	noControlCharactersInRegex?: RuleConfiguration;
 	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
@@ -650,38 +678,6 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
-	 * Enforce that tabIndex is not assigned to non-interactive HTML elements.
-	 */
-	noNoninteractiveTabindex?: RuleConfiguration;
-	/**
-	 * Disallow \8 and \9 escape sequences in string literals.
-	 */
-	noNonoctalDecimalEscape?: RuleConfiguration;
-	/**
-	 * Enforce explicit role property is not the same as implicit/default role property on an element.
-	 */
-	noRedundantRoles?: RuleConfiguration;
-	/**
-	 * Disallow assignments where both sides are exactly the same.
-	 */
-	noSelfAssign?: RuleConfiguration;
-	/**
-	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
-	 */
-	noStaticOnlyClass?: RuleConfiguration;
-	/**
-	 * Disallow unsafe declaration merging between interfaces and classes.
-	 */
-	noUnsafeDeclarationMerging?: RuleConfiguration;
-	/**
-	 * Disallow empty exports that don't change anything in a module file.
-	 */
-	noUselessEmptyExport?: RuleConfiguration;
-	/**
-	 * Disallow useless this aliasing.
-	 */
-	noUselessThisAlias?: RuleConfiguration;
-	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration;
@@ -689,10 +685,6 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
-	/**
-	 * Enforce that ARIA state and property values are valid.
-	 */
-	useAriaPropTypes?: RuleConfiguration;
 	/**
 	 * Use arrow functions over function expressions.
 	 */
@@ -705,10 +697,6 @@ export interface Nursery {
 	 * Enforce all dependencies are correctly specified.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration;
-	/**
-	 * Enforce get methods to always return a value.
-	 */
-	useGetterReturn?: RuleConfiguration;
 	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
@@ -725,14 +713,6 @@ export interface Nursery {
 	 * Use Array.isArray() instead of instanceof Array.
 	 */
 	useIsArray?: RuleConfiguration;
-	/**
-	 * Require all enum members to be literal values.
-	 */
-	useLiteralEnumMembers?: RuleConfiguration;
-	/**
-	 * Enforce naming conventions for everything across a codebase.
-	 */
-	useNamingConvention?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -861,6 +841,14 @@ export interface Style {
 	 */
 	useFragmentSyntax?: RuleConfiguration;
 	/**
+	 * Require all enum members to be literal values.
+	 */
+	useLiteralEnumMembers?: RuleConfiguration;
+	/**
+	 * Enforce naming conventions for everything across a codebase.
+	 */
+	useNamingConvention?: RuleConfiguration;
+	/**
 	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
 	 */
 	useNumericLiterals?: RuleConfiguration;
@@ -938,6 +926,10 @@ export interface Suspicious {
 	 */
 	noConstEnum?: RuleConfiguration;
 	/**
+	 * Prevents from having control characters and some escape sequences that match control characters in regular expressions.
+	 */
+	noControlCharactersInRegex?: RuleConfiguration;
+	/**
 	 * Disallow the use of debugger
 	 */
 	noDebugger?: RuleConfiguration;
@@ -1014,6 +1006,10 @@ export interface Suspicious {
 	 */
 	noSparseArray?: RuleConfiguration;
 	/**
+	 * Disallow unsafe declaration merging between interfaces and classes.
+	 */
+	noUnsafeDeclarationMerging?: RuleConfiguration;
+	/**
 	 * Disallow using unsafe negation.
 	 */
 	noUnsafeNegation?: RuleConfiguration;
@@ -1025,6 +1021,10 @@ export interface Suspicious {
 	 * Enforce default clauses in switch statements to be last
 	 */
 	useDefaultSwitchClauseLast?: RuleConfiguration;
+	/**
+	 * Enforce get methods to always return a value.
+	 */
+	useGetterReturn?: RuleConfiguration;
 	/**
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
@@ -1189,16 +1189,20 @@ export interface Advices {
 }
 export type Category =
 	| "lint/a11y/noAccessKey"
+	| "lint/a11y/noAriaUnsupportedElements"
 	| "lint/a11y/noAutofocus"
 	| "lint/a11y/noBlankTarget"
 	| "lint/a11y/noDistractingElements"
 	| "lint/a11y/noHeaderScope"
 	| "lint/a11y/noNoninteractiveElementToInteractiveRole"
+	| "lint/a11y/noNoninteractiveTabindex"
 	| "lint/a11y/noPositiveTabindex"
 	| "lint/a11y/noRedundantAlt"
+	| "lint/a11y/noRedundantRoles"
 	| "lint/a11y/noSvgWithoutTitle"
 	| "lint/a11y/useAltText"
 	| "lint/a11y/useAnchorContent"
+	| "lint/a11y/useAriaPropTypes"
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
 	| "lint/a11y/useHeadingContent"
@@ -1210,15 +1214,19 @@ export type Category =
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
 	| "lint/a11y/useValidLang"
+	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
+	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessFragments"
 	| "lint/complexity/noUselessLabel"
 	| "lint/complexity/noUselessRename"
 	| "lint/complexity/noUselessSwitchCase"
+	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noWith"
 	| "lint/complexity/useFlatMap"
@@ -1228,14 +1236,17 @@ export type Category =
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
 	| "lint/correctness/noConstAssign"
+	| "lint/correctness/noConstantCondition"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyPattern"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noNewSymbol"
+	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
 	| "lint/correctness/noRenderReturnValue"
+	| "lint/correctness/noSelfAssign"
 	| "lint/correctness/noSetterReturn"
 	| "lint/correctness/noStringCaseMismatch"
 	| "lint/correctness/noSwitchDeclarations"
@@ -1253,37 +1264,21 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccumulatingSpread"
-	| "lint/nursery/noAriaUnsupportedElements"
-	| "lint/nursery/noBannedTypes"
 	| "lint/nursery/noConfusingVoidType"
-	| "lint/nursery/noConstantCondition"
-	| "lint/nursery/noControlCharactersInRegex"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noExcessiveComplexity"
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
-	| "lint/nursery/noNoninteractiveTabindex"
-	| "lint/nursery/noNonoctalDecimalEscape"
-	| "lint/nursery/noRedundantRoles"
-	| "lint/nursery/noSelfAssign"
-	| "lint/nursery/noStaticOnlyClass"
-	| "lint/nursery/noUnsafeDeclarationMerging"
-	| "lint/nursery/noUselessEmptyExport"
-	| "lint/nursery/noUselessThisAlias"
 	| "lint/nursery/noVoid"
-	| "lint/nursery/useAriaPropTypes"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useCollapsedElseIf"
 	| "lint/nursery/useExhaustiveDependencies"
-	| "lint/nursery/useGetterReturn"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useHookAtTopLevel"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIsArray"
-	| "lint/nursery/useLiteralEnumMembers"
-	| "lint/nursery/useNamingConvention"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
@@ -1306,6 +1301,8 @@ export type Category =
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExponentiationOperator"
 	| "lint/style/useFragmentSyntax"
+	| "lint/style/useLiteralEnumMembers"
+	| "lint/style/useNamingConvention"
 	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
@@ -1323,6 +1320,7 @@ export type Category =
 	| "lint/suspicious/noConfusingLabels"
 	| "lint/suspicious/noConsoleLog"
 	| "lint/suspicious/noConstEnum"
+	| "lint/suspicious/noControlCharactersInRegex"
 	| "lint/suspicious/noDebugger"
 	| "lint/suspicious/noDoubleEquals"
 	| "lint/suspicious/noDuplicateCase"
@@ -1342,8 +1340,10 @@ export type Category =
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
 	| "lint/suspicious/noSparseArray"
+	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
+	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
 	| "files/missingHandler"

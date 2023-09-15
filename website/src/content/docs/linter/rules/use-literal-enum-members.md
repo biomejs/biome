@@ -3,6 +3,10 @@ title: useLiteralEnumMembers (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Require all enum members to be literal values.
 
 Usually, an enum member is initialized with a literal number or a literal string.
@@ -26,7 +30,7 @@ enum Computed {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useLiteralEnumMembers.js:4:9 <a href="https://biomejs.dev/linter/rules/use-literal-enum-members">lint/nursery/useLiteralEnumMembers</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useLiteralEnumMembers.js:4:9 <a href="https://biomejs.dev/linter/rules/use-literal-enum-members">lint/style/useLiteralEnumMembers</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The enum member should be initialized with a literal value such as a number or a string.</span>
   

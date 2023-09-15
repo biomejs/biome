@@ -2535,13 +2535,7 @@ fn should_not_enable_nursery_rules() {
     let file_path = Path::new("fix.ts");
     fs.insert(
         file_path.into(),
-        r#"const bannedType: Boolean = true;
-
-if (true) {
-	const obj = {};
-	obj["useLiteralKey"];
-}
-		"#,
+        r#"let confusingVoidType: void;"#,
     );
 
     let result = run_cli(

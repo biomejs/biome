@@ -10,6 +10,8 @@ description: List of available lint rules.
 Rules focused on preventing accessibility problems.
 ### [noAccessKey](/linter/rules/no-access-key)
 Enforce that the <code>accessKey</code> attribute is not used on any HTML element.
+### [noAriaUnsupportedElements](/linter/rules/no-aria-unsupported-elements)
+Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
 ### [noAutofocus](/linter/rules/no-autofocus)
 Enforce that autoFocus prop is not used on elements.
 ### [noBlankTarget](/linter/rules/no-blank-target)
@@ -20,16 +22,22 @@ Enforces that no distracting elements are used.
 The scope prop should be used only on <code>&lt;th&gt;</code> elements.
 ### [noNoninteractiveElementToInteractiveRole](/linter/rules/no-noninteractive-element-to-interactive-role)
 Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
+### [noNoninteractiveTabindex](/linter/rules/no-noninteractive-tabindex)
+Enforce that <code>tabIndex</code> is not assigned to non-interactive HTML elements.
 ### [noPositiveTabindex](/linter/rules/no-positive-tabindex)
 Prevent the usage of positive integers on <code>tabIndex</code> property
 ### [noRedundantAlt](/linter/rules/no-redundant-alt)
 Enforce <code>img</code> alt prop does not contain the word &quot;image&quot;, &quot;picture&quot;, or &quot;photo&quot;.
+### [noRedundantRoles](/linter/rules/no-redundant-roles)
+Enforce explicit <code>role</code> property is not the same as implicit/default role property on an element.
 ### [noSvgWithoutTitle](/linter/rules/no-svg-without-title)
 Enforces the usage of the <code>title</code> element for the <code>svg</code> element.
 ### [useAltText](/linter/rules/use-alt-text)
 Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
 ### [useAnchorContent](/linter/rules/use-anchor-content)
 Enforce that anchors have content and that the content is accessible to screen readers.
+### [useAriaPropTypes](/linter/rules/use-aria-prop-types)
+Enforce that ARIA state and property values are valid.
 ### [useAriaPropsForRole](/linter/rules/use-aria-props-for-role)
 Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 ### [useButtonType](/linter/rules/use-button-type)
@@ -57,16 +65,22 @@ Ensure that the attribute passed to the <code>lang</code> attribute is a correct
 ## Complexity
 
 Rules that focus on inspecting complex code that could be simplified.
+### [noBannedTypes](/linter/rules/no-banned-types)
+Disallow primitive type aliases and misleading types.
 ### [noExtraBooleanCast](/linter/rules/no-extra-boolean-cast)
 Disallow unnecessary boolean casts
 ### [noForEach](/linter/rules/no-for-each)
 Prefer <code>for...of</code> statement instead of <code>Array.forEach</code>.
 ### [noMultipleSpacesInRegularExpressionLiterals](/linter/rules/no-multiple-spaces-in-regular-expression-literals)
 Disallow unclear usage of multiple space characters in regular expression literals
+### [noStaticOnlyClass](/linter/rules/no-static-only-class)
+This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 ### [noUselessCatch](/linter/rules/no-useless-catch)
 Disallow unnecessary <code>catch</code> clauses.
 ### [noUselessConstructor](/linter/rules/no-useless-constructor)
 Disallow unnecessary constructors.
+### [noUselessEmptyExport](/linter/rules/no-useless-empty-export)
+Disallow empty exports that don't change anything in a module file.
 ### [noUselessFragments](/linter/rules/no-useless-fragments)
 Disallow unnecessary fragments
 ### [noUselessLabel](/linter/rules/no-useless-label)
@@ -75,6 +89,8 @@ Disallow unnecessary labels.
 Disallow renaming import, export, and destructured assignments to the same name.
 ### [noUselessSwitchCase](/linter/rules/no-useless-switch-case)
 Disallow useless <code>case</code> in <code>switch</code> statements.
+### [noUselessThisAlias](/linter/rules/no-useless-this-alias)
+Disallow useless <code>this</code> aliasing.
 ### [noUselessTypeConstraint](/linter/rules/no-useless-type-constraint)
 Disallow using <code>any</code> or <code>unknown</code> as type constraint.
 ### [noWith](/linter/rules/no-with)
@@ -97,6 +113,8 @@ Rules that detect code that is guaranteed to be incorrect or useless.
 Prevent passing of <strong>children</strong> as props.
 ### [noConstAssign](/linter/rules/no-const-assign)
 Prevents from having <code>const</code> variables being re-assigned.
+### [noConstantCondition](/linter/rules/no-constant-condition)
+Disallow constant expressions in conditions
 ### [noConstructorReturn](/linter/rules/no-constructor-return)
 Disallow returning a value from a <code>constructor</code>.
 ### [noEmptyPattern](/linter/rules/no-empty-pattern)
@@ -110,10 +128,14 @@ Prevents the incorrect use of <code>super()</code> inside classes.
 It also checks whether a call <code>super()</code> is missing from classes that extends other constructors.
 ### [noNewSymbol](/linter/rules/no-new-symbol)
 Disallow <code>new</code> operators with the <code>Symbol</code> object.
+### [noNonoctalDecimalEscape](/linter/rules/no-nonoctal-decimal-escape)
+Disallow <code>\8</code> and <code>\9</code> escape sequences in string literals.
 ### [noPrecisionLoss](/linter/rules/no-precision-loss)
 Disallow literal numbers that lose precision
 ### [noRenderReturnValue](/linter/rules/no-render-return-value)
 Prevent the usage of the return value of <code>React.render</code>.
+### [noSelfAssign](/linter/rules/no-self-assign)
+Disallow assignments where both sides are exactly the same.
 ### [noSetterReturn](/linter/rules/no-setter-return)
 Disallow returning a value from a setter
 ### [noStringCaseMismatch](/linter/rules/no-string-case-mismatch)
@@ -205,6 +227,10 @@ Require that each enum member value be explicitly initialized.
 Disallow the use of <code>Math.pow</code> in favor of the <code>**</code> operator.
 ### [useFragmentSyntax](/linter/rules/use-fragment-syntax)
 This rule enforces the use of <code>&lt;&gt;...&lt;/&gt;</code> over <code>&lt;Fragment&gt;...&lt;/Fragment&gt;</code>.
+### [useLiteralEnumMembers](/linter/rules/use-literal-enum-members)
+Require all enum members to be literal values.
+### [useNamingConvention](/linter/rules/use-naming-convention)
+Enforce naming conventions for everything across a codebase.
 ### [useNumericLiterals](/linter/rules/use-numeric-literals)
 Disallow <code>parseInt()</code> and <code>Number.parseInt()</code> in favor of binary, octal, and hexadecimal literals
 ### [useSelfClosingElements](/linter/rules/use-self-closing-elements)
@@ -245,6 +271,8 @@ Disallow labeled statements that are not loops.
 Disallow the use of <code>console.log</code>
 ### [noConstEnum](/linter/rules/no-const-enum)
 Disallow TypeScript <code>const enum</code>
+### [noControlCharactersInRegex](/linter/rules/no-control-characters-in-regex)
+Prevents from having control characters and some escape sequences that match control characters in regular expressions.
 ### [noDebugger](/linter/rules/no-debugger)
 Disallow the use of <code>debugger</code>
 ### [noDoubleEquals](/linter/rules/no-double-equals)
@@ -285,10 +313,14 @@ Disallow comparisons where both sides are exactly the same.
 Disallow identifiers from shadowing restricted names.
 ### [noSparseArray](/linter/rules/no-sparse-array)
 Disallow sparse arrays
+### [noUnsafeDeclarationMerging](/linter/rules/no-unsafe-declaration-merging)
+Disallow unsafe declaration merging between interfaces and classes.
 ### [noUnsafeNegation](/linter/rules/no-unsafe-negation)
 Disallow using unsafe negation.
 ### [useDefaultSwitchClauseLast](/linter/rules/use-default-switch-clause-last)
 Enforce default clauses in switch statements to be last
+### [useGetterReturn](/linter/rules/use-getter-return)
+Enforce <code>get</code> methods to always return a value.
 ### [useNamespaceKeyword](/linter/rules/use-namespace-keyword)
 Require using the <code>namespace</code> keyword over the <code>module</code> keyword to declare TypeScript namespaces.
 ### [useValidTypeof](/linter/rules/use-valid-typeof)
@@ -308,16 +340,8 @@ Nursery rules get promoted to other groups once they become stable or may be rem
 Rules that belong to this group <strong>are not subject to semantic version</strong>.
 ### [noAccumulatingSpread](/linter/rules/no-accumulating-spread)
 Disallow the use of spread (<code>...</code>) syntax on accumulators.
-### [noAriaUnsupportedElements](/linter/rules/no-aria-unsupported-elements)
-Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
-### [noBannedTypes](/linter/rules/no-banned-types)
-Disallow primitive type aliases and misleading types.
 ### [noConfusingVoidType](/linter/rules/no-confusing-void-type)
 Disallow <code>void</code> type outside of generic or return types.
-### [noConstantCondition](/linter/rules/no-constant-condition)
-Disallow constant expressions in conditions
-### [noControlCharactersInRegex](/linter/rules/no-control-characters-in-regex)
-Prevents from having control characters and some escape sequences that match control characters in regular expressions.
 ### [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys)
 Disallow two keys with the same name inside a JSON object.
 ### [noExcessiveComplexity](/linter/rules/no-excessive-complexity)
@@ -328,34 +352,14 @@ Disallow fallthrough of <code>switch</code> clauses.
 Use <code>Number.isFinite</code> instead of global <code>isFinite</code>.
 ### [noGlobalIsNan](/linter/rules/no-global-is-nan)
 Use <code>Number.isNaN</code> instead of global <code>isNaN</code>.
-### [noNoninteractiveTabindex](/linter/rules/no-noninteractive-tabindex)
-Enforce that <code>tabIndex</code> is not assigned to non-interactive HTML elements.
-### [noNonoctalDecimalEscape](/linter/rules/no-nonoctal-decimal-escape)
-Disallow <code>\8</code> and <code>\9</code> escape sequences in string literals.
-### [noRedundantRoles](/linter/rules/no-redundant-roles)
-Enforce explicit <code>role</code> property is not the same as implicit/default role property on an element.
-### [noSelfAssign](/linter/rules/no-self-assign)
-Disallow assignments where both sides are exactly the same.
-### [noStaticOnlyClass](/linter/rules/no-static-only-class)
-This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
-### [noUnsafeDeclarationMerging](/linter/rules/no-unsafe-declaration-merging)
-Disallow unsafe declaration merging between interfaces and classes.
-### [noUselessEmptyExport](/linter/rules/no-useless-empty-export)
-Disallow empty exports that don't change anything in a module file.
-### [noUselessThisAlias](/linter/rules/no-useless-this-alias)
-Disallow useless <code>this</code> aliasing.
 ### [noVoid](/linter/rules/no-void)
 Disallow the use of <code>void</code> operators, which is not a familiar operator.
-### [useAriaPropTypes](/linter/rules/use-aria-prop-types)
-Enforce that ARIA state and property values are valid.
 ### [useArrowFunction](/linter/rules/use-arrow-function)
 Use arrow functions over function expressions.
 ### [useCollapsedElseIf](/linter/rules/use-collapsed-else-if)
 Enforce using <code>else if</code> instead of nested <code>if</code> in <code>else</code> clauses.
 ### [useExhaustiveDependencies](/linter/rules/use-exhaustive-dependencies)
 Enforce all dependencies are correctly specified.
-### [useGetterReturn](/linter/rules/use-getter-return)
-Enforce <code>get</code> methods to always return a value.
 ### [useGroupedTypeImport](/linter/rules/use-grouped-type-import)
 Enforce the use of <code>import type</code> when an <code>import</code> only has specifiers with <code>type</code> qualifier.
 ### [useHookAtTopLevel](/linter/rules/use-hook-at-top-level)
@@ -365,7 +369,3 @@ component functions.
 Disallows package private imports.
 ### [useIsArray](/linter/rules/use-is-array)
 Use <code>Array.isArray()</code> instead of <code>instanceof Array</code>.
-### [useLiteralEnumMembers](/linter/rules/use-literal-enum-members)
-Require all enum members to be literal values.
-### [useNamingConvention](/linter/rules/use-naming-convention)
-Enforce naming conventions for everything across a codebase.

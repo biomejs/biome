@@ -3,6 +3,10 @@ title: noUnsafeDeclarationMerging (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Disallow unsafe declaration merging between interfaces and classes.
 
 _TypeScript_'s [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) supports merging separate declarations with the same name.
@@ -28,7 +32,7 @@ const foo = new Foo();
 foo.f(); // Runtime Error: Cannot read properties of undefined.
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnsafeDeclarationMerging.js:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-declaration-merging">lint/nursery/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noUnsafeDeclarationMerging.js:5:7 <a href="https://biomejs.dev/linter/rules/no-unsafe-declaration-merging">lint/suspicious/noUnsafeDeclarationMerging</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>class</strong></span><span style="color: Tomato;"> is unsafely merged with an </span><span style="color: Tomato;"><strong>interface</strong></span><span style="color: Tomato;">.</span>
   

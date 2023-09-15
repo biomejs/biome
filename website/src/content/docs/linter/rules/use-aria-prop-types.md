@@ -3,6 +3,10 @@ title: useAriaPropTypes (since v1.0.0)
 ---
 
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Enforce that ARIA state and property values are valid.
 
 ## Examples
@@ -13,9 +17,9 @@ Enforce that ARIA state and property values are valid.
 <span role="checkbox" aria-checked="test">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:23 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:23 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-checked</strong></span><span style="color: Orange;"> is not correct.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-checked</strong></span><span style="color: Tomato;"> is not correct.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;span role=&quot;checkbox&quot; aria-checked=&quot;test&quot;&gt;some text&lt;/span&gt;
    <strong>   │ </strong>                      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -33,9 +37,9 @@ Enforce that ARIA state and property values are valid.
 <span aria-labelledby="">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-labelledby</strong></span><span style="color: Orange;"> is not correct.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-labelledby</strong></span><span style="color: Tomato;"> is not correct.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;span aria-labelledby=&quot;&quot;&gt;some text&lt;/span&gt;
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -49,9 +53,9 @@ Enforce that ARIA state and property values are valid.
 <span aria-valuemax="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-valuemax</strong></span><span style="color: Orange;"> is not correct.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-valuemax</strong></span><span style="color: Tomato;"> is not correct.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;span aria-valuemax=&quot;hey&quot;&gt;some text&lt;/span&gt;
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -65,9 +69,9 @@ Enforce that ARIA state and property values are valid.
 <span aria-orientation="hey">some text</span>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/nursery/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useAriaPropTypes.js:1:7 <a href="https://biomejs.dev/linter/rules/use-aria-prop-types">lint/a11y/useAriaPropTypes</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The value of the ARIA attribute </span><span style="color: Orange;"><strong>aria-orientation</strong></span><span style="color: Orange;"> is not correct.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The value of the ARIA attribute </span><span style="color: Tomato;"><strong>aria-orientation</strong></span><span style="color: Tomato;"> is not correct.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;span aria-orientation=&quot;hey&quot;&gt;some text&lt;/span&gt;
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
