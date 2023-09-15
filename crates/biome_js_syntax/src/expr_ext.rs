@@ -1018,7 +1018,7 @@ impl AnyJsClassMemberName {
     /// ## Examples
     ///
     /// ```
-    /// use biome_js_syntax::{AnyJsObjectMemberName, AnyJsExpression, AnyJsLiteralExpression, T};
+    /// use biome_js_syntax::{AnyJsClassMemberName, AnyJsExpression, AnyJsLiteralExpression, T};
     /// use biome_js_factory::make;
     ///
     /// let name = make::js_literal_member_name(make::ident("a"));
@@ -1026,7 +1026,7 @@ impl AnyJsClassMemberName {
     /// assert_eq!(name.name().unwrap().text(), "a");
     ///
     /// let quoted_name = make::js_literal_member_name(make::js_string_literal("a"));
-    /// let quoted_name = AnyJsClassMemberName:JsLiteralMemberName(quoted_name);
+    /// let quoted_name = AnyJsClassMemberName::JsLiteralMemberName(quoted_name);
     /// assert_eq!(quoted_name.name().unwrap().text(), "a");
     ///
     /// let number_name = make::js_literal_member_name(make::js_number_literal(42));
