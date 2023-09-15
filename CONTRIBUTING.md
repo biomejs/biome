@@ -19,6 +19,12 @@ Our [GitHub issues](https://github.com/biomejs/biome/issues/) serve as a place f
 Make sure that the bugs is not reported yet and is not fixed in the main branch.
 You can test on the main branch, thanks to the [playground](https://biomejs.dev/playground/).
 
+### Issue Reproduction with CodeSandbox
+
+To facilitate issue reporting and testing, we have created a CodeSandbox environment with Biome installed and some basic commands prepared. If you encounter issues or want to experiment with our project without setting up a local development environment, you can use this sandbox.
+
+- [Reproduce Issue in CodeSandbox](https://codesandbox.io/p/sandbox/biome-4nym3k)
+
 ## Getting Started
 
 Building this project requires a `stable` Rust toolchain, which can be installed using [rustup](https://www.rust-lang.org/tools/install).
@@ -366,21 +372,21 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 When releasing a new version of a Biome, follow these steps:
 
 1. [ ] Add a [changelog](./CHANGELOG.md) entry for every Pull Request that lacks one.
-   You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
-   Read our [guidelines for editing the changelog](#changelog).
+       You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
+       Read our [guidelines for editing the changelog](#changelog).
 
 1. [ ] Based on the [changelog](./CHANGELOG.md), determine which version number to use.
-   See our [versioning guide](https://biomejs.dev/internals/versioning/) for more details.
+       See our [versioning guide](https://biomejs.dev/internals/versioning/) for more details.
 
 1. [ ] Rename `Unreleased` to `<version> (iso-date)` in the [changelog](./CHANGELOG.md).
-   Then update the website using `BIOME_VERSION=<version> cargo codegen-website`.
+       Then update the website using `BIOME_VERSION=<version> cargo codegen-website`.
 
 1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
 
 1. [ ] Update `version` in [Biome's LSP package.json](./editors/vscode/package.json) if applicable.
-   Note that the LSP follows a [distinct versioning scheme](https://biomejs.dev/internals/versioning/#visual-studio-code-extension).
+       Note that the LSP follows a [distinct versioning scheme](https://biomejs.dev/internals/versioning/#visual-studio-code-extension).
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
-   This field is set to `next` for newly created rules.
-   This field must be updated to the new version.
-   Then execute `just codegen-linter`.
+       This field is set to `next` for newly created rules.
+       This field must be updated to the new version.
+       Then execute `just codegen-linter`.
