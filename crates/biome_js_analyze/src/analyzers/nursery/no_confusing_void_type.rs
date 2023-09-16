@@ -114,6 +114,7 @@ fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
             JsSyntaxKind::TS_THIS_PARAMETER
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
             | JsSyntaxKind::TS_TYPE_PARAMETER
+            | JsSyntaxKind::TS_FUNCTION_TYPE
             | JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
                 return None;
             }
