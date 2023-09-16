@@ -1,4 +1,4 @@
-# intellij-biome
+# Biome JetBrains IDEs Plugin
 
 <!-- Plugin description -->
 https://biomejs.dev plugin for JetBrains IDEs.
@@ -10,7 +10,31 @@ https://biomejs.dev plugin for JetBrains IDEs.
 <!-- Plugin description end -->
 
 ---
-Plugin based on the [IntelliJ Platform Plugin Template][template].
+## Installation
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+### From JetBrains IDEs
+- Press `⌘Сmd,` to open the IDE settings and then select Plugins.
+![Plugins](https://resources.jetbrains.com/help/img/idea/2023.2/ws_plugins_settings.png)
+- Search for Biome and click `install`
+
+### From disk
+- Download the plugin .zip from releases tab.
+- Press `⌘Сmd,` to open the IDE settings and then select Plugins.
+- On the Plugins page, click The Settings button and then click Install Plugin from Disk….
+
+## Building and running the plugin
+
+Build and run the plugin requires:
+
+- Java 17
+- IntelliJ IDEA (Ultimate edition or community edition)
+
+### Running the plugin on IDEA
+```shell
+./gradlew runIde
+```
+
+### Build the plugin
+```shell
+./gradlew buildPlugin
+```
