@@ -15,6 +15,7 @@ use crate::syntax::jsx::jsx_parse_errors::{
     jsx_expected_attribute, jsx_expected_attribute_value, jsx_expected_children,
     jsx_expected_closing_tag,
 };
+use crate::syntax::typescript::TypeContext;
 use crate::JsSyntaxFeature::TypeScript;
 use crate::{parser::RecoveryResult, JsParser, ParseRecovery, ParsedSyntax};
 use crate::{Absent, Present};
@@ -158,7 +159,7 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         // <NonGeneric />;
         // <Generic<true> />;
         // <Generic<true>></Generic>;
-        let _ = parse_ts_type_arguments(p);
+        let _ = parse_ts_type_arguments(p, TypeContext::default());
     }
 
     JsxAttributeList.parse_list(p);

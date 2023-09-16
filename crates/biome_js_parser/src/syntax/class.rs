@@ -402,9 +402,11 @@ fn parse_extends_clause(p: &mut JsParser) -> ParsedSyntax {
         p.error(p.err_builder("'extends' list cannot be empty.", extends_end..extends_end))
     } else {
         TypeScript
-            .parse_exclusive_syntax(p, parse_ts_type_arguments, |p, arguments| {
-                ts_only_syntax_error(p, "type arguments", arguments.range(p))
-            })
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_ts_type_arguments(p, TypeContext::default()),
+                |p, arguments| ts_only_syntax_error(p, "type arguments", arguments.range(p)),
+            )
             .ok();
     }
 
@@ -419,7 +421,7 @@ fn parse_extends_clause(p: &mut JsParser) -> ParsedSyntax {
             break;
         }
 
-        parse_ts_type_arguments(p).ok();
+        parse_ts_type_arguments(p, TypeContext::default()).ok();
 
         let extra_class = extra.complete(p, JS_BOGUS);
 
@@ -605,6 +607,7 @@ fn parse_index_signature_class_member(p: &mut JsParser, member_marker: Marker) -
                 p,
                 member_marker,
                 MemberParent::Class,
+                TypeContext::default(),
             ))
         },
         |p, member| ts_only_syntax_error(p, "Index signatures", member.range(p)),
@@ -762,6 +765,7 @@ fn parse_class_member_impl(
                     decorator_list,
                     ParameterContext::ClassSetter,
                     ExpressionContext::default().and_object_expression_allowed(has_l_paren),
+                    TypeContext::default(),
                 )
             })
             .or_add_diagnostic(p, js_parse_error::expected_parameter);
@@ -771,7 +775,9 @@ fn parse_class_member_impl(
             // class Test {
             //     set a(value: string): void {}
             // }
-            if let Present(return_type_annotation) = parse_ts_return_type_annotation(p) {
+            if let Present(return_type_annotation) =
+                parse_ts_return_type_annotation(p, TypeContext::default())
+            {
                 p.error(ts_set_accessor_return_type_error(
                     p,
                     &return_type_annotation,
@@ -1124,17 +1130,17 @@ fn parse_ts_property_annotation(
 
     let mut annotation = match (optional_range, definite_range) {
         (Some(_), None) => {
-            parse_ts_type_annotation(p).ok();
+            parse_ts_type_annotation(p, TypeContext::default()).ok();
             m.complete(p, TS_OPTIONAL_PROPERTY_ANNOTATION)
         }
         (None, Some(_)) => {
-            parse_ts_type_annotation(p).or_add_diagnostic(p, |p, range| {
+            parse_ts_type_annotation(p, TypeContext::default()).or_add_diagnostic(p, |p, range| {
                 p.err_builder("Properties with definite assignment assertions must also have type annotations.",range, )
             });
             m.complete(p, TS_DEFINITE_PROPERTY_ANNOTATION)
         }
         (Some(optional_range), Some(definite_range)) => {
-            parse_ts_type_annotation(p).ok();
+            parse_ts_type_annotation(p, TypeContext::default()).ok();
             let error = p
                 .err_builder(
                     "class properties cannot be both optional and definite",
@@ -1246,13 +1252,15 @@ fn parse_method_class_member_rest(
         ParameterContext::ClassImplementation
     };
 
-    parse_parameter_list(p, parameter_context, flags)
+    parse_parameter_list(p, parameter_context, TypeContext::default(), flags)
         .or_add_diagnostic(p, js_parse_error::expected_class_parameters);
 
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_return_type_annotation, |p, annotation| {
-            ts_only_syntax_error(p, "return type annotation", annotation.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_return_type_annotation(p, TypeContext::default()),
+            |p, annotation| ts_only_syntax_error(p, "return type annotation", annotation.range(p)),
+        )
         .ok();
 
     let member_kind = expect_method_body(p, &m, modifiers, ClassMethodMemberKind::Method(flags));
@@ -1523,7 +1531,7 @@ fn parse_constructor_class_member_body(
     parse_constructor_parameter_list(p)
         .or_add_diagnostic(p, js_parse_error::expected_constructor_parameters);
 
-    if let Present(marker) = parse_ts_type_annotation(p) {
+    if let Present(marker) = parse_ts_type_annotation(p, TypeContext::default()) {
         let err = p.err_builder("constructors cannot have type annotations", marker.range(p));
 
         p.error(err);
@@ -1612,8 +1620,14 @@ fn parse_constructor_parameter(p: &mut JsParser, context: ExpressionContext) -> 
         let modifiers = parse_class_member_modifiers(p, true);
 
         // we pass decorator list as Absent because TsPropertyParameter has its own decorator list
-        parse_formal_parameter(p, Absent, ParameterContext::ParameterProperty, context)
-            .or_add_diagnostic(p, expected_binding);
+        parse_formal_parameter(
+            p,
+            Absent,
+            ParameterContext::ParameterProperty,
+            context,
+            TypeContext::default(),
+        )
+        .or_add_diagnostic(p, expected_binding);
 
         let kind = if modifiers.validate_and_complete(p, TS_PROPERTY_PARAMETER) {
             TS_PROPERTY_PARAMETER
@@ -1628,6 +1642,7 @@ fn parse_constructor_parameter(p: &mut JsParser, context: ExpressionContext) -> 
             decorator_list,
             ParameterContext::ClassImplementation,
             context,
+            TypeContext::default(),
         )
         .map(|mut parameter| {
             // test_err ts ts_constructor_this_parameter

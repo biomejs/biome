@@ -47,14 +47,31 @@ mod tests {
 
     #[test]
     fn needs_parentheses() {
-        assert_needs_parentheses!("let s: (infer string)[] = symbol();", TsInferType);
+        assert_needs_parentheses!(
+            "type A = T extends (infer string)[] ? string : never",
+            TsInferType
+        );
+        assert_needs_parentheses!(
+            "type A = T extends unique (infer string) ? string : never",
+            TsInferType
+        );
 
-        assert_needs_parentheses!("let s: unique (infer string);", TsInferType);
+        assert_not_needs_parentheses!(
+            "type A = T extends [number, ...infer string] ? string : never",
+            TsInferType
+        );
+        assert_needs_parentheses!(
+            "type A = T extends [(infer string)?] ? string : never",
+            TsInferType
+        );
 
-        assert_not_needs_parentheses!("let s: [number, ...infer string]", TsInferType);
-        assert_needs_parentheses!("let s: [(infer string)?]", TsInferType);
-
-        assert_needs_parentheses!("let s: (infer string)[a]", TsInferType);
-        assert_not_needs_parentheses!("let s: a[(infer string)]", TsInferType);
+        assert_needs_parentheses!(
+            "type A = T extends (infer string)[a] ? string : never",
+            TsInferType
+        );
+        assert_not_needs_parentheses!(
+            "type A = T extends a[(infer string)] ? string : never",
+            TsInferType
+        );
     }
 }
