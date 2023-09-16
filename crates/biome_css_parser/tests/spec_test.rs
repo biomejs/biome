@@ -5,6 +5,7 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
 use biome_rowan::SyntaxKind;
+use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -122,4 +123,20 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+#[ignore]
+#[test]
+pub fn quick_test() {
+    let code = r#".action {}"#;
+    let root = parse_css(code, CssParserOptions::default());
+    let syntax = root.syntax();
+    dbg!(&syntax, root.diagnostics(), root.has_errors());
+
+    if has_bogus_nodes_or_empty_slots(&syntax) {
+        panic!(
+            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
+            syntax
+        )
+    }
 }

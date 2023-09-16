@@ -174,10 +174,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRule::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_SELECTOR => {
-                    let $pattern = unsafe { $crate::CssSelector::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_SIMPLE_FUNCTION => {
                     let $pattern = unsafe { $crate::CssSimpleFunction::new_unchecked(node) };
                     $body
@@ -207,9 +203,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogus::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ANY_SELECTOR_PATTERN_LIST => {
-                    let $pattern =
-                        unsafe { $crate::CssAnySelectorPatternList::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_BOGUS_BODY => {
+                    let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_PATTERN => {
+                    let $pattern = unsafe { $crate::CssBogusPattern::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_AT_KEYFRAMES_ITEM_LIST => {

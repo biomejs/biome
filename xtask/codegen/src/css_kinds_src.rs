@@ -216,7 +216,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ID_SELECTOR_PATTERN",
         "CSS_RULE",
         "CSS_SELECTOR_LIST",
-        "CSS_SELECTOR",
         "CSS_ANY_FUNCTION",
         "CSS_AT_KEYFRAMES",
         "CSS_AT_KEYFRAMES_BODY",
@@ -265,5 +264,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_DECLARATION_IMPORTANT",
         // Bogs nodes
         "CSS_BOGUS",
+        "CSS_BOGUS_PATTERN",
+        "CSS_BOGUS_BODY",
     ],
 };

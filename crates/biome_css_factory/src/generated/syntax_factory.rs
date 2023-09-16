@@ -14,7 +14,9 @@ impl SyntaxFactory for CssSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            CSS_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            CSS_BOGUS | CSS_BOGUS_BODY | CSS_BOGUS_PATTERN => {
+                RawSyntaxNode::new(kind, children.into_iter().map(Some))
+            }
             CSS_ANY_FUNCTION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -1202,25 +1204,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_RULE, children)
             }
-            CSS_SELECTOR => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssAnySelectorPatternList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_SELECTOR.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_SELECTOR, children)
-            }
             CSS_SIMPLE_FUNCTION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -1391,9 +1374,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_VAR_FUNCTION_VALUE, children)
             }
-            CSS_ANY_SELECTOR_PATTERN_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyCssSelectorPattern::can_cast)
-            }
             CSS_AT_KEYFRAMES_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, CssKeyframesBlock::can_cast)
             }
@@ -1424,7 +1404,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                CssSelector::can_cast,
+                AnyCssSelectorPattern::can_cast,
                 T ! [,],
                 false,
             ),

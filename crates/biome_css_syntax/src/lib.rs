@@ -9,7 +9,7 @@ pub use biome_rowan::{
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
-use biome_rowan::RawSyntaxKind;
+use biome_rowan::{AstNode, RawSyntaxKind};
 
 impl From<u16> for CssSyntaxKind {
     fn from(d: u16) -> CssSyntaxKind {
@@ -41,7 +41,7 @@ impl CssSyntaxKind {
     /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {
-        (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (CSS_SELECTOR as u16)
+        (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (VAR_KW as u16)
     }
 
     /// Returns true for all non-contextual keywords (includes future reserved keywords)
@@ -60,7 +60,12 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     }
 
     fn to_bogus(&self) -> Self {
-        todo!()
+        dbg!(&self);
+        match self {
+            kind if AnyCssSelectorPattern::can_cast(*kind) => CSS_BOGUS_PATTERN,
+
+            _ => CSS_BOGUS,
+        }
     }
 
     #[inline]
