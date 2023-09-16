@@ -29,7 +29,7 @@ interface I {
 
 <pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/linter/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in interfaces.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use the </span><span style="color: Tomato;"><strong>new</strong></span><span style="color: Tomato;"> method in interfaces.</span>
   
     <strong>1 │ </strong>interface I {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  new (): I;
@@ -49,7 +49,7 @@ class C {
 
 <pre class="language-text"><code class="language-text">nursery/noMisleadingInstantiator.js:2:3 <a href="https://biomejs.dev/linter/rules/no-misleading-instantiator">lint/nursery/noMisleadingInstantiator</a> ━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Don't use the </span><span style="color: Orange;"><strong>new</strong></span><span style="color: Orange;"> method in classes.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Don't use the </span><span style="color: Tomato;"><strong>new</strong></span><span style="color: Tomato;"> method in classes.</span>
   
     <strong>1 │ </strong>class C {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  new(): C;

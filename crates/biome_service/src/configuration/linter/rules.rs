@@ -2278,19 +2278,21 @@ impl Nursery {
         "useImportRestrictions",
         "useIsArray",
     ];
-    const RECOMMENDED_RULES: [&'static str; 7] = [
+    const RECOMMENDED_RULES: [&'static str; 8] = [
         "noDuplicateJsonKeys",
         "noGlobalIsFinite",
         "noGlobalIsNan",
+        "noMisleadingInstantiator",
         "useArrowFunction",
         "useExhaustiveDependencies",
         "useGroupedTypeImport",
         "useIsArray",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 7] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 8] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
@@ -2503,7 +2505,7 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 7] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 8] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 16] {
