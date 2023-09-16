@@ -20,7 +20,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### New features
 
-- Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by [@unvalley](https://github.com/unvalley)
+- Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
 
 ### Parser
 ### VSCode
