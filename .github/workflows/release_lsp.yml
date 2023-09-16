@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - editors/vscode/package.json
+      - editors/intellij/gradle.properties
 
 jobs:
   check:
@@ -16,12 +17,14 @@ jobs:
     outputs:
       # LSP Extension Version
       version: ${{ env.version }}
+      intellij_version: ${{ env.intellij_version }}
 
       # Version of the Biome binary
       biome_version: ${{ env.biome_version }}
       prerelease: ${{ env.prerelease }}
       nightly: ${{ env.nightly }}
       version_changed: ${{ steps.version.outputs.changed }}
+      intellij_version_changed: ${{ steps.intellij_version.outputs.changed }}
     steps:
       - uses: actions/checkout@v3
 
@@ -30,13 +33,21 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: echo "nightly=true" >> $GITHUB_ENV
 
-      - name: Check version changes
+      - name: Check vscode version changes
         uses: EndBug/version-check@v2
         if: env.nightly != 'true'
         id: version
         with:
           diff-search: true
           file-name: editors/vscode/package.json
+
+      - name: Check intellij plugin version changes
+        uses: victor-teles/gradle-properties-diff-checker@v1
+        if: env.nightly != 'true'
+        id: intellij_version
+        with:
+          file-name: editors/intellij/gradle.properties
+          property: pluginVersion
 
       - name: Check Biome version changes
         uses: EndBug/version-check@v2
@@ -50,6 +61,7 @@ jobs:
         run: |
           echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
           echo "biome_version=${{ steps.biome_version.outputs.version }}" >> $GITHUB_ENV
+          echo "intellij_version=${{ steps.intellij_version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Check prerelease status
         id: prerelease
@@ -58,10 +70,15 @@ jobs:
           echo "prerelease=true" >> $GITHUB_ENV
           node ./editors/vscode/scripts/update-nightly-version.mjs >> $GITHUB_ENV
           echo "biome_version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+          echo "intellij_version=$(node ./editors/intellij/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
 
-      - name: Check version status
+      - name: Check vscode version status
         if: steps.version.outputs.changed == 'true'
-        run: 'echo "Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
+        run: 'echo "VSCode Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
+
+      - name: Check intellij version status
+        if: steps.intellij_version.outputs.changed == 'true'
+        run: 'echo "Intellij Version change found! New version: ${{ steps.intellij_version.outputs.version }}'
 
       - name: Biome Check version status
         if: steps.biome_version.outputs.changed == 'true'
@@ -90,7 +107,7 @@ jobs:
             target: aarch64-apple-darwin
             code-target: darwin-arm64
 
-    name: Package ${{ matrix.code-target }}
+    name: Package VSCode ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
 
     needs: check
@@ -148,7 +165,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.4.0
         with:
@@ -187,7 +204,7 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Publish
+    name: Publish VSCode
     runs-on: ubuntu-latest
     needs: build
     environment: marketplace
@@ -212,7 +229,7 @@ jobs:
         with:
           version: latest
           run_install: true
-        
+
       - name: Install VCSE
         run: pnpm add -g @vscode/vsce
 
@@ -253,5 +270,103 @@ jobs:
           body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
             biome_lsp-*.vsix
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+
+  build-intellij:
+    name: Build Intellij LSP
+    runs-on: ubuntu-latest
+    needs: check
+    env:
+      version: ${{ needs.check.outputs.intellij_version }}
+
+    if: needs.check.outputs.intellij_version_changed == 'true' || needs.check.outputs.nightly == 'true'
+    outputs:
+      version: ${{ env.version }}
+      prerelease: ${{ env.prerelease }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Update plugin version
+        if: needs.check.outputs.prerelease == 'true'
+        working-directory: editors/intellij
+        run: |
+          node ./scripts/update-nightly-version.mjs >> $GITHUB_ENV
+
+      - name: Build plugin
+        working-directory: editors/intellij
+        run: ./gradlew buildPlugin
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: intellij_package
+          path: ./editors/intellij/build/distributions/intellij-biome-*.zip
+          if-no-files-found: error
+
+  publish-intellij:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: build
+    environment: intellij-plugin
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download extension artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: intellij_package
+          path: ./editors/intellij/build/distributions
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Publish Plugin
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: ./gradlew publishPlugin
+        working-directory: editors/intellij
+
+      - name: Extract changelog
+        run: |
+          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
+      - name: Create GitHub release and tag
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Intellij Plugin v${{ needs.build.outputs.version }}
+          tag_name: lsp-intellij/v${{ needs.build.outputs.version }}
+          draft: false
+          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+          body_path: ${{ github.workspace }}/RELEASE_NOTES
+          files: |
+            ./editors/intellij/build/distributions/intellij-biome-*.zip
           fail_on_unmatched_files: true
           generate_release_notes: true
