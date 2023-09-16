@@ -51,7 +51,7 @@ declare_rule! {
     pub(crate) NoMisleadingInstantiator {
         version: "next",
         name: "noMisleadingInstantiator",
-        recommended: false,
+        recommended: true,
     }
 }
 
