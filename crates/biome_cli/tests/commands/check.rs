@@ -1628,7 +1628,7 @@ import * as something from "../something";
 }
 
 #[test]
-fn shows_organize_imports_diff_on_check_apply() {
+fn should_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1656,7 +1656,7 @@ import * as something from "../something";
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     let mut file = fs
         .open(file_path)
@@ -1672,7 +1672,7 @@ import * as something from "../something";
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "shows_organize_imports_diff_on_check_apply",
+        "should_organize_imports_diff_on_check",
         fs,
         console,
         result,

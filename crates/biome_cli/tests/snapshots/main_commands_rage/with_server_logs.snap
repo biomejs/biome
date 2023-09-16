@@ -70,3 +70,5 @@ INFO biome_cli::commands::daemon Received shutdown signal
 ├─┘
 ├─7897ms INFO biome_lsp::server Starting Biome Language Server...
 ```
+
+
