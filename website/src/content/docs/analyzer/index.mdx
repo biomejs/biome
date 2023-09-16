@@ -32,7 +32,7 @@ Import statements are sorted by "distance". Modules that are "farther" from the 
 
 For example, given the following code:
 
-```js
+```ts
 import uncle from "../uncle";
 import sibling from "./sibling";
 import express from "npm:express";
@@ -45,7 +45,7 @@ import { mock, test } from "node:test";
 
 They will be sorted like this:
 
-```js
+```ts
  import assert from "node:assert";
  import { mock, test } from "node:test";
  import express from "npm:express";
@@ -60,7 +60,7 @@ You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VS
 
 ### Import sorting via CLI
 
-Due to the nature of the language, the sorting of imports is categorised as **unsafe**, and you can apply it using the `--apply-unsafe` option:
+Using the command `check`, with the option `--apply`.
 
 ```shell
 biome check --apply-unsafe ./path/to/src
@@ -69,7 +69,7 @@ biome check --apply-unsafe ./path/to/src
 ### Import sorting via VSCode extension
 
 The Biome VS Code extension supports imports sorting through the "Organize Imports" code action.
-By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+By default, this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 
