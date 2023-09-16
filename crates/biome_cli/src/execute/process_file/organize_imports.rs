@@ -20,7 +20,7 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
 
     let input = workspace_file.input()?;
     if sorted.code != input {
-        if ctx.execution.is_check_apply_unsafe() {
+        if ctx.execution.is_check_apply_unsafe() || ctx.execution.is_check_apply() {
             workspace_file.update_file(sorted.code)?;
         } else {
             return Ok(FileStatus::Message(Message::Diff {

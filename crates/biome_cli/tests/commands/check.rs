@@ -1628,58 +1628,6 @@ import * as something from "../something";
 }
 
 #[test]
-fn shows_organize_imports_diff_on_check_apply() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let rome_json = r#"{ "organizeImports": { "enabled": true } }"#;
-
-    let config_path = Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
-
-    let file_path = Path::new("check.js");
-    let content = r#"import { lorem, foom, bar } from "foo";
-import * as something from "../something";
-"#;
-    fs.insert(file_path.into(), content.as_bytes());
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(
-            [
-                ("check"),
-                ("--apply"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, content);
-
-    drop(file);
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "shows_organize_imports_diff_on_check_apply",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn dont_applies_organize_imports_for_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
