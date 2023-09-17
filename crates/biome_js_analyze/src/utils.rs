@@ -1,9 +1,9 @@
 use biome_js_factory::make;
 use biome_js_syntax::{
     inner_string_text, AnyJsStatement, JsLanguage, JsModuleItemList, JsStatementList, JsSyntaxNode,
-    JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, T,
+    T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, Direction, WalkEvent};
+use biome_rowan::{AstNode, BatchMutation, Direction, WalkEvent};
 use std::iter;
 
 pub mod batch;
@@ -60,53 +60,6 @@ where
             node.clone().into(),
             AnyJsStatement::JsEmptyStatement(make::js_empty_statement(make::token(T![;]))),
         );
-    }
-
-    Some(())
-}
-
-/// Removes the declarator, and:
-/// 1 - removes the statement if the declaration only has one declarator;
-/// 2 - removes commas around the declarator to keep the declaration list valid.
-pub(crate) fn remove_declarator(
-    batch: &mut BatchMutation<JsLanguage>,
-    declarator: &JsVariableDeclarator,
-) -> Option<()> {
-    let list = declarator.parent::<JsVariableDeclaratorList>()?;
-    let declaration = list.parent::<JsVariableDeclaration>()?;
-
-    if list.syntax_list().len() == 1 {
-        let statement = declaration.parent::<JsVariableStatement>()?;
-        batch.remove_node(statement);
-    } else {
-        let mut elements = list.elements();
-
-        // Find the declarator we want to remove
-        // remove its trailing comma, if there is one
-        let mut previous_element = None;
-        for element in elements.by_ref() {
-            if let Ok(node) = element.node() {
-                if node == declarator {
-                    batch.remove_node(node.clone());
-                    if let Some(comma) = element.trailing_separator().ok().flatten() {
-                        batch.remove_token(comma.clone());
-                    }
-                    break;
-                }
-            }
-            previous_element = Some(element);
-        }
-
-        // if it is the last declarator of the list
-        // removes the comma before this element
-        let is_last = elements.next().is_none();
-        if is_last {
-            if let Some(element) = previous_element {
-                if let Some(comma) = element.trailing_separator().ok().flatten() {
-                    batch.remove_token(comma.clone());
-                }
-            }
-        }
     }
 
     Some(())
