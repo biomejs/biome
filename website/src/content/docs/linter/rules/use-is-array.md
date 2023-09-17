@@ -3,6 +3,10 @@ title: useIsArray (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Use `Array.isArray()` instead of `instanceof Array`.
 
 In _JavaScript_ some array-like objects such as _arguments_ are not instances of the `Array` class.    ///

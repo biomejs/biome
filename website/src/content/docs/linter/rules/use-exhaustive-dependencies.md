@@ -3,6 +3,10 @@ title: useExhaustiveDependencies (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Enforce all dependencies are correctly specified.
 
 ## Examples

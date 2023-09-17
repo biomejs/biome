@@ -3,6 +3,10 @@ title: useArrowFunction (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Use arrow functions over function expressions.
 
 An arrow function expression is a compact alternative to a regular function expression,

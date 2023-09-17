@@ -3,6 +3,10 @@ title: noExcessiveComplexity (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow functions that exceed a given complexity score.
 
 The more complexity a function contains, the harder it is to understand

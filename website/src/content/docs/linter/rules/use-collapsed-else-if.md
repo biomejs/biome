@@ -3,6 +3,10 @@ title: useCollapsedElseIf (since v1.1.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Enforce using `else if` instead of nested `if` in `else` clauses.
 
 If an `if` statement is the only statement in the `else` block, it is often clearer to use an `else if` form.

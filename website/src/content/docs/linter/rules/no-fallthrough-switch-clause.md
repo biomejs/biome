@@ -3,6 +3,10 @@ title: noFallthroughSwitchClause (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow fallthrough of `switch` clauses.
 
 Switch clauses in `switch` statements fall through by default.
