@@ -60,7 +60,6 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     }
 
     fn to_bogus(&self) -> Self {
-        dbg!(&self);
         match self {
             kind if AnyCssSelectorPattern::can_cast(*kind) => CSS_BOGUS_PATTERN,
 

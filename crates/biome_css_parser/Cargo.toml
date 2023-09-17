@@ -21,11 +21,11 @@ biome_rowan            = { workspace = true }
 tracing                = { workspace = true }
 
 [dev-dependencies]
+biome_test_utils  = { workspace = true }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
-biome_test_utils = { workspace = true}
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
