@@ -30,7 +30,7 @@ class BiomeFormatterProvider: AsyncDocumentFormattingService() {
         val ioFile = request.ioFile ?: return null
         val project = request.context.project
         val params = SmartList("format", "--stdin-file-path", ioFile.path)
-        BiomeUtils.attachConfigPath(params, project, thisLogger())
+
         val exePath = BiomeUtils.getBiomeExecutablePath(project)
 
         if(exePath.isNullOrEmpty()) {

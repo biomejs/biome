@@ -48,20 +48,6 @@ object BiomeUtils {
         return executablePath
     }
 
-    fun attachConfigPath(params: SmartList<String>, project: Project, logger: Logger) {
-        project.basePath?.let {
-            try {
-                val file = File(it)
-                if (file.exists()) {
-                    params.add("--config-path")
-                    params.add(project.basePath)
-                }
-            } catch (error: Exception) {
-                logger.error(error.message)
-            }
-        }
-    }
-
     private  fun createVersionCommandLine(project: Project, binaryPath: String): GeneralCommandLine {
         return GeneralCommandLine()
             .withWorkDirectory(project.basePath)

@@ -31,7 +31,6 @@ private class BiomeLspServerDescriptor(project: Project, val executable: String)
     override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
     override fun createCommandLine(): GeneralCommandLine {
         val params = SmartList("lsp-proxy")
-        BiomeUtils.attachConfigPath(params, project, thisLogger())
 
         if(executable.isEmpty()) {
             throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
