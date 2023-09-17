@@ -2,14 +2,14 @@
 use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
-    inner_string_text, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsObjectMemberName, AnyJsTemplateElement, JsArrayExpression, JsArrayHole,
-    JsAssignmentExpression, JsBinaryExpression, JsCallExpression, JsComputedMemberAssignment,
-    JsComputedMemberExpression, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
-    JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsReferenceIdentifier,
-    JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
-    JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    OperatorPrecedence, T,
+    inner_string_text, AnyJsCallArgument, AnyJsClassMemberName, AnyJsExpression,
+    AnyJsLiteralExpression, AnyJsObjectMemberName, AnyJsTemplateElement, JsArrayExpression,
+    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
+    JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
+    JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
@@ -1006,6 +1006,58 @@ impl AnyJsObjectMemberName {
                 }
             }
             AnyJsObjectMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
+        };
+        Some(inner_string_text(&token))
+    }
+}
+
+impl AnyJsClassMemberName {
+    /// Returns the member name of the current node
+    /// if it is a literal, a computed, or a private class member with a literal value.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsClassMemberName, AnyJsExpression, AnyJsLiteralExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let name = make::js_literal_member_name(make::ident("a"));
+    /// let name = AnyJsClassMemberName::JsLiteralMemberName(name);
+    /// assert_eq!(name.name().unwrap().text(), "a");
+    ///
+    /// let quoted_name = make::js_literal_member_name(make::js_string_literal("a"));
+    /// let quoted_name = AnyJsClassMemberName::JsLiteralMemberName(quoted_name);
+    /// assert_eq!(quoted_name.name().unwrap().text(), "a");
+    ///
+    /// let number_name = make::js_literal_member_name(make::js_number_literal(42));
+    /// let number_name = AnyJsClassMemberName::JsLiteralMemberName(number_name);
+    /// assert_eq!(number_name.name().unwrap().text(), "42");
+    ///
+    /// let string_literal = make::js_string_literal_expression(make::js_string_literal("a"));
+    /// let string_literal = AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(string_literal));
+    /// let computed = make::js_computed_member_name(make::token(T!['[']), string_literal, make::token(T![']']));
+    /// let computed = AnyJsClassMemberName::JsComputedMemberName(computed);
+    /// assert_eq!(computed.name().unwrap().text(), "a");
+    /// ```
+    pub fn name(&self) -> Option<TokenText> {
+        let token = match self {
+            AnyJsClassMemberName::JsComputedMemberName(expr) => {
+                let expr = expr.expression().ok()?;
+                match expr.omit_parentheses() {
+                    AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
+                    AnyJsExpression::JsTemplateExpression(expr) => {
+                        if !expr.is_constant() {
+                            return None;
+                        }
+                        let chunk = expr.elements().first()?;
+                        let chunk = chunk.as_js_template_chunk_element()?;
+                        chunk.template_chunk_token().ok()?
+                    }
+                    _ => return None,
+                }
+            }
+            AnyJsClassMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
+            AnyJsClassMemberName::JsPrivateClassMemberName(expr) => expr.id_token().ok()?,
         };
         Some(inner_string_text(&token))
     }

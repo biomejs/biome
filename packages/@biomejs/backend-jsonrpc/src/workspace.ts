@@ -678,6 +678,10 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Enforce proper usage of new and constructor.
+	 */
+	noMisleadingInstantiator?: RuleConfiguration;
+	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration;
@@ -1270,6 +1274,7 @@ export type Category =
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
+	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useBiomeSuppressionComment"

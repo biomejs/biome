@@ -95,6 +95,7 @@ define_categories! {
     "lint/nursery/noFallthroughSwitchClause": "https://biomejs.dev/linter/rules/no-fallthrough-switch-clause",
     "lint/nursery/noGlobalIsFinite": "https://biomejs.dev/linter/rules/no-global-is-finite",
     "lint/nursery/noGlobalIsNan": "https://biomejs.dev/linter/rules/no-global-is-nan",
+    "lint/nursery/noMisleadingInstantiator": "https://biomejs.dev/linter/rules/no-misleading-instantiator",
     "lint/nursery/noVoid": "https://biomejs.dev/linter/rules/no-void",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/lint/rules/use-biome-suppression-comment",
