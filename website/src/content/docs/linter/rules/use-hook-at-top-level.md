@@ -3,6 +3,10 @@ title: useHookAtTopLevel (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Enforce that all React hooks are being called from the Top Level
 component functions.
 

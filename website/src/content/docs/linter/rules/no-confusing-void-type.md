@@ -3,6 +3,10 @@ title: noConfusingVoidType (since v1.2.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow `void` type outside of generic or return types.
 
 `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.

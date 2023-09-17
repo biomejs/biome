@@ -3,6 +3,10 @@ title: noMisleadingInstantiator (since vnext)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Enforce proper usage of `new` and `constructor`.
 
 In JavaScript, classes utilize the `constructor` method to initialize a new instance. On the other hand, TypeScript interfaces can describe a class type with a `new()` method signature, though this pattern is not commonly seen in real-world code. Developers, especially those new to JavaScript or TypeScript, might occasionally confuse the use of `constructor` with `new`.

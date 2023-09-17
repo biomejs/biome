@@ -3,6 +3,10 @@ title: noAccumulatingSpread (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow the use of spread (`...`) syntax on accumulators.
 
 Spread syntax allows an iterable to be expanded into its individual elements.

@@ -3,6 +3,10 @@ title: useGroupedTypeImport (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Enforce the use of `import type` when an `import` only has specifiers with `type` qualifier.
 
 The [`--verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax) _TypeScript_'s compiler option causes _TypeScript_ to do simple and predictable transpilation on `import` declarations.

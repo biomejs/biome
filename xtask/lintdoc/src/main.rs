@@ -31,6 +31,8 @@ fn main() -> Result<()> {
     let reference_groups = project_root().join("website/src/components/generated/Groups.astro");
     let reference_number_of_rules =
         project_root().join("website/src/components/generated/NumberOfRules.astro");
+    let reference_recommended_rules =
+        project_root().join("website/src/components/generated/RecommendedRules.astro");
     // Clear the rules directory ignoring "not found" errors
     if let Err(err) = fs2::remove_dir_all(&root) {
         let is_not_found = err
@@ -112,6 +114,8 @@ fn main() -> Result<()> {
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
 
+    let mut recommended_rules = String::new();
+
     let LintRulesVisitor {
         mut groups,
         number_or_rules,
@@ -126,11 +130,25 @@ fn main() -> Result<()> {
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->"
     )?;
     for (group, rules) in groups {
-        generate_group(group, rules, &root, &mut index, &mut errors)?;
+        generate_group(
+            group,
+            rules,
+            &root,
+            &mut index,
+            &mut errors,
+            &mut recommended_rules,
+        )?;
         generate_reference(group, &mut reference_buffer)?;
     }
 
-    generate_group("nursery", nursery_rules, &root, &mut index, &mut errors)?;
+    generate_group(
+        "nursery",
+        nursery_rules,
+        &root,
+        &mut index,
+        &mut errors,
+        &mut recommended_rules,
+    )?;
     generate_reference("nursery", &mut reference_buffer)?;
     if !errors.is_empty() {
         bail!(
@@ -141,6 +159,11 @@ fn main() -> Result<()> {
                 .collect::<String>()
         );
     }
+    let recommended_rules_buffer = format!(
+        "<!-- this file is auto generated, use `cargo lintdoc` to update it -->\n \
+    <ul>\n{}\n</ul>",
+        recommended_rules
+    );
 
     let number_of_rules_buffer = format!(
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->\n \
@@ -150,6 +173,7 @@ fn main() -> Result<()> {
     fs2::write(root.join("index.mdx"), index)?;
     fs2::write(reference_groups, reference_buffer)?;
     fs2::write(reference_number_of_rules, number_of_rules_buffer)?;
+    fs2::write(reference_recommended_rules, recommended_rules_buffer)?;
 
     Ok(())
 }
@@ -160,6 +184,7 @@ fn generate_group(
     root: &Path,
     mut index: &mut dyn io::Write,
     errors: &mut Vec<(&'static str, Error)>,
+    recommended_rules: &mut String,
 ) -> io::Result<()> {
     let (group_name, description) = extract_group_metadata(group);
     let is_nursery = group == "nursery";
@@ -172,6 +197,11 @@ fn generate_group(
     for (rule, meta) in rules {
         let is_recommended = !is_nursery && meta.recommended;
         let dashed_rule = rule.to_case(Case::Kebab);
+        if is_recommended {
+            recommended_rules.push_str(&format!(
+                "\t<li><a href='/linter/rules/{dashed_rule}'>{rule}</a></li>\n"
+            ));
+        }
         match generate_rule(root, group, rule, meta.docs, meta.version, is_recommended) {
             Ok(summary) => {
                 writeln!(index, "### [{rule}](/linter/rules/{dashed_rule})")?;
@@ -209,6 +239,16 @@ fn generate_rule(
     if is_recommended {
         writeln!(content, ":::note")?;
         writeln!(content, "This rule is recommended by Biome. A diagnostic error will appear when linting your code.")?;
+        writeln!(content, ":::")?;
+        writeln!(content)?;
+    }
+
+    if group == "nursery" {
+        writeln!(content, ":::caution")?;
+        writeln!(
+            content,
+            "This rule is part of the [nursery](/linter/rules/#nursery) group."
+        )?;
         writeln!(content, ":::")?;
         writeln!(content)?;
     }

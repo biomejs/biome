@@ -3,6 +3,10 @@ title: useImportRestrictions (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallows package private imports.
 
 This rules enforces the following restrictions:

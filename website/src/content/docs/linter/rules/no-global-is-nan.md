@@ -3,6 +3,10 @@ title: noGlobalIsNan (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Use `Number.isNaN` instead of global `isNaN`.
 
 `Number.isNaN()` and `isNaN()` [have not the same behavior](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN#description).

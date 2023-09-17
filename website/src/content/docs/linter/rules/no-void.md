@@ -3,6 +3,10 @@ title: noVoid (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow the use of `void` operators, which is not a familiar operator.
 
 >The `void` operator is often used merely to obtain the undefined primitive value,

@@ -3,6 +3,10 @@ title: noDuplicateJsonKeys (since v1.0.0)
 ---
 
 
+:::caution
+This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::
+
 Disallow two keys with the same name inside a JSON object.
 
 ## Examples
