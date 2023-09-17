@@ -13,7 +13,7 @@ import java.io.File
 
 object BiomeUtils {
     fun isSupportedFileType(file: VirtualFile): Boolean = when (file.extension) {
-        "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx" -> true
+        "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx", "d.ts", "json", "jsonc" -> true
         else -> false
     }
 
