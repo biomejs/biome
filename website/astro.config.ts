@@ -178,6 +178,10 @@ export default defineConfig({
 						{
 							label: "Use Rome in big projects",
 							link: "/guides/big-projects",
+							badge: {
+								text: "New",
+								variant: "note"
+							}
 						},
 					],
 				},

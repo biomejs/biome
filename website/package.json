@@ -16,11 +16,10 @@
 	},
 	"devDependencies": {
 		"@algolia/client-search": "^4.17.0",
-		"@astrojs/mdx": "^0.19.7",
 		"@astrojs/prism": "^2.1.2",
 		"@astrojs/react": "^2.2.2",
 		"@astrojs/rss": "^2.4.4",
-		"@astrojs/vercel": "^3.8.1",
+		"@astrojs/vercel": "^5.0.0",
 		"@biomejs/wasm-web": "../packages/@biomejs/wasm-web",
 		"@codemirror/lang-javascript": "^6.1.8",
 		"@codemirror/lang-json": "^6.0.1",
@@ -36,7 +35,7 @@
 		"@types/react-dom": "^18.2.7",
 		"@uiw/react-codemirror": "^4.20.2",
 		"@vitejs/plugin-react": "^2.1.0",
-		"astro": "^2.10.9",
+		"astro": "^3.1.0",
 		"astro-compress": "^2.0.12",
 		"autoprefixer": "^10.4.12",
 		"codemirror-lang-rome-ast": "0.0.6",
@@ -59,12 +58,10 @@
 		"sass": "^1.62.1",
 		"typescript": "^5.0.4",
 		"vite": "3.1.8",
-		"vite-plugin-svgr": "^2.2.2"
-	},
-	"engines": {
-		"pnpm": "^8.0.0"
-	},
-	"dependencies": {
-		"@astrojs/starlight": "^0.8.0"
-	}
+		"vite-plugin-svgr": "^2.2.2",
+		"@astrojs/starlight": "^0.10.0"
+		},
+		"engines": {
+				"pnpm": "^8.0.0"
+		}
 }
