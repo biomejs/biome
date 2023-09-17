@@ -26,7 +26,7 @@ https://biomejs.dev plugin for JetBrains IDEs.
 
 Build and run the plugin requires:
 
-- Java 17
+- Java development kit 17+
 - IntelliJ IDEA (Ultimate edition or community edition)
 
 ### Running the plugin on IDEA
