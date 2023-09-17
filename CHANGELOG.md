@@ -22,6 +22,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
 
+#### Bug fixes
+
+- Fix [#294](https://github.com/biomejs/biome/issues/294). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) no longer reports false positives for return types. Contributed by @b4s36t4
+
 ### Parser
 ### VSCode
 
