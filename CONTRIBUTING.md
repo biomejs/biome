@@ -386,3 +386,18 @@ When releasing a new version of a Biome, follow these steps:
    Then execute `just codegen-linter`.
 
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+
+
+## Current Members
+
+Members are listed in alphabetical order. Members are free to use the full name, GitHub handle, or any other nickname they wish to be addressed. Members are free to disclose their pronouns.
+
+### Lead team
+
+- [Emanuele Stoppa @ematipico](https://github.com/ematipico)
+
+### Core Contributors team
+
+
+### Maintainers team
+

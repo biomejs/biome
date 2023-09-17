@@ -10,22 +10,41 @@ All members must follow the [Code of Conduct](CODE_OF_CONDUCT.md). Consequences 
 
 Leads are the owners of the organisation.
 
-Leads have additional privileges over core contributors. Leads control and maintain sensitive project assets and act as tiebreakers in the event of disagreements.
+Leads have additional privileges over core contributors. Leads control and maintain sensitive project assets and act as tiebreakers in the event of disagreements. In case of disagreements, only **one** lead must be involved in the resolution.
 
 These assets and responsibilities are but are not limited to:
 - Access to social accounts
 - Administration privileges of the [Biome Discord server][discord]
 - Administration privileges of the [Biome GitHub org][gh-org]
 - Website accesses (hosting platform, domain name, etc.)
+- Access to sensitive emails, such as the CoC email
+
+Also:
 - Ability to vote for new leads
 - Onboard new [core contributors](#core-contributor) and new leads;
 - Takes part in [project decisions](#project-direction-and-planning)
 
 The ownership of assets is only sometimes evenly distributed among all the leads.
 
+#### Lead nomination
+
+Core contributors may only be self-nominated. Being a lead only adds burden to a core contributor: more rights to be held accountable with, and more responsibilities.
+
+When nominating a core contributor, the person has to create a new thread in the `#leads` channel with a case of why the person should join as [core contributor](#core-contributor).
+
+`#leads` is a private channel available only to people who have the `Lead` role.
+
+The voting period will follow the [voting rules](#voting-rules). An individual becomes a [lead](#core-contributor) if all the other leads vote in favour.
+
+If vote is successful, the lead will ask the nominee if they want to accept the title.
+
+In the event of a rejection, the nominated person will be privately given the requirements they have yet to meet. Details of the discussion - for example, those who objected to the nomination - will not be disclosed.
+
+
+
 ### Core Contributor
 
-Core Contributors are outstanding [maintainers](#maintainer), ambassadors of Biome organisation and lead by example the community.
+Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of Biome organisation and lead by example the community.
 
 - Push access to the [Biome GitHub org][gh-org], this includes all repositories
 - `Core contributor` status on the [Biome Discord server][discord]
@@ -37,7 +56,7 @@ Core Contributors are outstanding [maintainers](#maintainer), ambassadors of Bio
 
 Core contributors may either be nominated by another, [Core contributor](#core-contributor), or [lead](#lead).
 
-When nominating a core contributor, the person has to create a new thread in the `#core-contributors` channel with a significant explanation of why the person should join as [core contributor](#core-contributor).
+When nominating a core contributor, the person has to create a new thread in the `#core-contributors` channel with a case and [their contributions](#contributions) of why the person should join as [core contributor](#core-contributor).
 
 `#core-contributors` is a private channel available only to people who have the `Core contributor` role.
 
@@ -45,11 +64,15 @@ The voting period will follow the [voting rules](#voting-rules). An individual b
 - receive at least a positive vote from a [lead](#lead);
 - more than 70% of positive votes across the members of the Core contributors team;
 
+Voting requirements may change in the future based on the amount of people involved in the vote.
+
 A core contributor can be self-nominated. They will have to message a [lead maintainer](#lead) privately and present a case. Then, the lead can:
-- reject the nomination in place, provide reasons why and possibly some suggestions for the future;
+- reject the nomination in place, provide reasons why and possibly some suggestions for the future; the lead
 - initiate a voting session among the core contributors;
 
-Upon termination of a nomination, the thread will be deleted, and a [lead](#lead) will reach out to the nominee and ask them if they want to accept the title.
+When the verdict is reached, the thread will be deleted, and a [lead](#lead) will reach out to the nominee.
+
+If vote is successful, the core member will ask the nominee if they want to accept the title.
 
 In the event of a rejection, the nominated person will be privately given the requirements they have yet to meet. Details of the discussion - for example, those who objected to the nomination - will not be disclosed.
 
@@ -66,7 +89,7 @@ Maintainers are those with a history of consistent contributions, including but 
 
 Maintainers may either be nominated by another [maintainer](#maintainer), [Core contributor](#core-contributor), [lead](#lead).
 
-When nominating a new maintainer, the person has to create a new thread in the `#maintainers` channel, provide a link to the history of the person's contributions to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
+When nominating a new maintainer, the person has to create a new thread in the `#maintainers` channel, provide a link to the history of the [person's contributions](#contributions) to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
 
 `#maintainers` is a private channel available only to people who have the `maintainer` role.
 
@@ -78,17 +101,20 @@ A maintainer can be self-nominated. They will have to message a [lead maintainer
 - reject the nomination in place, provide reasons why and possibly some suggestions for the future;
 - initiate a voting session among the maintainers;
 
-Upon termination of a nomination, the thread will be deleted, and a [core contributor](#core-contributor) will reach out to the nominee and ask them if they want to accept the title.
+When the verdict is reached, the thread will be deleted, and a [core contributor](#core-contributor) or [lead](#lead) will reach out to the nominee.
+
+If vote is successful, the lead will ask the nominee if they want to accept the title.
 
 In the event of a rejection, the nominated person will be privately given the requirements they have not met. Details of the discussion, such as the names of those who objected the nomination, will not be disclosed.
 
-
 ### Voting Rules
 
+- Members are required to vote.
 - Members may abstain from a vote.
 - Members who do not vote within seven days will automatically abstain.
 - Leads may reduce the seven days automatic abstain for urgent decisions.
 - Leads reserve the right to veto approval with a publicly disclosed reason.
+- It's highly suggested to pair the vote with a reason of the vote, e.g. "I vote in favour because that person writes good code". These reasons will be collected and brought up to the nominee at the end of the voting phase.
 
 ### Ownership
 
@@ -100,19 +126,14 @@ One or more people can own certain parts of the codebase. This process is inform
 There are no expectations around activity once someone becomes a core contributor or maintainer. Inactive core contributors or maintainers may have voting rights removed; however, will always retain their status. A core contributor or maintainer may request their voting rights back upon sufficient activity.
 
 
-## Current Members
+### Contributions
 
-Members are listed in alphabetical order. Members are free to use the full name, GitHub handle, or any other nickname they wish to be addressed. Members are free to disclose their gender.
-
-### Lead team
-
-- [Emanuele Stoppa @ematipico](https://github.com/ematipico)
-
-### Core Contributors team
-
-
-### Maintainers team
-
+Contributions to be project aren't only limited to code. Contributions come in different forms and ways:
+- Documentation
+- Code to all the repositories of the [GitHub org][gh-org]
+- Support in primary channels of the organization, e.g. GitHub and Discord
+- Support in secondary channels, e.g. StackOverflow, etc.
+- Website;
 
 ## Project direction and planning
 
