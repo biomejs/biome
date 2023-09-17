@@ -175,6 +175,10 @@ export default defineConfig({
 							label: "Manual installation",
 							link: "/guides/manual-installation",
 						},
+						{
+							label: "Use Rome in big projects",
+							link: "/guides/big-projects",
+						},
 					],
 				},
 				{

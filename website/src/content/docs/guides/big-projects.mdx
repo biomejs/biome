@@ -1,0 +1,17 @@
+---
+title: Use Rome in big projects
+description: A small guide how to set Biome in big projects
+---
+
+Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
+
+
+## Use multiple configuration files
+
+When you use Biome's features - either with the CLI or LSP - the tool looks for the nearest configuration file using the current working directory.
+
+If Biome doesn't the configuration file there, it **starts walking upwards** the directories of the file system, until it finds one.
+
+You can leverage this feature to apply different settings based on the project/folder.
+
+Let's suppose we have a project that contains a backend app and new frontend app.
