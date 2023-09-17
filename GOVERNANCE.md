@@ -199,11 +199,11 @@ The reviewers should aim to have a resolution agreed very rapidly; if they have 
 
 The reviewers will determine responses based on the information gathered and the potential consequences. It may include:
 
-- taking no further action
-- issuing a reprimand (private or public)
-- asking for an apology (private or public)
-- permanent ban from the GitHub org and Discord server
-- revoked contributor or moderator status
+- Taking no further action
+- Issuing a reprimand (private or public)
+- Asking for an apology (private or public)
+- Permanent ban from the GitHub org and Discord server
+- Revoked contributor or moderator status
 
 ## OpenCollective fund allocation
 
