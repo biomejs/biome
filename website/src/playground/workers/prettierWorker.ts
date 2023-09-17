@@ -1,10 +1,13 @@
-import prettier, { Options as PrettierOptions } from "prettier";
+import * as prettier from "prettier";
 // @ts-expect-error
 import parserBabel from "prettier/esm/parser-babel.mjs";
+// @ts-expect-error
+import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
 	IndentStyle,
 	PlaygroundSettings,
+	PrettierOptions,
 	PrettierOutput,
 	QuoteProperties,
 	QuoteStyle,
@@ -16,7 +19,7 @@ import { isJsonFilename, isTypeScriptFilename } from "../utils";
 
 let settings = defaultPlaygroundState.settings;
 
-self.addEventListener("message", (e) => {
+self.addEventListener("message", async (e) => {
 	switch (e.data.type) {
 		case "updateSettings": {
 			settings = e.data.settings as PlaygroundSettings;
@@ -38,7 +41,7 @@ self.addEventListener("message", (e) => {
 			const code = e.data.code as string;
 			const filename = e.data.filename as string;
 
-			const prettierOutput = formatWithPrettier(code, {
+			const prettierOutput = await formatWithPrettier(code, {
 				lineWidth,
 				indentStyle,
 				indentWidth,
@@ -65,7 +68,7 @@ self.addEventListener("message", (e) => {
 	}
 });
 
-function formatWithPrettier(
+async function formatWithPrettier(
 	code: string,
 	options: {
 		lineWidth: number;
@@ -79,14 +82,14 @@ function formatWithPrettier(
 		semicolons: Semicolons;
 		arrowParentheses: ArrowParentheses;
 	},
-): PrettierOutput {
+): Promise<PrettierOutput> {
 	try {
 		const prettierOptions: PrettierOptions = {
 			useTabs: options.indentStyle === IndentStyle.Tab,
 			tabWidth: options.indentWidth,
 			printWidth: options.lineWidth,
 			filepath: options.filepath,
-			plugins: [parserBabel],
+			plugins: [parserBabel, pluginEstree],
 			parser: getPrettierParser(options.filepath),
 			singleQuote: options.quoteStyle === QuoteStyle.Single,
 			jsxSingleQuote: options.jsxQuoteStyle === QuoteStyle.Single,
@@ -101,18 +104,15 @@ function formatWithPrettier(
 
 		// @ts-expect-error
 		const debug = prettier.__debug;
-		const document = debug.printToDoc(code, prettierOptions);
+		const document = await debug.printToDoc(code, prettierOptions);
 
-		// formatDoc must be before printDocToString because printDocToString mutates the document and breaks the ir
-		const ir = debug.formatDoc(document, {
+		// formatDoc must be before prettier.format because prettier.format mutates the document and breaks the ir
+		const ir = await debug.formatDoc(document, {
 			parser: "babel",
-			plugins: [parserBabel],
+			plugins: [parserBabel, pluginEstree],
 		});
 
-		const formattedCode = debug.printDocToString(
-			document,
-			prettierOptions,
-		).formatted;
+		const formattedCode = await prettier.format(code, prettierOptions);
 
 		return {
 			type: "SUCCESS",
