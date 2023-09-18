@@ -72,9 +72,7 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
         ),
         "jsonc" => deserialize_from_json_str::<Configuration>(
             input_code.as_str(),
-            JsonParserOptions::default()
-                .with_allow_comments()
-                .with_allow_trailing_commas(),
+            JsonParserOptions::default().with_allow_comments(),
         ),
         _ => {
             panic!("Extension not supported");
