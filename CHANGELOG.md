@@ -32,6 +32,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#294](https://github.com/biomejs/biome/issues/294). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) no longer reports false positives for return types. Contributed by @b4s36t4
 
 ### Parser
+
+- Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov
+
 ### VSCode
 
 ## 1.2.2 (2023-09-16)

@@ -304,7 +304,7 @@ pub(crate) fn parse_ts_interface_declaration(p: &mut JsParser) -> ParsedSyntax {
     parse_ts_type_parameters(p, TypeContext::default().and_allow_in_out_modifier(true)).ok();
     eat_interface_heritage_clause(p);
     p.expect(T!['{']);
-    TypeMembers.parse_list(p);
+    TypeMembers::default().parse_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, TS_INTERFACE_DECLARATION))

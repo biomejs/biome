@@ -255,16 +255,20 @@ fn parse_function(p: &mut JsParser, m: Marker, kind: FunctionKind) -> CompletedM
         ParameterContext::Implementation
     };
 
-    parse_parameter_list(p, parameter_context, flags)
+    parse_parameter_list(p, parameter_context, TypeContext::default(), flags)
         .or_add_diagnostic(p, js_parse_error::expected_parameters);
 
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_return_type_annotation, |p, marker| {
-            p.err_builder(
-                "return types can only be used in TypeScript files",
-                marker.range(p),
-            )
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_return_type_annotation(p, TypeContext::default()),
+            |p, marker| {
+                p.err_builder(
+                    "return types can only be used in TypeScript files",
+                    marker.range(p),
+                )
+            },
+        )
         .ok();
 
     let body = parse_function_body(p, flags);
@@ -416,9 +420,14 @@ fn parse_ambient_function(
     let binding_range = p.cur_range();
 
     parse_ts_type_parameters(p, TypeContext::default().and_allow_const_modifier(true)).ok();
-    parse_parameter_list(p, ParameterContext::Declaration, SignatureFlags::empty())
-        .or_add_diagnostic(p, expected_parameters);
-    parse_ts_return_type_annotation(p).ok();
+    parse_parameter_list(
+        p,
+        ParameterContext::Declaration,
+        TypeContext::default(),
+        SignatureFlags::empty(),
+    )
+    .or_add_diagnostic(p, expected_parameters);
+    parse_ts_return_type_annotation(p, TypeContext::default()).ok();
 
     if let Present(body) = parse_function_body(p, SignatureFlags::empty()) {
         p.error(
@@ -460,13 +469,17 @@ fn parse_ambient_function(
 }
 
 pub(crate) fn parse_ts_type_annotation_or_error(p: &mut JsParser) -> ParsedSyntax {
-    TypeScript.parse_exclusive_syntax(p, parse_ts_type_annotation, |p, annotation| {
-        p.err_builder(
-            "return types can only be used in TypeScript files",
-            annotation.range(p),
-        )
-        .hint("remove this type annotation")
-    })
+    TypeScript.parse_exclusive_syntax(
+        p,
+        |p| parse_ts_type_annotation(p, TypeContext::default()),
+        |p, annotation| {
+            p.err_builder(
+                "return types can only be used in TypeScript files",
+                annotation.range(p),
+            )
+            .hint("remove this type annotation")
+        },
+    )
 }
 
 /// Tells [is_at_async_function] if it needs to check line breaks
@@ -562,6 +575,7 @@ fn try_parse_parenthesized_arrow_function_head(
     parse_parameter_list(
         p,
         ParameterContext::Arrow,
+        TypeContext::default(),
         arrow_function_parameter_flags(p, flags),
     )
     .or_add_diagnostic(p, expected_parameters);
@@ -571,9 +585,11 @@ fn try_parse_parenthesized_arrow_function_head(
     }
 
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_return_type_annotation, |p, annotation| {
-            ts_only_syntax_error(p, "return type annotation", annotation.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_return_type_annotation(p, TypeContext::default()),
+            |p, annotation| ts_only_syntax_error(p, "return type annotation", annotation.range(p)),
+        )
         .ok();
 
     if p.has_preceding_line_break() {
@@ -884,9 +900,10 @@ pub(crate) fn parse_any_parameter(
     decorator_list: ParsedSyntax,
     parameter_context: ParameterContext,
     expression_context: ExpressionContext,
+    type_context: TypeContext,
 ) -> ParsedSyntax {
     let parameter = match p.cur() {
-        T![...] => parse_rest_parameter(p, decorator_list, expression_context),
+        T![...] => parse_rest_parameter(p, decorator_list, expression_context, type_context),
         T![this] => {
             // test_err ts ts_decorator_this_parameter_option { "parse_class_parameter_decorators": true }
             // class A {
@@ -900,9 +917,15 @@ pub(crate) fn parse_any_parameter(
                     decorator_list.change_to_bogus(p);
                     decorator_list
                 });
-            parse_ts_this_parameter(p)
+            parse_ts_this_parameter(p, type_context)
         }
-        _ => parse_formal_parameter(p, decorator_list, parameter_context, expression_context),
+        _ => parse_formal_parameter(
+            p,
+            decorator_list,
+            parameter_context,
+            expression_context,
+            type_context,
+        ),
     };
 
     parameter.map(|mut parameter| {
@@ -932,7 +955,8 @@ pub(crate) fn parse_any_parameter(
 pub(crate) fn parse_rest_parameter(
     p: &mut JsParser,
     decorator_list: ParsedSyntax,
-    context: ExpressionContext,
+    expression_context: ExpressionContext,
+    type_context: TypeContext,
 ) -> ParsedSyntax {
     if !p.at(T![...]) {
         return Absent;
@@ -942,7 +966,7 @@ pub(crate) fn parse_rest_parameter(
         .or_else(|| empty_decorator_list(p))
         .precede(p);
     p.bump(T![...]);
-    parse_binding_pattern(p, context).or_add_diagnostic(p, expected_binding);
+    parse_binding_pattern(p, expression_context).or_add_diagnostic(p, expected_binding);
 
     let mut valid = true;
 
@@ -955,9 +979,11 @@ pub(crate) fn parse_rest_parameter(
 
     // type annotation `...foo: number[]`
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_type_annotation, |p, annotation| {
-            ts_only_syntax_error(p, "type annotation", annotation.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_type_annotation(p, type_context),
+            |p, annotation| ts_only_syntax_error(p, "type annotation", annotation.range(p)),
+        )
         .ok();
 
     if let Present(initializer) = parse_initializer_clause(p, ExpressionContext::default()) {
@@ -994,14 +1020,14 @@ pub(crate) fn parse_rest_parameter(
 // test ts ts_this_parameter
 // function a(this) {}
 // function b(this: string) {}
-pub(crate) fn parse_ts_this_parameter(p: &mut JsParser) -> ParsedSyntax {
+pub(crate) fn parse_ts_this_parameter(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![this]) {
         return Absent;
     }
 
     let parameter = p.start();
     p.expect(T![this]);
-    parse_ts_type_annotation(p).ok();
+    parse_ts_type_annotation(p, context).ok();
     Present(parameter.complete(p, TS_THIS_PARAMETER))
 }
 
@@ -1077,6 +1103,7 @@ pub(crate) fn parse_formal_parameter(
     decorator_list: ParsedSyntax,
     parameter_context: ParameterContext,
     expression_context: ExpressionContext,
+    type_context: TypeContext,
 ) -> ParsedSyntax {
     // test ts ts_formal_parameter_decorator { "parse_class_parameter_decorators": true }
     // class Foo {
@@ -1149,9 +1176,11 @@ pub(crate) fn parse_formal_parameter(
         }
 
         TypeScript
-            .parse_exclusive_syntax(p, parse_ts_type_annotation, |p, annotation| {
-                ts_only_syntax_error(p, "Type annotations", annotation.range(p))
-            })
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_ts_type_annotation(p, type_context),
+                |p, annotation| ts_only_syntax_error(p, "Type annotations", annotation.range(p)),
+            )
             .ok();
 
         if let Present(initializer) = parse_initializer_clause(p, expression_context) {
@@ -1208,6 +1237,7 @@ pub(super) fn skip_parameter_start(p: &mut JsParser) -> bool {
 pub(super) fn parse_parameter_list(
     p: &mut JsParser,
     parameter_context: ParameterContext,
+    type_context: TypeContext,
     flags: SignatureFlags,
 ) -> ParsedSyntax {
     if !p.at(T!['(']) {
@@ -1288,7 +1318,13 @@ pub(super) fn parse_parameter_list(
                     .into()
             };
 
-            parse_any_parameter(p, decorator_list, parameter_context, expression_context)
+            parse_any_parameter(
+                p,
+                decorator_list,
+                parameter_context,
+                expression_context,
+                type_context,
+            )
         },
         JS_PARAMETER_LIST,
     );

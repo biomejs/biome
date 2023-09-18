@@ -124,7 +124,7 @@ fn parse_ts_name_with_type_arguments(p: &mut JsParser) -> ParsedSyntax {
         let m = name.precede(p);
 
         if !p.has_preceding_line_break() {
-            parse_ts_type_arguments(p).ok();
+            parse_ts_type_arguments(p, TypeContext::default()).ok();
         }
 
         m.complete(p, TS_NAME_WITH_TYPE_ARGUMENTS)
@@ -176,6 +176,7 @@ pub(crate) fn expect_ts_index_signature_member(
     p: &mut JsParser,
     m: Marker,
     parent: MemberParent,
+    context: TypeContext,
 ) -> CompletedMarker {
     while is_nth_at_modifier(p, 0, false) {
         if p.eat(T![readonly]) {
@@ -195,12 +196,12 @@ pub(crate) fn expect_ts_index_signature_member(
 
     let parameter = p.start();
     parse_identifier_binding(p).or_add_diagnostic(p, expected_identifier);
-    parse_ts_type_annotation(p).unwrap(); // It's a computed member name if the type annotation is missing
+    parse_ts_type_annotation(p, context).unwrap(); // It's a computed member name if the type annotation is missing
     parameter.complete(p, TS_INDEX_SIGNATURE_PARAMETER);
 
     p.expect(T![']']);
 
-    parse_ts_type_annotation(p).or_add_diagnostic(p, |p, range| {
+    parse_ts_type_annotation(p, context).or_add_diagnostic(p, |p, range| {
         p.err_builder("An index signature must have a type annotation", range)
     });
 
