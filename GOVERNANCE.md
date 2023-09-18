@@ -40,8 +40,6 @@ If vote is successful, the lead will ask the nominee if they want to accept the 
 
 In the event of a rejection, the nominated person will be privately given the requirements they have yet to meet. Details of the discussion - for example, those who objected to the nomination - will not be disclosed.
 
-
-
 ### Core Contributor
 
 Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of Biome organisation and lead by example the community.
@@ -53,6 +51,8 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 - Onboard new [maintainers](#maintainer)
 
 #### Core contributor nomination
+
+Only [maintainers](#maintainer) can be nominated to be core contributors.
 
 Core contributors may either be nominated by another, [Core contributor](#core-contributor), or [lead](#lead).
 
@@ -120,11 +120,14 @@ In the event of a rejection, the nominated person will be privately given the re
 
 One or more people can own certain parts of the codebase. This process is informal, and inclusion could result from substantial contributions or delegation by other members. A maintainer's responsibility is to identify the relevant owners and ensure there's an understanding when it comes to code review.
 
-
 ### Inactivity
 
-There are no expectations around activity once someone becomes a core contributor or maintainer. Inactive core contributors or maintainers may have voting rights removed; however, will always retain their status. A core contributor or maintainer may request their voting rights back upon sufficient activity.
+There aren't strict requirements and expectations around activity for core contributors and maintainers; although long periods of inactivity have be communicated to the team.
 
+Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past contributor_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
+
+> [!NOTE]
+> The definition of "long periods", and how long an individual needs to stay inactive in order to have their voting rights removed have yet to be decided.
 
 ### Contributions
 
@@ -208,8 +211,10 @@ The reviewers will determine responses based on the information gathered and the
 ## OpenCollective fund allocation
 
 - Funds will be allocated for project-specific services such as domain registration and website hosting.
-- Other usage of funds has yet to be decided.
 - Expenses will be approved by the [leads](#lead).
+
+> [!NOTE]
+> Other usage of funds has yet to be decided.
 
 
 [gh-org]: https://github.com/biomejs
