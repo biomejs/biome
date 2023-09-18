@@ -52,7 +52,7 @@ const UPGRADE_SEVERITY_CODE: &str = r#"if(!cond) { exprA(); } else { exprB() }"#
 const NURSERY_UNSTABLE: &str = r#"if(a = b) {}"#;
 
 #[test]
-fn check_help() {
+fn lint_help() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -66,7 +66,7 @@ fn check_help() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "check_help",
+        "lint_help",
         fs,
         console,
         result,

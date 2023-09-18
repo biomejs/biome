@@ -2,8 +2,10 @@ use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use biome_service::configuration::vcs::VcsConfiguration;
+use biome_service::configuration::{FilesConfiguration, LinterConfiguration};
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{Configuration, MergeWith};
+use biome_service::MergeWith;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -11,7 +13,9 @@ pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
     pub(crate) cli_options: CliOptions,
-    pub(crate) configuration: Option<Configuration>,
+    pub(crate) linter_configuration: Option<LinterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
 }
@@ -25,9 +29,11 @@ pub(crate) fn lint(
         apply,
         apply_unsafe,
         cli_options,
-        configuration,
+        linter_configuration,
         paths,
         stdin_file_path,
+        vcs_configuration,
+        files_configuration,
     } = payload;
 
     let fix_file_mode = if apply && apply_unsafe {
@@ -50,7 +56,9 @@ pub(crate) fn lint(
     } = load_configuration(&mut session, &cli_options)?
         .or_diagnostic(session.app.console, cli_options.verbose)?;
 
-    fs_configuration.merge_with(configuration);
+    fs_configuration.merge_with(linter_configuration);
+    fs_configuration.merge_with(files_configuration);
+    fs_configuration.merge_with(vcs_configuration);
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
