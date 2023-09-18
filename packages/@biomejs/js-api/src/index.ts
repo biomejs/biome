@@ -21,7 +21,7 @@ export interface FormatContentDebugOptions extends FormatContentOptions {
 export interface FormatContentOptions {
 	/**
 	 * A virtual path of the file. You should add the extension,
-	 * so Rome knows how to parse the content
+	 * so Biome knows how to parse the content
 	 */
 	filePath: string;
 	/**
@@ -59,7 +59,7 @@ export interface FormatDebugResult {
 export interface LintContentOptions {
 	/**
 	 * A virtual path of the file. You should add the extension,
-	 * so Rome knows how to parse the content
+	 * so Biome knows how to parse the content
 	 */
 	filePath: string;
 }
@@ -70,7 +70,7 @@ function isFormatContentDebug(
 	return "debug" in options && options.debug !== undefined;
 }
 
-export interface RomeCreate {
+export interface BiomeCreate {
 	distribution: Distribution;
 }
 
@@ -89,23 +89,23 @@ export interface PrintDiagnosticsOptions {
 	verbose?: boolean;
 }
 
-export class Rome {
+export class Biome {
 	private constructor(
 		private readonly module: WasmModule,
 		private readonly workspace: Workspace,
 	) {}
 
 	/**
-	 * It creates a new instance of the class {Rome}.
+	 * It creates a new instance of the class {Biome}.
 	 */
-	public static async create(options: RomeCreate): Promise<Rome> {
+	public static async create(options: BiomeCreate): Promise<Biome> {
 		const module = await loadModule(options.distribution);
 		const workspace = new module.Workspace();
-		return new Rome(module, workspace);
+		return new Biome(module, workspace);
 	}
 
 	/**
-	 * Stop this instance of Rome
+	 * Stop this instance of Biome
 	 *
 	 * After calling `shutdown()` on this object, it should be considered
 	 * unusable as calling any method on it will fail
@@ -137,21 +137,21 @@ export class Rome {
 		func: (path: RomePath) => T,
 	): T {
 		try {
-			const romePath: RomePath = {
+			const biomePath: RomePath = {
 				path,
 			};
 
 			this.workspace.openFile({
 				content,
 				version: 0,
-				path: romePath,
+				path: biomePath,
 			});
 
 			try {
-				return func(romePath);
+				return func(biomePath);
 			} finally {
 				this.workspace.closeFile({
-					path: romePath,
+					path: biomePath,
 				});
 			}
 		} catch (err) {

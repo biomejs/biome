@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { Distribution, Rome } from "../dist";
+import { Distribution, Biome } from "../dist";
 
 describe("Biome WebAssembly DiagnosticPrinter", () => {
-	let biome: Rome;
+	let biome: Biome;
 	beforeEach(async () => {
-		biome = await Rome.create({
+		biome = await Biome.create({
 			distribution: Distribution.NODE,
 		});
 	});
