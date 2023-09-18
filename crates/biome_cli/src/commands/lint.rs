@@ -2,12 +2,12 @@ use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{FilesConfiguration, LinterConfiguration};
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
 use biome_service::MergeWith;
 use std::ffi::OsString;
 use std::path::PathBuf;
-use biome_service::configuration::vcs::VcsConfiguration;
 
 pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
@@ -33,7 +33,7 @@ pub(crate) fn lint(
         paths,
         stdin_file_path,
         vcs_configuration,
-        files_configuration
+        files_configuration,
     } = payload;
 
     let fix_file_mode = if apply && apply_unsafe {
