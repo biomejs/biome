@@ -37,6 +37,8 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
+CssBogusPattern =  SyntaxElement*
+CssBogusBody =  SyntaxElement*
 
 CssRoot =
 	rules: CssRuleList
@@ -58,14 +60,7 @@ CssRule =
 
 // .header, .app {}
 // ^^^^^^^^^^^^^
-CssSelectorList = (CssSelector (',' CssSelector)*)
-
-
-CssSelector =
-	pattern_list: CssAnySelectorPatternList
-
-
-CssAnySelectorPatternList = AnyCssSelectorPattern*
+CssSelectorList = (AnyCssSelectorPattern (',' AnyCssSelectorPattern)*)
 
 AnyCssSelectorPattern =
 	CssIdSelectorPattern
@@ -75,6 +70,7 @@ AnyCssSelectorPattern =
 	| CssPseudoClassSelectorPattern
 	| CssTypeSelectorPattern
 	| CssCombinatorSelectorPattern
+	| CssBogusPattern
 
 /////////////
 /// SELECTORS

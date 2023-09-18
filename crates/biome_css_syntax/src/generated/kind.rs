@@ -216,7 +216,6 @@ pub enum CssSyntaxKind {
     CSS_ID_SELECTOR_PATTERN,
     CSS_RULE,
     CSS_SELECTOR_LIST,
-    CSS_SELECTOR,
     CSS_ANY_FUNCTION,
     CSS_AT_KEYFRAMES,
     CSS_AT_KEYFRAMES_BODY,
@@ -264,6 +263,8 @@ pub enum CssSyntaxKind {
     CSS_PARAMETER_LIST,
     CSS_DECLARATION_IMPORTANT,
     CSS_BOGUS,
+    CSS_BOGUS_PATTERN,
+    CSS_BOGUS_BODY,
     #[doc(hidden)]
     __LAST,
 }
