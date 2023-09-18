@@ -2031,6 +2031,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noGlobalIsFinite",
                 "noGlobalIsNan",
                 "noMisleadingInstantiator",
+                "noUselessElse",
                 "noVoid",
                 "useArrowFunction",
                 "useCollapsedElseIf",
@@ -2234,6 +2235,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_misleading_instantiator = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noUselessElse" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_useless_else = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noUselessElse",
+                        diagnostics,
+                    )?;
+                    self.no_useless_else = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

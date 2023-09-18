@@ -682,6 +682,10 @@ export interface Nursery {
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
 	/**
+	 * Disallow else block when the if block breaks early.
+	 */
+	noUselessElse?: RuleConfiguration;
+	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration;
@@ -1206,7 +1210,6 @@ export type Category =
 	| "lint/a11y/noSvgWithoutTitle"
 	| "lint/a11y/useAltText"
 	| "lint/a11y/useAnchorContent"
-	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
 	| "lint/a11y/useHeadingContent"
@@ -1217,6 +1220,7 @@ export type Category =
 	| "lint/a11y/useMediaCaption"
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
+	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noExtraBooleanCast"
@@ -1275,6 +1279,7 @@ export type Category =
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
 	| "lint/nursery/noMisleadingInstantiator"
+	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useBiomeSuppressionComment"
