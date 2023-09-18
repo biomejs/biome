@@ -9,7 +9,7 @@ Run various checks on a set of files.
 
 Usage: lint [--apply] [--apply-unsafe] [PATH]...
 
-The configuration that is contained inside the file `biome.json`
+Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
         --vcs-use-ignore-file=<true|false>  Whether Biome should use the VCS ignore file. When [true],
@@ -19,38 +19,12 @@ The configuration that is contained inside the file `biome.json`
                               If Biome can't find the configuration, it will attempt to use the current
                               working directory. If no current working directory can't be found, Biome
                               won't use the VCS integration, and a diagnostic will be emitted
+
+The configuration of the filesystem
         --files-max-size=NUMBER  The maximum allowed size for source code files in bytes. Files above
                               this limit will be ignored for performance reasons. Defaults to 1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
-        --indent-style=<tab|space>  The indent style.
-        --indent-size=NUMBER  The size of the indentation, 2 by default
-        --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
-        --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
-        --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
-        --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
-                              syntactic structures. Defaults to "all".
-        --semicolons=<always|as-needed>  Whether the formatter prints semicolons for all statements or
-                              only in for statements where it is necessary because of ASI.
-        --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
-                              Defaults to "always".
-        --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its super
-                              languages) files.
-        --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
-                              its super languages) files.
-        --javascript-formatter-indent-size=NUMBER  The size of the indentation applied to JavaScript
-                              (and its super languages) files. Default to 2.
-        --javascript-formatter-line-width=NUMBER  What's the max width of a line, applied to JavaScript
-                              (and its super languages) files. Defaults to 80.
-        --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
-                              files.
-        --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
-                              files.
-        --json-formatter-indent-size=NUMBER  The size of the indentation applied to JSON (and its super
-                              languages) files. Default to 2.
-        --json-formatter-line-width=NUMBER  What's the max width of a line, applied to JSON (and its
-                              super languages) files. Defaults to 80.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
