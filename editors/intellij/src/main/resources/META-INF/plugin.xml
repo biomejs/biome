@@ -30,7 +30,7 @@
         <group
                 id="com.github.biomejs.intellijbiome.actions-group"
                 text="Biome"
-                icon="/icons/pluginIcon.svg"
+                icon="/META-INF/pluginIcon.svg"
                 popup="true"
         >
             <add-to-group group-id="ToolsMenu"/>

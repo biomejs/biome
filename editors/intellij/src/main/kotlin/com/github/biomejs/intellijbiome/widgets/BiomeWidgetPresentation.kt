@@ -29,7 +29,7 @@ class BiomeWidgetPresentation(private val project: Project) : StatusBarWidget.Mu
 
     override fun getTooltipText(): String? {
         val lspServerManager = LspServerManager.getInstance(project)
-        val lspServer = lspServerManager.getServersForProvider(BiomeLspServerSupportProvider::class.java).first()
+        val lspServer = lspServerManager.getServersForProvider(BiomeLspServerSupportProvider::class.java).firstOrNull()
 
         return when (lspServer) {
             is LspServerImpl -> {
@@ -41,7 +41,7 @@ class BiomeWidgetPresentation(private val project: Project) : StatusBarWidget.Mu
             }
 
             else -> {
-                null
+							BiomeBundle.message("biome.language.server.is.stopped")
             }
         }
 

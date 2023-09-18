@@ -16,7 +16,7 @@ class BiomeSettingsConfigurable(internal val project: Project): BoundSearchableC
 			val biomeServerService = project.service<BiomeServerService>()
 
 			return panel {
-            row {
+            row(BiomeBundle.message("biome.path.label")) {
                 textFieldWithBrowseButton(BiomeBundle.message("biome.path.label")) { fileChosen(it) }
                     .bindText(settings::executablePath)
             }
