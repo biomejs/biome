@@ -176,7 +176,7 @@ export default defineConfig({
 							link: "/guides/manual-installation",
 						},
 						{
-							label: "Use Rome in big projects",
+							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
 							badge: {
 								text: "New",
