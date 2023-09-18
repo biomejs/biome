@@ -274,6 +274,10 @@ export interface JsonParser {
 	 * Allow parsing comments in `.json` files
 	 */
 	allowComments?: boolean;
+	/**
+	 * Allow parsing trailing commas in `.json` files
+	 */
+	allowTrailingCommas?: boolean;
 }
 export interface Rules {
 	a11y?: A11y;

@@ -594,12 +594,6 @@ pub fn css_rule(prelude: CssSelectorList, block: CssBlock) -> CssRule {
         ],
     ))
 }
-pub fn css_selector(pattern_list: CssAnySelectorPatternList) -> CssSelector {
-    CssSelector::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SELECTOR,
-        [Some(SyntaxElement::Node(pattern_list.into_syntax()))],
-    ))
-}
 pub fn css_simple_function(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
@@ -684,18 +678,6 @@ pub fn css_var_function_value(
             Some(SyntaxElement::Token(comma_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
         ],
-    ))
-}
-pub fn css_any_selector_pattern_list<I>(items: I) -> CssAnySelectorPatternList
-where
-    I: IntoIterator<Item = AnyCssSelectorPattern>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssAnySelectorPatternList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ANY_SELECTOR_PATTERN_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_at_keyframes_item_list<I>(items: I) -> CssAtKeyframesItemList
@@ -802,7 +784,7 @@ where
 }
 pub fn css_selector_list<I, S>(items: I, separators: S) -> CssSelectorList
 where
-    I: IntoIterator<Item = CssSelector>,
+    I: IntoIterator<Item = AnyCssSelectorPattern>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -827,4 +809,24 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     CssBogus::unwrap_cast(SyntaxNode::new_detached(CssSyntaxKind::CSS_BOGUS, slots))
+}
+pub fn css_bogus_body<I>(slots: I) -> CssBogusBody
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusBody::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_BODY,
+        slots,
+    ))
+}
+pub fn css_bogus_pattern<I>(slots: I) -> CssBogusPattern
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPattern::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PATTERN,
+        slots,
+    ))
 }

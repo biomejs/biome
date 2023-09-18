@@ -145,7 +145,7 @@ pub fn parse_test_path(file: &Path) -> (&str, &str) {
 /// This check is used in the parser test to ensure it doesn't emit
 /// bogus nodes without diagnostics, and in the analyzer tests to
 /// check the syntax trees resulting from code actions are correct
-pub fn has_bogus_nodes_or_empty_slots<L: Language>(node: &SyntaxNode<L>) -> bool {
+pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNode<L>) -> bool {
     node.descendants().any(|descendant| {
         let kind = descendant.kind();
         if kind.is_bogus() {

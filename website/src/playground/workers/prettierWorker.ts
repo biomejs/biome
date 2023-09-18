@@ -6,9 +6,9 @@ import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
 	IndentStyle,
-	PlaygroundSettings,
-	PrettierOptions,
-	PrettierOutput,
+	type PlaygroundSettings,
+	type PrettierOptions,
+	type PrettierOutput,
 	QuoteProperties,
 	QuoteStyle,
 	Semicolons,

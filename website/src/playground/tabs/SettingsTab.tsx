@@ -4,7 +4,7 @@ import {
 	ArrowParentheses,
 	IndentStyle,
 	LintRules,
-	PlaygroundState,
+	type PlaygroundState,
 	QuoteProperties,
 	QuoteStyle,
 	Semicolons,

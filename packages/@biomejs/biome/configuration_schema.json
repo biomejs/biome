@@ -910,6 +910,10 @@
 				"allowComments": {
 					"description": "Allow parsing comments in `.json` files",
 					"type": ["boolean", "null"]
+				},
+				"allowTrailingCommas": {
+					"description": "Allow parsing trailing commas in `.json` files",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

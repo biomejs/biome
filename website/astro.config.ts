@@ -175,6 +175,14 @@ export default defineConfig({
 							label: "Manual installation",
 							link: "/guides/manual-installation",
 						},
+						{
+							label: "Use Biome in big projects",
+							link: "/guides/big-projects",
+							badge: {
+								text: "New",
+								variant: "note",
+							},
+						},
 					],
 				},
 				{

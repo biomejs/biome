@@ -1,0 +1,58 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.action {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssClassSelectorPattern {
+                    dot_token: DOT@0..1 "." [] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@9..10 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@10..11 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..11
+  0: CSS_RULE_LIST@0..10
+    0: CSS_RULE@0..10
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_CLASS_SELECTOR_PATTERN@0..8
+          0: DOT@0..1 "." [] []
+          1: CSS_IDENTIFIER@1..8
+            0: IDENT@1..8 "action" [] [Whitespace(" ")]
+      1: CSS_BLOCK@8..10
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_LIST@9..9
+        2: R_CURLY@9..10 "}" [] []
+  1: EOF@10..11 "" [Newline("\n")] []
+
+```
+
+

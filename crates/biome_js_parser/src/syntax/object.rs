@@ -269,9 +269,11 @@ fn parse_getter_object_member(p: &mut JsParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_type_annotation, |p, annotation| {
-            ts_only_syntax_error(p, "type annotation", annotation.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_type_annotation(p, TypeContext::default()),
+            |p, annotation| ts_only_syntax_error(p, "type annotation", annotation.range(p)),
+        )
         .ok();
 
     parse_function_body(p, SignatureFlags::empty())
@@ -322,6 +324,7 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
             decorator_list,
             ParameterContext::Setter,
             ExpressionContext::default().and_object_expression_allowed(has_l_paren),
+            TypeContext::default(),
         )
         .or_add_diagnostic(p, js_parse_error::expected_parameter);
         p.expect(T![')']);
@@ -329,7 +332,9 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
 
     // test_err ts ts_object_setter_return_type
     // ({ set a(value: string): void {} });
-    if let Present(return_type_annotation) = parse_ts_return_type_annotation(p) {
+    if let Present(return_type_annotation) =
+        parse_ts_return_type_annotation(p, TypeContext::default())
+    {
         p.error(ts_set_accessor_return_type_error(
             p,
             &return_type_annotation,
@@ -462,13 +467,20 @@ fn parse_method_object_member_body(p: &mut JsParser, flags: SignatureFlags) {
         )
         .ok();
 
-    parse_parameter_list(p, ParameterContext::Implementation, flags)
-        .or_add_diagnostic(p, js_parse_error::expected_parameters);
+    parse_parameter_list(
+        p,
+        ParameterContext::Implementation,
+        TypeContext::default(),
+        flags,
+    )
+    .or_add_diagnostic(p, js_parse_error::expected_parameters);
 
     TypeScript
-        .parse_exclusive_syntax(p, parse_ts_return_type_annotation, |p, annotation| {
-            ts_only_syntax_error(p, "return type annotation", annotation.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_ts_return_type_annotation(p, TypeContext::default()),
+            |p, annotation| ts_only_syntax_error(p, "return type annotation", annotation.range(p)),
+        )
         .ok();
 
     parse_function_body(p, flags).or_add_diagnostic(p, js_parse_error::expected_function_body);

@@ -742,7 +742,7 @@ pub mod support {
         slot_index: usize,
     ) -> N {
         required_node(parent, slot_index)
-            .unwrap_or_else(|_| panic!("expected a list in slot {}", slot_index))
+            .unwrap_or_else(|_| panic!("expected a list in slot {} of {:?}", slot_index, parent))
     }
 
     pub fn token<L: Language>(parent: &SyntaxNode<L>, slot_index: usize) -> Option<SyntaxToken<L>> {

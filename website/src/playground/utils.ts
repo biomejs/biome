@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import type { ThemeName } from "../frontend-scripts/util";
 import { getCurrentTheme } from "../frontend-scripts/util";
 import {
-	PlaygroundFileState,
-	PlaygroundSettings,
-	PlaygroundState,
+	type PlaygroundFileState,
+	type PlaygroundSettings,
+	type PlaygroundState,
 	emptyBiomeOutput,
 	emptyPrettierOutput,
 } from "./types";

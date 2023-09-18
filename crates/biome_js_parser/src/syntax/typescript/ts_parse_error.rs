@@ -128,3 +128,10 @@ pub(crate) fn expected_ts_type(p: &JsParser, range: TextRange) -> ParseDiagnosti
 pub(crate) fn expected_ts_type_parameter(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("type parameter", range).into_diagnostic(p)
 }
+
+pub(crate) fn infer_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "'infer' declarations are only permitted in the 'extends' clause of a conditional type.",
+        range,
+    )
+}

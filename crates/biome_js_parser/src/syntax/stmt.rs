@@ -1506,7 +1506,7 @@ fn parse_variable_declarator(
 // !function test() {}
 fn parse_ts_variable_annotation(p: &mut JsParser) -> ParsedSyntax {
     if !p.at(T![!]) {
-        return parse_ts_type_annotation(p);
+        return parse_ts_type_annotation(p, TypeContext::default());
     }
 
     if p.has_preceding_line_break() {
@@ -1516,7 +1516,8 @@ fn parse_ts_variable_annotation(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![!]);
 
-    parse_ts_type_annotation(p).or_add_diagnostic(p, |_, _| expected_token(T![:]));
+    parse_ts_type_annotation(p, TypeContext::default())
+        .or_add_diagnostic(p, |_, _| expected_token(T![:]));
 
     Present(m.complete(p, TS_DEFINITE_VARIABLE_ANNOTATION))
 }

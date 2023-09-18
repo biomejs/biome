@@ -719,14 +719,6 @@ impl CssRule {
         )
     }
 }
-impl CssSelector {
-    pub fn with_pattern_list(self, element: CssAnySelectorPatternList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl CssSimpleFunction {
     pub fn with_name(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(

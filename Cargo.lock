@@ -240,6 +240,7 @@ dependencies = [
  "biome_js_unicode_table",
  "biome_parser",
  "biome_rowan",
+ "biome_test_utils",
  "insta",
  "quickcheck",
  "quickcheck_macros",

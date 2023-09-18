@@ -4,8 +4,8 @@ use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
     configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
-    json::json_formatter, vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration,
-    JavascriptFormatter,
+    json::json_formatter, linter_configuration, vcs::vcs_configuration, FilesConfiguration,
+    FormatterConfiguration, JavascriptFormatter, LinterConfiguration,
 };
 use biome_service::Configuration;
 use bpaf::Bpaf;
@@ -89,9 +89,17 @@ pub enum BiomeCommand {
         #[bpaf(long("apply-unsafe"), switch)]
         apply_unsafe: bool,
         #[bpaf(external, hide_usage, optional)]
-        configuration: Option<Configuration>,
+        linter_configuration: Option<LinterConfiguration>,
+
+        #[bpaf(external, optional, hide_usage)]
+        vcs_configuration: Option<VcsConfiguration>,
+
+        #[bpaf(external, optional, hide_usage)]
+        files_configuration: Option<FilesConfiguration>,
+
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
         /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,

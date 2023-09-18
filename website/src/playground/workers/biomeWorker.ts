@@ -1,17 +1,17 @@
 import init, {
-	Configuration,
+	type Configuration,
 	DiagnosticPrinter,
-	RomePath as BiomePath,
-	RuleCategories,
+	type RomePath as BiomePath,
+	type RuleCategories,
 	Workspace,
 } from "@biomejs/wasm-web";
 import {
 	ArrowParentheses,
-	BiomeOutput,
+	type BiomeOutput,
 	IndentStyle,
 	LintRules,
 	LoadingState,
-	PlaygroundSettings,
+	type PlaygroundSettings,
 	QuoteProperties,
 	QuoteStyle,
 	Semicolons,
