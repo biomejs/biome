@@ -2,6 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
+## `biome.json`
+
+```json
+{
+  "json": {
+    "parser": { "allowTrailingCommas": true }
+  }
+}
+```
+
 ## `file.jsonc`
 
 ```jsonc
@@ -10,7 +20,7 @@ expression: content
     /* some other comment */
     "array": [1, 2, 3],
 }
-	
+
 ```
 
 # Emitted Messages
@@ -25,9 +35,6 @@ file.jsonc format ━━━━━━━━━━━━━━━━━━━━�
       1 │ + /*test*/·{
     3 2 │       /* some other comment */
     4 3 │       "array": [1, 2, 3],
-    5 4 │   }
-    6   │ - → 
-      5 │ + 
   
 
 ```

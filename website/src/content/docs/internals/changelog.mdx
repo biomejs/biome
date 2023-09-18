@@ -45,6 +45,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Parser
 
 - Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov
+- Add support for parsing trailing commas inside JSON files:
+
+  ```json
+  {
+    "json": {
+      "parser": {
+        "allowTrailingCommas": true
+      }
+    }
+  }
+  ```
 
 ### VSCode
 
