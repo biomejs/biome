@@ -5,7 +5,7 @@ export type WasmWeb = typeof import("@biomejs/wasm-web");
 export type WasmModule = WasmBundler | WasmNodejs | WasmWeb;
 
 /**
- * What kind of client Rome should use to communicate with the binary
+ * What kind of client Biome should use to communicate with the binary
  */
 export enum Distribution {
 	/**

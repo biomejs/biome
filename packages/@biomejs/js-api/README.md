@@ -20,23 +20,23 @@ You need to install one of the `@biomejs/wasm-*` package as a **peer dependency*
 ## Usage
 
 ```js
-import { Rome, Distribution } from "@biomejs/js-api";
+import { Biome, Distribution } from "@biomejs/js-api";
 
-const rome = await Rome.create({
+const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
-const formatted = await rome.formatContent("function f   (a, b) { return a == b; }", {
+const formatted = await biome.formatContent("function f   (a, b) { return a == b; }", {
 	filePath: "example.js",
 });
 
 console.log('Formatted content: ', formatted.content);
 
-const result = await rome.lintContent(formatted.content, {
+const result = await biome.lintContent(formatted.content, {
 	filePath: "example.js",
 });
 
-const html = rome.printDiagnostics(result.diagnostics, {
+const html = biome.printDiagnostics(result.diagnostics, {
 	filePath: "example.js",
 	fileSource: formatted.content,
 });

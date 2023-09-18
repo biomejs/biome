@@ -96,7 +96,7 @@ interface PendingRequest {
 const MIME_JSONRPC = "application/vscode-jsonrpc";
 
 /**
- * Implements the Rome daemon server JSON-RPC protocol over a Socket instance
+ * Implements the Biome daemon server JSON-RPC protocol over a Socket instance
  */
 export class Transport {
 	/**

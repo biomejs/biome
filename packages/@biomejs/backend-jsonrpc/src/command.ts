@@ -1,5 +1,5 @@
 /**
- * Gets the path of the Rome binary for the current platform
+ * Gets the path of the Biome binary for the current platform
  *
  * @returns Filesystem path to the binary, or null if no prebuilt distribution exists for the current platform
  */

@@ -27,7 +27,7 @@ export async function createWorkspace(): Promise<Workspace | null> {
  * instance through the JSON-RPC protocol, using the provided command to spawn
  * the daemon if necessary
  *
- * @param command Path to the Rome binary distribution
+ * @param command Path to the Biome binary distribution
  * @returns A Workspace client, or null if the underlying platform is not supported
  */
 export async function createWorkspaceWithBinary(
