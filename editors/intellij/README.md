@@ -1,13 +1,11 @@
 # Biome JetBrains IDEs Plugin
 
-<!-- Plugin description -->
 https://biomejs.dev plugin for JetBrains IDEs.
 
 ## features
 - Linting
 - Quickfix
 - Formatting
-<!-- Plugin description end -->
 
 ---
 ## Installation
