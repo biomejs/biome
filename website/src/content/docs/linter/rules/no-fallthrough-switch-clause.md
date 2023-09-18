@@ -2,6 +2,7 @@
 title: noFallthroughSwitchClause (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/nursery/noFallthroughSwitchClause`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

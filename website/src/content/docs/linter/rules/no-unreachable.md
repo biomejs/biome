@@ -2,6 +2,7 @@
 title: noUnreachable (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/correctness/noUnreachable`**
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.

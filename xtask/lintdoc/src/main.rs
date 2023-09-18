@@ -234,6 +234,9 @@ fn generate_rule(
     writeln!(content, "---")?;
     writeln!(content)?;
 
+    write!(content, "**Diagnostic Category: `lint/{group}/{rule}`**")?;
+    writeln!(content)?;
+
     writeln!(content)?;
 
     if is_recommended {

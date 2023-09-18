@@ -2,6 +2,7 @@
 title: noArguments (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noArguments`**
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.

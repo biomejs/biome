@@ -2,6 +2,7 @@
 title: useSimpleNumberKeys (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/complexity/useSimpleNumberKeys`**
 
 Disallow number literal object member names which are not base10 or uses underscore as separator
 

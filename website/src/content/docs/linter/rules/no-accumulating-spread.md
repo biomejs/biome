@@ -2,6 +2,7 @@
 title: noAccumulatingSpread (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/nursery/noAccumulatingSpread`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

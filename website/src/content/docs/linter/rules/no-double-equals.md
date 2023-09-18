@@ -2,6 +2,7 @@
 title: noDoubleEquals (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/suspicious/noDoubleEquals`**
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.

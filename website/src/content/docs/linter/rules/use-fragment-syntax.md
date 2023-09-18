@@ -2,6 +2,7 @@
 title: useFragmentSyntax (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/useFragmentSyntax`**
 
 This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.
 

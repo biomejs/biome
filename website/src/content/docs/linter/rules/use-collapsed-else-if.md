@@ -2,6 +2,7 @@
 title: useCollapsedElseIf (since v1.1.0)
 ---
 
+**Diagnostic Category: `lint/nursery/useCollapsedElseIf`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

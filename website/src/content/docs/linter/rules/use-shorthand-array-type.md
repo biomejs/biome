@@ -2,6 +2,7 @@
 title: useShorthandArrayType (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/useShorthandArrayType`**
 
 When expressing array types, this rule promotes the usage of `T[]` shorthand instead of `Array<T>`.
 

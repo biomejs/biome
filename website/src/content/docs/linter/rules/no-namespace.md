@@ -2,6 +2,7 @@
 title: noNamespace (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noNamespace`**
 
 Disallow the use of TypeScript's `namespace`s.
 

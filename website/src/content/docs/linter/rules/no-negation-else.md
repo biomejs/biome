@@ -2,6 +2,7 @@
 title: noNegationElse (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noNegationElse`**
 
 Disallow negation in the condition of an `if` statement if it has an `else` clause
 

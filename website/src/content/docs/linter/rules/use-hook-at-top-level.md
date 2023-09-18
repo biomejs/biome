@@ -2,6 +2,7 @@
 title: useHookAtTopLevel (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/nursery/useHookAtTopLevel`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
