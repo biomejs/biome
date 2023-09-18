@@ -140,6 +140,9 @@ fn parse(
         allow_comments: parser.allow_comments
             || source_type.is_jsonc()
             || is_file_allowed_as_jsonc(rome_path),
+        allow_trailing_commas: parser.allow_trailing_commas
+            || source_type.is_jsonc()
+            || is_file_allowed_as_jsonc(rome_path),
     };
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();

@@ -1,0 +1,103 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+{
+    "prop1": [
+        1,
+        2,
+    ],
+    "prop2": 0,
+}
+
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@0..1 "{" [] [],
+        json_member_list: JsonMemberList [
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@1..13 "\"prop1\"" [Newline("\n"), Whitespace("    ")] [],
+                },
+                colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                value: JsonArrayValue {
+                    l_brack_token: L_BRACK@15..16 "[" [] [],
+                    elements: JsonArrayElementList [
+                        JsonNumberValue {
+                            value_token: JSON_NUMBER_LITERAL@16..26 "1" [Newline("\n"), Whitespace("        ")] [],
+                        },
+                        COMMA@26..27 "," [] [],
+                        JsonNumberValue {
+                            value_token: JSON_NUMBER_LITERAL@27..37 "2" [Newline("\n"), Whitespace("        ")] [],
+                        },
+                        COMMA@37..38 "," [] [],
+                        missing element,
+                    ],
+                    r_brack_token: R_BRACK@38..44 "]" [Newline("\n"), Whitespace("    ")] [],
+                },
+            },
+            COMMA@44..45 "," [] [],
+            JsonMember {
+                name: JsonMemberName {
+                    value_token: JSON_STRING_LITERAL@45..57 "\"prop2\"" [Newline("\n"), Whitespace("    ")] [],
+                },
+                colon_token: COLON@57..59 ":" [] [Whitespace(" ")],
+                value: JsonNumberValue {
+                    value_token: JSON_NUMBER_LITERAL@59..60 "0" [] [],
+                },
+            },
+            COMMA@60..61 "," [] [],
+            missing element,
+        ],
+        r_curly_token: R_CURLY@61..63 "}" [Newline("\n")] [],
+    },
+    eof_token: EOF@63..64 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..64
+  0: JSON_OBJECT_VALUE@0..63
+    0: L_CURLY@0..1 "{" [] []
+    1: JSON_MEMBER_LIST@1..61
+      0: JSON_MEMBER@1..44
+        0: JSON_MEMBER_NAME@1..13
+          0: JSON_STRING_LITERAL@1..13 "\"prop1\"" [Newline("\n"), Whitespace("    ")] []
+        1: COLON@13..15 ":" [] [Whitespace(" ")]
+        2: JSON_ARRAY_VALUE@15..44
+          0: L_BRACK@15..16 "[" [] []
+          1: JSON_ARRAY_ELEMENT_LIST@16..38
+            0: JSON_NUMBER_VALUE@16..26
+              0: JSON_NUMBER_LITERAL@16..26 "1" [Newline("\n"), Whitespace("        ")] []
+            1: COMMA@26..27 "," [] []
+            2: JSON_NUMBER_VALUE@27..37
+              0: JSON_NUMBER_LITERAL@27..37 "2" [Newline("\n"), Whitespace("        ")] []
+            3: COMMA@37..38 "," [] []
+            4: (empty)
+          2: R_BRACK@38..44 "]" [Newline("\n"), Whitespace("    ")] []
+      1: COMMA@44..45 "," [] []
+      2: JSON_MEMBER@45..60
+        0: JSON_MEMBER_NAME@45..57
+          0: JSON_STRING_LITERAL@45..57 "\"prop2\"" [Newline("\n"), Whitespace("    ")] []
+        1: COLON@57..59 ":" [] [Whitespace(" ")]
+        2: JSON_NUMBER_VALUE@59..60
+          0: JSON_NUMBER_LITERAL@59..60 "0" [] []
+      3: COMMA@60..61 "," [] []
+      4: (empty)
+    2: R_CURLY@61..63 "}" [Newline("\n")] []
+  1: EOF@63..64 "" [Newline("\n")] []
+
+```
+
+

@@ -46,16 +46,24 @@ pub struct JsonParser {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing comments in `.json` files
     pub allow_comments: Option<bool>,
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Allow parsing trailing commas in `.json` files
+    pub allow_trailing_commas: Option<bool>,
 }
 
 impl JsonParser {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["allowComments"];
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
+        &["allowComments", "allowTrailingCommas"];
 }
 
 impl MergeWith<JsonParser> for JsonParser {
     fn merge_with(&mut self, other: JsonParser) {
         if let Some(allow_comments) = other.allow_comments {
             self.allow_comments = Some(allow_comments);
+        }
+        if let Some(allow_trailing_commas) = other.allow_trailing_commas {
+            self.allow_trailing_commas = Some(allow_trailing_commas);
         }
     }
 }

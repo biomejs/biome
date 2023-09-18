@@ -60,10 +60,15 @@ impl VisitNode<JsonLanguage> for JsonParser {
     ) -> Option<()> {
         let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
         let name_text = name.text();
-        if name_text == "allowComments" {
-            self.allow_comments = self.map_to_boolean(&value, name_text, diagnostics);
+        match name_text {
+            "allowComments" => {
+                self.allow_comments = self.map_to_boolean(&value, name_text, diagnostics);
+            }
+            "allowTrailingCommas" => {
+                self.allow_trailing_commas = self.map_to_boolean(&value, name_text, diagnostics);
+            }
+            _ => {}
         }
-
         Some(())
     }
 }

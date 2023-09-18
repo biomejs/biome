@@ -6,9 +6,10 @@ expression: content
 
 ```jsonc
 
-/*test*/ [
-
-/* some other comment*/1, 2, 3]
+/*test*/{
+    /* some other comment */
+    "array": [1, 2, 3],
+}
 	
 ```
 
@@ -20,12 +21,13 @@ file.jsonc format ━━━━━━━━━━━━━━━━━━━━�
   i Formatter would have printed the following content:
   
     1   │ - 
-    2   │ - /*test*/·[
-    3   │ - 
-    4   │ - /*·some·other·comment*/1,·2,·3]
-    5   │ - → 
-      1 │ + /*test*/·[/*·some·other·comment*/·1,·2,·3]
-      2 │ + 
+    2   │ - /*test*/{
+      1 │ + /*test*/·{
+    3 2 │       /* some other comment */
+    4 3 │       "array": [1, 2, 3],
+    5 4 │   }
+    6   │ - → 
+      5 │ + 
   
 
 ```

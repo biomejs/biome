@@ -120,6 +120,8 @@ impl WorkspaceSettings {
             if let Some(parser) = json.parser {
                 self.languages.json.parser.allow_comments =
                     parser.allow_comments.unwrap_or_default();
+                self.languages.json.parser.allow_trailing_commas =
+                    parser.allow_trailing_commas.unwrap_or_default();
             }
             if let Some(formatter) = json.formatter {
                 self.languages.json.formatter.enabled = formatter.enabled;

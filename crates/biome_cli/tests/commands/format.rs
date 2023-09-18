@@ -1887,9 +1887,10 @@ fn format_jsonc_files() {
     let mut console = BufferConsole::default();
 
     let code = r#"
-/*test*/ [
-
-/* some other comment*/1, 2, 3]
+/*test*/{
+    /* some other comment */
+    "array": [1, 2, 3],
+}
 	"#;
     let file_path = Path::new("file.jsonc");
     fs.insert(file_path.into(), code.as_bytes());

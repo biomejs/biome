@@ -21,3 +21,8 @@ mod allow_comments {
     //! Tests should pass even with comments in json
     tests_macros::gen_tests! {"tests/json_test_suite/allow_comments/*.json", crate::spec_test::run, "allow_comments"}
 }
+
+mod allow_trainling_commas {
+    //! Tests should pass even with trailing commas in json
+    tests_macros::gen_tests! {"tests/json_test_suite/allow_trailing_commas/*.json", crate::spec_test::run, "allow_trailing_commas"}
+}

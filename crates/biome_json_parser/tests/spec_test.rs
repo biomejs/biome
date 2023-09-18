@@ -22,6 +22,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         "error" => ExpectedOutcome::Fail,
         "undefined" => ExpectedOutcome::Undefined,
         "allow_comments" => ExpectedOutcome::Pass,
+        "allow_trailing_commas" => ExpectedOutcome::Pass,
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
@@ -38,6 +39,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let parse_conifg = JsonParserOptions {
         allow_comments: outcome_str == "allow_comments",
+        allow_trailing_commas: outcome_str == "allow_trailing_commas",
     };
     let parsed = parse_json(&content, parse_conifg);
     let formatted_ast = format!("{:#?}", parsed.tree());

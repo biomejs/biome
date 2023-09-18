@@ -13,12 +13,12 @@ pub(crate) struct JsonTokenSource<'source> {
     current: JsonSyntaxKind,
     current_range: TextRange,
     preceding_line_break: bool,
-    config: JsonParserOptions,
+    options: JsonParserOptions,
 }
 
 impl<'source> JsonTokenSource<'source> {
-    pub fn from_str(source: &'source str, config: JsonParserOptions) -> Self {
-        let lexer = Lexer::from_str(source).with_config(config);
+    pub fn from_str(source: &'source str, options: JsonParserOptions) -> Self {
+        let lexer = Lexer::from_str(source).with_options(options);
 
         let mut source = Self {
             lexer,
@@ -26,7 +26,7 @@ impl<'source> JsonTokenSource<'source> {
             current: TOMBSTONE,
             current_range: TextRange::default(),
             preceding_line_break: false,
-            config,
+            options,
         };
 
         source.next_non_trivia_token(true);
@@ -46,7 +46,7 @@ impl<'source> JsonTokenSource<'source> {
                     // Not trivia
                     break;
                 }
-                Ok(trivia_kind) if trivia_kind.is_comment() && !self.config.allow_comments => {
+                Ok(trivia_kind) if trivia_kind.is_comment() && !self.options.allow_comments => {
                     self.set_current_token(token);
 
                     // Not trivia

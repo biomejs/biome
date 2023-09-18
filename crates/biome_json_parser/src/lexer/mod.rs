@@ -36,7 +36,7 @@ pub(crate) struct Lexer<'src> {
     position: usize,
 
     diagnostics: Vec<ParseDiagnostic>,
-    config: JsonParserOptions,
+    options: JsonParserOptions,
 }
 
 impl<'src> Lexer<'src> {
@@ -46,7 +46,7 @@ impl<'src> Lexer<'src> {
             source: string,
             position: 0,
             diagnostics: vec![],
-            config: JsonParserOptions::default(),
+            options: JsonParserOptions::default(),
         }
     }
 
@@ -699,7 +699,7 @@ impl<'src> Lexer<'src> {
                         b'*' if self.peek_byte() == Some(b'/') => {
                             self.advance(2);
 
-                            if !self.config.allow_comments {
+                            if !self.options.allow_comments {
                                 self.diagnostics.push(ParseDiagnostic::new(
                                     "JSON standard does not allow comments.",
                                     start..self.text_position(),
@@ -745,7 +745,7 @@ impl<'src> Lexer<'src> {
                     }
                 }
 
-                if !self.config.allow_comments {
+                if !self.options.allow_comments {
                     self.diagnostics.push(ParseDiagnostic::new(
                         "JSON standard does not allow comments.",
                         start..self.text_position(),
@@ -758,8 +758,8 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    pub(crate) fn with_config(mut self, config: JsonParserOptions) -> Self {
-        self.config = config;
+    pub(crate) fn with_options(mut self, options: JsonParserOptions) -> Self {
+        self.options = options;
         self
     }
 }
