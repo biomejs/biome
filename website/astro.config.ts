@@ -180,8 +180,8 @@ export default defineConfig({
 							link: "/guides/big-projects",
 							badge: {
 								text: "New",
-								variant: "note"
-							}
+								variant: "note",
+							},
 						},
 					],
 				},
