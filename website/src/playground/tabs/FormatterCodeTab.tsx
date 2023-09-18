@@ -1,5 +1,5 @@
 import fastDiff from "fast-diff";
-import CodeMirror, { BiomeExtension } from "../CodeMirror";
+import CodeMirror, { type BiomeExtension } from "../CodeMirror";
 import Collapsible from "../Collapsible";
 import BiomeHeader from "../components/BiomeHeader";
 import PrettierHeader from "../components/PrettierHeader";

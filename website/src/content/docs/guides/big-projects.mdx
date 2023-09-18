@@ -1,0 +1,103 @@
+---
+title: Use Rome in big projects
+description: A small guide how to set Biome in big projects
+---
+
+import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
+
+
+Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
+
+
+## Use multiple configuration files
+
+When you use Biome's features - either with the CLI or LSP - the tool looks for the nearest configuration file using the current working directory.
+
+If Biome doesn't find the configuration file there, it **starts walking upwards** the directories of the file system, until it finds one.
+
+You can leverage this feature to apply different settings based on the project/folder.
+
+Let's suppose we have a project that contains a backend app and new frontend app.
+
+
+```
+app
+├── backend
+│   ├── biome.json
+│   └── package.json
+└── frontend
+    ├── biome.json
+    ├── legacy-app
+    │   └── package.json
+    └── new-app
+        └── package.json
+```
+
+This means that when you run a script from the file `app/backend/package.json`, Biome will use the configuration file `app/backend/biome.json`.
+
+When you run a script from `app/frontend/legacy-app/package.json` or `app/frontend/new-app/package.json`, Biome will use the configuration file `app/frontend/biome.json`.
+
+## Share the configuration
+
+It's possible to use the [`extends`](/reference/configuration#extends) configuration option to breakdown options across files.
+
+Let's assume that we have these requirements:
+- `legacy-app` have to format using spaces;
+- `backend` and `new-pp` have to format using tabs;
+- all apps have to format using line width 120;
+- `backend` app needs some extra linting;
+
+We start by creating a new configuration file at `app/biome.json`, and put there the shared options:
+
+<CodeBlockHeader filename="app/biome.json" />
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 120
+  }
+}
+```
+
+Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, because that's where we need to use a different formatting.
+
+<CodeBlockHeader filename="app/frontend/legacy-app/biome.json" />
+
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space"
+  }
+}
+```
+
+Then, we tell Biome to inherit all the options from the main `app/biome.json` file, using the `extends` property:
+
+<CodeBlockHeader filename="app/frontend/legacy-app/biome.json" />
+
+```diff
+{
++  "extends": ["../../app.json"],
+   "formatter": {
+     "indentStyle": "space"
+   }
+}
+```
+
+Let's jump to `app/backend/biome.json`, where we need to enable the linting:
+
+<CodeBlockHeader filename="app/backend/biome.json" />
+
+```json
+{
+  "extends": ["../app.json"],
+    "linter": {
+      "enabled": "true",
+      "rules": {
+        "recommended": true
+      }
+   }
+}
+```

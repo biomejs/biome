@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import Playground from "./Playground";
 import LoadingScreen from "./components/LoadingScreen";
 import {
@@ -6,8 +12,8 @@ import {
 	IndentStyle,
 	LintRules,
 	LoadingState,
-	PlaygroundSettings,
-	PlaygroundState,
+	type PlaygroundSettings,
+	type PlaygroundState,
 	QuoteProperties,
 	QuoteStyle,
 	Semicolons,
