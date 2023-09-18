@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { Distribution, Biome } from "../dist";
+import { Biome, Distribution } from "../dist";
 
 describe("Biome WebAssembly DiagnosticPrinter", () => {
 	let biome: Biome;
