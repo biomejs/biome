@@ -106,7 +106,7 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
         .items()
         .into_iter()
         .count();
-    if param_count < 2 || param_count > 4 {
+    if !(2..=4).contains(&param_count) {
         return None;
     }
 
