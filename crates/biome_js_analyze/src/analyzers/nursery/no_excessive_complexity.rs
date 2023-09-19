@@ -24,7 +24,7 @@ const MAX_FUNCTION_DEPTH: usize = 10;
 const MAX_SCORE: u8 = u8::MAX;
 
 declare_rule! {
-    /// Disallow functions that exceed a given complexity score.
+    /// Disallow functions that exceed a given Cognitive Complexity score.
     ///
     /// The more complexity a function contains, the harder it is to understand
     /// later on.
@@ -34,7 +34,10 @@ declare_rule! {
     /// side-effects when making changes.
     ///
     /// This rule calculates a complexity score for every function and disallows
-    /// those that exceed a configured complexity threshold (default: 10).
+    /// those that exceed a configured complexity threshold (default: 15).
+    ///
+    /// The complexity score is calculated based on the Cognitive Complexity
+    /// algorithm: http://redirect.sonarsource.com/doc/cognitive-complexity.html
     ///
     /// Source:
     ///
@@ -71,7 +74,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// The allowed values range from 1 through 254. The default is 10.
+    /// The allowed values range from 1 through 254. The default is 15.
     ///
     pub(crate) NoExcessiveComplexity {
         version: "1.0.0",
@@ -379,7 +382,7 @@ pub struct ComplexityOptions {
 impl Default for ComplexityOptions {
     fn default() -> Self {
         Self {
-            max_allowed_complexity: 10,
+            max_allowed_complexity: 15,
         }
     }
 }
