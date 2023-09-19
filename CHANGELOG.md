@@ -25,6 +25,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Configuration
 ### Editors
 ### Formatter
+
+#### Enhancements
+- Use `OnceCell` for the Memoized memory because that's what the `RefCell<Option>` implemented. Contributed by @denbezrukov
+
 ### JavaScript APIs
 ### Linter
 
