@@ -17,7 +17,11 @@ import org.eclipse.lsp4j.*
 @Suppress("UnstableApiUsage")
 class BiomeLspServerSupportProvider : LspServerSupportProvider {
 
-    override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
+    override fun fileOpened(
+        project: Project,
+        file: VirtualFile,
+        serverStarter: LspServerSupportProvider.LspServerStarter
+    ) {
         if (BiomeUtils.isSupportedFileType(file)) {
             val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
 
@@ -27,12 +31,13 @@ class BiomeLspServerSupportProvider : LspServerSupportProvider {
 }
 
 @Suppress("UnstableApiUsage")
-private class BiomeLspServerDescriptor(project: Project, val executable: String) : ProjectWideLspServerDescriptor(project, "Biome") {
+private class BiomeLspServerDescriptor(project: Project, val executable: String) :
+    ProjectWideLspServerDescriptor(project, "Biome") {
     override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
     override fun createCommandLine(): GeneralCommandLine {
         val params = SmartList("lsp-proxy")
 
-        if(executable.isEmpty()) {
+        if (executable.isEmpty()) {
             throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
         }
 

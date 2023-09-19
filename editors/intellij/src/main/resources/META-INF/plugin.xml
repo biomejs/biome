@@ -12,8 +12,9 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="Biome" displayType="BALLOON"/>
-        <statusBarWidgetFactory implementation="com.github.biomejs.intellijbiome.widgets.BiomeStatusBarWidgetFactory" />
-        <platform.lsp.serverSupportProvider implementation="com.github.biomejs.intellijbiome.lsp.BiomeLspServerSupportProvider"/>
+        <statusBarWidgetFactory implementation="com.github.biomejs.intellijbiome.widgets.BiomeStatusBarWidgetFactory"/>
+        <platform.lsp.serverSupportProvider
+                implementation="com.github.biomejs.intellijbiome.lsp.BiomeLspServerSupportProvider"/>
         <projectConfigurable id="Settings.Biome"
                              bundle="messages.BiomeBundle"
                              groupId="language"
@@ -22,10 +23,10 @@
                              instance="com.github.biomejs.intellijbiome.settings.BiomeSettingsConfigurable"/>
         <formattingService implementation="com.github.biomejs.intellijbiome.formatter.BiomeFormatterProvider"/>
     </extensions>
-	<projectListeners>
-		<listener class="com.github.biomejs.intellijbiome.listeners.BiomeConfigListener"
-							topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
-	</projectListeners>
+    <projectListeners>
+        <listener class="com.github.biomejs.intellijbiome.listeners.BiomeConfigListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </projectListeners>
     <actions>
         <group
                 id="com.github.biomejs.intellijbiome.actions-group"

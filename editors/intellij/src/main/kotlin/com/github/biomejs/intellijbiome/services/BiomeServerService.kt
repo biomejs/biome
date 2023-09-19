@@ -11,14 +11,18 @@ import com.intellij.platform.lsp.api.LspServerManager
 @Service(Service.Level.PROJECT)
 class BiomeServerService(private val project: Project) {
 
-	fun restartBiomeServer() {
-		LspServerManager.getInstance(project).stopAndRestartIfNeeded(BiomeLspServerSupportProvider::class.java)
-	}
+    fun restartBiomeServer() {
+        LspServerManager.getInstance(project).stopAndRestartIfNeeded(BiomeLspServerSupportProvider::class.java)
+    }
 
-	fun notifyRestart(){
-		NotificationGroupManager.getInstance()
-		.getNotificationGroup("Biome")
-		.createNotification(BiomeBundle.message("biome.language.server.restarted"), "", NotificationType.INFORMATION)
-		.notify(project)
-	}
+    fun notifyRestart() {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("Biome")
+            .createNotification(
+                BiomeBundle.message("biome.language.server.restarted"),
+                "",
+                NotificationType.INFORMATION
+            )
+            .notify(project)
+    }
 }

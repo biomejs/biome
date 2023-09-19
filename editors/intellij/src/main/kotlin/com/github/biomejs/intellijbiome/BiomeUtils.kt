@@ -18,7 +18,7 @@ object BiomeUtils {
     }
 
     fun getBiomeVersion(project: Project, binaryPath: String): String? {
-        if(binaryPath.isEmpty()){
+        if (binaryPath.isEmpty()) {
             return null
         }
 
@@ -36,10 +36,10 @@ object BiomeUtils {
         val directoryManager = NodeModulesDirectoryManager.getInstance(project)
         val executablePath = BiomeSettings.getInstance(project).executablePath
         val biomeBinFile = directoryManager.nodeModulesDirs
-                .asSequence()
-                .mapNotNull { it.findFileByRelativePath(".bin/biome") }
-                .filter { it.isValid }
-                .firstOrNull()
+            .asSequence()
+            .mapNotNull { it.findFileByRelativePath(".bin/biome") }
+            .filter { it.isValid }
+            .firstOrNull()
 
         if (executablePath.isEmpty()) {
             return biomeBinFile?.path
@@ -48,7 +48,7 @@ object BiomeUtils {
         return executablePath
     }
 
-    private  fun createVersionCommandLine(project: Project, binaryPath: String): GeneralCommandLine {
+    private fun createVersionCommandLine(project: Project, binaryPath: String): GeneralCommandLine {
         return GeneralCommandLine()
             .withWorkDirectory(project.basePath)
             .withExePath(binaryPath)

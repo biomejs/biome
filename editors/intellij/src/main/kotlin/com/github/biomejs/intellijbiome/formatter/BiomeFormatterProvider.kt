@@ -17,10 +17,11 @@ import java.nio.charset.StandardCharsets
 import java.util.EnumSet
 import com.intellij.execution.ExecutionException
 
-class BiomeFormatterProvider: AsyncDocumentFormattingService() {
+class BiomeFormatterProvider : AsyncDocumentFormattingService() {
     override fun getFeatures(): MutableSet<Feature> = EnumSet.noneOf(Feature::class.java)
 
-    override fun canFormat(file: PsiFile): Boolean = file.virtualFile?.let {  BiomeUtils.isSupportedFileType(it) } ?: false
+    override fun canFormat(file: PsiFile): Boolean =
+        file.virtualFile?.let { BiomeUtils.isSupportedFileType(it) } ?: false
 
     override fun getNotificationGroupId(): String = "Biome"
 
@@ -33,7 +34,7 @@ class BiomeFormatterProvider: AsyncDocumentFormattingService() {
 
         val exePath = BiomeUtils.getBiomeExecutablePath(project)
 
-        if(exePath.isNullOrEmpty()) {
+        if (exePath.isNullOrEmpty()) {
             throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
         }
 

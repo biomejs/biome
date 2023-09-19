@@ -15,7 +15,7 @@ class BiomeWidgetPresentation(private val project: Project) : StatusBarWidget.Mu
         val biomeBin = BiomeUtils.getBiomeExecutablePath(project)
         val progressManager = ProgressManager.getInstance()
 
-        if(biomeBin == null) {
+        if (biomeBin == null) {
             return null
         }
 
@@ -33,7 +33,7 @@ class BiomeWidgetPresentation(private val project: Project) : StatusBarWidget.Mu
 
         return when (lspServer) {
             is LspServerImpl -> {
-                if (lspServer.isRunning){
+                if (lspServer.isRunning) {
                     BiomeBundle.message("biome.language.server.is.running")
                 } else {
                     BiomeBundle.message("biome.language.server.is.stopped")
@@ -41,7 +41,7 @@ class BiomeWidgetPresentation(private val project: Project) : StatusBarWidget.Mu
             }
 
             else -> {
-							BiomeBundle.message("biome.language.server.is.stopped")
+                BiomeBundle.message("biome.language.server.is.stopped")
             }
         }
 

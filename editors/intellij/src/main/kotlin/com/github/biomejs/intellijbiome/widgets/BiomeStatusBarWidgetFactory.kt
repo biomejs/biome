@@ -14,6 +14,6 @@ class BiomeStatusBarWidgetFactory : StatusBarWidgetFactory {
     }
 
     override fun createWidget(project: Project): StatusBarWidget {
-        return  BiomeWidget(project)
+        return BiomeWidget(project)
     }
 }
