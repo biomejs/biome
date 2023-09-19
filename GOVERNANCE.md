@@ -151,6 +151,7 @@ Roadmaps don't provide dates or deadlines; they only reflect what the core contr
 The span of a roadmap should cover six months, but it might vary.
 
 ## Code review
+
 We have a reasonably liberal approach to code review and merging. We value quick iteration and low development friction, which comes with great responsibility. Reverting code is easy, so landing code should be just as easy. Because of this, Biome will have discrete releases rather than rolling releases that are automatically published.
 
 - If you own a particular area, you can merge it without any review despite PR size.
