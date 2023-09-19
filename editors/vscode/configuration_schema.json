@@ -985,7 +985,7 @@
 					]
 				},
 				"noExcessiveComplexity": {
-					"description": "Disallow functions that exceed a given complexity score.",
+					"description": "Disallow functions that exceed a given Cognitive Complexity score.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

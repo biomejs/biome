@@ -2175,7 +2175,7 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration>,
-    #[doc = "Disallow functions that exceed a given complexity score."]
+    #[doc = "Disallow functions that exceed a given Cognitive Complexity score."]
     #[bpaf(
         long("no-excessive-complexity"),
         argument("on|off|warn"),
