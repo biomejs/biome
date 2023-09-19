@@ -662,7 +662,7 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
 	/**
-	 * Disallow functions that exceed a given complexity score.
+	 * Disallow functions that exceed a given Cognitive Complexity score.
 	 */
 	noExcessiveComplexity?: RuleConfiguration;
 	/**
