@@ -3,6 +3,24 @@
     <id>com.github.biomejs.intellijbiome</id>
     <name>Biome</name>
     <vendor>biomejs</vendor>
+    <description><![CDATA[
+    <a href="https://biomejs.dev">Biome</a> plugin for JetBrains IDEs.
+
+    <h3>Features</h3>
+
+    <ul>
+			<li>Linting</li>
+			<li>
+				Quick Fix (from mouse-over, <code>⌥⏎</code> or <code>Alt+Enter</code>)
+				<ul>
+					<li>Quick fixes</li>
+					<li>Supress rules</li>
+				</ul>
+			</li>
+			<li>Reformat your code with <code>⌥⇧ ⌘ L</code> or <code>Ctrl+Alt+L</code></li>
+		</ul>
+    ]]></description>
+
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.ultimate</depends>
