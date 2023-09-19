@@ -28,13 +28,13 @@ The ownership of assets is only sometimes evenly distributed among all the leads
 
 #### Lead nomination
 
-Core contributors may only be self-nominated. Being a lead only adds burden to a core contributor: more rights to be held accountable with, and more responsibilities.
+Leads may only be self-nominated. Being a lead only adds burden to a core contributor: more rights to be held accountable with, and more responsibilities.
 
-When nominating a core contributor, the person has to create a new thread in the `#leads` channel with a case of why the person should join as [core contributor](#core-contributor).
+When nominating a lead, a new thread in the `#leads` channel with a case of why the person should join as [core contributor](#core-contributor) has to be created.
 
 `#leads` is a private channel available only to people who have the `Lead` role.
 
-The voting period will follow the [voting rules](#voting-rules). An individual becomes a [lead](#core-contributor) if all the other leads vote in favour.
+The voting period will follow the [voting rules](#voting-rules). An individual becomes a lead if all the other leads vote in favour.
 
 If vote is successful, the lead will ask the nominee if they want to accept the title.
 
@@ -56,7 +56,7 @@ Only [maintainers](#maintainer) can be nominated to be core contributors.
 
 Core contributors may either be nominated by another, [Core contributor](#core-contributor), or [lead](#lead).
 
-When nominating a core contributor, the person has to create a new thread in the `#core-contributors` channel with a case and [their contributions](#contributions) of why the person should join as [core contributor](#core-contributor).
+When nominating a core contributor, a new thread in the `#core-contributors` channel has to be created, with a case and [their contributions](#contributions) of why the person should join as [core contributor](#core-contributor).
 
 `#core-contributors` is a private channel available only to people who have the `Core contributor` role.
 
@@ -89,7 +89,7 @@ Maintainers are those with a history of consistent contributions, including but 
 
 Maintainers may either be nominated by another [maintainer](#maintainer), [Core contributor](#core-contributor), [lead](#lead).
 
-When nominating a new maintainer, the person has to create a new thread in the `#maintainers` channel, provide a link to the history of the [person's contributions](#contributions) to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
+When nominating a new maintainer, a new thread in the `#maintainers` channel has to be created, provide a link to the history of the [person's contributions](#contributions) to the project and a brief explanation of why the person should join as [maintainer](#maintainer).
 
 `#maintainers` is a private channel available only to people who have the `maintainer` role.
 
@@ -158,7 +158,7 @@ We have a reasonably liberal approach to code review and merging. We value quick
 - If there are comments or suggestions after a PR is merged after the fact, allow yourself time to address them in a follow-up PR. If you don't respond in a reasonable timeframe, then create an issue to track.
 - Ensure that the PR summary is detailed, listing steps you took to verify the rationale and relevant issues and people involved in any prior discussion.
 - Ensure that PRs contain adequate tests and code comments for a future contributor to derive intent and modify your code safely.
-- You are welcome to the repos for your WIP branches. Branches that have more than four months of inactivity will be pruned.
+- You are welcome to the repos for your WIP branches. If you don't use your own fork, prepend the name of the branch with your github handle, e.g. `<handle>/experiment-code` Branches that have more than four months of inactivity will be pruned.
 - If you add a new feature, ensure it has been discussed or approved on GitHub or Discord.
 - If necessary, identify potential owners for PR review and approval.
 - All code must go through Pull Requests (PR) and pass status checks before being merged. If a PR is merged that breaks `main` due to the branch not being up-to-date, then it should either be reverted or a quick fix merged as a separate PR.
