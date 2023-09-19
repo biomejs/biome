@@ -31,7 +31,6 @@ JsonRoot {
                 value_token: JSON_NUMBER_LITERAL@9..10 "1" [] [],
             },
             COMMA@10..11 "," [] [],
-            missing element,
         ],
         r_brack_token: missing (required),
     },
@@ -55,7 +54,6 @@ JsonRoot {
       4: JSON_NUMBER_VALUE@9..10
         0: JSON_NUMBER_LITERAL@9..10 "1" [] []
       5: COMMA@10..11 "," [] []
-      6: (empty)
     2: (empty)
   1: EOF@11..11 "" [] []
 

@@ -27,7 +27,6 @@ JsonRoot {
                 },
             },
             COMMA@7..8 "," [] [],
-            missing element,
         ],
         r_curly_token: R_CURLY@8..9 "}" [] [],
     },
@@ -49,7 +48,6 @@ JsonRoot {
         2: JSON_NUMBER_VALUE@6..7
           0: JSON_NUMBER_LITERAL@6..7 "0" [] []
       1: COMMA@7..8 "," [] []
-      2: (empty)
     2: R_CURLY@8..9 "}" [] []
   1: EOF@9..9 "" [] []
 

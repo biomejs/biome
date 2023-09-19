@@ -48,7 +48,7 @@ AnyJsonValue =  JsonStringValue | JsonBooleanValue | JsonNullValue | JsonNumberV
 
 JsonObjectValue = '{' JsonMemberList? '}'
 
-JsonMemberList = (JsonMember (',' JsonMember)* )
+JsonMemberList = (JsonMember (',' JsonMember)* ','?)
 
 JsonMember = name: JsonMemberName ':' value: AnyJsonValue
 
@@ -56,7 +56,7 @@ JsonMemberName = value: 'json_string_literal'
 
 JsonArrayValue = '[' elements: JsonArrayElementList? ']'
 
-JsonArrayElementList = (AnyJsonValue (',' AnyJsonValue)* )
+JsonArrayElementList = (AnyJsonValue (',' AnyJsonValue)* ','?)
 
 JsonBooleanValue = value_token: ('true' | 'false')
 

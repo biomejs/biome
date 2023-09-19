@@ -35,7 +35,6 @@ JsonRoot {
             COMMA@10..11 "," [] [],
             missing element,
             COMMA@11..12 "," [] [],
-            missing element,
         ],
         r_curly_token: R_CURLY@12..13 "}" [] [],
     },
@@ -65,7 +64,6 @@ JsonRoot {
       7: COMMA@10..11 "," [] []
       8: (empty)
       9: COMMA@11..12 "," [] []
-      10: (empty)
     2: R_CURLY@12..13 "}" [] []
   1: EOF@13..13 "" [] []
 

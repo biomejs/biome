@@ -19,7 +19,6 @@ JsonRoot {
         json_member_list: JsonMemberList [
             missing element,
             COMMA@1..2 "," [] [],
-            missing element,
         ],
         r_curly_token: missing (required),
     },
@@ -36,7 +35,6 @@ JsonRoot {
     1: JSON_MEMBER_LIST@1..2
       0: (empty)
       1: COMMA@1..2 "," [] []
-      2: (empty)
     2: (empty)
   1: EOF@2..2 "" [] []
 

@@ -23,7 +23,6 @@ JsonRoot {
             COMMA@2..3 "," [] [],
             missing element,
             COMMA@3..4 "," [] [],
-            missing element,
         ],
         r_brack_token: R_BRACK@4..5 "]" [] [],
     },
@@ -43,7 +42,6 @@ JsonRoot {
       1: COMMA@2..3 "," [] []
       2: (empty)
       3: COMMA@3..4 "," [] []
-      4: (empty)
     2: R_BRACK@4..5 "]" [] []
   1: EOF@5..5 "" [] []
 

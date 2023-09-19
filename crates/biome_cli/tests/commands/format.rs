@@ -1856,13 +1856,13 @@ fn ignore_comments_error_when_allow_comments() {
 }
 
 	"#;
-    let biome_config = "biome.json";
+    let rome_config = "biome.json";
     let code = r#"
 /*test*/ [1, 2, 3]
 	"#;
     let file_path = Path::new("tsconfig.json");
     fs.insert(file_path.into(), code.as_bytes());
-    fs.insert(biome_config.into(), config_json);
+    fs.insert(rome_config.into(), config_json);
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1886,21 +1886,13 @@ fn format_jsonc_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config_json = r#"{
-    "json": {
-        "parser": { "allowTrailingCommas": true }
-    }
-}"#;
-    let biome_config = "biome.json";
     let code = r#"
-/*test*/{
-    /* some other comment */
-    "array": [1, 2, 3],
-}
-"#;
+/*test*/ [
+
+/* some other comment*/1, 2, 3]
+	"#;
     let file_path = Path::new("file.jsonc");
     fs.insert(file_path.into(), code.as_bytes());
-    fs.insert(biome_config.into(), config_json);
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),

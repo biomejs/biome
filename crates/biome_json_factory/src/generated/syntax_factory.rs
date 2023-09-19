@@ -242,14 +242,14 @@ impl SyntaxFactory for JsonSyntaxFactory {
                 children,
                 AnyJsonValue::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             JSON_MEMBER_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
                 JsonMember::can_cast,
                 T ! [,],
-                false,
+                true,
             ),
             _ => unreachable!("Is {:?} a token?", kind),
         }
