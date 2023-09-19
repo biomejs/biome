@@ -1856,13 +1856,13 @@ fn ignore_comments_error_when_allow_comments() {
 }
 
 	"#;
-    let rome_config = "biome.json";
+    let biome_config = "biome.json";
     let code = r#"
 /*test*/ [1, 2, 3]
 	"#;
     let file_path = Path::new("tsconfig.json");
     fs.insert(file_path.into(), code.as_bytes());
-    fs.insert(rome_config.into(), config_json);
+    fs.insert(biome_config.into(), config_json);
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -1905,6 +1905,43 @@ fn format_jsonc_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_jsonc_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_json_when_allow_trailing_commas() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_json = r#"{
+    "json": {
+        "parser": { "allowTrailingCommas": true }
+    }
+}"#;
+    let biome_config = "biome.json";
+    let code = r#"{
+    "array": [
+        1,
+    ],
+}"#;
+    let file_path = Path::new("file.json");
+    fs.insert(file_path.into(), code.as_bytes());
+    fs.insert(biome_config.into(), config_json);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_json_when_allow_trailing_commas",
         fs,
         console,
         result,

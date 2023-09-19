@@ -51,6 +51,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
+  Contributed by @nissy-dev
+
 ### VSCode
 
 ## 1.2.2 (2023-09-16)
