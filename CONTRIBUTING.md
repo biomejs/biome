@@ -169,6 +169,25 @@ If files specific to your local development environment should be ignored, pleas
 
 You can find more information on this process [here](https://help.github.com/en/github/using-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer).
 
+## Intellij plugin
+
+To start development from source, navigate to the `editors/intellij` directory.
+
+Build and run the plugin requires:
+
+- Java development kit 17+
+- IntelliJ IDEA (Ultimate edition or community edition)
+
+### Running the plugin on IDEA
+```bash
+./gradlew runIde
+```
+
+### Build the plugin
+```bash
+./gradlew buildPlugin
+```
+
 ## Node.js development
 
 The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
