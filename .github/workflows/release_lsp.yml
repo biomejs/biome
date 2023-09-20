@@ -314,7 +314,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: intellij_package
-          path: ./editors/intellij/build/distributions/intellij-biome-*.zip
+          path: ./editors/intellij/build/distributions/Biome-*.zip
           if-no-files-found: error
 
   publish-intellij:
@@ -367,6 +367,6 @@ jobs:
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
-            ./editors/intellij/build/distributions/intellij-biome-*.zip
+            ./editors/intellij/build/distributions/Biome-*.zip
           fail_on_unmatched_files: true
           generate_release_notes: true
