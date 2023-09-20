@@ -2,6 +2,7 @@
 title: useIsArray (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/nursery/useIsArray`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

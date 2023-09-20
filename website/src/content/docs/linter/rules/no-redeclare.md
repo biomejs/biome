@@ -2,6 +2,7 @@
 title: noRedeclare (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/suspicious/noRedeclare`**
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.

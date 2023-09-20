@@ -2,6 +2,7 @@
 title: useSimplifiedLogicExpression (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/complexity/useSimplifiedLogicExpression`**
 
 Discard redundant terms from logical expressions.
 

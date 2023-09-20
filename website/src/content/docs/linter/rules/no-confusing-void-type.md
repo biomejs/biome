@@ -2,6 +2,7 @@
 title: noConfusingVoidType (since v1.2.0)
 ---
 
+**Diagnostic Category: `lint/nursery/noConfusingVoidType`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

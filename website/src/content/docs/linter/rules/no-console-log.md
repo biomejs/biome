@@ -2,6 +2,7 @@
 title: noConsoleLog (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/suspicious/noConsoleLog`**
 
 Disallow the use of `console.log`
 

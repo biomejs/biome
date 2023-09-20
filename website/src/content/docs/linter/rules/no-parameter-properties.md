@@ -2,6 +2,7 @@
 title: noParameterProperties (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noParameterProperties`**
 
 Disallow the use of parameter properties in class constructors.
 

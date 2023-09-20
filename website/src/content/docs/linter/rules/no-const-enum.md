@@ -2,6 +2,7 @@
 title: noConstEnum (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/suspicious/noConstEnum`**
 
 :::note
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.

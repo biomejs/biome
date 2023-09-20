@@ -2,6 +2,7 @@
 title: noForEach (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/complexity/noForEach`**
 
 Prefer `for...of` statement instead of `Array.forEach`.
 

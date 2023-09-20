@@ -2,6 +2,7 @@
 title: noDuplicateJsonKeys (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/nursery/noDuplicateJsonKeys`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

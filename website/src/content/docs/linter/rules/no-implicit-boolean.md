@@ -2,6 +2,7 @@
 title: noImplicitBoolean (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noImplicitBoolean`**
 
 Disallow implicit `true` values on JSX boolean attributes
 

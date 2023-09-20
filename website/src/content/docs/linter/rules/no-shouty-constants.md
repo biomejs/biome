@@ -2,6 +2,7 @@
 title: noShoutyConstants (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/noShoutyConstants`**
 
 Disallow the use of constants which its value is the upper-case version of its name.
 

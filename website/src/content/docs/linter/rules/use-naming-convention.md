@@ -2,6 +2,7 @@
 title: useNamingConvention (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/useNamingConvention`**
 
 Enforce naming conventions for everything across a codebase.
 

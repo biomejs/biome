@@ -2,6 +2,7 @@
 title: noAccessKey (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/a11y/noAccessKey`**
 
 Enforce that the `accessKey` attribute is not used on any HTML element.
 

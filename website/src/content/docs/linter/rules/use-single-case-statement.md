@@ -2,6 +2,7 @@
 title: useSingleCaseStatement (since v1.0.0)
 ---
 
+**Diagnostic Category: `lint/style/useSingleCaseStatement`**
 
 Enforces switch clauses have a single statement, emits a quick fix wrapping
 the statements in a block.
