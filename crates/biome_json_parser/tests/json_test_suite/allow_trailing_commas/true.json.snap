@@ -1,0 +1,35 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```json
+true,
+
+```
+
+
+## AST
+
+```
+JsonRoot {
+    value: JsonBooleanValue {
+        value_token: TRUE_KW@0..4 "true" [] [],
+    },
+    eof_token: EOF@4..6 ",\n" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..6
+  0: JSON_BOOLEAN_VALUE@0..4
+    0: TRUE_KW@0..4 "true" [] []
+  1: EOF@4..6 ",\n" [] []
+
+```
+
+

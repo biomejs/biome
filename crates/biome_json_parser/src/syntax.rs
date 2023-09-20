@@ -36,7 +36,7 @@ pub(crate) fn parse_root(p: &mut JsonParser) {
     };
 
     // Process the file to the end, e.g. in cases where there have been multiple values
-    if !p.at(EOF) {
+    if !(p.at(EOF) || p.options().allow_trailing_commas && p.at(T![,])) {
         parse_rest(p, value);
     }
 
