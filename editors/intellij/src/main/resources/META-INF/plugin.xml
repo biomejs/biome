@@ -9,16 +9,10 @@
     <h3>Features</h3>
 
     <ul>
-			<li>Linting</li>
-			<li>
-				Quick Fix (from mouse-over, <code>⌥⏎</code> or <code>Alt+Enter</code>)
-				<ul>
-					<li>Quick fixes</li>
-					<li>Supress rules</li>
-				</ul>
-			</li>
-			<li>Reformat your code with <code>⌥⇧ ⌘ L</code> or <code>Ctrl+Alt+L</code></li>
-		</ul>
+        <li>Linting</li>
+        <li>Quick Fix (from mouse-over, <code>⌥⏎</code> or <code>Alt+Enter</code>)</li>
+        <li>Reformat your code with <code>⌥⇧ ⌘ L</code> or <code>Ctrl+Alt+L</code></li>
+    </ul>
     ]]></description>
 
 
