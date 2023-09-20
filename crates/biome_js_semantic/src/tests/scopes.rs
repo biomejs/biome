@@ -43,8 +43,8 @@ assert_semantics! {
     ok_scope_static_initialization_block,
         "class A {
             static/*START A*/ {
-                const a/*@ A*/ = 2; 
-            }/*END A*/  
+                const a/*@ A*/ = 2;
+            }/*END A*/
         };",
 }
 

@@ -32,6 +32,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### JavaScript APIs
 ### Linter
 
+#### Bug fixes
+
+- Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
+
 #### New features
 
 - Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley

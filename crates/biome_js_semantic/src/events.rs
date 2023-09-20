@@ -2,7 +2,9 @@
 
 use rustc_hash::FxHashMap;
 use std::collections::{HashMap, VecDeque};
+use std::mem;
 
+use biome_js_syntax::AnyTsType;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression,
     JsCallExpression, JsForVariableDeclaration, JsIdentifierAssignment, JsIdentifierBinding,
@@ -162,6 +164,7 @@ pub struct SemanticEventExtractor {
     /// At any point this is the set of available bindings and
     /// the range of its declaration
     bindings: FxHashMap<TokenText, BindingInfo>,
+    infers: Vec<TsTypeParameterName>,
 }
 
 /// Holds the text range of the token when it is bound,
@@ -247,6 +250,7 @@ impl SemanticEventExtractor {
             scopes: vec![],
             next_scope_id: 0,
             bindings: FxHashMap::default(),
+            infers: vec![],
         }
     }
 
@@ -304,7 +308,6 @@ impl SemanticEventExtractor {
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
-            | TS_FUNCTION_TYPE
             | TS_DECLARE_FUNCTION_DECLARATION => {
                 self.push_scope(
                     node.text_range(),
@@ -321,8 +324,11 @@ impl SemanticEventExtractor {
                     false,
                 );
             }
-
-            _ => {}
+            _ => {
+                if let Some(node) = node.clone().cast::<AnyTsType>() {
+                    self.enter_any_type(&node);
+                }
+            }
         }
     }
 
@@ -348,6 +354,18 @@ impl SemanticEventExtractor {
         Some(is_var)
     }
 
+    fn enter_any_type(&mut self, node: &AnyTsType) {
+        if node.in_conditional_true_type() {
+            self.push_conditional_true_scope(node);
+        } else if let Some(node) = node.as_ts_function_type() {
+            self.push_scope(
+                node.syntax().text_range(),
+                ScopeHoisting::DontHoistDeclarationsToParent,
+                false,
+            );
+        }
+    }
+
     fn enter_identifier_binding(&mut self, node: &JsSyntaxNode) -> Option<()> {
         use JsSyntaxKind::*;
         debug_assert!(matches!(
@@ -371,6 +389,13 @@ impl SemanticEventExtractor {
             TS_TYPE_PARAMETER_NAME => {
                 let token = node.clone().cast::<TsTypeParameterName>()?;
                 let name_token = token.ident_token().ok()?;
+
+                if token.in_infer_type() {
+                    self.infers.push(token);
+
+                    return None;
+                }
+
                 let is_var = Some(false);
                 (name_token, is_var)
             }
@@ -562,7 +587,6 @@ impl SemanticEventExtractor {
             | JS_CATCH_CLAUSE
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_DECLARE_FUNCTION_DECLARATION
-            | TS_FUNCTION_TYPE
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
@@ -570,7 +594,19 @@ impl SemanticEventExtractor {
             | TS_EXTERNAL_MODULE_DECLARATION => {
                 self.pop_scope(node.text_range());
             }
-            _ => {}
+            _ => {
+                if let Some(node) = node.clone().cast::<AnyTsType>() {
+                    self.leave_any_type(&node);
+                }
+            }
+        }
+    }
+
+    fn leave_any_type(&mut self, node: &AnyTsType) {
+        if node.in_conditional_true_type() {
+            self.pop_scope(node.syntax().text_range());
+        } else if let Some(node) = node.as_ts_function_type() {
+            self.pop_scope(node.syntax().text_range());
         }
     }
 
@@ -578,6 +614,24 @@ impl SemanticEventExtractor {
     #[inline]
     pub fn pop(&mut self) -> Option<SemanticEvent> {
         self.stash.pop_front()
+    }
+
+    fn push_conditional_true_scope(&mut self, node: &AnyTsType) {
+        self.push_scope(
+            node.syntax().text_range(),
+            ScopeHoisting::DontHoistDeclarationsToParent,
+            false,
+        );
+
+        let infers = mem::take(&mut self.infers);
+        for infer in infers {
+            let name_token = infer.ident_token().ok();
+            let parent_kind = infer.syntax().parent().map(|parent| parent.kind());
+
+            if let (Some(name_token), Some(parent_kind)) = (name_token, parent_kind) {
+                self.push_binding_into_scope(None, &name_token, &parent_kind);
+            }
+        }
     }
 
     fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, is_closure: bool) {

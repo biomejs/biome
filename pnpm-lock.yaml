@@ -80,8 +80,6 @@ importers:
 
   packages/@biomejs/wasm-bundler: {}
 
-  packages/@biomejs/wasm-nodejs: {}
-
   packages/@biomejs/wasm-web: {}
 
   website:
