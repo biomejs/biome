@@ -19,6 +19,8 @@ Our [GitHub issues](https://github.com/biomejs/biome/issues/) serve as a place f
 Make sure that the bugs is not reported yet and is not fixed in the main branch.
 You can test on the main branch, thanks to the [playground](https://biomejs.dev/playground/).
 
+Alternatively, you can use our official [CodeSandbox template](https://codesandbox.io/p/sandbox/biome-starter-cbs-rky6zq).
+
 ## Getting Started
 
 Building this project requires a `stable` Rust toolchain, which can be installed using [rustup](https://www.rust-lang.org/tools/install).

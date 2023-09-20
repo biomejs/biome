@@ -26,9 +26,12 @@ body:
       description: |
         Provide a detailed list of steps that reproduce the issue
         The more information and included steps, the quicker your report can be triaged and addressed!
-        
+
         You can also use the [playground](https://biomejs.dev/playground/) to share code snippets.
         This is useful to reproduce the issue.
+
+        If you can't use the playground, use our official [CBS template](https://codesandbox.io/p/sandbox/biome-starter-cbs-rky6zq).
+        Fork it and share a reproduction.
       placeholder: |
         1.
         2.
