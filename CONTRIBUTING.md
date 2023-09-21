@@ -414,6 +414,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Lead team
 
 - [Emanuele Stoppa @ematipico](https://github.com/ematipico)
+- [Victorien Elvinger @Conaclos](https://github.com/Conaclos)
 
 ### Core Contributors team
 
