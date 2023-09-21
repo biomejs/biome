@@ -122,7 +122,7 @@ One or more people can own certain parts of the codebase. This process is inform
 
 ### Inactivity
 
-There aren't strict requirements and expectations around activity for core contributors and maintainers; although long periods of inactivity have be communicated to the team.
+There aren't strict requirements and expectations around activity for core contributors and maintainers; although long periods of inactivity must be communicated to the team.
 
 Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past contributor_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
 
@@ -131,7 +131,7 @@ Inactive core contributors or maintainers may have voting and access rights remo
 
 ### Contributions
 
-Contributions to be project aren't only limited to code. Contributions come in different forms and ways:
+Contributions to the project aren't only limited to code. Contributions come in different forms and ways:
 - Documentation
 - Code to all the repositories of the [GitHub org][gh-org]
 - Support in primary channels of the organization, e.g. GitHub and Discord
