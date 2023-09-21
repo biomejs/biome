@@ -3,7 +3,7 @@ use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 
 use biome_diagnostics::Applicability;
-use biome_js_syntax::TsTypeConstraintClause;
+use biome_js_syntax::{AnyTsType, TsTypeConstraintClause};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
@@ -88,12 +88,7 @@ impl Rule for NoUselessTypeConstraint {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let ty = node.ty().ok()?;
-
-        if ty.as_ts_any_type().is_some() || ty.as_ts_unknown_type().is_some() {
-            Some(())
-        } else {
-            None
-        }
+        matches!(ty, AnyTsType::TsAnyType(_) | AnyTsType::TsUnknownType(_)).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -115,11 +110,15 @@ impl Rule for NoUselessTypeConstraint {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
+        let prev = node.syntax().prev_sibling()?;
+        mutation.replace_element_discard_trivia(
+            prev.clone().into(),
+            prev.trim_trailing_trivia()?.into(),
+        );
         mutation.remove_node(node.clone());
-
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+            applicability: Applicability::Always,
             message: markup! { "Remove the constraint." }.to_owned(),
             mutation,
         })
