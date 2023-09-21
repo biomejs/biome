@@ -22,6 +22,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#319](https://github.com/biomejs/biome/issues/319). The command `biome lint` now shows the correct options. Contributed by @ematipico
 
+- Fix [#312](https://github.com/biomejs/biome/issues/312). Running `biome --version` now exits with status code `0` instead of `1`. Contributed by @nhedger
+
 ### Configuration
 ### Editors
 ### Formatter
@@ -35,6 +37,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### New features
 
 - Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
+
+- Add [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) rule.
+  The rule reports `else` clauses that can be omitted because their `if` branches break.
+  Contributed by @Conaclos
+
+#### Enhancements
+
+- The following rules have now safe code fixes:
+
+  - [noUselessLabel](https://biomejs.dev/linter/rules/no-useless-label)
 
 #### Bug fixes
 

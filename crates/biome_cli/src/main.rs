@@ -49,7 +49,7 @@ fn main() -> ExitCode {
         Err(failure) => {
             return if let ParseFailure::Stdout(help, _) = &failure {
                 console.log(markup! {{help.to_string()}});
-                ExitCode::FAILURE
+                ExitCode::SUCCESS
             } else {
                 let diagnostic = CliDiagnostic::parse_error_bpaf(failure);
                 console.error(markup! { {PrintDiagnostic::simple(&diagnostic)}});

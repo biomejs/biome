@@ -292,7 +292,7 @@ pub trait AstNode: Clone {
     }
 
     /// Return a new version of this node without leading and trailing newlines and whitespaces.
-    fn trim(self) -> Option<Self> {
+    fn trim_trivia(self) -> Option<Self> {
         Self::cast(
             self.into_syntax()
                 .trim_leading_trivia()?
@@ -301,12 +301,12 @@ pub trait AstNode: Clone {
     }
 
     /// Return a new version of this node without leading newlines and whitespaces.
-    fn trim_start(self) -> Option<Self> {
+    fn trim_leading_trivia(self) -> Option<Self> {
         Self::cast(self.into_syntax().trim_leading_trivia()?)
     }
 
     /// Return a new version of this node without trailing newlines and whitespaces.
-    fn trim_end(self) -> Option<Self> {
+    fn trim_trailing_trivia(self) -> Option<Self> {
         Self::cast(self.into_syntax().trim_trailing_trivia()?)
     }
 }

@@ -51,14 +51,13 @@ export default function PlaygroundLoader({
 	const codeMirrorExtensions = useMemo(() => {
 		if (isJsonFilename(playgroundState.currentFile)) {
 			return [json()];
-		} else {
-			return [
-				javascript({
-					jsx: isJsxFilename(playgroundState.currentFile),
-					typescript: isTypeScriptFilename(playgroundState.currentFile),
-				}),
-			];
 		}
+		return [
+			javascript({
+				jsx: isJsxFilename(playgroundState.currentFile),
+				typescript: isTypeScriptFilename(playgroundState.currentFile),
+			}),
+		];
 	}, [playgroundState.currentFile]);
 
 	const biomeAstSyntacticDataRef = useRef<BiomeAstSyntacticData | null>(null);

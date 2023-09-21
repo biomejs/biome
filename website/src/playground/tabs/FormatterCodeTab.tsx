@@ -18,7 +18,8 @@ function removeWhitespace(str: string): string {
 function calculateHint(a: string, b: string): string | JSX.Element {
 	if (a === b) {
 		return <strong>Exact match</strong>;
-	} else if (removeWhitespace(a) === removeWhitespace(b)) {
+	}
+	if (removeWhitespace(a) === removeWhitespace(b)) {
 		return <strong>Only whitespace differences</strong>;
 	}
 
