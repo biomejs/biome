@@ -78,7 +78,7 @@ jobs:
 
       - name: Check intellij version status
         if: steps.intellij_version.outputs.changed == 'true'
-        run: 'echo "Intellij Version change found! New version: ${{ steps.intellij_version.outputs.version }}'
+        run: 'echo "Intellij Version change found! New version: ${{ steps.intellij_version.outputs.version }}"'
 
       - name: Biome Check version status
         if: steps.biome_version.outputs.changed == 'true'
