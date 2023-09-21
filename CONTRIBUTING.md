@@ -418,6 +418,8 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Core Contributors team
 
+- [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
+
 
 ### Maintainers team
 
