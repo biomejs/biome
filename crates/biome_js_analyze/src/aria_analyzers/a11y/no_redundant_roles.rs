@@ -94,7 +94,7 @@ impl Rule for NoRedundantRoles {
             rule_category!(),
             state.redundant_attribute_value.range(),
             markup! {
-                "Using the role attribute '"{role_attribute}"' on the '"{element}"' element is redundant."
+                "Using the role attribute '"{role_attribute}"' on the '"{element}"' element is redundant, since the role is already described by the semantic HTML element."
             },
         ))
     }
