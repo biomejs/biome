@@ -227,16 +227,15 @@ async function getServerPath(
 async function getWorkspaceRelativePath(path: string) {
 	if (isAbsolute(path)) {
 		return path;
-	} else {
-		for (let i = 0; i < workspace.workspaceFolders.length; i++) {
-			const workspaceFolder = workspace.workspaceFolders[i];
-			const possiblePath = Uri.joinPath(workspaceFolder.uri, path);
-			if (await fileExists(possiblePath)) {
-				return possiblePath.fsPath;
-			}
-		}
-		return undefined;
 	}
+	for (let i = 0; i < workspace.workspaceFolders.length; i++) {
+		const workspaceFolder = workspace.workspaceFolders[i];
+		const possiblePath = Uri.joinPath(workspaceFolder.uri, path);
+		if (await fileExists(possiblePath)) {
+			return possiblePath.fsPath;
+		}
+	}
+	return undefined;
 }
 
 // Tries to resolve a path to `@biomejs/cli-*` binary package from the root of the workspace
@@ -298,9 +297,8 @@ async function fileExists(path: Uri) {
 	} catch (err) {
 		if (err.code === "ENOENT" || err.code === "FileNotFound") {
 			return false;
-		} else {
-			throw err;
 		}
+		throw err;
 	}
 }
 
@@ -390,10 +388,9 @@ async function getSocket(
 		}
 
 		throw new Error(message);
-	} else {
-		outputChannel.appendLine(`Connecting to "${pipeName}" ...`);
-		return pipeName;
 	}
+	outputChannel.appendLine(`Connecting to "${pipeName}" ...`);
+	return pipeName;
 }
 
 function wrapConnectionError(err: Error, path: string): Error {

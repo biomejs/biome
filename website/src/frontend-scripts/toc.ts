@@ -205,10 +205,9 @@ class Manager {
 		if (this.lastActiveHeading !== undefined) {
 			if (this.isVisibleHeading(this.lastActiveHeading)) {
 				return;
-			} else {
-				this.toggleActiveHeading(this.lastActiveHeading, false);
-				this.lastActiveHeading = undefined;
 			}
+			this.toggleActiveHeading(this.lastActiveHeading, false);
+			this.lastActiveHeading = undefined;
 		}
 
 		this.ensureCalculatedHeadings();
