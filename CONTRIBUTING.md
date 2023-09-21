@@ -420,3 +420,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Maintainers team
 
+- [Nicolas Hedger @nhedger](https://github.com/nhedger)
