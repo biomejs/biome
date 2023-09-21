@@ -325,7 +325,7 @@ impl SemanticEventExtractor {
                 );
             }
             _ => {
-                if let Some(node) = node.clone().cast::<AnyTsType>() {
+                if let Some(node) = AnyTsType::cast_ref(node) {
                     self.enter_any_type(&node);
                 }
             }
@@ -595,7 +595,7 @@ impl SemanticEventExtractor {
                 self.pop_scope(node.text_range());
             }
             _ => {
-                if let Some(node) = node.clone().cast::<AnyTsType>() {
+                if let Some(node) = AnyTsType::cast_ref(node) {
                     self.leave_any_type(&node);
                 }
             }
