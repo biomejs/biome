@@ -135,7 +135,7 @@ pub fn contains_fst_setup() -> fst::Set<Vec<u8>> {
     let w = vec![];
     let mut set = fst::SetBuilder::new(w).unwrap();
 
-    let mut keywords = keywords().to_vec();
+    let mut keywords = keywords().clone();
     keywords.sort();
 
     for k in keywords {

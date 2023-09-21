@@ -195,10 +195,10 @@ impl Format<IrFormatContext> for &[FormatElement] {
             first_element = false;
 
             match element {
-                element @ FormatElement::Space
-                | element @ FormatElement::StaticText { .. }
-                | element @ FormatElement::DynamicText { .. }
-                | element @ FormatElement::LocatedTokenText { .. } => {
+                element @ (FormatElement::Space
+                | FormatElement::StaticText { .. }
+                | FormatElement::DynamicText { .. }
+                | FormatElement::LocatedTokenText { .. }) => {
                     if !in_text {
                         write!(f, [text("\"")])?;
                     }

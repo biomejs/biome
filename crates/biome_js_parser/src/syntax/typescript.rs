@@ -181,15 +181,14 @@ pub(crate) fn expect_ts_index_signature_member(
     while is_nth_at_modifier(p, 0, false) {
         if p.eat(T![readonly]) {
             continue;
-        } else {
-            p.error(ts_member_cannot_be(
-                p,
-                p.cur_range(),
-                "index signature",
-                p.cur_text(),
-            ));
-            p.bump_any();
         }
+        p.error(ts_member_cannot_be(
+            p,
+            p.cur_range(),
+            "index signature",
+            p.cur_text(),
+        ));
+        p.bump_any();
     }
 
     p.bump(T!['[']);

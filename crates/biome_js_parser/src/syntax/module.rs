@@ -677,10 +677,7 @@ fn parse_import_assertion_entry(
     if let Some(key) = key {
         if let Some(first_use) = seen_assertion_keys.get(&key) {
             p.error(duplicate_assertion_keys_error(
-                p,
-                &key,
-                first_use.to_owned(),
-                key_range,
+                p, &key, *first_use, key_range,
             ));
             valid = false;
         } else {
@@ -1310,7 +1307,7 @@ fn parse_export_default_clause(p: &mut JsParser) -> ParsedSyntax {
                     )
                     .detail(clause.range(p), "multiple default exports are erroneous")
                     .detail(
-                        existing_default_item.range.to_owned(),
+                        existing_default_item.range.clone(),
                         "the module's default export is first defined here",
                     );
 

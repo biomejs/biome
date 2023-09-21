@@ -142,9 +142,10 @@ fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
         | AnyJsClassMember::JsSetterClassMember(_) => false,
 
         // Computed members may be misinterpreted as array accessors/array types
-        member @ AnyJsClassMember::JsPropertyClassMember(_)
-        | member @ AnyJsClassMember::TsPropertySignatureClassMember(_)
-        | member @ AnyJsClassMember::TsInitializedPropertySignatureClassMember(_) => match member.name()? {
+        member @
+(AnyJsClassMember::JsPropertyClassMember(_) |
+AnyJsClassMember::TsPropertySignatureClassMember(_) |
+AnyJsClassMember::TsInitializedPropertySignatureClassMember(_)) => match member.name()? {
             Some(name) => name.is_computed(),
             None => false,
         },

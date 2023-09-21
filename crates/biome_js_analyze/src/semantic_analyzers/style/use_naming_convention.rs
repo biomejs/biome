@@ -826,7 +826,7 @@ impl Named {
             var.syntax()
                 .ancestors()
                 .find_map(AnyJsControlFlowRoot::cast),
-            Some(AnyJsControlFlowRoot::JsModule(_)) | Some(AnyJsControlFlowRoot::JsScript(_))
+            Some(AnyJsControlFlowRoot::JsModule(_) | AnyJsControlFlowRoot::JsScript(_))
         );
         let var_declaration = var
             .syntax()

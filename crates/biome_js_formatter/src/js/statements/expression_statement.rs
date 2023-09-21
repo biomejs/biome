@@ -136,10 +136,8 @@ fn needs_semicolon(node: &JsExpressionStatement) -> bool {
                 assignment,
                 AnyJsAssignmentPattern::JsArrayAssignmentPattern(_)
                     | AnyJsAssignmentPattern::AnyJsAssignment(
-                        AnyJsAssignment::JsParenthesizedAssignment(_),
-                    )
-                    | AnyJsAssignmentPattern::AnyJsAssignment(
-                        AnyJsAssignment::TsTypeAssertionAssignment(_),
+                        AnyJsAssignment::JsParenthesizedAssignment(_)
+                            | AnyJsAssignment::TsTypeAssertionAssignment(_)
                     )
             ),
         };

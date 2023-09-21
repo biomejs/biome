@@ -1118,7 +1118,7 @@ impl<'src> Lexer<'src> {
     #[inline]
     fn read_zero(&mut self) {
         match self.peek_byte() {
-            Some(b'x') | Some(b'X') => {
+            Some(b'x' | b'X') => {
                 if self.special_number_start(|c| c.is_ascii_hexdigit()) {
                     self.read_hexnumber();
                     self.maybe_bigint();
@@ -1126,7 +1126,7 @@ impl<'src> Lexer<'src> {
                     self.next_byte();
                 }
             }
-            Some(b'b') | Some(b'B') => {
+            Some(b'b' | b'B') => {
                 if self.special_number_start(|c| c == '0' || c == '1') {
                     self.read_bindigits();
                     self.maybe_bigint();
@@ -1134,7 +1134,7 @@ impl<'src> Lexer<'src> {
                     self.next_byte();
                 }
             }
-            Some(b'o') | Some(b'O') => {
+            Some(b'o' | b'O') => {
                 if self.special_number_start(|c| ('0'..='7').contains(&c)) {
                     self.read_octaldigits();
                     self.maybe_bigint();
@@ -1149,10 +1149,10 @@ impl<'src> Lexer<'src> {
                 self.advance(1);
                 self.read_float()
             }
-            Some(b'e') | Some(b'E') => {
+            Some(b'e' | b'E') => {
                 // At least one digit is required
                 match self.byte_at(2) {
-                    Some(b'-') | Some(b'+') => {
+                    Some(b'-' | b'+') => {
                         if let Some(b'0'..=b'9') = self.byte_at(3) {
                             self.next_byte();
                             self.read_exponent();
@@ -1195,7 +1195,7 @@ impl<'src> Lexer<'src> {
 
         let peeked = self.peek_byte();
 
-        if peeked.is_none() || !char::from(peeked.unwrap()).is_digit(radix as u32) {
+        if peeked.is_none() || !char::from(peeked.unwrap()).is_digit(u32::from(radix)) {
             self.diagnostics.push(err_diag);
             return;
         }
@@ -1248,10 +1248,10 @@ impl<'src> Lexer<'src> {
                     return self.read_float();
                 }
                 // TODO: merge this, and read_float's implementation into one so we dont duplicate exponent code
-                Some(b'e') | Some(b'E') => {
+                Some(b'e' | b'E') => {
                     // At least one digit is required
                     match self.peek_byte() {
-                        Some(b'-') | Some(b'+') => {
+                        Some(b'-' | b'+') => {
                             if let Some(b'0'..=b'9') = self.byte_at(2) {
                                 self.next_byte();
                                 self.read_exponent();
@@ -1294,10 +1294,10 @@ impl<'src> Lexer<'src> {
                 // LLVM has a hard time optimizing inclusive patterns, perhaps we should check if it makes llvm sad,
                 // and optimize this into a lookup table
                 Some(b'0'..=b'9') => {}
-                Some(b'e') | Some(b'E') => {
+                Some(b'e' | b'E') => {
                     // At least one digit is required
                     match self.peek_byte() {
-                        Some(b'-') | Some(b'+') => {
+                        Some(b'-' | b'+') => {
                             if let Some(b'0'..=b'9') = self.byte_at(2) {
                                 self.next_byte();
                                 self.read_exponent();
@@ -1324,7 +1324,7 @@ impl<'src> Lexer<'src> {
 
     #[inline]
     fn read_exponent(&mut self) {
-        if let Some(b'-') | Some(b'+') = self.peek_byte() {
+        if let Some(b'-' | b'+') = self.peek_byte() {
             self.next_byte();
         }
 
@@ -1344,7 +1344,7 @@ impl<'src> Lexer<'src> {
         loop {
             match self.next_byte() {
                 Some(b'_') => self.handle_numeric_separator(2),
-                Some(b'0') | Some(b'1') => {}
+                Some(b'0' | b'1') => {}
                 _ => {
                     return;
                 }

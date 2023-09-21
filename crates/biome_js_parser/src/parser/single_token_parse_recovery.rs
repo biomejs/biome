@@ -60,7 +60,7 @@ impl SingleTokenParseRecovery {
 
     /// It returns the diagnostic
     fn get_error(&self) -> Option<ParseDiagnostic> {
-        self.error.to_owned()
+        self.error.clone()
     }
 
     /// It returns the bogus node kind that will be used to complete the parsing

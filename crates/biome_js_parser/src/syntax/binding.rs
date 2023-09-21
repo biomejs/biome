@@ -119,7 +119,7 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                         ),
                     )
                     .detail(
-                        existing.to_owned(),
+                        *existing,
                         format!("`{}` is first declared here", identifier_name),
                     );
                 p.error(err);

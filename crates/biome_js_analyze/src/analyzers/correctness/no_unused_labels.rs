@@ -165,8 +165,8 @@ impl Rule for NoUnusedLabels {
         let body = unused_label.body().ok()?;
         let mut mutation = ctx.root().begin();
         mutation.replace_element(
-            NodeOrToken::Node(unused_label.syntax().to_owned()),
-            NodeOrToken::Node(body.syntax().to_owned()),
+            NodeOrToken::Node(unused_label.syntax().clone()),
+            NodeOrToken::Node(body.syntax().clone()),
         );
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,

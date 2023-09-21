@@ -661,20 +661,14 @@ impl SemanticEventExtractor {
                                             shadowed_binding_info.declaration_kind,
                                         ) {
                                             (
-                                                JsSyntaxKind::JS_VARIABLE_DECLARATOR,
+                                                JsSyntaxKind::JS_VARIABLE_DECLARATOR
+                                                | JsSyntaxKind::JS_CLASS_DECLARATION,
                                                 JsSyntaxKind::TS_INTERFACE_DECLARATION,
                                             )
                                             | (
                                                 JsSyntaxKind::TS_INTERFACE_DECLARATION,
-                                                JsSyntaxKind::JS_VARIABLE_DECLARATOR,
-                                            )
-                                            | (
-                                                JsSyntaxKind::JS_CLASS_DECLARATION,
-                                                JsSyntaxKind::TS_INTERFACE_DECLARATION,
-                                            )
-                                            | (
-                                                JsSyntaxKind::TS_INTERFACE_DECLARATION,
-                                                JsSyntaxKind::JS_CLASS_DECLARATION,
+                                                JsSyntaxKind::JS_VARIABLE_DECLARATOR
+                                                | JsSyntaxKind::JS_CLASS_DECLARATION,
                                             ) => Some(shadowed_binding_info),
                                             _ => None,
                                         }
@@ -915,7 +909,7 @@ impl SemanticEventExtractor {
                 .and_then(|declaration| declaration.parent())
                 .and_then(|declaration_clause| declaration_clause.parent())
                 .map(|x| x.kind()),
-            Some(JS_EXPORT) | Some(TS_EXPORT_DECLARE_CLAUSE)
+            Some(JS_EXPORT | TS_EXPORT_DECLARE_CLAUSE)
         );
 
         if is_exported {

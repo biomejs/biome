@@ -199,7 +199,7 @@ impl DiffReport {
 
             let single_file_metric_data = SingleFileMetricData {
                 diff,
-                filename: file_name.to_string(),
+                filename: (*file_name).to_string(),
                 single_file_compatibility: ratio,
             };
 
@@ -207,7 +207,7 @@ impl DiffReport {
         }
 
         report_metric_data.file_based_average_prettier_similarity =
-            file_ratio_sum / file_count as f64;
+            file_ratio_sum / f64::from(file_count);
         report_metric_data.line_based_average_prettier_similarity =
             total_matched_lines as f64 / total_lines as f64;
 

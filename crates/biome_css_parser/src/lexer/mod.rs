@@ -538,9 +538,9 @@ impl<'src> Lexer<'src> {
         // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or
         // U+0065 LATIN SMALL LETTER E (e), optionally followed by U+002D HYPHEN-MINUS
         // (-) or U+002B PLUS SIGN (+), followed by a digit, then:
-        if matches!(self.current_byte(), Some(b'e') | Some(b'E')) {
+        if matches!(self.current_byte(), Some(b'e' | b'E')) {
             match (self.peek_byte(), self.byte_at(2)) {
-                (Some(b'-') | Some(b'+'), Some(byte)) if byte.is_ascii_digit() => {
+                (Some(b'-' | b'+'), Some(byte)) if byte.is_ascii_digit() => {
                     // Consume them.
                     self.advance(3);
 
@@ -721,7 +721,7 @@ impl<'src> Lexer<'src> {
     /// Check if the lexer starts a number.
     fn is_number_start(&self) -> bool {
         match self.current_byte() {
-            Some(b'+') | Some(b'-') => match self.peek_byte() {
+            Some(b'+' | b'-') => match self.peek_byte() {
                 // If the second code point is a digit, return true.
                 Some(byte) if byte.is_ascii_digit() => true,
                 // Otherwise, if the second code point is a U+002E FULL STOP (.) and the

@@ -225,7 +225,7 @@ where
 {
     let mut builder = JsxSplitChildrenBuilder::new();
 
-    for child in children.into_iter() {
+    for child in children {
         match child {
             AnyJsxChild::JsxText(text) => {
                 // Split the text into words

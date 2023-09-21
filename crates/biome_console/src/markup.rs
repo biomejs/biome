@@ -98,7 +98,7 @@ impl<'fmt> MarkupElement<'fmt> {
             MarkupElement::Inverse => MarkupElement::Inverse,
             MarkupElement::Hyperlink { href } => MarkupElement::Hyperlink {
                 href: Cow::Owned(match href {
-                    Cow::Borrowed(href) => href.to_string(),
+                    Cow::Borrowed(href) => (*href).to_string(),
                     Cow::Owned(href) => href.clone(),
                 }),
             },

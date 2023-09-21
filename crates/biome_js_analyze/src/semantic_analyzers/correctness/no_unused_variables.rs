@@ -171,13 +171,13 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
                 suggestion_for_binding(binding)
             }
         }
-        node @ AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-        | node @ AnyJsBindingDeclaration::JsClassDeclaration(_)
-        | node @ AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-        | node @ AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-        | node @ AnyJsBindingDeclaration::TsEnumDeclaration(_)
-        | node @ AnyJsBindingDeclaration::TsModuleDeclaration(_)
-        | node @ AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
+        node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassDeclaration(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+        | AnyJsBindingDeclaration::TsModuleDeclaration(_)
+        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)) => {
             if is_in_ambient_context(node.syntax()) {
                 None
             } else {

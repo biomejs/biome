@@ -70,7 +70,7 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         let lint_end_index = categories.find(lint_end).unwrap();
         let lint_rule_text = &categories[lint_start_index..lint_end_index];
         let mut lint_rules: Vec<_> = lint_rule_text.lines().collect();
-        lint_rules.sort();
+        lint_rules.sort_unstable();
         let new_lint_rule_text = lint_rules.join("\n");
         categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
 

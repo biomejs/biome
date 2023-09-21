@@ -379,7 +379,7 @@ impl<L: Language, N: AstNode<Language = L>> AstNodeListIterator<L, N> {
     fn slot_to_node(slot: &SyntaxSlot<L>) -> N {
         match slot {
             SyntaxSlot::Empty => panic!("Node isn't permitted to contain empty slots"),
-            SyntaxSlot::Node(node) => N::unwrap_cast(node.to_owned()),
+            SyntaxSlot::Node(node) => N::unwrap_cast(node.clone()),
             SyntaxSlot::Token(token) => panic!(
                 "Expected node of type `{:?}` but found token `{:?}` instead.",
                 std::any::type_name::<N>(),
@@ -807,7 +807,7 @@ mod tests {
 
         builder.start_node(RawLanguageKind::SEPARATED_EXPRESSION_LIST);
 
-        for (node, separator) in elements.into_iter() {
+        for (node, separator) in elements {
             if let Some(node) = node {
                 builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
                 builder.token(RawLanguageKind::NUMBER_TOKEN, node.to_string().as_str());
