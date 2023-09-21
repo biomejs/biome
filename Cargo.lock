@@ -204,7 +204,6 @@ dependencies = [
 name = "biome_console"
 version = "0.0.1"
 dependencies = [
- "atty",
  "biome_markup",
  "biome_text_size",
  "schemars",
@@ -3606,7 +3605,6 @@ name = "xtask_coverage"
 version = "0.0.0"
 dependencies = [
  "ascii_table",
- "atty",
  "backtrace",
  "biome_console",
  "biome_diagnostics",

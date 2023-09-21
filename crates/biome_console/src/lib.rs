@@ -1,6 +1,5 @@
-use atty::Stream;
 use std::io;
-use std::io::{Read, Stdin, Write};
+use std::io::{stderr, stdin, stdout, IsTerminal, Read, Stdin, Write};
 use std::panic::RefUnwindSafe;
 use termcolor::{ColorChoice, StandardStream};
 use write::Termcolor;
@@ -97,13 +96,13 @@ impl EnvConsole {
             ColorMode::Enabled => (ColorChoice::Always, ColorChoice::Always),
             ColorMode::Disabled => (ColorChoice::Never, ColorChoice::Never),
             ColorMode::Auto => {
-                let stdout = if atty::is(atty::Stream::Stdout) {
+                let stdout = if stdout().is_terminal() {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
                 };
 
-                let stderr = if atty::is(atty::Stream::Stderr) {
+                let stderr = if stderr().is_terminal() {
                     ColorChoice::Auto
                 } else {
                     ColorChoice::Never
@@ -169,7 +168,7 @@ impl Console for EnvConsole {
         //
         // Doing this check allows us to pipe stdin to rome, without expecting
         // user content when we call `read_to_string`
-        if atty::is(Stream::Stdin) {
+        if stdin().is_terminal() {
             return None;
         }
         let mut handle = self.r#in.lock();

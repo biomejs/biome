@@ -1,7 +1,7 @@
 use crate::*;
+use std::io::{stderr, stdout, IsTerminal};
 
 pub use ansi_term::{self, ANSIGenericString, Color, Style};
-use atty::is;
 
 /// A structure for syntax highlighting pieces of JavaScript source code
 /// using ANSI.
@@ -44,7 +44,7 @@ impl<'s> Highlighter<'s> {
     }
 
     fn check_terminal(&self) -> bool {
-        is(atty::Stream::Stderr) && is(atty::Stream::Stdout)
+        stderr().is_terminal() && stdout().is_terminal()
     }
 
     /// Reset the highlighter to the start of the source code

@@ -10,7 +10,6 @@ version              = "0.0.1"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-atty            = { workspace = true }
 biome_markup    = { workspace = true }
 biome_text_size = { workspace = true }
 schemars        = { workspace = true, optional = true }
