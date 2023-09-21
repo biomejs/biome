@@ -1012,6 +1012,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidNewBuiltin": {
+					"description": "Disallow new operators with global non-constructor functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisleadingInstantiator": {
 					"description": "Enforce proper usage of new and constructor.",
 					"anyOf": [

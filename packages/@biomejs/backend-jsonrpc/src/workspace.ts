@@ -678,6 +678,10 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Disallow new operators with global non-constructor functions.
+	 */
+	noInvalidNewBuiltin?: RuleConfiguration;
+	/**
 	 * Enforce proper usage of new and constructor.
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
@@ -1278,6 +1282,7 @@ export type Category =
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
+	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"

@@ -2030,6 +2030,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noFallthroughSwitchClause",
                 "noGlobalIsFinite",
                 "noGlobalIsNan",
+                "noInvalidNewBuiltin",
                 "noMisleadingInstantiator",
                 "noUselessElse",
                 "noVoid",
@@ -2212,6 +2213,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_global_is_nan = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noInvalidNewBuiltin" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_invalid_new_builtin = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noInvalidNewBuiltin",
+                        diagnostics,
+                    )?;
+                    self.no_invalid_new_builtin = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
