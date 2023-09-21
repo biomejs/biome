@@ -1,6 +1,7 @@
+use biome_rowan::AstNode;
 use std::iter;
 
-use crate::AnyTsType;
+use crate::{AnyTsType, TsConditionalType, TsInferType, TsTypeParameterName};
 
 impl AnyTsType {
     /// Try to extract non `TsParenthesizedType` from `AnyTsType`
@@ -76,5 +77,59 @@ impl AnyTsType {
                 | AnyTsType::TsNumberType(_)
                 | AnyTsType::TsStringType(_)
         )
+    }
+
+    /// Checks if `self` stands as the `true_type` of a conditional type in Typescript.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::T;
+    /// use biome_js_syntax::AnyTsType;
+    ///
+    /// let check_type = AnyTsType::TsNumberType(make::ts_number_type(make::token(T![number])));
+    /// let extends_type = AnyTsType::TsNumberType(make::ts_number_type(make::token(T![number])));
+    /// let true_type = AnyTsType::TsNumberType(make::ts_number_type(make::token(T![number])));
+    /// let false_type = AnyTsType::TsNumberType(make::ts_number_type(make::token(T![number])));
+    ///
+    /// let conditional = make::ts_conditional_type(
+    ///     check_type,
+    ///     make::token(T![extends]),
+    ///     extends_type,
+    ///     make::token(T![?]),
+    ///     true_type,
+    ///     make::token(T![:]),
+    ///     false_type,
+    /// );
+    ///
+    /// assert!(!conditional.check_type().unwrap().in_conditional_true_type());
+    /// assert!(!conditional.extends_type().unwrap().in_conditional_true_type());
+    /// assert!(conditional.true_type().unwrap().in_conditional_true_type());
+    /// assert!(!conditional.false_type().unwrap().in_conditional_true_type());
+    /// ```
+    pub fn in_conditional_true_type(&self) -> bool {
+        self.parent::<TsConditionalType>()
+            .and_then(|parent| parent.true_type().ok())
+            .map_or(false, |ref true_type| true_type == self)
+    }
+}
+
+impl TsTypeParameterName {
+    /// Checks if `self` is the type being inferred in a TypeScript `TsInferType`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::T;
+    ///
+    /// let infer = make::ts_infer_type(make::token(T![infer]), make::ts_type_parameter_name(make::ident("T"))).build();
+    /// assert!(infer.name().unwrap().in_infer_type());
+    /// ```
+    pub fn in_infer_type(&self) -> bool {
+        self.parent::<TsInferType>()
+            .and_then(|parent| parent.name().ok())
+            .map_or(false, |ref name| name == self)
     }
 }
