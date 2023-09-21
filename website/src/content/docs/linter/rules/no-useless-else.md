@@ -2,6 +2,7 @@
 title: noUselessElse (since vnext)
 ---
 
+**Diagnostic Category: `lint/nursery/noUselessElse`**
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
