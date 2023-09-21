@@ -22,7 +22,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 
 <pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:15 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'article' on the 'article' element is redundant.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'article' on the 'article' element is redundant, because it is implied by the semantic 'article' element.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;article role='article'&gt;&lt;/article&gt;
    <strong>   │ </strong>              <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -40,7 +40,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 
 <pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:14 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'button' on the 'button' element is redundant.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'button' on the 'button' element is redundant, because it is implied by the semantic 'button' element.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;button role='button'&gt;&lt;/button&gt;
    <strong>   │ </strong>             <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -58,7 +58,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.
 
 <pre class="language-text"><code class="language-text">a11y/noRedundantRoles.js:1:10 <a href="https://biomejs.dev/linter/rules/no-redundant-roles">lint/a11y/noRedundantRoles</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'heading' on the 'h1' element is redundant.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using the role attribute 'heading' on the 'h1' element is redundant, because it is implied by the semantic 'h1' element.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;h1 role='heading' aria-level='1'&gt;title&lt;/h1&gt;
    <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
