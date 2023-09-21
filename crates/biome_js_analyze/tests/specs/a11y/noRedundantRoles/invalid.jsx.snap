@@ -45,7 +45,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'article' on the 'article' element is redundant.
+  ! Using the role attribute 'article' on the 'article' element is redundant, since the role is already described by the semantic HTML element.
   
     1 │ <>
   > 2 │ 	<article role="article"></article>
@@ -63,7 +63,7 @@ invalid.jsx:2:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:3:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'button' on the 'button' element is redundant.
+  ! Using the role attribute 'button' on the 'button' element is redundant, since the role is already described by the semantic HTML element.
   
     1 │ <>
     2 │ 	<article role="article"></article>
@@ -82,7 +82,7 @@ invalid.jsx:3:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'heading' on the 'h1' element is redundant.
+  ! Using the role attribute 'heading' on the 'h1' element is redundant, since the role is already described by the semantic HTML element.
   
     2 │ 	<article role="article"></article>
     3 │ 	<button role="button"></button>
@@ -101,7 +101,7 @@ invalid.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:7:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'heading' on the 'h1' element is redundant.
+  ! Using the role attribute 'heading' on the 'h1' element is redundant, since the role is already described by the semantic HTML element.
   
     5 │ 		title
     6 │ 	</h1>
@@ -120,7 +120,7 @@ invalid.jsx:7:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:8:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'heading' on the 'h2' element is redundant.
+  ! Using the role attribute 'heading' on the 'h2' element is redundant, since the role is already described by the semantic HTML element.
   
      6 │ 	</h1>
      7 │ 	<h1 role="heading">title</h1>
@@ -139,7 +139,7 @@ invalid.jsx:8:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:9:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'dialog' on the 'dialog' element is redundant.
+  ! Using the role attribute 'dialog' on the 'dialog' element is redundant, since the role is already described by the semantic HTML element.
   
      7 │ 	<h1 role="heading">title</h1>
      8 │ 	<h2 role={`heading`}></h2>
@@ -158,7 +158,7 @@ invalid.jsx:9:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:10:30 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'checkbox' on the 'input' element is redundant.
+  ! Using the role attribute 'checkbox' on the 'input' element is redundant, since the role is already described by the semantic HTML element.
   
      8 │ 	<h2 role={`heading`}></h2>
      9 │ 	<dialog role="dialog"></dialog>
@@ -177,7 +177,7 @@ invalid.jsx:10:30 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:11:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'figure' on the 'figure' element is redundant.
+  ! Using the role attribute 'figure' on the 'figure' element is redundant, since the role is already described by the semantic HTML element.
   
      9 │ 	<dialog role="dialog"></dialog>
     10 │ 	<input type="checkbox" role="checkbox" />
@@ -196,7 +196,7 @@ invalid.jsx:11:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:12:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'form' on the 'form' element is redundant.
+  ! Using the role attribute 'form' on the 'form' element is redundant, since the role is already described by the semantic HTML element.
   
     10 │ 	<input type="checkbox" role="checkbox" />
     11 │ 	<figure role="figure"></figure>
@@ -215,7 +215,7 @@ invalid.jsx:12:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:14:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'group' on the 'fieldset' element is redundant.
+  ! Using the role attribute 'group' on the 'fieldset' element is redundant, since the role is already described by the semantic HTML element.
   
     12 │ 	<form role="form"></form>
     13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
@@ -234,7 +234,7 @@ invalid.jsx:14:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:15:32 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'img' on the 'img' element is redundant.
+  ! Using the role attribute 'img' on the 'img' element is redundant, since the role is already described by the semantic HTML element.
   
     13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
     14 │ 	<fieldset role="group"></fieldset>
@@ -253,7 +253,7 @@ invalid.jsx:15:32 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:16:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'presentation' on the 'img' element is redundant.
+  ! Using the role attribute 'presentation' on the 'img' element is redundant, since the role is already described by the semantic HTML element.
   
     14 │ 	<fieldset role="group"></fieldset>
     15 │ 	<img src="foo" alt="bar" role="img" />
@@ -272,7 +272,7 @@ invalid.jsx:16:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:17:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'link' on the 'a' element is redundant.
+  ! Using the role attribute 'link' on the 'a' element is redundant, since the role is already described by the semantic HTML element.
   
     15 │ 	<img src="foo" alt="bar" role="img" />
     16 │ 	<img alt="" role="presentation"></img>
@@ -291,7 +291,7 @@ invalid.jsx:17:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:18:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'list' on the 'ol' element is redundant.
+  ! Using the role attribute 'list' on the 'ol' element is redundant, since the role is already described by the semantic HTML element.
   
     16 │ 	<img alt="" role="presentation"></img>
     17 │ 	<a href="#" role="link"></a>
@@ -310,7 +310,7 @@ invalid.jsx:18:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:19:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'list' on the 'ul' element is redundant.
+  ! Using the role attribute 'list' on the 'ul' element is redundant, since the role is already described by the semantic HTML element.
   
     17 │ 	<a href="#" role="link"></a>
     18 │ 	<ol role="list"></ol>
@@ -329,7 +329,7 @@ invalid.jsx:19:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:20:27 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'combobox' on the 'select' element is redundant.
+  ! Using the role attribute 'combobox' on the 'select' element is redundant, since the role is already described by the semantic HTML element.
   
     18 │ 	<ol role="list"></ol>
     19 │ 	<ul role="list"></ul>
@@ -348,7 +348,7 @@ invalid.jsx:20:27 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:21:45 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'listbox' on the 'select' element is redundant.
+  ! Using the role attribute 'listbox' on the 'select' element is redundant, since the role is already described by the semantic HTML element.
   
     19 │ 	<ul role="list"></ul>
     20 │ 	<select name="name" role="combobox"></select>
@@ -367,7 +367,7 @@ invalid.jsx:21:45 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:22:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'listitem' on the 'li' element is redundant.
+  ! Using the role attribute 'listitem' on the 'li' element is redundant, since the role is already described by the semantic HTML element.
   
     20 │ 	<select name="name" role="combobox"></select>
     21 │ 	<select name="name" multiple size="4" role="listbox"></select>
@@ -386,7 +386,7 @@ invalid.jsx:22:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:23:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'navigation' on the 'nav' element is redundant.
+  ! Using the role attribute 'navigation' on the 'nav' element is redundant, since the role is already described by the semantic HTML element.
   
     21 │ 	<select name="name" multiple size="4" role="listbox"></select>
     22 │ 	<li role="listitem"></li>
@@ -405,7 +405,7 @@ invalid.jsx:23:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:25:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'row' on the 'tr' element is redundant.
+  ! Using the role attribute 'row' on the 'tr' element is redundant, since the role is already described by the semantic HTML element.
   
     23 │ 	<nav role="navigation"></nav>
     24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
@@ -424,7 +424,7 @@ invalid.jsx:25:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:26:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'rowgroup' on the 'tbody' element is redundant.
+  ! Using the role attribute 'rowgroup' on the 'tbody' element is redundant, since the role is already described by the semantic HTML element.
   
     24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
     25 │ 	<tr role="row"></tr>
@@ -443,7 +443,7 @@ invalid.jsx:26:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:27:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'rowgroup' on the 'tfoot' element is redundant.
+  ! Using the role attribute 'rowgroup' on the 'tfoot' element is redundant, since the role is already described by the semantic HTML element.
   
     25 │ 	<tr role="row"></tr>
     26 │ 	<tbody role="rowgroup"></tbody>
@@ -462,7 +462,7 @@ invalid.jsx:27:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:28:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'rowgroup' on the 'thead' element is redundant.
+  ! Using the role attribute 'rowgroup' on the 'thead' element is redundant, since the role is already described by the semantic HTML element.
   
     26 │ 	<tbody role="rowgroup"></tbody>
     27 │ 	<tfoot role="rowgroup"></tfoot>
@@ -481,7 +481,7 @@ invalid.jsx:28:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:30:28 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'searchbox' on the 'input' element is redundant.
+  ! Using the role attribute 'searchbox' on the 'input' element is redundant, since the role is already described by the semantic HTML element.
   
     28 │ 	<thead role="rowgroup"></thead>
     29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
@@ -500,7 +500,7 @@ invalid.jsx:30:28 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:31:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'table' on the 'table' element is redundant.
+  ! Using the role attribute 'table' on the 'table' element is redundant, since the role is already described by the semantic HTML element.
   
     29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
     30 │ 	<input type="search" role="searchbox" />
@@ -519,7 +519,7 @@ invalid.jsx:31:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:32:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'textbox' on the 'textarea' element is redundant.
+  ! Using the role attribute 'textbox' on the 'textarea' element is redundant, since the role is already described by the semantic HTML element.
   
     30 │ 	<input type="search" role="searchbox" />
     31 │ 	<table role="table"></table>
@@ -538,7 +538,7 @@ invalid.jsx:32:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:33:26 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using the role attribute 'textbox' on the 'input' element is redundant.
+  ! Using the role attribute 'textbox' on the 'input' element is redundant, since the role is already described by the semantic HTML element.
   
     31 │ 	<table role="table"></table>
     32 │ 	<textarea role="textbox"></textarea>
