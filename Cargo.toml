@@ -67,7 +67,6 @@ biome_text_size              = { version = "0.0.1", path = "./crates/biome_text_
 tests_macros                 = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-atty              = "0.2.14"
 bitflags          = "2.3.1"
 bpaf              = { version = "0.9.5", features = ["derive"] }
 countme           = "3.0.1"

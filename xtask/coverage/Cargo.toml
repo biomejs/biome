@@ -6,7 +6,6 @@ version = "0.0.0"
 
 [dependencies]
 ascii_table        = "4.0.2"
-atty               = { workspace = true }
 backtrace          = "0.3.65"
 biome_console      = { path = "../../crates/biome_console" }
 biome_diagnostics  = { path = "../../crates/biome_diagnostics" }

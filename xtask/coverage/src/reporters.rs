@@ -1,14 +1,13 @@
 use crate::runner::{TestCaseFiles, TestRunOutcome, TestRunResult, TestSuite, TestSuiteInstance};
 use crate::{Summary, TestResults};
 use ascii_table::{Align, AsciiTable};
-use atty::Stream;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error};
 use colored::Colorize;
 use indicatif::ProgressBar;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::io::Write;
+use std::io::{stdout, IsTerminal, Write};
 use std::str::FromStr;
 use std::time::Instant;
 
@@ -186,7 +185,7 @@ impl Write for OutputTarget {
 
 impl SummaryReporter {
     pub fn new(detail_level: SummaryDetailLevel, output_target: OutputTarget) -> Self {
-        let buffer = if atty::is(Stream::Stdout) {
+        let buffer = if stdout().is_terminal() {
             Buffer::ansi()
         } else {
             // piping to a file
