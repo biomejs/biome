@@ -326,6 +326,13 @@ jobs:
           path: ./editors/intellij/build/distributions/Biome-*.zip
           if-no-files-found: error
 
+      - name: Upload gradle properties file
+        uses: actions/upload-artifact@v3
+        with:
+          name: gradle_properties
+          path: ./editors/intellij/gradle.properties
+          if-no-files-found: error
+
   publish-intellij:
     name: Publish Intellij LSP
     runs-on: ubuntu-latest
@@ -335,6 +342,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+
+      - name: Download gradle properties file
+        uses: actions/download-artifact@v3
+        with:
+          name: gradle_properties
+          path: ./editors/intellij
 
       - name: Download extension artifacts
         uses: actions/download-artifact@v3
