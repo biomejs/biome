@@ -84,11 +84,10 @@ export function createLocalStorage(name: string): {
 		},
 		getNumber: () => {
 			const elem = localStorage.getItem(key);
-			if (elem == null) {
-				return undefined;
-			} else {
+			if (elem != null) {
 				return Number(elem);
 			}
+			return undefined;
 		},
 		getBoolean: () => {
 			return localStorage.getItem(key) === "true";

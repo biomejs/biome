@@ -14,9 +14,8 @@ import remarkToc from "remark-toc";
 function resolveFile(relative: string, parent: string, root: string): string {
 	if (relative[0] === "/") {
 		return `${root}${relative}`;
-	} else {
-		return path.resolve(path.join(parent, relative));
 	}
+	return path.resolve(path.join(parent, relative));
 }
 
 const IMPORT_REGEX = /^import"(.*?)";?$/;

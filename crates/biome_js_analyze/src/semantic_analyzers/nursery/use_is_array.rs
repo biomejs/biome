@@ -85,7 +85,7 @@ impl Rule for UseIsArray {
             make::token(T![.]),
             make::js_name(make::ident("isArray")).into(),
         );
-        let arg = AnyJsCallArgument::AnyJsExpression(node.left().ok()?.trim()?);
+        let arg = AnyJsCallArgument::AnyJsExpression(node.left().ok()?.trim_trivia()?);
         let instanceof_trailing_trivia = node.instanceof_token().ok()?.trailing_trivia().pieces();
         let args = make::js_call_arguments(
             make::token(T!['(']).with_trailing_trivia_pieces(trim_leading_trivia_pieces(

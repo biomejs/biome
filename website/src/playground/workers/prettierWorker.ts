@@ -125,21 +125,20 @@ async function formatWithPrettier(
 				type: "ERROR",
 				stack: err.message,
 			};
-		} else {
-			return {
-				type: "ERROR",
-				stack: (err as Error).stack ?? "",
-			};
 		}
+		return {
+			type: "ERROR",
+			stack: (err as Error).stack ?? "",
+		};
 	}
 }
 
 function getPrettierParser(filename: string): string {
 	if (isTypeScriptFilename(filename)) {
 		return "babel-ts";
-	} else if (isJsonFilename(filename)) {
-		return "json5";
-	} else {
-		return "babel";
 	}
+	if (isJsonFilename(filename)) {
+		return "json5";
+	}
+	return "babel";
 }
