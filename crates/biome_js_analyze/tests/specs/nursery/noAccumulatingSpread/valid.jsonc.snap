@@ -42,4 +42,19 @@ foo.reduce((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
 foo.reduceRight((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
 ```
 
+# Input
+```js
+foo.reduce((acc,value,index,array,somethingExtra) => [...acc, value], [])
+```
+
+# Input
+```js
+foo.reduce((acc) => [...acc], [])
+```
+
+# Input
+```js
+foo.reduce((acc, bar) => [...acc, bar], [], 123)
+```
+
 
