@@ -440,7 +440,7 @@ export interface Complexity {
 	 */
 	noForEach?: RuleConfiguration;
 	/**
-	 * Disallow unclear usage of multiple space characters in regular expression literals
+	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
 	noMultipleSpacesInRegularExpressionLiterals?: RuleConfiguration;
 	/**

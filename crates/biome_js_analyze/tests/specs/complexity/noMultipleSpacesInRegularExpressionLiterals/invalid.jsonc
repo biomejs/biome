@@ -4,5 +4,24 @@
 	"/foo   /;",
 	"/foo  bar/;",
 	"/foo   bar    baz/;",
-	"/foo [ba]r  b(a|z)/;"
+	"/foo [ba]r  b(a|z)/;",
+	"/foo  +/;",
+	"/foo  +?/;",
+	"/foo  */;",
+	"/foo  *?/;",
+	"/foo   */;",
+	"/foo  ?/;",
+	"/foo  {2}/;",
+	"/foo  {2}a{1,2}/;",
+	"/foo  {2,}/;",
+	"/foo  {,2}/;",
+	"/foo  {2,3}/;",
+	"/foo  +  *   *   {2,}/;",
+	// Malformed regexes
+	"/foo  {}/;",
+	"/foo  {,}/;",
+	"/foo  {,2}/;",
+	"/foo  {1 2}/;",
+	"/foo  {1/;",
+	"/foo  {1,2/;"
 ]

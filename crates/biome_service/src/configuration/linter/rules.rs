@@ -975,7 +975,7 @@ pub struct Complexity {
     #[bpaf(long("no-for-each"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_for_each: Option<RuleConfiguration>,
-    #[doc = "Disallow unclear usage of multiple space characters in regular expression literals"]
+    #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
     #[bpaf(
         long("no-multiple-spaces-in-regular-expression-literals"),
         argument("on|off|warn"),
