@@ -279,6 +279,7 @@ jobs:
     needs: check
     env:
       version: ${{ needs.check.outputs.intellij_version }}
+      prerelease: ${{ needs.check.outputs.prerelease }}
 
     if: needs.check.outputs.intellij_version_changed == 'true' || needs.check.outputs.nightly == 'true'
     outputs:
