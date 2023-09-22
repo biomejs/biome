@@ -24,12 +24,15 @@ a = a;
 a.b = a.b;
 a.#b = a.#b;
 a[b] = a[b];
-a.b().c = a.b().c;
 a.b.c = a.b.c;
 ({a} = {a});
 a['b'].bar = a['b'].bar;
 a[foobar].b = a[foobar].b;
 a[10].b = a[10].b;
+a[4] = a[4];
+
+// issue #322
+document.querySelector("foo").value = document.querySelector("foo").value
 
 ```
 
@@ -710,7 +713,7 @@ invalid.js:19:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 19 │ a.#b = a.#b;
        │          ^^
     20 │ a[b] = a[b];
-    21 │ a.b().c = a.b().c;
+    21 │ a.b.c = a.b.c;
   
   i This is where is assigned.
   
@@ -719,7 +722,7 @@ invalid.js:19:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 19 │ a.#b = a.#b;
        │   ^^
     20 │ a[b] = a[b];
-    21 │ a.b().c = a.b().c;
+    21 │ a.b.c = a.b.c;
   
 
 ```
@@ -733,8 +736,8 @@ invalid.js:20:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     19 │ a.#b = a.#b;
   > 20 │ a[b] = a[b];
        │          ^
-    21 │ a.b().c = a.b().c;
-    22 │ a.b.c = a.b.c;
+    21 │ a.b.c = a.b.c;
+    22 │ ({a} = {a});
   
   i This is where is assigned.
   
@@ -742,150 +745,152 @@ invalid.js:20:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     19 │ a.#b = a.#b;
   > 20 │ a[b] = a[b];
        │   ^
-    21 │ a.b().c = a.b().c;
-    22 │ a.b.c = a.b.c;
+    21 │ a.b.c = a.b.c;
+    22 │ ({a} = {a});
   
 
 ```
 
 ```
-invalid.js:21:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:13 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! c is assigned to itself.
   
     19 │ a.#b = a.#b;
     20 │ a[b] = a[b];
-  > 21 │ a.b().c = a.b().c;
-       │                 ^
-    22 │ a.b.c = a.b.c;
-    23 │ ({a} = {a});
-  
-  i This is where is assigned.
-  
-    19 │ a.#b = a.#b;
-    20 │ a[b] = a[b];
-  > 21 │ a.b().c = a.b().c;
-       │       ^
-    22 │ a.b.c = a.b.c;
-    23 │ ({a} = {a});
-  
-
-```
-
-```
-invalid.js:22:13 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! c is assigned to itself.
-  
-    20 │ a[b] = a[b];
-    21 │ a.b().c = a.b().c;
-  > 22 │ a.b.c = a.b.c;
+  > 21 │ a.b.c = a.b.c;
        │             ^
-    23 │ ({a} = {a});
-    24 │ a['b'].bar = a['b'].bar;
+    22 │ ({a} = {a});
+    23 │ a['b'].bar = a['b'].bar;
   
   i This is where is assigned.
   
+    19 │ a.#b = a.#b;
     20 │ a[b] = a[b];
-    21 │ a.b().c = a.b().c;
-  > 22 │ a.b.c = a.b.c;
+  > 21 │ a.b.c = a.b.c;
        │     ^
-    23 │ ({a} = {a});
-    24 │ a['b'].bar = a['b'].bar;
+    22 │ ({a} = {a});
+    23 │ a['b'].bar = a['b'].bar;
   
 
 ```
 
 ```
-invalid.js:23:9 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:9 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! a is assigned to itself.
   
-    21 │ a.b().c = a.b().c;
-    22 │ a.b.c = a.b.c;
-  > 23 │ ({a} = {a});
+    20 │ a[b] = a[b];
+    21 │ a.b.c = a.b.c;
+  > 22 │ ({a} = {a});
        │         ^
-    24 │ a['b'].bar = a['b'].bar;
-    25 │ a[foobar].b = a[foobar].b;
+    23 │ a['b'].bar = a['b'].bar;
+    24 │ a[foobar].b = a[foobar].b;
   
   i This is where is assigned.
   
-    21 │ a.b().c = a.b().c;
-    22 │ a.b.c = a.b.c;
-  > 23 │ ({a} = {a});
+    20 │ a[b] = a[b];
+    21 │ a.b.c = a.b.c;
+  > 22 │ ({a} = {a});
        │   ^
-    24 │ a['b'].bar = a['b'].bar;
-    25 │ a[foobar].b = a[foobar].b;
+    23 │ a['b'].bar = a['b'].bar;
+    24 │ a[foobar].b = a[foobar].b;
   
 
 ```
 
 ```
-invalid.js:24:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! bar is assigned to itself.
   
-    22 │ a.b.c = a.b.c;
-    23 │ ({a} = {a});
-  > 24 │ a['b'].bar = a['b'].bar;
+    21 │ a.b.c = a.b.c;
+    22 │ ({a} = {a});
+  > 23 │ a['b'].bar = a['b'].bar;
        │                     ^^^
-    25 │ a[foobar].b = a[foobar].b;
-    26 │ a[10].b = a[10].b;
+    24 │ a[foobar].b = a[foobar].b;
+    25 │ a[10].b = a[10].b;
   
   i This is where is assigned.
   
-    22 │ a.b.c = a.b.c;
-    23 │ ({a} = {a});
-  > 24 │ a['b'].bar = a['b'].bar;
+    21 │ a.b.c = a.b.c;
+    22 │ ({a} = {a});
+  > 23 │ a['b'].bar = a['b'].bar;
        │        ^^^
-    25 │ a[foobar].b = a[foobar].b;
-    26 │ a[10].b = a[10].b;
+    24 │ a[foobar].b = a[foobar].b;
+    25 │ a[10].b = a[10].b;
   
 
 ```
 
 ```
-invalid.js:25:25 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:25 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! b is assigned to itself.
   
-    23 │ ({a} = {a});
-    24 │ a['b'].bar = a['b'].bar;
-  > 25 │ a[foobar].b = a[foobar].b;
+    22 │ ({a} = {a});
+    23 │ a['b'].bar = a['b'].bar;
+  > 24 │ a[foobar].b = a[foobar].b;
        │                         ^
-    26 │ a[10].b = a[10].b;
-    27 │ 
+    25 │ a[10].b = a[10].b;
+    26 │ a[4] = a[4];
   
   i This is where is assigned.
   
-    23 │ ({a} = {a});
-    24 │ a['b'].bar = a['b'].bar;
-  > 25 │ a[foobar].b = a[foobar].b;
+    22 │ ({a} = {a});
+    23 │ a['b'].bar = a['b'].bar;
+  > 24 │ a[foobar].b = a[foobar].b;
        │           ^
-    26 │ a[10].b = a[10].b;
-    27 │ 
+    25 │ a[10].b = a[10].b;
+    26 │ a[4] = a[4];
   
 
 ```
 
 ```
-invalid.js:26:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! b is assigned to itself.
   
-    24 │ a['b'].bar = a['b'].bar;
-    25 │ a[foobar].b = a[foobar].b;
-  > 26 │ a[10].b = a[10].b;
+    23 │ a['b'].bar = a['b'].bar;
+    24 │ a[foobar].b = a[foobar].b;
+  > 25 │ a[10].b = a[10].b;
        │                 ^
+    26 │ a[4] = a[4];
     27 │ 
   
   i This is where is assigned.
   
-    24 │ a['b'].bar = a['b'].bar;
-    25 │ a[foobar].b = a[foobar].b;
-  > 26 │ a[10].b = a[10].b;
+    23 │ a['b'].bar = a['b'].bar;
+    24 │ a[foobar].b = a[foobar].b;
+  > 25 │ a[10].b = a[10].b;
        │       ^
+    26 │ a[4] = a[4];
     27 │ 
+  
+
+```
+
+```
+invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! 4 is assigned to itself.
+  
+    24 │ a[foobar].b = a[foobar].b;
+    25 │ a[10].b = a[10].b;
+  > 26 │ a[4] = a[4];
+       │          ^
+    27 │ 
+    28 │ // issue #322
+  
+  i This is where is assigned.
+  
+    24 │ a[foobar].b = a[foobar].b;
+    25 │ a[10].b = a[10].b;
+  > 26 │ a[4] = a[4];
+       │   ^
+    27 │ 
+    28 │ // issue #322
   
 
 ```

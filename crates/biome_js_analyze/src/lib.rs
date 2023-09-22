@@ -239,8 +239,16 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"value['optimizelyService'] = optimizelyService
+        const SOURCE: &str = r#"document
+	.querySelector(`[data-field-id="customModel-container"]`)
+	.querySelector('input').value = document
+	.querySelector(`[data-field-id="${modelField.id}-field"]`)
+	.querySelector('input').value;
+
         "#;
+        // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
+        //
+        // "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -251,7 +259,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("complexity", "useLiteralKeys");
+        let rule_filter = RuleFilter::Rule("correctness", "noSelfAssign");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),
