@@ -31,9 +31,6 @@ a[foobar].b = a[foobar].b;
 a[10].b = a[10].b;
 a[4] = a[4];
 
-// issue #322
-document.querySelector("foo").value = document.querySelector("foo").value
-
 ```
 
 # Diagnostics
@@ -881,7 +878,6 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 26 │ a[4] = a[4];
        │          ^
     27 │ 
-    28 │ // issue #322
   
   i This is where is assigned.
   
@@ -890,7 +886,6 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 26 │ a[4] = a[4];
        │   ^
     27 │ 
-    28 │ // issue #322
   
 
 ```
