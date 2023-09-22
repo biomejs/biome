@@ -34,7 +34,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This 'let' declares a variable which is never re-assigned.
+  × This let declares a variable which is never re-assigned.
   
   > 1 │ let a = !b || !c
       │ ^^^
@@ -44,7 +44,7 @@ file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
   > 1 │ let a = !b || !c
       │     ^
   
-  i Suggested fix: Use 'const' instead.
+  i Safe fix: Use const instead.
   
   - let·a·=·!b·||·!c
   + const·a·=·!b·||·!c

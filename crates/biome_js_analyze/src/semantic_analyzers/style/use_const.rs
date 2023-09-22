@@ -61,26 +61,8 @@ declare_rule! {
     }
 }
 
-declare_node_union! {
-    pub(crate) VariableDeclaration = JsVariableDeclaration | JsForVariableDeclaration
-}
-
-declare_node_union! {
-    pub(crate) DestructuringHost = JsVariableDeclarator | JsAssignmentExpression
-}
-
-pub(crate) struct ConstBindings {
-    pub can_be_const: Vec<JsIdentifierBinding>,
-    pub can_fix: bool,
-}
-
-enum ConstCheckResult {
-    Fix,
-    Report,
-}
-
 impl Rule for UseConst {
-    type Query = Semantic<VariableDeclaration>;
+    type Query = Semantic<AnyJsVariableDeclaration>;
     type State = ConstBindings;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -100,12 +82,18 @@ impl Rule for UseConst {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let declaration = ctx.query();
         let kind = declaration.kind_token()?;
-        let title = if state.can_be_const.len() == 1 {
-            "This 'let' declares a variable which is never re-assigned."
+        let title_end = if state.can_be_const.len() == 1 {
+            "a variable which is never re-assigned."
         } else {
-            "This 'let' declares some variables which are never re-assigned."
+            "some variables which are never re-assigned."
         };
-        let mut diag = RuleDiagnostic::new(rule_category!(), kind.text_trimmed_range(), title);
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            kind.text_trimmed_range(),
+            markup! {
+                "This "<Emphasis>"let"</Emphasis>" declares "{title_end}
+            },
+        );
 
         for binding in state.can_be_const.iter() {
             let binding = binding.name_token().ok()?;
@@ -130,8 +118,8 @@ impl Rule for UseConst {
             );
             Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
-                message: markup! { "Use 'const' instead." }.to_owned(),
+                applicability: Applicability::Always,
+                message: markup! { "Use "<Emphasis>"const"</Emphasis>" instead." }.to_owned(),
                 mutation: batch,
             })
         } else {
@@ -140,18 +128,28 @@ impl Rule for UseConst {
     }
 }
 
+pub(crate) struct ConstBindings {
+    pub can_be_const: Vec<JsIdentifierBinding>,
+    pub can_fix: bool,
+}
+
+enum ConstCheckResult {
+    Fix,
+    Report,
+}
+
 impl ConstBindings {
-    pub fn new(declaration: &VariableDeclaration, model: &SemanticModel) -> Option<Self> {
+    pub fn new(declaration: &AnyJsVariableDeclaration, model: &SemanticModel) -> Option<Self> {
         let mut state = Self {
             can_be_const: Vec::new(),
             can_fix: true,
         };
         let in_for_in_or_of_loop = matches!(
             declaration,
-            VariableDeclaration::JsForVariableDeclaration(..)
+            AnyJsVariableDeclaration::JsForVariableDeclaration(..)
         );
         let mut bindings = 0;
-        declaration.for_each_binding(|binding, declarator| {
+        for_each_binding_of(declaration, |binding, declarator| {
             bindings += 1;
 
             let has_initializer = declarator.initializer().is_some();
@@ -168,11 +166,7 @@ impl ConstBindings {
         });
 
         // Only flag if all bindings can be const
-        if state.can_be_const.len() != bindings {
-            None
-        } else {
-            Some(state)
-        }
+        (state.can_be_const.len() == bindings).then_some(state)
     }
 }
 
@@ -187,11 +181,7 @@ fn check_binding_can_be_const(
 
     // In a for-in or for-of loop or if it has an initializer
     if in_for_in_or_of_loop || has_initializer {
-        return if writes.next().is_none() {
-            Some(ConstCheckResult::Fix)
-        } else {
-            None
-        };
+        return writes.next().is_none().then_some(ConstCheckResult::Fix);
     }
 
     // If no initializer and one assignment in same scope
@@ -208,58 +198,35 @@ fn check_binding_can_be_const(
         return None;
     }
 
-    if host.can_become_variable_declaration()? {
-        Some(ConstCheckResult::Report)
-    } else {
-        None
+    host.can_become_variable_declaration()?
+        .then_some(ConstCheckResult::Report)
+}
+
+fn for_each_declarator_of(decl: &AnyJsVariableDeclaration, f: impl FnMut(JsVariableDeclarator)) {
+    match decl {
+        AnyJsVariableDeclaration::JsVariableDeclaration(x) => x
+            .declarators()
+            .into_iter()
+            .filter_map(Result::ok)
+            .for_each(f),
+        AnyJsVariableDeclaration::JsForVariableDeclaration(x) => {
+            x.declarator().into_iter().for_each(f)
+        }
     }
 }
 
-impl VariableDeclaration {
-    pub fn for_each_declarator(&self, f: impl FnMut(JsVariableDeclarator)) {
-        match self {
-            VariableDeclaration::JsVariableDeclaration(x) => x
-                .declarators()
-                .into_iter()
-                .filter_map(Result::ok)
-                .for_each(f),
-            VariableDeclaration::JsForVariableDeclaration(x) => {
-                x.declarator().into_iter().for_each(f)
-            }
+fn for_each_binding_of(
+    decl: &AnyJsVariableDeclaration,
+    mut f: impl FnMut(JsIdentifierBinding, &JsVariableDeclarator),
+) {
+    for_each_declarator_of(decl, |declarator| {
+        if let Ok(pattern) = declarator.id() {
+            with_binding_pat_identifiers(pattern, &mut |binding| {
+                f(binding, &declarator);
+                false
+            });
         }
-    }
-
-    pub fn for_each_binding(&self, mut f: impl FnMut(JsIdentifierBinding, &JsVariableDeclarator)) {
-        self.for_each_declarator(|declarator| {
-            if let Ok(pattern) = declarator.id() {
-                with_binding_pat_identifiers(pattern, &mut |binding| {
-                    f(binding, &declarator);
-                    false
-                });
-            }
-        });
-    }
-
-    pub fn kind_token(&self) -> Option<JsSyntaxToken> {
-        match self {
-            Self::JsVariableDeclaration(x) => x.kind().ok(),
-            Self::JsForVariableDeclaration(x) => x.kind_token().ok(),
-        }
-    }
-
-    pub fn is_let(&self) -> bool {
-        match self {
-            Self::JsVariableDeclaration(it) => it.is_let(),
-            Self::JsForVariableDeclaration(it) => it.is_let(),
-        }
-    }
-
-    pub fn is_var(&self) -> bool {
-        match self {
-            Self::JsVariableDeclaration(it) => it.is_var(),
-            Self::JsForVariableDeclaration(it) => it.is_var(),
-        }
-    }
+    });
 }
 
 /// Visit [JsIdentifierBinding] in the given [JsAnyBindingPattern].
@@ -327,6 +294,10 @@ fn with_binding_identifier(
         AnyJsBinding::JsIdentifierBinding(id) => f(id),
         AnyJsBinding::JsBogusBinding(_) => false,
     }
+}
+
+declare_node_union! {
+    pub(crate) DestructuringHost = JsVariableDeclarator | JsAssignmentExpression
 }
 
 impl DestructuringHost {
