@@ -179,7 +179,7 @@ impl Rule for UseEnumInitializers {
         if has_mutations {
             return Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
+                applicability: Applicability::Always,
                 message: markup! { "Initialize all enum members." }.to_owned(),
                 mutation,
             });

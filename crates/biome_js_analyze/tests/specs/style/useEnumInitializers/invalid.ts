@@ -45,3 +45,23 @@ export namespace A {
         }
     }
 }
+
+const RED = 0;
+export enum RgbColor {
+	Red = RED,
+	Green,
+	Blue,
+}
+
+export enum RgbColor2 {
+	Red = RED,
+	Green = 5,
+	Blue,
+}
+
+const GREEN = 0;
+export enum RgbColor3 {
+	Red,
+	Green = GREEN,
+	Blue,
+}
