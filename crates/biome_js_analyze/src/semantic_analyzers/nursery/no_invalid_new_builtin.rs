@@ -95,13 +95,16 @@ impl Rule for NoInvalidNewBuiltin {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, builtin_name: &Self::State) -> Option<RuleDiagnostic> {
+        let builtin_name = builtin_name.text();
         Some(RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
             markup! {
-                <Emphasis>"`"{builtin_name.text()}"`"</Emphasis>" cannot be called as a constructor."
+                <Emphasis>{builtin_name}</Emphasis>" cannot be called as a constructor."
             },
-        ))
+        ).note(markup! {
+            "Calling "<Emphasis>{builtin_name}</Emphasis>" with the "<Emphasis>"new"</Emphasis>" operator throws a "<Emphasis>"TypeError"</Emphasis>"."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, builtin_name: &Self::State) -> Option<JsRuleAction> {
@@ -116,7 +119,7 @@ impl Rule for NoInvalidNewBuiltin {
             "Symbol" | "BigInt" => Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
                 applicability: Applicability::MaybeIncorrect,
-                message: markup! { "Remove "<Emphasis>"`new`"</Emphasis>"." }.to_owned(),
+                message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
                 mutation,
             }),
             _ => None,

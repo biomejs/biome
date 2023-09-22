@@ -52,14 +52,16 @@ var baz = new Intl();
 ```
 invalid.js:1:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Symbol` cannot be called as a constructor.
+  ! Symbol cannot be called as a constructor.
   
   > 1 │ var foo = new Symbol("foo");
       │           ^^^^^^^^^^^^^^^^^
     2 │ function bar() {
     3 │ 	return function Symbol() {};
   
-  i Suggested fix: Remove `new`.
+  i Calling Symbol with the new operator throws a TypeError.
+  
+  i Suggested fix: Remove new.
   
     1 │ var·foo·=·new·Symbol("foo");
       │           ----              
@@ -69,7 +71,7 @@ invalid.js:1:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
 ```
 invalid.js:5:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Symbol` cannot be called as a constructor.
+  ! Symbol cannot be called as a constructor.
   
     3 │ 	return function Symbol() {};
     4 │ }
@@ -78,7 +80,9 @@ invalid.js:5:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
     6 │ 
     7 │ var foo = new BigInt(9007199254740991);
   
-  i Suggested fix: Remove `new`.
+  i Calling Symbol with the new operator throws a TypeError.
+  
+  i Suggested fix: Remove new.
   
     5 │ var·baz·=·new·Symbol("baz");
       │           ----              
@@ -88,7 +92,7 @@ invalid.js:5:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
 ```
 invalid.js:7:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `BigInt` cannot be called as a constructor.
+  ! BigInt cannot be called as a constructor.
   
     5 │ var baz = new Symbol("baz");
     6 │ 
@@ -97,7 +101,9 @@ invalid.js:7:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
     8 │ function bar() {
     9 │ 	return function BigInt() {};
   
-  i Suggested fix: Remove `new`.
+  i Calling BigInt with the new operator throws a TypeError.
+  
+  i Suggested fix: Remove new.
   
     7 │ var·foo·=·new·BigInt(9007199254740991);
       │           ----                         
@@ -107,7 +113,7 @@ invalid.js:7:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
 ```
 invalid.js:11:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `BigInt` cannot be called as a constructor.
+  ! BigInt cannot be called as a constructor.
   
      9 │ 	return function BigInt() {};
     10 │ }
@@ -116,7 +122,9 @@ invalid.js:11:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━�
     12 │ 
     13 │ var foo = new Math();
   
-  i Suggested fix: Remove `new`.
+  i Calling BigInt with the new operator throws a TypeError.
+  
+  i Suggested fix: Remove new.
   
     11 │ var·baz·=·new·BigInt(9007199254740991);
        │           ----                         
@@ -126,7 +134,7 @@ invalid.js:11:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━�
 ```
 invalid.js:13:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Math` cannot be called as a constructor.
+  ! Math cannot be called as a constructor.
   
     11 │ var baz = new BigInt(9007199254740991);
     12 │ 
@@ -135,13 +143,15 @@ invalid.js:13:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     14 │ function bar() {
     15 │ 	return function Math() {};
   
+  i Calling Math with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:17:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Math` cannot be called as a constructor.
+  ! Math cannot be called as a constructor.
   
     15 │ 	return function Math() {};
     16 │ }
@@ -150,13 +160,15 @@ invalid.js:17:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     18 │ 
     19 │ var foo = new JSON();
   
+  i Calling Math with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:19:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `JSON` cannot be called as a constructor.
+  ! JSON cannot be called as a constructor.
   
     17 │ var baz = new Math();
     18 │ 
@@ -165,13 +177,15 @@ invalid.js:19:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     20 │ function bar() {
     21 │ 	return function JSON() {};
   
+  i Calling JSON with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:23:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `JSON` cannot be called as a constructor.
+  ! JSON cannot be called as a constructor.
   
     21 │ 	return function JSON() {};
     22 │ }
@@ -180,13 +194,15 @@ invalid.js:23:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     24 │ 
     25 │ var foo = new Reflect();
   
+  i Calling JSON with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:25:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Reflect` cannot be called as a constructor.
+  ! Reflect cannot be called as a constructor.
   
     23 │ var baz = new JSON();
     24 │ 
@@ -195,13 +211,15 @@ invalid.js:25:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     26 │ function bar() {
     27 │ 	return function Reflect() {};
   
+  i Calling Reflect with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:29:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Reflect` cannot be called as a constructor.
+  ! Reflect cannot be called as a constructor.
   
     27 │ 	return function Reflect() {};
     28 │ }
@@ -210,13 +228,15 @@ invalid.js:29:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     30 │ 
     31 │ var foo = new Atomics();
   
+  i Calling Reflect with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:31:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Atomics` cannot be called as a constructor.
+  ! Atomics cannot be called as a constructor.
   
     29 │ var baz = new Reflect();
     30 │ 
@@ -225,13 +245,15 @@ invalid.js:31:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     32 │ function bar() {
     33 │ 	return function Atomics() {};
   
+  i Calling Atomics with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:35:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Atomics` cannot be called as a constructor.
+  ! Atomics cannot be called as a constructor.
   
     33 │ 	return function Atomics() {};
     34 │ }
@@ -240,13 +262,15 @@ invalid.js:35:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     36 │ 
     37 │ var foo = new Intl();
   
+  i Calling Atomics with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:37:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Intl` cannot be called as a constructor.
+  ! Intl cannot be called as a constructor.
   
     35 │ var baz = new Atomics();
     36 │ 
@@ -255,19 +279,23 @@ invalid.js:37:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━
     38 │ function bar() {
     39 │ 	return function Intl() {};
   
+  i Calling Intl with the new operator throws a TypeError.
+  
 
 ```
 
 ```
 invalid.js:41:11 lint/nursery/noInvalidNewBuiltin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! `Intl` cannot be called as a constructor.
+  ! Intl cannot be called as a constructor.
   
     39 │ 	return function Intl() {};
     40 │ }
   > 41 │ var baz = new Intl();
        │           ^^^^^^^^^^
     42 │ 
+  
+  i Calling Intl with the new operator throws a TypeError.
   
 
 ```
