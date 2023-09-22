@@ -36,7 +36,7 @@ pub(crate) fn parse_root(p: &mut JsonParser) {
     };
 
     // Process the file to the end, e.g. in cases where there have been multiple values
-    if !p.at(EOF) {
+    if !(p.at(EOF)) {
         parse_rest(p, value);
     }
 
@@ -181,6 +181,10 @@ fn parse_sequence(p: &mut JsonParser, root_kind: SequenceKind) -> ParsedSyntax {
 
             match current.parse_item(p) {
                 SequenceItem::Parsed(Absent) => {
+                    if p.options().allow_trailing_commas && p.last() == Some(T![,]) {
+                        break;
+                    }
+
                     let range = if p.at(T![,]) {
                         p.cur_range()
                     } else {
@@ -249,7 +253,9 @@ fn parse_object_member(p: &mut JsonParser) -> SequenceItem {
     let m = p.start();
 
     if parse_member_name(p).is_absent() {
-        p.error(expected_property(p, p.cur_range()));
+        if !(p.options().allow_trailing_commas && p.last() == Some(T![,])) {
+            p.error(expected_property(p, p.cur_range()));
+        }
 
         if !p.at(T![:]) && !p.at_ts(VALUE_START) {
             m.abandon(p);

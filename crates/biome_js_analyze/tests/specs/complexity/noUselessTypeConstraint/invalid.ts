@@ -13,3 +13,5 @@ class BazAny<T extends any> {
 const QuuxAny = <T extends any>() => {};
 
 function QuuzAny<T extends any>() {}
+
+function commented<T /*a*/ extends /*b*/ any /*c*/>() {}

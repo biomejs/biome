@@ -453,7 +453,7 @@ fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> Parse
 						format!("a second use of `{}` here is not allowed", label),
 					)
 					.detail(
-						label_item.range().to_owned(),
+						*label_item.range(),
 						format!("`{}` is first used as a label here", label),
 					);
 
@@ -661,7 +661,7 @@ fn parse_continue_statement(p: &mut JsParser) -> ParsedSyntax {
 			Some(LabelledItem::Other(range)) => {
 				Some(p.err_builder("A `continue` statement can only jump to a label of an enclosing `for`, `while` or `do while` statement.", p.cur_range())
 					.detail(p.cur_range(), "This label")
-					.detail(range.to_owned(), "points to non-iteration statement"))
+					.detail(*range, "points to non-iteration statement"))
 			}
 			None => {
 				Some(p

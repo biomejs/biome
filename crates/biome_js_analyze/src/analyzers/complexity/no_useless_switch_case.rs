@@ -137,18 +137,18 @@ impl Rule for NoUselessSwitchCase {
         if consequent.len() > 0 {
             let default_clause_colon_token = default_clause.colon_token().ok()?;
             let new_default_clause = default_clause
-                .to_owned()
+                .clone()
                 .with_consequent(consequent)
                 .with_colon_token(default_clause_colon_token.append_trivia_pieces(
                     useless_case.colon_token().ok()?.trailing_trivia().pieces(),
                 ));
-            mutation.remove_node(default_clause.to_owned());
+            mutation.remove_node(default_clause.clone());
             mutation.replace_element(
-                SyntaxElement::Node(useless_case.syntax().to_owned()),
-                SyntaxElement::Node(new_default_clause.syntax().to_owned()),
+                SyntaxElement::Node(useless_case.syntax().clone()),
+                SyntaxElement::Node(new_default_clause.syntax().clone()),
             );
         } else {
-            mutation.remove_node(useless_case.to_owned());
+            mutation.remove_node(useless_case.clone());
         }
         Some(JsRuleAction {
             mutation,

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.ts
 ---
 # Input
@@ -21,6 +20,8 @@ const QuuxAny = <T extends any>() => {};
 
 function QuuzAny<T extends any>() {}
 
+function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
+
 ```
 
 # Diagnostics
@@ -36,10 +37,10 @@ invalid.ts:1:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     1 │ interface·FooAny1<T·extends·any>·{
-      │                     -----------   
+      │                    ------------   
 
 ```
 
@@ -57,10 +58,10 @@ invalid.ts:5:21 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     5 │ interface·FooAny2<T·extends·unknown>·{
-      │                     ---------------   
+      │                    ----------------   
 
 ```
 
@@ -78,10 +79,10 @@ invalid.ts:9:16 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     9 │ class·BazAny<T·extends·any>·{
-      │                -----------   
+      │               ------------   
 
 ```
 
@@ -98,10 +99,10 @@ invalid.ts:10:12 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     10 │ ··quxAny<U·extends·any>()·{}
-       │            -----------      
+       │           ------------      
 
 ```
 
@@ -119,10 +120,10 @@ invalid.ts:13:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     13 │ const·QuuxAny·=·<T·extends·any>()·=>·{};
-       │                    -----------          
+       │                   ------------          
 
 ```
 
@@ -136,13 +137,34 @@ invalid.ts:15:20 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   > 15 │ function QuuzAny<T extends any>() {}
        │                    ^^^^^^^^^^^
     16 │ 
+    17 │ function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
   
   i All types are subtypes of any and unknown.
   
-  i Suggested fix: Remove the constraint.
+  i Safe fix: Remove the constraint.
   
     15 │ function·QuuzAny<T·extends·any>()·{}
-       │                    -----------      
+       │                   ------------      
+
+```
+
+```
+invalid.ts:17:28 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Constraining a type parameter to any or unknown is useless.
+  
+    15 │ function QuuzAny<T extends any>() {}
+    16 │ 
+  > 17 │ function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
+       │                            ^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i All types are subtypes of any and unknown.
+  
+  i Safe fix: Remove the constraint.
+  
+    17 │ function·commented<T·/*a*/·extends·/*b*/·any·/*c*/>()·{}
+       │                           ------------------------      
 
 ```
 

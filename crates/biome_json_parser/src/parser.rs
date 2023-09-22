@@ -9,11 +9,13 @@ use biome_parser::ParserContext;
 pub(crate) struct JsonParser<'source> {
     context: ParserContext<JsonSyntaxKind>,
     source: JsonTokenSource<'source>,
+    options: JsonParserOptions,
 }
 
 #[derive(Default, Debug, Clone, Copy)]
 pub struct JsonParserOptions {
     pub allow_comments: bool,
+    pub allow_trailing_commas: bool,
 }
 
 impl JsonParserOptions {
@@ -21,13 +23,19 @@ impl JsonParserOptions {
         self.allow_comments = true;
         self
     }
+
+    pub fn with_allow_trailing_commas(mut self) -> Self {
+        self.allow_trailing_commas = true;
+        self
+    }
 }
 
 impl<'source> JsonParser<'source> {
-    pub fn new(source: &'source str, config: JsonParserOptions) -> Self {
+    pub fn new(source: &'source str, options: JsonParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
-            source: JsonTokenSource::from_str(source, config),
+            source: JsonTokenSource::from_str(source, options),
+            options,
         }
     }
 
@@ -44,6 +52,10 @@ impl<'source> JsonParser<'source> {
         let diagnostics = merge_diagnostics(lexer_diagnostics, parse_diagnostics);
 
         (events, diagnostics, trivia)
+    }
+
+    pub fn options(&self) -> &JsonParserOptions {
+        &self.options
     }
 }
 

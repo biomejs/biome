@@ -553,6 +553,22 @@ Enables the parsing of comments in JSON files.
 }
 ```
 
+### `json.parser.allowTrailingCommas`
+
+Enables the parsing of trailing Commas in JSON files.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "json": {
+    "parser": {
+      "allowTrailingCommas": true
+    }
+  }
+}
+```
+
 ### `json.formatter.enabled`
 
 Enables Biome's formatter for JSON (and its super languages) files.

@@ -56,7 +56,7 @@ pub fn coverage_compare(
 
     let mut new_results = read_test_results(new_result_dir.as_path(), "new");
 
-    for (suite, base) in base_results.into_iter() {
+    for (suite, base) in base_results {
         let new_result = new_results.remove(&suite).unwrap_or_else(TestResults::new);
 
         emit_compare(&base, &new_result, suite.as_str(), markdown);

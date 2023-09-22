@@ -27,7 +27,6 @@ JsonRoot {
                 },
             },
             COMMA@10..11 "," [] [],
-            missing element,
         ],
         r_curly_token: missing (required),
     },
@@ -49,7 +48,6 @@ JsonRoot {
         2: JSON_BOOLEAN_VALUE@6..10
           0: TRUE_KW@6..10 "true" [] []
       1: COMMA@10..11 "," [] []
-      2: (empty)
     2: (empty)
   1: EOF@11..11 "" [] []
 

@@ -158,7 +158,8 @@ pub trait ParseSeparatedList {
             if parsed_element.is_absent() && p.at(self.separating_element_kind()) {
                 // a missing element
                 continue;
-            } else if self.recover(p, parsed_element).is_err() {
+            }
+            if self.recover(p, parsed_element).is_err() {
                 break;
             }
         }

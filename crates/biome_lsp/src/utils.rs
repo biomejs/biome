@@ -501,7 +501,7 @@ line 7 new";
         let change = TextDocumentContentChangeEvent {
             range: Some(Range::new(Position::new(0, 30), Position::new(1, 0))),
             range_length: Some(1),
-            text: "".to_string(),
+            text: String::new(),
         };
 
         let output = apply_document_changes(encoding, input, vec![change]);

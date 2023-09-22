@@ -1,6 +1,7 @@
 mod assertions;
 pub mod declarations;
 mod functions;
+mod infer;
 mod references;
 mod scopes;
 

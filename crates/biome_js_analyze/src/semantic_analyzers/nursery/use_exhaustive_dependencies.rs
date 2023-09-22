@@ -377,7 +377,7 @@ impl VisitNode<JsonLanguage> for HooksOptions {
 impl ReactExtensiveDependenciesOptions {
     pub fn new(hooks: HooksOptions) -> Self {
         let mut default = ReactExtensiveDependenciesOptions::default();
-        for hook in hooks.hooks.into_iter() {
+        for hook in hooks.hooks {
             default.hooks_config.insert(
                 hook.name,
                 ReactHookConfiguration {
@@ -445,8 +445,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             let declaration = declarator
                 .syntax()
                 .ancestors()
-                .filter_map(JsVariableDeclaration::cast)
-                .next()?;
+                .find_map(JsVariableDeclaration::cast)?;
             let declaration_range = declaration.syntax().text_range();
 
             if declaration.is_const() {

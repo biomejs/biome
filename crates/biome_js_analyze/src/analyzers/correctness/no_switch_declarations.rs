@@ -126,7 +126,7 @@ impl Rule for NoSwitchDeclarations {
                 make::token(T!['{'])
                     .with_leading_trivia(Some((TriviaPieceKind::Whitespace, " ")))
                     .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces()),
-                consequent.to_owned(),
+                consequent.clone(),
                 make::token(T!['}'])
                     .with_leading_trivia_pieces(clause_token.indentation_trivia_pieces()),
             ),

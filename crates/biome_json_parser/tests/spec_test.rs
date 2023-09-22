@@ -21,7 +21,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         "ok" => ExpectedOutcome::Pass,
         "error" => ExpectedOutcome::Fail,
         "undefined" => ExpectedOutcome::Undefined,
-        "allow_comments" => ExpectedOutcome::Pass,
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
@@ -37,7 +36,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
     let parse_conifg = JsonParserOptions {
-        allow_comments: outcome_str == "allow_comments",
+        allow_comments: test_directory.contains("allow_comments"),
+        allow_trailing_commas: test_directory.contains("allow_trailing_commas"),
     };
     let parsed = parse_json(&content, parse_conifg);
     let formatted_ast = format!("{:#?}", parsed.tree());

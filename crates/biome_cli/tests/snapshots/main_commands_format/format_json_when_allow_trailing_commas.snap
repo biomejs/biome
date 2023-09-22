@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "json": {
+    "parser": { "allowTrailingCommas": true }
+  }
+}
+```
+
+## `file.json`
+
+```json
+{
+    "array": [
+        1,
+    ],
+}
+```
+
+# Emitted Messages
+
+```block
+file.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Formatter would have printed the following content:
+  
+    3 3 │           1,
+    4 4 │       ],
+    5   │ - }
+      5 │ + }
+      6 │ + 
+  
+
+```
+
+```block
+Compared 1 file(s) in <TIME>
+```
+
+

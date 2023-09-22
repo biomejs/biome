@@ -143,8 +143,8 @@ impl CaseMismatchInfo {
                 ..
             } => cases
                 .into_iter()
-                .flat_map(|case| case.as_js_case_clause().and_then(|case| case.test().ok()))
-                .flat_map(|test| Self::compare_call_with_literal(call.clone(), test))
+                .filter_map(|case| case.as_js_case_clause().and_then(|case| case.test().ok()))
+                .filter_map(|test| Self::compare_call_with_literal(call.clone(), test))
                 .collect(),
             _ => Vec::new(),
         }

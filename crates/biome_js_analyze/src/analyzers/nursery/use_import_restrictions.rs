@@ -137,7 +137,7 @@ fn get_restricted_import(module_path: &TokenText) -> Option<ImportRestrictionsSt
                 // We pop the index file because it shouldn't count as a path,
                 // component, but we store the file name so we can add it to
                 // both the reported path and the suggestion.
-                index_filename = path_parts.last().cloned();
+                index_filename = path_parts.last().copied();
                 path_parts.pop();
             }
         }

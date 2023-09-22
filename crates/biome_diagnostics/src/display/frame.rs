@@ -446,7 +446,7 @@ impl<'diagnostic> SourceFile<'diagnostic> {
             Ordering::Less => Ok(self
                 .line_starts
                 .get(line_index)
-                .cloned()
+                .copied()
                 .expect("failed despite previous check")),
             Ordering::Equal => Ok(self.source.text_len()),
             Ordering::Greater => Err(io::Error::new(

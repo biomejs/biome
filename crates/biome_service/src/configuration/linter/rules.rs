@@ -337,7 +337,7 @@ impl Rules {
         } else if self.is_recommended() {
             enabled_rules.extend(Suspicious::recommended_rules_as_filters());
         }
-        enabled_rules.difference(&disabled_rules).cloned().collect()
+        enabled_rules.difference(&disabled_rules).copied().collect()
     }
 }
 #[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]

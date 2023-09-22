@@ -44,7 +44,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         .iter()
         .map(|name| format_ident!("{}_KW", to_upper_snake_case(name)))
         .collect::<Vec<_>>();
-    let all_keyword_strings = all_keywords_values.iter().map(|name| name.to_string());
+    let all_keyword_strings = all_keywords_values.iter().map(|name| (*name).to_string());
 
     let literals = grammar
         .literals

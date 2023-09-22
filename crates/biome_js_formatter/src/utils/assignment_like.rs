@@ -148,7 +148,7 @@ pub(crate) fn is_complex_type_annotation(
                 let has_at_least_a_complex_type = type_arguments
                     .ts_type_argument_list()
                     .iter()
-                    .flat_map(|p| p.ok())
+                    .filter_map(|p| p.ok())
                     .any(|argument| {
                         if matches!(argument, AnyTsType::TsConditionalType(_)) {
                             return true;
@@ -732,10 +732,8 @@ impl AnyJsAssignmentLike {
                 AnyJsExpression::JsClassExpression(_)
                     | AnyJsExpression::JsTemplateExpression(_)
                     | AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsBooleanLiteralExpression(_),
-                    )
-                    | AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                        AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+                            | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
                     )
             )
         ) {

@@ -32,8 +32,35 @@ documentation = """
     --no-deps
 """
 format = "fmt --all --verbose"
-lint = "clippy --workspace --all-targets --verbose -- --deny warnings -W clippy::cargo -W clippy::dbg_macro -A clippy::cargo_common_metadata -A clippy::multiple_crate_versions"
+lint = "clippy --workspace --all-targets --verbose -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
+
+[target.'cfg(all())']
+rustflags = [
+  # CLIPPY LINT SETTINGS
+  # This is a workaround to configure lints for the entire workspace.
+  # See: `https://github.com/rust-lang/cargo/issues/5034`
+
+  "-Wclippy::cargo",
+  "-Aclippy::cargo_common_metadata",
+  "-Aclippy::multiple_crate_versions",
+
+  # pedantic
+  "-Wclippy::dbg_macro",
+  "-Wclippy::implicit_clone",
+  "-Wclippy::cloned_instead_of_copied",
+  "-Wclippy::copy_iterator",
+  "-Wclippy::explicit_into_iter_loop",
+  "-Wclippy::inefficient_to_string",
+  "-Wclippy::iter_not_returning_iterator",
+  "-Wclippy::manual_string_new",
+  "-Wclippy::needless_bitwise_bool",
+  "-Wclippy::needless_continue",
+  "-Wclippy::needless_for_each",
+  "-Wclippy::stable_sort_primitive",
+  "-Wclippy::unnecessary_join",
+  "-Wclippy::unnested_or_patterns",
+]
 
 [profile.release]
 lto = true

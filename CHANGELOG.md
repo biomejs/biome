@@ -22,6 +22,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#319](https://github.com/biomejs/biome/issues/319). The command `biome lint` now shows the correct options. Contributed by @ematipico
 
+- Fix [#312](https://github.com/biomejs/biome/issues/312). Running `biome --version` now exits with status code `0` instead of `1`. Contributed by @nhedger
+
 ### Configuration
 ### Editors
 ### Formatter
@@ -32,6 +34,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### JavaScript APIs
 ### Linter
 
+#### Bug fixes
+
+- Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
+- Fix [#322](ttps://github.com/biomejs/biome/issues/322), now [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) correctly handles literals inside call expressions.
+- Changed how [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) behaves. The rule is not triggered anymore on function calls. Contributed by @ematipico
+
 #### New features
 
 - Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
@@ -40,6 +48,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule reports `else` clauses that can be omitted because their `if` branches break.
   Contributed by @Conaclos
 
+#### Enhancements
+
+- The following rules have now safe code fixes:
+
+  - [noUselessLabel](https://biomejs.dev/linter/rules/no-useless-label)
+  - [noUselessTypeConstraint](https://biomejs.dev/linter/rules/no-useless-type-constraint)
+
 #### Bug fixes
 
 - Fix [#294](https://github.com/biomejs/biome/issues/294). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) no longer reports false positives for return types. Contributed by @b4s36t4
@@ -47,6 +62,19 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Parser
 
 - Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov
+- Add support for parsing trailing commas inside JSON files:
+
+  ```json
+  {
+    "json": {
+      "parser": {
+        "allowTrailingCommas": true
+      }
+    }
+  }
+  ```
+
+  Contributed by @nissy-dev
 
 ### VSCode
 

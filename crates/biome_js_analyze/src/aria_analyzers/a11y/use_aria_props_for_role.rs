@@ -110,7 +110,7 @@ impl Rule for UseAriaPropsForRole {
                     if *required {
                         let attribute = node.find_attribute_by_name(property_name);
                         if attribute.is_none() {
-                            Some(property_name.to_string())
+                            Some((*property_name).to_string())
                         } else {
                             None
                         }

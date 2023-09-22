@@ -62,7 +62,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
                     return TestRunOutcome::IncorrectlyErrored {
                         files: TestCaseFiles::single(
                             self.name.clone(),
-                            "".to_string(),
+                            String::new(),
                             JsFileSource::tsx(),
                             options,
                         ),

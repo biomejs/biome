@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsFormalParameter, JsParameterList, JsParameters, JsSpread,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstSeparatedList};
 
 use crate::semantic_services::Semantic;
 
@@ -97,15 +97,40 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
         .parent::<JsParameterList>()
         .and_then(|list| list.parent::<JsParameters>())
         .and_then(|parameters| parameters.parent::<AnyJsFunction>())?;
+
+    // Known accumulators need at least 2 arguments and no more than 4. (accumulator, value, index, array)
+    let param_count = function
+        .parameters()
+        .ok()?
+        .as_js_parameters()?
+        .items()
+        .iter()
+        .count();
+    if !(2..=4).contains(&param_count) {
+        return None;
+    }
+
     let call_expression = function
         .parent::<JsCallArgumentList>()
         .and_then(|arguments| arguments.parent::<JsCallArguments>())
         .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
+
+    // The accumulator function should be a part of a call expression. This call expression should
+    // have no more than 2 arguments. (callback, initialValue)
+    let arg_count = call_expression.arguments().ok()?.args().iter().count();
+    if arg_count > 2 {
+        return None;
+    }
+
     let callee = call_expression.callee().ok()?;
     let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+
+    // We only care about `.reduce` and `.reduceRight`.
     let member_name = member_expression.member_name()?;
     if !matches!(member_name.text(), "reduce" | "reduceRight") {
         return None;
     }
+
+    // Finally check that the spread references the first parameter.
     Some(parameter.syntax().index() == 0)
 }

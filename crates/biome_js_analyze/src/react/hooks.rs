@@ -163,7 +163,7 @@ pub(crate) fn react_hook_with_dependency(
     let dependencies_index = hook.dependencies_index?;
 
     let mut indices = [closure_index, dependencies_index];
-    indices.sort();
+    indices.sort_unstable();
     let [closure_node, dependencies_node] = call.get_arguments_by_index(indices);
 
     Some(ReactCallWithDependencyResult {

@@ -4,7 +4,7 @@ use biome_js_syntax::{
     inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
     AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectMember, JsAssignmentExpression,
-    JsAssignmentOperator, JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
+    JsAssignmentOperator, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName, JsReferenceIdentifier,
     JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
 };
@@ -334,6 +334,8 @@ impl SameIdentifiers {
                             .ok()?;
                             return Some(AnyAssignmentLike::Identifiers(source_identifier));
                         }
+                    } else if identifier_like.is_literal() {
+                        return Some(AnyAssignmentLike::Identifiers(identifier_like));
                     } else {
                         return Self::next_static_expression(left, right);
                     }
@@ -424,6 +426,7 @@ impl AnyJsAssignmentExpressionLikeIterator {
                 AnyJsExpression::JsIdentifierExpression(node) => {
                     Ok(AnyNameLike::from(node.name()?))
                 }
+                AnyJsExpression::AnyJsLiteralExpression(node) => Ok(AnyNameLike::from(node)),
                 _ => Err(SyntaxError::MissingRequiredChild),
             })?,
             source_object: source.object()?,
@@ -438,6 +441,8 @@ impl AnyJsAssignmentExpressionLikeIterator {
                 AnyJsExpression::JsIdentifierExpression(node) => {
                     Ok(AnyNameLike::from(node.name()?))
                 }
+                AnyJsExpression::AnyJsLiteralExpression(node) => Ok(AnyNameLike::from(node)),
+
                 _ => Err(SyntaxError::MissingRequiredChild),
             })?,
             source_object: source.object()?,
@@ -477,12 +482,7 @@ impl Iterator for AnyJsAssignmentExpressionLikeIterator {
                 self.drained = true;
                 Some(identifier.name().ok()?)
             }
-            AnyJsExpression::JsCallExpression(call_expression) => {
-                self.current_member_expression = Some(
-                    AnyAssignmentExpressionLike::JsCallExpression(call_expression),
-                );
-                None
-            }
+
             AnyJsExpression::JsComputedMemberExpression(computed_expression) => {
                 self.current_member_expression = Some(
                     AnyAssignmentExpressionLike::JsComputedMemberExpression(computed_expression),
@@ -547,7 +547,7 @@ declare_node_union! {
 }
 
 declare_node_union! {
-    pub(crate) AnyAssignmentExpressionLike = JsStaticMemberExpression | JsComputedMemberExpression | JsCallExpression
+    pub(crate) AnyAssignmentExpressionLike = JsStaticMemberExpression | JsComputedMemberExpression
 }
 
 impl AnyAssignmentExpressionLike {
@@ -565,15 +565,6 @@ impl AnyAssignmentExpressionLike {
                     })
                 })
             }
-            AnyAssignmentExpressionLike::JsCallExpression(node) => node
-                .callee()
-                .ok()
-                .and_then(|callee| callee.as_js_static_member_expression().cloned())
-                .and_then(|callee| callee.member().ok())
-                .and_then(|member| {
-                    let js_name = member.as_js_name()?;
-                    Some(AnyNameLike::from(AnyJsName::JsName(js_name.clone())))
-                }),
         }
     }
 
@@ -581,12 +572,6 @@ impl AnyAssignmentExpressionLike {
         match self {
             AnyAssignmentExpressionLike::JsStaticMemberExpression(node) => node.object().ok(),
             AnyAssignmentExpressionLike::JsComputedMemberExpression(node) => node.object().ok(),
-            AnyAssignmentExpressionLike::JsCallExpression(node) => node
-                .callee()
-                .ok()?
-                .as_js_static_member_expression()?
-                .object()
-                .ok(),
         }
     }
 }
@@ -758,6 +743,10 @@ impl IdentifiersLike {
             IdentifiersLike::References(_, right) => right.value_token().ok(),
             IdentifiersLike::Literal(_, right) => right.value_token().ok(),
         }
+    }
+
+    const fn is_literal(&self) -> bool {
+        matches!(self, IdentifiersLike::Literal(_, _))
     }
 }
 

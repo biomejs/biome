@@ -1369,7 +1369,7 @@ if(a === -0) {}
                         character: 16,
                     },
                 },
-                new_text: String::from(""),
+                new_text: String::new(),
             },
             lsp::TextEdit {
                 range: lsp::Range {
@@ -1690,7 +1690,7 @@ isSpreadAssignment;
                     },
                 }),
                 range_length: None,
-                text: String::from(""),
+                text: String::new(),
             }],
         )
         .await?;

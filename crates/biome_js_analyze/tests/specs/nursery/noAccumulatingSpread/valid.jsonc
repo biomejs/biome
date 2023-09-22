@@ -13,5 +13,12 @@
 
 	// Object - Allow spreading the item into the accumulator
 	"foo.reduce((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})",
-	"foo.reduceRight((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})"
+	"foo.reduceRight((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})",
+
+	// Callbacks with wrong number of parameters
+	"foo.reduce((acc,value,index,array,somethingExtra) => [...acc, value], [])",
+	"foo.reduce((acc) => [...acc], [])",
+
+	// Wrong number of arguments to known method (reduce can have 1 or 2 args, but not more)
+	"foo.reduce((acc, bar) => [...acc, bar], [], 123)"
 ]

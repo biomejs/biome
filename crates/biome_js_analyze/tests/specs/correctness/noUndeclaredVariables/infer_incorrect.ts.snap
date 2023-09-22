@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: infer_incorrect.ts
+---
+# Input
+```js
+type A = number extends infer T ? never : T;
+
+```
+
+# Diagnostics
+```
+infer_incorrect.ts:1:43 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The T variable is undeclared
+  
+  > 1 │ type A = number extends infer T ? never : T;
+      │                                           ^
+    2 │ 
+  
+
+```
+
+

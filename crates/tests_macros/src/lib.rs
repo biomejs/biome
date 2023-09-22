@@ -177,7 +177,7 @@ impl Arguments {
             if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
                 format!("_{}", extension)
             } else {
-                "".to_string()
+                String::new()
             }
         );
         let test_directory = path.parent().unwrap().display().to_string();
@@ -185,7 +185,7 @@ impl Arguments {
         let test_full_path = path.display().to_string();
         let extension = match path.extension() {
             Some(ext) => format!(".{}", ext.to_str().unwrap_or("")),
-            None => "".into(),
+            None => String::new(),
         };
 
         let mut test_expected_file = path.to_path_buf();
