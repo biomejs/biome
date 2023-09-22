@@ -678,7 +678,7 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
-	 * Disallow new operators with global non-constructor functions and non-constructor built-in objects.
+	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration;
 	/**

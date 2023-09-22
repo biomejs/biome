@@ -1013,7 +1013,7 @@
 					]
 				},
 				"noInvalidNewBuiltin": {
-					"description": "Disallow new operators with global non-constructor functions and non-constructor built-in objects.",
+					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
