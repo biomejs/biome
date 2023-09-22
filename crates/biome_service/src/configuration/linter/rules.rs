@@ -2201,7 +2201,7 @@ pub struct Nursery {
     #[bpaf(long("no-global-is-nan"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_global_is_nan: Option<RuleConfiguration>,
-    #[doc = "Disallow new operators with global non-constructor functions."]
+    #[doc = "Disallow new operators with global non-constructor functions and non-constructor built-in objects."]
     #[bpaf(
         long("no-invalid-new-builtin"),
         argument("on|off|warn"),
