@@ -579,7 +579,7 @@ fn is_factory(token: &JsSyntaxToken) -> bool {
 
     match text.chars().next() {
         // Any sequence of '$' or '_' characters
-        Some('_') | Some('$') => chars.all(|c| matches!(c, '_' | '$')),
+        Some('_' | '$') => chars.all(|c| matches!(c, '_' | '$')),
         Some(c) => c.is_uppercase(),
         _ => false,
     }

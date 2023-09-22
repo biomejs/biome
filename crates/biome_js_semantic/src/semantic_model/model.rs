@@ -85,7 +85,7 @@ impl SemanticModelData {
     }
 
     fn scope_hoisted_to(&self, range: &TextRange) -> Option<usize> {
-        self.scope_hoisted_to_by_range.get(&range.start()).cloned()
+        self.scope_hoisted_to_by_range.get(&range.start()).copied()
     }
 
     pub fn is_exported(&self, range: TextRange) -> bool {

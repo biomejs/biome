@@ -39,11 +39,11 @@ impl<'fmt, Context> Argument<'fmt, Context> {
             fmt: &mut Formatter<Context>,
         ) -> FormatResult<()> {
             // SAFETY: Safe because the 'fmt lifetime is captured by the 'lifetime' field.
-            F::fmt(unsafe { &*(ptr as *const F) }, fmt)
+            F::fmt(unsafe { &*ptr.cast::<F>() }, fmt)
         }
 
         Self {
-            value: value as *const F as *const c_void,
+            value: (value as *const F).cast::<std::ffi::c_void>(),
             lifetime: PhantomData,
             formatter: formatter::<F, Context>,
         }

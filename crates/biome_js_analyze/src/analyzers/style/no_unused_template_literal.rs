@@ -75,23 +75,20 @@ impl Rule for NoUnusedTemplateLiteral {
         let mut mutation = ctx.root().begin();
 
         // join all template content
-        let inner_content = node
-            .elements()
-            .iter()
-            .fold(String::from(""), |mut acc, cur| {
-                match cur {
-                    AnyJsTemplateElement::JsTemplateChunkElement(ele) => {
-                        // Safety: if `ele.template_chunk_token()` is `Err` variant, [can_convert_to_string_lit] should return false,
-                        // thus `run` will return None
-                        acc += ele.template_chunk_token().unwrap().text();
-                        acc
-                    }
-                    AnyJsTemplateElement::JsTemplateElement(_) => {
-                        // Because we know if TemplateLit has any `JsTemplateElement` will return `None` in `run` function
-                        unreachable!()
-                    }
+        let inner_content = node.elements().iter().fold(String::new(), |mut acc, cur| {
+            match cur {
+                AnyJsTemplateElement::JsTemplateChunkElement(ele) => {
+                    // Safety: if `ele.template_chunk_token()` is `Err` variant, [can_convert_to_string_lit] should return false,
+                    // thus `run` will return None
+                    acc += ele.template_chunk_token().unwrap().text();
+                    acc
                 }
-            });
+                AnyJsTemplateElement::JsTemplateElement(_) => {
+                    // Because we know if TemplateLit has any `JsTemplateElement` will return `None` in `run` function
+                    unreachable!()
+                }
+            }
+        });
 
         mutation.replace_node(
             AnyJsExpression::JsTemplateExpression(node.clone()),

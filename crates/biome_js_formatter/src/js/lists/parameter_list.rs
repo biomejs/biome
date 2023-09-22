@@ -38,7 +38,7 @@ impl<'a> FormatJsAnyParameterList<'a> {
 impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self.layout {
-            None | Some(ParameterLayout::Default) | Some(ParameterLayout::NoParameters) => {
+            None | Some(ParameterLayout::Default | ParameterLayout::NoParameters) => {
                 // The trailing separator is disallowed if the last element in the list is a rest parameter
                 let has_trailing_rest = match self.list.last() {
                     Some(elem) => matches!(

@@ -34,7 +34,7 @@ impl Default for PrintWidth {
 
 impl From<LineWidth> for PrintWidth {
     fn from(width: LineWidth) -> Self {
-        Self(u16::from(width) as u32)
+        Self(u32::from(u16::from(width)))
     }
 }
 

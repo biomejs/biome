@@ -205,7 +205,7 @@ impl Rule for NoNonoctalDecimalEscape {
         let prev_token = node.value_token().ok()?;
         let replaced = safe_replace_by_range(
             prev_token.text().to_string(),
-            replace_string_range.to_owned(),
+            replace_string_range.clone(),
             replace_to,
         )?;
 

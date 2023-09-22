@@ -29,12 +29,12 @@ pub(crate) fn write_member_name(
     f: &mut JsFormatter,
 ) -> FormatResult<usize> {
     match name {
-        name @ AnyJsMemberName::AnyJsClassMemberName(AnyJsClassMemberName::JsLiteralMemberName(
-            literal,
-        ))
-        | name @ AnyJsMemberName::AnyJsObjectMemberName(
+        name @ (AnyJsMemberName::AnyJsClassMemberName(
+            AnyJsClassMemberName::JsLiteralMemberName(literal),
+        )
+        | AnyJsMemberName::AnyJsObjectMemberName(
             AnyJsObjectMemberName::JsLiteralMemberName(literal),
-        ) => {
+        )) => {
             let value = literal.value()?;
 
             if value.kind() == JS_STRING_LITERAL {

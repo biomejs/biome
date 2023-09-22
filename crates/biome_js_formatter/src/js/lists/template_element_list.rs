@@ -253,12 +253,12 @@ pub struct TemplateElementIndention(u32);
 impl TemplateElementIndention {
     /// Returns the indention level
     pub(crate) fn level(&self, tab_width: TabWidth) -> u32 {
-        self.0 / (u8::from(tab_width) as u32)
+        self.0 / u32::from(u8::from(tab_width))
     }
 
     /// Returns the number of space indents on top of the indent level
     pub(crate) fn align(&self, tab_width: TabWidth) -> u8 {
-        (self.0 % u8::from(tab_width) as u32) as u8
+        (self.0 % u32::from(u8::from(tab_width))) as u8
     }
 
     /// Computes the indention after the last new line character.

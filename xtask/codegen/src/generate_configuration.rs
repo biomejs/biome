@@ -255,7 +255,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 let mut disabled_rules = IndexSet::new();
                 #( #group_rules_union )*
 
-                enabled_rules.difference(&disabled_rules).cloned().collect()
+                enabled_rules.difference(&disabled_rules).copied().collect()
             }
         }
 

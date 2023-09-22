@@ -659,7 +659,7 @@ pub trait BufferExtensions: Buffer + Sized {
     where
         I: IntoIterator<Item = FormatElement>,
     {
-        for element in elements.into_iter() {
+        for element in elements {
             self.write_element(element)?;
         }
 

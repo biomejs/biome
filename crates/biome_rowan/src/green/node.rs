@@ -215,8 +215,8 @@ impl GreenNodeData {
             .slots()
             .map(|slot| match slot {
                 Slot::Empty { .. } => None,
-                Slot::Node { node, .. } => Some(NodeOrToken::Node(node.to_owned())),
-                Slot::Token { token, .. } => Some(NodeOrToken::Token(token.to_owned())),
+                Slot::Node { node, .. } => Some(NodeOrToken::Node(node.clone())),
+                Slot::Token { token, .. } => Some(NodeOrToken::Token(token.clone())),
             })
             .collect();
 
