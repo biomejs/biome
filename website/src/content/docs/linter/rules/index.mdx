@@ -174,6 +174,8 @@ Require generator functions to contain <code>yield</code>.
 ## Performance
 
 Rules catching ways your code could be written to run faster, or generally be more efficient.
+### [noAccumulatingSpread](/linter/rules/no-accumulating-spread)
+Disallow the use of spread (<code>...</code>) syntax on accumulators.
 ### [noDelete](/linter/rules/no-delete)
 Disallow the use of the <code>delete</code> operator.
 
@@ -338,8 +340,6 @@ warning, depending on whether we intend for the rule to be recommended or not wh
 Nursery rules get promoted to other groups once they become stable or may be removed.
 
 Rules that belong to this group <strong>are not subject to semantic version</strong>.
-### [noAccumulatingSpread](/linter/rules/no-accumulating-spread)
-Disallow the use of spread (<code>...</code>) syntax on accumulators.
 ### [noConfusingVoidType](/linter/rules/no-confusing-void-type)
 Disallow <code>void</code> type outside of generic or return types.
 ### [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys)

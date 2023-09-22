@@ -2023,7 +2023,6 @@ impl VisitNode<JsonLanguage> for Nursery {
             &[
                 "recommended",
                 "all",
-                "noAccumulatingSpread",
                 "noConfusingVoidType",
                 "noDuplicateJsonKeys",
                 "noExcessiveComplexity",
@@ -2059,29 +2058,6 @@ impl VisitNode<JsonLanguage> for Nursery {
             "all" => {
                 self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
             }
-            "noAccumulatingSpread" => match value {
-                AnyJsonValue::JsonStringValue(_) => {
-                    let mut configuration = RuleConfiguration::default();
-                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.no_accumulating_spread = Some(configuration);
-                }
-                AnyJsonValue::JsonObjectValue(_) => {
-                    let mut rule_configuration = RuleConfiguration::default();
-                    rule_configuration.map_rule_configuration(
-                        &value,
-                        name_text,
-                        "noAccumulatingSpread",
-                        diagnostics,
-                    )?;
-                    self.no_accumulating_spread = Some(rule_configuration);
-                }
-                _ => {
-                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-                        "object or string",
-                        value.range(),
-                    ));
-                }
-            },
             "noConfusingVoidType" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
@@ -2461,7 +2437,11 @@ impl VisitNode<JsonLanguage> for Performance {
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        has_only_known_keys(node, &["recommended", "all", "noDelete"], diagnostics)
+        has_only_known_keys(
+            node,
+            &["recommended", "all", "noAccumulatingSpread", "noDelete"],
+            diagnostics,
+        )
     }
     fn visit_map(
         &mut self,
@@ -2478,6 +2458,29 @@ impl VisitNode<JsonLanguage> for Performance {
             "all" => {
                 self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
             }
+            "noAccumulatingSpread" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_accumulating_spread = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noAccumulatingSpread",
+                        diagnostics,
+                    )?;
+                    self.no_accumulating_spread = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
             "noDelete" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();

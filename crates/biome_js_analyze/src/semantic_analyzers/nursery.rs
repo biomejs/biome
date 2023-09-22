@@ -2,7 +2,6 @@
 
 use biome_analyze::declare_group;
 
-pub(crate) mod no_accumulating_spread;
 pub(crate) mod no_global_is_finite;
 pub(crate) mod no_global_is_nan;
 pub(crate) mod use_exhaustive_dependencies;
@@ -13,7 +12,6 @@ declare_group! {
     pub (crate) Nursery {
         name : "nursery" ,
         rules : [
-            self :: no_accumulating_spread :: NoAccumulatingSpread ,
             self :: no_global_is_finite :: NoGlobalIsFinite ,
             self :: no_global_is_nan :: NoGlobalIsNan ,
             self :: use_exhaustive_dependencies :: UseExhaustiveDependencies ,

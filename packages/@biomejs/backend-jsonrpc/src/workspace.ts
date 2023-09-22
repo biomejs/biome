@@ -654,10 +654,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow the use of spread (...) syntax on accumulators.
-	 */
-	noAccumulatingSpread?: RuleConfiguration;
-	/**
 	 * Disallow void type outside of generic or return types.
 	 */
 	noConfusingVoidType?: RuleConfiguration;
@@ -734,6 +730,10 @@ export interface Performance {
 	 * It enables ALL rules for this group.
 	 */
 	all?: boolean;
+	/**
+	 * Disallow the use of spread (...) syntax on accumulators.
+	 */
+	noAccumulatingSpread?: RuleConfiguration;
 	/**
 	 * Disallow the use of the delete operator.
 	 */
@@ -1275,7 +1275,6 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noExcessiveComplexity"
@@ -1293,6 +1292,7 @@ export type Category =
 	| "lint/nursery/useHookAtTopLevel"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIsArray"
+	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"

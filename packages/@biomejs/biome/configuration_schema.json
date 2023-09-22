@@ -967,13 +967,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noAccumulatingSpread": {
-					"description": "Disallow the use of spread (...) syntax on accumulators.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConfusingVoidType": {
 					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
@@ -1114,6 +1107,13 @@
 				"all": {
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
+				},
+				"noAccumulatingSpread": {
+					"description": "Disallow the use of spread (...) syntax on accumulators.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noDelete": {
 					"description": "Disallow the use of the delete operator.",

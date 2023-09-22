@@ -2,11 +2,7 @@
 title: noAccumulatingSpread (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noAccumulatingSpread`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/performance/noAccumulatingSpread`**
 
 Disallow the use of spread (`...`) syntax on accumulators.
 
@@ -26,7 +22,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => [...acc, val], []);
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAccumulatingSpread.js:2:25 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/nursery/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:25 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   
@@ -44,7 +40,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => {return [...acc, val];}, []);
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAccumulatingSpread.js:2:33 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/nursery/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:33 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   
@@ -62,7 +58,7 @@ var a = ['a', 'b', 'c'];
 a.reduce((acc, val) => ({...acc, [val]: val}), {});
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAccumulatingSpread.js:2:26 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/nursery/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">performance/noAccumulatingSpread.js:2:26 <a href="https://biomejs.dev/linter/rules/no-accumulating-spread">lint/performance/noAccumulatingSpread</a> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid the use of spread (`...`) syntax on accumulators.</span>
   

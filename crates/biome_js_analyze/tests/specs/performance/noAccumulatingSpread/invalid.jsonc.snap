@@ -9,7 +9,7 @@ foo.reduce((acc, bar) => [...acc, bar], [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:27 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:27 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -28,7 +28,7 @@ foo.reduceRight((acc, bar) => [...acc, bar], [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:32 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:32 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -47,7 +47,7 @@ foo.reduce((acc, bar) => {return [...acc, bar];}, [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:35 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -66,7 +66,7 @@ foo.reduceRight((acc, bar) => {return [...acc, bar];}, [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:40 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -85,7 +85,7 @@ foo.reduce((acc, bar) => [...acc, ...bar], [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:27 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:27 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -104,7 +104,7 @@ foo.reduceRight((acc, bar) => [...acc, ...bar], [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:32 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:32 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -123,7 +123,7 @@ foo.reduce((acc, bar) => {return [...acc, ...bar];}, [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:35 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -142,7 +142,7 @@ foo.reduceRight((acc, bar) => {return [...acc, ...bar];}, [])
 
 # Diagnostics
 ```
-invalid.jsonc:1:40 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -161,7 +161,7 @@ foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:28 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:28 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -180,7 +180,7 @@ foo.reduceRight((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:33 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:33 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -199,7 +199,7 @@ foo.reduce((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:35 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -218,7 +218,7 @@ foo.reduceRight((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:40 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -237,7 +237,7 @@ foo.reduce((acc, bar) => ({...acc, ...bar}), {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:28 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:28 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -256,7 +256,7 @@ foo.reduceRight((acc, bar) => ({...acc, ...bar}), {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:33 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:33 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -275,7 +275,7 @@ foo.reduce((acc, bar) => {return {...acc, ...bar};}, {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:35 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
@@ -294,7 +294,7 @@ foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})
 
 # Diagnostics
 ```
-invalid.jsonc:1:40 lint/nursery/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of spread (`...`) syntax on accumulators.
   
