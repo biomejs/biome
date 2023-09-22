@@ -5,12 +5,14 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, TextRange, TextSize};
 use biome_rowan::BatchMutationExt;
-use std::fmt::Write;
+use std::{fmt::Write, ops::Range};
 
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Disallow unclear usage of multiple space characters in regular expression literals
+    /// Disallow unclear usage of consecutive space characters in regular expression literals
+    ///
+    /// Source: https://eslint.org/docs/latest/rules/no-regex-spaces/
     ///
     /// ## Examples
     ///
@@ -21,19 +23,11 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// /  foo/
+    /// /foo  */
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// /foo   /
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// /foo  bar/
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// /foo   bar    baz/
+    /// /foo  {2,}bar   {3,5}baz/
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -47,15 +41,11 @@ declare_rule! {
     ///```
     ///
     /// ```js
-    /// /foo bar baz/
+    /// / foo bar baz /
     ///```
     ///
     /// ```js
     /// /foo bar	baz/
-    ///```
-    ///
-    /// ```js
-    /// /foo /
     ///```
     pub(crate) NoMultipleSpacesInRegularExpressionLiterals {
         version: "1.0.0",
@@ -66,7 +56,7 @@ declare_rule! {
 
 impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
     type Query = Ast<JsRegexLiteralExpression>;
-    type State = Vec<(usize, usize)>;
+    type State = Vec<Range<usize>>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -74,19 +64,19 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         let value_token = ctx.query().value_token().ok()?;
         let trimmed_text = value_token.text_trimmed();
         let mut range_list = vec![];
-        let mut continue_white_space = false;
-        let mut last_white_index = 0;
+        let mut previous_is_space = false;
+        let mut first_consecutive_space_index = 0;
         for (i, ch) in trimmed_text.chars().enumerate() {
             if ch == ' ' {
-                if !continue_white_space {
-                    continue_white_space = true;
-                    last_white_index = i;
+                if !previous_is_space {
+                    previous_is_space = true;
+                    first_consecutive_space_index = i;
                 }
-            } else if continue_white_space {
-                if i - last_white_index > 1 {
-                    range_list.push((last_white_index, i));
+            } else if previous_is_space {
+                if i - first_consecutive_space_index > 1 {
+                    range_list.push(first_consecutive_space_index..i);
                 }
-                continue_white_space = false;
+                previous_is_space = false;
             }
         }
         if !range_list.is_empty() {
@@ -101,50 +91,117 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         let value_token_range = value_token.text_trimmed_range();
         // SAFETY: We know diagnostic will be sended only if the `range_list` is not empty
         // first and last continuous whitespace range of `range_list`
-        let (first_start, _) = state[0];
-        let (_, last_end) = state[state.len() - 1];
-
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            TextRange::new(
-                value_token_range.start() + TextSize::from(first_start as u32),
-                value_token_range.start() + TextSize::from(last_end as u32),
-            ),
-            markup! {
-                "This regular expression contains unclear uses of multiple spaces."
-            },
-        ))
+        let Range {
+            start: first_start, ..
+        } = state[0];
+        let Range { end: last_end, .. } = state[state.len() - 1];
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                TextRange::new(
+                    value_token_range.start() + TextSize::from(first_start as u32),
+                    value_token_range.start() + TextSize::from(last_end as u32),
+                ),
+                markup! {
+                    "This regular expression contains unclear uses of consecutive spaces."
+                },
+            )
+            .note(markup! { "It's hard to visually count the amount of spaces." }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
-
-        let trimmed_token = ctx.query().value_token().ok()?;
-        let trimmed_token_string = trimmed_token.text_trimmed();
-        let mut normalized_string_token = String::new();
+        let token = ctx.query().value_token().ok()?;
+        let text = token.text_trimmed();
+        let mut normalized_text = String::with_capacity(text.len());
         let mut previous_start = 0;
-
-        let mut eg_length = 0;
-
-        for (start, end) in state.iter() {
-            normalized_string_token += &trimmed_token_string[previous_start..*start];
-            write!(normalized_string_token, " {{{}}}", *end - *start).unwrap();
-            previous_start = *end;
-            eg_length += *end - *start;
+        for range in state {
+            // copy previous characters and the first space
+            normalized_text += &text[previous_start..range.start + 1];
+            let n = match text.chars().nth(range.end) {
+                Some('?') => {
+                    write!(normalized_text, "{{{},{}}}", range.len() - 1, range.len()).unwrap();
+                    1
+                }
+                Some('+') => {
+                    write!(normalized_text, "{{{},}}", range.len()).unwrap();
+                    1
+                }
+                Some('*') => {
+                    if range.len() == 2 {
+                        write!(normalized_text, "+").unwrap();
+                    } else {
+                        write!(normalized_text, "{{{},}}", range.len() - 1).unwrap();
+                    }
+                    1
+                }
+                Some('{') => {
+                    let (quantifier, n) = parse_range_quantifier(&text[range.end..])?;
+                    match quantifier {
+                        RegexQuantifier::Amount(amount) => {
+                            write!(normalized_text, "{{{}}}", amount + range.len() - 1).unwrap();
+                        }
+                        RegexQuantifier::OpenRange(start) => {
+                            write!(normalized_text, "{{{},}}", start + range.len() - 1).unwrap();
+                        }
+                        RegexQuantifier::InclusiveRange((start, end)) => {
+                            let extra = range.len() - 1;
+                            write!(normalized_text, "{{{},{}}}", start + extra, end + extra)
+                                .unwrap();
+                        }
+                    }
+                    n
+                }
+                _ => {
+                    write!(normalized_text, "{{{}}}", range.len()).unwrap();
+                    0
+                }
+            };
+            previous_start = range.end + n;
         }
-        normalized_string_token += &trimmed_token_string[previous_start..];
-        let next_trimmed_token = JsSyntaxToken::new_detached(
-            JsSyntaxKind::JS_REGEX_LITERAL,
-            &normalized_string_token,
-            [],
-            [],
-        );
-        mutation.replace_token(trimmed_token, next_trimmed_token);
+        normalized_text += &text[previous_start..];
+        let next_trimmed_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &normalized_text, [], []);
+        let mut mutation = ctx.root().begin();
+        mutation.replace_token(token, next_trimmed_token);
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "It's hard to visually count the amount of spaces, it's clearer if you use a quantifier instead. eg / {"{eg_length}"}/" }.to_owned(),
+            message: markup! { "Use a quantifier instead." }.to_owned(),
             mutation,
         })
     }
+}
+
+#[derive(Debug)]
+enum RegexQuantifier {
+    /// `{n}`
+    Amount(usize),
+    /// `{n,}`
+    OpenRange(usize),
+    /// `{n,m}`
+    InclusiveRange((usize, usize)),
+}
+
+/// Returns the quantifier and the number of consumed characters,
+/// if `source` starts with a well-formed range quantifier such as `{1,2}`.
+fn parse_range_quantifier(source: &str) -> Option<(RegexQuantifier, usize)> {
+    debug_assert!(source.starts_with('{'));
+    let quantifier_end = source.find('}')?;
+    let comma = source[..quantifier_end].find(',');
+    // A range quantifier must include at least one number.
+    // If a comma is present, a number must precede the comma.
+    let quantifier_start: usize = source[1..comma.unwrap_or(quantifier_end)].parse().ok()?;
+    let quantifier = if let Some(comma) = comma {
+        debug_assert!(comma < quantifier_end);
+        let quantifier_end = source[comma + 1..quantifier_end].parse::<usize>();
+        if let Ok(quantifier_end) = quantifier_end {
+            RegexQuantifier::InclusiveRange((quantifier_start, quantifier_end))
+        } else {
+            RegexQuantifier::OpenRange(quantifier_start)
+        }
+    } else {
+        RegexQuantifier::Amount(quantifier_start)
+    };
+    Some((quantifier, quantifier_end + 1))
 }
