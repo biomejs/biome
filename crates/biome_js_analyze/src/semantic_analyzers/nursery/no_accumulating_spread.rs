@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
     JsFormalParameter, JsParameterList, JsParameters, JsSpread,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstSeparatedList};
 
 use crate::semantic_services::Semantic;
 
@@ -104,7 +104,7 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
         .ok()?
         .as_js_parameters()?
         .items()
-        .into_iter()
+        .iter()
         .count();
     if !(2..=4).contains(&param_count) {
         return None;
@@ -117,7 +117,7 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
 
     // The accumulator function should be a part of a call expression. This call expression should
     // have no more than 2 arguments. (callback, initialValue)
-    let arg_count = call_expression.arguments().ok()?.args().into_iter().count();
+    let arg_count = call_expression.arguments().ok()?.args().iter().count();
     if arg_count > 2 {
         return None;
     }
