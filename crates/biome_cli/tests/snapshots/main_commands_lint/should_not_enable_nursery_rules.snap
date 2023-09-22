@@ -14,7 +14,7 @@ expression: content
     "rules": {
       "recommended": true,
       "nursery": {
-        "noAccumulatingSpread": "error"
+        "noUselessElse": "error"
       }
     }
   }

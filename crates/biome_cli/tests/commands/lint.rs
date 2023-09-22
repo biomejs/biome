@@ -2123,7 +2123,7 @@ fn should_not_enable_nursery_rules() {
     "rules": {
       "recommended": true,
       "nursery": {
-        "noAccumulatingSpread": "error"
+        "noUselessElse": "error"
       }
     }
   }
