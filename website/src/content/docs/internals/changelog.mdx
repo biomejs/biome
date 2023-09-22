@@ -43,7 +43,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
-- Fix [#322](ttps://github.com/biomejs/biome/issues/322), now [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) correctly handles literals inside call expressions. Contributed by @ematipico
+- Fix [#322](ttps://github.com/biomejs/biome/issues/322), now [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) correctly handles literals inside call expressions.
+- Changed how [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) behaves. The rule is not triggered anymore on function calls. Contributed by @ematipico
 
 #### New features
 

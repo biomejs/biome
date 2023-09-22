@@ -334,12 +334,10 @@ impl SameIdentifiers {
                             .ok()?;
                             return Some(AnyAssignmentLike::Identifiers(source_identifier));
                         }
+                    } else if identifier_like.is_literal() {
+                        return Some(AnyAssignmentLike::Identifiers(identifier_like));
                     } else {
-                        if identifier_like.is_literal() {
-                            return Some(AnyAssignmentLike::Identifiers(identifier_like));
-                        } else {
-                            return Self::next_static_expression(left, right);
-                        }
+                        return Self::next_static_expression(left, right);
                     }
                 }
             }
