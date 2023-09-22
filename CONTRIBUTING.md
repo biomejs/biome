@@ -421,7 +421,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Core Contributors team
 
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
-
+- [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev)
 
 ### Maintainers team
 
