@@ -173,19 +173,16 @@ fn is_valid_attribute_value(
 
 /// Checks if the given `JsxChildList` has a valid `title` element.
 fn has_valid_title_element(jsx_child_list: &JsxChildList) -> Option<bool> {
-    jsx_child_list
-        .iter()
-        .filter_map(|child| {
-            let jsx_element = child.as_jsx_element()?;
-            let opening_element = jsx_element.opening_element().ok()?;
-            let name = opening_element.name().ok()?;
-            let name = name.as_jsx_name()?.value_token().ok()?;
-            let has_title_name = name.text_trimmed() == "title";
-            if !has_title_name {
-                return has_valid_title_element(&jsx_element.children());
-            }
-            let is_empty_child = jsx_element.children().is_empty();
-            Some(has_title_name && !is_empty_child)
-        })
-        .next()
+    jsx_child_list.iter().find_map(|child| {
+        let jsx_element = child.as_jsx_element()?;
+        let opening_element = jsx_element.opening_element().ok()?;
+        let name = opening_element.name().ok()?;
+        let name = name.as_jsx_name()?.value_token().ok()?;
+        let has_title_name = name.text_trimmed() == "title";
+        if !has_title_name {
+            return has_valid_title_element(&jsx_element.children());
+        }
+        let is_empty_child = jsx_element.children().is_empty();
+        Some(has_title_name && !is_empty_child)
+    })
 }

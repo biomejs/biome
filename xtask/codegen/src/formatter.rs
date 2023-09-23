@@ -128,11 +128,10 @@ struct ModuleIndex {
 impl ModuleIndex {
     fn new(root: PathBuf) -> Self {
         let mut unused_files = HashSet::new();
-        let mut queue = VecDeque::from_iter(
-            NodeDialect::all()
-                .iter()
-                .map(|dialect| root.join(dialect.as_str())),
-        );
+        let mut queue: VecDeque<_> = NodeDialect::all()
+            .iter()
+            .map(|dialect| root.join(dialect.as_str()))
+            .collect();
 
         while let Some(dir) = queue.pop_front() {
             if !dir.exists() {

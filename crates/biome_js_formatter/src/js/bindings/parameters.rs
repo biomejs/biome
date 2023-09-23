@@ -6,7 +6,8 @@ use crate::js::lists::parameter_list::FormatJsAnyParameterList;
 use crate::utils::test_call::is_test_call_argument;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{
-    AnyJsConstructorParameter, AnyJsFormalParameter, AnyTsType, JsArrowFunctionExpression,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
     JsConstructorParameters, JsParameters, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, SyntaxResult};
@@ -204,10 +205,59 @@ pub(crate) fn should_hug_function_parameters(
     parameters: &FormatAnyJsParameters,
     comments: &JsComments,
 ) -> FormatResult<bool> {
-    use biome_js_syntax::{
-        AnyJsBinding::*, AnyJsBindingPattern::*, AnyJsExpression::*, AnyJsFormalParameter::*,
-        AnyJsParameter::*,
-    };
+    /// Returns true if the first parameter should be forced onto the same line as the `(` and `)` parentheses.
+    /// See the `[ParameterLayout::Hug] documentation.
+    fn hug_formal_parameter(parameter: &self::AnyJsFormalParameter) -> FormatResult<bool> {
+        let result = match parameter {
+            AnyJsFormalParameter::JsFormalParameter(parameter) => {
+                match parameter.initializer() {
+                    None => {
+                        match parameter.binding()? {
+                            // always true for `[a]` or `{a}`
+                            AnyJsBindingPattern::JsArrayBindingPattern(_)
+                            | AnyJsBindingPattern::JsObjectBindingPattern(_) => true,
+                            // only if the type parameter is an object type
+                            // `a: { prop: string }`
+                            AnyJsBindingPattern::AnyJsBinding(
+                                AnyJsBinding::JsIdentifierBinding(_),
+                            ) => parameter
+                                .type_annotation()
+                                .map_or(false, |type_annotation| {
+                                    matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
+                                }),
+                            AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsBogusBinding(_)) => {
+                                return Err(FormatError::SyntaxError);
+                            }
+                        }
+                    }
+
+                    Some(initializer) => {
+                        // only for `[a] = []`, `{a} = {}`
+                        let object_or_array_binding = matches!(
+                            parameter.binding()?,
+                            AnyJsBindingPattern::JsArrayBindingPattern(_)
+                                | AnyJsBindingPattern::JsObjectBindingPattern(_)
+                        );
+                        let should_hug_right = match initializer.expression()? {
+                            AnyJsExpression::JsObjectExpression(object) => {
+                                object.members().is_empty()
+                            }
+                            AnyJsExpression::JsArrayExpression(array) => {
+                                array.elements().is_empty()
+                            }
+                            AnyJsExpression::JsIdentifierExpression(_) => true,
+                            _ => false,
+                        };
+
+                        object_or_array_binding && should_hug_right
+                    }
+                }
+            }
+            AnyJsFormalParameter::JsBogusParameter(_) => return Err(FormatError::SyntaxError),
+        };
+
+        Ok(result)
+    }
 
     let list = parameters.list();
 
@@ -222,59 +272,17 @@ pub(crate) fn should_hug_function_parameters(
         return Ok(false);
     }
 
-    /// Returns true if the first parameter should be forced onto the same line as the `(` and `)` parentheses.
-    /// See the `[ParameterLayout::Hug] documentation.
-    fn hug_formal_parameter(parameter: &self::AnyJsFormalParameter) -> FormatResult<bool> {
-        let result = match parameter {
-            JsFormalParameter(parameter) => {
-                match parameter.initializer() {
-                    None => {
-                        match parameter.binding()? {
-                            // always true for `[a]` or `{a}`
-                            JsArrayBindingPattern(_) | JsObjectBindingPattern(_) => true,
-                            // only if the type parameter is an object type
-                            // `a: { prop: string }`
-                            AnyJsBinding(JsIdentifierBinding(_)) => parameter
-                                .type_annotation()
-                                .map_or(false, |type_annotation| {
-                                    matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
-                                }),
-                            AnyJsBinding(JsBogusBinding(_)) => {
-                                return Err(FormatError::SyntaxError);
-                            }
-                        }
-                    }
-
-                    Some(initializer) => {
-                        // only for `[a] = []`, `{a} = {}`
-                        let object_or_array_binding = matches!(
-                            parameter.binding()?,
-                            JsArrayBindingPattern(_) | JsObjectBindingPattern(_)
-                        );
-                        let should_hug_right = match initializer.expression()? {
-                            JsObjectExpression(object) => object.members().is_empty(),
-                            JsArrayExpression(array) => array.elements().is_empty(),
-                            JsIdentifierExpression(_) => true,
-                            _ => false,
-                        };
-
-                        object_or_array_binding && should_hug_right
-                    }
-                }
-            }
-            JsBogusParameter(_) => return Err(FormatError::SyntaxError),
-        };
-
-        Ok(result)
-    }
-
     let result = match only_parameter {
         AnyParameter::AnyJsParameter(parameter) => match parameter {
-            AnyJsFormalParameter(formal_parameter) => hug_formal_parameter(&formal_parameter)?,
-            JsRestParameter(_) => false,
-            TsThisParameter(this) => this.type_annotation().map_or(false, |type_annotation| {
-                matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
-            }),
+            AnyJsParameter::AnyJsFormalParameter(formal_parameter) => {
+                hug_formal_parameter(&formal_parameter)?
+            }
+            AnyJsParameter::JsRestParameter(_) => false,
+            AnyJsParameter::TsThisParameter(this) => {
+                this.type_annotation().map_or(false, |type_annotation| {
+                    matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
+                })
+            }
         },
         AnyParameter::AnyJsConstructorParameter(constructor_parameter) => {
             match constructor_parameter {
