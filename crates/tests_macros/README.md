@@ -2,13 +2,6 @@
 
 A set of utilities that automatically generate unit tests from files.
 
-## How to install
-
-```
-[dev-dependencies]
-tests_macros = { path = "../tests_macros" }
-``` 
-
 ## Usage
 
 First argument: glob that will passed to https://github.com/gilnaa/globwalk. Crate's cargo.toml will be the base directory. To pattern format see here: https://git-scm.com/docs/gitignore#_pattern_format  

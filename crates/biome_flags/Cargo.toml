@@ -1,10 +1,16 @@
 [package]
 authors.workspace    = true
+categories.workspace = true
+description          = "Utilities to implement simple feature flags"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_flags"
+publish              = false
 repository.workspace = true
 version              = "0.0.0"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

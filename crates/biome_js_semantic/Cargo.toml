@@ -1,12 +1,15 @@
 [package]
 authors.workspace    = true
-description          = "Semantic model for the JavaScript language"
-documentation        = "https://docs.rs/biome_js_semantic"
+categories.workspace = true
+description          = "Biome's semantic model for JavaScript"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_semantic"
+publish              = false
 repository.workspace = true
-version              = "0.2.0"
+version              = "0.0.0"
 
 [dependencies]
 biome_js_syntax = { workspace = true }

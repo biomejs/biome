@@ -1,11 +1,15 @@
 [package]
-authors     = { workspace = true }
-description = "Rome suppression utilities"
-edition     = { workspace = true }
-license     = { workspace = true }
-name        = "biome_suppression"
-repository  = { workspace = true }
-version     = "0.2.0"
+authors.workspace    = true
+categories.workspace = true
+description          = "Utilities to suppress diagnostics"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_suppression"
+publish              = false
+repository.workspace = true
+version              = "0.0.0"
 
 
 [dependencies]

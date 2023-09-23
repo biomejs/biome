@@ -1,12 +1,14 @@
 [package]
 authors.workspace    = true
-description          = "Shared infrastructure for Rome's parser"
-documentation        = "https://docs.rs/biome_parser"
+categories.workspace = true
+description          = "Biome's parser shared infrastructure"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_parser"
 repository.workspace = true
-version              = "0.2.0"
+version              = "0.0.1"
 
 
 [dependencies]

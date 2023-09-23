@@ -5,13 +5,10 @@
 <div align="center">
 
 [![Discord chat][discord-badge]][discord-url]
-[![CI][ci-badge]][ci-url]
 [![cargo version][cargo-badge]][cargo-url]
 
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
 [discord-url]: https://discord.gg/BypW39g6Yc
-[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [cargo-badge]: https://badgen.net/crates/v/biome_js_parser?&color=green
 [cargo-url]: https://crates.io/crates/biome_js_parser/
 
@@ -20,4 +17,3 @@
 # `biome_js_parser`
 
 Biome's JavaScript parser implementation. Follow the [documentation](https://docs.rs/biome_js_parser/).
-

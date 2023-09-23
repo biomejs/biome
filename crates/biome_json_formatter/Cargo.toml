@@ -1,14 +1,14 @@
 [package]
 authors.workspace    = true
-categories           = ["development-tools"]
-description          = "Rome's JSON formatter"
-documentation        = "https://docs.rs/biome_js_formatter"
+categories.workspace = true
+description          = "Biome's JSON formatter"
 edition.workspace    = true
 homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_json_formatter"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.0.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

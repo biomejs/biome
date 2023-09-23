@@ -1,12 +1,15 @@
 [package]
-authors              = ["Rome Tools and Contributors"]
+authors.workspace    = true
+categories.workspace = true
 description          = "Unicode table for JavaScript IDs"
-documentation        = "https://docs.rs/biome_js_parser"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_unicode_table"
+publish              = false
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.0.0"
 
 [dependencies]
 

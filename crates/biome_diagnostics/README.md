@@ -1,7 +1,6 @@
 # `biome_diagnostics`
 
-This crate contains the types and utility functions used to implement errors
-and diagnostics in the Biome codebase
+This crate contains the types and utility functions used to implement errors and diagnostics in the Biome codebase.
 
 ## Acknowledgement
 

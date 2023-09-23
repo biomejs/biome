@@ -1,11 +1,15 @@
 [package]
-authors     = ["Biome Tools Developers and Contributors"]
-description = "WebAssembly bindings to the Biome Workspace API"
-edition     = "2021"
-license     = "MIT"
-name        = "biome_wasm"
-repository  = "https://github.com/biomejs/biome"
-version     = "0.2.0"
+authors.workspace    = true
+categories.workspace = true
+description          = "WebAssembly bindings to the Biome workspace API"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_wasm"
+publish              = false
+repository.workspace = true
+version              = "0.0.0"
 
 
 [lib]
@@ -16,8 +20,8 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 biome_console      = { workspace = true }
-biome_diagnostics  = { path = "../../crates/biome_diagnostics" }
-biome_service      = { path = "../../crates/biome_service" }
+biome_diagnostics  = { workspace = true }
+biome_service      = { workspace = true }
 js-sys             = "0.3.59"
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.4.5"

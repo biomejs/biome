@@ -4,9 +4,3 @@ The crate contains procedural macros to build `biome_console` markup object with
 
 The macro cannot be used alone as it generates code that requires supporting types declared in the
 `biome_console` crate, so it's re-exported from there and should be used as `biome_console::markup`
-
-## Local installation
-
-```toml
-biome_markup = { version = "0.0.0", path = "../biome_markup" }
-```

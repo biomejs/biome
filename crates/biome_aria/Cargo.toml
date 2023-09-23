@@ -1,8 +1,13 @@
 [package]
 authors.workspace    = true
+categories.workspace = true
+description          = "Utilities to create ARIA query for biome_js_analyze"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_aria"
+publish              = false
 repository.workspace = true
 version              = "0.0.0"
 
