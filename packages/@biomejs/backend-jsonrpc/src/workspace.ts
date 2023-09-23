@@ -761,6 +761,10 @@ export interface Nursery {
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration;
 	/**
+	 * Restrict use of implicit any type in Typescript.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
+	/**
 	 * Enforce proper usage of new and constructor.
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
@@ -1458,6 +1462,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
+	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"

@@ -2634,6 +2634,10 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_interactive_element_to_noninteractive_role: Option<RuleConfiguration>,
+    #[doc = "Restrict use of implicit any type in Typescript."]
+    #[bpaf(long("no-implicit-any-let"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_implicit_any_let: Option<RuleConfiguration>,
     #[doc = "Disallow new operators with global non-constructor functions."]
     #[bpaf(
         long("no-invalid-new-builtin"),
@@ -2830,12 +2834,13 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 22] = [
+    pub(crate) const GROUP_RULES: [&'static str; 23] = [
         "noApproximativeNumericConstant",
         "noDefaultExport",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
         "noEmptyCharacterClassInRegex",
+        "noImplicitAnyLet",
         "noInteractiveElementToNoninteractiveRole",
         "noInvalidNewBuiltin",
         "noMisleadingInstantiator",
@@ -2854,9 +2859,10 @@ impl Nursery {
         "useShorthandAssign",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES: [&'static str; 10] = [
+    const RECOMMENDED_RULES: [&'static str; 11] = [
         "noDuplicateJsonKeys",
         "noEmptyCharacterClassInRegex",
+        "noImplicitAnyLet",
         "noInvalidNewBuiltin",
         "noMisleadingInstantiator",
         "noUselessElse",
@@ -2866,9 +2872,10 @@ impl Nursery {
         "useGroupedTypeImport",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 10] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 11] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
@@ -2952,7 +2959,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_misleading_instantiator.as_ref() {
+        if let Some(rule) = self.no_implicit_any_let.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -3066,7 +3073,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_misleading_instantiator.as_ref() {
+        if let Some(rule) = self.no_implicit_any_let.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -3151,7 +3158,7 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 10] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 11] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 22] {
@@ -3185,6 +3192,7 @@ impl Nursery {
             "noInteractiveElementToNoninteractiveRole" => {
                 self.no_interactive_element_to_noninteractive_role.as_ref()
             }
+            "noImplicitAnyLet" => self.no_implicit_any_let.as_ref(),
             "noInvalidNewBuiltin" => self.no_invalid_new_builtin.as_ref(),
             "noMisleadingInstantiator" => self.no_misleading_instantiator.as_ref(),
             "noMisrefactoredShorthandAssign" => self.no_misrefactored_shorthand_assign.as_ref(),

@@ -890,6 +890,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noImplicitAnyLet" => {
+                            result.no_implicit_any_let = Deserializable::deserialize(
+                                &value,
+                                "noImplicitAnyLet",
+                                diagnostics,
+                            );
+                        }
                         "noInteractiveElementToNoninteractiveRole" => {
                             result.no_interactive_element_to_noninteractive_role =
                                 Deserializable::deserialize(
@@ -1011,6 +1018,7 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noEmptyCharacterClassInRegex",
+                                    "noImplicitAnyLet",
                                     "noInteractiveElementToNoninteractiveRole",
                                     "noInvalidNewBuiltin",
                                     "noMisleadingInstantiator",

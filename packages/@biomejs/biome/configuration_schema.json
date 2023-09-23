@@ -1079,6 +1079,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImplicitAnyLet": {
+					"description": "Restrict use of implicit any type in Typescript.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisleadingInstantiator": {
 					"description": "Enforce proper usage of new and constructor.",
 					"anyOf": [
