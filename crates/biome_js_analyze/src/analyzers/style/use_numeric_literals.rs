@@ -15,17 +15,26 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 declare_rule! {
     /// Disallow `parseInt()` and `Number.parseInt()` in favor of binary, octal, and hexadecimal literals
     ///
+    /// _JavaScript_ provides literal forms for binary, octal, and hexadecimal numbers.
+    /// For example: `0b11`, `0o77`, and `0xff`.
+    /// Using the literal forms enable static code analysis and avoid unnecessary computations.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// parseInt("111110111", 2) === 503;
+    /// parseInt("111110111", 2);
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// Number.parseInt("767", 8) === 503;
+    /// Number.parseInt("767", 8);
     /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// Number.parseInt("-1f7", 16);
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -52,12 +61,6 @@ declare_rule! {
     }
 }
 
-pub struct CallInfo {
-    callee: &'static str,
-    text: String,
-    radix: Radix,
-}
-
 impl Rule for UseNumericLiterals {
     type Query = Semantic<JsCallExpression>;
     type State = CallInfo;
@@ -72,13 +75,14 @@ impl Rule for UseNumericLiterals {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
-            markup! { "Use "{state.radix.description()}" literals instead of "{state.callee} }
+            markup! { "This call to "<Emphasis>{state.callee}</Emphasis>" can be replaced by "{state.radix.article()}" "{state.radix.description()}" literal." }
                 .to_owned(),
-        ))
+        ).note(markup! {
+            "Using a literal avoids unnecessary computations."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, call: &Self::State) -> Option<JsRuleAction> {
@@ -98,10 +102,17 @@ impl Rule for UseNumericLiterals {
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace with "{call.radix.description()}" literals" }.to_owned(),
+            message: markup! { "Use the computed "{call.radix.description()}" literal instead." }
+                .to_owned(),
             mutation,
         })
     }
+}
+
+pub struct CallInfo {
+    callee: &'static str,
+    text: String,
+    radix: Radix,
 }
 
 impl CallInfo {
@@ -110,17 +121,15 @@ impl CallInfo {
         if args.len() != 2 {
             return None;
         }
-        let mut args = args.into_iter();
-        let text = args
-            .next()?
-            .ok()?
+        let [Some(text), Some(radix)] = expr.get_arguments_by_index([0, 1]) else {
+            return None;
+        };
+        let text = text
             .as_any_js_expression()?
             .as_static_value()?
             .as_string_constant()?
             .to_string();
-        let radix = args
-            .next()?
-            .ok()?
+        let radix = radix
             .as_any_js_expression()?
             .as_any_js_literal_expression()?
             .as_js_number_literal_expression()?
@@ -134,9 +143,17 @@ impl CallInfo {
     }
 
     fn to_numeric_literal(&self) -> Option<JsSyntaxToken> {
-        i128::from_str_radix(&self.text, self.radix as u32).ok()?;
-        let number = format!("{}{}", self.radix.prefix(), self.text);
-        let number = make::js_number_literal(&number);
+        // `parseInt` ignores leading and trailing white-spaces
+        let text_trimmed = self.text.trim();
+        // Handle optional sign
+        let (sign, text_trimmed) = if let Some(text) = text_trimmed.strip_prefix('-') {
+            ("-", text)
+        } else {
+            ("", text_trimmed.strip_prefix('+').unwrap_or(text_trimmed))
+        };
+        i128::from_str_radix(text_trimmed, self.radix as u32).ok()?;
+        let prefix = self.radix.prefix();
+        let number = make::js_number_literal(format_args!("{sign}{prefix}{text_trimmed}"));
         Some(number)
     }
 }
@@ -181,19 +198,27 @@ impl Radix {
         })
     }
 
-    fn prefix(&self) -> &'static str {
+    const fn prefix(self) -> &'static str {
         match self {
-            Radix::Binary => "0b",
-            Radix::Octal => "0o",
-            Radix::Hexadecimal => "0x",
+            Self::Binary => "0b",
+            Self::Octal => "0o",
+            Self::Hexadecimal => "0x",
         }
     }
 
-    fn description(&self) -> &'static str {
+    const fn description(self) -> &'static str {
         match self {
-            Radix::Binary => "binary",
-            Radix::Octal => "octal",
-            Radix::Hexadecimal => "hexadecimal",
+            Self::Binary => "binary",
+            Self::Octal => "octal",
+            Self::Hexadecimal => "hexadecimal",
+        }
+    }
+
+    const fn article(self) -> &'static str {
+        if matches!(self, Self::Octal) {
+            "an"
+        } else {
+            "a"
         }
     }
 }
