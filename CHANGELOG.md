@@ -54,6 +54,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   - [noUselessLabel](https://biomejs.dev/linter/rules/no-useless-label)
   - [noUselessTypeConstraint](https://biomejs.dev/linter/rules/no-useless-type-constraint)
+  - [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
 
 #### Bug fixes
 

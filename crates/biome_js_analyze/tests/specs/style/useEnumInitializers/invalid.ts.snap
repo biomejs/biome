@@ -52,6 +52,26 @@ export namespace A {
     }
 }
 
+const RED = 0;
+export enum RgbColor {
+	Red = RED,
+	Green,
+	Blue,
+}
+
+export enum RgbColor2 {
+	Red = RED,
+	Green = 5,
+	Blue,
+}
+
+const GREEN = 0;
+export enum RgbColor3 {
+	Red,
+	Green = GREEN,
+	Blue,
+}
+
 ```
 
 # Diagnostics
@@ -84,7 +104,7 @@ invalid.ts:1:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
   i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
   
-  i Suggested fix: Initialize all enum members.
+  i Safe fix: Initialize all enum members.
   
      1  1 │   export enum Status {
      2    │ - → Close,
@@ -174,7 +194,7 @@ invalid.ts:14:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
   i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
   
-  i Suggested fix: Initialize all enum members.
+  i Safe fix: Initialize all enum members.
   
     13 13 │   
     14 14 │   export enum Direction {
@@ -215,7 +235,7 @@ invalid.ts:21:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
   i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
   
-  i Suggested fix: Initialize all enum members.
+  i Safe fix: Initialize all enum members.
   
     24 │ → Blue·=·"Blue",
        │       +++++++++ 
@@ -315,7 +335,7 @@ invalid.ts:42:21 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
   i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
   
-  i Suggested fix: Initialize all enum members.
+  i Safe fix: Initialize all enum members.
   
     41 41 │       export namespace B {
     42 42 │           export enum Enum {
@@ -326,6 +346,108 @@ invalid.ts:42:21 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
     45 45 │           }
     46 46 │       }
   
+
+```
+
+```
+invalid.ts:50:13 lint/style/useEnumInitializers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    49 │ const RED = 0;
+  > 50 │ export enum RgbColor {
+       │             ^^^^^^^^
+    51 │ 	Red = RED,
+    52 │ 	Green,
+  
+  i This enum member should be explicitly initialized.
+  
+    50 │ export enum RgbColor {
+    51 │ 	Red = RED,
+  > 52 │ 	Green,
+       │ 	^^^^^
+    53 │ 	Blue,
+    54 │ }
+  
+  i This enum member should be explicitly initialized.
+  
+    51 │ 	Red = RED,
+    52 │ 	Green,
+  > 53 │ 	Blue,
+       │ 	^^^^
+    54 │ }
+    55 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+
+```
+
+```
+invalid.ts:56:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    54 │ }
+    55 │ 
+  > 56 │ export enum RgbColor2 {
+       │             ^^^^^^^^^
+    57 │ 	Red = RED,
+    58 │ 	Green = 5,
+  
+  i This enum member should be explicitly initialized.
+  
+    57 │ 	Red = RED,
+    58 │ 	Green = 5,
+  > 59 │ 	Blue,
+       │ 	^^^^
+    60 │ }
+    61 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Safe fix: Initialize all enum members.
+  
+    59 │ → Blue·=·6,
+       │       ++++ 
+
+```
+
+```
+invalid.ts:63:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This enum declaration contains members that are implicitly initialized.
+  
+    62 │ const GREEN = 0;
+  > 63 │ export enum RgbColor3 {
+       │             ^^^^^^^^^
+    64 │ 	Red,
+    65 │ 	Green = GREEN,
+  
+  i This enum member should be explicitly initialized.
+  
+    62 │ const GREEN = 0;
+    63 │ export enum RgbColor3 {
+  > 64 │ 	Red,
+       │ 	^^^
+    65 │ 	Green = GREEN,
+    66 │ 	Blue,
+  
+  i This enum member should be explicitly initialized.
+  
+    64 │ 	Red,
+    65 │ 	Green = GREEN,
+  > 66 │ 	Blue,
+       │ 	^^^^
+    67 │ }
+    68 │ 
+  
+  i Allowing implicit initializations for enum members can cause bugs if enum declarations are modified over time.
+  
+  i Safe fix: Initialize all enum members.
+  
+    64 │ → Red·=·0,
+       │      ++++ 
 
 ```
 
