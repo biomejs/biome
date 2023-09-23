@@ -334,20 +334,18 @@ impl SemanticEventExtractor {
 
     fn is_var(binding: &impl AstNode<Language = JsLanguage>) -> Option<bool> {
         let declarator = binding.parent::<JsVariableDeclarator>()?;
-
-        use JsSyntaxKind::*;
         let is_var = match declarator.syntax().parent().kind() {
-            Some(JS_VARIABLE_DECLARATOR_LIST) => declarator
+            Some(JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST) => declarator
                 .parent::<JsVariableDeclaratorList>()?
                 .parent::<JsVariableDeclaration>()?
                 .is_var(),
-            Some(JS_FOR_VARIABLE_DECLARATION) => {
+            Some(JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION) => {
                 declarator
                     .parent::<JsForVariableDeclaration>()?
                     .kind_token()
                     .ok()?
                     .kind()
-                    == VAR_KW
+                    == JsSyntaxKind::VAR_KW
             }
             _ => false,
         };

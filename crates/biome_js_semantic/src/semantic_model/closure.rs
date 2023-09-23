@@ -280,9 +280,9 @@ impl Closure {
     pub fn all_captures(&self) -> impl Iterator<Item = Capture> {
         let scope = &self.data.scopes[self.scope_id];
 
-        let scopes = Vec::from_iter(scope.children.iter().copied());
+        let scopes = scope.children.clone();
 
-        let mut references = Vec::from_iter(scope.read_references.iter().cloned());
+        let mut references = scope.read_references.clone();
         references.extend(scope.write_references.iter().cloned());
 
         AllCapturesIter {
@@ -309,11 +309,9 @@ impl Closure {
     /// ```
     pub fn children(&self) -> impl Iterator<Item = Closure> {
         let scope = &self.data.scopes[self.scope_id];
-        let scopes = Vec::from_iter(scope.children.iter().copied());
-
         ChildrenIter {
             data: self.data.clone(),
-            scopes,
+            scopes: scope.children.clone(),
         }
     }
 
