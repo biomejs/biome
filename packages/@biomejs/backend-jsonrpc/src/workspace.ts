@@ -682,6 +682,10 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Restrict use of implicit any type in Typescript.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
+	/**
 	 * Enforce proper usage of new and constructor.
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
@@ -1282,6 +1286,7 @@ export type Category =
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
+	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"

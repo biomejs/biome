@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+let someVar1;
+someVar1 = '123';
+someVar1 = 123;
+
+
+var someVar1;
+someVar1 = '123';
+someVar1 = 123;
+
+
+function ex() {
+    let b;
+}
+```
+
+# Diagnostics
+```
+invalid.ts:1:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable someVar1 has implicitly any type
+  
+  > 1 │ let someVar1;
+      │     ^^^^^^^^
+    2 │ someVar1 = '123';
+    3 │ someVar1 = 123;
+  
+  i Declare type or initialize the variable with some value
+  
+
+```
+
+```
+invalid.ts:6:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable someVar1 has implicitly any type
+  
+  > 6 │ var someVar1;
+      │     ^^^^^^^^
+    7 │ someVar1 = '123';
+    8 │ someVar1 = 123;
+  
+  i Declare type or initialize the variable with some value
+  
+
+```
+
+```
+invalid.ts:12:9 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable b has implicitly any type
+  
+    11 │ function ex() {
+  > 12 │     let b;
+       │         ^
+    13 │ }
+  
+  i Declare type or initialize the variable with some value
+  
+
+```
+
+

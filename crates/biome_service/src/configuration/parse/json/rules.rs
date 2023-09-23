@@ -2030,6 +2030,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noFallthroughSwitchClause",
                 "noGlobalIsFinite",
                 "noGlobalIsNan",
+                "noImplicitAnyLet",
                 "noMisleadingInstantiator",
                 "noUselessElse",
                 "noVoid",
@@ -2212,6 +2213,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_global_is_nan = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noImplicitAnyLet" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_implicit_any_let = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noImplicitAnyLet",
+                        diagnostics,
+                    )?;
+                    self.no_implicit_any_let = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
