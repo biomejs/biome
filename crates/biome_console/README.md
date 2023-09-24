@@ -2,12 +2,6 @@
 
 The crate contains a general abstraction over printing messages (formatted with markup) and diagnostics to a console.
 
-## Local installation
-
-```toml
-biome_console = { version = "0.0.0", path = "../biome_console" }
-```
-
 ## Usage example
 
 The `Console` trait can be used to print two types of information to the user: messages (in the form of markup) and diagnostics:
@@ -24,6 +18,7 @@ console.diagnostic(
 ```
 
 The following markup elements are supported:
+
 - `Emphasis`: Print the content in bold text
 - `Dim`: Print the content in dimmed text
 - `Italic`: Print the content in italic text

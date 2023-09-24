@@ -1,8 +1,10 @@
 [package]
 authors.workspace    = true
-description          = "Macro to write text using a HTML-like syntax"
-documentation        = "https://docs.rs/biome_markup"
+categories.workspace = true
+description          = "Macros to write text using a HTML-like syntax"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_markup"
 repository.workspace = true

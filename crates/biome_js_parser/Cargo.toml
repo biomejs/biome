@@ -1,14 +1,14 @@
 [package]
 authors.workspace    = true
-categories           = ["parser-implementations", "development-tools"]
-description          = "An extremely fast ECMAScript parser for Biome, forked from the RSlint project"
-documentation        = "https://docs.rs/biome_js_parser"
+categories.workspace = true
+description          = "Biome's JavaScript parser"
 edition.workspace    = true
 homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_parser"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.0.1"
 
 [dependencies]
 biome_console          = { workspace = true }

@@ -1,12 +1,15 @@
 [package]
 authors.workspace    = true
-description          = "Expose utilities to print HTML-syntax messages"
-documentation        = "https://docs.rs/biome_console"
+categories.workspace = true
+description          = "Utilities to print messages (formatted with biome_markup) and diagnostics"
 edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_console"
 repository.workspace = true
 version              = "0.0.1"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

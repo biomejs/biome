@@ -1,14 +1,15 @@
 [package]
-edition = "2018"
-name    = "biome_text_size"
-version = "0.0.1"
-
-authors              = ["Aleksey Kladov <aleksey.kladov@gmail.com>", "Christopher Durham (CAD97) <cad97@cad97.com>"]
-description          = "Fork of the crate text_size"
-documentation        = "https://docs.rs/biome_text_size"
-license              = "MIT OR Apache-2.0"
+authors.workspace    = true
+categories.workspace = true
+description          = "Utilities to treat text sizes/ranges in a more type-safe"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_text_size"
+publish              = false
 repository.workspace = true
-
+version              = "0.0.0"
 
 [dependencies]
 schemars = { workspace = true, optional = true }
