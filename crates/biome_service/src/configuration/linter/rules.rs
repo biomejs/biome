@@ -2240,6 +2240,15 @@ pub struct Nursery {
     #[bpaf(long("use-arrow-function"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_arrow_function: Option<RuleConfiguration>,
+    #[doc = "Enforce the use of as const over literal type and type annotation."]
+    #[bpaf(
+        long("use-as-const-assertion"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_as_const_assertion: Option<RuleConfiguration>,
     #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[bpaf(long("use-collapsed-else-if"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2300,6 +2309,7 @@ impl Nursery {
         "noUselessElse",
         "noVoid",
         "useArrowFunction",
+        "useAsConstAssertion",
         "useCollapsedElseIf",
         "useExhaustiveDependencies",
         "useGroupedTypeImport",
@@ -2624,6 +2634,7 @@ impl Nursery {
             "noUselessElse" => self.no_useless_else.as_ref(),
             "noVoid" => self.no_void.as_ref(),
             "useArrowFunction" => self.use_arrow_function.as_ref(),
+            "useAsConstAssertion" => self.use_as_const_assertion.as_ref(),
             "useCollapsedElseIf" => self.use_collapsed_else_if.as_ref(),
             "useExhaustiveDependencies" => self.use_exhaustive_dependencies.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),

@@ -722,6 +722,10 @@ export interface Nursery {
 	 */
 	useArrowFunction?: RuleConfiguration;
 	/**
+	 * Enforce the use of as const over literal type and type annotation.
+	 */
+	useAsConstAssertion?: RuleConfiguration;
+	/**
 	 * Enforce using else if instead of nested if in else clauses.
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
@@ -1312,6 +1316,7 @@ export type Category =
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useArrowFunction"
+	| "lint/nursery/useAsConstAssertion"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useCollapsedElseIf"
 	| "lint/nursery/useExhaustiveDependencies"

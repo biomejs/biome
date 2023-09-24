@@ -1,0 +1,299 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+// ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
+
+let foo = { bar: 'baz' as 'baz' };
+let foo = { bar: 1 as 1 };
+let []: 'bar' = 'bar';
+let foo: 'bar' = 'bar';
+let foo: 2 = 2;
+let foo: 'bar' = 'bar' as 'bar';
+let foo = 'bar' as 'bar';
+let foo = 5 as 5;
+
+class foo {
+  bar: 'baz' = 'baz';
+}
+
+class foo {
+  bar: 2 = 2;
+}
+
+class foo {
+  foo = 'bar' as 'bar';
+}
+
+class foo {
+  foo = 5 as 5;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+    1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
+    2 │ 
+  > 3 │ let foo = { bar: 'baz' as 'baz' };
+      │                           ^^^^^
+    4 │ let foo = { bar: 1 as 1 };
+    5 │ let []: 'bar' = 'bar';
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+     1  1 │   // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
+     2  2 │   
+     3    │ - let·foo·=·{·bar:·'baz'·as·'baz'·};
+        3 │ + let·foo·=·{·bar:·'baz'·as·const·};
+     4  4 │   let foo = { bar: 1 as 1 };
+     5  5 │   let []: 'bar' = 'bar';
+  
+
+```
+
+```
+invalid.ts:4:23 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+    3 │ let foo = { bar: 'baz' as 'baz' };
+  > 4 │ let foo = { bar: 1 as 1 };
+      │                       ^
+    5 │ let []: 'bar' = 'bar';
+    6 │ let foo: 'bar' = 'bar';
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+     2  2 │   
+     3  3 │   let foo = { bar: 'baz' as 'baz' };
+     4    │ - let·foo·=·{·bar:·1·as·1·};
+        4 │ + let·foo·=·{·bar:·1·as·const·};
+     5  5 │   let []: 'bar' = 'bar';
+     6  6 │   let foo: 'bar' = 'bar';
+  
+
+```
+
+```
+invalid.ts:5:9 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of type annotation.
+  
+    3 │ let foo = { bar: 'baz' as 'baz' };
+    4 │ let foo = { bar: 1 as 1 };
+  > 5 │ let []: 'bar' = 'bar';
+      │         ^^^^^
+    6 │ let foo: 'bar' = 'bar';
+    7 │ let foo: 2 = 2;
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+
+```
+
+```
+invalid.ts:6:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of type annotation.
+  
+    4 │ let foo = { bar: 1 as 1 };
+    5 │ let []: 'bar' = 'bar';
+  > 6 │ let foo: 'bar' = 'bar';
+      │          ^^^^^
+    7 │ let foo: 2 = 2;
+    8 │ let foo: 'bar' = 'bar' as 'bar';
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+
+```
+
+```
+invalid.ts:7:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of type annotation.
+  
+    5 │ let []: 'bar' = 'bar';
+    6 │ let foo: 'bar' = 'bar';
+  > 7 │ let foo: 2 = 2;
+      │          ^
+    8 │ let foo: 'bar' = 'bar' as 'bar';
+    9 │ let foo = 'bar' as 'bar';
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+
+```
+
+```
+invalid.ts:8:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+     6 │ let foo: 'bar' = 'bar';
+     7 │ let foo: 2 = 2;
+   > 8 │ let foo: 'bar' = 'bar' as 'bar';
+       │                           ^^^^^
+     9 │ let foo = 'bar' as 'bar';
+    10 │ let foo = 5 as 5;
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+     6  6 │   let foo: 'bar' = 'bar';
+     7  7 │   let foo: 2 = 2;
+     8    │ - let·foo:·'bar'·=·'bar'·as·'bar';
+        8 │ + let·foo:·'bar'·=·'bar'·as·const;
+     9  9 │   let foo = 'bar' as 'bar';
+    10 10 │   let foo = 5 as 5;
+  
+
+```
+
+```
+invalid.ts:9:20 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+     7 │ let foo: 2 = 2;
+     8 │ let foo: 'bar' = 'bar' as 'bar';
+   > 9 │ let foo = 'bar' as 'bar';
+       │                    ^^^^^
+    10 │ let foo = 5 as 5;
+    11 │ 
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+     7  7 │   let foo: 2 = 2;
+     8  8 │   let foo: 'bar' = 'bar' as 'bar';
+     9    │ - let·foo·=·'bar'·as·'bar';
+        9 │ + let·foo·=·'bar'·as·const;
+    10 10 │   let foo = 5 as 5;
+    11 11 │   
+  
+
+```
+
+```
+invalid.ts:10:16 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+     8 │ let foo: 'bar' = 'bar' as 'bar';
+     9 │ let foo = 'bar' as 'bar';
+  > 10 │ let foo = 5 as 5;
+       │                ^
+    11 │ 
+    12 │ class foo {
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+     8  8 │   let foo: 'bar' = 'bar' as 'bar';
+     9  9 │   let foo = 'bar' as 'bar';
+    10    │ - let·foo·=·5·as·5;
+       10 │ + let·foo·=·5·as·const;
+    11 11 │   
+    12 12 │   class foo {
+  
+
+```
+
+```
+invalid.ts:13:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of type annotation.
+  
+    12 │ class foo {
+  > 13 │   bar: 'baz' = 'baz';
+       │        ^^^^^
+    14 │ }
+    15 │ 
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+
+```
+
+```
+invalid.ts:17:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of type annotation.
+  
+    16 │ class foo {
+  > 17 │   bar: 2 = 2;
+       │        ^
+    18 │ }
+    19 │ 
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+
+```
+
+```
+invalid.ts:21:18 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+    20 │ class foo {
+  > 21 │   foo = 'bar' as 'bar';
+       │                  ^^^^^
+    22 │ }
+    23 │ 
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+    19 19 │   
+    20 20 │   class foo {
+    21    │ - ··foo·=·'bar'·as·'bar';
+       21 │ + ··foo·=·'bar'·as·const;
+    22 22 │   }
+    23 23 │   
+  
+
+```
+
+```
+invalid.ts:25:14 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! You should use as const instead of as with a literal type.
+  
+    24 │ class foo {
+  > 25 │   foo = 5 as 5;
+       │              ^
+    26 │ }
+    27 │ 
+  
+  i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const .
+  
+    23 23 │   
+    24 24 │   class foo {
+    25    │ - ··foo·=·5·as·5;
+       25 │ + ··foo·=·5·as·const;
+    26 26 │   }
+    27 27 │   
+  
+
+```
+
+

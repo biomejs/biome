@@ -9,7 +9,8 @@ use crate::{
     JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
     JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
-    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence, T,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence,
+    TsNumberLiteralType, TsStringLiteralType, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
@@ -511,6 +512,10 @@ impl JsObjectExpression {
 impl JsNumberLiteralExpression {
     pub fn as_number(&self) -> Option<f64> {
         parse_js_number(self.value_token().unwrap().text())
+    }
+
+    pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
+        Ok(inner_string_text(&self.value_token()?))
     }
 }
 
@@ -1235,4 +1240,28 @@ fn is_optional_chain(start: AnyJsExpression) -> bool {
     }
 
     false
+}
+
+impl TsStringLiteralType {
+    /// Get the inner text of a string not including the quotes
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_rowan::TriviaPieceKind;
+    ///
+    /// let string = make::ts_string_literal_type(make::js_string_literal("foo")
+    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    /// assert_eq!(string.inner_string_text().unwrap().text(), "foo");
+    /// ```
+    pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
+        Ok(inner_string_text(&self.literal_token()?))
+    }
+}
+
+impl TsNumberLiteralType {
+    pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
+        Ok(inner_string_text(&self.literal_token()?))
+    }
 }
