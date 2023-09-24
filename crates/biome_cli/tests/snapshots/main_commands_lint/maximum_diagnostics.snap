@@ -33,18 +33,20 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 check.js:2:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │ ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + while·(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
+        2 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -54,18 +56,20 @@ check.js:2:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
 ```block
 check.js:2:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │             ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);while·(true);for(;true;);for(;true;);for(;true;);for(;true;);
+        2 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -75,18 +79,20 @@ check.js:2:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:2:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │                         ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);while·(true);for(;true;);for(;true;);for(;true;);
+        2 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -96,18 +102,20 @@ check.js:2:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:2:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │                                     ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);while·(true);for(;true;);for(;true;);
+        2 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -117,18 +125,20 @@ check.js:2:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:2:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │                                                 ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);while·(true);for(;true;);
+        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -138,18 +148,20 @@ check.js:2:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:2:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
       │                                                             ^^^^^^^^^^^
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while·(true);
+        2 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -159,7 +171,7 @@ check.js:2:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:3:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -167,12 +179,14 @@ check.js:3:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + while·(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
+        3 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -182,7 +196,7 @@ check.js:3:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
 ```block
 check.js:3:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -190,12 +204,14 @@ check.js:3:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);while·(true);for(;true;);for(;true;);for(;true;);for(;true;);
+        3 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -205,7 +221,7 @@ check.js:3:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:3:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -213,12 +229,14 @@ check.js:3:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);while·(true);for(;true;);for(;true;);for(;true;);
+        3 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -228,7 +246,7 @@ check.js:3:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:3:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -236,12 +254,14 @@ check.js:3:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);while·(true);for(;true;);for(;true;);
+        3 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -251,7 +271,7 @@ check.js:3:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:3:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -259,12 +279,14 @@ check.js:3:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);while·(true);for(;true;);
+        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -274,7 +296,7 @@ check.js:3:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:3:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   > 3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -282,12 +304,14 @@ check.js:3:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      1  1 │   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while·(true);
+        3 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -297,7 +321,7 @@ check.js:3:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -306,12 +330,14 @@ check.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + while·(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
+        4 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -321,7 +347,7 @@ check.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
 ```block
 check.js:4:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -330,12 +356,14 @@ check.js:4:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);while·(true);for(;true;);for(;true;);for(;true;);for(;true;);
+        4 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -345,7 +373,7 @@ check.js:4:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:4:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -354,12 +382,14 @@ check.js:4:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);while·(true);for(;true;);for(;true;);for(;true;);
+        4 │ + for(;true;);for(;true;);while(true);for(;true;);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -369,7 +399,7 @@ check.js:4:25 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:4:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -378,12 +408,14 @@ check.js:4:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);while·(true);for(;true;);for(;true;);
+        4 │ + for(;true;);for(;true;);for(;true;);while(true);for(;true;);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -393,7 +425,7 @@ check.js:4:37 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:4:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -402,12 +434,14 @@ check.js:4:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);while·(true);for(;true;);
+        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);while(true);for(;true;);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -417,7 +451,7 @@ check.js:4:49 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:4:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     2 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -426,12 +460,14 @@ check.js:4:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     5 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      2  2 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while·(true);
+        4 │ + for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);while(true);
      5  5 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -441,7 +477,7 @@ check.js:4:61 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
 ```block
 check.js:5:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -450,12 +486,14 @@ check.js:5:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     7 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        5 │ + while·(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
+        5 │ + while(true);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      7  7 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
@@ -465,7 +503,7 @@ check.js:5:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
 ```block
 check.js:5:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
     3 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     4 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -474,12 +512,14 @@ check.js:5:13 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━
     6 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
     7 │ for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
      3  3 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      4  4 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      5    │ - for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
-        5 │ + for(;true;);while·(true);for(;true;);for(;true;);for(;true;);for(;true;);
+        5 │ + for(;true;);while(true);for(;true;);for(;true;);for(;true;);for(;true;);
      6  6 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
      7  7 │   for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
   

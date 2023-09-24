@@ -56,6 +56,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - [noUselessTypeConstraint](https://biomejs.dev/linter/rules/no-useless-type-constraint)
   - [useConst](https://biomejs.dev/linter/rules/use-const)
   - [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
+  - [useWhile](https://biomejs.dev/linter/rules/use-while)
 
 #### Bug fixes
 

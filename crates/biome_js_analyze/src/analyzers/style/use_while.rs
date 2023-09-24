@@ -4,14 +4,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsStatement, JsForStatement, JsForStatementFields, T};
-use biome_rowan::BatchMutationExt;
+use biome_js_syntax::{AnyJsStatement, JsForStatement, T};
+use biome_rowan::{trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
 declare_rule! {
     /// Enforce the use of `while` loops instead of `for` loops when the
-    /// initializer and update expressions are not needed
+    /// initializer and update expressions are not needed.
     ///
     /// ## Examples
     ///
@@ -20,6 +20,23 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// for (; x.running;) {
     ///     x.step();
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// for(let x = 0; x < 10; i++) {}
+    /// ```
+    ///
+    /// ```js
+    /// let x = 0
+    /// for(; x < 10; i++) {}
+    /// ```
+    ///
+    /// ```js
+    /// for(let x = 0; x < 10;) {
+    ///     i++
     /// }
     /// ```
     pub(crate) UseWhile {
@@ -36,27 +53,9 @@ impl Rule for UseWhile {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let n = ctx.query();
+        let node = ctx.query();
 
-        let JsForStatementFields {
-            for_token: _,
-            l_paren_token,
-            initializer,
-            first_semi_token: _,
-            test,
-            second_semi_token: _,
-            update,
-            r_paren_token,
-            body,
-        } = n.as_fields();
-
-        if l_paren_token.is_err()
-            || initializer.is_some()
-            || test.is_none()
-            || update.is_some()
-            || r_paren_token.is_err()
-            || body.is_err()
-        {
+        if node.initializer().is_some() || node.test().is_none() || node.update().is_some() {
             None
         } else {
             Some(())
@@ -65,51 +64,41 @@ impl Rule for UseWhile {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
-        // SAFETY: These tokens have been checked for errors in `run` already
-        let for_range = node.for_token().unwrap().text_trimmed_range();
-        let r_paren_range = node.r_paren_token().unwrap().text_trimmed_range();
+        let for_range = node.for_token().ok()?.text_trimmed_range();
+        let r_paren_range = node.r_paren_token().ok()?.text_trimmed_range();
 
         Some(RuleDiagnostic::new(
             rule_category!(),
             for_range.cover(r_paren_range),
             markup! {
-                "Use "<Emphasis>"while"</Emphasis>" loops instead of "<Emphasis>"for"</Emphasis>" loops."
+                "Use a "<Emphasis>"while"</Emphasis>" loop instead of a "<Emphasis>"for"</Emphasis>" loop."
             },
-        ))
+        ).note(markup! {
+            "Prefer a "<Emphasis>"while"</Emphasis>" loop over a "<Emphasis>"for"</Emphasis>" loop without initialization and update."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-
-        let JsForStatementFields {
-            for_token: _,
-            l_paren_token,
-            initializer: _,
-            first_semi_token: _,
-            test,
-            second_semi_token: _,
-            update: _,
-            r_paren_token,
-            body,
-        } = node.as_fields();
-
+        let test_leading_comments = node.first_semi_token().ok()?.trailing_trivia().pieces();
+        let for_trailing_trivia = node.for_token().ok()?.trailing_trivia().pieces();
         mutation.replace_node(
             AnyJsStatement::from(node.clone()),
             AnyJsStatement::from(make::js_while_statement(
-                make::token_decorated_with_space(T![while]),
-                l_paren_token.ok()?,
-                test?,
-                r_paren_token.ok()?,
-                body.ok()?,
+                make::token(T![while]).with_trailing_trivia_pieces(for_trailing_trivia),
+                node.l_paren_token().ok()?.with_trailing_trivia([]),
+                node.test()?
+                    .prepend_trivia_pieces(trim_leading_trivia_pieces(test_leading_comments))?,
+                node.r_paren_token().ok()?,
+                node.body().ok()?,
             )),
         );
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use a while loop" }.to_owned(),
+            applicability: Applicability::Always,
+            message: markup! { "Use a "<Emphasis>"while"</Emphasis>" loop." }.to_owned(),
             mutation,
         })
     }

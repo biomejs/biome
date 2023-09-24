@@ -1474,7 +1474,7 @@
 					]
 				},
 				"useWhile": {
-					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed",
+					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

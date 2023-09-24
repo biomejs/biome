@@ -2989,7 +2989,7 @@ pub struct Style {
     #[bpaf(long("use-template"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_template: Option<RuleConfiguration>,
-    #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed"]
+    #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[bpaf(long("use-while"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleConfiguration>,
