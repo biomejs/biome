@@ -275,8 +275,62 @@ impl std::fmt::Debug for StaticText {
     }
 }
 
-/// Creates a text from a dynamic string and a range of the input source
-pub fn dynamic_text(text: &str, position: TextSize) -> DynamicText {
+/// Creates a source map entry from the passed source `position` to the position in the formatted output.
+///
+/// ## Examples
+///
+/// ```
+/// /// ```
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// // the tab must be encoded as \\t to not literally print a tab character ("Hello{tab}World" vs "Hello\tWorld")
+/// use biome_formatter::TextSize;
+/// use biome_formatter::SourceMarker;
+///
+///
+/// let elements = format!(SimpleFormatContext::default(), [
+///     source_position(TextSize::new(0)),
+///     text("\"Hello "),
+///     source_position(TextSize::new(8)),
+///     text("'Ruff'"),
+///     source_position(TextSize::new(14)),
+///     text("\""),
+///     source_position(TextSize::new(20))
+/// ])?;
+///
+/// let printed = elements.print()?;
+///
+/// assert_eq!(printed.as_code(), r#""Hello 'Ruff'""#);
+/// assert_eq!(printed.sourcemap(), [
+///     SourceMarker { source: TextSize::new(0), dest: TextSize::new(0) },
+///     SourceMarker { source: TextSize::new(0), dest: TextSize::new(7) },
+///     SourceMarker { source: TextSize::new(8), dest: TextSize::new(7) },
+///     SourceMarker { source: TextSize::new(8), dest: TextSize::new(13) },
+///     SourceMarker { source: TextSize::new(14), dest: TextSize::new(13) },
+///     SourceMarker { source: TextSize::new(14), dest: TextSize::new(14) },
+///     SourceMarker { source: TextSize::new(20), dest: TextSize::new(14) },
+/// ]);
+///
+/// # Ok(())
+/// # }
+/// ```
+pub const fn source_position(position: TextSize) -> SourcePosition {
+    SourcePosition(position)
+}
+
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub struct SourcePosition(TextSize);
+
+impl<Context> Format<Context> for SourcePosition {
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        f.write_element(FormatElement::SourcePosition(self.0))
+    }
+}
+
+/// Creates a text from a dynamic string with its optional start-position in the source document
+pub fn dynamic_text(text: &str, position: Option<TextSize>) -> DynamicText {
     debug_assert_no_newlines(text);
 
     DynamicText { text, position }
@@ -285,14 +339,17 @@ pub fn dynamic_text(text: &str, position: TextSize) -> DynamicText {
 #[derive(Eq, PartialEq)]
 pub struct DynamicText<'a> {
     text: &'a str,
-    position: TextSize,
+    position: Option<TextSize>,
 }
 
 impl<Context> Format<Context> for DynamicText<'_> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        if let Some(source_position) = self.position {
+            f.write_element(FormatElement::SourcePosition(source_position))?;
+        }
+
         f.write_element(FormatElement::DynamicText {
             text: self.text.to_string().into_boxed_str(),
-            source_position: self.position,
         })
     }
 }
@@ -337,13 +394,16 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
 
                 f.write_element(FormatElement::LocatedTokenText {
                     slice,
-                    source_position: self.start,
+                    range,
                 })
             }
-            Cow::Owned(text) => f.write_element(FormatElement::DynamicText {
-                text: text.to_string().into_boxed_str(),
-                source_position: self.start,
-            }),
+            Cow::Owned(text) => {
+                f.write_element(FormatElement::SourcePosition(self.start))?;
+
+                f.write_element(FormatElement::DynamicText {
+                    text: text.to_string().into_boxed_str(),
+                })
+            }
         }
     }
 }
@@ -366,20 +426,20 @@ pub fn located_token_text<L: Language>(
 
     LocatedTokenText {
         text: slice,
-        source_position: range.start(),
+        range,
     }
 }
 
 pub struct LocatedTokenText {
     text: TokenText,
-    source_position: TextSize,
+    range: TextRange,
 }
 
 impl<Context> Format<Context> for LocatedTokenText {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::LocatedTokenText {
             slice: self.text.clone(),
-            source_position: self.source_position,
+            range: self.range,
         })
     }
 }
@@ -1855,7 +1915,7 @@ impl<Context, T> std::fmt::Debug for FormatWith<Context, T> {
 ///                 let mut join = f.join_with(&separator);
 ///
 ///                 for item in &self.items {
-///                     join.entry(&format_with(|f| write!(f, [dynamic_text(item, TextSize::default())])));
+///                     join.entry(&format_with(|f| write!(f, [dynamic_text(item, None)])));
 ///                 }
 ///                 join.finish()
 ///             })),

@@ -27,7 +27,7 @@ impl FormatNodeRule<TsBigintLiteralType> for FormatTsBigintLiteralType {
                     f,
                     [format_replaced(
                         &literal_token,
-                        &dynamic_text(&lowercase, literal_token.text_trimmed_range().start())
+                        &dynamic_text(&lowercase, Some(literal_token.text_trimmed_range().start()))
                     )]
                 )
             }

@@ -286,8 +286,9 @@ where
                                 .token_text()
                                 .slice(TextRange::at(relative_start, word.text_len()));
                             let source_position = value_token.text_range().start() + relative_start;
+                            let range = TextRange::at(source_position, word.text_len());
 
-                            builder.entry(JsxChild::Word(JsxWord::new(text, source_position)));
+                            builder.entry(JsxChild::Word(JsxWord::new(text, range)));
                         }
                     }
                 }
@@ -402,14 +403,14 @@ impl JsxChild {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct JsxWord {
     text: TokenText,
-    source_position: TextSize,
+    range: TextRange,
 }
 
 impl JsxWord {
-    fn new(text: TokenText, source_position: TextSize) -> Self {
+    fn new(text: TokenText, range: TextRange) -> Self {
         JsxWord {
             text,
-            source_position,
+            range,
         }
     }
 
@@ -426,7 +427,7 @@ impl JsxWord {
 impl Format<JsFormatContext> for JsxWord {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
+            range: self.range,
             slice: self.text.clone(),
         })
     }

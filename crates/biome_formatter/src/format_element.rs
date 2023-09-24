@@ -1,16 +1,16 @@
 pub mod document;
 pub mod tag;
 
-use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
-use crate::{TagKind, TextSize};
-#[cfg(target_pointer_width = "64")]
-use biome_rowan::static_assert;
 use biome_rowan::TokenText;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
+
+use crate::format_element::tag::{LabelId, Tag};
+use crate::TagKind;
+use biome_text_size::{TextRange, TextSize};
 
 /// Language agnostic IR for formatting source code.
 ///
@@ -26,6 +26,11 @@ pub enum FormatElement {
     /// Forces the parent group to print in expanded mode.
     ExpandParent,
 
+    /// Indicates the position of the elements coming after this element in the source document.
+    /// The printer will create a source map entry from this position in the source document to the
+    /// formatted position.
+    SourcePosition(TextSize),
+
     /// Token constructed by the formatter from a static string
     StaticText { text: &'static str },
 
@@ -34,15 +39,13 @@ pub enum FormatElement {
     DynamicText {
         /// There's no need for the text to be mutable, using `Box<str>` safes 8 bytes over `String`.
         text: Box<str>,
-        /// The start position of the dynamic token in the unformatted source code
-        source_position: TextSize,
     },
 
     /// A token for a text that is taken as is from the source code (input text and formatted representation are identical).
     /// Implementing by taking a slice from a `SyntaxToken` to avoid allocating a new string.
     LocatedTokenText {
-        /// The start position of the token in the unformatted source code
-        source_position: TextSize,
+        /// The range of the token in the unformatted source code
+        range: TextRange,
         /// The token text
         slice: TokenText,
     },
@@ -86,6 +89,9 @@ impl std::fmt::Debug for FormatElement {
                 fmt.debug_list().entries(interned.deref()).finish()
             }
             FormatElement::Tag(tag) => fmt.debug_tuple("Tag").field(tag).finish(),
+            FormatElement::SourcePosition(position) => {
+                fmt.debug_tuple("SourcePosition").field(position).finish()
+            }
         }
     }
 }
@@ -247,9 +253,10 @@ impl FormatElements for FormatElement {
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
             FormatElement::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
-            FormatElement::LineSuffixBoundary | FormatElement::Space | FormatElement::Tag(_) => {
-                false
-            }
+            FormatElement::LineSuffixBoundary
+            | FormatElement::Space
+            | FormatElement::Tag(_)
+            | FormatElement::SourcePosition(_) => false,
         }
     }
 
@@ -375,20 +382,26 @@ mod tests {
 }
 
 #[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<biome_rowan::TextRange>() == 8usize);
+mod sizes {
+    // Increasing the size of FormatElement has serious consequences on runtime performance and memory footprint.
+    // Is there a more efficient way to encode the data to avoid increasing its size? Can the information
+    // be recomputed at a later point in time?
+    // You reduced the size of a format element? Excellent work!
 
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::format_element::tag::VerbatimKind>() == 8usize);
+    use crate::format_element::BestFittingElement;
+    use crate::prelude::tag::VerbatimKind;
+    use crate::prelude::Interned;
+    use biome_text_size::TextRange;
+    use static_assertions::assert_eq_size;
 
-#[cfg(not(debug_assertions))]
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::format_element::Tag>() == 16usize);
+    assert_eq_size!(TextRange, [u8; 8]);
+    assert_eq_size!(VerbatimKind, [u8; 8]);
+    assert_eq_size!(Interned, [u8; 16]);
+    assert_eq_size!(BestFittingElement, [u8; 16]);
 
-// Increasing the size of FormatElement has serious consequences on runtime performance and memory footprint.
-// Is there a more efficient way to encode the data to avoid increasing its size? Can the information
-// be recomputed at a later point in time?
-// You reduced the size of a format element? Excellent work!
+    #[cfg(not(debug_assertions))]
+    assert_eq_size!(crate::format_element::Tag, [u8; 16]);
 
-#[cfg(not(debug_assertions))]
-#[cfg(target_pointer_width = "64")]
-static_assert!(std::mem::size_of::<crate::FormatElement>() == 24usize);
+    #[cfg(not(debug_assertions))]
+    assert_eq_size!(crate::FormatElement, [u8; 32]);
+}
