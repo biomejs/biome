@@ -25,19 +25,26 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var foo = new Symbol('foo');
-    /// var bar = new BigInt(9007199254740991);
+    /// let foo = new Symbol('foo');
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// let bar = new BigInt(9007199254740991);
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// var foo = Symbol('foo');
-    /// var bar = BigInt(9007199254740991);
+    /// let foo = Symbol('foo');
     ///
     /// function baz(Symbol) {
     ///     const qux = new Symbol("baz");
     /// }
+    /// ```
+    ///
+    /// ```js
+    /// let bar = BigInt(9007199254740991);
+    ///
     /// function quux(BigInt) {
     ///     const corge = new BigInt(9007199254740991);
     /// }
