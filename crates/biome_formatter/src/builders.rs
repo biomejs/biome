@@ -392,10 +392,7 @@ impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L> {
                 let relative_range = range - self.token.text_range().start();
                 let slice = self.token.token_text().slice(relative_range);
 
-                f.write_element(FormatElement::LocatedTokenText {
-                    slice,
-                    range,
-                })
+                f.write_element(FormatElement::LocatedTokenText { slice, range })
             }
             Cow::Owned(text) => {
                 f.write_element(FormatElement::SourcePosition(self.start))?;
@@ -424,10 +421,7 @@ pub fn located_token_text<L: Language>(
 
     debug_assert_no_newlines(&slice);
 
-    LocatedTokenText {
-        text: slice,
-        range,
-    }
+    LocatedTokenText { text: slice, range }
 }
 
 pub struct LocatedTokenText {

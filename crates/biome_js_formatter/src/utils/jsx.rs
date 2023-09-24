@@ -408,10 +408,7 @@ pub(crate) struct JsxWord {
 
 impl JsxWord {
     fn new(text: TokenText, range: TextRange) -> Self {
-        JsxWord {
-            text,
-            range,
-        }
+        JsxWord { text, range }
     }
 
     pub(crate) fn is_ascii_punctuation(&self) -> bool {

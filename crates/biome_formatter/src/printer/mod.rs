@@ -96,15 +96,9 @@ impl<'a> Printer<'a> {
 
             FormatElement::StaticText { text } => self.print_text(text, None),
             FormatElement::DynamicText { text } => self.print_text(text, None),
-            FormatElement::LocatedTokenText {
-                slice,
-                range,
-            } => {
-                self.print_text(
-                    slice,
-                    Some(*range),
-                )
-            },
+            FormatElement::LocatedTokenText { slice, range } => {
+                self.print_text(slice, Some(*range))
+            }
 
             FormatElement::Line(line_mode) => {
                 if args.mode().is_flat()
