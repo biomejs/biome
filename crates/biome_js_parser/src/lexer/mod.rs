@@ -668,7 +668,7 @@ impl<'src> Lexer<'src> {
         };
 
         match u32::from_str_radix(digits_str, 16) {
-            Ok(digits) if digits <= 0x10FFFF => {
+            Ok(digits) if digits <= 0x10_FFFF => {
                 let res = std::char::from_u32(digits);
                 if let Some(chr) = res {
                     Ok(chr)

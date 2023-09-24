@@ -157,7 +157,7 @@ pub fn markup(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 }
                 _ => abort!(group.span(), "unexpected token"),
             },
-            _ => abort!(token.span(), "unexpected token"),
+            TokenTree::Ident(_) => abort!(token.span(), "unexpected token"),
         }
     }
 

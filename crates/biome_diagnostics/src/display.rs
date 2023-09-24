@@ -709,7 +709,7 @@ mod tests {
         fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
             let backtrace = from_value(json!([
                 {
-                    "ip": 0x0f0f0f0f,
+                    "ip": 0x0f0f_0f0f,
                     "symbols": [
                         {
                             "name": "crate::module::function",
