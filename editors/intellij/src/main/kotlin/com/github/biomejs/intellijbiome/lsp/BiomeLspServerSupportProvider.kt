@@ -41,9 +41,10 @@ private class BiomeLspServerDescriptor(project: Project, val executable: String)
             throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
         }
 
-        return GeneralCommandLine()
-            .withExePath(executable)
-            .withParameters(params)
+        return BiomeUtils.createNodeCommandLine(project, executable).apply {
+					addParameters(params)
+				}
+
     }
 
     override val lspGoToDefinitionSupport = false
