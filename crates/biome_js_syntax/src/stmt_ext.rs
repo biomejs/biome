@@ -55,9 +55,8 @@ impl JsVariableDeclaration {
     }
 
     pub fn variable_kind(&self) -> SyntaxResult<JsVariableKind> {
-        let token_kind = self.kind().map(|t| t.kind())?;
-
-        Ok(match token_kind {
+        let kind_token = self.kind()?;
+        Ok(match kind_token.kind() {
             T![const] => JsVariableKind::Const,
             T![let] => JsVariableKind::Let,
             T![var] => JsVariableKind::Var,
@@ -84,9 +83,8 @@ impl JsForVariableDeclaration {
     }
 
     pub fn variable_kind(&self) -> SyntaxResult<JsVariableKind> {
-        let token_kind = self.kind_token().map(|t| t.kind())?;
-
-        Ok(match token_kind {
+        let kind_token = self.kind_token()?;
+        Ok(match kind_token.kind() {
             T![const] => JsVariableKind::Const,
             T![let] => JsVariableKind::Let,
             T![var] => JsVariableKind::Var,
@@ -101,10 +99,32 @@ declare_node_union! {
 }
 
 impl AnyJsVariableDeclaration {
+    /// Whether the declaration is a const declaration
+    pub fn is_const(&self) -> bool {
+        self.variable_kind() == Ok(JsVariableKind::Const)
+    }
+
+    /// Whether the declaration is a let declaration
+    pub fn is_let(&self) -> bool {
+        self.variable_kind() == Ok(JsVariableKind::Let)
+    }
+
+    /// Whether the declaration is a var declaration
+    pub fn is_var(&self) -> bool {
+        self.variable_kind() == Ok(JsVariableKind::Var)
+    }
+
     pub fn variable_kind(&self) -> SyntaxResult<JsVariableKind> {
         match self {
             AnyJsVariableDeclaration::JsForVariableDeclaration(decl) => decl.variable_kind(),
             AnyJsVariableDeclaration::JsVariableDeclaration(decl) => decl.variable_kind(),
+        }
+    }
+
+    pub fn kind_token(&self) -> Option<SyntaxToken> {
+        match self {
+            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind().ok(),
+            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token().ok(),
         }
     }
 }

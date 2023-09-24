@@ -340,12 +340,7 @@ impl SemanticEventExtractor {
                 .parent::<JsVariableDeclaration>()?
                 .is_var(),
             Some(JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION) => {
-                declarator
-                    .parent::<JsForVariableDeclaration>()?
-                    .kind_token()
-                    .ok()?
-                    .kind()
-                    == JsSyntaxKind::VAR_KW
+                declarator.parent::<JsForVariableDeclaration>()?.is_var()
             }
             _ => false,
         };

@@ -3,11 +3,11 @@ use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, Ru
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{JsModule, JsScript, JsSyntaxKind};
+use biome_js_syntax::{AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind};
 
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use super::use_const::{ConstBindings, VariableDeclaration};
+use super::use_const::ConstBindings;
 
 declare_rule! {
     /// Disallow the use of `var`
@@ -40,7 +40,7 @@ declare_rule! {
 }
 
 impl Rule for NoVar {
-    type Query = Semantic<VariableDeclaration>;
+    type Query = Semantic<AnyJsVariableDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
