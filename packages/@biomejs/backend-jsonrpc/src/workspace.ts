@@ -797,7 +797,7 @@ export interface Style {
 	 */
 	noNamespace?: RuleConfiguration;
 	/**
-	 * Disallow negation in the condition of an if statement if it has an else clause
+	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
 	noNegationElse?: RuleConfiguration;
 	/**

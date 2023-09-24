@@ -2856,7 +2856,7 @@ pub struct Style {
     #[bpaf(long("no-namespace"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_namespace: Option<RuleConfiguration>,
-    #[doc = "Disallow negation in the condition of an if statement if it has an else clause"]
+    #[doc = "Disallow negation in the condition of an if statement if it has an else clause."]
     #[bpaf(long("no-negation-else"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_negation_else: Option<RuleConfiguration>,

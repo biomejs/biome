@@ -44,7 +44,7 @@ file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
   > 1 │ if(!cond) { exprA(); } else { exprB() }
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Exchange alternate and consequent of the node
+  i Safe fix: Invert the condition and the blocks.
   
   - if(!cond)·{·exprA();·}·else·{·exprB()·}
   + if(cond)·{·exprB()·}·else·{·exprA();·}
