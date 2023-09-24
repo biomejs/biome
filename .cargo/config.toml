@@ -64,6 +64,7 @@ rustflags = [
   "-Wclippy::invalid_upcast_comparisons",
   "-Wclippy::iter_not_returning_iterator",
   "-Wclippy::large_stack_arrays",
+  "-Wclippy::large_types_passed_by_value",
   "-Wclippy::macro_use_imports",
   "-Wclippy::manual_ok_or",
   "-Wclippy::manual_string_new",
@@ -78,9 +79,11 @@ rustflags = [
   "-Wclippy::ref_option_ref",
   "-Wclippy::stable_sort_primitive",
   "-Wclippy::unnecessary_box_returns",
+  "-Wclippy::unnecessary_box_returns",
   "-Wclippy::unnecessary_join",
   "-Wclippy::unnested_or_patterns",
   "-Wclippy::verbose_bit_mask",
+  "-Wclippy::unreadable_literal",
   "-Wclippy::zero_sized_map_values",
 ]
 

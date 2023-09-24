@@ -456,9 +456,9 @@ impl<'src> Lexer<'src> {
                                 // If this number is zero
                                 0 => REPLACEMENT_CHARACTER,
                                 // or is for a surrogate
-                                55296..=57343 => REPLACEMENT_CHARACTER,
+                                55_296..=57_343 => REPLACEMENT_CHARACTER,
                                 // or is greater than the maximum allowed code point
-                                1114112.. => REPLACEMENT_CHARACTER,
+                                1_114_112.. => REPLACEMENT_CHARACTER,
                                 _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
                             };
 
