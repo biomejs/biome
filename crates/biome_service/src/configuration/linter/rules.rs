@@ -2279,10 +2279,14 @@ pub struct Nursery {
     #[bpaf(long("use-is-array"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_is_array: Option<RuleConfiguration>,
+    #[doc = "Require assignment operator shorthand where possible"]
+    #[bpaf(long("use-shorthand-assign"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_shorthand_assign: Option<RuleConfiguration>,
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 19] = [
+    pub(crate) const GROUP_RULES: [&'static str; 20] = [
         "noAccumulatingSpread",
         "noConfusingVoidType",
         "noDuplicateJsonKeys",
@@ -2302,6 +2306,7 @@ impl Nursery {
         "useHookAtTopLevel",
         "useImportRestrictions",
         "useIsArray",
+        "useShorthandAssign",
     ];
     const RECOMMENDED_RULES: [&'static str; 11] = [
         "noDuplicateJsonKeys",
@@ -2460,6 +2465,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -2559,6 +2569,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -2614,6 +2629,7 @@ impl Nursery {
             "useHookAtTopLevel" => self.use_hook_at_top_level.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
             "useIsArray" => self.use_is_array.as_ref(),
+            "useShorthandAssign" => self.use_shorthand_assign.as_ref(),
             _ => None,
         }
     }
