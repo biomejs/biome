@@ -39,6 +39,20 @@ object BiomeUtils {
         return matchResult?.value
     }
 
+		fun attachConfigPath(params: SmartList<String>, project: Project, logger: Logger) {
+			project.basePath?.let {
+					try {
+							val file = File(it)
+							if (file.exists()) {
+									params.add("--config-path")
+									params.add(project.basePath)
+							}
+					} catch (error: Exception) {
+							logger.error(error.message)
+					}
+			}
+	}
+
     fun getBiomeExecutablePath(project: Project): String? {
         val directoryManager = NodeModulesDirectoryManager.getInstance(project)
         val executablePath = BiomeSettings.getInstance(project).executablePath
