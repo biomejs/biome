@@ -757,7 +757,7 @@ enum Indention {
 }
 
 impl Indention {
-    const fn is_empty(&self) -> bool {
+    const fn is_empty(self) -> bool {
         matches!(self, Indention::Level(0))
     }
 
@@ -767,18 +767,18 @@ impl Indention {
     }
 
     /// Returns the indention level
-    fn level(&self) -> u16 {
+    fn level(self) -> u16 {
         match self {
-            Indention::Level(count) => *count,
-            Indention::Align { level: indent, .. } => *indent,
+            Indention::Level(count) => count,
+            Indention::Align { level: indent, .. } => indent,
         }
     }
 
     /// Returns the number of trailing align spaces or 0 if none
-    fn align(&self) -> u8 {
+    fn align(self) -> u8 {
         match self {
             Indention::Level(_) => 0,
-            Indention::Align { align, .. } => (*align).into(),
+            Indention::Align { align, .. } => align.into(),
         }
     }
 

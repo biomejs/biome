@@ -331,19 +331,19 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     update(
         &config_root.join("rules.rs"),
         &xtask::reformat(configuration)?,
-        &mode,
+        mode,
     )?;
 
     update(
         &config_parsing_root.join("rules.rs"),
         &xtask::reformat(visitors)?,
-        &mode,
+        mode,
     )?;
 
     update(
         &push_rules_directory.join("generated.rs"),
         &xtask::reformat(push_rules)?,
-        &mode,
+        mode,
     )?;
 
     Ok(())

@@ -205,7 +205,7 @@ enum ClassKind {
 }
 
 impl ClassKind {
-    fn is_id_optional(&self) -> bool {
+    fn is_id_optional(self) -> bool {
         matches!(self, ClassKind::Expression | ClassKind::ExportDefault)
     }
 }
@@ -1912,14 +1912,14 @@ enum ModifierKind {
 }
 
 impl ModifierKind {
-    const fn is_ts_modifier(&self) -> bool {
+    const fn is_ts_modifier(self) -> bool {
         !matches!(
             self,
             ModifierKind::Static | ModifierKind::Accessor | ModifierKind::Decorator
         )
     }
 
-    const fn as_syntax_kind(&self) -> JsSyntaxKind {
+    const fn as_syntax_kind(self) -> JsSyntaxKind {
         match self {
             ModifierKind::Declare => TS_DECLARE_MODIFIER,
             ModifierKind::Abstract => TS_ABSTRACT_MODIFIER,
@@ -1934,7 +1934,7 @@ impl ModifierKind {
         }
     }
 
-    const fn as_flags(&self) -> ModifierFlags {
+    const fn as_flags(self) -> ModifierFlags {
         match self {
             ModifierKind::Declare => ModifierFlags::DECLARE,
             ModifierKind::Abstract => ModifierFlags::ABSTRACT,

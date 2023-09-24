@@ -68,7 +68,7 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
-                if is_global(text, source_type) {
+                if is_global(text, *source_type) {
                     return None;
                 }
 
@@ -90,7 +90,7 @@ impl Rule for NoUndeclaredVariables {
     }
 }
 
-fn is_global(reference_name: &str, source_type: &JsFileSource) -> bool {
+fn is_global(reference_name: &str, source_type: JsFileSource) -> bool {
     ES_2021.binary_search(&reference_name).is_ok()
         || BROWSER.binary_search(&reference_name).is_ok()
         || NODE.binary_search(&reference_name).is_ok()

@@ -78,7 +78,7 @@ rustflags = [
   "-Wclippy::ref_binding_to_reference",
   "-Wclippy::ref_option_ref",
   "-Wclippy::stable_sort_primitive",
-  "-Wclippy::unnecessary_box_returns",
+  "-Wclippy::trivially_copy_pass_by_ref",
   "-Wclippy::unnecessary_box_returns",
   "-Wclippy::unnecessary_join",
   "-Wclippy::unnested_or_patterns",

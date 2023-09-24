@@ -239,7 +239,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
 
 impl FormatJsAnyConditionalRule {
     fn layout(
-        &self,
+        self,
         conditional: &AnyJsConditional,
         source_type: JsFileSource,
     ) -> ConditionalLayout {
@@ -300,7 +300,7 @@ impl FormatJsAnyConditionalRule {
     /// ).member
     /// ```
     fn should_extra_indent(
-        &self,
+        self,
         conditional: &AnyJsConditional,
         layout: &ConditionalLayout,
     ) -> bool {
@@ -476,7 +476,7 @@ impl FormatJsAnyConditionalRule {
 
     /// Returns `true` if this is the root conditional expression and the parent is a [JsStaticMemberExpression].
     fn is_parent_static_member_expression(
-        &self,
+        self,
         conditional: &AnyJsConditional,
         layout: &ConditionalLayout,
     ) -> bool {
@@ -634,10 +634,10 @@ pub enum ConditionalJsxChain {
 }
 
 impl ConditionalJsxChain {
-    pub const fn is_chain(&self) -> bool {
+    pub const fn is_chain(self) -> bool {
         matches!(self, ConditionalJsxChain::Chain)
     }
-    pub const fn is_no_chain(&self) -> bool {
+    pub const fn is_no_chain(self) -> bool {
         matches!(self, ConditionalJsxChain::NoChain)
     }
 }

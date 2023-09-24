@@ -147,7 +147,7 @@ enum AmbientFunctionKind {
 }
 
 impl AmbientFunctionKind {
-    const fn is_export_default(&self) -> bool {
+    const fn is_export_default(self) -> bool {
         matches!(self, AmbientFunctionKind::ExportDefault)
     }
 }
@@ -163,19 +163,19 @@ enum FunctionKind {
 }
 
 impl FunctionKind {
-    const fn is_export_default(&self) -> bool {
+    const fn is_export_default(self) -> bool {
         matches!(self, FunctionKind::ExportDefault)
     }
 
-    fn is_id_optional(&self) -> bool {
+    fn is_id_optional(self) -> bool {
         matches!(self, FunctionKind::Expression | FunctionKind::ExportDefault)
     }
 
-    fn is_expression(&self) -> bool {
+    fn is_expression(self) -> bool {
         matches!(self, FunctionKind::Expression)
     }
 
-    fn is_in_single_statement_context(&self) -> bool {
+    fn is_in_single_statement_context(self) -> bool {
         matches!(
             self,
             FunctionKind::Declaration {
@@ -516,7 +516,7 @@ pub(crate) enum Ambiguity {
 }
 
 impl Ambiguity {
-    fn is_disallowed(&self) -> bool {
+    fn is_disallowed(self) -> bool {
         matches!(self, Ambiguity::Disallowed)
     }
 }
@@ -1056,32 +1056,32 @@ pub(crate) enum ParameterContext {
 }
 
 impl ParameterContext {
-    pub fn is_any_setter(&self) -> bool {
+    pub fn is_any_setter(self) -> bool {
         self.is_setter() || self.is_class_setter()
     }
 
-    pub fn is_setter(&self) -> bool {
-        self == &ParameterContext::Setter
+    pub fn is_setter(self) -> bool {
+        self == ParameterContext::Setter
     }
 
-    pub fn is_class_setter(&self) -> bool {
-        self == &ParameterContext::ClassSetter
+    pub fn is_class_setter(self) -> bool {
+        self == ParameterContext::ClassSetter
     }
 
-    pub fn is_class_method_implementation(&self) -> bool {
-        self == &ParameterContext::ClassImplementation
+    pub fn is_class_method_implementation(self) -> bool {
+        self == ParameterContext::ClassImplementation
     }
 
-    pub fn is_any_class_method(&self) -> bool {
+    pub fn is_any_class_method(self) -> bool {
         self.is_class_method_implementation() || self.is_class_setter()
     }
 
-    pub fn is_parameter_property(&self) -> bool {
-        self == &ParameterContext::ParameterProperty
+    pub fn is_parameter_property(self) -> bool {
+        self == ParameterContext::ParameterProperty
     }
 
-    pub fn is_arrow_function(&self) -> bool {
-        self == &ParameterContext::Arrow
+    pub fn is_arrow_function(self) -> bool {
+        self == ParameterContext::Arrow
     }
 }
 

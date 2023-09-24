@@ -456,6 +456,7 @@ const fn default_strict_case() -> bool {
     true
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 const fn is_default_strict_case(strict_case: &bool) -> bool {
     *strict_case == default_strict_case()
 }

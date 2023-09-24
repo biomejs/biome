@@ -181,7 +181,7 @@ impl Radix {
         })
     }
 
-    fn prefix(&self) -> &'static str {
+    fn prefix(self) -> &'static str {
         match self {
             Radix::Binary => "0b",
             Radix::Octal => "0o",
@@ -189,7 +189,7 @@ impl Radix {
         }
     }
 
-    fn description(&self) -> &'static str {
+    fn description(self) -> &'static str {
         match self {
             Radix::Binary => "binary",
             Radix::Octal => "octal",

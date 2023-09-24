@@ -763,7 +763,7 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
 }
 
 impl LanguageKind {
-    fn formatter_ident(&self) -> Ident {
+    fn formatter_ident(self) -> Ident {
         let name = match self {
             LanguageKind::Js => "JsFormatter",
             LanguageKind::Css => "CssFormatter",
@@ -773,7 +773,7 @@ impl LanguageKind {
         Ident::new(name, Span::call_site())
     }
 
-    fn format_context_ident(&self) -> Ident {
+    fn format_context_ident(self) -> Ident {
         let name = match self {
             LanguageKind::Js => "JsFormatContext",
             LanguageKind::Css => "CssFormatContext",

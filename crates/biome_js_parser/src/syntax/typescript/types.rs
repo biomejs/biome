@@ -81,19 +81,19 @@ impl TypeContext {
         self.and(TypeContext::IN_CONDITIONAL_EXTENDS, allow)
     }
 
-    pub(crate) const fn is_conditional_type_allowed(&self) -> bool {
+    pub(crate) const fn is_conditional_type_allowed(self) -> bool {
         !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
     }
 
-    pub(crate) const fn is_in_out_modifier_allowed(&self) -> bool {
+    pub(crate) const fn is_in_out_modifier_allowed(self) -> bool {
         self.contains(TypeContext::ALLOW_IN_OUT_MODIFIER)
     }
 
-    pub(crate) const fn is_const_modifier_allowed(&self) -> bool {
+    pub(crate) const fn is_const_modifier_allowed(self) -> bool {
         self.contains(TypeContext::ALLOW_CONST_MODIFIER)
     }
 
-    pub(crate) const fn in_conditional_extends(&self) -> bool {
+    pub(crate) const fn in_conditional_extends(self) -> bool {
         self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
     }
 
@@ -387,10 +387,10 @@ impl ClassMemberModifierList {
         self.0.push(modifier);
     }
 
-    fn find(&self, modifier_kind: &TypeParameterModifierKind) -> Option<&TypeParameterModifier> {
+    fn find(&self, modifier_kind: TypeParameterModifierKind) -> Option<&TypeParameterModifier> {
         self.0
             .iter()
-            .find(|predicate| predicate.kind == *modifier_kind)
+            .find(|predicate| predicate.kind == modifier_kind)
     }
 }
 
@@ -439,7 +439,7 @@ fn parse_ts_type_parameter_modifiers(p: &mut JsParser, context: TypeContext) -> 
         }
 
         // check for duplicate modifiers
-        if let Some(existing_modifier) = modifiers.find(&modifier_kind) {
+        if let Some(existing_modifier) = modifiers.find(modifier_kind) {
             p.error(modifier_already_seen(
                 p,
                 text_range,
@@ -450,7 +450,7 @@ fn parse_ts_type_parameter_modifiers(p: &mut JsParser, context: TypeContext) -> 
         }
 
         // check for modifier precedence
-        if let Some(ts_out_modifier) = modifiers.find(&TypeParameterModifierKind::Out) {
+        if let Some(ts_out_modifier) = modifiers.find(TypeParameterModifierKind::Out) {
             if modifier_kind == TypeParameterModifierKind::In {
                 p.error(modifier_must_precede_modifier(
                     p,
@@ -592,7 +592,7 @@ enum IntersectionOrUnionType {
 
 impl IntersectionOrUnionType {
     #[inline]
-    fn operator(&self) -> JsSyntaxKind {
+    fn operator(self) -> JsSyntaxKind {
         match self {
             IntersectionOrUnionType::Union => T![|],
             IntersectionOrUnionType::Intersection => T![&],
@@ -600,7 +600,7 @@ impl IntersectionOrUnionType {
     }
 
     #[inline]
-    fn list_kind(&self) -> JsSyntaxKind {
+    fn list_kind(self) -> JsSyntaxKind {
         match self {
             IntersectionOrUnionType::Union => TS_UNION_TYPE_VARIANT_LIST,
             IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE_ELEMENT_LIST,
@@ -608,7 +608,7 @@ impl IntersectionOrUnionType {
     }
 
     #[inline]
-    fn kind(&self) -> JsSyntaxKind {
+    fn kind(self) -> JsSyntaxKind {
         match self {
             IntersectionOrUnionType::Union => TS_UNION_TYPE,
             IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE,
@@ -616,7 +616,7 @@ impl IntersectionOrUnionType {
     }
 
     #[inline]
-    fn parse_element(&self, p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
+    fn parse_element(self, p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
         match self {
             IntersectionOrUnionType::Union => parse_ts_intersection_type_or_higher(p, context),
             IntersectionOrUnionType::Intersection => parse_ts_primary_type(p, context),

@@ -161,7 +161,7 @@ impl FormatFunction {
     pub(crate) fn fmt_with_options(
         &self,
         f: &mut JsFormatter,
-        options: &FormatFunctionOptions,
+        options: FormatFunctionOptions,
     ) -> FormatResult<()> {
         if let Some(async_token) = self.async_token() {
             write!(f, [async_token.format(), space()])?;
@@ -248,7 +248,7 @@ impl FormatFunction {
 
 impl Format<JsFormatContext> for FormatFunction {
     fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
-        self.fmt_with_options(f, &FormatFunctionOptions::default())?;
+        self.fmt_with_options(f, FormatFunctionOptions::default())?;
         Ok(())
     }
 }

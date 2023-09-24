@@ -44,7 +44,7 @@ impl<'source> JsParser<'source> {
         let source = JsTokenSource::from_str(source);
 
         JsParser {
-            state: ParserState::new(&source_type),
+            state: ParserState::new(source_type),
             source_type,
             context: ParserContext::default(),
             source,

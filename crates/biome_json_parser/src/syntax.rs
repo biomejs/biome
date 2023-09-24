@@ -90,28 +90,28 @@ enum SequenceKind {
 }
 
 impl SequenceKind {
-    const fn node_kind(&self) -> JsonSyntaxKind {
+    const fn node_kind(self) -> JsonSyntaxKind {
         match self {
             SequenceKind::Array => JSON_ARRAY_VALUE,
             SequenceKind::Object => JSON_OBJECT_VALUE,
         }
     }
 
-    const fn list_kind(&self) -> JsonSyntaxKind {
+    const fn list_kind(self) -> JsonSyntaxKind {
         match self {
             SequenceKind::Array => JSON_ARRAY_ELEMENT_LIST,
             SequenceKind::Object => JSON_MEMBER_LIST,
         }
     }
 
-    const fn open_paren(&self) -> JsonSyntaxKind {
+    const fn open_paren(self) -> JsonSyntaxKind {
         match self {
             SequenceKind::Array => T!['['],
             SequenceKind::Object => T!['{'],
         }
     }
 
-    const fn close_paren(&self) -> JsonSyntaxKind {
+    const fn close_paren(self) -> JsonSyntaxKind {
         match self {
             SequenceKind::Array => T![']'],
             SequenceKind::Object => T!['}'],

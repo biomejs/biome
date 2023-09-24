@@ -73,11 +73,11 @@ impl FromStr for LanguageKind {
 }
 
 impl LanguageKind {
-    pub(crate) fn syntax_crate_ident(&self) -> Ident {
+    pub(crate) fn syntax_crate_ident(self) -> Ident {
         Ident::new(self.syntax_crate_name(), Span::call_site())
     }
 
-    pub(crate) fn syntax_kind(&self) -> TokenStream {
+    pub(crate) fn syntax_kind(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxKind },
             LanguageKind::Css => quote! { CssSyntaxKind },
@@ -85,7 +85,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn syntax_node(&self) -> TokenStream {
+    pub(crate) fn syntax_node(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxNode },
             LanguageKind::Css => quote! { CssSyntaxNode },
@@ -93,7 +93,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn syntax_element(&self) -> TokenStream {
+    pub(crate) fn syntax_element(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxElement },
             LanguageKind::Css => quote! { CssSyntaxElement },
@@ -101,7 +101,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn syntax_token(&self) -> TokenStream {
+    pub(crate) fn syntax_token(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxToken },
             LanguageKind::Css => quote! { CssSyntaxToken },
@@ -109,7 +109,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn syntax_element_children(&self) -> TokenStream {
+    pub(crate) fn syntax_element_children(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxElementChildren },
             LanguageKind::Css => quote! { CssSyntaxElementChildren },
@@ -117,7 +117,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn syntax_list(&self) -> TokenStream {
+    pub(crate) fn syntax_list(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsSyntaxList },
             LanguageKind::Css => quote! { CssSyntaxList },
@@ -125,7 +125,7 @@ impl LanguageKind {
         }
     }
 
-    pub(crate) fn language(&self) -> TokenStream {
+    pub(crate) fn language(self) -> TokenStream {
         match self {
             LanguageKind::Js => quote! { JsLanguage },
             LanguageKind::Css => quote! { CssLanguage },
@@ -133,7 +133,7 @@ impl LanguageKind {
         }
     }
 
-    pub fn formatter_crate_name(&self) -> &'static str {
+    pub fn formatter_crate_name(self) -> &'static str {
         match self {
             LanguageKind::Js => "biome_js_formatter",
             LanguageKind::Css => "rome_css_formatter",
@@ -141,7 +141,7 @@ impl LanguageKind {
         }
     }
 
-    pub fn syntax_crate_name(&self) -> &'static str {
+    pub fn syntax_crate_name(self) -> &'static str {
         match self {
             LanguageKind::Js => "biome_js_syntax",
             LanguageKind::Css => "biome_css_syntax",
@@ -149,7 +149,7 @@ impl LanguageKind {
         }
     }
 
-    pub fn factory_crate_name(&self) -> &'static str {
+    pub fn factory_crate_name(self) -> &'static str {
         match self {
             LanguageKind::Js => "biome_js_factory",
             LanguageKind::Css => "biome_css_factory",
@@ -160,7 +160,7 @@ impl LanguageKind {
 
 /// A helper to update file on disk if it has changed.
 /// With verify = false,
-pub fn update(path: &Path, contents: &str, mode: &Mode) -> Result<UpdateResult> {
+pub fn update(path: &Path, contents: &str, mode: Mode) -> Result<UpdateResult> {
     match fs2::read_to_string(path) {
         Ok(old_contents) if old_contents == contents => {
             return Ok(UpdateResult::NotUpdated);
@@ -168,7 +168,7 @@ pub fn update(path: &Path, contents: &str, mode: &Mode) -> Result<UpdateResult> 
         _ => (),
     }
 
-    if *mode == Mode::Verify {
+    if mode == Mode::Verify {
         anyhow::bail!("`{}` is not up-to-date", path.display());
     }
 

@@ -711,7 +711,7 @@ pub(crate) enum BinaryLikeOperator {
 }
 
 impl BinaryLikeOperator {
-    pub const fn precedence(&self) -> OperatorPrecedence {
+    pub const fn precedence(self) -> OperatorPrecedence {
         match self {
             BinaryLikeOperator::Logical(logical) => logical.precedence(),
             BinaryLikeOperator::Binary(binary) => binary.precedence(),
@@ -721,7 +721,7 @@ impl BinaryLikeOperator {
         }
     }
 
-    pub const fn is_remainder(&self) -> bool {
+    pub const fn is_remainder(self) -> bool {
         matches!(
             self,
             BinaryLikeOperator::Binary(JsBinaryOperator::Remainder)

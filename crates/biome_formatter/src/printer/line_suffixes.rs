@@ -32,7 +32,7 @@ impl<'a> LineSuffixes<'a> {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub(super) enum LineSuffixEntry<'a> {
     /// A line suffix to print
     Suffix(&'a FormatElement),

@@ -414,7 +414,7 @@ pub enum JsxChildListLayout {
 }
 
 impl JsxChildListLayout {
-    const fn is_multiline(&self) -> bool {
+    const fn is_multiline(self) -> bool {
         matches!(self, JsxChildListLayout::Multiline)
     }
 }
@@ -467,7 +467,7 @@ enum WordSeparator {
 
 impl WordSeparator {
     /// Returns if formatting this separator will result in a child that expands
-    fn will_break(&self) -> bool {
+    fn will_break(self) -> bool {
         matches!(
             self,
             WordSeparator::EndOfText {

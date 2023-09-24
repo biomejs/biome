@@ -1,1 +1,2 @@
 allow-dbg-in-tests = true
+trivial-copy-size-limit = 4

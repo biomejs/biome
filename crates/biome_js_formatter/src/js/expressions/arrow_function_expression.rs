@@ -48,7 +48,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         let layout =
-            ArrowFunctionLayout::for_arrow(node.clone(), f.context().comments(), &self.options)?;
+            ArrowFunctionLayout::for_arrow(node.clone(), f.context().comments(), self.options)?;
 
         match layout {
             ArrowFunctionLayout::Chain(chain) => {
@@ -555,7 +555,7 @@ impl ArrowFunctionLayout {
     fn for_arrow(
         arrow: JsArrowFunctionExpression,
         comments: &JsComments,
-        options: &FormatJsArrowFunctionExpressionOptions,
+        options: FormatJsArrowFunctionExpressionOptions,
     ) -> SyntaxResult<ArrowFunctionLayout> {
         let mut head = None;
         let mut middle = Vec::new();
@@ -589,7 +589,7 @@ impl ArrowFunctionLayout {
                             middle,
                             tail: current,
                             expand_signatures: should_break,
-                            options: *options,
+                            options,
                         }),
                     }
                 }

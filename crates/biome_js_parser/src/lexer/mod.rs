@@ -122,11 +122,11 @@ bitflags! {
 }
 
 impl TokenFlags {
-    pub const fn has_preceding_line_break(&self) -> bool {
+    pub const fn has_preceding_line_break(self) -> bool {
         self.contains(TokenFlags::PRECEDING_LINE_BREAK)
     }
 
-    pub const fn has_unicode_escape(&self) -> bool {
+    pub const fn has_unicode_escape(self) -> bool {
         self.contains(TokenFlags::UNICODE_ESCAPE)
     }
 }

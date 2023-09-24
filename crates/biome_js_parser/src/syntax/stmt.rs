@@ -138,11 +138,11 @@ pub(crate) enum StatementContext {
 }
 
 impl StatementContext {
-    pub(crate) fn is_single_statement(&self) -> bool {
+    pub(crate) fn is_single_statement(self) -> bool {
         !matches!(self, StatementContext::StatementList)
     }
 
-    pub(crate) fn is_statement_list(&self) -> bool {
+    pub(crate) fn is_statement_list(self) -> bool {
         matches!(self, StatementContext::StatementList)
     }
 }

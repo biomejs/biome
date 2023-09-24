@@ -24,7 +24,7 @@ impl FormatRuleWithOptions<JsFunctionExpression> for FormatJsFunctionExpression 
 
 impl FormatNodeRule<JsFunctionExpression> for FormatJsFunctionExpression {
     fn fmt_fields(&self, node: &JsFunctionExpression, f: &mut JsFormatter) -> FormatResult<()> {
-        FormatFunction::from(node.clone()).fmt_with_options(f, &self.options)?;
+        FormatFunction::from(node.clone()).fmt_with_options(f, self.options)?;
         Ok(())
     }
 

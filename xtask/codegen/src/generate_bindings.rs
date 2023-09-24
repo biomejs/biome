@@ -408,7 +408,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let printed = formatted.print().unwrap();
     let code = printed.into_code();
 
-    update(&bindings_path, &code, &mode)?;
+    update(&bindings_path, &code, mode)?;
 
     Ok(())
 }

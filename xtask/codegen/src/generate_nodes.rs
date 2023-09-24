@@ -84,7 +84,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                 let is_list = match field {
                     Field::Node { ty, .. } => ast.is_list(ty),
-                    _ => false,
+                    Field::Token { .. } => false,
                 };
 
                 let string_name = name.to_string();

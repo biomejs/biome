@@ -33,15 +33,15 @@ pub(crate) enum ExportDefaultItemKind {
 }
 
 impl ExportDefaultItemKind {
-    pub(crate) fn is_overload(&self) -> bool {
+    pub(crate) fn is_overload(self) -> bool {
         matches!(self, ExportDefaultItemKind::FunctionOverload)
     }
 
-    pub(crate) fn is_function_declaration(&self) -> bool {
+    pub(crate) fn is_function_declaration(self) -> bool {
         matches!(self, ExportDefaultItemKind::FunctionDeclaration)
     }
 
-    pub(crate) fn is_interface(&self) -> bool {
+    pub(crate) fn is_interface(self) -> bool {
         matches!(self, ExportDefaultItemKind::Interface)
     }
 }
@@ -97,7 +97,7 @@ pub(crate) enum StrictMode {
 }
 
 impl ParserState {
-    pub fn new(source_type: &JsFileSource) -> Self {
+    pub fn new(source_type: JsFileSource) -> Self {
         let mut state = ParserState {
             parsing_context: ParsingContextFlags::TOP_LEVEL,
             label_set: IndexMap::new(),

@@ -621,7 +621,7 @@ impl PartIndex {
         Self(NonZeroU32::try_from(value as u32 + 1).unwrap())
     }
 
-    fn value(&self) -> usize {
+    fn value(self) -> usize {
         (u32::from(self.0) - 1) as usize
     }
 
@@ -629,7 +629,7 @@ impl PartIndex {
         *self = self.incremented();
     }
 
-    fn incremented(&self) -> PartIndex {
+    fn incremented(self) -> PartIndex {
         PartIndex(NonZeroU32::new(self.0.get() + 1).unwrap())
     }
 }

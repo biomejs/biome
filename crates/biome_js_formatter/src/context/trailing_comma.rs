@@ -22,7 +22,7 @@ pub(crate) enum FormatTrailingComma {
 
 impl FormatTrailingComma {
     /// This function returns corresponding [TrailingSeparator] for [format_separated] function.
-    pub fn trailing_separator(&self, options: &JsFormatOptions) -> TrailingSeparator {
+    pub fn trailing_separator(self, options: &JsFormatOptions) -> TrailingSeparator {
         if options.trailing_comma.is_none() {
             return TrailingSeparator::Omit;
         }

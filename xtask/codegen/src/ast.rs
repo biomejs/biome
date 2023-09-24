@@ -55,7 +55,7 @@ pub fn generate_ast(mode: Mode, language_kind_list: Vec<String>) -> Result<()> {
         );
         let mut ast = load_ast(kind);
         ast.sort();
-        generate_syntax(ast, &mode, kind)?;
+        generate_syntax(ast, mode, kind)?;
     }
 
     Ok(())
@@ -69,7 +69,7 @@ pub(crate) fn load_ast(language: LanguageKind) -> AstSrc {
     }
 }
 
-pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageKind) -> Result<()> {
+pub(crate) fn generate_syntax(ast: AstSrc, mode: Mode, language_kind: LanguageKind) -> Result<()> {
     let syntax_generated_path = project_root()
         .join("crates")
         .join(language_kind.syntax_crate_name())
@@ -299,8 +299,8 @@ fn classify_node_rule(grammar: &Grammar, rule: &Rule) -> NodeRuleClassification 
     }
 }
 
-fn clean_token_name(grammar: &Grammar, token: &Token) -> String {
-    let mut name = grammar[*token].name.clone();
+fn clean_token_name(grammar: &Grammar, token: Token) -> String {
+    let mut name = grammar[token].name.clone();
 
     // These tokens, when parsed to proc_macro2::TokenStream, generates a stream of bytes
     // that can't be recognized by [quote].
@@ -338,7 +338,7 @@ fn handle_rule(
             fields.push(field);
         }
         Rule::Token(token) => {
-            let name = clean_token_name(grammar, token);
+            let name = clean_token_name(grammar, *token);
 
             if name == "''" {
                 // array hole
@@ -449,7 +449,7 @@ fn handle_tokens_in_unions(
     let mut token_kinds = vec![];
     for rule in rule.iter() {
         match rule {
-            Rule::Token(token) => token_kinds.push(clean_token_name(grammar, token)),
+            Rule::Token(token) => token_kinds.push(clean_token_name(grammar, *token)),
             _ => return false,
         }
     }

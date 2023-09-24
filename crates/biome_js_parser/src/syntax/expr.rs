@@ -84,18 +84,18 @@ impl ExpressionContext {
     }
 
     /// Returns true if object expressions or object patterns are valid in this context
-    pub(crate) const fn is_object_expression_allowed(&self) -> bool {
+    pub(crate) const fn is_object_expression_allowed(self) -> bool {
         self.0
             .contains(ExpressionContextFlags::ALLOW_OBJECT_EXPRESSION)
     }
 
     /// Returns `true` if the expression parsing includes binary in expressions.
-    pub(crate) const fn is_in_included(&self) -> bool {
+    pub(crate) const fn is_in_included(self) -> bool {
         self.0.contains(ExpressionContextFlags::INCLUDE_IN)
     }
 
     /// Returns `true` if currently parsing a decorator expression `@<expr>`.
-    pub(crate) const fn is_in_decorator(&self) -> bool {
+    pub(crate) const fn is_in_decorator(self) -> bool {
         self.0.contains(ExpressionContextFlags::IN_DECORATOR)
     }
 

@@ -401,19 +401,19 @@ impl SemanticEventExtractor {
             JS_VARIABLE_DECLARATOR => {
                 if let Some(true) = is_var {
                     let hoisted_scope_id = self.scope_index_to_hoist_declarations(0);
-                    self.push_binding_into_scope(hoisted_scope_id, &name_token, &parent_kind);
+                    self.push_binding_into_scope(hoisted_scope_id, &name_token, parent_kind);
                 } else {
-                    self.push_binding_into_scope(None, &name_token, &parent_kind);
+                    self.push_binding_into_scope(None, &name_token, parent_kind);
                 };
                 self.export_variable_declarator(node, &parent);
             }
             JS_FUNCTION_DECLARATION | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
                 let hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
-                self.push_binding_into_scope(hoisted_scope_id, &name_token, &parent_kind);
+                self.push_binding_into_scope(hoisted_scope_id, &name_token, parent_kind);
                 self.export_function_declaration(node, &parent);
             }
             JS_CLASS_EXPRESSION | JS_FUNCTION_EXPRESSION => {
-                self.push_binding_into_scope(None, &name_token, &parent_kind);
+                self.push_binding_into_scope(None, &name_token, parent_kind);
                 self.export_declaration_expression(node, &parent);
             }
             JS_CLASS_DECLARATION
@@ -425,7 +425,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION => {
                 let parent_scope = self.scopes.get(self.scopes.len() - 2);
                 let parent_scope = parent_scope.map(|scope| scope.scope_id);
-                self.push_binding_into_scope(parent_scope, &name_token, &parent_kind);
+                self.push_binding_into_scope(parent_scope, &name_token, parent_kind);
                 self.export_declaration(node, &parent);
             }
             JS_BINDING_PATTERN_WITH_DEFAULT
@@ -437,7 +437,7 @@ impl SemanticEventExtractor {
             | JS_ARRAY_BINDING_PATTERN
             | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
             | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
-                self.push_binding_into_scope(None, &name_token, &parent_kind);
+                self.push_binding_into_scope(None, &name_token, parent_kind);
 
                 let possible_declarator = parent.ancestors().find(|x| {
                     !matches!(
@@ -459,7 +459,7 @@ impl SemanticEventExtractor {
                 }
             }
             _ => {
-                self.push_binding_into_scope(None, &name_token, &parent_kind);
+                self.push_binding_into_scope(None, &name_token, parent_kind);
             }
         }
 
@@ -622,7 +622,7 @@ impl SemanticEventExtractor {
             let parent_kind = infer.syntax().parent().map(|parent| parent.kind());
 
             if let (Some(name_token), Some(parent_kind)) = (name_token, parent_kind) {
-                self.push_binding_into_scope(None, &name_token, &parent_kind);
+                self.push_binding_into_scope(None, &name_token, parent_kind);
             }
         }
     }
@@ -827,7 +827,7 @@ impl SemanticEventExtractor {
         &mut self,
         hoisted_scope_id: Option<usize>,
         name_token: &JsSyntaxToken,
-        declaration_kind: &JsSyntaxKind,
+        declaration_kind: JsSyntaxKind,
     ) {
         let name = name_token.token_text_trimmed();
         let declaration_range = name_token.text_range();
@@ -840,7 +840,7 @@ impl SemanticEventExtractor {
                 name.clone(),
                 BindingInfo {
                     text_range: declaration_range,
-                    declaration_kind: *declaration_kind,
+                    declaration_kind,
                 },
             )
             .map(|shadowed_range| (name.clone(), shadowed_range));
