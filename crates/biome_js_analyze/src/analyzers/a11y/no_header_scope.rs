@@ -72,7 +72,14 @@ impl Rule for NoHeaderScope {
             scope_node.range(),
             markup! {"Avoid using the "<Emphasis>"scope"</Emphasis>" attribute on elements other than "<Emphasis>"th"</Emphasis>" elements."}
                 .to_owned(),
-        );
+        ).note(markup!{
+            "The "<Emphasis>"scope"</Emphasis>" attribute is used to associate a data cell with its corresponding header cell in a data table, 
+            so it should be placed on "<Emphasis>"th"</Emphasis>" elements to provide accessibility to screen readers."
+        }).note(markup!{
+            "Follow the links for more information,
+            "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships">"WCAG 1.3.1"</Hyperlink>"
+            "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/parsing">"WCAG 4.1.1"</Hyperlink>""
+        });
 
         Some(diagnostic)
     }
