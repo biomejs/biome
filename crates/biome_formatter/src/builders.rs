@@ -286,31 +286,31 @@ impl std::fmt::Debug for StaticText {
 ///
 /// # fn main() -> FormatResult<()> {
 /// // the tab must be encoded as \\t to not literally print a tab character ("Hello{tab}World" vs "Hello\tWorld")
-/// use biome_formatter::TextSize;
+/// use biome_text_size::TextSize;
 /// use biome_formatter::SourceMarker;
 ///
 ///
 /// let elements = format!(SimpleFormatContext::default(), [
-///     source_position(TextSize::new(0)),
+///     source_position(TextSize::from(0)),
 ///     text("\"Hello "),
-///     source_position(TextSize::new(8)),
-///     text("'Ruff'"),
-///     source_position(TextSize::new(14)),
+///     source_position(TextSize::from(8)),
+///     text("'Rust'"),
+///     source_position(TextSize::from(14)),
 ///     text("\""),
-///     source_position(TextSize::new(20))
+///     source_position(TextSize::from(20))
 /// ])?;
 ///
 /// let printed = elements.print()?;
 ///
-/// assert_eq!(printed.as_code(), r#""Hello 'Ruff'""#);
+/// assert_eq!(printed.as_code(), r#""Hello 'Rust'""#);
 /// assert_eq!(printed.sourcemap(), [
-///     SourceMarker { source: TextSize::new(0), dest: TextSize::new(0) },
-///     SourceMarker { source: TextSize::new(0), dest: TextSize::new(7) },
-///     SourceMarker { source: TextSize::new(8), dest: TextSize::new(7) },
-///     SourceMarker { source: TextSize::new(8), dest: TextSize::new(13) },
-///     SourceMarker { source: TextSize::new(14), dest: TextSize::new(13) },
-///     SourceMarker { source: TextSize::new(14), dest: TextSize::new(14) },
-///     SourceMarker { source: TextSize::new(20), dest: TextSize::new(14) },
+///     SourceMarker { source: TextSize::from(0), dest: TextSize::from(0) },
+///     SourceMarker { source: TextSize::from(0), dest: TextSize::from(7) },
+///     SourceMarker { source: TextSize::from(8), dest: TextSize::from(7) },
+///     SourceMarker { source: TextSize::from(8), dest: TextSize::from(13) },
+///     SourceMarker { source: TextSize::from(14), dest: TextSize::from(13) },
+///     SourceMarker { source: TextSize::from(14), dest: TextSize::from(14) },
+///     SourceMarker { source: TextSize::from(20), dest: TextSize::from(14) },
 /// ]);
 ///
 /// # Ok(())
