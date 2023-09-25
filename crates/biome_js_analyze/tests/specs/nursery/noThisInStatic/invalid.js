@@ -1,5 +1,23 @@
+class A {
+    static foo() {
+        doSomething()
+    }
 
+    static bar() {
+        this.foo()
+    }
 
- var a = 1;
-a = 2;
- a = 3;
+    fax() {
+        return 'asd';
+    }
+}
+
+class B extends A {
+    static foo() {
+        super.foo()
+    }
+
+    fax() { 
+        return 'asd';
+    }
+}
