@@ -25,9 +25,9 @@ indexmap          = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"], optional = true }
+static_assertions = "1.1"
 tracing           = { workspace = true }
 unicode-width     = "0.1.9"
-static_assertions = "1.1"
 
 [dev-dependencies]
 biome_js_parser = { workspace = true }
