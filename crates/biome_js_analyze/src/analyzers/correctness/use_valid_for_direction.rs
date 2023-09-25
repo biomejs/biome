@@ -3,7 +3,6 @@ use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentOperator, JsBinaryOperator, JsForStatement,
     JsIdentifierAssignment, JsIdentifierExpression, JsPostUpdateOperator, JsUnaryOperator,
-    TextRange,
 };
 
 declare_rule! {
@@ -46,28 +45,15 @@ declare_rule! {
     }
 }
 
-pub struct RuleRangeState {
-    l_paren_range: TextRange,
-    r_paren_range: TextRange,
-}
-
 impl Rule for UseValidForDirection {
     type Query = Ast<JsForStatement>;
-    type State = RuleRangeState;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let n = ctx.query();
-
-        let l_paren_range = n.l_paren_token().ok()?.text_trimmed_range();
-        let r_paren_range = n.r_paren_token().ok()?.text_trimmed_range();
-        let rule_state = RuleRangeState {
-            l_paren_range,
-            r_paren_range,
-        };
-
-        let test = n.test()?;
+        let node = ctx.query();
+        let test = node.test()?;
         let binary_expr = test.as_js_binary_expression()?;
         let operator = binary_expr.operator().ok()?;
 
@@ -84,7 +70,7 @@ impl Rule for UseValidForDirection {
             return None;
         }
 
-        match n.update()? {
+        match node.update()? {
             AnyJsExpression::JsPostUpdateExpression(update_expr) => {
                 let binary_expr_left = binary_expr.left().ok()?;
                 let counter_ident = binary_expr_left.as_js_identifier_expression()?;
@@ -98,11 +84,11 @@ impl Rule for UseValidForDirection {
                 if update_expr.operator().ok()? == JsPostUpdateOperator::Increment
                     && is_greater_than
                 {
-                    return Some(rule_state);
+                    return Some(());
                 }
 
                 if update_expr.operator().ok()? == JsPostUpdateOperator::Decrement && is_less_than {
-                    return Some(rule_state);
+                    return Some(());
                 }
             }
             AnyJsExpression::JsAssignmentExpression(assignment_expr) => {
@@ -129,25 +115,25 @@ impl Rule for UseValidForDirection {
                 match assignment_expr.operator().ok()? {
                     JsAssignmentOperator::AddAssign => {
                         if is_greater_than {
-                            return Some(rule_state);
+                            return Some(());
                         }
 
                         let assignment_expr_right = assignment_expr.right().ok()?;
                         let unary_expr = assignment_expr_right.as_js_unary_expression()?;
                         if is_less_than && unary_expr.operator().ok()? == JsUnaryOperator::Minus {
-                            return Some(rule_state);
+                            return Some(());
                         }
                     }
                     JsAssignmentOperator::SubtractAssign => {
                         if is_less_than {
-                            return Some(rule_state);
+                            return Some(());
                         }
 
                         let assignment_expr_right = assignment_expr.right().ok()?;
                         let unary_expr = assignment_expr_right.as_js_unary_expression()?;
                         if is_greater_than && unary_expr.operator().ok()? == JsUnaryOperator::Minus
                         {
-                            return Some(rule_state);
+                            return Some(());
                         }
                     }
                     _ => return None,
@@ -159,10 +145,13 @@ impl Rule for UseValidForDirection {
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let l_paren_range = node.l_paren_token().ok()?.text_trimmed_range();
+        let r_paren_range = node.r_paren_token().ok()?.text_trimmed_range();
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.l_paren_range.cover(state.r_paren_range),
+            l_paren_range.cover(r_paren_range),
             markup! {
                 "The update clause in this loop moves the variable in the wrong direction."
             },
