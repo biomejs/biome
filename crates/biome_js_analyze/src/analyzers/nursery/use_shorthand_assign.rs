@@ -154,7 +154,7 @@ declare_rule! {
 
 pub struct RuleState {
     shorthand_operator: JsSyntaxKind,
-    right: AnyJsExpression
+    right: AnyJsExpression,
 }
 
 impl Rule for UseShorthandAssign {
@@ -191,7 +191,7 @@ impl Rule for UseShorthandAssign {
         if has_same_reference {
             Some(RuleState {
                 shorthand_operator: shorhand,
-                right
+                right,
             })
         } else {
             None
@@ -222,9 +222,10 @@ impl Rule for UseShorthandAssign {
             .with_leading_trivia_pieces(token_leading_trivia)
             .with_trailing_trivia_pieces(token_trailing_trivia);
 
-        let next_node = node.clone()
-        .with_operator_token_token(token)
-        .with_right(state.right.clone());
+        let next_node = node
+            .clone()
+            .with_operator_token_token(token)
+            .with_right(state.right.clone());
 
         mutation.replace_node(
             AnyJsExpression::JsAssignmentExpression(node.clone()),
