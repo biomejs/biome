@@ -9,7 +9,8 @@ use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
 use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectFeaturesParams, RageEntry, RageParams, RageResult, ServerInfo,
+    OrganizeImportsResult, ProjectFeaturesParams, ProjectFeaturesResult, RageEntry, RageParams,
+    RageResult, ServerInfo,
 };
 use crate::{
     file_handlers::Features,
@@ -279,7 +280,7 @@ impl Workspace for WorkspaceServer {
     fn project_features(
         &self,
         params: ProjectFeaturesParams,
-    ) -> Result<Option<()>, WorkspaceError> {
+    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
         // let capabilities = self.get_project_capabilities(&params.manifest_path);
         // let capabilities = self.get_parse(&params.manifest_path);
         // let load = capabilities
@@ -289,7 +290,7 @@ impl Workspace for WorkspaceServer {
 
         // let result = load(&params.manifest_path)?;
 
-        Ok(Some(()))
+        Ok(ProjectFeaturesResult {})
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {

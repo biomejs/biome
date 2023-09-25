@@ -1,6 +1,7 @@
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectFeaturesParams, RageParams, RageResult, ServerInfo,
+    OrganizeImportsResult, ProjectFeaturesParams, ProjectFeaturesResult, RageParams, RageResult,
+    ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -118,7 +119,7 @@ where
     fn project_features(
         &self,
         params: ProjectFeaturesParams,
-    ) -> Result<Option<()>, WorkspaceError> {
+    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
         self.request("rome/project_features", params)
     }
 
