@@ -15,8 +15,11 @@ const PLATFORMS = {
 		arm64: "@biomejs/cli-linux-arm64/biome",
 	},
 };
+if (env.ROME_BINARY) {
+	console.warn(`[WARN] The environment variable "ROME_BINARY" is deprecated. Use "BIOME_BINARY" instead.`)
+}
 
-const binPath = env.ROME_BINARY || PLATFORMS?.[platform]?.[arch];
+const binPath = env.BIOME_BINARY || env.ROME_BINARY || PLATFORMS?.[platform]?.[arch];
 if (binPath) {
 	const packageManager = detectPackageManager();
 	const result = require("child_process").spawnSync(

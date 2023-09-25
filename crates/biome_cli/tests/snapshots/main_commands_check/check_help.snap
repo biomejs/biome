@@ -78,6 +78,8 @@ Available options:
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
                               e.g. echo 'let a;' | biome check --stdin-file-path=file.js"
+                              The file doesn't need to exist on disk, what matters is the extension of
+                              the file. Based on the extension, Biome will use the appropriate tool.
     -h, --help                Prints help information
 
 ```

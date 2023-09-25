@@ -73,6 +73,8 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
         /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome check --stdin-file-path=file.js"
+        ///
+        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome will use the appropriate tool.
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// Single file, single path or list of paths
@@ -101,6 +103,8 @@ pub enum BiomeCommand {
         cli_options: CliOptions,
 
         /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
+        ///
+        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome will use the appropriate tool.
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// Single file, single path or list of paths
@@ -126,6 +130,8 @@ pub enum BiomeCommand {
         files_configuration: Option<FilesConfiguration>,
 
         /// A file name with its extension to pass when reading from standard in, e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
+        ///
+        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome will use the appropriate tool.
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 

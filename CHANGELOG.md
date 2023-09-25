@@ -24,6 +24,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#312](https://github.com/biomejs/biome/issues/312). Running `biome --version` now exits with status code `0` instead of `1`. Contributed by @nhedger
 
+#### New features
+
+- Add support for `BIOME_BINARY` environment variable to override the location of the binary. Contributed by @ematipico
+
+#### Enhancements
+- Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
+
 ### Configuration
 ### Editors
 ### Formatter
