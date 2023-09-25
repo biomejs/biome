@@ -9,7 +9,7 @@ use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
 use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
+    OrganizeImportsResult, ProjectFeaturesParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::{
     file_handlers::Features,
@@ -275,6 +275,23 @@ impl Workspace for WorkspaceServer {
         }
     }
 
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn project_features(
+        &self,
+        params: ProjectFeaturesParams,
+    ) -> Result<Option<()>, WorkspaceError> {
+        // let capabilities = self.get_project_capabilities(&params.manifest_path);
+        // let capabilities = self.get_parse(&params.manifest_path);
+        // let load = capabilities
+        //     .syntax
+        //     .parse
+        //     .ok_or_else(self.build_capability_error(&params.manifest_path))?;
+
+        // let result = load(&params.manifest_path)?;
+
+        Ok(Some(()))
+    }
+
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         let settings = self.settings();
         let path = params.rome_path.as_path();
@@ -407,14 +424,6 @@ impl Workspace for WorkspaceServer {
         Ok(printed)
     }
 
-    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
-        let document = self
-            .documents
-            .get(&params.path)
-            .ok_or(WorkspaceError::not_found())?;
-        Ok(document.content.clone())
-    }
-
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
         let capabilities = self.get_capabilities(&params.path);
         let debug_formatter_ir = capabilities
@@ -429,6 +438,14 @@ impl Workspace for WorkspaceServer {
         }
 
         debug_formatter_ir(&params.path, parse, settings)
+    }
+
+    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
+        let document = self
+            .documents
+            .get(&params.path)
+            .ok_or(WorkspaceError::not_found())?;
+        Ok(document.content.clone())
     }
 
     /// Change the content of an open file

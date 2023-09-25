@@ -1,10 +1,10 @@
 use crate::Manifest;
+use biome_deserialize::json::{deserialize_from_json_ast, JsonDeserialize, VisitJsonNode};
+use biome_deserialize::{DeserializationDiagnostic, Deserialized, VisitNode};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, JsonStringValue, JsonSyntaxNode};
+use biome_rowan::{AstNode, SyntaxNode};
+use biome_text_size::{TextRange, TextSize};
 use node_semver::{SemverError, Version};
-use rome_deserialize::json::{deserialize_from_json_ast, JsonDeserialize, VisitJsonNode};
-use rome_deserialize::{DeserializationDiagnostic, Deserialized, VisitNode};
-use rome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, JsonStringValue, JsonSyntaxNode};
-use rome_rowan::{AstNode, SyntaxNode};
-use rome_text_size::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::ops::Add;
 
@@ -62,8 +62,6 @@ impl JsonDeserialize for PackageJson {
     }
 }
 
-impl VisitJsonNode for PackageJson {}
-
 impl VisitNode<JsonLanguage> for PackageJson {
     fn visit_member_name(
         &mut self,
@@ -118,7 +116,6 @@ impl VisitNode<JsonLanguage> for PackageJson {
     }
 }
 
-impl VisitJsonNode for Dependencies {}
 impl VisitNode<JsonLanguage> for Dependencies {
     fn visit_member_name(
         &mut self,

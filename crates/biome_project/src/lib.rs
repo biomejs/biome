@@ -3,12 +3,12 @@ mod license;
 mod node_js_project;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
+use biome_deserialize::{DeserializationDiagnostic, Deserialized};
+use biome_diagnostics::serde::Diagnostic;
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_rowan::{Language, SyntaxNode};
 pub use license::generated::*;
 pub use node_js_project::{NodeJsProject, PackageJson};
-use rome_deserialize::{DeserializationDiagnostic, Deserialized};
-use rome_diagnostics::serde::Diagnostic;
-use rome_parser::diagnostic::ParseDiagnostic;
-use rome_rowan::{Language, SyntaxNode};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::path::Path;

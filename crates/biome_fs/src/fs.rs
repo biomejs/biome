@@ -17,7 +17,6 @@ pub const ROME_JSON: &str = "rome.json";
 pub const BIOME_JSON: &str = "biome.json";
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
-    fn set_configuration_base_path(&self, path: PathBuf);
     fn get_configuration_base_path(&self) -> Option<PathBuf> {
         None
     }
@@ -280,10 +279,6 @@ impl<T> FileSystem for Arc<T>
 where
     T: FileSystem + Send,
 {
-    fn set_configuration_base_path(&self, path: PathBuf) {
-        T::set_configuration_base_path(self, path);
-    }
-
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         T::open_with_options(self, path, options)
     }

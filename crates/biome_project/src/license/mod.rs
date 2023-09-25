@@ -9,6 +9,6 @@ impl LicenseList {
             .iter()
             .find(|license| license.license_id == license_id);
 
-        true
+        license_found.is_some()
     }
 }

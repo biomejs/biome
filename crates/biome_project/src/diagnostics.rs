@@ -1,7 +1,7 @@
-use rome_console::markup;
-use rome_diagnostics::console::fmt::Display;
-use rome_diagnostics::{Diagnostic, DiagnosticTags, MessageAndDescription};
-use rome_text_size::TextRange;
+use biome_console::markup;
+use biome_diagnostics::console::fmt::Display;
+use biome_diagnostics::{Diagnostic, DiagnosticTags, MessageAndDescription};
+use biome_text_size::TextRange;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize, Clone)]

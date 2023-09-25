@@ -3,9 +3,9 @@ mod package_json;
 use crate::diagnostics::ProjectDiagnostic;
 pub use crate::node_js_project::package_json::PackageJson;
 use crate::{Manifest, Project, ProjectAnalyzeResult};
-use rome_diagnostics::Error;
-use rome_json_syntax::{JsonRoot, JsonSyntaxNode};
-use rome_rowan::AstNode;
+use biome_diagnostics::Error;
+use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
+use biome_rowan::AstNode;
 use std::path::{Path, PathBuf};
 
 #[derive(Default, Debug)]

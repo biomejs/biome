@@ -1,15 +1,15 @@
 use crate::project_handlers::node::NodeProjectHandler;
 use crate::project_handlers::unknown::UnknownProjectHandler;
 use crate::WorkspaceError;
-use rome_fs::RomePath;
-use rome_parser::AnyParse;
+use biome_fs::RomePath;
+use biome_parser::AnyParse;
 use std::path::Path;
 
 mod node;
 mod unknown;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Manifests {
     Node,
     #[default]
@@ -61,7 +61,7 @@ pub(crate) struct KnownProjectHandlers {
 }
 
 pub(crate) struct DeserializeResults {
-    pub(crate) diagnostics: Vec<rome_diagnostics::serde::Diagnostic>,
+    pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u64,
 }

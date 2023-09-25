@@ -2,11 +2,11 @@ use crate::project_handlers::{
     DeserializeResults, ProjectAnalyzerCapabilities, ProjectCapabilities, ProjectHandler,
 };
 use crate::WorkspaceError;
-use rome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
-use rome_diagnostics::Severity;
-use rome_fs::RomePath;
-use rome_parser::AnyParse;
-use rome_project::NodeJsProject;
+use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
+use biome_diagnostics::Severity;
+use biome_fs::RomePath;
+use biome_parser::AnyParse;
+use biome_project::NodeJsProject;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct NodeProjectHandler {}

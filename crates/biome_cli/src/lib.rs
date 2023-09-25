@@ -57,7 +57,7 @@ impl<'app> CliSession<'app> {
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
             app: App::new(
-                DynRef::Owned(Box::new(OsFileSystem::new())),
+                DynRef::Owned(Box::new(OsFileSystem)),
                 console,
                 WorkspaceRef::Borrowed(workspace),
             ),

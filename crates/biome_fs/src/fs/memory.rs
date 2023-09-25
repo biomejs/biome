@@ -101,11 +101,6 @@ impl FileSystem for MemoryFileSystem {
         configuration.map(|p| p.clone())
     }
 
-    fn set_configuration_base_path(&self, path: PathBuf) {
-        let mut configuration = self.configuration_base_path.write();
-        _ = configuration.insert(path);
-    }
-
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         if !self.allow_write
             && (options.create || options.create_new || options.truncate || options.write)
