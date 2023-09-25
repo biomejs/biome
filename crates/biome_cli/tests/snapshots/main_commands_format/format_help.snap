@@ -79,6 +79,8 @@ Available options:
                               super languages) files. Defaults to 80.
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
                               e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
+                              The file doesn't need to exist on disk, what matters is the extension of
+                              the file. Based on the extension, Biome will use the appropriate tool.
         --write               Writes formatted files to file system.
     -h, --help                Prints help information
 

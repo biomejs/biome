@@ -49,6 +49,8 @@ Available options:
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
         --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
                               e.g. echo 'let a;' | biome lint --stdin-file-path=file.js"
+                              The file doesn't need to exist on disk, what matters is the extension of
+                              the file. Based on the extension, Biome will use the appropriate tool.
     -h, --help                Prints help information
 
 ```
