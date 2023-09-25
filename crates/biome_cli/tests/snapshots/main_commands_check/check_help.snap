@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Run various checks on a set of files.
+Runs formatter, linter and import sorting to the requested files.
 
 Usage: check [--apply] [--apply-unsafe] [PATH]...
 

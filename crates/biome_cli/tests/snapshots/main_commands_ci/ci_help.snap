@@ -5,7 +5,8 @@ expression: content
 # Emitted Messages
 
 ```block
-Command to use in CI environments. Run various checks of a set of files.
+Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
+Files won't be modified, the command is a read-only operation.
 
 Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--organize-imports-enabled
 =<true|false>] [PATH]...
