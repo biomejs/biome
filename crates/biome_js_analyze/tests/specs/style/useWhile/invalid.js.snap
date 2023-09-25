@@ -4,31 +4,89 @@ expression: invalid.js
 ---
 # Input
 ```js
-for (let i = 0; i < 16; ++i) {}
-
 for (; true; ) {}
+
+let i =0;
+for (; i < 10; ) {
+    i++;
+}
+
+// Comment
+for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
+    // body
+}
 
 ```
 
 # Diagnostics
 ```
-invalid.js:3:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use while loops instead of for loops.
+  ! Use a while loop instead of a for loop.
   
-    1 │ for (let i = 0; i < 16; ++i) {}
-    2 │ 
-  > 3 │ for (; true; ) {}
+  > 1 │ for (; true; ) {}
       │ ^^^^^^^^^^^^^^
-    4 │ 
+    2 │ 
+    3 │ let i =0;
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
   
-    1 1 │   for (let i = 0; i < 16; ++i) {}
-    2 2 │   
-    3   │ - for·(;·true;·)·{}
-      3 │ + while·(true)·{}
-    4 4 │   
+  i Safe fix: Use a while loop.
+  
+     1    │ - for·(;·true;·)·{}
+        1 │ + while·(true)·{}
+     2  2 │   
+     3  3 │   let i =0;
+  
+
+```
+
+```
+invalid.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+    3 │ let i =0;
+  > 4 │ for (; i < 10; ) {
+      │ ^^^^^^^^^^^^^^^^
+    5 │     i++;
+    6 │ }
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+     2  2 │   
+     3  3 │   let i =0;
+     4    │ - for·(;·i·<·10;·)·{
+        4 │ + while·(i·<·10)·{
+     5  5 │       i++;
+     6  6 │   }
+  
+
+```
+
+```
+invalid.js:9:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+     8 │ // Comment
+   > 9 │ for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     // body
+    11 │ }
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+     7  7 │   
+     8  8 │   // Comment
+     9    │ - for·/*a*/·(·/*init*/;·/*test·before*/·true·/*test·after*/;·/*update*/·)·/*b*/·{
+        9 │ + while·/*a*/·(/*test·before*/·true·/*test·after*/)·/*b*/·{
+    10 10 │       // body
+    11 11 │   }
   
 
 ```

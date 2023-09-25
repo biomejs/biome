@@ -25,16 +25,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 check.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use while loops instead of for loops.
+  × Use a while loop instead of a for loop.
   
   > 1 │ for(;true;);
       │ ^^^^^^^^^^^
     2 │ 
   
-  i Suggested fix: Use a while loop
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
   
     1   │ - for(;true;);
-      1 │ + while·(true);
+      1 │ + while(true);
     2 2 │   
   
 

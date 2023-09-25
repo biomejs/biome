@@ -889,7 +889,7 @@ export interface Style {
 	 */
 	useTemplate?: RuleConfiguration;
 	/**
-	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed
+	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
 	 */
 	useWhile?: RuleConfiguration;
 }
