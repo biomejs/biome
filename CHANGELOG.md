@@ -71,6 +71,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#383](https://github.com/biomejs/biome/issues/383). [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals) now provides correct code fixes when consecutive spaces are followed by a quantifier. Contributed by @Conaclos
 
+- Fix [#397](https://github.com/biomejs/biome/issues/397). [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals) now provides correct code fixes for signed numbers. Contributed by @Conaclos
+
 ### Parser
 
 - Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov
