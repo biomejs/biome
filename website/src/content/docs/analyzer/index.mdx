@@ -56,7 +56,47 @@ They will be sorted like this:
  import imageUrl from "url:./image.png";
 ```
 
-You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension)
+You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension).
+
+### Grouped imports
+
+It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
+
+```js
+import "../styles/reset.css";
+import "../styles/layout.css";
+import { Grid } from "../components/Grid.jsx";
+```
+
+Another common case is import polyfills or shim files, that needs to stay at the top file:
+
+```js
+import "../polyfills/array/flatMap";
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+In these cases, Biome will sort all these three imports, and it might happen that the order will **break** your application.
+
+To avoid this, create a "group" of imports. You create a "group" by adding a **new line** to separate the groups.
+
+By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
+
+```js
+// group 1, only these two files will be sorted
+import "../styles/reset.css";
+import "../styles/layout.css";
+
+// group 2, only this one is sorted
+import { Grid } from "../components/Grid.jsx";
+```
+
+```js
+// group 1, the polyfill/shim
+import "../polyfills/array/flatMap";
+
+// group 2, the files tha require the polyfill/shim
+import { functionThatUsesFlatMap } from "./utils.js";
+```
 
 ### Import sorting via CLI
 
