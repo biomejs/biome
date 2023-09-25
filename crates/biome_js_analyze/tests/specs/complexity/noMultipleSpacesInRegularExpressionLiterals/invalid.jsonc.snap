@@ -369,7 +369,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -377,6 +377,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{,2}/;
+  + /foo·{2}{,2}/;
   
 
 ```
@@ -436,7 +441,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -444,6 +449,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{}/;
+  + /foo·{2}{}/;
   
 
 ```
@@ -455,7 +465,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -463,6 +473,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{,}/;
+  + /foo·{2}{,}/;
   
 
 ```
@@ -474,7 +489,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -482,6 +497,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{,2}/;
+  + /foo·{2}{,2}/;
   
 
 ```
@@ -493,7 +513,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -501,6 +521,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{1·2}/;
+  + /foo·{2}{1·2}/;
   
 
 ```
@@ -512,7 +537,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -520,6 +545,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{1/;
+  + /foo·{2}{1/;
   
 
 ```
@@ -531,7 +561,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals ━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
   ! This regular expression contains unclear uses of consecutive spaces.
   
@@ -539,6 +569,11 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals �
       │     ^^
   
   i It's hard to visually count the amount of spaces.
+  
+  i Suggested fix: Use a quantifier instead.
+  
+  - /foo··{1,2/;
+  + /foo·{2}{1,2/;
   
 
 ```
