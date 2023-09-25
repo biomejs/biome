@@ -38,51 +38,6 @@ declare_rule! {
     /// a = a * 1;
     /// ```
     ///
-    ///  ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a / 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a % 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a << 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a >> 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a >>> 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a & 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a ^ 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a | 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = a ** 1;
-    /// ```
-    ///
     /// ## Valid
     ///
     /// ```js
@@ -98,51 +53,6 @@ declare_rule! {
     ///  ```js
     /// var a = 1;
     /// a *= 1;
-    /// ```
-    ///
-    ///  ```js
-    /// var a = 1;
-    /// a /= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a %= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a <<= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a >>= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a >>>= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a &= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a ^= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a |= 1;
-    /// ```
-    ///
-    /// ```js
-    /// var a = 1;
-    /// a **= 1;
     /// ```
     ///
     pub(crate) UseShorthandAssign {
@@ -165,28 +75,31 @@ impl Rule for UseShorthandAssign {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let operator = node.operator().ok()?;
-        let right = node.right().ok();
-        let left = node.left().ok();
-        let left_var_name = left?.text();
 
-        if !matches!(operator, JsAssignmentOperator::Assign) {
+        if !matches!(node.operator(), Ok(JsAssignmentOperator::Assign)) {
             return None;
         }
 
-        let binary_expression = match right {
-            Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => Some(binary_expression),
-            Some(AnyJsExpression::JsParenthesizedExpression(param)) => Some(
+        let left = node.left().ok();
+        let left_var_name = left?
+            .as_any_js_assignment()?
+            .as_js_identifier_assignment()?
+            .name_token()
+            .ok()?;
+        let left_var_name = left_var_name.text_trimmed();
+
+        let binary_expression = match node.right().ok()? {
+            AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
+            AnyJsExpression::JsParenthesizedExpression(param) =>
                 JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?,
-            ),
-            _ => None,
-        }?;
+            _ => return None,
+        };
 
         let has_same_reference =
             has_same_reference_in_expression(left_var_name, &binary_expression)?;
         let operator = binary_expression.operator().ok()?;
         let right = binary_expression.right().ok()?;
-        let shorhand = get_shorthand(&operator)?;
+        let shorhand = get_shorthand(operator)?;
 
         if has_same_reference {
             Some(RuleState {
@@ -206,7 +119,7 @@ impl Rule for UseShorthandAssign {
             rule_category!(),
             node.range(),
             markup! {
-                "Assignment (=) can be replaced with operator assignment "{shorthand_operator}""
+                "Assignment "<Emphasis>"(=)"</Emphasis>" can be replaced with operator assignment "<Emphasis>""{shorthand_operator}""</Emphasis>""
             },
         ))
     }
@@ -243,13 +156,13 @@ impl Rule for UseShorthandAssign {
 }
 
 fn has_same_reference_in_expression(
-    variable_name: String,
+    variable_name: &str,
     binary_expression: &JsBinaryExpression,
 ) -> Option<bool> {
     Some(variable_name == binary_expression.left().ok()?.omit_parentheses().text())
 }
 
-fn get_shorthand(operator: &JsBinaryOperator) -> Option<JsSyntaxKind> {
+fn get_shorthand(operator: JsBinaryOperator) -> Option<JsSyntaxKind> {
     match operator {
         JsBinaryOperator::Plus => Some(T![+=]),
         JsBinaryOperator::Minus => Some(T![-=]),
