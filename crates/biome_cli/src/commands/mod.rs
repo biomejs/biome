@@ -40,7 +40,7 @@ pub enum BiomeCommand {
     #[bpaf(command)]
     Stop,
 
-    /// Run various checks on a set of files.
+    /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
         /// Apply safe fixes, formatting
@@ -140,7 +140,9 @@ pub enum BiomeCommand {
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
     },
-    /// Command to use in CI environments. Run various checks of a set of files.
+    /// Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
+    ///
+    /// Files won't be modified, the command is a read-only operation.
     #[bpaf(command)]
     Ci {
         /// Allow to enable or disable the formatter check.
