@@ -60,7 +60,7 @@ You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VS
 
 ### Grouped imports
 
-It's very common to have imports in a determinate order, especially when you work on a frontend project, and you import CSS files:
+It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
 
 ```js
 import "../styles/reset.css";
@@ -77,7 +77,7 @@ import { functionThatUsesFlatMap } from "./utils.js";
 
 In these cases, Biome will sort all these three imports, and it might happen that the order will **break** your application.
 
-To avoid this, create a "group" of imports. You crate a "group" by adding **new line** to separate the groups.
+To avoid this, create a "group" of imports. You create a "group" by adding a **new line** to separate the groups.
 
 By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
 
