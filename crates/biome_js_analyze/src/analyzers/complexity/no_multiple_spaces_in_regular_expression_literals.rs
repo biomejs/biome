@@ -118,6 +118,9 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         for range in state {
             // copy previous characters and the first space
             normalized_text += &text[previous_start..range.start + 1];
+            // handle quantifiers
+            // See: https://262.ecma-international.org/#prod-QuantifierPrefix
+            // `n` holds the number of characters used by the quantifier
             let n = match text.chars().nth(range.end) {
                 Some('?') => {
                     write!(normalized_text, "{{{},{}}}", range.len() - 1, range.len()).unwrap();
@@ -136,21 +139,28 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
                     1
                 }
                 Some('{') => {
-                    let (quantifier, n) = parse_range_quantifier(&text[range.end..])?;
-                    match quantifier {
-                        RegexQuantifier::Amount(amount) => {
-                            write!(normalized_text, "{{{}}}", amount + range.len() - 1).unwrap();
+                    if let Some((quantifier, n)) = parse_range_quantifier(&text[range.end..]) {
+                        match quantifier {
+                            RegexQuantifier::Amount(amount) => {
+                                write!(normalized_text, "{{{}}}", amount + range.len() - 1)
+                                    .unwrap();
+                            }
+                            RegexQuantifier::OpenRange(start) => {
+                                write!(normalized_text, "{{{},}}", start + range.len() - 1)
+                                    .unwrap();
+                            }
+                            RegexQuantifier::InclusiveRange((start, end)) => {
+                                let extra = range.len() - 1;
+                                write!(normalized_text, "{{{},{}}}", start + extra, end + extra)
+                                    .unwrap();
+                            }
                         }
-                        RegexQuantifier::OpenRange(start) => {
-                            write!(normalized_text, "{{{},}}", start + range.len() - 1).unwrap();
-                        }
-                        RegexQuantifier::InclusiveRange((start, end)) => {
-                            let extra = range.len() - 1;
-                            write!(normalized_text, "{{{},{}}}", start + extra, end + extra)
-                                .unwrap();
-                        }
+                        n
+                    } else {
+                        // invalid range quantifiers are treated as regular chars
+                        write!(normalized_text, "{{{}}}", range.len()).unwrap();
+                        0
                     }
-                    n
                 }
                 _ => {
                     write!(normalized_text, "{{{}}}", range.len()).unwrap();
