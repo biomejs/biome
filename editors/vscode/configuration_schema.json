@@ -1316,7 +1316,7 @@
 					]
 				},
 				"noNegationElse": {
-					"description": "Disallow negation in the condition of an if statement if it has an else clause",
+					"description": "Disallow negation in the condition of an if statement if it has an else clause.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
