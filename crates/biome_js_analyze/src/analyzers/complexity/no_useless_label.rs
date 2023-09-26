@@ -2,13 +2,10 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{
-    AnyJsStatement, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsLabeledStatement, JsSwitchStatement, JsWhileStatement,
-};
+use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
 
 use crate::JsRuleAction;
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Disallow unnecessary labels.
@@ -44,16 +41,6 @@ declare_rule! {
     }
 }
 
-declare_node_union! {
-    pub(crate) JsBreakableStatement =
-        JsDoWhileStatement |
-        JsForInStatement |
-        JsForOfStatement |
-        JsForStatement |
-        JsSwitchStatement |
-        JsWhileStatement
-}
-
 impl Rule for NoUselessLabel {
     type Query = Ast<AnyJsStatement>;
     type State = ();
@@ -69,7 +56,7 @@ impl Rule for NoUselessLabel {
         }?;
         let label = label_token.text_trimmed();
         for parent in stmt.syntax().ancestors() {
-            if JsBreakableStatement::can_cast(parent.kind()) {
+            if is_breakable_statement_kind(parent.kind()) {
                 if let Some(labeled_stmt) = JsLabeledStatement::cast(parent.parent()?) {
                     if labeled_stmt.label_token().ok()?.text_trimmed() == label {
                         return Some(());
@@ -127,4 +114,16 @@ impl Rule for NoUselessLabel {
             mutation,
         })
     }
+}
+
+const fn is_breakable_statement_kind(kind: JsSyntaxKind) -> bool {
+    matches!(
+        kind,
+        JsSyntaxKind::JS_DO_WHILE_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_WHILE_STATEMENT
+    )
 }

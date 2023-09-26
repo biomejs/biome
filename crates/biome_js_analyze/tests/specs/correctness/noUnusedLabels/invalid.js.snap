@@ -1,34 +1,31 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.js
 ---
 # Input
 ```js
-/*before*/ A /*inner*/: /*after*/ var foo = 0;
+/*before*/ A /*inner*/: /*after*/ while(true) {};
 
-B: {
+A: for (let i = 0; i < 10; ++i) {
 	foo();
 }
 
-C: for (let i = 0; i < 10; ++i) {
+A: {
 	foo();
 }
 
-D: var foo = 0;
-
-E: {
+A: {
 	foo();
 	bar();
 }
 
-F: for (var i = 0; i < 10; ++i) {
+A: for (var i = 0; i < 10; ++i) {
 	foo();
 	if (a) break;
 	bar();
 }
 
-G: for (var i = 0; i < 10; ++i) {
+A: for (var i = 0; i < 10; ++i) {
 	foo();
 	if (a) continue;
 	bar();
@@ -38,34 +35,30 @@ A: for (var i = 0; i < 10; ++i) {
 	H: break A;
 }
 
-I: {
+A: {
 	var I = 0;
 	console.log(I);
 }
 
-J: /* comment */ foo;
-
-K /* comment */: foo;
-
-L: {
+A: {
 	function f() {
-		L: {
-			break L;
+		A: {
+			break A;
 		}
 	}
 }
 
-M: {
+A: {
 	class X {
 		static {
-			M: {
-				break M;
+			B: {
+				break B;
 			}
 		}
 
 		method() {
-			M: {
-				break M;
+			B: {
+				break B;
 			}
 		}
 	}
@@ -87,15 +80,17 @@ invalid.js:1:12 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━�
 
   ! Unused label.
   
-  > 1 │ /*before*/ A /*inner*/: /*after*/ var foo = 0;
+  > 1 │ /*before*/ A /*inner*/: /*after*/ while(true) {};
       │            ^
     2 │ 
-    3 │ B: {
+    3 │ A: for (let i = 0; i < 10; ++i) {
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    1 │ /*before*/·A·/*inner*/:·/*after*/·var·foo·=·0;
-      │            -----------------------            
+  i Safe fix: Remove the unused label.
+  
+    1 │ /*before*/·A·/*inner*/:·/*after*/·while(true)·{};
+      │            -----------------------               
 
 ```
 
@@ -104,17 +99,19 @@ invalid.js:3:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━�
 
   ! Unused label.
   
-    1 │ /*before*/ A /*inner*/: /*after*/ var foo = 0;
+    1 │ /*before*/ A /*inner*/: /*after*/ while(true) {};
     2 │ 
-  > 3 │ B: {
+  > 3 │ A: for (let i = 0; i < 10; ++i) {
       │ ^
     4 │ 	foo();
     5 │ }
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    3 │ B:·{
-      │ --- 
+  i Safe fix: Remove the unused label.
+  
+    3 │ A:·for·(let·i·=·0;·i·<·10;·++i)·{
+      │ ---                              
 
 ```
 
@@ -125,15 +122,17 @@ invalid.js:7:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━�
   
     5 │ }
     6 │ 
-  > 7 │ C: for (let i = 0; i < 10; ++i) {
+  > 7 │ A: {
       │ ^
     8 │ 	foo();
     9 │ }
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    7 │ C:·for·(let·i·=·0;·i·<·10;·++i)·{
-      │ ---                              
+  i Safe fix: Remove the unused label.
+  
+    7 │ A:·{
+      │ --- 
 
 ```
 
@@ -144,184 +143,121 @@ invalid.js:11:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━�
   
      9 │ }
     10 │ 
-  > 11 │ D: var foo = 0;
+  > 11 │ A: {
        │ ^
-    12 │ 
-    13 │ E: {
+    12 │ 	foo();
+    13 │ 	bar();
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    11 │ D:·var·foo·=·0;
-       │ ---            
-
-```
-
-```
-invalid.js:13:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unused label.
+  i Safe fix: Remove the unused label.
   
-    11 │ D: var foo = 0;
-    12 │ 
-  > 13 │ E: {
-       │ ^
-    14 │ 	foo();
-    15 │ 	bar();
-  
-  i Suggested fix: Remove the unused label.
-  
-    13 │ E:·{
+    11 │ A:·{
        │ --- 
 
 ```
 
 ```
-invalid.js:18:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unused label.
   
-    16 │ }
-    17 │ 
-  > 18 │ F: for (var i = 0; i < 10; ++i) {
+    14 │ }
+    15 │ 
+  > 16 │ A: for (var i = 0; i < 10; ++i) {
        │ ^
-    19 │ 	foo();
-    20 │ 	if (a) break;
+    17 │ 	foo();
+    18 │ 	if (a) break;
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    18 │ F:·for·(var·i·=·0;·i·<·10;·++i)·{
+  i Safe fix: Remove the unused label.
+  
+    16 │ A:·for·(var·i·=·0;·i·<·10;·++i)·{
        │ ---                              
 
 ```
 
 ```
-invalid.js:24:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unused label.
   
-    22 │ }
-    23 │ 
-  > 24 │ G: for (var i = 0; i < 10; ++i) {
+    20 │ }
+    21 │ 
+  > 22 │ A: for (var i = 0; i < 10; ++i) {
        │ ^
-    25 │ 	foo();
-    26 │ 	if (a) continue;
+    23 │ 	foo();
+    24 │ 	if (a) continue;
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    24 │ G:·for·(var·i·=·0;·i·<·10;·++i)·{
+  i Safe fix: Remove the unused label.
+  
+    22 │ A:·for·(var·i·=·0;·i·<·10;·++i)·{
        │ ---                              
 
 ```
 
 ```
-invalid.js:31:2 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unused label.
   
-    30 │ A: for (var i = 0; i < 10; ++i) {
-  > 31 │ 	H: break A;
-       │ 	^
-    32 │ }
-    33 │ 
-  
-  i Suggested fix: Remove the unused label.
-  
-    31 │ → H:·break·A;
-       │   ---        
-
-```
-
-```
-invalid.js:34:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unused label.
-  
-    32 │ }
-    33 │ 
-  > 34 │ I: {
+    30 │ }
+    31 │ 
+  > 32 │ A: {
        │ ^
-    35 │ 	var I = 0;
-    36 │ 	console.log(I);
+    33 │ 	var I = 0;
+    34 │ 	console.log(I);
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    34 │ I:·{
+  i Safe fix: Remove the unused label.
+  
+    32 │ A:·{
        │ --- 
 
 ```
 
 ```
-invalid.js:39:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unused label.
   
-    37 │ }
-    38 │ 
-  > 39 │ J: /* comment */ foo;
+    35 │ }
+    36 │ 
+  > 37 │ A: {
        │ ^
-    40 │ 
-    41 │ K /* comment */: foo;
+    38 │ 	function f() {
+    39 │ 		A: {
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    39 │ J:·/*·comment·*/·foo;
-       │ -----------------    
-
-```
-
-```
-invalid.js:41:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unused label.
+  i Safe fix: Remove the unused label.
   
-    39 │ J: /* comment */ foo;
-    40 │ 
-  > 41 │ K /* comment */: foo;
-       │ ^
-    42 │ 
-    43 │ L: {
-  
-  i Suggested fix: Remove the unused label.
-  
-    41 │ K·/*·comment·*/:·foo;
-       │ -----------------    
-
-```
-
-```
-invalid.js:43:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unused label.
-  
-    41 │ K /* comment */: foo;
-    42 │ 
-  > 43 │ L: {
-       │ ^
-    44 │ 	function f() {
-    45 │ 		L: {
-  
-  i Suggested fix: Remove the unused label.
-  
-    43 │ L:·{
+    37 │ A:·{
        │ --- 
 
 ```
 
 ```
-invalid.js:51:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unused label.
   
-    49 │ }
-    50 │ 
-  > 51 │ M: {
+    43 │ }
+    44 │ 
+  > 45 │ A: {
        │ ^
-    52 │ 	class X {
-    53 │ 		static {
+    46 │ 	class X {
+    47 │ 		static {
   
-  i Suggested fix: Remove the unused label.
+  i The label is not used by any break statement and continue statement.
   
-    51 │ M:·{
+  i Safe fix: Remove the unused label.
+  
+    45 │ A:·{
        │ --- 
 
 ```

@@ -6,11 +6,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage, TextRange, WalkEvent,
+    AnyJsStatement, JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage,
+    TextRange, WalkEvent,
 };
 
-use biome_rowan::{AstNode, BatchMutationExt, Language, NodeOrToken, SyntaxNode};
-use rustc_hash::FxHashMap;
+use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
+use rustc_hash::FxHashSet;
 
 use crate::control_flow::AnyJsControlFlowRoot;
 use crate::JsRuleAction;
@@ -26,7 +27,7 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```cjs,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// LOOP: for (const x of xs) {
     ///     if (x > 0) {
     ///         break;
@@ -37,7 +38,7 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```cjs
+    /// ```js
     /// LOOP: for (const x of xs) {
     ///     if (x > 0) {
     ///         break LOOP;
@@ -46,6 +47,12 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// function nonNegative(n) {
+    ///     DEV: assert(n >= 0);
+    ///     return n;
+    /// }
+    /// ```
     pub(crate) NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
@@ -55,17 +62,17 @@ declare_rule! {
 
 #[derive(Default)]
 struct UnusedLabelVisitor {
-    root_id: usize,
+    root_id: u32,
     // Key = (root_id, label)
-    labels: FxHashMap<(usize, String), JsLabeledStatement>,
+    labels: FxHashSet<(u32, TokenText)>,
 }
 
 impl UnusedLabelVisitor {
-    fn insert(&mut self, label: String, label_stmt: JsLabeledStatement) {
-        self.labels.insert((self.root_id, label), label_stmt);
+    fn insert(&mut self, label: TokenText) {
+        self.labels.insert((self.root_id, label));
     }
 
-    fn remove(&mut self, label: String) -> Option<JsLabeledStatement> {
+    fn remove(&mut self, label: TokenText) -> bool {
         self.labels.remove(&(self.root_id, label))
     }
 }
@@ -83,26 +90,29 @@ impl Visitor for UnusedLabelVisitor {
                 if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id += 1;
                 } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
-                    if let Ok(label_tok) = label_stmt.label_token() {
-                        self.insert(label_tok.text_trimmed().to_owned(), label_stmt);
+                    // Ignore unbreakable statements.
+                    // It is sometimes use to mark debug-only statements.
+                    if is_breakable_labeled_statement(&label_stmt.body()) {
+                        if let Ok(label_tok) = label_stmt.label_token() {
+                            self.insert(label_tok.token_text_trimmed());
+                        }
                     }
                 } else if let Some(break_stmt) = JsBreakStatement::cast_ref(node) {
                     if let Some(label_tok) = break_stmt.label_token() {
-                        self.remove(label_tok.text_trimmed().to_owned());
+                        self.remove(label_tok.token_text_trimmed());
                     }
                 } else if let Some(continue_stmt) = JsContinueStatement::cast_ref(node) {
                     if let Some(label_tok) = continue_stmt.label_token() {
-                        self.remove(label_tok.text_trimmed().to_owned());
+                        self.remove(label_tok.token_text_trimmed());
                     }
                 }
             }
             WalkEvent::Leave(node) => {
                 if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id -= 1;
-                } else if let Some(stmt_label) = JsLabeledStatement::cast_ref(node) {
-                    if let Ok(label_tok) = stmt_label.label_token() {
-                        let result = self.remove(label_tok.text_trimmed().to_owned());
-                        if let Some(label_stmt) = result {
+                } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
+                    if let Ok(label_tok) = label_stmt.label_token() {
+                        if self.remove(label_tok.token_text_trimmed()) {
                             ctx.match_query(UnusedLabel(label_stmt));
                         }
                     }
@@ -157,22 +167,38 @@ impl Rule for NoUnusedLabels {
             markup! {
                 "Unused "<Emphasis>"label"</Emphasis>"."
             },
-        ))
+        ).note(markup!{
+            "The label is not used by any "<Emphasis>"break"</Emphasis>" statement and continue statement."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let unused_label = ctx.query();
         let body = unused_label.body().ok()?;
         let mut mutation = ctx.root().begin();
-        mutation.replace_element(
-            NodeOrToken::Node(unused_label.syntax().clone()),
-            NodeOrToken::Node(body.syntax().clone()),
-        );
+        mutation.replace_node(unused_label.clone().into(), body);
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+            applicability: Applicability::Always,
             message: markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
             mutation,
         })
     }
+}
+
+fn is_breakable_labeled_statement(stmt: &SyntaxResult<AnyJsStatement>) -> bool {
+    matches!(
+        stmt,
+        Ok(AnyJsStatement::JsBlockStatement(_)
+            | AnyJsStatement::JsDoWhileStatement(_)
+            | AnyJsStatement::JsForInStatement(_)
+            | AnyJsStatement::JsForOfStatement(_)
+            | AnyJsStatement::JsForStatement(_)
+            | AnyJsStatement::JsIfStatement(_)
+            | AnyJsStatement::JsSwitchStatement(_)
+            | AnyJsStatement::JsTryFinallyStatement(_)
+            | AnyJsStatement::JsTryStatement(_)
+            | AnyJsStatement::JsWhileStatement(_)
+            | AnyJsStatement::JsWithStatement(_))
+    )
 }

@@ -18,7 +18,7 @@ Source: https://eslint.org/docs/latest/rules/no-unused-labels
 
 ### Invalid
 
-```js
+```jsx
 LOOP: for (const x of xs) {
     if (x > 0) {
         break;
@@ -36,7 +36,9 @@ LOOP: for (const x of xs) {
     <strong>2 │ </strong>    if (x &gt; 0) {
     <strong>3 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Suggested fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Remove the unused </span><span style="color: rgb(38, 148, 255);"><strong>label</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The label is not used by any </span><span style="color: rgb(38, 148, 255);"><strong>break</strong></span><span style="color: rgb(38, 148, 255);"> statement and continue statement.</span>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Remove the unused </span><span style="color: rgb(38, 148, 255);"><strong>label</strong></span><span style="color: rgb(38, 148, 255);">.</span>
   
 <strong>  </strong><strong>  1 │ </strong><span style="color: Tomato;">L</span><span style="color: Tomato;">O</span><span style="color: Tomato;">O</span><span style="color: Tomato;">P</span><span style="color: Tomato;">:</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>for<span style="opacity: 0.8;">·</span>(const<span style="opacity: 0.8;">·</span>x<span style="opacity: 0.8;">·</span>of<span style="opacity: 0.8;">·</span>xs)<span style="opacity: 0.8;">·</span>{
 <strong>  </strong><strong>    │ </strong><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>                     
@@ -44,12 +46,19 @@ LOOP: for (const x of xs) {
 
 ### Valid
 
-```js
+```jsx
 LOOP: for (const x of xs) {
     if (x > 0) {
         break LOOP;
     }
     f(x);
+}
+```
+
+```jsx
+function nonNegative(n) {
+    DEV: assert(n >= 0);
+    return n;
 }
 ```
 
