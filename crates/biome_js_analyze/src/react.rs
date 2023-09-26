@@ -4,9 +4,9 @@ pub mod hooks;
 
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
-    JsCallExpression, JsIdentifierBinding, JsImport, JsImportNamedClause,
-    JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsObjectExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsImportClause, AnyJsMemberExpression, AnyJsNamedImport,
+    AnyJsNamedImportSpecifier, JsCallExpression, JsIdentifierBinding, JsImport,
+    JsImportNamedClause, JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsObjectExpression,
     JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -124,19 +124,66 @@ pub(crate) enum ReactLibrary {
 }
 
 impl ReactLibrary {
-    const fn import_name(self) -> &'static str {
+    pub const fn import_name(self) -> &'static str {
         match self {
             ReactLibrary::React => "react",
             ReactLibrary::ReactDOM => "react-dom",
         }
     }
 
-    const fn global_name(self) -> &'static str {
+    pub const fn global_name(self) -> &'static str {
         match self {
             ReactLibrary::React => "React",
             ReactLibrary::ReactDOM => "ReactDOM",
         }
     }
+}
+
+/// Return `Some(true)` if `import` imports the global react name from react.
+pub(crate) fn is_global_react_import(import: &JsImport, lib: ReactLibrary) -> Option<bool> {
+    let is_react_import = import.source_is(lib.import_name()).ok()?;
+    if !is_react_import {
+        return None;
+    }
+    let local_name = match import.import_clause().ok()? {
+        AnyJsImportClause::JsImportBareClause(_) => {
+            return None;
+        }
+        AnyJsImportClause::JsImportDefaultClause(import_clause) => import_clause.local_name(),
+        AnyJsImportClause::JsImportNamedClause(import_clause) => {
+            if let Some(default_specifier) = import_clause.default_specifier() {
+                default_specifier.local_name()
+            } else {
+                match import_clause.named_import().ok()? {
+                    AnyJsNamedImport::JsNamedImportSpecifiers(import_clause) => {
+                        import_clause.specifiers().iter().find_map(|specifier| {
+                            let specifier = specifier.ok()?;
+                            let specifier = specifier.as_js_named_import_specifier()?;
+                            specifier
+                                .name()
+                                .ok()?
+                                .is_default()
+                                .ok()?
+                                .then_some(specifier.local_name())
+                        })?
+                    }
+                    AnyJsNamedImport::JsNamespaceImportSpecifier(import_clause) => {
+                        import_clause.local_name()
+                    }
+                }
+            }
+        }
+        AnyJsImportClause::JsImportNamespaceClause(import_clause) => import_clause.local_name(),
+    };
+    Some(
+        local_name
+            .ok()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()?
+            .text_trimmed()
+            == lib.global_name(),
+    )
 }
 
 /// List of valid [`React` API]
