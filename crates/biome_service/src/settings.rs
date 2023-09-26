@@ -95,8 +95,10 @@ impl WorkspaceSettings {
                 self.languages.javascript.formatter.arrow_parentheses = formatter.arrow_parentheses;
                 self.languages.javascript.formatter.enabled = formatter.enabled;
                 self.languages.javascript.formatter.line_width = formatter.line_width;
-                self.languages.javascript.formatter.indent_width =
-                    formatter.indent_size.map(Into::into);
+                self.languages.javascript.formatter.indent_width = formatter
+                    .indent_width
+                    .map(Into::into)
+                    .or(formatter.indent_size.map(Into::into));
                 self.languages.javascript.formatter.indent_style =
                     formatter.indent_style.map(Into::into);
             }

@@ -81,7 +81,7 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
 
     let has_errors = result.has_errors();
 
-    if has_errors {
+    if !result.diagnostics().is_empty() {
         let diagnostics = result
             .into_diagnostics()
             .into_iter()
@@ -94,10 +94,12 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
             })
             .collect::<Vec<_>>()
             .join("\n\n");
-        panic!(
-            "This test should not have diagnostics, but some have been emitted.\n {}",
-            diagnostics
-        );
+        if has_errors {
+            panic!(
+                "This test should not have diagnostics, but some have been emitted.\n {}",
+                diagnostics
+            );
+        }
     } else {
         // test passed, no errors
     }
