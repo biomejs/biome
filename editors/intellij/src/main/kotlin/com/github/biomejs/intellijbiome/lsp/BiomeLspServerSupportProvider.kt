@@ -19,39 +19,39 @@ import org.eclipse.lsp4j.*
 @Suppress("UnstableApiUsage")
 class BiomeLspServerSupportProvider : LspServerSupportProvider {
 
-	override fun fileOpened(
-		project: Project,
-		file: VirtualFile,
-		serverStarter: LspServerSupportProvider.LspServerStarter
-	) {
-		if (BiomeUtils.isSupportedFileType(file)) {
-			val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
-			serverStarter.ensureServerStarted(BiomeLspServerDescriptor(project, executable))
-		}
-	}
+    override fun fileOpened(
+        project: Project,
+        file: VirtualFile,
+        serverStarter: LspServerSupportProvider.LspServerStarter
+    ) {
+        if (BiomeUtils.isSupportedFileType(file)) {
+            val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
+            serverStarter.ensureServerStarted(BiomeLspServerDescriptor(project, executable))
+        }
+    }
 }
 
 @Suppress("UnstableApiUsage")
 private class BiomeLspServerDescriptor(project: Project, val executable: String) :
-	ProjectWideLspServerDescriptor(project, "Biome") {
-	override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
-	override fun createCommandLine(): GeneralCommandLine {
-		val params = SmartList("lsp-proxy")
+    ProjectWideLspServerDescriptor(project, "Biome") {
+    override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
+    override fun createCommandLine(): GeneralCommandLine {
+        val params = SmartList("lsp-proxy")
 
-		if (executable.isEmpty()) {
-			throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
-		}
+        if (executable.isEmpty()) {
+            throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
+        }
 
-		val version = BiomeUtils.getBiomeVersion(project, executable)
+        val version = BiomeUtils.getBiomeVersion(project, executable)
 
-		version?.let { project.messageBus.syncPublisher(BIOME_CONFIG_RESOLVED_TOPIC).resolved(it) }
+        version?.let { project.messageBus.syncPublisher(BIOME_CONFIG_RESOLVED_TOPIC).resolved(it) }
 
-		return BiomeUtils.createNodeCommandLine(project, executable).apply {
-			addParameters(params)
-		}
+        return BiomeUtils.createNodeCommandLine(project, executable).apply {
+            addParameters(params)
+        }
 
-	}
+    }
 
-	override val lspGoToDefinitionSupport = false
-	override val lspCompletionSupport = null
+    override val lspGoToDefinitionSupport = false
+    override val lspCompletionSupport = null
 }

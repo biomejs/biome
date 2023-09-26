@@ -18,74 +18,74 @@ import java.lang.reflect.Method
 import javax.imageio.ImageIO
 
 class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
-	private val url: String = System.getProperty("remote-robot-url") ?: "http://127.0.0.1:8082"
-	private val remoteRobot: RemoteRobot = if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
-		val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
-			this.level = HttpLoggingInterceptor.Level.BODY
-		}
-		val client = OkHttpClient.Builder().apply {
-			this.addInterceptor(interceptor)
-		}.build()
-		RemoteRobot(url, client)
-	} else {
-		RemoteRobot(url)
-	}
-	private val client = OkHttpClient()
+    private val url: String = System.getProperty("remote-robot-url") ?: "http://127.0.0.1:8082"
+    private val remoteRobot: RemoteRobot = if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
+        val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
+        val client = OkHttpClient.Builder().apply {
+            this.addInterceptor(interceptor)
+        }.build()
+        RemoteRobot(url, client)
+    } else {
+        RemoteRobot(url)
+    }
+    private val client = OkHttpClient()
 
-	override fun supportsParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Boolean {
-		return parameterContext?.parameter?.type?.equals(RemoteRobot::class.java) ?: false
-	}
+    override fun supportsParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Boolean {
+        return parameterContext?.parameter?.type?.equals(RemoteRobot::class.java) ?: false
+    }
 
-	override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
-		return remoteRobot
-	}
+    override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
+        return remoteRobot
+    }
 
-	override fun afterTestExecution(context: ExtensionContext?) {
-		val testMethod: Method = context?.requiredTestMethod ?: throw IllegalStateException("test method is null")
-		val testMethodName = testMethod.name
-		val testFailed: Boolean = context.executionException?.isPresent ?: false
-		if (testFailed) {
+    override fun afterTestExecution(context: ExtensionContext?) {
+        val testMethod: Method = context?.requiredTestMethod ?: throw IllegalStateException("test method is null")
+        val testMethodName = testMethod.name
+        val testFailed: Boolean = context.executionException?.isPresent ?: false
+        if (testFailed) {
 //            saveScreenshot(testMethodName)
-			saveIdeaFrames(testMethodName)
-			saveHierarchy(testMethodName)
-		}
-	}
+            saveIdeaFrames(testMethodName)
+            saveHierarchy(testMethodName)
+        }
+    }
 
-	private fun saveScreenshot(testName: String) {
-		fetchScreenShot().save(testName)
-	}
+    private fun saveScreenshot(testName: String) {
+        fetchScreenShot().save(testName)
+    }
 
-	private fun saveHierarchy(testName: String) {
-		val hierarchySnapshot =
-			saveFile(url, "build/reports", "hierarchy-$testName.html")
-		if (File("build/reports/styles.css").exists().not()) {
-			saveFile("$url/styles.css", "build/reports", "styles.css")
-		}
-		println("Hierarchy snapshot: ${hierarchySnapshot.absolutePath}")
-	}
+    private fun saveHierarchy(testName: String) {
+        val hierarchySnapshot =
+            saveFile(url, "build/reports", "hierarchy-$testName.html")
+        if (File("build/reports/styles.css").exists().not()) {
+            saveFile("$url/styles.css", "build/reports", "styles.css")
+        }
+        println("Hierarchy snapshot: ${hierarchySnapshot.absolutePath}")
+    }
 
-	private fun saveFile(url: String, folder: String, name: String): File {
-		val response = client.newCall(Request.Builder().url(url).build()).execute()
-		return File(folder).apply {
-			mkdirs()
-		}.resolve(name).apply {
-			writeText(response.body?.string() ?: "")
-		}
-	}
+    private fun saveFile(url: String, folder: String, name: String): File {
+        val response = client.newCall(Request.Builder().url(url).build()).execute()
+        return File(folder).apply {
+            mkdirs()
+        }.resolve(name).apply {
+            writeText(response.body?.string() ?: "")
+        }
+    }
 
-	private fun BufferedImage.save(name: String) {
-		val bytes = ByteArrayOutputStream().use { b ->
-			ImageIO.write(this, "png", b)
-			b.toByteArray()
-		}
-		File("build/reports").apply { mkdirs() }.resolve("$name.png").writeBytes(bytes)
-	}
+    private fun BufferedImage.save(name: String) {
+        val bytes = ByteArrayOutputStream().use { b ->
+            ImageIO.write(this, "png", b)
+            b.toByteArray()
+        }
+        File("build/reports").apply { mkdirs() }.resolve("$name.png").writeBytes(bytes)
+    }
 
-	private fun saveIdeaFrames(testName: String) {
-		remoteRobot.findAll<ContainerFixture>(byXpath("//div[@class='IdeFrameImpl']")).forEachIndexed { n, frame ->
-			val pic = try {
-				frame.callJs<ByteArray>(
-					"""
+    private fun saveIdeaFrames(testName: String) {
+        remoteRobot.findAll<ContainerFixture>(byXpath("//div[@class='IdeFrameImpl']")).forEachIndexed { n, frame ->
+            val pic = try {
+                frame.callJs<ByteArray>(
+                    """
                         importPackage(java.io)
                         importPackage(javax.imageio)
                         importPackage(java.awt.image)
@@ -101,20 +101,20 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                         }
                         pictureBytes;
             """, true
-				)
-			} catch (e: Throwable) {
-				e.printStackTrace()
-				throw e
-			}
-			pic.inputStream().use {
-				ImageIO.read(it)
-			}.save(testName + "_" + n)
-		}
-	}
+                )
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                throw e
+            }
+            pic.inputStream().use {
+                ImageIO.read(it)
+            }.save(testName + "_" + n)
+        }
+    }
 
-	private fun fetchScreenShot(): BufferedImage {
-		return remoteRobot.callJs<ByteArray>(
-			"""
+    private fun fetchScreenShot(): BufferedImage {
+        return remoteRobot.callJs<ByteArray>(
+            """
             importPackage(java.io)
             importPackage(javax.imageio)
             const screenShot = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
@@ -128,8 +128,8 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
             }
             pictureBytes;
         """
-		).inputStream().use {
-			ImageIO.read(it)
-		}
-	}
+        ).inputStream().use {
+            ImageIO.read(it)
+        }
+    }
 }

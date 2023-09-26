@@ -7,7 +7,8 @@ import com.intellij.remoterobot.stepsProcessing.step
 import java.time.Duration
 
 fun ContainerFixture.quickfix(
-	timeout: Duration = Duration.ofSeconds(20),
-	function: JListFixture.() -> Unit = {}): JListFixture = step("Search for quickfixes panel") {
-	find<JListFixture>(byXpath("//div[@class='MyList']"), timeout).apply(function)
+    timeout: Duration = Duration.ofSeconds(20),
+    function: JListFixture.() -> Unit = {}
+): JListFixture = step("Search for quickfixes panel") {
+    find<JListFixture>(byXpath("//div[@class='MyList']"), timeout).apply(function)
 }

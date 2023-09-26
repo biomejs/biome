@@ -20,62 +20,62 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.openapi.progress.util.ProgressIndicatorBase
 
 class BiomeFormatterProvider : AsyncDocumentFormattingService() {
-	override fun getFeatures(): MutableSet<Feature> = EnumSet.noneOf(Feature::class.java)
+    override fun getFeatures(): MutableSet<Feature> = EnumSet.noneOf(Feature::class.java)
 
-	override fun canFormat(file: PsiFile): Boolean =
-		file.virtualFile?.let { BiomeUtils.isSupportedFileType(it) } ?: false
+    override fun canFormat(file: PsiFile): Boolean =
+        file.virtualFile?.let { BiomeUtils.isSupportedFileType(it) } ?: false
 
-	override fun getNotificationGroupId(): String = "Biome"
+    override fun getNotificationGroupId(): String = "Biome"
 
-	override fun getName(): String = "Biome"
+    override fun getName(): String = "Biome"
 
-	override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
-		val ioFile = request.ioFile ?: return null
-		val project = request.context.project
-		val params = SmartList("format", "--stdin-file-path", ioFile.path)
+    override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
+        val ioFile = request.ioFile ?: return null
+        val project = request.context.project
+        val params = SmartList("format", "--stdin-file-path", ioFile.path)
 
-		val exePath = BiomeUtils.getBiomeExecutablePath(project)
+        val exePath = BiomeUtils.getBiomeExecutablePath(project)
 
-		if (exePath.isNullOrEmpty()) {
-			throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
-		}
+        if (exePath.isNullOrEmpty()) {
+            throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
+        }
 
-		try {
-			val commandLine: GeneralCommandLine = BiomeUtils.createNodeCommandLine(project, exePath).apply {
-				withInput(ioFile)
-				addParameters(params)
-				withWorkDirectory(project.basePath)
-			}
+        try {
+            val commandLine: GeneralCommandLine = BiomeUtils.createNodeCommandLine(project, exePath).apply {
+                withInput(ioFile)
+                addParameters(params)
+                withWorkDirectory(project.basePath)
+            }
 
-			val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
-			return object : FormattingTask {
-				override fun run() {
-					handler.addProcessListener(object : CapturingProcessAdapter() {
-						override fun processTerminated(@NotNull event: ProcessEvent) {
-							val exitCode = event.exitCode
-							if (exitCode == 0) {
-								request.onTextReady(output.stdout)
-							} else {
-								request.onError(BiomeBundle.message("biome.formatting.failure"), output.stderr)
-							}
-						}
-					})
-					handler.startNotify()
-				}
+            val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
+            return object : FormattingTask {
+                override fun run() {
+                    handler.addProcessListener(object : CapturingProcessAdapter() {
+                        override fun processTerminated(@NotNull event: ProcessEvent) {
+                            val exitCode = event.exitCode
+                            if (exitCode == 0) {
+                                request.onTextReady(output.stdout)
+                            } else {
+                                request.onError(BiomeBundle.message("biome.formatting.failure"), output.stderr)
+                            }
+                        }
+                    })
+                    handler.startNotify()
+                }
 
-				override fun cancel(): Boolean {
-					handler.destroyProcess()
-					return true
-				}
+                override fun cancel(): Boolean {
+                    handler.destroyProcess()
+                    return true
+                }
 
-				override fun isRunUnderProgress(): Boolean {
-					return true
-				}
-			}
-		} catch (error: ExecutionException) {
-			val message = error.message ?: ""
-			request.onError(BiomeBundle.message("biome.formatting.failure"), message)
-			return null
-		}
-	}
+                override fun isRunUnderProgress(): Boolean {
+                    return true
+                }
+            }
+        } catch (error: ExecutionException) {
+            val message = error.message ?: ""
+            request.onError(BiomeBundle.message("biome.formatting.failure"), message)
+            return null
+        }
+    }
 }

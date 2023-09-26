@@ -5,10 +5,10 @@ import java.util.*
 
 
 val BIOME_CONFIG_RESOLVED_TOPIC = Topic.create(
-	"Biome config resolved topic",
-	BiomeConfigResolvedListener::class.java
+    "Biome config resolved topic",
+    BiomeConfigResolvedListener::class.java
 )
 
 interface BiomeConfigResolvedListener : EventListener {
-	fun resolved(version: String)
+    fun resolved(version: String)
 }
