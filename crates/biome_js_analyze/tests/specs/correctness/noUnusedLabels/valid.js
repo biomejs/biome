@@ -5,9 +5,9 @@ A: {
 	bar();
 }
 
-B: for (let i = 0; i < 10; ++i) {
+A: for (let i = 0; i < 10; ++i) {
 	if (foo()) {
-		break B;
+		break A;
 	}
 	bar();
 }
@@ -47,3 +47,9 @@ A: {
 		bar();
 	}
 }
+
+// unbreakable statements
+
+A: var foo = 0;
+
+A: asserts(cond, "cond should hold");

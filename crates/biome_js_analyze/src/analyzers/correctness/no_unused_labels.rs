@@ -6,10 +6,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage, TextRange, WalkEvent,
+    AnyJsStatement, JsBreakStatement, JsContinueStatement, JsLabeledStatement, JsLanguage,
+    TextRange, WalkEvent,
 };
 
-use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
 use rustc_hash::FxHashSet;
 
 use crate::control_flow::AnyJsControlFlowRoot;
@@ -26,7 +27,7 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```cjs,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// LOOP: for (const x of xs) {
     ///     if (x > 0) {
     ///         break;
@@ -37,7 +38,7 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```cjs
+    /// ```js
     /// LOOP: for (const x of xs) {
     ///     if (x > 0) {
     ///         break LOOP;
@@ -46,6 +47,12 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// function nonNegative(n) {
+    ///     DEV: assert(n >= 0);
+    ///     return n;
+    /// }
+    /// ```
     pub(crate) NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
@@ -83,8 +90,12 @@ impl Visitor for UnusedLabelVisitor {
                 if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id += 1;
                 } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
-                    if let Ok(label_tok) = label_stmt.label_token() {
-                        self.insert(label_tok.token_text_trimmed());
+                    // Ignore unbreakable statements.
+                    // It is sometimes use to mark debug-only statements.
+                    if is_breakable_labeled_statement(&label_stmt.body()) {
+                        if let Ok(label_tok) = label_stmt.label_token() {
+                            self.insert(label_tok.token_text_trimmed());
+                        }
                     }
                 } else if let Some(break_stmt) = JsBreakStatement::cast_ref(node) {
                     if let Some(label_tok) = break_stmt.label_token() {
@@ -173,4 +184,21 @@ impl Rule for NoUnusedLabels {
             mutation,
         })
     }
+}
+
+fn is_breakable_labeled_statement(stmt: &SyntaxResult<AnyJsStatement>) -> bool {
+    matches!(
+        stmt,
+        Ok(AnyJsStatement::JsBlockStatement(_)
+            | AnyJsStatement::JsDoWhileStatement(_)
+            | AnyJsStatement::JsForInStatement(_)
+            | AnyJsStatement::JsForOfStatement(_)
+            | AnyJsStatement::JsForStatement(_)
+            | AnyJsStatement::JsIfStatement(_)
+            | AnyJsStatement::JsSwitchStatement(_)
+            | AnyJsStatement::JsTryFinallyStatement(_)
+            | AnyJsStatement::JsTryStatement(_)
+            | AnyJsStatement::JsWhileStatement(_)
+            | AnyJsStatement::JsWithStatement(_))
+    )
 }

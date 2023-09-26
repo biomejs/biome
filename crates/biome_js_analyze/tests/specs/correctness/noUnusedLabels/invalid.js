@@ -1,27 +1,25 @@
-/*before*/ A /*inner*/: /*after*/ var foo = 0;
+/*before*/ A /*inner*/: /*after*/ while(true) {};
 
-B: {
+A: for (let i = 0; i < 10; ++i) {
 	foo();
 }
 
-C: for (let i = 0; i < 10; ++i) {
+A: {
 	foo();
 }
 
-D: var foo = 0;
-
-E: {
+A: {
 	foo();
 	bar();
 }
 
-F: for (var i = 0; i < 10; ++i) {
+A: for (var i = 0; i < 10; ++i) {
 	foo();
 	if (a) break;
 	bar();
 }
 
-G: for (var i = 0; i < 10; ++i) {
+A: for (var i = 0; i < 10; ++i) {
 	foo();
 	if (a) continue;
 	bar();
@@ -31,34 +29,30 @@ A: for (var i = 0; i < 10; ++i) {
 	H: break A;
 }
 
-I: {
+A: {
 	var I = 0;
 	console.log(I);
 }
 
-J: /* comment */ foo;
-
-K /* comment */: foo;
-
-L: {
+A: {
 	function f() {
-		L: {
-			break L;
+		A: {
+			break A;
 		}
 	}
 }
 
-M: {
+A: {
 	class X {
 		static {
-			M: {
-				break M;
+			B: {
+				break B;
 			}
 		}
 
 		method() {
-			M: {
-				break M;
+			B: {
+				break B;
 			}
 		}
 	}

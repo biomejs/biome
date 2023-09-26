@@ -18,7 +18,7 @@ Source: https://eslint.org/docs/latest/rules/no-unused-labels
 
 ### Invalid
 
-```js
+```jsx
 LOOP: for (const x of xs) {
     if (x > 0) {
         break;
@@ -46,12 +46,19 @@ LOOP: for (const x of xs) {
 
 ### Valid
 
-```js
+```jsx
 LOOP: for (const x of xs) {
     if (x > 0) {
         break LOOP;
     }
     f(x);
+}
+```
+
+```jsx
+function nonNegative(n) {
+    DEV: assert(n >= 0);
+    return n;
 }
 ```
 
