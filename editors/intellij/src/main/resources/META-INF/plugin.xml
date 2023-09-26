@@ -24,7 +24,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="Biome" displayType="BALLOON"/>
-        <statusBarWidgetFactory implementation="com.github.biomejs.intellijbiome.widgets.BiomeStatusBarWidgetFactory"/>
+        <statusBarWidgetFactory implementation="com.github.biomejs.intellijbiome.widgets.BiomeStatusBarWidgetFactory"
+																id="BiomeWidget"/>
         <platform.lsp.serverSupportProvider
                 implementation="com.github.biomejs.intellijbiome.lsp.BiomeLspServerSupportProvider"/>
         <projectConfigurable id="Settings.Biome"

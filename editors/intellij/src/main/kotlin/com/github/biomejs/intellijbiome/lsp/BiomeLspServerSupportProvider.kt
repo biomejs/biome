@@ -2,8 +2,10 @@ package com.github.biomejs.intellijbiome.lsp
 
 import com.github.biomejs.intellijbiome.BiomeBundle
 import com.github.biomejs.intellijbiome.BiomeUtils
+import com.github.biomejs.intellijbiome.listeners.BIOME_CONFIG_RESOLVED_TOPIC
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -17,36 +19,39 @@ import org.eclipse.lsp4j.*
 @Suppress("UnstableApiUsage")
 class BiomeLspServerSupportProvider : LspServerSupportProvider {
 
-    override fun fileOpened(
-        project: Project,
-        file: VirtualFile,
-        serverStarter: LspServerSupportProvider.LspServerStarter
-    ) {
-        if (BiomeUtils.isSupportedFileType(file)) {
-            val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
-
-            serverStarter.ensureServerStarted(BiomeLspServerDescriptor(project, executable))
-        }
-    }
+	override fun fileOpened(
+		project: Project,
+		file: VirtualFile,
+		serverStarter: LspServerSupportProvider.LspServerStarter
+	) {
+		if (BiomeUtils.isSupportedFileType(file)) {
+			val executable = BiomeUtils.getBiomeExecutablePath(project) ?: return
+			serverStarter.ensureServerStarted(BiomeLspServerDescriptor(project, executable))
+		}
+	}
 }
 
 @Suppress("UnstableApiUsage")
 private class BiomeLspServerDescriptor(project: Project, val executable: String) :
-    ProjectWideLspServerDescriptor(project, "Biome") {
-    override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
-    override fun createCommandLine(): GeneralCommandLine {
-        val params = SmartList("lsp-proxy")
+	ProjectWideLspServerDescriptor(project, "Biome") {
+	override fun isSupportedFile(file: VirtualFile) = BiomeUtils.isSupportedFileType(file)
+	override fun createCommandLine(): GeneralCommandLine {
+		val params = SmartList("lsp-proxy")
 
-        if (executable.isEmpty()) {
-            throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
-        }
+		if (executable.isEmpty()) {
+			throw ExecutionException(BiomeBundle.message("biome.language.server.not.found"))
+		}
 
-        return BiomeUtils.createNodeCommandLine(project, executable).apply {
-					addParameters(params)
-				}
+		val version = BiomeUtils.getBiomeVersion(project, executable)
 
-    }
+		version?.let { project.messageBus.syncPublisher(BIOME_CONFIG_RESOLVED_TOPIC).resolved(it) }
 
-    override val lspGoToDefinitionSupport = false
-    override val lspCompletionSupport = null
+		return BiomeUtils.createNodeCommandLine(project, executable).apply {
+			addParameters(params)
+		}
+
+	}
+
+	override val lspGoToDefinitionSupport = false
+	override val lspCompletionSupport = null
 }
