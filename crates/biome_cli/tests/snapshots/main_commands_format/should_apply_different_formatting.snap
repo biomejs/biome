@@ -28,7 +28,7 @@ expression: content
 
 ```js
 const a = {
-        array: ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"],
+  array: ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"],
 };
 
 ```
@@ -51,6 +51,36 @@ const a = {
 ```
 
 # Emitted Messages
+
+```block
+biome.json:8:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property indentSize is deprecated. Use javascript.formatter.indentWidth instead.
+  
+     6 │             "formatter": {
+     7 │                 "lineWidth": 320,
+   > 8 │                 "indentSize": 8
+       │                 ^^^^^^^^^^^^
+     9 │             }
+    10 │         },
+  
+
+```
+
+```block
+biome.json:14:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property indentSize is deprecated. Use json.formatter.indentWidth instead.
+  
+    12 │             "formatter": {
+    13 │                 "lineWidth": 80,
+  > 14 │                 "indentSize": 2
+       │                 ^^^^^^^^^^^^
+    15 │             }
+    16 │         }
+  
+
+```
 
 ```block
 Formatted 2 file(s) in <TIME>

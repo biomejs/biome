@@ -1,7 +1,9 @@
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::location::AsSpan;
-use biome_diagnostics::{Advices, Diagnostic, LogCategory, MessageAndDescription, Severity, Visit};
+use biome_diagnostics::{
+    Advices, Diagnostic, DiagnosticTags, LogCategory, MessageAndDescription, Severity, Visit,
+};
 use biome_rowan::{SyntaxError, TextRange};
 use serde::{Deserialize, Serialize};
 
@@ -18,6 +20,8 @@ pub struct DeserializationDiagnostic {
     deserialization_advice: DeserializationAdvice,
     #[severity]
     severity: Severity,
+    #[tags]
+    tags: DiagnosticTags,
 }
 
 impl DeserializationDiagnostic {
@@ -27,6 +31,7 @@ impl DeserializationDiagnostic {
             range: None,
             deserialization_advice: DeserializationAdvice::default(),
             severity: Severity::Error,
+            tags: DiagnosticTags::empty(),
         }
     }
 
@@ -71,6 +76,15 @@ impl DeserializationDiagnostic {
             .note_with_list("Accepted values:", known_variants)
     }
 
+    /// Emitted when there's a deprecated property
+    pub fn new_deprecated(key_name: impl Display, range: impl AsSpan, instead: &str) -> Self {
+        Self::new(
+            markup! { "The property "<Emphasis>{{key_name}}</Emphasis>" is deprecated. Use "<Emphasis>{{instead}}</Emphasis>" instead." },
+        )
+        .with_range(range)
+        .with_tags(DiagnosticTags::DEPRECATED_CODE).with_custom_severity(Severity::Warning)
+    }
+
     /// Adds a range to the diagnostic
     pub fn with_range(mut self, span: impl AsSpan) -> Self {
         self.range = span.as_span();
@@ -88,6 +102,12 @@ impl DeserializationDiagnostic {
     /// Changes the severity of the diagnostic
     pub fn with_custom_severity(mut self, severity: Severity) -> Self {
         self.severity = severity;
+        self
+    }
+
+    /// Add a tag to the list of tags
+    pub fn with_tags(mut self, tag: DiagnosticTags) -> Self {
+        self.tags |= tag;
         self
     }
 

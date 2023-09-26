@@ -41,6 +41,11 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
             }
             "indentSize" => {
                 self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
+                diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                    name_text,
+                    key.text_trimmed_range(),
+                    "formatter.indentWidth",
+                ));
             }
             "indentWidth" => {
                 self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);

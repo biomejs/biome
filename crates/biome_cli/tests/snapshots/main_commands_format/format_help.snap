@@ -31,6 +31,8 @@ Formatting options specific to the JavaScript files
                               its super languages) files.
         --javascript-formatter-indent-size=NUMBER  The size of the indentation applied to JavaScript
                               (and its super languages) files. Default to 2.
+        --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to JavaScript
+                              (and its super languages) files. Default to 2.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line, applied to JavaScript
                               (and its super languages) files. Defaults to 80.
 
@@ -74,6 +76,8 @@ Available options:
                               files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
                               files.
+        --json-formatter-indent-width=NUMBER  The size of the indentation applied to JSON (and its super
+                              languages) files. Default to 2.
         --json-formatter-indent-size=NUMBER  The size of the indentation applied to JSON (and its super
                               languages) files. Default to 2.
         --json-formatter-line-width=NUMBER  What's the max width of a line, applied to JSON (and its

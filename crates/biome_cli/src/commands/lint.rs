@@ -49,13 +49,15 @@ pub(crate) fn lint(
         Some(FixFileMode::SafeAndUnsafeFixes)
     };
 
+    let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
+
+    loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
+
     let LoadedConfiguration {
         configuration: mut fs_configuration,
         directory_path: configuration_path,
         ..
-    } = load_configuration(&mut session, &cli_options)?
-        .or_diagnostic(session.app.console, cli_options.verbose)?;
-
+    } = loaded_configuration;
     fs_configuration.merge_with(linter_configuration);
     fs_configuration.merge_with(files_configuration);
     fs_configuration.merge_with(vcs_configuration);

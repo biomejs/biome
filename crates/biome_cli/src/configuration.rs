@@ -4,7 +4,7 @@ use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
-use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic, Severity};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
 use biome_service::configuration::diagnostics::CantLoadExtendFile;
@@ -83,22 +83,42 @@ impl LoadedConfiguration {
         Ok(deserialized_configurations)
     }
 
-    pub fn or_diagnostic(
-        self,
-        console: &mut dyn Console,
-        verbose: bool,
-    ) -> Result<Self, CliDiagnostic> {
-        if !self.diagnostics.is_empty() {
-            for diagnostic in self.diagnostics {
-                let diagnostic = if let Some(file_path) = &self.file_path {
+    /// It re
+    #[must_use]
+    pub fn with_file_path(mut self) -> Self {
+        self.diagnostics = self
+            .diagnostics
+            .into_iter()
+            .map(|diagnostic| {
+                if let Some(file_path) = &self.file_path {
                     diagnostic.with_file_path(file_path.display().to_string())
                 } else {
                     diagnostic
-                };
+                }
+            })
+            .collect::<Vec<_>>();
+        self
+    }
+
+    /// It prints diagnostics to console if there are any, and return [Err] if any of them is an error
+    pub fn check_for_errors(
+        &self,
+        console: &mut dyn Console,
+        verbose: bool,
+    ) -> Result<(), CliDiagnostic> {
+        let hss_errors = self
+            .diagnostics
+            .iter()
+            .any(|e| e.severity() == Severity::Error);
+
+        if !self.diagnostics.is_empty() {
+            for diagnostic in &self.diagnostics {
                 console.error(markup! {
-					{if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+					{if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
             	})
             }
+        }
+        if hss_errors {
             return Err(CliDiagnostic::workspace_error(
                 WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
                     "Biome exited because the configuration resulted in errors. Please fix them.",
@@ -120,7 +140,7 @@ impl LoadedConfiguration {
             }
         }
 
-        Ok(self)
+        Ok(())
     }
 }
 

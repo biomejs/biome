@@ -126,7 +126,10 @@ impl WorkspaceSettings {
             if let Some(formatter) = json.formatter {
                 self.languages.json.formatter.enabled = formatter.enabled;
                 self.languages.json.formatter.line_width = formatter.line_width;
-                self.languages.json.formatter.indent_width = formatter.indent_size.map(Into::into);
+                self.languages.json.formatter.indent_width = formatter
+                    .indent_width
+                    .map(Into::into)
+                    .or(formatter.indent_size.map(Into::into));
                 self.languages.json.formatter.indent_style = formatter.indent_style.map(Into::into);
             }
         }
