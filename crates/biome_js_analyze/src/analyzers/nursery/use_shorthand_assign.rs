@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
-    JsBinaryOperator, JsSyntaxKind, T,
+    AnyJsAssignment, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
+    JsBinaryExpression, JsBinaryOperator, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -64,7 +64,13 @@ declare_rule! {
 
 pub struct RuleState {
     shorthand_operator: JsSyntaxKind,
-    right: AnyJsExpression,
+    replacement_expression: AnyJsExpression,
+}
+
+#[derive(Clone)]
+enum VariablePosition {
+    Left,
+    Right,
 }
 
 impl Rule for UseShorthandAssign {
@@ -81,34 +87,40 @@ impl Rule for UseShorthandAssign {
         }
 
         let left = node.left().ok();
-        let left_var_name = left?
-            .as_any_js_assignment()?
-            .as_js_identifier_assignment()?
-            .name_token()
-            .ok()?;
-        let left_var_name = left_var_name.text_trimmed();
-
-        let binary_expression = match node.right().ok()? {
-            AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
-            AnyJsExpression::JsParenthesizedExpression(param) =>
-                JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?,
+        let left_var_name = match left?.as_any_js_assignment()? {
+            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.text(),
+            AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.text(),
+            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.text(),
             _ => return None,
         };
 
-        let has_same_reference =
-            has_same_reference_in_expression(left_var_name, &binary_expression)?;
-        let operator = binary_expression.operator().ok()?;
-        let right = binary_expression.right().ok()?;
-        let shorhand = get_shorthand(operator)?;
+        let binary_expression = match node.right().ok()? {
+            AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
+            AnyJsExpression::JsParenthesizedExpression(param) => {
+                JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?
+            }
+            _ => return None,
+        };
 
-        if has_same_reference {
-            Some(RuleState {
-                shorthand_operator: shorhand,
-                right,
-            })
-        } else {
-            None
+        let operator = binary_expression.operator().ok()?;
+        let shorthand_operator = get_shorthand(operator)?;
+        let is_commutative = is_commutative(operator);
+        let variable_position_in_expression =
+            parse_variable_reference_in_expression(&left_var_name, &binary_expression)?;
+
+        let replacement_expression = match variable_position_in_expression {
+            VariablePosition::Left => binary_expression.left().ok()?,
+            VariablePosition::Right => binary_expression.right().ok()?,
+        };
+
+        if !is_commutative && matches!(variable_position_in_expression, VariablePosition::Right) {
+            return None;
         }
+
+        Some(RuleState {
+            shorthand_operator,
+            replacement_expression,
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -126,6 +138,7 @@ impl Rule for UseShorthandAssign {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
+
         let mut mutation = ctx.root().begin();
         let shorthand_operator = state.shorthand_operator;
 
@@ -135,14 +148,14 @@ impl Rule for UseShorthandAssign {
             .with_leading_trivia_pieces(token_leading_trivia)
             .with_trailing_trivia_pieces(token_trailing_trivia);
 
-        let next_node = node
+        let shorthand_node = node
             .clone()
             .with_operator_token_token(token)
-            .with_right(state.right.clone());
+            .with_right(state.replacement_expression.clone());
 
         mutation.replace_node(
             AnyJsExpression::JsAssignmentExpression(node.clone()),
-            AnyJsExpression::JsAssignmentExpression(next_node),
+            AnyJsExpression::JsAssignmentExpression(shorthand_node),
         );
 
         Some(JsRuleAction {
@@ -155,11 +168,31 @@ impl Rule for UseShorthandAssign {
     }
 }
 
-fn has_same_reference_in_expression(
+fn parse_variable_reference_in_expression(
     variable_name: &str,
     binary_expression: &JsBinaryExpression,
-) -> Option<bool> {
-    Some(variable_name == binary_expression.left().ok()?.omit_parentheses().text())
+) -> Option<VariablePosition> {
+    let present_on_left = variable_name == binary_expression.left().ok()?.omit_parentheses().text();
+    let present_on_right =
+        variable_name == binary_expression.right().ok()?.omit_parentheses().text();
+
+    if present_on_left {
+        Some(VariablePosition::Left)
+    } else if present_on_right {
+        Some(VariablePosition::Right)
+    } else {
+        None
+    }
+}
+
+fn is_commutative(operator: JsBinaryOperator) -> bool {
+    matches!(
+        operator,
+        JsBinaryOperator::Times
+            | JsBinaryOperator::BitwiseAnd
+            | JsBinaryOperator::BitwiseOr
+            | JsBinaryOperator::BitwiseXor
+    )
 }
 
 fn get_shorthand(operator: JsBinaryOperator) -> Option<JsSyntaxKind> {
