@@ -40,7 +40,10 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                 self.indent_style = Some(indent_style);
             }
             "indentSize" => {
-                self.indent_size = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
+                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
+            }
+            "indentWidth" => {
+                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
             }
             "lineWidth" => {
                 let line_width = self.map_to_u16(&value, name_text, LineWidth::MAX, diagnostics)?;

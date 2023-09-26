@@ -28,10 +28,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add support for `BIOME_BINARY` environment variable to override the location of the binary. Contributed by @ematipico
 
+- Add option `--indent-width`, and deprecated the option `--indent-size`. Contributed by @ematipico
+
 #### Enhancements
 - Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
 
 ### Configuration
+
+#### New features
+
+- Add option `indentWidth`, and deprecated the option `indentSize`. Contributed by @ematipico
+
+
 ### Editors
 ### Formatter
 

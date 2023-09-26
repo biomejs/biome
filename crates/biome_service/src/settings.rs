@@ -161,7 +161,7 @@ pub struct FormatSettings {
     /// has syntax errors
     pub format_with_errors: bool,
     pub indent_style: Option<IndentStyle>,
-    pub indent_size: Option<IndentWidth>,
+    pub indent_width: Option<IndentWidth>,
     pub line_width: Option<LineWidth>,
     /// List of paths/files to matcher
     pub ignored_files: Matcher,
@@ -173,7 +173,7 @@ impl Default for FormatSettings {
             enabled: true,
             format_with_errors: false,
             indent_style: Some(IndentStyle::default()),
-            indent_size: Some(IndentWidth::default()),
+            indent_width: Some(IndentWidth::default()),
             line_width: Some(LineWidth::default()),
             ignored_files: Matcher::new(MatchOptions {
                 case_sensitive: true,

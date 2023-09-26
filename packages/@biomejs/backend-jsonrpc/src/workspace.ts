@@ -92,13 +92,17 @@ export interface FormatterConfiguration {
 	 */
 	ignore?: StringSet;
 	/**
-	 * The size of the indentation, 2 by default
+	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
 	indentSize?: number;
 	/**
 	 * The indent style.
 	 */
 	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation, 2 by default
+	 */
+	indentWidth?: number;
 	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */

@@ -696,7 +696,7 @@
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"indentSize": {
-					"description": "The size of the indentation, 2 by default",
+					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
 					"default": 2,
 					"type": ["integer", "null"],
 					"format": "uint8",
@@ -709,6 +709,13 @@
 						{ "$ref": "#/definitions/PlainIndentStyle" },
 						{ "type": "null" }
 					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation, 2 by default",
+					"default": 2,
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",

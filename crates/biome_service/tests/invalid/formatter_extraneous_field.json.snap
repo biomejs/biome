@@ -19,6 +19,7 @@ formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━�
   - formatWithErrors
   - indentStyle
   - indentSize
+  - indentWidth
   - lineWidth
   - ignore
   

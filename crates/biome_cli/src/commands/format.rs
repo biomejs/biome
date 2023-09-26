@@ -1,8 +1,11 @@
 use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
+use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
@@ -45,6 +48,19 @@ pub(crate) fn format(
         ..
     } = load_configuration(&mut session, &cli_options)?
         .or_diagnostic(session.app.console, cli_options.verbose)?;
+
+    if formatter_configuration
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument"<Emphasis>"--indent-size"</Emphasis>"is deprecated. Use "<Emphasis>"--indent-width"</Emphasis>" instead"
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
 
     configuration.merge_with(javascript_formatter);
     configuration.merge_with(json_formatter);
