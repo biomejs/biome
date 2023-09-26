@@ -31,7 +31,7 @@ invalid.js:1:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
   
   i Calling Symbol with the new operator throws a TypeError.
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·foo·=·new·Symbol("foo");
       │           ----              
@@ -52,7 +52,7 @@ invalid.js:5:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
   
   i Calling Symbol with the new operator throws a TypeError.
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     5 │ var·baz·=·new·Symbol("baz");
       │           ----              
@@ -73,7 +73,7 @@ invalid.js:7:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━━
   
   i Calling BigInt with the new operator throws a TypeError.
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     7 │ var·foo·=·new·BigInt(9007199254740991);
       │           ----                         
@@ -93,7 +93,7 @@ invalid.js:11:11 lint/nursery/noInvalidNewBuiltin  FIXABLE  ━━━━━━�
   
   i Calling BigInt with the new operator throws a TypeError.
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     11 │ var·baz·=·new·BigInt(9007199254740991);
        │           ----                         

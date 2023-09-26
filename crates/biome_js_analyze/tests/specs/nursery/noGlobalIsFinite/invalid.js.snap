@@ -39,7 +39,7 @@ invalid.js:1:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      1    │ - isFinite({});
         1 │ + Number.isFinite({});
@@ -63,7 +63,7 @@ invalid.js:3:2 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      1  1 │   isFinite({});
      2  2 │   
@@ -89,7 +89,7 @@ invalid.js:5:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      3  3 │   (isFinite)({});
      4  4 │   
@@ -115,7 +115,7 @@ invalid.js:7:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      5  5 │   globalThis.isFinite({});
      6  6 │   
@@ -141,7 +141,7 @@ invalid.js:9:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      7  7 │   (globalThis).isFinite({});
      8  8 │   
@@ -167,7 +167,7 @@ invalid.js:11:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
      9  9 │   globalThis.globalThis.window.isFinite({});
     10 10 │   
@@ -193,7 +193,7 @@ invalid.js:13:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
     13 │ (globalThis).Number[("isFinite")]({});
        │             +++++++                   
@@ -213,7 +213,7 @@ invalid.js:16:5 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
     14 14 │   
     15 15 │   function localIsNaN(isFinite) {
@@ -238,7 +238,7 @@ invalid.js:19:12 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━�
   
   i See the MDN documentation for more details.
   
-  i Suggested fix: Use Number.isFinite instead.
+  i Unsafe fix: Use Number.isFinite instead.
   
     17 17 │   }
     18 18 │   

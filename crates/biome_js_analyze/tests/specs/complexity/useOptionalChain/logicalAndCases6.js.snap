@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 91
 expression: logicalAndCases6.js
 ---
 # Input
@@ -83,7 +82,7 @@ logicalAndCases6.js:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     3 │ foo.bar != undefined && foo.bar.baz.buzz()
     4 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      1  1 │   // case with a jump (i.e. a non-nullish prop)
      2    │ - foo·!=·undefined·&&·foo.bar·!=·undefined·&&·foo.bar.baz.buzz()
@@ -106,7 +105,7 @@ logicalAndCases6.js:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     4 │ 
     5 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      1  1 │   // case with a jump (i.e. a non-nullish prop)
      2  2 │   foo != undefined && foo.bar != undefined && foo.bar.baz.buzz()
@@ -129,7 +128,7 @@ logicalAndCases6.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     7 │ 
     8 │ // case with a call expr inside the chain for some inefficient reason
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      4  4 │   
      5  5 │   // case with a jump (i.e. a non-nullish prop)
@@ -152,7 +151,7 @@ logicalAndCases6.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     10 │ 
     11 │ // chained calls with element access
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      7  7 │   
      8  8 │   // case with a call expr inside the chain for some inefficient reason
@@ -175,7 +174,7 @@ logicalAndCases6.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     13 │ foo != undefined && foo.bar != undefined && foo.bar.baz != undefined && foo.bar.baz[buzz] != undefined && foo.bar.baz[buzz]()
     14 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     10 10 │   
     11 11 │   // chained calls with element access
@@ -199,7 +198,7 @@ logicalAndCases6.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     14 │ 
     15 │ // (partially) pre-optional chained
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     11 11 │   // chained calls with element access
     12 12 │   foo != undefined && foo.bar != undefined && foo.bar.baz != undefined && foo.bar.baz[buzz]()
@@ -222,7 +221,7 @@ logicalAndCases6.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     17 │ foo != undefined && foo?.bar.baz != undefined && foo?.bar.baz[buzz]
     18 │ foo != undefined && foo?.() != undefined && foo?.().bar
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     14 14 │   
     15 15 │   // (partially) pre-optional chained
@@ -246,7 +245,7 @@ logicalAndCases6.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     18 │ foo != undefined && foo?.() != undefined && foo?.().bar
     19 │ foo.bar != undefined && foo.bar?.() != undefined && foo.bar?.().baz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     17 │ foo·!=·undefined·&&·foo?.bar.baz·!=·undefined·&&·foo?.bar.baz[buzz]
        │    --------------------         --------------------  -------      
@@ -265,7 +264,7 @@ logicalAndCases6.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     19 │ foo.bar != undefined && foo.bar?.() != undefined && foo.bar?.().baz
     20 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     18 │ foo·!=·undefined·&&·foo?.()·!=·undefined·&&·foo?.().bar
        │    --------------------    -------------------- ---    
@@ -284,7 +283,7 @@ logicalAndCases6.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     20 │ 
     21 │ //private static member name
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     19 │ foo.bar·!=·undefined·&&·foo.bar?.()·!=·undefined·&&·foo.bar?.().baz
        │        ------------------------    ------------------------ ---    
@@ -302,7 +301,7 @@ logicalAndCases6.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     23 │ foo.#bar && foo.#bar.#baz
     24 │ foo.#bar && foo.#bar()
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     20 20 │   
     21 21 │   //private static member name
@@ -326,7 +325,7 @@ logicalAndCases6.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     24 │ foo.#bar && foo.#bar()
     25 │ foo && foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     21 21 │   //private static member name
     22 22 │   foo && foo.#bar
@@ -350,7 +349,7 @@ logicalAndCases6.js:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     25 │ foo && foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
     26 │ foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     22 22 │   foo && foo.#bar
     23 23 │   foo.#bar && foo.#bar.#baz
@@ -374,7 +373,7 @@ logicalAndCases6.js:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     26 │ foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
     27 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     23 23 │   foo.#bar && foo.#bar.#baz
     24 24 │   foo.#bar && foo.#bar()
@@ -398,7 +397,7 @@ logicalAndCases6.js:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     27 │ 
     28 │ // two  errors
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     24 24 │   foo.#bar && foo.#bar()
     25 25 │   foo && foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
@@ -421,7 +420,7 @@ logicalAndCases6.js:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     30 │ 
     31 │ // case with inconsistent checks
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     27 27 │   
     28 28 │   // two  errors
@@ -444,7 +443,7 @@ logicalAndCases6.js:29:34 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     30 │ 
     31 │ // case with inconsistent checks
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     27 27 │   
     28 28 │   // two  errors
@@ -467,7 +466,7 @@ logicalAndCases6.js:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     33 │ 
     34 │ foo.bar && foo.bar.baz != null && foo.bar.baz.qux !== undefined && foo.bar.baz.qux.buzz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     30 30 │   
     31 31 │   // case with inconsistent checks
@@ -491,7 +490,7 @@ logicalAndCases6.js:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     35 │ 
     36 │ // ensure essential whitespace isn't removed
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     32 32 │   foo && foo.bar != null && foo.bar.baz !== undefined && foo.bar.baz.buzz;
     33 33 │   
@@ -514,7 +513,7 @@ logicalAndCases6.js:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     38 │ foo && foo.bar(baz => typeof baz);
     39 │ foo && foo["some long string"] && foo["some long string"].baz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     35 35 │   
     36 36 │   // ensure essential whitespace isn't removed
@@ -538,7 +537,7 @@ logicalAndCases6.js:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     39 │ foo && foo["some long string"] && foo["some long string"].baz
     40 │ foo && foo[`some long string`] && foo[`some long string`].baz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     36 36 │   // ensure essential whitespace isn't removed
     37 37 │   foo && foo.bar(baz => <This Requires Spaces />);
@@ -562,7 +561,7 @@ logicalAndCases6.js:39:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     40 │ foo && foo[`some long string`] && foo[`some long string`].baz
     41 │ foo && foo['some long string'] && foo['some long string'].baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     37 37 │   foo && foo.bar(baz => <This Requires Spaces />);
     38 38 │   foo && foo.bar(baz => typeof baz);
@@ -586,7 +585,7 @@ logicalAndCases6.js:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     41 │ foo && foo['some long string'] && foo['some long string'].baz;
     42 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     38 38 │   foo && foo.bar(baz => typeof baz);
     39 39 │   foo && foo["some long string"] && foo["some long string"].baz
@@ -610,7 +609,7 @@ logicalAndCases6.js:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     42 │ 
     43 │ // other literal expressions
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     39 39 │   foo && foo["some long string"] && foo["some long string"].baz
     40 40 │   foo && foo[`some long string`] && foo[`some long string`].baz
@@ -633,7 +632,7 @@ logicalAndCases6.js:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     45 │ foo && foo[true] && foo[true].baz;
     46 │ foo && foo[null] && foo[null].baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     42 42 │   
     43 43 │   // other literal expressions
@@ -657,7 +656,7 @@ logicalAndCases6.js:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     46 │ foo && foo[null] && foo[null].baz;
     47 │ foo && foo[12n] && foo[12n].baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     43 43 │   // other literal expressions
     44 44 │   foo && foo[123] && foo[123].baz;
@@ -681,7 +680,7 @@ logicalAndCases6.js:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     47 │ foo && foo[12n] && foo[12n].baz;
     48 │ foo && foo[/\w+/] && foo[/\w+/].baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     44 44 │   foo && foo[123] && foo[123].baz;
     45 45 │   foo && foo[true] && foo[true].baz;
@@ -705,7 +704,7 @@ logicalAndCases6.js:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     48 │ foo && foo[/\w+/] && foo[/\w+/].baz;
     49 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     45 45 │   foo && foo[true] && foo[true].baz;
     46 46 │   foo && foo[null] && foo[null].baz;
@@ -728,7 +727,7 @@ logicalAndCases6.js:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     46 46 │   foo && foo[null] && foo[null].baz;
     47 47 │   foo && foo[12n] && foo[12n].baz;
@@ -754,7 +753,7 @@ logicalAndCases6.js:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     55 │ 
     56 │ // other weird cases
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     50 50 │   
     51 51 │   // should preserve comments in a call expression
@@ -777,7 +776,7 @@ logicalAndCases6.js:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     58 │ foo.bar && foo.bar?.();
     59 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     57 │ foo·&&·foo?.();
        │    -------     
@@ -796,7 +795,7 @@ logicalAndCases6.js:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     59 │ 
     60 │ // comments
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     58 │ foo.bar·&&·foo.bar?.();
        │        -----------     
@@ -814,7 +813,7 @@ logicalAndCases6.js:61:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     62 │ foo && foo[bar] && /*0*/foo/*1*/[/*2*/bar/*3*/]/*4*/[/*5*/baz/*6*/]/*7*/;
     63 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     59 59 │   
     60 60 │   // comments
@@ -838,7 +837,7 @@ logicalAndCases6.js:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     63 │ 
     64 │ foo && foo[bar] && /*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     60 60 │   // comments
     61 61 │   foo && foo.bar && /*0*/foo/*1*/./*2*/bar/*3*/./*4*/baz/*5*/;
@@ -860,7 +859,7 @@ logicalAndCases6.js:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   > 64 │ foo && foo[bar] && /*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     64 │ foo·&&·foo[bar]·&&·/*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
        │    ------------------------                                                            

@@ -44,7 +44,7 @@ check.js:1:1 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━�
   > 1 │ new Symbol("");
       │ ^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ new·Symbol("");
       │ ----           

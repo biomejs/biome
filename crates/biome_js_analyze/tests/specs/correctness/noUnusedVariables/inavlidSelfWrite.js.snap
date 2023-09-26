@@ -32,7 +32,7 @@ inavlidSelfWrite.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
      1    │ - let·a·=·1;
         1 │ + let·_a·=·1;
@@ -60,7 +60,7 @@ inavlidSelfWrite.js:7:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend d with an underscore.
+  i Unsafe fix: If this is intentional, prepend d with an underscore.
   
      5  5 │   
      6  6 │   // object assignment pattern
@@ -87,7 +87,7 @@ inavlidSelfWrite.js:7:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend e with an underscore.
+  i Unsafe fix: If this is intentional, prepend e with an underscore.
   
      5  5 │   
      6  6 │   // object assignment pattern
@@ -115,7 +115,7 @@ inavlidSelfWrite.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend f with an underscore.
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
   
      8  8 │   ({d, e} = {d: 1, e: 2});
      9  9 │   

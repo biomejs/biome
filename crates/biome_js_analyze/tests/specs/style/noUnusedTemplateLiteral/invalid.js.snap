@@ -29,7 +29,7 @@ invalid.js:1:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     2 │ var foo1 = `bar `;
     3 │ var foo = `back\rtick`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      1    │ - var·foo·=·`bar`;
         1 │ + var·foo·=·"bar";
@@ -50,7 +50,7 @@ invalid.js:2:12 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     3 │ var foo = `back\rtick`;
     4 │ var foo = `back\ntick`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      1  1 │   var foo = `bar`;
      2    │ - var·foo1·=·`bar·`;
@@ -73,7 +73,7 @@ invalid.js:3:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     4 │ var foo = `back\ntick`;
     5 │ var foo = `back\u2028tick`
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      1  1 │   var foo = `bar`;
      2  2 │   var foo1 = `bar `;
@@ -97,7 +97,7 @@ invalid.js:4:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     5 │ var foo = `back\u2028tick`
     6 │ var foo = `back\u2029tick`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      2  2 │   var foo1 = `bar `;
      3  3 │   var foo = `back\rtick`;
@@ -121,7 +121,7 @@ invalid.js:5:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     6 │ var foo = `back\u2029tick`;
     7 │ var foo = `back\\\\\ntick`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      3  3 │   var foo = `back\rtick`;
      4  4 │   var foo = `back\ntick`;
@@ -145,7 +145,7 @@ invalid.js:6:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     7 │ var foo = `back\\\\\ntick`;
     8 │ var foo = `\n`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      4  4 │   var foo = `back\ntick`;
      5  5 │   var foo = `back\u2028tick`
@@ -169,7 +169,7 @@ invalid.js:7:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     8 │ var foo = `\n`;
     9 │ function foo() { `use strict`; foo(); }
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      5  5 │   var foo = `back\u2028tick`
      6  6 │   var foo = `back\u2029tick`;
@@ -193,7 +193,7 @@ invalid.js:8:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
      9 │ function foo() { `use strict`; foo(); }
     10 │ var foo = `foo\\nbar`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      6  6 │   var foo = `back\u2029tick`;
      7  7 │   var foo = `back\\\\\ntick`;
@@ -217,7 +217,7 @@ invalid.js:9:18 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
     10 │ var foo = `foo\\nbar`;
     11 │ var foo = `foo\\\nbar`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      7  7 │   var foo = `back\\\\\ntick`;
      8  8 │   var foo = `\n`;
@@ -241,7 +241,7 @@ invalid.js:10:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
     11 │ var foo = `foo\\\nbar`;
     12 │ var foo = `foo\\\\\\\nbar`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      8  8 │   var foo = `\n`;
      9  9 │   function foo() { `use strict`; foo(); }
@@ -264,7 +264,7 @@ invalid.js:11:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
        │           ^^^^^^^^^^^^
     12 │ var foo = `foo\\\\\\\nbar`;
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
      9  9 │   function foo() { `use strict`; foo(); }
     10 10 │   var foo = `foo\\nbar`;
@@ -285,7 +285,7 @@ invalid.js:12:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
   > 12 │ var foo = `foo\\\\\\\nbar`;
        │           ^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Replace with string literal
+  i Unsafe fix: Replace with string literal
   
     10 10 │   var foo = `foo\\nbar`;
     11 11 │   var foo = `foo\\\nbar`;

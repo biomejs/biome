@@ -37,7 +37,7 @@ invalid.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     3 │ ····onClick={(event)·=>·console.log(event.ctrlKey·===·true)}
       │                                                     +       

@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, Queryable,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::fmt::Termcolor;
 use biome_console::{
@@ -56,7 +56,22 @@ fn main() -> Result<()> {
     writeln!(index, "---")?;
     writeln!(index)?;
 
-    writeln!(index)?;
+    writeln!(
+        index,
+        "Below the list of rules supported by Biome, divided by group. Here's a legend of the emojis:"
+    )?;
+    writeln!(
+        index,
+        "- The emoji 👌indicates that the rule is part of the recommended rules."
+    )?;
+    writeln!(
+        index,
+        "- The emoji ✅ indicates that the rule provides a code action (fix) that is **safe** to apply."
+    )?;
+    writeln!(
+        index,
+        "- The emoji ⚠️ indicates that the rule provides a code action (fix) that is **unsafe** to apply."
+    )?;
 
     // Accumulate errors for all lint rules to print all outstanding issues on
     // failure instead of just the first one
@@ -182,17 +197,22 @@ fn generate_group(
     group: &'static str,
     rules: BTreeMap<&'static str, RuleMetadata>,
     root: &Path,
-    mut index: &mut dyn io::Write,
+    main_page_buffer: &mut dyn io::Write,
     errors: &mut Vec<(&'static str, Error)>,
     recommended_rules: &mut String,
 ) -> io::Result<()> {
     let (group_name, description) = extract_group_metadata(group);
     let is_nursery = group == "nursery";
 
-    writeln!(index, "\n## {group_name}")?;
-    writeln!(index)?;
-    write_markup_to_string(index, description)?;
-    writeln!(index)?;
+    writeln!(main_page_buffer, "\n## {group_name}")?;
+    writeln!(main_page_buffer)?;
+    write_markup_to_string(main_page_buffer, description)?;
+    writeln!(main_page_buffer)?;
+    writeln!(
+        main_page_buffer,
+        "| Rule name | Properties |  Description |"
+    )?;
+    writeln!(main_page_buffer, "| --- | --- | --- |")?;
 
     for (rule, meta) in rules {
         let is_recommended = !is_nursery && meta.recommended;
@@ -202,11 +222,29 @@ fn generate_group(
                 "\t<li><a href='/linter/rules/{dashed_rule}'>{rule}</a></li>\n"
             ));
         }
+
         match generate_rule(root, group, rule, meta.docs, meta.version, is_recommended) {
             Ok(summary) => {
-                writeln!(index, "### [{rule}](/linter/rules/{dashed_rule})")?;
-                write_html(&mut index, summary.into_iter())?;
-                writeln!(index)?;
+                let mut properties = String::new();
+                if is_recommended {
+                    properties.push_str("<span aria-label=\"Recommended\" role=\"img\" title=\"Recommended\">👌 </span>");
+                }
+                if let Some(fix_kind) = meta.fix_kind.as_ref() {
+                    if *fix_kind == FixKind::Safe {
+                        properties.push_str("<span aria-label=\"The rule has a safe fix\" role=\"img\" title=\"The rule has a safe fix\">✅ </span>");
+                    } else {
+                        properties.push_str("<span aria-label=\"The rule has an unsafe fix\" role=\"img\" title=\"The rule has an unsafe fix\">⚠️ </span>");
+                    }
+                }
+
+                let mut summary_html = Vec::new();
+                write_html(&mut summary_html, summary.into_iter())?;
+                let summary_html = String::from_utf8_lossy(&summary_html);
+                write!(
+                    main_page_buffer,
+                    "| [{rule}](/linter/rules/{dashed_rule}) | {summary_html} | {properties} |"
+                )?;
+                writeln!(main_page_buffer)?;
             }
             Err(err) => {
                 errors.push((rule, err));

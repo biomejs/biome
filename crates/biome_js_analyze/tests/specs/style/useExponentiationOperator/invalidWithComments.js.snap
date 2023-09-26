@@ -25,7 +25,7 @@ invalidWithComments.js:1:14 lint/style/useExponentiationOperator  FIXABLE  ━�
     2 │ Math.pow(a, b)/* comment */;
     3 │ Math.pow(a, b)// comment
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     1   │ - /*·comment·*/Math.pow(a,·b)
       1 │ + /*·comment·*/a·**·b
@@ -46,7 +46,7 @@ invalidWithComments.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━
     3 │ Math.pow(a, b)// comment
     4 │ 
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     1 1 │   /* comment */Math.pow(a, b)
     2   │ - Math.pow(a,·b)/*·comment·*/;
@@ -69,7 +69,7 @@ invalidWithComments.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━
     4 │ 
     5 │ Math.pow(/**/a/**/, /**/b/**/)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     1 1 │   /* comment */Math.pow(a, b)
     2 2 │   Math.pow(a, b)/* comment */;
@@ -93,7 +93,7 @@ invalidWithComments.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━
     6 │ 
     7 │ Math/**/.pow/**/(a, b)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     3 3 │   Math.pow(a, b)// comment
     4 4 │   
@@ -116,7 +116,7 @@ invalidWithComments.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━
       │ ^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     5 5 │   Math.pow(/**/a/**/, /**/b/**/)
     6 6 │   

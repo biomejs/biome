@@ -81,7 +81,7 @@ logicalAndCases3.js:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     3 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong
     4 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      1  1 │   // chained calls
      2    │ - foo·&&·foo.bar·&&·foo.bar.baz·&&·foo.bar.baz.buzz()·&&·bing.bong
@@ -104,7 +104,7 @@ logicalAndCases3.js:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     4 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong
     5 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      1  1 │   // chained calls
      2  2 │   foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz() && bing.bong
@@ -128,7 +128,7 @@ logicalAndCases3.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     5 │ 
     6 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      2  2 │   foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz() && bing.bong
      3  3 │   foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong
@@ -151,7 +151,7 @@ logicalAndCases3.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     8 │ foo.bar && foo.bar.baz.buzz() && bing.bong
     9 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      5  5 │   
      6  6 │   // case with a jump (i.e. a non-nullish prop)
@@ -175,7 +175,7 @@ logicalAndCases3.js:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
      9 │ 
     10 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      6  6 │   // case with a jump (i.e. a non-nullish prop)
      7  7 │   foo && foo.bar && foo.bar.baz.buzz() && bing.bong
@@ -198,7 +198,7 @@ logicalAndCases3.js:11:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     12 │ 
     13 │ // case with a call expr inside the chain for some inefficient reason
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      9  9 │   
     10 10 │   // case with a jump (i.e. a non-nullish prop)
@@ -221,7 +221,7 @@ logicalAndCases3.js:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     15 │ 
     16 │ // chained calls with element access
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     12 12 │   
     13 13 │   // case with a call expr inside the chain for some inefficient reason
@@ -244,7 +244,7 @@ logicalAndCases3.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     18 │ foo && foo.bar && foo.bar.baz && foo.bar.baz[buzz] && foo.bar.baz[buzz]() && bing.bong
     19 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     15 15 │   
     16 16 │   // chained calls with element access
@@ -268,7 +268,7 @@ logicalAndCases3.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     19 │ 
     20 │ // (partially) pre-optional chained
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     16 16 │   // chained calls with element access
     17 17 │   foo && foo.bar && foo.bar.baz && foo.bar.baz[buzz]() && bing.bong
@@ -291,7 +291,7 @@ logicalAndCases3.js:21:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     22 │ foo && foo?.bar.baz && foo?.bar.baz[buzz] && bing.bong
     23 │ foo && foo?.() && foo?.().bar && bing.bong
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     19 19 │   
     20 20 │   // (partially) pre-optional chained
@@ -315,7 +315,7 @@ logicalAndCases3.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     23 │ foo && foo?.() && foo?.().bar && bing.bong
     24 │ foo.bar && foo.bar?.() && foo.bar?.().baz && bing.bong
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     22 │ foo·&&·foo?.bar.baz·&&·foo?.bar.baz[buzz]·&&·bing.bong
        │    -------         -------  -------                   
@@ -334,7 +334,7 @@ logicalAndCases3.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     24 │ foo.bar && foo.bar?.() && foo.bar?.().baz && bing.bong
     25 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     23 │ foo·&&·foo?.()·&&·foo?.().bar·&&·bing.bong
        │    -------    ------- ---                 
@@ -353,7 +353,7 @@ logicalAndCases3.js:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     25 │ 
     26 │ // strict nullish equality checks x !== null && x.y !== null
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     24 │ foo.bar·&&·foo.bar?.()·&&·foo.bar?.().baz·&&·bing.bong
        │        -----------    ----------- ---                 
@@ -372,7 +372,7 @@ logicalAndCases3.js:28:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     29 │ foo.bar !== null && foo.bar.baz
     30 │ foo !== null && foo()
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     26 26 │   // strict nullish equality checks x !== null && x.y !== null
     27 27 │   // chained members
@@ -396,7 +396,7 @@ logicalAndCases3.js:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     30 │ foo !== null && foo()
     31 │ foo.bar !== null && foo.bar()
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     27 27 │   // chained members
     28 28 │   foo !== null && foo.bar
@@ -420,7 +420,7 @@ logicalAndCases3.js:30:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     31 │ foo.bar !== null && foo.bar()
     32 │ foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     28 28 │   foo !== null && foo.bar
     29 29 │   foo.bar !== null && foo.bar.baz
@@ -444,7 +444,7 @@ logicalAndCases3.js:31:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     32 │ foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz
     33 │ foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     29 29 │   foo.bar !== null && foo.bar.baz
     30 30 │   foo !== null && foo()
@@ -468,7 +468,7 @@ logicalAndCases3.js:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     33 │ foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz
     34 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     30 30 │   foo !== null && foo()
     31 31 │   foo.bar !== null && foo.bar()
@@ -492,7 +492,7 @@ logicalAndCases3.js:33:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     34 │ 
     35 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     31 31 │   foo.bar !== null && foo.bar()
     32 32 │   foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz
@@ -515,7 +515,7 @@ logicalAndCases3.js:36:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     37 │ foo.bar !== null && foo.bar.baz.buzz
     38 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     34 34 │   
     35 35 │   // case with a jump (i.e. a non-nullish prop)
@@ -539,7 +539,7 @@ logicalAndCases3.js:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     38 │ 
     39 │ // case where for some reason there is a doubled up expression
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     35 35 │   // case with a jump (i.e. a non-nullish prop)
     36 36 │   foo !== null && foo.bar !== null && foo.bar.baz.buzz
@@ -562,7 +562,7 @@ logicalAndCases3.js:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     41 │ foo.bar !== null && foo.bar.baz !== null && foo.bar.baz !== null && foo.bar.baz.buzz
     42 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     38 38 │   
     39 39 │   // case where for some reason there is a doubled up expression
@@ -586,7 +586,7 @@ logicalAndCases3.js:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     42 │ 
     43 │ // chained members with element access
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     39 39 │   // case where for some reason there is a doubled up expression
     40 40 │   foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz !== null && foo.bar.baz.buzz
@@ -609,7 +609,7 @@ logicalAndCases3.js:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     45 │ 
     46 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     42 42 │   
     43 43 │   // chained members with element access
@@ -632,7 +632,7 @@ logicalAndCases3.js:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     48 │ 
     49 │ // chained calls
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     45 45 │   
     46 46 │   // case with a jump (i.e. a non-nullish prop)
@@ -655,7 +655,7 @@ logicalAndCases3.js:50:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     51 │ foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz !== null && foo.bar.baz.buzz()
     52 │ foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz !== null && foo.bar.baz.buzz()
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     48 48 │   
     49 49 │   // chained calls
@@ -679,7 +679,7 @@ logicalAndCases3.js:51:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     52 │ foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz !== null && foo.bar.baz.buzz()
     53 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     49 49 │   // chained calls
     50 50 │   foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz()
@@ -703,7 +703,7 @@ logicalAndCases3.js:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     53 │ 
     54 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     50 50 │   foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz()
     51 51 │   foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz.buzz !== null && foo.bar.baz.buzz()
@@ -726,7 +726,7 @@ logicalAndCases3.js:55:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     56 │ foo.bar !== null && foo.bar.baz.buzz()
     57 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     53 53 │   
     54 54 │   // case with a jump (i.e. a non-nullish prop)
@@ -750,7 +750,7 @@ logicalAndCases3.js:56:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     57 │ 
     58 │ // case with a jump (i.e. a non-nullish prop)
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     54 54 │   // case with a jump (i.e. a non-nullish prop)
     55 55 │   foo !== null && foo.bar !== null && foo.bar.baz.buzz()
@@ -773,7 +773,7 @@ logicalAndCases3.js:59:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     60 │ 
     61 │ // case with a call expr inside the chain for some inefficient reason
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     57 57 │   
     58 58 │   // case with a jump (i.e. a non-nullish prop)
@@ -795,7 +795,7 @@ logicalAndCases3.js:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     63 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     60 60 │   
     61 61 │   // case with a call expr inside the chain for some inefficient reason

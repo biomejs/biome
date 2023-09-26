@@ -53,7 +53,7 @@ invalid.jsx:2:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     3 │ 	<button role="button"></button>
     4 │ 	<h1 role="heading" aria-level="1">
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     2 │ → <article·role="article"></article>
       │            --------------           
@@ -72,7 +72,7 @@ invalid.jsx:3:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     4 │ 	<h1 role="heading" aria-level="1">
     5 │ 		title
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     3 │ → <button·role="button"></button>
       │           -------------          
@@ -91,7 +91,7 @@ invalid.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     5 │ 		title
     6 │ 	</h1>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     4 │ → <h1·role="heading"·aria-level="1">
       │       ---------------               
@@ -110,7 +110,7 @@ invalid.jsx:7:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     8 │ 	<h2 role={`heading`}></h2>
     9 │ 	<dialog role="dialog"></dialog>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     7 │ → <h1·role="heading">title</h1>
       │       --------------           
@@ -129,7 +129,7 @@ invalid.jsx:8:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
      9 │ 	<dialog role="dialog"></dialog>
     10 │ 	<input type="checkbox" role="checkbox" />
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     8 │ → <h2·role={`heading`}></h2>
       │       ----------------      
@@ -148,7 +148,7 @@ invalid.jsx:9:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     10 │ 	<input type="checkbox" role="checkbox" />
     11 │ 	<figure role="figure"></figure>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     9 │ → <dialog·role="dialog"></dialog>
       │           -------------          
@@ -167,7 +167,7 @@ invalid.jsx:10:30 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     11 │ 	<figure role="figure"></figure>
     12 │ 	<form role="form"></form>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     10 │ → <input·type="checkbox"·role="checkbox"·/>
        │                          ----------------  
@@ -186,7 +186,7 @@ invalid.jsx:11:15 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     12 │ 	<form role="form"></form>
     13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     11 │ → <figure·role="figure"></figure>
        │           -------------          
@@ -205,7 +205,7 @@ invalid.jsx:12:13 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     13 │ 	{/* Needs to check the ancestors: <td role="gridcell"></td> */}
     14 │ 	<fieldset role="group"></fieldset>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     12 │ → <form·role="form"></form>
        │         -----------        
@@ -224,7 +224,7 @@ invalid.jsx:14:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     15 │ 	<img src="foo" alt="bar" role="img" />
     16 │ 	<img alt="" role="presentation"></img>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     14 │ → <fieldset·role="group"></fieldset>
        │             ------------            
@@ -243,7 +243,7 @@ invalid.jsx:15:32 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     16 │ 	<img alt="" role="presentation"></img>
     17 │ 	<a href="#" role="link"></a>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     15 │ → <img·src="foo"·alt="bar"·role="img"·/>
        │                            -----------  
@@ -262,7 +262,7 @@ invalid.jsx:16:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     17 │ 	<a href="#" role="link"></a>
     18 │ 	<ol role="list"></ol>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     16 │ → <img·alt=""·role="presentation"></img>
        │               -------------------       
@@ -281,7 +281,7 @@ invalid.jsx:17:19 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     18 │ 	<ol role="list"></ol>
     19 │ 	<ul role="list"></ul>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     17 │ → <a·href="#"·role="link"></a>
        │               -----------     
@@ -300,7 +300,7 @@ invalid.jsx:18:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     19 │ 	<ul role="list"></ul>
     20 │ 	<select name="name" role="combobox"></select>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     18 │ → <ol·role="list"></ol>
        │       -----------      
@@ -319,7 +319,7 @@ invalid.jsx:19:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     20 │ 	<select name="name" role="combobox"></select>
     21 │ 	<select name="name" multiple size="4" role="listbox"></select>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     19 │ → <ul·role="list"></ul>
        │       -----------      
@@ -338,7 +338,7 @@ invalid.jsx:20:27 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     21 │ 	<select name="name" multiple size="4" role="listbox"></select>
     22 │ 	<li role="listitem"></li>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     20 │ → <select·name="name"·role="combobox"></select>
        │                       ---------------          
@@ -357,7 +357,7 @@ invalid.jsx:21:45 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     22 │ 	<li role="listitem"></li>
     23 │ 	<nav role="navigation"></nav>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     21 │ → <select·name="name"·multiple·size="4"·role="listbox"></select>
        │                                         --------------          
@@ -376,7 +376,7 @@ invalid.jsx:22:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     23 │ 	<nav role="navigation"></nav>
     24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     22 │ → <li·role="listitem"></li>
        │       ---------------      
@@ -395,7 +395,7 @@ invalid.jsx:23:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     24 │ 	{/* Needs to check the ancestors: <option role="option"></option> */}
     25 │ 	<tr role="row"></tr>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     23 │ → <nav·role="navigation"></nav>
        │        -----------------       
@@ -414,7 +414,7 @@ invalid.jsx:25:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     26 │ 	<tbody role="rowgroup"></tbody>
     27 │ 	<tfoot role="rowgroup"></tfoot>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     25 │ → <tr·role="row"></tr>
        │       ----------      
@@ -433,7 +433,7 @@ invalid.jsx:26:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     27 │ 	<tfoot role="rowgroup"></tfoot>
     28 │ 	<thead role="rowgroup"></thead>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     26 │ → <tbody·role="rowgroup"></tbody>
        │          ---------------         
@@ -452,7 +452,7 @@ invalid.jsx:27:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     28 │ 	<thead role="rowgroup"></thead>
     29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     27 │ → <tfoot·role="rowgroup"></tfoot>
        │          ---------------         
@@ -471,7 +471,7 @@ invalid.jsx:28:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     29 │ 	{/* Needs to check the ancestors: <th scope="row" role="rowheader"></th> */}
     30 │ 	<input type="search" role="searchbox" />
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     28 │ → <thead·role="rowgroup"></thead>
        │          ---------------         
@@ -490,7 +490,7 @@ invalid.jsx:30:28 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     31 │ 	<table role="table"></table>
     32 │ 	<textarea role="textbox"></textarea>
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     30 │ → <input·type="search"·role="searchbox"·/>
        │                        -----------------  
@@ -509,7 +509,7 @@ invalid.jsx:31:14 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     32 │ 	<textarea role="textbox"></textarea>
     33 │ 	<input type="text" role="textbox" />
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     31 │ → <table·role="table"></table>
        │          ------------         
@@ -528,7 +528,7 @@ invalid.jsx:32:17 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     33 │ 	<input type="text" role="textbox" />
     34 │ </>;
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     32 │ → <textarea·role="textbox"></textarea>
        │             --------------            
@@ -547,7 +547,7 @@ invalid.jsx:33:26 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
     34 │ </>;
     35 │ 
   
-  i Suggested fix: Remove the role attribute.
+  i Unsafe fix: Remove the role attribute.
   
     33 │ → <input·type="text"·role="textbox"·/>
        │                      ---------------  

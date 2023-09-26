@@ -42,7 +42,7 @@ invalid.js:1:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant `Boolean` call
+  i Unsafe fix: Remove redundant `Boolean` call
   
     1 │ if·(Boolean(foo))·{
       │     --------   -   
@@ -63,7 +63,7 @@ invalid.js:4:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use double-negation when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant double-negation
+  i Unsafe fix: Remove redundant double-negation
   
     4 │ if·(!!Boolean(foo))·{
       │     --               
@@ -84,7 +84,7 @@ invalid.js:4:7 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant `Boolean` call
+  i Unsafe fix: Remove redundant `Boolean` call
   
     4 │ if·(!!Boolean(foo))·{
       │       --------   -   
@@ -105,7 +105,7 @@ invalid.js:7:6 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant `Boolean` call
+  i Unsafe fix: Remove redundant `Boolean` call
   
     7 │ if·(!Boolean(foo))·{
       │      --------   -   
@@ -126,7 +126,7 @@ invalid.js:10:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use double-negation when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant double-negation
+  i Unsafe fix: Remove redundant double-negation
   
     10 │ while·(!!foo)·{}
        │        --       
@@ -147,7 +147,7 @@ invalid.js:15:10 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant `Boolean` call
+  i Unsafe fix: Remove redundant `Boolean` call
   
     15 │ }·while·(Boolean(x));
        │          -------- -  
@@ -168,7 +168,7 @@ invalid.js:17:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use double-negation when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant double-negation
+  i Unsafe fix: Remove redundant double-negation
   
     17 │ for·(;·!!foo;·)·{}
        │        --         
@@ -189,7 +189,7 @@ invalid.js:19:13 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
   
   i It is not necessary to use double-negation when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant double-negation
+  i Unsafe fix: Remove redundant double-negation
   
     19 │ new·Boolean(!!x);
        │             --   
@@ -210,7 +210,7 @@ invalid.js:21:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use double-negation when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant double-negation
+  i Unsafe fix: Remove redundant double-negation
   
     21 │ !!!x;
        │  --  
@@ -229,7 +229,7 @@ invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
-  i Suggested fix: Remove redundant `Boolean` call
+  i Unsafe fix: Remove redundant `Boolean` call
   
     23 │ !Boolean(x);
        │  -------- - 

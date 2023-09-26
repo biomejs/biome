@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsCaseClause, JsDefaultClause};
@@ -63,6 +63,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noUselessSwitchCase",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

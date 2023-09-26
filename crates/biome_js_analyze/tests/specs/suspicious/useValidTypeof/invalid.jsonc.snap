@@ -94,7 +94,7 @@ invalid.jsonc:1:16 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━�
   
   i not a string literal
   
-  i Suggested fix: Compare the result of `typeof` with a valid type name
+  i Unsafe fix: Compare the result of `typeof` with a valid type name
   
     1 │ typeof·foo·===·"undefined"
       │                +         +
@@ -117,7 +117,7 @@ invalid.jsonc:1:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━�
   
   i not a string literal
   
-  i Suggested fix: Compare the result of `typeof` with a valid type name
+  i Unsafe fix: Compare the result of `typeof` with a valid type name
   
   - typeof·bar·==·Object
   + typeof·bar·==·"object"

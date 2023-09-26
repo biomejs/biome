@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
@@ -38,6 +38,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noUselessLabel",
         recommended: true,
+        fix_kind: FixKind::Safe,
     }
 }
 

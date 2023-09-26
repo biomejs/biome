@@ -64,7 +64,7 @@ invalid.js:1:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     1 │ let·x·=·"\8"
       │          -  
@@ -84,7 +84,7 @@ invalid.js:2:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     2 │ let·x·=·"\9"
       │          -  
@@ -105,7 +105,7 @@ invalid.js:3:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     3 │ let·x·=·"\"\8\""
       │            -    
@@ -126,7 +126,7 @@ invalid.js:4:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
      2  2 │   let x = "\9"
      3  3 │   let x = "\"\8\""
@@ -152,7 +152,7 @@ invalid.js:5:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
      3  3 │   let x = "\"\8\""
      4  4 │   let x = "f\9"
@@ -178,7 +178,7 @@ invalid.js:6:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
      4  4 │   let x = "f\9"
      5  5 │   let x = "fo\9"
@@ -204,7 +204,7 @@ invalid.js:7:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
      5  5 │   let x = "fo\9"
      6  6 │   let x = "foo\9"
@@ -230,7 +230,7 @@ invalid.js:8:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     8 │ let·x·=·"👍\8"
       │            -  
@@ -251,7 +251,7 @@ invalid.js:9:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     9 │ let·x·=·"\\\8"
       │            -  
@@ -272,7 +272,7 @@ invalid.js:10:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     10 │ let·x·=·"\\\\\9"
        │              -  
@@ -293,7 +293,7 @@ invalid.js:11:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     11 │ let·x·=·"foo\\\8"
        │               -  
@@ -314,7 +314,7 @@ invalid.js:12:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     12 │ let·x·=·"\\·\8"
        │             -  
@@ -335,7 +335,7 @@ invalid.js:13:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     11 11 │   let x = "foo\\\8"
     12 12 │   let x = "\\ \8"
@@ -361,7 +361,7 @@ invalid.js:14:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     12 12 │   let x = "\\ \8"
     13 13 │   let x = "\\1\9"
@@ -387,7 +387,7 @@ invalid.js:15:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     13 13 │   let x = "\\1\9"
     14 14 │   let x = "foo\\1\9"
@@ -413,7 +413,7 @@ invalid.js:16:17 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     14 14 │   let x = "foo\\1\9"
     15 15 │   let x = "\\n\\n\8\\n"
@@ -439,7 +439,7 @@ invalid.js:17:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     15 15 │   let x = "\\n\\n\8\\n"
     16 16 │   let x = "\\n.\\n\8\\n"
@@ -465,7 +465,7 @@ invalid.js:18:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     18 │ let·x·=·"\\👍\8"
        │              -  
@@ -486,7 +486,7 @@ invalid.js:19:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     19 │ let·x·=·"\\\8\9"
        │            -    
@@ -507,7 +507,7 @@ invalid.js:20:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     20 │ let·x·=·"\8\\\9"
        │          -      
@@ -528,7 +528,7 @@ invalid.js:21:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     21 │ let·x·=·"\8·\\\9"
        │          -       
@@ -549,7 +549,7 @@ invalid.js:21:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     21 │ let·x·=·"\8·\\\9"
        │               -  
@@ -570,7 +570,7 @@ invalid.js:22:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     22 │ let·x·=·"\8\8"
        │          -    
@@ -591,7 +591,7 @@ invalid.js:23:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     23 │ let·x·=·"\9\8"
        │          -    
@@ -612,7 +612,7 @@ invalid.js:24:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     22 22 │   let x = "\8\8"
     23 23 │   let x = "\9\8"
@@ -638,7 +638,7 @@ invalid.js:24:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     22 22 │   let x = "\8\8"
     23 23 │   let x = "\9\8"
@@ -664,7 +664,7 @@ invalid.js:25:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     25 │ let·x·=·"\8\\1\9"
        │          -       
@@ -685,7 +685,7 @@ invalid.js:25:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     23 23 │   let x = "\9\8"
     24 24 │   let x = "foo\8bar\9baz"
@@ -711,7 +711,7 @@ invalid.js:26:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     26 │ let·x·=·"\9\\n9\\\9\9"
        │          -            
@@ -732,7 +732,7 @@ invalid.js:26:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     26 │ let·x·=·"\9\\n9\\\9\9"
        │                  -    
@@ -753,7 +753,7 @@ invalid.js:27:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     27 │ let·x·=·"\8\\\\\9"
        │          -        
@@ -774,7 +774,7 @@ invalid.js:28:21 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     28 │ let·x·=·"var·foo·=·'\8';·bar('\9')"
        │                     -              
@@ -795,7 +795,7 @@ invalid.js:28:31 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     28 │ let·x·=·"var·foo·=·'\8';·bar('\9')"
        │                               -    
@@ -816,7 +816,7 @@ invalid.js:29:34 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     29 │ let·x·=·"var·foo·=·'8'\n··bar·=·'\9'"
        │                                  -   
@@ -837,7 +837,7 @@ invalid.js:30:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     28 28 │   let x = "var foo = '\8'; bar('\9')"
     29 29 │   let x = "var foo = '8'\n  bar = '\9'"
@@ -863,7 +863,7 @@ invalid.js:31:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     29 29 │   let x = "var foo = '8'\n  bar = '\9'"
     30 30 │   let x = "\\\n\8"
@@ -889,7 +889,7 @@ invalid.js:32:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     30 30 │   let x = "\\\n\8"
     31 31 │   let x = "\\\r\n\9"
@@ -915,7 +915,7 @@ invalid.js:33:20 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with 9. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with 9. This maintains the current functionality.
   
     31 31 │   let x = "\\\r\n\9"
     32 32 │   let x = "\\\\\n\8"
@@ -941,7 +941,7 @@ invalid.js:34:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\8 with \u00008. This maintains the current functionality.
+  i Unsafe fix: Replace \0\8 with \u00008. This maintains the current functionality.
   
     32 32 │   let x = "\\\\\n\8"
     33 33 │   let x = "foo\\\nbar\9baz"
@@ -967,7 +967,7 @@ invalid.js:34:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with \u0038. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with \u0038. This maintains the current functionality.
   
     32 32 │   let x = "\\\\\n\8"
     33 33 │   let x = "foo\\\nbar\9baz"
@@ -993,7 +993,7 @@ invalid.js:35:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\9 with \u00009. This maintains the current functionality.
+  i Unsafe fix: Replace \0\9 with \u00009. This maintains the current functionality.
   
     33 33 │   let x = "foo\\\nbar\9baz"
     34 34 │   let x = "\\0\8"
@@ -1019,7 +1019,7 @@ invalid.js:35:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with \u0039. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with \u0039. This maintains the current functionality.
   
     33 33 │   let x = "foo\\\nbar\9baz"
     34 34 │   let x = "\\0\8"
@@ -1045,7 +1045,7 @@ invalid.js:36:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\8 with \u00008. This maintains the current functionality.
+  i Unsafe fix: Replace \0\8 with \u00008. This maintains the current functionality.
   
     34 34 │   let x = "\\0\8"
     35 35 │   let x = "foo\\0\9bar"
@@ -1071,7 +1071,7 @@ invalid.js:36:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with \u0038. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with \u0038. This maintains the current functionality.
   
     34 34 │   let x = "\\0\8"
     35 35 │   let x = "foo\\0\9bar"
@@ -1097,7 +1097,7 @@ invalid.js:37:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\8 with \u00008. This maintains the current functionality.
+  i Unsafe fix: Replace \0\8 with \u00008. This maintains the current functionality.
   
     35 35 │   let x = "foo\\0\9bar"
     36 36 │   let x = "\\1\\0\8"
@@ -1123,7 +1123,7 @@ invalid.js:37:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with \u0038. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with \u0038. This maintains the current functionality.
   
     35 35 │   let x = "foo\\0\9bar"
     36 36 │   let x = "\\1\\0\8"
@@ -1149,7 +1149,7 @@ invalid.js:38:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     38 │ let·x·=·"\8\\0\9"
        │          -       
@@ -1170,7 +1170,7 @@ invalid.js:38:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\9 with \u00009. This maintains the current functionality.
+  i Unsafe fix: Replace \0\9 with \u00009. This maintains the current functionality.
   
     36 36 │   let x = "\\1\\0\8"
     37 37 │   let x = "\\0\8\9"
@@ -1196,7 +1196,7 @@ invalid.js:38:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \9 with \u0039. This maintains the current functionality.
+  i Unsafe fix: Replace \9 with \u0039. This maintains the current functionality.
   
     36 36 │   let x = "\\1\\0\8"
     37 37 │   let x = "\\0\8\9"
@@ -1222,7 +1222,7 @@ invalid.js:39:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     37 37 │   let x = "\\0\8\9"
     38 38 │   let x = "\8\\0\9"
@@ -1248,7 +1248,7 @@ invalid.js:40:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \0\8 with \u00008. This maintains the current functionality.
+  i Unsafe fix: Replace \0\8 with \u00008. This maintains the current functionality.
   
     38 38 │   let x = "\8\\0\9"
     39 39 │   let x = "0\8"
@@ -1274,7 +1274,7 @@ invalid.js:40:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with \u0038. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with \u0038. This maintains the current functionality.
   
     38 38 │   let x = "\8\\0\9"
     39 39 │   let x = "0\8"
@@ -1300,7 +1300,7 @@ invalid.js:41:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     41 │ let·x·=·"\0·\8"
        │             -  
@@ -1321,7 +1321,7 @@ invalid.js:42:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     40 40 │   let x = "\\0\8"
     41 41 │   let x = "\0 \8"
@@ -1347,7 +1347,7 @@ invalid.js:43:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     41 41 │   let x = "\0 \8"
     42 42 │   let x = "\01\8"
@@ -1372,7 +1372,7 @@ invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
-  i Suggested fix: Replace \8 with 8. This maintains the current functionality.
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
   
     42 42 │   let x = "\01\8"
     43 43 │   let x = "\0\1\8"

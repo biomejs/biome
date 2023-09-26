@@ -8,9 +8,7 @@ title: noUnreachableSuper (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Ensures the `super()` constructor is called exactly once on every code
-path in a class constructor before `this` is accessed if the class has
-a superclass
+Ensures the `super()` constructor is called exactly once on every code  path in a class constructor before `this` is accessed if the class has a superclass
 
 ## Examples
 

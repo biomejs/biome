@@ -7,7 +7,7 @@ use std::{
 };
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, SourceActionKind,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -51,6 +51,7 @@ declare_rule! {
         version: "1.0.0",
         name: "organizeImports",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

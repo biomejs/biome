@@ -26,7 +26,7 @@ invalid.js:2:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━
   
   i instanceof Array returns false for array-like objects and arrays from other execution contexts.
   
-  i Suggested fix: Use Array.isArray() instead.
+  i Unsafe fix: Use Array.isArray() instead.
   
     1 1 │   
     2   │ - if·(/*a*/·arr·/*b*/·instanceof·/*c*/·Array·/*d*/)·{}
@@ -51,7 +51,7 @@ invalid.js:4:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━
   
   i instanceof Array returns false for array-like objects and arrays from other execution contexts.
   
-  i Suggested fix: Use Array.isArray() instead.
+  i Unsafe fix: Use Array.isArray() instead.
   
     2 2 │   if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
     3 3 │   
@@ -76,7 +76,7 @@ invalid.js:6:11 lint/nursery/useIsArray  FIXABLE  ━━━━━━━━━━
   
   i instanceof Array returns false for array-like objects and arrays from other execution contexts.
   
-  i Suggested fix: Use Array.isArray() instead.
+  i Unsafe fix: Use Array.isArray() instead.
   
     4 4 │   const c = [1,2,3] instanceof globalThis.Array === b;
     5 5 │   

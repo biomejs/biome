@@ -40,7 +40,7 @@ invalidClass.ts:2:4 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     1 1 │   class D {
     2   │ - → f(a:·D):·D·|·undefined·{·return;·}

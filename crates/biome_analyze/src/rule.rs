@@ -28,6 +28,14 @@ pub struct RuleMetadata {
     pub docs: &'static str,
     /// Whether a rule is recommended or not
     pub recommended: bool,
+    /// The kind of fix
+    pub fix_kind: Option<FixKind>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum FixKind {
+    Safe,
+    Unsafe,
 }
 
 impl RuleMetadata {
@@ -38,6 +46,7 @@ impl RuleMetadata {
             name,
             docs,
             recommended: false,
+            fix_kind: None,
         }
     }
 
@@ -48,6 +57,11 @@ impl RuleMetadata {
 
     pub const fn deprecated(mut self, deprecated: &'static str) -> Self {
         self.deprecated = Some(deprecated);
+        self
+    }
+
+    pub const fn fix_kind(mut self, kind: FixKind) -> Self {
+        self.fix_kind = Some(kind);
         self
     }
 }

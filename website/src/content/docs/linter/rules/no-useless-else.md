@@ -55,7 +55,7 @@ while (x > 0) {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Suggested fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (f(x)) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          break;
@@ -105,7 +105,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Suggested fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          return 0;
@@ -155,7 +155,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Suggested fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          throw new RangeError();

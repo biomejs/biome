@@ -27,7 +27,7 @@ invalidMethodParameters.ts:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     1 1 │   class D {
     2   │ - → constructor(a:·number)·{}
@@ -52,7 +52,7 @@ invalidMethodParameters.ts:3:4 lint/correctness/noUnusedVariables  FIXABLE  ━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     1 1 │   class D {
     2 2 │   	constructor(a: number) {}
@@ -78,7 +78,7 @@ invalidMethodParameters.ts:4:8 lint/correctness/noUnusedVariables  FIXABLE  ━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     2 2 │   	constructor(a: number) {}
     3 3 │   	f(a: number) {}

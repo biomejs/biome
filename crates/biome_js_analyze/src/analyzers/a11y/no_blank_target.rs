@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
@@ -52,6 +52,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noBlankTarget",
         recommended: true,
+        fix_kind: FixKind::Safe,
     }
 }
 

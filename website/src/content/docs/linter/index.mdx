@@ -6,6 +6,7 @@ description: How to use the Biome linter.
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
 import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+import RecommendedRulesMd from "@src/components/generated/RecommendedRules.md";
 
 Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
 
@@ -29,8 +30,8 @@ For more information about all the available options, check the [CLI page](/refe
 
 ## Recommended rules
 
-When the linter is enabled, it recommends a number of rules. Below the list of recommended rules:
-
+When the linter is enabled, it recommends a number of rules. Recommended rules will emit error diagnostics. Below the list of recommended rules:
+<RecommendedRulesMd />
 <RecommendedRules />
 
 ## Code fixes

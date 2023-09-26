@@ -51,7 +51,7 @@ fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━�
       │     ^^^^^^^^^
     5 │     
   
-  i Suggested fix: Break out into multiple declarations
+  i Unsafe fix: Break out into multiple declarations
   
     2 2 │       function f() {arguments;}
     3 3 │       const FOO = "FOO";
@@ -93,7 +93,7 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'let' instead.
+  i Unsafe fix: Use 'let' instead.
   
     2 2 │       function f() {arguments;}
     3 3 │       const FOO = "FOO";

@@ -16,7 +16,7 @@ withJsxTextInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━━�
   > 1 │ <>foo</>
       │ ^^^^^^^^
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
   - <>foo</>
   + "foo"

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 91
 expression: validCases.ts
 ---
 # Input
@@ -65,7 +64,7 @@ validCases.ts:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^
     46 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     43 43 │   (foo || {})().bar;
     44 44 │   

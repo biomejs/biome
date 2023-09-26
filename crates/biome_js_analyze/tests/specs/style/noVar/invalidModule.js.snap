@@ -22,7 +22,7 @@ invalidModule.js:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'const' instead.
+  i Unsafe fix: Use 'const' instead.
   
     1   │ - var·x·=·1;
       1 │ + const·x·=·1;

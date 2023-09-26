@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -41,6 +41,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noHeaderScope",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -73,7 +74,7 @@ impl Rule for NoHeaderScope {
             markup! {"Avoid using the "<Emphasis>"scope"</Emphasis>" attribute on elements other than "<Emphasis>"th"</Emphasis>" elements."}
                 .to_owned(),
         ).note(markup!{
-            "The "<Emphasis>"scope"</Emphasis>" attribute is used to associate a data cell with its corresponding header cell in a data table, 
+            "The "<Emphasis>"scope"</Emphasis>" attribute is used to associate a data cell with its corresponding header cell in a data table,
             so it should be placed on "<Emphasis>"th"</Emphasis>" elements to provide accessibility to screen readers."
         }).note(markup!{
             "Follow the links for more information,

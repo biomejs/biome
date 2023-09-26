@@ -7,8 +7,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 
 declare_rule! {
-    /// Prevents the incorrect use of `super()` inside classes.
-    /// It also checks whether a call `super()` is missing from classes that extends other constructors.
+    /// Prevents the incorrect use of `super()` inside classes. It also checks whether a call `super()` is missing from classes that extends other constructors.
     ///
     /// ## Examples
     ///

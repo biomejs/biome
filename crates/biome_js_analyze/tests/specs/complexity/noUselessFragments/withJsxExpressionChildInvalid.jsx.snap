@@ -16,7 +16,7 @@ withJsxExpressionChildInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABL
   > 1 │ <>{foo}</>
       │ ^^^^^^^^^^
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     1 │ <>{foo}</>
       │ ---   ----

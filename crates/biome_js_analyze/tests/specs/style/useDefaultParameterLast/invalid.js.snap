@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 100
 expression: invalid.js
 ---
 # Input
@@ -37,7 +36,7 @@ invalid.js:1:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     1 │ export·function·f(a·=·0,·b)·{}
       │                    ----       
@@ -67,7 +66,7 @@ invalid.js:3:22 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     3 │ export·function·g(a,·b·=·0,·c)·{}
       │                       ----       
@@ -97,7 +96,7 @@ invalid.js:7:22 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     7 │ export·function·g(a,·b·/*·before·*/·=·/*·mid·*/·0·/*·after·*/·/*·after·comma·*/,·c)·{}
       │                                     --------------                                    
@@ -125,7 +124,7 @@ invalid.js:9:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     9 │ export·function·u(a=5,·b,·c)·{}
       │                    --          

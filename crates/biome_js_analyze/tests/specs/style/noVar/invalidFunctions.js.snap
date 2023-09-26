@@ -32,7 +32,7 @@ invalidFunctions.js:4:9 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'const' instead.
+  i Unsafe fix: Use 'const' instead.
   
     2 2 │       if(x) {
     3 3 │           // assign 'y'

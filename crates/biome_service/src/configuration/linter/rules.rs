@@ -1579,7 +1579,7 @@ pub struct Correctness {
     #[bpaf(long("no-unreachable"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unreachable: Option<RuleConfiguration>,
-    #[doc = "Ensures the super() constructor is called exactly once on every code path in a class constructor before this is accessed if the class has a superclass"]
+    #[doc = "Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass"]
     #[bpaf(long("no-unreachable-super"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unreachable_super: Option<RuleConfiguration>,
@@ -2898,7 +2898,7 @@ pub struct Style {
     #[bpaf(long("no-var"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_var: Option<RuleConfiguration>,
-    #[doc = "Requires following curly brace conventions. JavaScript allows the omission of curly braces when a block contains only one statement. However, it is considered by many to be best practice to never omit curly braces around blocks, even when they are optional, because it can lead to bugs and reduces code clarity."]
+    #[doc = "Requires following curly brace conventions."]
     #[bpaf(long("use-block-statements"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_block_statements: Option<RuleConfiguration>,
@@ -3541,7 +3541,7 @@ pub struct Suspicious {
     #[bpaf(long("no-double-equals"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_double_equals: Option<RuleConfiguration>,
-    #[doc = "Disallow duplicate case labels. If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression."]
+    #[doc = "Disallow duplicate case labels."]
     #[bpaf(long("no-duplicate-case"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_case: Option<RuleConfiguration>,
@@ -3563,7 +3563,7 @@ pub struct Suspicious {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_jsx_props: Option<RuleConfiguration>,
-    #[doc = "Prevents object literals having more than one property declaration for the same name. If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake."]
+    #[doc = "Prevents object literals having more than one property declaration for the same name."]
     #[bpaf(
         long("no-duplicate-object-keys"),
         argument("on|off|warn"),

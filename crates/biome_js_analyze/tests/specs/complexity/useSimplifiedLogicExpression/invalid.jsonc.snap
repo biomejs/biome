@@ -21,7 +21,7 @@ invalid.jsonc:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
   > 1 │ const r = true && boolExp;
       │           ^^^^^^^^^^^^^^^
   
-  i Suggested fix: Discard redundant terms from the logical expression.
+  i Unsafe fix: Discard redundant terms from the logical expression.
   
     1 │ const·r·=·true·&&·boolExp;
       │           --------        
@@ -47,7 +47,7 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
   > 1 │ const r2 = boolExp || true;
       │            ^^^^^^^^^^^^^^^
   
-  i Suggested fix: Discard redundant terms from the logical expression.
+  i Unsafe fix: Discard redundant terms from the logical expression.
   
     1 │ const·r2·=·boolExp·||·true;
       │            -----------     
@@ -73,7 +73,7 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
   > 1 │ const r3 = null ?? nonNullExp;
       │            ^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Discard redundant terms from the logical expression.
+  i Unsafe fix: Discard redundant terms from the logical expression.
   
     1 │ const·r3·=·null·??·nonNullExp;
       │            --------           
@@ -104,7 +104,7 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
   > 1 │ const r4 = !boolExpr1 || !boolExpr2;
       │            ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Reduce the complexity of the logical expression.
+  i Unsafe fix: Reduce the complexity of the logical expression.
   
   - const·r4·=·!boolExpr1·||·!boolExpr2;
   + const·r4·=·!(boolExpr1·&&·boolExpr2);

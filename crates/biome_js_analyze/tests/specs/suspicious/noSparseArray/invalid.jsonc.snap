@@ -16,7 +16,7 @@ invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━
   > 1 │ const b = [/**test*/,];
       │           ^^^^^^^^^^^^
   
-  i Suggested fix: Replace hole with undefined
+  i Unsafe fix: Replace hole with undefined
   
     1 │ const·b·=·[/**test*/undefined,];
       │                     +++++++++   
@@ -37,7 +37,7 @@ invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━
   > 1 │ const c = [,,];
       │           ^^^^
   
-  i Suggested fix: Replace hole with undefined
+  i Unsafe fix: Replace hole with undefined
   
     1 │ const·c·=·[undefined,·undefined,];
       │            +++++++++ ++++++++++   
@@ -58,7 +58,7 @@ invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━
   > 1 │ const d = [,2];
       │           ^^^^
   
-  i Suggested fix: Replace hole with undefined
+  i Unsafe fix: Replace hole with undefined
   
     1 │ const·d·=·[undefined,2];
       │            +++++++++    
@@ -79,7 +79,7 @@ invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━
   > 1 │ const e = [1,,];
       │           ^^^^^
   
-  i Suggested fix: Replace hole with undefined
+  i Unsafe fix: Replace hole with undefined
   
     1 │ const·e·=·[1,·undefined,];
       │              ++++++++++   
@@ -100,7 +100,7 @@ invalid.jsonc:1:11 lint/suspicious/noSparseArray  FIXABLE  ━━━━━━━
   > 1 │ const f = [1,,2];
       │           ^^^^^^
   
-  i Suggested fix: Replace hole with undefined
+  i Unsafe fix: Replace hole with undefined
   
     1 │ const·f·=·[1,·undefined,2];
       │              ++++++++++    

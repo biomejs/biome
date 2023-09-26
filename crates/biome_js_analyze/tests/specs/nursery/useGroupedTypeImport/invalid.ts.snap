@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.ts
 ---
 # Input
@@ -33,7 +32,7 @@ invalid.ts:1:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━
   
   i Only import type are removed at compile time.
   
-  i Suggested fix: Use import type instead.
+  i Unsafe fix: Use import type instead.
   
      1    │ - import·{·type·A·}·from·'mod';
         1 │ + import·type·{·A·}·from·'mod';
@@ -54,7 +53,7 @@ invalid.ts:4:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━
   
   i Only import type are removed at compile time.
   
-  i Suggested fix: Use import type instead.
+  i Unsafe fix: Use import type instead.
   
      2  2 │   
      3  3 │   
@@ -77,7 +76,7 @@ invalid.ts:7:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━━
   
   i Only import type are removed at compile time.
   
-  i Suggested fix: Use import type instead.
+  i Unsafe fix: Use import type instead.
   
      5  5 │   
      6  6 │   
@@ -100,7 +99,7 @@ invalid.ts:10:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━�
   
   i Only import type are removed at compile time.
   
-  i Suggested fix: Use import type instead.
+  i Unsafe fix: Use import type instead.
   
      8  8 │   
      9  9 │   
@@ -123,7 +122,7 @@ invalid.ts:13:8 lint/nursery/useGroupedTypeImport  FIXABLE  ━━━━━━�
   
   i Only import type are removed at compile time.
   
-  i Suggested fix: Use import type instead.
+  i Unsafe fix: Use import type instead.
   
     11 11 │   
     12 12 │   

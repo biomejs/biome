@@ -20,7 +20,7 @@ invalid.tsx:1:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     2 │ const a4 = <div>/* comment */</div>;
     3 │ const a5 = <div>/** comment */</div>;
   
-  i Suggested fix: Wrap the comments with braces
+  i Unsafe fix: Wrap the comments with braces
   
     1   │ - const·a3·=·<div>//·comment</div>;
       1 │ + const·a3·=·<div>{/*·comment*/}</div>;
@@ -40,7 +40,7 @@ invalid.tsx:2:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
       │                 ^^^^^^^^^^^^^
     3 │ const a5 = <div>/** comment */</div>;
   
-  i Suggested fix: Wrap the comments with braces
+  i Unsafe fix: Wrap the comments with braces
   
     2 │ const·a4·=·<div>{/*·comment·*/}</div>;
       │                 +             +       
@@ -57,7 +57,7 @@ invalid.tsx:3:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
   > 3 │ const a5 = <div>/** comment */</div>;
       │                 ^^^^^^^^^^^^^^
   
-  i Suggested fix: Wrap the comments with braces
+  i Unsafe fix: Wrap the comments with braces
   
     1 1 │   const a3 = <div>// comment</div>;
     2 2 │   const a4 = <div>/* comment */</div>;

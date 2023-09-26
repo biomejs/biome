@@ -31,7 +31,7 @@ SuppressionComments.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE  �
     2 │ function SuppressionComments1() {
     3 │     beforeReturn();
   
-  i Suggested fix: Use // biome-ignore instead
+  i Unsafe fix: Use // biome-ignore instead
   
     1    │ - //·rome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
        1 │ + //·biome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
@@ -89,7 +89,7 @@ SuppressionComments.js:11:5 suppressions/deprecatedSuppressionComment  FIXABLE  
     12 │     afterReturn();
     13 │ }
   
-  i Suggested fix: Use // biome-ignore instead
+  i Unsafe fix: Use // biome-ignore instead
   
     1    │ - 
     2    │ - ····//·rome-ignore·lint/correctness/noUnreachable:·supress·warning

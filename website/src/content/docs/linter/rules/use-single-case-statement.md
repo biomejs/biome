@@ -4,8 +4,7 @@ title: useSingleCaseStatement (since v1.0.0)
 
 **Diagnostic Category: `lint/style/useSingleCaseStatement`**
 
-Enforces switch clauses have a single statement, emits a quick fix wrapping
-the statements in a block.
+Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.
 
 ## Examples
 
@@ -33,7 +32,7 @@ switch (foo) {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Suggested fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the statements in a block.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the statements in a block.</span>
   
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      case true:

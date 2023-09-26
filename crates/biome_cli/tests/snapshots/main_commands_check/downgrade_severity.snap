@@ -44,7 +44,7 @@ file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
   > 1 │ debugger;
       │ ^^^^^^^^^
   
-  i Suggested fix: Remove debugger statement
+  i Unsafe fix: Remove debugger statement
   
     1 │ debugger;
       │ ---------

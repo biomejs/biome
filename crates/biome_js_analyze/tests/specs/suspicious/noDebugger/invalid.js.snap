@@ -29,7 +29,7 @@ invalid.js:3:10 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━
     4 │ 
     5 │ debugger;
   
-  i Suggested fix: Remove debugger statement
+  i Unsafe fix: Remove debugger statement
   
      1  1 │   const test = { debugger: 1 }; test.debugger;
      2  2 │   
@@ -53,7 +53,7 @@ invalid.js:5:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
     6 │ 
     7 │ function test() {
   
-  i Suggested fix: Remove debugger statement
+  i Unsafe fix: Remove debugger statement
   
      3 3 │   if (foo) debugger
      4 4 │   
@@ -76,7 +76,7 @@ invalid.js:9:3 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
        │   ^^^^^^^^^
     10 │ }
   
-  i Suggested fix: Remove debugger statement
+  i Unsafe fix: Remove debugger statement
   
      7 7 │   function test() {
      8 8 │     let a = 3;

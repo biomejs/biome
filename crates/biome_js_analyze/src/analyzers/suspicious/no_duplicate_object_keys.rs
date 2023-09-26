@@ -1,6 +1,6 @@
 use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
@@ -17,6 +17,7 @@ use crate::JsRuleAction;
 
 declare_rule! {
     /// Prevents object literals having more than one property declaration for the same name.
+    ///
     /// If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake.
     ///
     /// ## Examples
@@ -57,6 +58,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noDuplicateObjectKeys",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

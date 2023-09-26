@@ -27,7 +27,7 @@ invalid.jsx:3:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
-  i Suggested fix: Remove the 'marquee' element.
+  i Unsafe fix: Remove the 'marquee' element.
   
     3 │ ····<marquee·/>
       │     -----------
@@ -48,7 +48,7 @@ invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
   
   i Visually distracting elements can cause accessibility issues and should be avoided.
   
-  i Suggested fix: Remove the 'blink' element.
+  i Unsafe fix: Remove the 'blink' element.
   
     4 │ ····<blink·/>
       │     ---------

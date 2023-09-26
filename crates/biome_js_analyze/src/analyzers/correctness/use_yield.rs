@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, ServiceBag,
-    Visitor, VisitorContext,
+    declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
+    ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};

@@ -51,7 +51,7 @@ invalid.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     3 │ ${a·===·b}
       │       +   
@@ -79,7 +79,7 @@ invalid.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     7 │ a·===·b;
       │     +   
@@ -109,7 +109,7 @@ invalid.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     9 │ if·(a·===·b)·{
       │         +     
@@ -137,7 +137,7 @@ invalid.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     14 │ ····**/·a·===·b)·{
        │             +     
@@ -165,7 +165,7 @@ invalid.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     19 │ ··formatter·enabled:·${formatter·===·true}
        │                                    +      

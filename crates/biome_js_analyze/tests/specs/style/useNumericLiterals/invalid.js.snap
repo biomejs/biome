@@ -98,7 +98,7 @@ invalid.js:1:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
      1    │ - parseInt("111110111",·2)·===·503;
         1 │ + 0b111110111·===·503;
@@ -121,7 +121,7 @@ invalid.js:2:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
      1  1 │   parseInt("111110111", 2) === 503;
      2    │ - parseInt("·+111110111·",·2)·===·503;
@@ -146,7 +146,7 @@ invalid.js:3:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
      1  1 │   parseInt("111110111", 2) === 503;
      2  2 │   parseInt(" +111110111 ", 2) === 503;
@@ -172,7 +172,7 @@ invalid.js:4:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
      2  2 │   parseInt(" +111110111 ", 2) === 503;
      3  3 │   parseInt(" -111110111 ", 2) === 503;
@@ -198,7 +198,7 @@ invalid.js:5:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
      3  3 │   parseInt(" -111110111 ", 2) === 503;
      4  4 │   parseInt("767", 8) === 503;
@@ -224,7 +224,7 @@ invalid.js:6:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
      4  4 │   parseInt("767", 8) === 503;
      5  5 │   parseInt(" +767 ", 8) === 503;
@@ -250,7 +250,7 @@ invalid.js:7:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
      5  5 │   parseInt(" +767 ", 8) === 503;
      6  6 │   parseInt(" -767 ", 8) === 503;
@@ -276,7 +276,7 @@ invalid.js:8:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
      6  6 │   parseInt(" -767 ", 8) === 503;
      7  7 │   parseInt("1F7", 16) === 255;
@@ -302,7 +302,7 @@ invalid.js:9:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
      7  7 │   parseInt("1F7", 16) === 255;
      8  8 │   parseInt(" +1F7 ", 16) === 255;
@@ -328,7 +328,7 @@ invalid.js:10:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
      8  8 │   parseInt(" +1F7 ", 16) === 255;
      9  9 │   parseInt(" -1F7 ", 16) === 255;
@@ -354,7 +354,7 @@ invalid.js:11:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
      9  9 │   parseInt(" -1F7 ", 16) === 255;
     10 10 │   Number.parseInt("111110111", 2) === 503;
@@ -380,7 +380,7 @@ invalid.js:12:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     10 10 │   Number.parseInt("111110111", 2) === 503;
     11 11 │   Number.parseInt("767", 8) === 503;
@@ -542,7 +542,7 @@ invalid.js:21:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     19 19 │   Number.parseInt('1234.5', 8);
     20 20 │   Number.parseInt('1��3��3��7��', 16);
@@ -568,7 +568,7 @@ invalid.js:22:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     20 20 │   Number.parseInt('1��3��3��7��', 16);
     21 21 │   parseInt(`111110111`, 2) === 503;
@@ -594,7 +594,7 @@ invalid.js:23:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     21 21 │   parseInt(`111110111`, 2) === 503;
     22 22 │   parseInt(`767`, 8) === 503;
@@ -705,7 +705,7 @@ invalid.js:29:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     27 27 │   parseInt(`1234`, 2);
     28 28 │   parseInt(`1234.5`, 8);
@@ -731,7 +731,7 @@ invalid.js:30:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     28 28 │   parseInt(`1234.5`, 8);
     29 29 │   parseInt('11', 2)
@@ -757,7 +757,7 @@ invalid.js:31:3 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     29 29 │   parseInt('11', 2)
     30 30 │   Number.parseInt('67', 8)
@@ -783,7 +783,7 @@ invalid.js:32:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     30 30 │   Number.parseInt('67', 8)
     31 31 │   5+parseInt('A', 16)
@@ -809,7 +809,7 @@ invalid.js:33:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     31 31 │   5+parseInt('A', 16)
     32 32 │   function *f(){ yield(Number).parseInt('11', 2) }
@@ -835,7 +835,7 @@ invalid.js:34:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     32 32 │   function *f(){ yield(Number).parseInt('11', 2) }
     33 33 │   function *f(){ yield(Number.parseInt)('67', 8) }
@@ -861,7 +861,7 @@ invalid.js:35:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     33 33 │   function *f(){ yield(Number.parseInt)('67', 8) }
     34 34 │   function *f(){ yield(parseInt)('A', 16) }
@@ -887,7 +887,7 @@ invalid.js:36:25 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     34 34 │   function *f(){ yield(parseInt)('A', 16) }
     35 35 │   function *f(){ yield Number.parseInt('11', 2) }
@@ -913,7 +913,7 @@ invalid.js:37:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     35 35 │   function *f(){ yield Number.parseInt('11', 2) }
     36 36 │   function *f(){ yield/**/Number.parseInt('67', 8) }
@@ -939,7 +939,7 @@ invalid.js:38:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     36 36 │   function *f(){ yield/**/Number.parseInt('67', 8) }
     37 37 │   function *f(){ yield(parseInt('A', 16)) }
@@ -965,7 +965,7 @@ invalid.js:39:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     37 37 │   function *f(){ yield(parseInt('A', 16)) }
     38 38 │   parseInt('11', 2)+5
@@ -991,7 +991,7 @@ invalid.js:40:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     38 38 │   parseInt('11', 2)+5
     39 39 │   Number.parseInt('17', 8)+5
@@ -1017,7 +1017,7 @@ invalid.js:41:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     39 39 │   Number.parseInt('17', 8)+5
     40 40 │   parseInt('A', 16)+5
@@ -1043,7 +1043,7 @@ invalid.js:42:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     40 40 │   parseInt('A', 16)+5
     41 41 │   parseInt('11', 2)in foo
@@ -1069,7 +1069,7 @@ invalid.js:43:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     41 41 │   parseInt('11', 2)in foo
     42 42 │   Number.parseInt('17', 8)in foo
@@ -1095,7 +1095,7 @@ invalid.js:44:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     42 42 │   Number.parseInt('17', 8)in foo
     43 43 │   parseInt('A', 16)in foo
@@ -1121,7 +1121,7 @@ invalid.js:45:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed octal literal instead.
+  i Unsafe fix: Use the computed octal literal instead.
   
     43 43 │   parseInt('A', 16)in foo
     44 44 │   parseInt('11', 2) in foo
@@ -1147,7 +1147,7 @@ invalid.js:46:2 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     44 44 │   parseInt('11', 2) in foo
     45 45 │   Number.parseInt('17', 8)/**/in foo
@@ -1173,7 +1173,7 @@ invalid.js:47:14 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     45 45 │   Number.parseInt('17', 8)/**/in foo
     46 46 │   (parseInt('A', 16))in foo
@@ -1199,7 +1199,7 @@ invalid.js:48:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     46 46 │   (parseInt('A', 16))in foo
     47 47 │   /* comment */Number.parseInt('11', 2);
@@ -1227,7 +1227,7 @@ invalid.js:49:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     47 47 │   /* comment */Number.parseInt('11', 2);
     48 48 │   Number/**/.parseInt('11', 2);
@@ -1254,7 +1254,7 @@ invalid.js:51:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     49 49 │   Number//
     50 50 │   .parseInt('11', 2);
@@ -1280,7 +1280,7 @@ invalid.js:52:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     50 50 │   .parseInt('11', 2);
     51 51 │   Number./**/parseInt('11', 2);
@@ -1306,7 +1306,7 @@ invalid.js:53:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     51 51 │   Number./**/parseInt('11', 2);
     52 52 │   Number.parseInt(/**/'11', 2);
@@ -1332,7 +1332,7 @@ invalid.js:54:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     52 52 │   Number.parseInt(/**/'11', 2);
     53 53 │   Number.parseInt('11', /**/2);
@@ -1358,7 +1358,7 @@ invalid.js:55:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     53 53 │   Number.parseInt('11', /**/2);
     54 54 │   Number.parseInt('11', 2)/* comment */;
@@ -1386,7 +1386,7 @@ invalid.js:56:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     54 54 │   Number.parseInt('11', 2)/* comment */;
     55 55 │   parseInt/**/('11', 2);
@@ -1413,7 +1413,7 @@ invalid.js:58:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     56 56 │   parseInt(//
     57 57 │   '11', 2);
@@ -1439,7 +1439,7 @@ invalid.js:59:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     57 57 │   '11', 2);
     58 58 │   parseInt('11'/**/, 2);
@@ -1465,7 +1465,7 @@ invalid.js:61:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     59 59 │   parseInt(`11`/**/, 2);
     60 60 │   parseInt('11', 2 /**/);
@@ -1491,7 +1491,7 @@ invalid.js:63:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     61 61 │   parseInt('11', 2)//comment
     62 62 │   ;
@@ -1517,7 +1517,7 @@ invalid.js:64:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     62 62 │   ;
     63 63 │   parseInt?.("1F7", 16) === 255;
@@ -1543,7 +1543,7 @@ invalid.js:65:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     63 63 │   parseInt?.("1F7", 16) === 255;
     64 64 │   Number?.parseInt("1F7", 16) === 255;
@@ -1569,7 +1569,7 @@ invalid.js:66:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     64 64 │   Number?.parseInt("1F7", 16) === 255;
     65 65 │   Number?.parseInt?.("1F7", 16) === 255;
@@ -1595,7 +1595,7 @@ invalid.js:67:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed hexadecimal literal instead.
+  i Unsafe fix: Use the computed hexadecimal literal instead.
   
     65 65 │   Number?.parseInt?.("1F7", 16) === 255;
     66 66 │   (Number?.parseInt)("1F7", 16) === 255;
@@ -1689,7 +1689,7 @@ invalid.js:72:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     70 70 │   parseInt('0_1', 16);
     71 71 │   Number.parseInt('0_0', 16);
@@ -1715,7 +1715,7 @@ invalid.js:73:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     71 71 │   Number.parseInt('0_0', 16);
     72 72 │   globalThis.parseInt('11'/**/, 2);
@@ -1741,7 +1741,7 @@ invalid.js:74:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     72 72 │   globalThis.parseInt('11'/**/, 2);
     73 73 │   globalThis.Number.parseInt('11'/**/, 2);
@@ -1767,7 +1767,7 @@ invalid.js:75:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     73 73 │   globalThis.Number.parseInt('11'/**/, 2);
     74 74 │   globalThis.globalThis.parseInt('11'/**/, 2);
@@ -1793,7 +1793,7 @@ invalid.js:76:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     74 74 │   globalThis.globalThis.parseInt('11'/**/, 2);
     75 75 │   globalThis.globalThis.Number.parseInt('11'/**/, 2);
@@ -1819,7 +1819,7 @@ invalid.js:77:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     75 75 │   globalThis.globalThis.Number.parseInt('11'/**/, 2);
     76 76 │   window.parseInt('11'/**/, 2);
@@ -1844,7 +1844,7 @@ invalid.js:78:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     76 76 │   window.parseInt('11'/**/, 2);
     77 77 │   window.Number.parseInt('11'/**/, 2);
@@ -1867,7 +1867,7 @@ invalid.js:79:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
   
   i Using a literal avoids unnecessary computations.
   
-  i Suggested fix: Use the computed binary literal instead.
+  i Unsafe fix: Use the computed binary literal instead.
   
     77 77 │   window.Number.parseInt('11'/**/, 2);
     78 78 │   window.window.parseInt('11'/**/, 2);

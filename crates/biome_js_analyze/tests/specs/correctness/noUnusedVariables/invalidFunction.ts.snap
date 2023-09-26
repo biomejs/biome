@@ -106,7 +106,7 @@ invalidFunction.ts:17:13 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     15 15 │   
     16 16 │   // parameter a is not used
@@ -149,7 +149,7 @@ invalidFunction.ts:19:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     17 17 │   {(function (a) { })}
     18 18 │   {(function ({a}) { })}
@@ -175,7 +175,7 @@ invalidFunction.ts:20:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
     18 18 │   {(function ({a}) { })}
     19 19 │   {(function ([a]) { })}
@@ -200,7 +200,7 @@ invalidFunction.ts:25:15 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend b with an underscore.
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
   
     23 23 │   
     24 24 │   // parameter b is not used
@@ -225,7 +225,7 @@ invalidFunction.ts:30:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend f5 with an underscore.
+  i Unsafe fix: If this is intentional, prepend f5 with an underscore.
   
     28 28 │   
     29 29 │   // f5 is not used
@@ -250,7 +250,7 @@ invalidFunction.ts:33:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend f6 with an underscore.
+  i Unsafe fix: If this is intentional, prepend f6 with an underscore.
   
     31 31 │   
     32 32 │   // f6 is recursive, but never called
@@ -274,7 +274,7 @@ invalidFunction.ts:36:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend e with an underscore.
+  i Unsafe fix: If this is intentional, prepend e with an underscore.
   
     34 34 │   
     35 35 │   // e is not used

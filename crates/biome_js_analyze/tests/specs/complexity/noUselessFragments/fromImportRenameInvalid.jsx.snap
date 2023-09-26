@@ -25,7 +25,7 @@ fromImportRenameInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━
     5 │     <AwesomeReact.Fragment>foo</AwesomeReact.Fragment>
     6 │ </>
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     4 │ ····<AwesomeFragment></AwesomeFragment>
       │     -----------------------------------
@@ -44,7 +44,7 @@ fromImportRenameInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━
     6 │ </>
     7 │ 
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     5 │ ····<AwesomeReact.Fragment>foo</AwesomeReact.Fragment>
       │     -----------------------   ------------------------

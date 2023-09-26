@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.ts
 ---
 # Input
@@ -70,7 +69,7 @@ invalid.ts:3:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     5 │ }
     6 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
      1  1 │   switch (1) {
      2    │ - → case·1:
@@ -108,7 +107,7 @@ invalid.ts:9:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     11 │ }
     12 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
      6  6 │   
      7  7 │   switch (1) {
@@ -147,7 +146,7 @@ invalid.ts:15:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     17 │ }
     18 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
     12 12 │   
     13 13 │   switch (1) {
@@ -188,7 +187,7 @@ invalid.ts:21:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     25 │ }
     26 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
     18 18 │   
     19 19 │   switch (1) {
@@ -229,7 +228,7 @@ invalid.ts:29:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     31 │ }
     32 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
     26 26 │   
     27 27 │   switch (1) {
@@ -268,7 +267,7 @@ invalid.ts:35:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     37 │ }
     38 │ 
   
-  i Suggested fix: Wrap the declaration in a block.
+  i Unsafe fix: Wrap the declaration in a block.
   
     32 32 │   
     33 33 │   switch (1) {
