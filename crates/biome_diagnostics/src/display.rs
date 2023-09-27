@@ -136,6 +136,12 @@ impl<'fmt, D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'fmt, D> {
             })?;
         }
 
+        if tags.contains(DiagnosticTags::DEPRECATED_CODE) {
+            fmt.write_markup(markup! {
+                <Inverse>" DEPRECATED "</Inverse>" "
+            })?;
+        }
+
         if diagnostic.severity() == Severity::Fatal {
             fmt.write_markup(markup! {
                 <Inverse><Error>" FATAL "</Error></Inverse>" "

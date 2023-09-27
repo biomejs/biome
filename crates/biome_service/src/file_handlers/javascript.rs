@@ -111,7 +111,7 @@ impl Language for JsLanguage {
         let indent_width = if let Some(indent_width) = language.indent_width {
             indent_width
         } else {
-            global.indent_size.unwrap_or_default()
+            global.indent_width.unwrap_or_default()
         };
         JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(indent_style)

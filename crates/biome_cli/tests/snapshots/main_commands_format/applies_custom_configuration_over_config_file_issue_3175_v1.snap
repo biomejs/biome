@@ -24,6 +24,21 @@ import React from 'react';
 # Emitted Messages
 
 ```block
+biome.json:4:5 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property indentSize is deprecated. Use formatter.indentWidth instead.
+  
+    2 │   "formatter": {
+    3 │     "indentStyle": "space",
+  > 4 │     "indentSize": 2,
+      │     ^^^^^^^^^^^^
+    5 │     "lineWidth": 120
+    6 │   }
+  
+
+```
+
+```block
 Compared 1 file(s) in <TIME>
 ```
 

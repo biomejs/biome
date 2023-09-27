@@ -22,13 +22,15 @@ pub(crate) struct CiCommandPayload {
 
 /// Handler for the "ci" command of the Biome CLI
 pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
+    let loaded_configuration =
+        load_configuration(&mut session, &payload.cli_options)?.with_file_path();
+
+    loaded_configuration.check_for_errors(session.app.console, payload.cli_options.verbose)?;
     let LoadedConfiguration {
         mut configuration,
         directory_path: configuration_path,
         ..
-    } = load_configuration(&mut session, &payload.cli_options)?
-        .or_diagnostic(session.app.console, payload.cli_options.verbose)?;
-
+    } = loaded_configuration;
     let formatter = configuration
         .formatter
         .get_or_insert_with(FormatterConfiguration::default);

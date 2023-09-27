@@ -56,6 +56,15 @@ pub struct JavascriptFormatter {
     #[bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
+    /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(
+        long("javascript-formatter-indent-width"),
+        argument("NUMBER"),
+        optional
+    )]
+    pub indent_width: Option<u8>,
+
     /// What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
@@ -77,6 +86,7 @@ impl JavascriptFormatter {
         "enabled",
         "indentStyle",
         "indentSize",
+        "indentWidth",
         "lineWidth",
     ];
 }

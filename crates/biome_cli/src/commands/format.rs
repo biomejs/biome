@@ -1,8 +1,11 @@
 use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
+use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
@@ -39,12 +42,54 @@ pub(crate) fn format(
         write,
         json_formatter,
     } = payload;
+    let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
+
+    loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
+
     let LoadedConfiguration {
         mut configuration,
         directory_path: configuration_path,
         ..
-    } = load_configuration(&mut session, &cli_options)?
-        .or_diagnostic(session.app.console, cli_options.verbose)?;
+    } = loaded_configuration;
+    // TODO: remove in biome 2.0
+    if formatter_configuration
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+    // TODO: remove in biome 2.0
+    if javascript_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--javascript-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--javascript-formatter-indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+    // TODO: remove in biome 2.0
+    if json_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--json-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--json-formatter-indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
 
     configuration.merge_with(javascript_formatter);
     configuration.merge_with(json_formatter);

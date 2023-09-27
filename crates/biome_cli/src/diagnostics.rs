@@ -1,4 +1,4 @@
-use biome_console::fmt::Formatter;
+use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_diagnostics::adapters::{BpafError, IoError};
 use biome_diagnostics::{
@@ -280,6 +280,25 @@ pub struct DeprecatedConfigurationFile {
 impl DeprecatedConfigurationFile {
     pub fn new(path: impl Into<String>) -> Self {
         Self { path: path.into() }
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Warning,
+    tags(DEPRECATED_CODE)
+)]
+pub struct DeprecatedArgument {
+    #[message]
+    pub message: MessageAndDescription,
+}
+
+impl DeprecatedArgument {
+    pub fn new(message: impl Display) -> Self {
+        Self {
+            message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        }
     }
 }
 

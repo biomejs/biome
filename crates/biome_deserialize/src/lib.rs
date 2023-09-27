@@ -4,7 +4,7 @@ mod visitor;
 pub mod json;
 pub mod string_set;
 
-use biome_diagnostics::Error;
+use biome_diagnostics::{Error, Severity};
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic};
 use std::fmt::Debug;
 pub use string_set::{deserialize_string_set, serialize_string_set, StringSet};
@@ -41,7 +41,9 @@ impl<P> Deserialized<P> {
     }
 
     pub fn has_errors(&self) -> bool {
-        !self.diagnostics.is_empty()
+        self.diagnostics
+            .iter()
+            .any(|d| d.severity() == Severity::Error)
     }
 
     /// Consume itself to return the parsed result and its diagnostics

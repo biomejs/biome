@@ -92,13 +92,17 @@ export interface FormatterConfiguration {
 	 */
 	ignore?: StringSet;
 	/**
-	 * The size of the indentation, 2 by default
+	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
 	indentSize?: number;
 	/**
 	 * The indent style.
 	 */
 	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation, 2 by default
+	 */
+	indentWidth?: number;
 	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */
@@ -212,6 +216,10 @@ export interface JavascriptFormatter {
 	 */
 	indentStyle?: PlainIndentStyle;
 	/**
+	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: number;
+	/**
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
 	jsxQuoteStyle?: QuoteStyle;
@@ -261,6 +269,10 @@ export interface JsonFormatter {
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
 	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: number;
 	/**
 	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
 	 */

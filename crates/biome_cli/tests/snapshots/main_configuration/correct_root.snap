@@ -60,6 +60,21 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+biome.json:6:5 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property indentSize is deprecated. Use formatter.indentWidth instead.
+  
+    4 │     "formatWithErrors": true,
+    5 │     "indentStyle": "tab",
+  > 6 │     "indentSize": 2,
+      │     ^^^^^^^^^^^^
+    7 │     "lineWidth": 80
+    8 │   },
+  
+
+```
+
+```block
 Compared 0 file(s) in <TIME>
 ```
 

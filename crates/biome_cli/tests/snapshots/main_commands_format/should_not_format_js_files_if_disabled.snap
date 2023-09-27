@@ -53,6 +53,21 @@ const a = {
 # Emitted Messages
 
 ```block
+biome.json:13:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property indentSize is deprecated. Use json.formatter.indentWidth instead.
+  
+    11 │             "formatter": {
+    12 │                 "lineWidth": 80,
+  > 13 │                 "indentSize": 2
+       │                 ^^^^^^^^^^^^
+    14 │             }
+    15 │         }
+  
+
+```
+
+```block
 Formatted 1 file(s) in <TIME>
 ```
 

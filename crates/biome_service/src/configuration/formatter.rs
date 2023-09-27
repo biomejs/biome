@@ -26,10 +26,15 @@ pub struct FormatterConfiguration {
     #[bpaf(long("indent-style"), argument("tab|space"), optional)]
     pub indent_style: Option<PlainIndentStyle>,
 
-    /// The size of the indentation, 2 by default
+    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
+
+    /// The size of the indentation, 2 by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
+    pub indent_width: Option<u8>,
 
     /// What's the max width of a line. Defaults to 80.
     #[serde(
@@ -55,6 +60,7 @@ impl FormatterConfiguration {
         "formatWithErrors",
         "indentStyle",
         "indentSize",
+        "indentWidth",
         "lineWidth",
         "ignore",
     ];
@@ -66,6 +72,7 @@ impl Default for FormatterConfiguration {
             enabled: Some(true),
             format_with_errors: Some(false),
             indent_size: Some(2),
+            indent_width: Some(2),
             indent_style: Some(PlainIndentStyle::default()),
             line_width: Some(LineWidth::default()),
             ignore: None,
@@ -87,7 +94,10 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
             self.enabled = Some(enabled);
         }
         if let Some(indent_size) = other.indent_size {
-            self.indent_size = Some(indent_size);
+            self.indent_width = Some(indent_size);
+        }
+        if let Some(indent_width) = other.indent_width {
+            self.indent_width = Some(indent_width);
         }
         if let Some(indent_style) = other.indent_style {
             self.indent_style = Some(indent_style);
@@ -115,7 +125,11 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             Some(PlainIndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
-        let indent_size = conf.indent_size.map(Into::into).unwrap_or_default();
+        let indent_width = conf
+            .indent_width
+            .map(Into::into)
+            .or(conf.indent_size.map(Into::into))
+            .unwrap_or_default();
         let mut matcher = Matcher::new(MatchOptions {
             case_sensitive: true,
             require_literal_leading_dot: false,
@@ -137,7 +151,7 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             indent_style: Some(indent_style),
-            indent_size: Some(indent_size),
+            indent_width: Some(indent_width),
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: matcher,

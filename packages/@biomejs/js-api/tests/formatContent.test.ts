@@ -107,7 +107,7 @@ describe("Biome WebAssembly formatContent", () => {
 		biome.applyConfiguration({
 			formatter: {
 				indentStyle: "space",
-				indentSize: 8,
+				indentWidth: 8,
 			},
 			javascript: {
 				formatter: {
@@ -132,7 +132,7 @@ describe("Biome WebAssembly formatContent", () => {
 		biome.applyConfiguration({
 			formatter: {
 				indentStyle: "space",
-				indentSize: 8,
+				indentWidth: 8,
 			},
 			javascript: {
 				formatter: {

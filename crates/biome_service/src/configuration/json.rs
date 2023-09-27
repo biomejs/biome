@@ -84,6 +84,11 @@ pub struct JsonFormatter {
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional)]
+    pub indent_width: Option<u8>,
+
+    /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
@@ -98,8 +103,13 @@ pub struct JsonFormatter {
 }
 
 impl JsonFormatter {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
-        &["enabled", "indentStyle", "indentSize", "lineWidth"];
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
+        "enabled",
+        "indentStyle",
+        "indentSize",
+        "indentWidth",
+        "lineWidth",
+    ];
 }
 
 impl MergeWith<JsonFormatter> for JsonFormatter {
@@ -108,7 +118,7 @@ impl MergeWith<JsonFormatter> for JsonFormatter {
             self.enabled = Some(enabled);
         }
         if let Some(indent_size) = other.indent_size {
-            self.indent_size = Some(indent_size);
+            self.indent_width = Some(indent_size);
         }
         if let Some(indent_style) = other.indent_style {
             self.indent_style = Some(indent_style);

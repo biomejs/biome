@@ -95,8 +95,10 @@ impl WorkspaceSettings {
                 self.languages.javascript.formatter.arrow_parentheses = formatter.arrow_parentheses;
                 self.languages.javascript.formatter.enabled = formatter.enabled;
                 self.languages.javascript.formatter.line_width = formatter.line_width;
-                self.languages.javascript.formatter.indent_width =
-                    formatter.indent_size.map(Into::into);
+                self.languages.javascript.formatter.indent_width = formatter
+                    .indent_width
+                    .map(Into::into)
+                    .or(formatter.indent_size.map(Into::into));
                 self.languages.javascript.formatter.indent_style =
                     formatter.indent_style.map(Into::into);
             }
@@ -126,7 +128,10 @@ impl WorkspaceSettings {
             if let Some(formatter) = json.formatter {
                 self.languages.json.formatter.enabled = formatter.enabled;
                 self.languages.json.formatter.line_width = formatter.line_width;
-                self.languages.json.formatter.indent_width = formatter.indent_size.map(Into::into);
+                self.languages.json.formatter.indent_width = formatter
+                    .indent_width
+                    .map(Into::into)
+                    .or(formatter.indent_size.map(Into::into));
                 self.languages.json.formatter.indent_style = formatter.indent_style.map(Into::into);
             }
         }
@@ -161,7 +166,7 @@ pub struct FormatSettings {
     /// has syntax errors
     pub format_with_errors: bool,
     pub indent_style: Option<IndentStyle>,
-    pub indent_size: Option<IndentWidth>,
+    pub indent_width: Option<IndentWidth>,
     pub line_width: Option<LineWidth>,
     /// List of paths/files to matcher
     pub ignored_files: Matcher,
@@ -173,7 +178,7 @@ impl Default for FormatSettings {
             enabled: true,
             format_with_errors: false,
             indent_style: Some(IndentStyle::default()),
-            indent_size: Some(IndentWidth::default()),
+            indent_width: Some(IndentWidth::default()),
             line_width: Some(LineWidth::default()),
             ignored_files: Matcher::new(MatchOptions {
                 case_sensitive: true,
