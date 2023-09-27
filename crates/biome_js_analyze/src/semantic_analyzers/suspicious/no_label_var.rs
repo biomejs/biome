@@ -1,4 +1,4 @@
-use crate::{semantic_services::Semantic};
+use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};

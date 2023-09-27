@@ -33,8 +33,12 @@ pub struct RuleMetadata {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+/// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
+    /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
     Safe,
+    /// The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change
+    /// the semantic of the program.
     Unsafe,
 }
 

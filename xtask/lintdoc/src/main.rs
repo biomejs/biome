@@ -62,11 +62,11 @@ fn main() -> Result<()> {
     )?;
     writeln!(
         index,
-        "- The emoji 👌indicates that the rule is part of the recommended rules."
+        "- The emoji ✅ indicates that the rule is part of the recommended rules."
     )?;
     writeln!(
         index,
-        "- The emoji ✅ indicates that the rule provides a code action (fix) that is **safe** to apply."
+        "- The emoji 🔧 indicates that the rule provides a code action (fix) that is **safe** to apply."
     )?;
     writeln!(
         index,
@@ -227,11 +227,11 @@ fn generate_group(
             Ok(summary) => {
                 let mut properties = String::new();
                 if is_recommended {
-                    properties.push_str("<span aria-label=\"Recommended\" role=\"img\" title=\"Recommended\">👌 </span>");
+                    properties.push_str("<span aria-label=\"Recommended\" role=\"img\" title=\"Recommended\">✅ </span>");
                 }
                 if let Some(fix_kind) = meta.fix_kind.as_ref() {
                     if *fix_kind == FixKind::Safe {
-                        properties.push_str("<span aria-label=\"The rule has a safe fix\" role=\"img\" title=\"The rule has a safe fix\">✅ </span>");
+                        properties.push_str("<span aria-label=\"The rule has a safe fix\" role=\"img\" title=\"The rule has a safe fix\">🔧 </span>");
                     } else {
                         properties.push_str("<span aria-label=\"The rule has an unsafe fix\" role=\"img\" title=\"The rule has an unsafe fix\">⚠️ </span>");
                     }

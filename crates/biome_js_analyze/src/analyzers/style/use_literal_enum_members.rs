@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsUnaryOperator,
@@ -67,7 +67,6 @@ declare_rule! {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
         recommended: true,
-        fix_kind: FixKind::Unsafe,
     }
 }
 

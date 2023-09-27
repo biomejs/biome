@@ -127,6 +127,13 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 
    This function is called for every signal emitted by the `run` function.
    It may return zero or one code action.
+   Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_rule`.
+   ```rust,ignore
+   use biome_analyze::FixKind;
+   declare_rule!{
+     fix_kind: FixKind::Safe,
+   }
+   ```
    When returning a code action, you must pass the `category` and the `applicability` fields.
    `category` must be `ActionCategory::QuickFix`.
    `applicability` is either `Applicability:MaybeIncorrect` or `Applicability:Always`.
