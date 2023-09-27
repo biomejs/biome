@@ -19,7 +19,7 @@ function f() {
 ```block
 internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The argument --indent-sizeis deprecated, it will be removed in the next major release. Use --indent-width instead.
+  ! The argument --indent-size is deprecated, it will be removed in the next major release. Use --indent-width instead.
   
 
 ```

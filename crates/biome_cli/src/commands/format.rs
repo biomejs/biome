@@ -51,13 +51,40 @@ pub(crate) fn format(
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
+    // TODO: remove in biome 2.0
     if formatter_configuration
         .as_ref()
         .is_some_and(|f| f.indent_size.is_some())
     {
         let console = &mut session.app.console;
         let diagnostic = DeprecatedArgument::new(markup! {
-            "The argument "<Emphasis>"--indent-size"</Emphasis>"is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
+            "The argument "<Emphasis>"--indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+    // TODO: remove in biome 2.0
+    if javascript_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--javascript-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--javascript-formatter-indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+    // TODO: remove in biome 2.0
+    if json_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--json-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--json-formatter-indent-width"</Emphasis>" instead."
         });
         console.error(markup! {
             {PrintDiagnostic::simple(&diagnostic)}

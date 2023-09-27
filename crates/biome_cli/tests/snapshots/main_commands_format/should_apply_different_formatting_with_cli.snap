@@ -41,6 +41,22 @@ const a = {
 # Emitted Messages
 
 ```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --javascript-formatter-indent-size is deprecated, it will be removed in the next major release. Use --javascript-formatter-indent-width instead.
+  
+
+```
+
+```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --json-formatter-indent-size is deprecated, it will be removed in the next major release. Use --json-formatter-indent-width instead.
+  
+
+```
+
+```block
 Formatted 2 file(s) in <TIME>
 ```
 
