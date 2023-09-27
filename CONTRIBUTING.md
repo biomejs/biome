@@ -190,6 +190,16 @@ Build and run the plugin requires:
 ./gradlew buildPlugin
 ```
 
+### UI Testing intellij plugin
+
+Before start testing the plugin you will need to start IDE by invoking the `./gradlew runIdeForUiTests &` and wait IDE startup
+
+You can now run the test task:
+
+```bash
+./gradlew test
+```
+
 ## Node.js development
 
 The npm module `npm/biome` contains Biome's Node JS API that supports different backends:
