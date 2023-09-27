@@ -34,6 +34,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Enhancements
 - Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
+- Biome doesn't check anymore the presence of the `.git` folder when VCS support is enabled. Contributed by @ematipico
 
 ### Configuration
 

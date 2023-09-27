@@ -14,12 +14,6 @@ expression: content
 }
 ```
 
-## `.git`
-
-```git
-
-```
-
 ## `.gitignore`
 
 ```gitignore

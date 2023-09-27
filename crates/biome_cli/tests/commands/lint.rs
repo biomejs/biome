@@ -1717,10 +1717,6 @@ file2.js
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    // git folder
-    let git_folder = Path::new(".git");
-    fs.insert(git_folder.into(), "".as_bytes());
-
     // git ignore file
     let ignore_file = Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
@@ -1780,10 +1776,6 @@ fn ignore_vcs_os_independent_parse() {
     // configuration
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
-
-    // git folder
-    let git_folder = Path::new(".git");
-    fs.insert(git_folder.into(), "".as_bytes());
 
     // git ignore file
     let ignore_file = Path::new(".gitignore");

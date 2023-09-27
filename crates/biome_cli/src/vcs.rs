@@ -1,10 +1,10 @@
 use crate::cli_options::CliOptions;
-use crate::diagnostics::{DisabledVcs, NoVcsFolderFound};
+use crate::diagnostics::DisabledVcs;
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::StringSet;
 use biome_diagnostics::PrintDiagnostic;
-use biome_service::configuration::vcs::{VcsClientKind, VcsConfiguration};
+use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::FilesConfiguration;
 use biome_service::{Configuration, WorkspaceError};
 use std::path::PathBuf;
@@ -59,18 +59,6 @@ pub(crate) fn read_vcs_ignore_file(
     let file_system = &session.app.fs;
 
     if let Some(client_kind) = &configuration.client_kind {
-        match client_kind {
-            VcsClientKind::Git => {
-                let git_folder = current_directory.join(".git");
-
-                if !file_system.path_exists(git_folder.as_path()) {
-                    return Err(CliDiagnostic::NoVcsFolderFound(NoVcsFolderFound {
-                        path: git_folder.display().to_string(),
-                        source: None,
-                    }));
-                }
-            }
-        }
         if !configuration.ignore_file_disabled() {
             let result = file_system
                 .auto_search(current_directory, client_kind.ignore_file(), false)
