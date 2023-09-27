@@ -24,34 +24,34 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
+
     /// a = a + 1;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
+
     /// a = a - 1;
     /// ```
     ///
     ///  ```js,expect_diagnostic
-    /// var a = 1;
+
     /// a = a * 1;
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// var a = 1;
+
     /// a += 1;
     /// ```
     ///
     /// ```js
-    /// var a = 1;
+
     /// a -= 1;
     /// ```
     ///
     ///  ```js
-    /// var a = 1;
+
     /// a *= 1;
     /// ```
     ///
@@ -153,10 +153,7 @@ impl Rule for UseShorthandAssign {
             .with_operator_token_token(token)
             .with_right(state.replacement_expression.clone());
 
-        mutation.replace_node(
-            AnyJsExpression::JsAssignmentExpression(node.clone()),
-            AnyJsExpression::JsAssignmentExpression(shorthand_node),
-        );
+        mutation.replace_node(node.clone(), shorthand_node);
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
@@ -173,12 +170,15 @@ fn parse_variable_reference_in_expression(
     binary_expression: &JsBinaryExpression,
 ) -> Option<VariablePosition> {
     let present_on_left = variable_name == binary_expression.left().ok()?.omit_parentheses().text();
+
+    if present_on_left {
+        return Some(VariablePosition::Left);
+    }
+
     let present_on_right =
         variable_name == binary_expression.right().ok()?.omit_parentheses().text();
 
-    if present_on_left {
-        Some(VariablePosition::Left)
-    } else if present_on_right {
+    if present_on_right {
         Some(VariablePosition::Right)
     } else {
         None
