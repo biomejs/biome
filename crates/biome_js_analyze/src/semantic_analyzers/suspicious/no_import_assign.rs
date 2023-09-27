@@ -4,8 +4,7 @@ use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsImportDefaultClause,
-    JsImportNamespaceClause, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
-    JsShorthandNamedImportSpecifier,
+    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
 };
 
 use biome_rowan::{declare_node_union, AstNode};
@@ -69,8 +68,6 @@ impl Rule for NoImportAssign {
         let local_name_binding = match label_statement {
             // `import xx from 'y'`
             AnyJsImportLike::JsImportDefaultClause(clause) => clause.local_name().ok(),
-            // `import * as xxx from 'y'`
-            AnyJsImportLike::JsImportNamespaceClause(clause) => clause.local_name().ok(),
             // `import {x as xx} from 'y'`
             //          ^^^^^^^
             AnyJsImportLike::JsNamedImportSpecifier(specifier) => specifier.local_name().ok(),
@@ -125,5 +122,5 @@ impl Rule for NoImportAssign {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsImportLike = JsImportDefaultClause | JsImportNamespaceClause | JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
+    pub(crate) AnyJsImportLike = JsImportDefaultClause | JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
 }

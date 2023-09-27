@@ -4,10 +4,10 @@ use crate::{
     JsConstructorClassMember, JsConstructorParameterList, JsConstructorParameters,
     JsDefaultImportSpecifier, JsFormalParameter, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsIdentifierBinding,
-    JsImportDefaultClause, JsImportNamespaceClause, JsMethodClassMember, JsMethodObjectMember,
-    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsParameterList, JsParameters,
-    JsRestParameter, JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
+    JsImportDefaultClause, JsMethodClassMember, JsMethodObjectMember, JsNamedImportSpecifier,
+    JsNamespaceImportSpecifier, JsParameterList, JsParameters, JsRestParameter,
+    JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
     TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
     TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
@@ -32,7 +32,7 @@ declare_node_union! {
             | JsClassDeclaration | JsClassExpression
             | TsInterfaceDeclaration | TsTypeAliasDeclaration | TsEnumDeclaration | TsModuleDeclaration
         // import
-            | JsImportDefaultClause | JsImportNamespaceClause | JsShorthandNamedImportSpecifier
+            | JsImportDefaultClause | JsShorthandNamedImportSpecifier
                 | JsNamedImportSpecifier | JsBogusNamedImportSpecifier | JsDefaultImportSpecifier
                 | JsNamespaceImportSpecifier
             | TsImportEqualsDeclaration

@@ -342,10 +342,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsImportNamedClause::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => {
-                    let $pattern = unsafe { $crate::JsImportNamespaceClause::new_unchecked(node) };
-                    $body
-                }
                 $crate::JsSyntaxKind::JS_IN_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsInExpression::new_unchecked(node) };
                     $body

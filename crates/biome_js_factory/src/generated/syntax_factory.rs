@@ -3079,67 +3079,6 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_IMPORT_NAMED_CLAUSE, children)
             }
-            JS_IMPORT_NAMESPACE_CLAUSE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![type] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [*] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![as] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyJsBinding::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![from] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if JsModuleSource::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        JS_IMPORT_NAMESPACE_CLAUSE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(JS_IMPORT_NAMESPACE_CLAUSE, children)
-            }
             JS_IN_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();

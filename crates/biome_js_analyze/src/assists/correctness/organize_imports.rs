@@ -105,7 +105,6 @@ impl Rule for OrganizeImports {
                 AnyJsImportClause::JsImportBareClause(clause) => clause.source().ok()?,
                 AnyJsImportClause::JsImportDefaultClause(clause) => clause.source().ok()?,
                 AnyJsImportClause::JsImportNamedClause(clause) => clause.source().ok()?,
-                AnyJsImportClause::JsImportNamespaceClause(clause) => clause.source().ok()?,
             };
 
             let key = source.inner_string_text().ok()?;
@@ -338,8 +337,7 @@ impl From<JsImport> for ImportNode {
         let specifiers = import_clause.and_then(|import_clause| {
             let import_named_clause = match import_clause {
                 AnyJsImportClause::JsImportBareClause(_)
-                | AnyJsImportClause::JsImportDefaultClause(_)
-                | AnyJsImportClause::JsImportNamespaceClause(_) => return None,
+                | AnyJsImportClause::JsImportDefaultClause(_) => return None,
                 AnyJsImportClause::JsImportNamedClause(import_clause) => import_clause,
             };
 

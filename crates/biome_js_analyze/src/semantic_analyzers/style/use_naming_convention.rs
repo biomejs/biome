@@ -794,8 +794,7 @@ impl Named {
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Named::CatchParameter),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Named::ParameterProperty),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Named::IndexParameter),
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => Some(Named::ImportNamespace),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Named::ImportNamespace),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)

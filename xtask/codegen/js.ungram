@@ -1224,7 +1224,6 @@ AnyJsImportClause =
     JsImportBareClause
     | JsImportNamedClause
     | JsImportDefaultClause
-    | JsImportNamespaceClause
 
 // import "abcd"
 // import "abcd" assert ...
@@ -1240,17 +1239,6 @@ JsImportDefaultClause =
 		'from'
 		source: JsModuleSource
 		assertion: JsImportAssertion?
-
-// import * as foo from "mod";
-// import type * as foo from "mod";
-JsImportNamespaceClause =
-  'type'?
-	'*'
-	'as'
-	local_name: AnyJsBinding
-	'from'
-	source: JsModuleSource
-	assertion: JsImportAssertion?
 
 // import { a, b: c } from "d"
 //        ^^^^^^^^^^^^^^^^^^^^

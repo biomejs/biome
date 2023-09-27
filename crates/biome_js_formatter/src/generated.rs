@@ -6321,46 +6321,6 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsImportNamespaceClause>
-    for crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause
-{
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_js_syntax::JsImportNamespaceClause,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsImportNamespaceClause>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::JsImportNamespaceClause,
-        crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
-        )
-    }
-}
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportNamespaceClause,
-        crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause::default(),
-        )
-    }
-}
 impl FormatRule<biome_js_syntax::JsModuleSource>
     for crate::js::module::module_source::FormatJsModuleSource
 {

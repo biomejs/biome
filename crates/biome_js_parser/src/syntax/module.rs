@@ -280,8 +280,7 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     }
 
     let clause = match p.cur() {
-        T![*] => parse_import_namespace_clause_rest(p, m),
-        T!['{'] => parse_import_named_clause_rest(p, m),
+        T![*] | T!['{'] => parse_import_named_clause_rest(p, m),
         _ if is_at_identifier_binding(p) => {
             parse_identifier_binding(p).unwrap();
             parse_import_default_or_named_clause_rest(p, m, is_typed)
@@ -356,20 +355,6 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
         parse_import_assertion(p).ok();
         m.complete(p, JS_IMPORT_BARE_CLAUSE)
     })
-}
-
-// test js import_decl
-// import * as foo from "bla";
-fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    p.expect(T![*]);
-
-    p.expect(T![as]);
-    parse_binding(p).or_add_diagnostic(p, expected_binding);
-    p.expect(T![from]);
-    parse_module_source(p).or_add_diagnostic(p, expected_module_source);
-    parse_import_assertion(p).ok();
-
-    m.complete(p, JS_IMPORT_NAMESPACE_CLAUSE)
 }
 
 // test js import_named_clause

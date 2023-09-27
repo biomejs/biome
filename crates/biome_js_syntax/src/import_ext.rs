@@ -22,7 +22,6 @@ impl JsImport {
             AnyJsImportClause::JsImportBareClause(node) => node.source(),
             AnyJsImportClause::JsImportDefaultClause(node) => node.source(),
             AnyJsImportClause::JsImportNamedClause(node) => node.source(),
-            AnyJsImportClause::JsImportNamespaceClause(node) => node.source(),
         }?;
 
         Ok(source.inner_string_text()?.text() == source_to_check)

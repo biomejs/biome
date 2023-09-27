@@ -482,7 +482,6 @@ fn capture_needs_to_be_in_the_dependency_list(
         // This should not be unreachable because of the test
         // if the capture is imported
         AnyJsBindingDeclaration::JsImportDefaultClause(_)
-        | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
         | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)

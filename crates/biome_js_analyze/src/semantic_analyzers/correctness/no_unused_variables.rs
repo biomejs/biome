@@ -192,7 +192,6 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         AnyJsBindingDeclaration::JsBogusParameter(_)
         // Imports are never ok to be unused
         | AnyJsBindingDeclaration::JsImportDefaultClause(_)
-        | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
         | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
