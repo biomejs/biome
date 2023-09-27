@@ -64,7 +64,7 @@ exports[`Biome WebAssembly lintContent > should lint content > lint diagnostics 
             "Info",
             [
               {
-                "content": "Suggested fix: Use ",
+                "content": "Unsafe fix: Use ",
                 "elements": [],
               },
               {
