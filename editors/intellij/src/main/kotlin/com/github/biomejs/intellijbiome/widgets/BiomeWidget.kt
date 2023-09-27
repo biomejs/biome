@@ -1,6 +1,7 @@
 package com.github.biomejs.intellijbiome.widgets
 
 import com.github.biomejs.intellijbiome.BiomeBundle
+import com.github.biomejs.intellijbiome.BiomeUtils
 import com.github.biomejs.intellijbiome.listeners.BIOME_CONFIG_RESOLVED_TOPIC
 import com.github.biomejs.intellijbiome.listeners.BiomeConfigResolvedListener
 import com.github.biomejs.intellijbiome.lsp.BiomeLspServerSupportProvider
@@ -15,9 +16,13 @@ import com.intellij.openapi.wm.impl.status.TextPanel.WithIconAndArrows
 import com.intellij.platform.lsp.api.LspServerManager
 import com.intellij.platform.lsp.impl.LspServerImpl
 import javax.swing.JComponent
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.wm.StatusBarWidget
 
-class BiomeWidget(project: Project) : EditorBasedWidget(project), CustomStatusBarWidget, WidgetPresentation {
-    private var component: WithIconAndArrows? = null
+class BiomeWidget(project: Project) : EditorBasedWidget(project), StatusBarWidget,
+    StatusBarWidget.MultipleTextValuesPresentation {
+    private val logger: Logger = Logger.getInstance(javaClass)
 
     init {
         project
@@ -25,27 +30,33 @@ class BiomeWidget(project: Project) : EditorBasedWidget(project), CustomStatusBa
             .connect(this)
             .subscribe(BIOME_CONFIG_RESOLVED_TOPIC, object : BiomeConfigResolvedListener {
                 override fun resolved(version: String) {
-                    update("Biome $version")
+                    update()
                 }
             })
     }
 
     override fun ID(): String {
-        return "BiomeWidget"
+        return javaClass.name;
     }
 
     override fun getPresentation(): WidgetPresentation {
         return this
     }
 
-    override fun getComponent(): JComponent {
-        val component = WithIconAndArrows()
-        component.text = "Biome"
-        component.toolTipText = getTooltipText()
+    override fun getSelectedValue(): String? {
+        val biomeBin = BiomeUtils.getBiomeExecutablePath(project);
+        val progressManager = ProgressManager.getInstance()
 
-        this.component = component
+        if (biomeBin == null) {
+            return "Biome"
+        }
 
-        return component
+        val version = progressManager.runProcessWithProgressSynchronously<String, Exception>({
+            BiomeUtils.getBiomeVersion(project, biomeBin)
+        }, BiomeBundle.message("biome.loading"), true, project)
+
+
+        return "Biome ${version}"
     }
 
     override fun getTooltipText(): String {
@@ -67,20 +78,13 @@ class BiomeWidget(project: Project) : EditorBasedWidget(project), CustomStatusBa
         }
     }
 
-    private fun update(text: String?) {
-        ApplicationManager.getApplication()
-            .invokeLater(
-                {
-                    if (project.isDisposed || component == null) {
-                        return@invokeLater
-                    }
+    private fun update() {
+        if (myStatusBar == null) {
+            logger.warn("Failed to update biome statusbar")
+            return
+        }
 
-                    component!!.text = text
-                    val statusBar = WindowManager.getInstance().getStatusBar(project)
-                    statusBar?.component?.updateUI()
-                },
-                ModalityState.any()
-            )
+        myStatusBar!!.updateWidget(ID())
     }
 
 }
