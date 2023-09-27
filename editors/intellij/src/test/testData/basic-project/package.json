@@ -1,6 +1,7 @@
 {
   "name": "basic-project",
   "version": "1.0.0",
+	"private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,6 +9,6 @@
   },
   "license": "MIT",
 	"dependencies": {
-		"@biomejs/biome": "1.2.2"
+		"@biomejs/biome": "workspace:*"
 	}
 }
