@@ -1,56 +1,62 @@
+mod parse_error;
+mod pattern;
+
 use crate::parser::CssParser;
+use crate::syntax::parse_error::{expect_any_pattern, expect_block};
+use crate::syntax::pattern::{
+    parse_class_selector_pattern, parse_id_selector_pattern, parse_type_selector_pattern,
+    parse_universal_selector_pattern,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::expected_any;
-use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_lists::ParseSeparatedList;
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::prelude::{ParseDiagnostic, ParsedSyntax, ToDiagnostic};
 use biome_parser::{token_set, Parser, ParserProgress, TokenSet};
-use biome_rowan::TextRange;
 
-const SELECTOR_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
+const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![#], T![.], T![*], T![ident], T![:], T!['{']];
+const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    SELECTOR_RECOVERY_SET.union(token_set![T![.], T![*],]);
+    SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
 
-    parse_rules_list(p).expect("Parse rule list, handle this case");
+    parse_rule_list(p);
 
     m.complete(p, CSS_ROOT);
 }
 
-pub(crate) fn parse_rules_list(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_rule_list(p: &mut CssParser) {
+    let mut progress = ParserProgress::default();
+
     let rules = p.start();
     while !p.at(EOF) {
-        match p.cur() {
-            T![.] => {
-                parse_rule(p).expect("Parse rule, handle this case properly");
-            }
-            _ => return Absent,
+        progress.assert_progressing(p);
+
+        if parse_rule(p)
+            .or_recover(
+                p,
+                &ParseRecovery::new(CSS_BOGUS_RULE, RULE_RECOVERY_SET),
+                expect_any_pattern,
+            )
+            .is_err()
+        {
+            break;
         }
     }
 
-    let completed = rules.complete(p, CSS_RULE_LIST);
-
-    Present(completed)
+    rules.complete(p, CSS_RULE_LIST);
 }
 
 pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
-    if parse_selector_list(p)
-        .or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS_PATTERN, SELECTOR_RECOVERY_SET),
-            expect_pattern,
-        )
-        .is_err()
-    {
-        m.abandon(p);
-        return Absent;
-    }
 
-    if parse_css_block(p)
+    CssSelectorList.parse_list(p);
+
+    if parse_rule_block(p)
         .or_recover(
             p,
             &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET),
@@ -66,57 +72,49 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(completed)
 }
 
-pub(crate) fn parse_selector_list(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
-    let mut progress = ParserProgress::default();
+pub(crate) struct CssSelectorList;
 
-    while !p.at(EOF) && !p.at(T!['{']) {
-        progress.assert_progressing(p);
+impl ParseSeparatedList for CssSelectorList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
-            T![.] => {
-                parse_css_selector_pattern(p).expect("Handle this case");
-            }
-
-            _ => {
-                return Absent;
-            }
+            T![.] => parse_class_selector_pattern(p),
+            T![#] => parse_id_selector_pattern(p),
+            T![*] => parse_universal_selector_pattern(p),
+            _ if is_at_identifier(p) => parse_type_selector_pattern(p),
+            _ => Absent,
         }
     }
-    if p.at(EOF) {
-        m.abandon(p);
-        return Absent;
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['{'])
     }
 
-    Present(m.complete(p, CSS_SELECTOR_LIST))
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ParseRecovery::new(
+                CSS_BOGUS_PATTERN,
+                RULE_RECOVERY_SET.union(token_set![T![,]]),
+            )
+            .enable_recovery_on_line_break(),
+            expect_any_pattern,
+        )
+    }
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
 }
 
 #[inline]
-pub(crate) fn parse_css_selector_pattern(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T![.]) {
-        return Absent;
-    }
-    let m = p.start();
-
-    p.bump(T![.]);
-
-    match p.cur() {
-        IDENT => {
-            let m = p.start();
-            p.bump(IDENT);
-            m.complete(p, CSS_IDENTIFIER);
-        }
-
-        _ => {
-            m.abandon(p);
-            return Absent;
-        }
-    }
-
-    Present(m.complete(p, CSS_CLASS_SELECTOR_PATTERN))
-}
-
-pub(crate) fn parse_css_block(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
     }
@@ -129,10 +127,19 @@ pub(crate) fn parse_css_block(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_BLOCK))
 }
 
-fn expect_pattern(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["selector pattern"], range).into_diagnostic(p)
-}
+#[inline]
+pub(super) fn parse_identifier(p: &mut CssParser, kind: CssSyntaxKind) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
 
-fn expect_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["body"], range).into_diagnostic(p)
+    let m = p.start();
+    p.bump_remap(T![ident]);
+    let identifier = m.complete(p, kind);
+
+    Present(identifier)
+}
+#[inline]
+pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
+    matches!(p.cur(), T![ident]) || p.cur().is_contextual_keyword()
 }

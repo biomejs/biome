@@ -1,0 +1,94 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+!.selector {
+
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssBogusPattern {
+                    items: [
+                        ERROR_TOKEN@0..1 "!" [] [],
+                    ],
+                },
+                missing separator,
+                CssClassSelectorPattern {
+                    dot_token: DOT@1..2 "." [] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@2..11 "selector" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@11..12 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..16
+  0: CSS_RULE_LIST@0..15
+    0: CSS_RULE@0..15
+      0: CSS_SELECTOR_LIST@0..11
+        0: CSS_BOGUS_PATTERN@0..1
+          0: ERROR_TOKEN@0..1 "!" [] []
+        1: (empty)
+        2: CSS_CLASS_SELECTOR_PATTERN@1..11
+          0: DOT@1..2 "." [] []
+          1: CSS_IDENTIFIER@2..11
+            0: IDENT@2..11 "selector" [] [Whitespace(" ")]
+      1: CSS_BLOCK@11..15
+        0: L_CURLY@11..12 "{" [] []
+        1: CSS_DECLARATION_LIST@12..12
+        2: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] []
+  1: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `!`
+  
+  > 1 │ !.selector {
+      │ ^
+    2 │ 
+    3 │ }
+  
+invalid_selector.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+  > 1 │ !.selector {
+      │  ^
+    2 │ 
+    3 │ }
+  
+  i Remove .
+  
+```
+
+
