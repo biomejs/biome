@@ -136,7 +136,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
- "bitflags 2.3.3",
+ "bitflags 2.3.1",
  "rustc-hash",
  "schemars",
  "serde",
@@ -145,14 +145,14 @@ dependencies = [
 
 [[package]]
 name = "biome_aria"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_aria_metadata",
 ]
 
 [[package]]
 name = "biome_aria_metadata"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "case",
  "proc-macro2",
@@ -215,14 +215,14 @@ dependencies = [
 
 [[package]]
 name = "biome_control_flow"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_rowan",
 ]
 
 [[package]]
 name = "biome_css_factory"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_css_syntax",
  "biome_rowan",
@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_parser"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_css_factory",
@@ -249,14 +249,14 @@ dependencies = [
 
 [[package]]
 name = "biome_css_syntax"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_rowan",
 ]
 
 [[package]]
 name = "biome_deserialize"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -281,7 +281,7 @@ dependencies = [
  "biome_rowan",
  "biome_text_edit",
  "biome_text_size",
- "bitflags 2.3.3",
+ "bitflags 2.3.1",
  "bpaf",
  "schemars",
  "serde",
@@ -293,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_categories"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "quote",
  "schemars",
@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_macros"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -355,7 +355,7 @@ dependencies = [
 
 [[package]]
 name = "biome_fs"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -453,7 +453,7 @@ dependencies = [
  "biome_js_unicode_table",
  "biome_parser",
  "biome_rowan",
- "bitflags 2.3.3",
+ "bitflags 2.3.1",
  "cfg-if",
  "drop_bomb",
  "expect-test",
@@ -470,7 +470,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_semantic"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -496,7 +496,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_transform"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -514,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_unicode_table"
-version = "0.0.0"
+version = "0.0.1"
 
 [[package]]
 name = "biome_json_analyze"
@@ -700,7 +700,7 @@ dependencies = [
 
 [[package]]
 name = "biome_suppression"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -730,7 +730,7 @@ dependencies = [
 
 [[package]]
 name = "biome_text_edit"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "biome_text_size",
  "schemars",
@@ -740,7 +740,7 @@ dependencies = [
 
 [[package]]
 name = "biome_text_size"
-version = "0.0.0"
+version = "0.0.3"
 dependencies = [
  "schemars",
  "serde",
@@ -791,9 +791,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.3.3"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "630be753d4e58660abd17930c71b647fe46c27ea6b63cc59e1e3851406972e42"
+checksum = "6776fc96284a0bb647b615056fc496d1fe1644a7ab01829818a6d91cae888b84"
 
 [[package]]
 name = "bpaf"
@@ -1647,9 +1647,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.30.0"
+version = "1.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28491f7753051e5704d4d0ae7860d45fae3238d7d235bc4289dcd45c48d3cec3"
+checksum = "9a28d25139df397cbca21408bb742cf6837e04cdbebf1b07b760caf971d6a972"
 dependencies = [
  "console",
  "globset",
@@ -1681,12 +1681,13 @@ dependencies = [
 
 [[package]]
 name = "is-terminal"
-version = "0.4.9"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
+checksum = "adcf93614601c8129ddf72e2d5633df827ba6551541c6d8c59520a371475be1f"
 dependencies = [
  "hermit-abi 0.3.2",
- "rustix 0.38.8",
+ "io-lifetimes",
+ "rustix 0.37.7",
  "windows-sys 0.48.0",
 ]
 
@@ -1804,9 +1805,9 @@ checksum = "f051f77a7c8e6957c0696eac88f26b0117e54f52d3fc682ab19397a8812846a4"
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.4.5"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57bcfdad1b858c2db7c38303a6d2ad4dfaf5eb53dfeb0910128b2c26d6158503"
+checksum = "ef53942eb7bf7ff43a617b3e2c1c4a5ecf5944a7c1bc12d7ee39bbb15e5c1519"
 
 [[package]]
 name = "lock_api"
@@ -2209,9 +2210,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.29"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "573015e8ab27661678357f27dc26460738fd2b6c86e46f386fde94cb5d913105"
+checksum = "1b9ab9c7eadfd8df19006f1cf1a4aed13540ed5cbc047010ece5826e10825488"
 dependencies = [
  "proc-macro2",
 ]
@@ -2431,15 +2432,16 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.8"
+version = "0.37.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19ed4fa021d81c8392ce04db050a3da9a60299050b7ae1cf482d862b54a7218f"
+checksum = "2aae838e49b3d63e9274e1c01833cc8139d3fec468c3b84688c628f44b1ae11d"
 dependencies = [
- "bitflags 2.3.3",
+ "bitflags 1.3.2",
  "errno 0.3.2",
+ "io-lifetimes",
  "libc",
- "linux-raw-sys 0.4.5",
- "windows-sys 0.48.0",
+ "linux-raw-sys 0.3.8",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]

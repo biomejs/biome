@@ -8,7 +8,7 @@ version = "0.0.0"
 regex = { version = "1.6.0" }
 
 [dev-dependencies]
-biome_js_analyze = { path = "../../crates/biome_js_analyze" }
+biome_js_analyze = { workspace = true }
 case             = "1.0.0"
 criterion        = "0.4.0"
 fastbloom-rs     = "0.3.0"

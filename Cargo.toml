@@ -17,7 +17,7 @@ authors    = ["Biome Developers and Contributors"]
 categories = ["development-tools", "web-programming"]
 edition    = "2021"
 homepage   = "https://biomejs.dev/"
-keywords   = ["JavaScript", "TypeScript", "JSON", "parser", "linter", "formatter"]
+keywords   = ["parser", "linter", "formatter"]
 license    = "MIT"
 repository = "https://github.com/biomejs/biome"
 
@@ -27,48 +27,48 @@ inherits = "release"
 
 [workspace.dependencies]
 # publish
-biome_analyze        = { version = "0.0.1", path = "./crates/biome_analyze" }
-biome_console        = { version = "0.0.1", path = "./crates/biome_console" }
-biome_diagnostics    = { version = "0.0.1", path = "./crates/biome_diagnostics" }
-biome_formatter      = { version = "0.0.1", path = "./crates/biome_formatter" }
-biome_js_analyze     = { version = "0.0.1", path = "./crates/biome_js_analyze" }
-biome_js_factory     = { version = "0.0.1", path = "./crates/biome_js_factory" }
-biome_js_formatter   = { version = "0.0.1", path = "./crates/biome_js_formatter" }
-biome_js_parser      = { version = "0.0.1", path = "./crates/biome_js_parser" }
-biome_js_syntax      = { version = "0.0.1", path = "./crates/biome_js_syntax" }
-biome_json_analyze   = { version = "0.0.1", path = "./crates/biome_json_analyze" }
-biome_json_factory   = { version = "0.0.1", path = "./crates/biome_json_factory" }
-biome_json_formatter = { version = "0.0.1", path = "./crates/biome_json_formatter" }
-biome_json_parser    = { version = "0.0.1", path = "./crates/biome_json_parser" }
-biome_json_syntax    = { version = "0.0.1", path = "./crates/biome_json_syntax" }
-biome_markup         = { version = "0.0.1", path = "./crates/biome_markup" }
-biome_parser         = { version = "0.0.1", path = "./crates/biome_parser" }
-biome_rowan          = { version = "0.0.1", path = "./crates/biome_rowan" }
+biome_analyze                = { version = "0.0.1", path = "./crates/biome_analyze" }
+biome_aria                   = { version = "0.0.1", path = "./crates/biome_aria" }
+biome_aria_metadata          = { version = "0.0.1", path = "./crates/biome_aria_metadata" }
+biome_console                = { version = "0.0.1", path = "./crates/biome_console" }
+biome_control_flow           = { version = "0.0.1", path = "./crates/biome_control_flow" }
+biome_css_factory            = { version = "0.0.1", path = "./crates/biome_css_factory" }
+biome_css_parser             = { version = "0.0.1", path = "./crates/biome_css_parser" }
+biome_css_syntax             = { version = "0.0.1", path = "./crates/biome_css_syntax" }
+biome_deserialize            = { version = "0.0.1", path = "./crates/biome_deserialize" }
+biome_diagnostics            = { version = "0.0.1", path = "./crates/biome_diagnostics" }
+biome_diagnostics_categories = { version = "0.0.1", path = "./crates/biome_diagnostics_categories" }
+biome_diagnostics_macros     = { version = "0.0.1", path = "./crates/biome_diagnostics_macros" }
+biome_formatter              = { version = "0.0.1", path = "./crates/biome_formatter" }
+biome_fs                     = { version = "0.0.1", path = "./crates/biome_fs" }
+biome_js_analyze             = { version = "0.0.1", path = "./crates/biome_js_analyze" }
+biome_js_factory             = { version = "0.0.1", path = "./crates/biome_js_factory" }
+biome_js_formatter           = { version = "0.0.1", path = "./crates/biome_js_formatter" }
+biome_js_parser              = { version = "0.0.1", path = "./crates/biome_js_parser" }
+biome_js_semantic            = { version = "0.0.1", path = "./crates/biome_js_semantic" }
+biome_js_syntax              = { version = "0.0.1", path = "./crates/biome_js_syntax" }
+biome_js_transform           = { version = "0.0.1", path = "./crates/biome_js_transform" }
+biome_js_unicode_table       = { version = "0.0.1", path = "./crates/biome_js_unicode_table" }
+biome_json_analyze           = { version = "0.0.1", path = "./crates/biome_json_analyze" }
+biome_json_factory           = { version = "0.0.1", path = "./crates/biome_json_factory" }
+biome_json_formatter         = { version = "0.0.1", path = "./crates/biome_json_formatter" }
+biome_json_parser            = { version = "0.0.1", path = "./crates/biome_json_parser" }
+biome_json_syntax            = { version = "0.0.1", path = "./crates/biome_json_syntax" }
+biome_markup                 = { version = "0.0.1", path = "./crates/biome_markup" }
+biome_parser                 = { version = "0.0.1", path = "./crates/biome_parser" }
+biome_rowan                  = { version = "0.0.1", path = "./crates/biome_rowan" }
+biome_suppression            = { version = "0.0.1", path = "./crates/biome_suppression" }
+biome_text_edit              = { version = "0.0.1", path = "./crates/biome_text_edit" }
+biome_text_size              = { version = "0.0.3", path = "./crates/biome_text_size" }
 # not publish
-biome_aria                   = { path = "./crates/biome_aria" }
-biome_aria_metadata          = { path = "./crates/biome_aria_metadata" }
-biome_cli                    = { path = "./crates/biome_cli" }
-biome_control_flow           = { path = "./crates/biome_control_flow" }
-biome_css_factory            = { path = "./crates/biome_css_factory" }
-biome_css_parser             = { path = "./crates/biome_css_parser" }
-biome_css_syntax             = { path = "./crates/biome_css_syntax" }
-biome_deserialize            = { path = "./crates/biome_deserialize" }
-biome_diagnostics_categories = { path = "./crates/biome_diagnostics_categories" }
-biome_diagnostics_macros     = { path = "./crates/biome_diagnostics_macros" }
-biome_flags                  = { path = "./crates/biome_flags" }
-biome_formatter_test         = { path = "./crates/biome_formatter_test" }
-biome_fs                     = { path = "./crates/biome_fs" }
-biome_js_semantic            = { path = "./crates/biome_js_semantic" }
-biome_js_transform           = { path = "./crates/biome_js_transform" }
-biome_js_unicode_table       = { path = "./crates/biome_js_unicode_table" }
-biome_lsp                    = { path = "./crates/biome_lsp" }
-biome_migrate                = { path = "./crates/biome_migrate" }
-biome_service                = { path = "./crates/biome_service" }
-biome_suppression            = { path = "./crates/biome_suppression" }
-biome_test_utils             = { path = "./crates/biome_test_utils" }
-biome_text_edit              = { path = "./crates/biome_text_edit" }
-biome_text_size              = { path = "./crates/biome_text_size" }
-tests_macros                 = { path = "./crates/tests_macros" }
+biome_cli            = { path = "./crates/biome_cli" }
+biome_flags          = { path = "./crates/biome_flags" }
+biome_formatter_test = { path = "./crates/biome_formatter_test" }
+biome_lsp            = { path = "./crates/biome_lsp" }
+biome_migrate        = { path = "./crates/biome_migrate" }
+biome_service        = { path = "./crates/biome_service" }
+biome_test_utils     = { path = "./crates/biome_test_utils" }
+tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
 bitflags          = "2.3.1"
@@ -82,9 +82,10 @@ quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }
 rustc-hash        = "1.1.0"
+# pinning to avoid crate publishing failures
 schemars          = { version = "0.8.12" }
-serde             = { version = "1.0.163", features = ["derive"], default-features = false }
-serde_json        = "1.0.96"
+serde             = { version = "1.0.164", features = ["derive"] }
+serde_json        = "1.0.99"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency

@@ -7,13 +7,12 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_text_size"
-publish              = false
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.0.3"
 
 [dependencies]
 schemars = { workspace = true, optional = true }
-serde    = { workspace = true, optional = true, default_features = false }
+serde    = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_test        = "1.0"
