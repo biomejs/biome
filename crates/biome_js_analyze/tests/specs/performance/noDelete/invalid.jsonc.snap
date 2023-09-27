@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 91
 expression: invalid.jsonc
 ---
 # Input
@@ -17,7 +16,7 @@ invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━�
   > 1 │ delete a.b;
       │ ^^^^^^^^^^
   
-  i Suggested fix: Use an undefined assignment instead.
+  i Unsafe fix: Use an undefined assignment instead.
   
   - delete·a.b;
   + a.b·=·undefined;
@@ -56,7 +55,7 @@ invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━�
   > 1 │ delete a['b'];
       │ ^^^^^^^^^^^^^
   
-  i Suggested fix: Use an undefined assignment instead.
+  i Unsafe fix: Use an undefined assignment instead.
   
   - delete·a['b'];
   + a['b']·=·undefined;
@@ -95,7 +94,7 @@ invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━�
   > 1 │ delete a.b.c;
       │ ^^^^^^^^^^^^
   
-  i Suggested fix: Use an undefined assignment instead.
+  i Unsafe fix: Use an undefined assignment instead.
   
   - delete·a.b.c;
   + a.b.c·=·undefined;
@@ -134,7 +133,7 @@ invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━�
   > 1 │ delete a.b['c'];
       │ ^^^^^^^^^^^^^^^
   
-  i Suggested fix: Use an undefined assignment instead.
+  i Unsafe fix: Use an undefined assignment instead.
   
   - delete·a.b['c'];
   + a.b['c']·=·undefined;

@@ -130,7 +130,7 @@ invalid.js:4:7 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━�
     7 │ }
     8 │ 
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
      2  2 │       if (x < 0) {
      3  3 │           throw new RangeError();
@@ -173,7 +173,7 @@ invalid.js:13:7 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━
     16 │     h();
     17 │ }
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     11 11 │       if (x < 0) {
     12 12 │           throw new RangeError();
@@ -210,7 +210,7 @@ invalid.js:22:7 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━
     23 │ }
     24 │ 
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     22 │ ····}·else·return·x;
        │      ------         
@@ -243,7 +243,7 @@ invalid.js:28:5 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━
     30 │ }
     31 │ 
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     26 26 │       if (x < 0)
     27 27 │           throw new RangeError();
@@ -284,7 +284,7 @@ invalid.js:35:7 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━
     40 │ }
     41 │ 
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     35 │ ····}·else·if·(x·===·0)·{
        │      ------              
@@ -352,7 +352,7 @@ invalid.js:46:11 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━�
     49 │     }
     50 │     return x;
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     44 44 │           if (x < 0) {
     45 45 │               break;
@@ -395,7 +395,7 @@ invalid.js:57:11 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━�
     60 │     }
     61 │     return x;
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     55 55 │           if (x < 0) {
     56 56 │               break;
@@ -437,7 +437,7 @@ invalid.js:73:7 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━━
     76 │ }
     77 │ 
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     71 71 │                   return x;
     72 72 │           }
@@ -482,7 +482,7 @@ invalid.js:88:13 lint/nursery/noUselessElse  FIXABLE  ━━━━━━━━�
     93 │     // 2
     94 │ } // 3
   
-  i Suggested fix: Omit the else clause.
+  i Unsafe fix: Omit the else clause.
   
     86 86 │                   return x;
     87 87 │           }

@@ -81,7 +81,7 @@ fix.js:3:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend FOO with an underscore.
+  i Unsafe fix: If this is intentional, prepend FOO with an underscore.
   
     1 1 │   
     2 2 │       function f() {arguments;}
@@ -106,7 +106,7 @@ fix.js:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend x with an underscore.
+  i Unsafe fix: If this is intentional, prepend x with an underscore.
   
     2 2 │       function f() {arguments;}
     3 3 │       const FOO = "FOO";
@@ -130,7 +130,7 @@ fix.js:4:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend y with an underscore.
+  i Unsafe fix: If this is intentional, prepend y with an underscore.
   
     2 2 │       function f() {arguments;}
     3 3 │       const FOO = "FOO";

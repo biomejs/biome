@@ -28,7 +28,7 @@ invalid.js:1:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
     2 │ 
     3 │ function test() {
   
-  i Suggested fix: Break out into multiple declarations
+  i Unsafe fix: Break out into multiple declarations
   
      1    │ - var·x,·y
         1 │ + var·x
@@ -51,7 +51,7 @@ invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
     6 │ }
     7 │ 
   
-  i Suggested fix: Break out into multiple declarations
+  i Unsafe fix: Break out into multiple declarations
   
      3  3 │   function test() {
      4  4 │   	// Comment
@@ -78,7 +78,7 @@ invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
        │     ^^^^^
     11 │ 
   
-  i Suggested fix: Break out into multiple declarations
+  i Unsafe fix: Break out into multiple declarations
   
      6  6 │   }
      7  7 │   

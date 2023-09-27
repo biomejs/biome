@@ -14,9 +14,7 @@ use rustc_hash::FxHashSet;
 use crate::control_flow::{AnyJsControlFlowRoot, ControlFlowGraph};
 
 declare_rule! {
-    /// Ensures the `super()` constructor is called exactly once on every code
-    /// path in a class constructor before `this` is accessed if the class has
-    /// a superclass
+    /// Ensures the `super()` constructor is called exactly once on every code  path in a class constructor before `this` is accessed if the class has a superclass
     ///
     /// ## Examples
     ///

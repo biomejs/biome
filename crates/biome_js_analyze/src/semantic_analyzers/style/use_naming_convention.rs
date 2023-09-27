@@ -7,7 +7,9 @@ use crate::{
     utils::rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
     JsRuleAction,
 };
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
@@ -273,6 +275,7 @@ declare_rule! {
         version: "1.0.0",
         name: "useNamingConvention",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 

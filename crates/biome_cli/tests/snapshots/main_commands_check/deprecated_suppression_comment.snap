@@ -31,7 +31,7 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
   
-  i Suggested fix: Use // biome-ignore instead
+  i Unsafe fix: Use // biome-ignore instead
   
     1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
     2   │ - a·

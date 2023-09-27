@@ -23,7 +23,7 @@ complexLogicalAndCases.ts:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     3 │ foo && foo[1 + 2] && foo[1 + 2].baz;
     4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     1 1 │   // currently do not handle complex computed properties
     2   │ - foo·&&·foo[bar·as·string]·&&·foo[bar·as·string].baz;
@@ -46,7 +46,7 @@ complexLogicalAndCases.ts:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
     5 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     1 1 │   // currently do not handle complex computed properties
     2 2 │   foo && foo[bar as string] && foo[bar as string].baz;
@@ -69,7 +69,7 @@ complexLogicalAndCases.ts:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     2 2 │   foo && foo[bar as string] && foo[bar as string].baz;
     3 3 │   foo && foo[1 + 2] && foo[1 + 2].baz;

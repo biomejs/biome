@@ -16,7 +16,7 @@ withJsxElementInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━�
   > 1 │ <><Component /></>
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     1 │ <><Component·/></>
       │  --          ---  

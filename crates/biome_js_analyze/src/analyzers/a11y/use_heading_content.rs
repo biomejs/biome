@@ -4,8 +4,7 @@ use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
-    /// Accessible means that it is not hidden using the aria-hidden prop.
+    /// Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
     ///
     /// ## Examples
     ///

@@ -9,6 +9,7 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 :::
 
 Disallow duplicate case labels.
+
 If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression.
 
 Source: https://eslint.org/docs/latest/rules/no-duplicate-case

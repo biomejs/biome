@@ -20,7 +20,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'const' instead.
+  i Unsafe fix: Use 'const' instead.
   
   - var·x·=·1;·foo(x);
   + const·x·=·1;·foo(x);
@@ -46,7 +46,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'let' instead.
+  i Unsafe fix: Use 'let' instead.
   
   - var·x·=·1;·x·=·5;
   + let·x·=·1;·x·=·5;
@@ -72,7 +72,7 @@ invalidScript.jsonc:1:6 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'const' instead.
+  i Unsafe fix: Use 'const' instead.
   
   - for·(var·i·in·[1,2,3])·{·foo(i);·}
   + for·(const·i·in·[1,2,3])·{·foo(i);·}
@@ -98,7 +98,7 @@ invalidScript.jsonc:1:6 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'const' instead.
+  i Unsafe fix: Use 'const' instead.
   
   - for·(var·x·of·[1,2,3])·{·foo(x);·}
   + for·(const·x·of·[1,2,3])·{·foo(x);·}
@@ -124,7 +124,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'let' instead.
+  i Unsafe fix: Use 'let' instead.
   
   - var·[x·=·-1,·y]·=·[1,2];·y·=·0;
   + let·[x·=·-1,·y]·=·[1,2];·y·=·0;
@@ -150,7 +150,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
   i See MDN web docs for more details.
   
-  i Suggested fix: Use 'let' instead.
+  i Unsafe fix: Use 'let' instead.
   
   - var·{a:·x·=·-1,·b:·y}·=·{a:1,b:2};·y·=·0;
   + let·{a:·x·=·-1,·b:·y}·=·{a:1,b:2};·y·=·0;

@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
@@ -34,6 +34,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

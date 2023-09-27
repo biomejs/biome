@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -16,6 +16,7 @@ use crate::{use_block_statements_diagnostic, use_block_statements_replace_body};
 
 declare_rule! {
     /// Requires following curly brace conventions.
+    ///
     /// JavaScript allows the omission of curly braces when a block contains only one statement. However, it is considered by many to be best practice to never omit curly braces around blocks, even when they are optional, because it can lead to bugs and reduces code clarity.
     ///
     /// ## Examples
@@ -66,6 +67,7 @@ declare_rule! {
         version: "1.0.0",
         name: "useBlockStatements",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

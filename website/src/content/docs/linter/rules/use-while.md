@@ -8,8 +8,7 @@ title: useWhile (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Enforce the use of `while` loops instead of `for` loops when the
-initializer and update expressions are not needed.
+Enforce the use of `while` loops instead of `for` loops when the initializer and update expressions are not needed.
 
 ## Examples
 

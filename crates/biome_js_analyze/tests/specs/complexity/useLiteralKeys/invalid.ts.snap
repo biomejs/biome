@@ -58,7 +58,7 @@ invalid.ts:2:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     3 │ 
     4 │ 	"p2": number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     2 │ → ["p1"]:·number
       │   --  --        
@@ -77,7 +77,7 @@ invalid.ts:4:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     5 │ 
     6 │ 	get ["p3"](): number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     4 │ → "p2":·number
       │   -  -        
@@ -96,7 +96,7 @@ invalid.ts:6:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     7 │ 
     8 │ 	get "p4"(): number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     6 │ → get·["p3"]():·number
       │       --  --          
@@ -115,7 +115,7 @@ invalid.ts:8:6 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
      9 │ 
     10 │ 	set ["p3"](x: number)
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     8 │ → get·"p4"():·number
       │       -  -          
@@ -134,7 +134,7 @@ invalid.ts:10:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     11 │ 
     12 │ 	set "p4"(x: number)
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     10 │ → set·["p3"](x:·number)
        │       --  --           
@@ -153,7 +153,7 @@ invalid.ts:12:6 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     13 │ 
     14 │ 	["m1"](): void
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     12 │ → set·"p4"(x:·number)
        │       -  -           
@@ -172,7 +172,7 @@ invalid.ts:14:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     15 │ 
     16 │ 	"m2"(): void
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     14 │ → ["m1"]():·void
        │   --  --        
@@ -191,7 +191,7 @@ invalid.ts:16:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     17 │ 
     18 │ 	[""]: number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     16 │ → "m2"():·void
        │   -  -        
@@ -210,7 +210,7 @@ invalid.ts:18:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     19 │ }
     20 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     18 │ → [""]:·number
        │   -  -        
@@ -228,7 +228,7 @@ invalid.ts:22:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     23 │ 
     24 │ 	"p2": number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     22 │ → ["p1"]:·number
        │   --  --        
@@ -247,7 +247,7 @@ invalid.ts:24:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     25 │ 
     26 │ 	get ["p3"](): number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     24 │ → "p2":·number
        │   -  -        
@@ -266,7 +266,7 @@ invalid.ts:26:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     27 │ 
     28 │ 	get "p4"(): number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     26 │ → get·["p3"]():·number
        │       --  --          
@@ -285,7 +285,7 @@ invalid.ts:28:6 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     29 │ 
     30 │ 	set ["p3"](x: number)
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     28 │ → get·"p4"():·number
        │       -  -          
@@ -304,7 +304,7 @@ invalid.ts:30:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     31 │ 
     32 │ 	set "p4"(x: number)
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     30 │ → set·["p3"](x:·number)
        │       --  --           
@@ -323,7 +323,7 @@ invalid.ts:32:6 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     33 │ 
     34 │ 	["m1"](): void
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     32 │ → set·"p4"(x:·number)
        │       -  -           
@@ -342,7 +342,7 @@ invalid.ts:34:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     35 │ 
     36 │ 	"m2"(): void
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     34 │ → ["m1"]():·void
        │   --  --        
@@ -361,7 +361,7 @@ invalid.ts:36:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     37 │ 
     38 │ 	[""]: number
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     36 │ → "m2"():·void
        │   -  -        
@@ -380,7 +380,7 @@ invalid.ts:38:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     39 │ }
     40 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     38 │ → [""]:·number
        │   -  -        

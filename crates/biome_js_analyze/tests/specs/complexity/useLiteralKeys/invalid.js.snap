@@ -59,7 +59,7 @@ invalid.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     2 │ a.b["c"];
     3 │ a.b["c"].d.e["f"];
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      1    │ - a["b"];
         1 │ + a.b;
@@ -80,7 +80,7 @@ invalid.js:2:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     3 │ a.b["c"].d.e["f"];
     4 │ a.b[`c`];
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      1  1 │   a["b"];
      2    │ - a.b["c"];
@@ -103,7 +103,7 @@ invalid.js:3:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     4 │ a.b[`c`];
     5 │ a.b[c["d"]];
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      1  1 │   a["b"];
      2  2 │   a.b["c"];
@@ -127,7 +127,7 @@ invalid.js:3:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     4 │ a.b[`c`];
     5 │ a.b[c["d"]];
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      1  1 │   a["b"];
      2  2 │   a.b["c"];
@@ -151,7 +151,7 @@ invalid.js:4:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     5 │ a.b[c["d"]];
     6 │ a["b"] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      2  2 │   a.b["c"];
      3  3 │   a.b["c"].d.e["f"];
@@ -175,7 +175,7 @@ invalid.js:5:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     6 │ a["b"] = "something";
     7 │ a.b["c"] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      3  3 │   a.b["c"].d.e["f"];
      4  4 │   a.b[`c`];
@@ -199,7 +199,7 @@ invalid.js:6:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     7 │ a.b["c"] = "something";
     8 │ a.b["c"].d.e["f"] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      4  4 │   a.b[`c`];
      5  5 │   a.b[c["d"]];
@@ -223,7 +223,7 @@ invalid.js:7:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     8 │ a.b["c"].d.e["f"] = "something";
     9 │ a.b[`c`] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      5  5 │   a.b[c["d"]];
      6  6 │   a["b"] = "something";
@@ -247,7 +247,7 @@ invalid.js:8:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
      9 │ a.b[`c`] = "something";
     10 │ a.b[c["d"]] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      6  6 │   a["b"] = "something";
      7  7 │   a.b["c"] = "something";
@@ -271,7 +271,7 @@ invalid.js:8:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
      9 │ a.b[`c`] = "something";
     10 │ a.b[c["d"]] = "something";
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      6  6 │   a["b"] = "something";
      7  7 │   a.b["c"] = "something";
@@ -295,7 +295,7 @@ invalid.js:9:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
     10 │ a.b[c["d"]] = "something";
     11 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      7  7 │   a.b["c"] = "something";
      8  8 │   a.b["c"].d.e["f"] = "something";
@@ -319,7 +319,7 @@ invalid.js:10:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     11 │ a = {
     12 │ 	['b']: d
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
      8  8 │   a.b["c"].d.e["f"] = "something";
      9  9 │   a.b[`c`] = "something";
@@ -343,7 +343,7 @@ invalid.js:12:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     13 │ };
     14 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     12 │ → ['b']:·d
        │   -- --   
@@ -362,7 +362,7 @@ invalid.js:15:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     16 │ };
     17 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     15 │ → [`b`]:·d
        │   -- --   
@@ -381,7 +381,7 @@ invalid.js:18:2 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     19 │ };
     20 │ a.b[`$c`];
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     18 │ → "b":·d
        │   - -   
@@ -400,7 +400,7 @@ invalid.js:20:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     21 │ a.b["_d"];
     22 │ class C { ["a"] = 0 }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     18 18 │   	"b": d
     19 19 │   };
@@ -424,7 +424,7 @@ invalid.js:21:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     22 │ class C { ["a"] = 0 }
     23 │ class C { "a" = 0 }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     19 19 │   };
     20 20 │   a.b[`$c`];
@@ -448,7 +448,7 @@ invalid.js:22:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     23 │ class C { "a" = 0 }
     24 │ class C { ["a"](){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     22 │ class·C·{·["a"]·=·0·}
        │           -- --      
@@ -467,7 +467,7 @@ invalid.js:23:11 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     24 │ class C { ["a"](){} }
     25 │ class C { "a"(){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     23 │ class·C·{·"a"·=·0·}
        │           - -      
@@ -486,7 +486,7 @@ invalid.js:24:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     25 │ class C { "a"(){} }
     26 │ class C { get ["a"](){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     24 │ class·C·{·["a"](){}·}
        │           -- --      
@@ -505,7 +505,7 @@ invalid.js:25:11 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     26 │ class C { get ["a"](){} }
     27 │ class C { get "a"(){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     25 │ class·C·{·"a"(){}·}
        │           - -      
@@ -524,7 +524,7 @@ invalid.js:26:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     27 │ class C { get "a"(){} }
     28 │ class C { set ["a"](x){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     26 │ class·C·{·get·["a"](){}·}
        │               -- --      
@@ -543,7 +543,7 @@ invalid.js:27:15 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     28 │ class C { set ["a"](x){} }
     29 │ class C { set "a"(x){} }
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     27 │ class·C·{·get·"a"(){}·}
        │               - -      
@@ -562,7 +562,7 @@ invalid.js:28:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     29 │ class C { set "a"(x){} }
     30 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     28 │ class·C·{·set·["a"](x){}·}
        │               -- --       
@@ -581,7 +581,7 @@ invalid.js:29:15 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     30 │ a = {
     31 │ 	["1+1"]: 2
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     29 │ class·C·{·set·"a"(x){}·}
        │               - -       
@@ -600,7 +600,7 @@ invalid.js:31:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     32 │ }
     33 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     31 │ → ["1+1"]:·2
        │   -     -   
@@ -619,7 +619,7 @@ invalid.js:34:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     35 │ }
     36 │ a = {
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     32 32 │   }
     33 33 │   a = {
@@ -643,7 +643,7 @@ invalid.js:37:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     38 │ }
     39 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     37 │ → [""]:·2
        │   -  -   
@@ -660,7 +660,7 @@ invalid.js:41:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │     ^^^
     42 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     41 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │    -- --                    
@@ -677,7 +677,7 @@ invalid.js:41:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │            ^^^
     42 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     41 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │           -- --             
@@ -694,7 +694,7 @@ invalid.js:41:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
        │                         ^^^
     42 │ 
   
-  i Suggested fix: Use a literal key instead.
+  i Unsafe fix: Use a literal key instead.
   
     41 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │                        -- --

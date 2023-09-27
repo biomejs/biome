@@ -36,7 +36,7 @@ invalidVariables.ts:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend a with an underscore.
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
   
      1    │ - var·a·=·1;
         1 │ + var·_a·=·1;
@@ -59,7 +59,7 @@ invalidVariables.ts:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend b with an underscore.
+  i Unsafe fix: If this is intentional, prepend b with an underscore.
   
      1  1 │   var a = 1;
      2    │ - let·b·=·1;
@@ -84,7 +84,7 @@ invalidVariables.ts:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend c with an underscore.
+  i Unsafe fix: If this is intentional, prepend c with an underscore.
   
      1  1 │   var a = 1;
      2  2 │   let b = 1;
@@ -160,7 +160,7 @@ invalidVariables.ts:9:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend g with an underscore.
+  i Unsafe fix: If this is intentional, prepend g with an underscore.
   
      7  7 │   const { f } = { f: 1 };
      8  8 │   
@@ -185,7 +185,7 @@ invalidVariables.ts:10:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend h with an underscore.
+  i Unsafe fix: If this is intentional, prepend h with an underscore.
   
      8  8 │   
      9  9 │   var [g] = [1];
@@ -211,7 +211,7 @@ invalidVariables.ts:11:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend i with an underscore.
+  i Unsafe fix: If this is intentional, prepend i with an underscore.
   
      9  9 │   var [g] = [1];
     10 10 │   let [h] = [1];
@@ -253,7 +253,7 @@ invalidVariables.ts:14:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend l with an underscore.
+  i Unsafe fix: If this is intentional, prepend l with an underscore.
   
     12 12 │   
     13 13 │   var [{ j }] = [{ j: 1 }]
@@ -278,7 +278,7 @@ invalidVariables.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend m with an underscore.
+  i Unsafe fix: If this is intentional, prepend m with an underscore.
   
     14 14 │   var { k: [l] } = { k: [1] }·
     15 15 │   
@@ -302,7 +302,7 @@ invalidVariables.ts:16:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Suggested fix: If this is intentional, prepend n with an underscore.
+  i Unsafe fix: If this is intentional, prepend n with an underscore.
   
     14 14 │   var { k: [l] } = { k: [1] }·
     15 15 │   

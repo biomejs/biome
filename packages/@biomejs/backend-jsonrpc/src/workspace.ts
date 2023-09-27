@@ -613,7 +613,7 @@ export interface Correctness {
 	 */
 	noUnreachable?: RuleConfiguration;
 	/**
-	 * Ensures the super() constructor is called exactly once on every code path in a class constructor before this is accessed if the class has a superclass
+	 * Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass
 	 */
 	noUnreachableSuper?: RuleConfiguration;
 	/**
@@ -845,7 +845,7 @@ export interface Style {
 	 */
 	recommended?: boolean;
 	/**
-	 * Requires following curly brace conventions. JavaScript allows the omission of curly braces when a block contains only one statement. However, it is considered by many to be best practice to never omit curly braces around blocks, even when they are optional, because it can lead to bugs and reduces code clarity.
+	 * Requires following curly brace conventions.
 	 */
 	useBlockStatements?: RuleConfiguration;
 	/**
@@ -966,7 +966,7 @@ export interface Suspicious {
 	 */
 	noDoubleEquals?: RuleConfiguration;
 	/**
-	 * Disallow duplicate case labels. If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression.
+	 * Disallow duplicate case labels.
 	 */
 	noDuplicateCase?: RuleConfiguration;
 	/**
@@ -978,7 +978,7 @@ export interface Suspicious {
 	 */
 	noDuplicateJsxProps?: RuleConfiguration;
 	/**
-	 * Prevents object literals having more than one property declaration for the same name. If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake.
+	 * Prevents object literals having more than one property declaration for the same name.
 	 */
 	noDuplicateObjectKeys?: RuleConfiguration;
 	/**

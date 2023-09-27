@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, ActionCategory, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
-    ServiceBag, Visitor, VisitorContext,
+    declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule,
+    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -57,6 +57,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noUnusedLabels",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

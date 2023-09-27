@@ -23,7 +23,7 @@ invalid.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━�
   
   i Using === may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use ===
+  i Unsafe fix: Use ===
   
     1 │ const·isZero·=·a·===·0;
       │                    +   
@@ -51,7 +51,7 @@ invalid.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━�
   
   i Using !== may be unsafe if you are relying on type coercion
   
-  i Suggested fix: Use !==
+  i Unsafe fix: Use !==
   
     1 │ const·isNonZero·=·a·!==·0;
       │                       +   

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -50,6 +50,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noDoubleEquals",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

@@ -50,7 +50,7 @@ invalid.js:2:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━�
     3 │ }
     4 │ 
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
      1  1 │   loop: for (let i = 0; i < 5; i++) {
      2    │ - → continue·loop;
@@ -71,7 +71,7 @@ invalid.js:6:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━�
     7 │ }
     8 │ 
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
      4  4 │   
      5  5 │   while (i--) {
@@ -93,7 +93,7 @@ invalid.js:10:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
     11 │ }
     12 │ 
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
      8  8 │   
      9  9 │   while (1) {
@@ -116,7 +116,7 @@ invalid.js:16:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
     17 │ 	} else if (i >= 5 && i < 8) {
     18 │ 		console.log("test");
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
     14 14 │   	if (i > 5) {
     15 15 │   		console.log("foo");
@@ -140,7 +140,7 @@ invalid.js:25:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
     26 │ }
     27 │ 
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
     23 23 │   
     24 24 │   for (let i = 0; i < 9; i++) {
@@ -163,7 +163,7 @@ invalid.js:28:35 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━�
     29 │ 
     30 │ test2: do {
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
     28 │ test:·for·(let·i·=·0;·i·<·9;·i++)·continue·test;
        │                                   ------------- 
@@ -180,7 +180,7 @@ invalid.js:31:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
        │ 	^^^^^^^^^^^^^^^
     32 │ } while (true);
   
-  i Suggested fix: Delete the unnecessary continue statement
+  i Unsafe fix: Delete the unnecessary continue statement
   
     29 29 │   
     30 30 │   test2: do {

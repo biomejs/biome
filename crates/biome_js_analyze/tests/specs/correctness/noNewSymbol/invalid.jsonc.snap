@@ -16,7 +16,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var foo = new Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·foo·=·new·Symbol('foo');
       │           ----              
@@ -37,7 +37,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var foo = new globalThis.Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·foo·=·new·globalThis.Symbol('foo');
       │           ----                         
@@ -58,7 +58,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var foo = new window.Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·foo·=·new·window.Symbol('foo');
       │           ----                     
@@ -79,7 +79,7 @@ invalid.jsonc:1:12 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var foo2 = new Symbol();
       │            ^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·foo2·=·new·Symbol();
       │            ----         
@@ -100,7 +100,7 @@ invalid.jsonc:1:13 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var lorem = new Symbol() // comment
       │             ^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
     1 │ var·lorem·=·new·Symbol()·//·comment
       │             ----                   
@@ -121,7 +121,7 @@ invalid.jsonc:1:26 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
   > 1 │ var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Remove new.
+  i Unsafe fix: Remove new.
   
   - var·s·=·/*·prefix_cmt·*/·new·/*·suffix_cmt·*/·Symbol()·//·comment
   + var·s·=·/*·prefix_cmt·*/··/*·suffix_cmt·*/·Symbol()·//·comment

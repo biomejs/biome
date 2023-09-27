@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -94,6 +94,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noBannedTypes",
         recommended: true,
+        fix_kind: FixKind::Safe,
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{semantic_services::Semantic, JsRuleAction};
+use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
@@ -66,9 +66,5 @@ impl Rule for NoLabelVar {
             "The variable is declared here"
         },)
         .note(markup! {"Creating a label with the same name as an in-scope variable leads to confusion."}))
-    }
-
-    fn action(_: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        None
     }
 }

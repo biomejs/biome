@@ -31,7 +31,7 @@ invalidBaseExpoentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  F
     3 │ Math.pow(a, b * c)
     4 │ Math.pow(a / b, c)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // base and exponent with a lower precedence
      2    │ - Math.pow(a·*·b,·c)
@@ -54,7 +54,7 @@ invalidBaseExpoentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  F
     4 │ Math.pow(a / b, c)
     5 │ Math.pow(a, b / c)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // base and exponent with a lower precedence
      2  2 │   Math.pow(a * b, c)
@@ -78,7 +78,7 @@ invalidBaseExpoentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  F
     5 │ Math.pow(a, b / c)
     6 │ Math.pow(a + b, 3)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │   Math.pow(a * b, c)
      3  3 │   Math.pow(a, b * c)
@@ -102,7 +102,7 @@ invalidBaseExpoentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  F
     6 │ Math.pow(a + b, 3)
     7 │ Math.pow(2, a - b)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      3  3 │   Math.pow(a, b * c)
      4  4 │   Math.pow(a / b, c)
@@ -126,7 +126,7 @@ invalidBaseExpoentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  F
     7 │ Math.pow(2, a - b)
     8 │ Math.pow(a + b, c + d)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │   Math.pow(a / b, c)
      5  5 │   Math.pow(a, b / c)
@@ -150,7 +150,7 @@ invalidBaseExpoentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  F
     8 │ Math.pow(a + b, c + d)
     9 │ Math.pow(a = b, c = d)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      5  5 │   Math.pow(a, b / c)
      6  6 │   Math.pow(a + b, 3)
@@ -174,7 +174,7 @@ invalidBaseExpoentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  F
      9 │ Math.pow(a = b, c = d)
     10 │ Math.pow(a += b, c -= d)
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      6  6 │   Math.pow(a + b, 3)
      7  7 │   Math.pow(2, a - b)
@@ -198,7 +198,7 @@ invalidBaseExpoentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  F
     10 │ Math.pow(a += b, c -= d)
     11 │ Math.pow((a, b), (c, d))
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      7  7 │   Math.pow(2, a - b)
      8  8 │   Math.pow(a + b, c + d)
@@ -222,7 +222,7 @@ invalidBaseExpoentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  
     11 │ Math.pow((a, b), (c, d))
     12 │ function *f() { Math.pow(yield, yield) }
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      8  8 │   Math.pow(a + b, c + d)
      9  9 │   Math.pow(a = b, c = d)
@@ -246,7 +246,7 @@ invalidBaseExpoentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  
     12 │ function *f() { Math.pow(yield, yield) }
     13 │ 
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
      9  9 │   Math.pow(a = b, c = d)
     10 10 │   Math.pow(a += b, c -= d)
@@ -269,7 +269,7 @@ invalidBaseExpoentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator 
        │                 ^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
   
-  i Suggested fix: Use the '**' operator instead of 'Math.pow'.
+  i Unsafe fix: Use the '**' operator instead of 'Math.pow'.
   
     10 10 │   Math.pow(a += b, c -= d)
     11 11 │   Math.pow((a, b), (c, d))

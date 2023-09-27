@@ -30,7 +30,7 @@ createElement.js:3:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
     6 │ 
     7 │ React.createElement('img', {
   
-  i Suggested fix: Remove the children.
+  i Unsafe fix: Remove the children.
   
     5 │ },·'child')
       │    ------- 
@@ -51,7 +51,7 @@ createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
        │ ^^
     10 │ 
   
-  i Suggested fix: Remove the dangerouslySetInnerHTML prop.
+  i Unsafe fix: Remove the dangerouslySetInnerHTML prop.
   
      6 6 │   
      7 7 │   React.createElement('img', {

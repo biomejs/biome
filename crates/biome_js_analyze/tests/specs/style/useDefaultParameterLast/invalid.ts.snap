@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 100
 expression: invalid.ts
 ---
 # Input
@@ -38,7 +37,7 @@ invalid.ts:1:30 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A optional parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     1 │ export·function·h(a:·number,·b?:·number,·c:·number)·{}
       │                               -                       
@@ -68,7 +67,7 @@ invalid.ts:3:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     3 │ export·function·l(a·=·0,·b?:·number,·c:·number)·{}
       │                    ----                           
@@ -98,7 +97,7 @@ invalid.ts:3:26 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A optional parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     3 │ export·function·l(a·=·0,·b?:·number,·c:·number)·{}
       │                           -                       
@@ -128,7 +127,7 @@ invalid.ts:5:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     5 │ export·function·f(a·=·0,·b·=·0,·c?:·string,·c:·string)·{}
       │                    ----                                  
@@ -158,7 +157,7 @@ invalid.ts:5:26 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     5 │ export·function·f(a·=·0,·b·=·0,·c?:·string,·c:·string)·{}
       │                           ----                           
@@ -188,7 +187,7 @@ invalid.ts:5:33 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A optional parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     5 │ export·function·f(a·=·0,·b·=·0,·c?:·string,·c:·string)·{}
       │                                  -                       
@@ -218,7 +217,7 @@ invalid.ts:7:19 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━�
   
   i A optional parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     7 │ export·function·h(a/*·before·*/?/*·after·*/:·number,·b:·number)·{}
       │                                -                                  
@@ -244,7 +243,7 @@ invalid.ts:10:17 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━
   
   i A default parameter that precedes a required parameter cannot be omitted at call site.
   
-  i Suggested fix: Turn the parameter into a required parameter.
+  i Unsafe fix: Turn the parameter into a required parameter.
   
     10 │ ····constructor(readonly·a·=·10,·readonly·b:·number)·{}
        │                           -----                        

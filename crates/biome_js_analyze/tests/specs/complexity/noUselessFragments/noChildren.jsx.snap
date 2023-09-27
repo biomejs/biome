@@ -26,7 +26,7 @@ noChildren.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
     5 │     <React.Fragment></React.Fragment>
     6 │     <Fragment></Fragment>
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     4 │ ····<></>
       │     -----
@@ -45,7 +45,7 @@ noChildren.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
     6 │     <Fragment></Fragment>
     7 │ </>
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     5 │ ····<React.Fragment></React.Fragment>
       │     ---------------------------------
@@ -64,7 +64,7 @@ noChildren.jsx:6:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
     7 │ </>
     8 │ 
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     6 │ ····<Fragment></Fragment>
       │     ---------------------

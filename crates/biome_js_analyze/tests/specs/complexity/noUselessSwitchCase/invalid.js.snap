@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.js
 ---
 # Input
@@ -48,7 +47,7 @@ invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━�
     5 │ 	case 3:
     6 │ 		break;
   
-  i Suggested fix: Remove the useless case.
+  i Unsafe fix: Remove the useless case.
   
      1  1 │   switch (foo) {
      2    │ - → case·0:
@@ -80,7 +79,7 @@ invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━�
     13 │ 	case 1:
     14 │ 	case 2:/* statements */
   
-  i Suggested fix: Remove the useless case.
+  i Unsafe fix: Remove the useless case.
   
      8  8 │   
      9  9 │   switch (foo) {
@@ -114,7 +113,7 @@ invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
     13 │ 	case 1:
     14 │ 	case 2:/* statements */
   
-  i Suggested fix: Remove the useless case.
+  i Unsafe fix: Remove the useless case.
   
     11 11 │   	// comment for default
     12 12 │   	default:
@@ -150,7 +149,7 @@ invalid.js:14:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
     13 │ 	case 1:
     14 │ 	case 2:/* statements */
   
-  i Suggested fix: Remove the useless case.
+  i Unsafe fix: Remove the useless case.
   
      9  9 │   switch (foo) {
     10 10 │   	/* before */case 0:/* after */

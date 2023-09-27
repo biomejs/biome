@@ -18,7 +18,7 @@ assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
       │       ^^^^^^^^^^
     2 │ 
   
-  i Suggested fix: Remove the Fragment
+  i Unsafe fix: Remove the Fragment
   
     1   │ - arr·=·<>Error</>
       1 │ + arr·=·"Error"

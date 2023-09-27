@@ -60,7 +60,7 @@ invalid.js:4:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
         value as the variable name. It introduces a level of unnecessary
         indirection when it's only two additional characters to inline.
   
-  i Suggested fix: Use the constant value directly
+  i Unsafe fix: Use the constant value directly
   
      1  1 │   const FOO = "FOO";
      2    │ - console.log(FOO,·FOO2);
@@ -99,7 +99,7 @@ invalid.js:4:34 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
         value as the variable name. It introduces a level of unnecessary
         indirection when it's only two additional characters to inline.
   
-  i Suggested fix: Use the constant value directly
+  i Unsafe fix: Use the constant value directly
   
      2  2 │   console.log(FOO, FOO2);
      3  3 │   
@@ -138,7 +138,7 @@ invalid.js:20:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
         value as the variable name. It introduces a level of unnecessary
         indirection when it's only two additional characters to inline.
   
-  i Suggested fix: Use the constant value directly
+  i Unsafe fix: Use the constant value directly
   
     18 18 │   };
     19 19 │   
@@ -177,7 +177,7 @@ invalid.js:26:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
         value as the variable name. It introduces a level of unnecessary
         indirection when it's only two additional characters to inline.
   
-  i Suggested fix: Use the constant value directly
+  i Unsafe fix: Use the constant value directly
   
     23 23 │   	foo: C
     24 24 │   };

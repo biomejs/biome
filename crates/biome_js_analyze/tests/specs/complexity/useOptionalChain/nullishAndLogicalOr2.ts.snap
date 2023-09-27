@@ -97,7 +97,7 @@ nullishAndLogicalOr2.ts:1:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     2 │ ((() => foo())() ?? {}).#bar;
     3 │ const foo = (bar ?? {}).#baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     1 │ (foo1?.foo2·??·{}).#foo3;
       │ -          - -----       
@@ -115,7 +115,7 @@ nullishAndLogicalOr2.ts:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     3 │ const foo = (bar ?? {}).#baz;
     4 │ (foo.bar ?? {})[baz];
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     2 │ ((()·=>·foo())()·??·{}).#bar;
       │   -             - -----      
@@ -134,7 +134,7 @@ nullishAndLogicalOr2.ts:3:13 lint/complexity/useOptionalChain  FIXABLE  ━━�
     4 │ (foo.bar ?? {})[baz];
     5 │ ((foo1 ?? {}).#foo2 ?? {}).#foo3;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     3 │ const·foo·=·(bar·??·{}).#baz;
       │             -   - -----      
@@ -153,7 +153,7 @@ nullishAndLogicalOr2.ts:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     5 │ ((foo1 ?? {}).#foo2 ?? {}).#foo3;
     6 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      2  2 │   ((() => foo())() ?? {}).#bar;
      3  3 │   const foo = (bar ?? {}).#baz;
@@ -177,7 +177,7 @@ nullishAndLogicalOr2.ts:5:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     6 │ 
     7 │ (foo ?? undefined ?? {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     5 │ ((foo1·??·{}).#foo2·??·{}).#foo3;
       │ --    -- ----      - -----       
@@ -196,7 +196,7 @@ nullishAndLogicalOr2.ts:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     8 │ (foo() ?? bar ?? {}).#baz;
     9 │ ((foo1 ? foo2 : foo3) ?? {}).#foo4;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      5  5 │   ((foo1 ?? {}).#foo2 ?? {}).#foo3;
      6  6 │   
@@ -219,7 +219,7 @@ nullishAndLogicalOr2.ts:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
      9 │ ((foo1 ? foo2 : foo3) ?? {}).#foo4;
     10 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
      6  6 │   
      7  7 │   (foo ?? undefined ?? {}).#bar;
@@ -243,7 +243,7 @@ nullishAndLogicalOr2.ts:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━
     10 │ 
     11 │ if (foo) { (foo ?? {}).#bar; }
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     9 │ ((foo1·?·foo2·:·foo3)·??·{}).#foo4;
       │  -                   - -----       
@@ -262,7 +262,7 @@ nullishAndLogicalOr2.ts:11:12 lint/complexity/useOptionalChain  FIXABLE  ━━�
     12 │ if ((foo ?? {}).#bar) { foo.bar; }
     13 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     11 │ if·(foo)·{·(foo·??·{}).#bar;·}
        │            -   - -----        
@@ -280,7 +280,7 @@ nullishAndLogicalOr2.ts:12:5 lint/complexity/useOptionalChain  FIXABLE  ━━�
     13 │ 
     14 │ (undefined && foo ?? {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     12 │ if·((foo·??·{}).#bar)·{·foo.bar;·}
        │     -   - -----                   
@@ -299,7 +299,7 @@ nullishAndLogicalOr2.ts:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     15 │ (a > b || {}).#bar;
     16 │ (((typeof x) as string) || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     12 12 │   if ((foo ?? {}).#bar) { foo.bar; }
     13 13 │   
@@ -322,7 +322,7 @@ nullishAndLogicalOr2.ts:15:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     16 │ (((typeof x) as string) || {}).#bar;
     17 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     13 13 │   
     14 14 │   (undefined && foo ?? {}).#bar;
@@ -346,7 +346,7 @@ nullishAndLogicalOr2.ts:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     17 │ 
     18 │ (void foo() || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     14 14 │   (undefined && foo ?? {}).#bar;
     15 15 │   (a > b || {}).#bar;
@@ -370,7 +370,7 @@ nullishAndLogicalOr2.ts:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     19 │ ((a ? b : c) || {}).#bar;
     20 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     16 16 │   (((typeof x) as string) || {}).#bar;
     17 17 │   
@@ -393,7 +393,7 @@ nullishAndLogicalOr2.ts:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     20 │ 
     21 │ ((a instanceof Error) || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     17 17 │   
     18 18 │   (void foo() || {}).#bar;
@@ -417,7 +417,7 @@ nullishAndLogicalOr2.ts:21:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     22 │ ((a << b) || {}).#bar;
     23 │ ((foo ** 2) || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     19 19 │   ((a ? b : c) || {}).#bar;
     20 20 │   
@@ -440,7 +440,7 @@ nullishAndLogicalOr2.ts:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     23 │ ((foo ** 2) || {}).#bar;
     24 │ (foo ** 2 || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     20 20 │   
     21 21 │   ((a instanceof Error) || {}).#bar;
@@ -464,7 +464,7 @@ nullishAndLogicalOr2.ts:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     24 │ (foo ** 2 || {}).#bar;
     25 │ (foo++ || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     21 21 │   ((a instanceof Error) || {}).#bar;
     22 22 │   ((a << b) || {}).#bar;
@@ -488,7 +488,7 @@ nullishAndLogicalOr2.ts:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     25 │ (foo++ || {}).#bar;
     26 │ (+foo || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     22 22 │   ((a << b) || {}).#bar;
     23 23 │   ((foo ** 2) || {}).#bar;
@@ -512,7 +512,7 @@ nullishAndLogicalOr2.ts:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     26 │ (+foo || {}).#bar;
     27 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     23 23 │   ((foo ** 2) || {}).#bar;
     24 24 │   (foo ** 2 || {}).#bar;
@@ -535,7 +535,7 @@ nullishAndLogicalOr2.ts:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^^^^
     27 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     24 24 │   (foo ** 2 || {}).#bar;
     25 25 │   (foo++ || {}).#bar;
@@ -558,7 +558,7 @@ nullishAndLogicalOr2.ts:30:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     31 │ (this || ({})).bar;
     32 │ (await this || {}).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     28 28 │   
     29 29 │   //this expression
@@ -582,7 +582,7 @@ nullishAndLogicalOr2.ts:31:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     32 │ (await this || {}).bar;
     33 │ const foo = (this || {}).baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     29 29 │   //this expression
     30 30 │   (this || {}).bar;
@@ -606,7 +606,7 @@ nullishAndLogicalOr2.ts:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     33 │ const foo = (this || {}).baz;
     34 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     30 30 │   (this || {}).bar;
     31 31 │   (this || ({})).bar;
@@ -630,7 +630,7 @@ nullishAndLogicalOr2.ts:33:13 lint/complexity/useOptionalChain  FIXABLE  ━━�
     34 │ 
     35 │ ((this || {}).foo2 || {}).foo3;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     31 31 │   (this || ({})).bar;
     32 32 │   (await this || {}).bar;
@@ -654,7 +654,7 @@ nullishAndLogicalOr2.ts:35:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     36 │ 
     37 │ if (foo) { (this || {}).bar; }
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     33 33 │   const foo = (this || {}).baz;
     34 34 │   
@@ -678,7 +678,7 @@ nullishAndLogicalOr2.ts:37:12 lint/complexity/useOptionalChain  FIXABLE  ━━�
     38 │ if ((this || {}).bar) { foo.bar; }
     39 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     35 35 │   ((this || {}).foo2 || {}).foo3;
     36 36 │   
@@ -701,7 +701,7 @@ nullishAndLogicalOr2.ts:38:5 lint/complexity/useOptionalChain  FIXABLE  ━━�
     39 │ 
     40 │ (undefined && this || {}).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     36 36 │   
     37 37 │   if (foo) { (this || {}).bar; }
@@ -725,7 +725,7 @@ nullishAndLogicalOr2.ts:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     41 │ (this ?? {}).bar;
     42 │ (this ?? ({})).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     38 38 │   if ((this || {}).bar) { foo.bar; }
     39 39 │   
@@ -748,7 +748,7 @@ nullishAndLogicalOr2.ts:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     42 │ (this ?? ({})).bar;
     43 │ (await this ?? {}).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     41 │ (this·??·{}).bar;
        │ -    - -----     
@@ -767,7 +767,7 @@ nullishAndLogicalOr2.ts:42:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     43 │ (await this ?? {}).bar;
     44 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     42 │ (this·??·({})).bar;
        │ -    -- ------     
@@ -786,7 +786,7 @@ nullishAndLogicalOr2.ts:43:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     44 │ 
     45 │ const foo = (this ?? {}).baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     41 41 │   (this ?? {}).bar;
     42 42 │   (this ?? ({})).bar;
@@ -810,7 +810,7 @@ nullishAndLogicalOr2.ts:45:13 lint/complexity/useOptionalChain  FIXABLE  ━━�
     46 │ ((this ?? {}).foo2 ?? {}).foo3;
     47 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     45 │ const·foo·=·(this·??·{}).baz;
        │             -    - -----     
@@ -828,7 +828,7 @@ nullishAndLogicalOr2.ts:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     47 │ 
     48 │ if (foo) { (this ?? {}).bar; }
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     46 │ ((this·??·{}).foo2·??·{}).foo3;
        │ --    -- ----     - -----      
@@ -847,7 +847,7 @@ nullishAndLogicalOr2.ts:48:12 lint/complexity/useOptionalChain  FIXABLE  ━━�
     49 │ if ((this ?? {}).bar) { foo.bar; }
     50 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     48 │ if·(foo)·{·(this·??·{}).bar;·}
        │            -    - -----       
@@ -865,7 +865,7 @@ nullishAndLogicalOr2.ts:49:5 lint/complexity/useOptionalChain  FIXABLE  ━━�
     50 │ 
     51 │ (undefined && this ?? {}).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     49 │ if·((this·??·{}).bar)·{·foo.bar;·}
        │     -    - -----                  
@@ -884,7 +884,7 @@ nullishAndLogicalOr2.ts:51:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     52 │ (((typeof this) as string) || {}).bar;
     53 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     49 49 │   if ((this ?? {}).bar) { foo.bar; }
     50 50 │   
@@ -907,7 +907,7 @@ nullishAndLogicalOr2.ts:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     53 │ 
     54 │ // this expression with private name
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     50 50 │   
     51 51 │   (undefined && this ?? {}).bar;
@@ -930,7 +930,7 @@ nullishAndLogicalOr2.ts:55:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     56 │ (this || ({})).#bar;
     57 │ (await this || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     53 53 │   
     54 54 │   // this expression with private name
@@ -954,7 +954,7 @@ nullishAndLogicalOr2.ts:56:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     57 │ (await this || {}).#bar;
     58 │ const foo = (this || {}).#baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     54 54 │   // this expression with private name
     55 55 │   (this || {}).#bar;
@@ -978,7 +978,7 @@ nullishAndLogicalOr2.ts:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     58 │ const foo = (this || {}).#baz;
     59 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     55 55 │   (this || {}).#bar;
     56 56 │   (this || ({})).#bar;
@@ -1002,7 +1002,7 @@ nullishAndLogicalOr2.ts:58:13 lint/complexity/useOptionalChain  FIXABLE  ━━�
     59 │ 
     60 │ ((this || {}).#foo2 || {}).#foo3;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     56 56 │   (this || ({})).#bar;
     57 57 │   (await this || {}).#bar;
@@ -1026,7 +1026,7 @@ nullishAndLogicalOr2.ts:60:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     61 │ 
     62 │ if (foo) { (this || {}).#bar; }
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     58 58 │   const foo = (this || {}).#baz;
     59 59 │   
@@ -1050,7 +1050,7 @@ nullishAndLogicalOr2.ts:62:12 lint/complexity/useOptionalChain  FIXABLE  ━━�
     63 │ if ((this || {}).#bar) { foo.bar; }
     64 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     60 60 │   ((this || {}).#foo2 || {}).#foo3;
     61 61 │   
@@ -1073,7 +1073,7 @@ nullishAndLogicalOr2.ts:63:5 lint/complexity/useOptionalChain  FIXABLE  ━━�
     64 │ 
     65 │ (undefined && this || {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     61 61 │   
     62 62 │   if (foo) { (this || {}).#bar; }
@@ -1097,7 +1097,7 @@ nullishAndLogicalOr2.ts:65:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     66 │ (this ?? {}).#bar;
     67 │ (this ?? ({})).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     63 63 │   if ((this || {}).#bar) { foo.bar; }
     64 64 │   
@@ -1120,7 +1120,7 @@ nullishAndLogicalOr2.ts:66:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     67 │ (this ?? ({})).#bar;
     68 │ (await this ?? {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     66 │ (this·??·{}).#bar;
        │ -    - -----      
@@ -1139,7 +1139,7 @@ nullishAndLogicalOr2.ts:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     68 │ (await this ?? {}).#bar;
     69 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     67 │ (this·??·({})).#bar;
        │ -    -- ------      
@@ -1158,7 +1158,7 @@ nullishAndLogicalOr2.ts:68:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     69 │ 
     70 │ const foo = (this ?? {}).#baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     66 66 │   (this ?? {}).#bar;
     67 67 │   (this ?? ({})).#bar;
@@ -1182,7 +1182,7 @@ nullishAndLogicalOr2.ts:70:13 lint/complexity/useOptionalChain  FIXABLE  ━━�
     71 │ ((this ?? {}).#foo2 ?? {}).#foo3;
     72 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     70 │ const·foo·=·(this·??·{}).#baz;
        │             -    - -----      
@@ -1200,7 +1200,7 @@ nullishAndLogicalOr2.ts:71:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     72 │ 
     73 │ if (foo) { (this ?? {}).#bar; }
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     71 │ ((this·??·{}).#foo2·??·{}).#foo3;
        │ --    -- ----      - -----       
@@ -1219,7 +1219,7 @@ nullishAndLogicalOr2.ts:73:12 lint/complexity/useOptionalChain  FIXABLE  ━━�
     74 │ if ((this ?? {}).#bar) { foo.bar; }
     75 │ 
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     73 │ if·(foo)·{·(this·??·{}).#bar;·}
        │            -    - -----        
@@ -1237,7 +1237,7 @@ nullishAndLogicalOr2.ts:74:5 lint/complexity/useOptionalChain  FIXABLE  ━━�
     75 │ 
     76 │ (undefined && this ?? {}).#bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     74 │ if·((this·??·{}).#bar)·{·foo.bar;·}
        │     -    - -----                   
@@ -1256,7 +1256,7 @@ nullishAndLogicalOr2.ts:76:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     77 │ (((typeof this) as string) || {}).#bar;
     78 │ // (new foo || {}).bar;  // tracked here https://github.com/rome/tools/issues/3257
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     74 74 │   if ((this ?? {}).#bar) { foo.bar; }
     75 75 │   
@@ -1279,7 +1279,7 @@ nullishAndLogicalOr2.ts:77:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     78 │ // (new foo || {}).bar;  // tracked here https://github.com/rome/tools/issues/3257
     79 │ (foo() || {}).bar;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     75 75 │   
     76 76 │   (undefined && this ?? {}).#bar;
@@ -1302,7 +1302,7 @@ nullishAndLogicalOr2.ts:79:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^^^^
     80 │ ((foo || {}).bar() || {}).baz;
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     77 77 │   (((typeof this) as string) || {}).#bar;
     78 78 │   // (new foo || {}).bar;  // tracked here https://github.com/rome/tools/issues/3257
@@ -1323,7 +1323,7 @@ nullishAndLogicalOr2.ts:80:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
   > 80 │ ((foo || {}).bar() || {}).baz;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Change to an optional chain.
+  i Unsafe fix: Change to an optional chain.
   
     78 78 │   // (new foo || {}).bar;  // tracked here https://github.com/rome/tools/issues/3257
     79 79 │   (foo() || {}).bar;

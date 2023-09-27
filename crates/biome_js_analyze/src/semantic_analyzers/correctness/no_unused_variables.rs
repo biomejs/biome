@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use crate::{semantic_services::Semantic, utils::rename::RenameSymbolExtensions};
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_semantic::ReferencesExtensions;
@@ -94,6 +96,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noUnusedVariables",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

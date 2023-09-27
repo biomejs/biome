@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -10,8 +10,7 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Enforces switch clauses have a single statement, emits a quick fix wrapping
-    /// the statements in a block.
+    /// Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.
     ///
     /// ## Examples
     ///
@@ -41,6 +40,7 @@ declare_rule! {
         version: "1.0.0",
         name: "useSingleCaseStatement",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

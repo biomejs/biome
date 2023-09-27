@@ -44,7 +44,7 @@ invalid.jsx:5:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━�
   
   i Shorthand fragment syntax saves keystrokes and is only inapplicable when keys are required.
   
-  i Suggested fix: Replace <Fragment> with the fragment syntax
+  i Unsafe fix: Replace <Fragment> with the fragment syntax
   
      3  3 │   <div>
      4  4 │       {/* invalid */}
@@ -78,7 +78,7 @@ invalid.jsx:10:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━
   
   i Shorthand fragment syntax saves keystrokes and is only inapplicable when keys are required.
   
-  i Suggested fix: Replace <Fragment> with the fragment syntax
+  i Unsafe fix: Replace <Fragment> with the fragment syntax
   
      8  8 │       </Fragment>
      9  9 │   
@@ -111,7 +111,7 @@ invalid.jsx:15:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━
   
   i Shorthand fragment syntax saves keystrokes and is only inapplicable when keys are required.
   
-  i Suggested fix: Replace <Fragment> with the fragment syntax
+  i Unsafe fix: Replace <Fragment> with the fragment syntax
   
     13 13 │       </React.Fragment>
     14 14 │   

@@ -174,7 +174,7 @@ where
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let applicability = match self.applicability {
             Applicability::Always => "Safe fix",
-            Applicability::MaybeIncorrect => "Suggested fix",
+            Applicability::MaybeIncorrect => "Unsafe fix",
         };
 
         visitor.record_log(

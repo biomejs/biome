@@ -26,7 +26,7 @@ invalid.jsonc:1:11 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ const a = s.toUpperCase() === 'abc';
       │                               ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - const·a·=·s.toUpperCase()·===·'abc';
   + const·a·=·s.toUpperCase()·===·"ABC";
@@ -58,7 +58,7 @@ invalid.jsonc:1:11 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ const c = s.toUpperCase() == 'abc';
       │                              ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - const·c·=·s.toUpperCase()·==·'abc';
   + const·c·=·s.toUpperCase()·==·"ABC";
@@ -90,7 +90,7 @@ invalid.jsonc:1:12 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ const a2 = 'abc' === s.toUpperCase();
       │            ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - const·a2·=·'abc'·===·s.toUpperCase();
   + const·a2·=·"ABC"·===·s.toUpperCase();
@@ -122,7 +122,7 @@ invalid.jsonc:1:5 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {}
       │                         ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - if·(s.toUpperCase()·===·'abc'·&&·c·==·d·&&·e·==·f)·{}
   + if·(s.toUpperCase()·===·"ABC"·&&·c·==·d·&&·e·==·f)·{}
@@ -154,7 +154,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {}
       │                            ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - while·(s.toUpperCase()·===·'abc'·&&·c·==·d·&&·e·==·f)·{}
   + while·(s.toUpperCase()·===·"ABC"·&&·c·==·d·&&·e·==·f)·{}
@@ -186,7 +186,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ while (s.toUpperCase() === 'abc') {}
       │                            ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - while·(s.toUpperCase()·===·'abc')·{}
   + while·(s.toUpperCase()·===·"ABC")·{}
@@ -218,7 +218,7 @@ invalid.jsonc:1:9 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ let b = s.toLowerCase() === `eFg`;
       │                             ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - let·b·=·s.toLowerCase()·===·`eFg`;
   + let·b·=·s.toLowerCase()·===·"efg";
@@ -250,7 +250,7 @@ invalid.jsonc:1:14 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ do {} while (s.toLowerCase() === 'ABC');
       │                                  ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - do·{}·while·(s.toLowerCase()·===·'ABC');
   + do·{}·while·(s.toLowerCase()·===·"abc");
@@ -282,7 +282,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ for (; s.toLowerCase() === 'ABC'; ) {}
       │                            ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - for·(;·s.toLowerCase()·===·'ABC';·)·{}
   + for·(;·s.toLowerCase()·===·"abc";·)·{}
@@ -314,7 +314,7 @@ invalid.jsonc:1:45 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
       │                                             ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·'aBc':·default:·}
   + switch·(s.toUpperCase())·{·case·'ABC':·case·"ABC":·case·'aBc':·default:·}
@@ -340,7 +340,7 @@ invalid.jsonc:1:57 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
       │                                                         ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·'aBc':·default:·}
   + switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·"ABC":·default:·}
@@ -372,7 +372,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ for (; s['toLowerCase']() === 'ABC'; ) {}
       │                               ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - for·(;·s['toLowerCase']()·===·'ABC';·)·{}
   + for·(;·s['toLowerCase']()·===·"abc";·)·{}
@@ -404,7 +404,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
       │                               ^^^^^
   
-  i Suggested fix: Use upper case string value.
+  i Unsafe fix: Use upper case string value.
   
   - for·(;·s[`toUpperCase`]()·===·'abc';·)·{}
   + for·(;·s[`toUpperCase`]()·===·"ABC";·)·{}
@@ -436,7 +436,7 @@ invalid.jsonc:1:36 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
       │                                    ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
   + switch·(s['toLowerCase']())·{·case·"abc":·case·'aBc':·case·'abC':·default:·}
@@ -462,7 +462,7 @@ invalid.jsonc:1:48 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
       │                                                ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
   + switch·(s['toLowerCase']())·{·case·'Abc':·case·"abc":·case·'abC':·default:·}
@@ -488,7 +488,7 @@ invalid.jsonc:1:60 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
   > 1 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
       │                                                            ^^^^^
   
-  i Suggested fix: Use lower case string value.
+  i Unsafe fix: Use lower case string value.
   
   - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
   + switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·"abc":·default:·}

@@ -68,7 +68,7 @@ invalid.js:4:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━
     6 │ }
     7 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
      1  1 │   switch (foo) {
      2  2 │       // comment
@@ -97,7 +97,7 @@ invalid.js:10:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     12 │ }
     13 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
      7  7 │   
      8  8 │   switch (foo) {
@@ -126,7 +126,7 @@ invalid.js:17:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     19 │ }
     20 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
     14 14 │   switch (foo) {
     15 15 │       case false
@@ -155,7 +155,7 @@ invalid.js:24:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     26 │ }
     27 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
     21 21 │   switch (foo) {
     22 22 │       case true:
@@ -184,7 +184,7 @@ invalid.js:31:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     33 │ }
     34 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
     28 28 │   switch (foo) {
     29 29 │       // comment
@@ -213,7 +213,7 @@ invalid.js:37:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     39 │ }
     40 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
     34 34 │   
     35 35 │   switch (foo) {
@@ -242,7 +242,7 @@ invalid.js:44:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
     46 │ }
     47 │ 
   
-  i Suggested fix: Wrap the statements in a block.
+  i Unsafe fix: Wrap the statements in a block.
   
     41 41 │   switch (foo) {
     42 42 │       default

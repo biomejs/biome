@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::{make, syntax::T};
@@ -58,6 +58,7 @@ declare_rule! {
         version: "1.0.0",
         name: "useExponentiationOperator",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

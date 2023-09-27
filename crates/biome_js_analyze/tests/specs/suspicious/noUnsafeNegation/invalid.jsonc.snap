@@ -16,7 +16,7 @@ invalid.jsonc:1:1 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━�
   > 1 │ !1 in [1,2];
       │ ^^^^^^^^^^^
   
-  i Suggested fix: Wrap the expression with a parenthesis
+  i Unsafe fix: Wrap the expression with a parenthesis
   
     1 │ !(1·in·[1,2]);
       │  +          + 
@@ -37,7 +37,7 @@ invalid.jsonc:1:10 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━
   > 1 │ /**test*/!/** test*/1 instanceof [1,2];
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Suggested fix: Wrap the expression with a parenthesis
+  i Unsafe fix: Wrap the expression with a parenthesis
   
     1 │ /**test*/!/**·test*/(1·instanceof·[1,2]);
       │                     +                  + 

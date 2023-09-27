@@ -74,7 +74,7 @@ invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     2 │ 
     3 │ 1 * 2 + 'foo';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      1    │ - foo·+·'baz';
         1 │ + `${foo}baz`;
@@ -96,7 +96,7 @@ invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     4 │ 
     5 │ 1 + 2 + 3 + "px" + 4 + 5;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      1  1 │   foo + 'baz';
      2  2 │   
@@ -120,7 +120,7 @@ invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     6 │ 
     7 │ a + b + c + 'px' + d + e;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      3  3 │   1 * 2 + 'foo';
      4  4 │   
@@ -144,7 +144,7 @@ invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     8 │ 
     9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      5  5 │   1 + 2 + 3 + "px" + 4 + 5;
      6  6 │   
@@ -168,7 +168,7 @@ invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     10 │ 
     11 │ (1 + 'foo') * 2;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      7  7 │   a + b + c + 'px' + d + e;
      8  8 │   
@@ -192,7 +192,7 @@ invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     12 │ 
     13 │ 1 * (2 + 'foo') + 'bar';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
      9  9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
     10 10 │   
@@ -216,7 +216,7 @@ invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     14 │ 
     15 │ 'foo' + 1;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     11 11 │   (1 + 'foo') * 2;
     12 12 │   
@@ -240,7 +240,7 @@ invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     14 │ 
     15 │ 'foo' + 1;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     11 11 │   (1 + 'foo') * 2;
     12 12 │   
@@ -264,7 +264,7 @@ invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     16 │ 
     17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     13 13 │   1 * (2 + 'foo') + 'bar';
     14 14 │   
@@ -288,7 +288,7 @@ invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     18 │ 
     19 │ 'foo' + 1 + 2;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     15 15 │   'foo' + 1;
     16 16 │   
@@ -312,7 +312,7 @@ invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     20 │ 
     21 │ 1 + '2' - 3;
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     17 17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
     18 18 │   
@@ -336,7 +336,7 @@ invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     22 │ 
     23 │ foo() + ' bar';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     19 19 │   'foo' + 1 + 2;
     20 20 │   
@@ -360,7 +360,7 @@ invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     24 │ 
     25 │ foo() + '\n';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     21 21 │   1 + '2' - 3;
     22 22 │   
@@ -384,7 +384,7 @@ invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     26 │ 
     27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     23 23 │   foo() + ' bar';
     24 24 │   
@@ -408,7 +408,7 @@ invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     28 │ 
     29 │ // strings including `${`
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     25 25 │   foo() + '\n';
     26 26 │   
@@ -432,7 +432,7 @@ invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     32 │ 
     33 │ 'foo: ${bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     29 29 │   // strings including `${`
     30 30 │   
@@ -456,7 +456,7 @@ invalid.js:33:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     34 │ 
     35 │ 'foo: `bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     31 31 │   '${foo.' + bar + '.baz}';
     32 32 │   
@@ -480,7 +480,7 @@ invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     36 │ 
     37 │ '${foo}: `bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     33 33 │   'foo: ${bar.' + baz + '.bat}';
     34 34 │   
@@ -504,7 +504,7 @@ invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     38 │ 
     39 │ 'foo: ${bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     35 35 │   'foo: `bar.' + baz + '.bat}';
     36 36 │   
@@ -528,7 +528,7 @@ invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     40 │ 
     41 │ 'foo: `bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     37 37 │   '${foo}: `bar.' + baz + '.bat}';
     38 38 │   
@@ -552,7 +552,7 @@ invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     42 │ 
     43 │ 'foo: \\${bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     39 39 │   'foo: ${bar.' + baz + '.bat}';
     40 40 │   
@@ -576,7 +576,7 @@ invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     44 │ 
     45 │ 'foo: \\${bar.' + baz + '.bat}';
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     41 41 │   'foo: `bar.' + baz + '.bat}';
     42 42 │   
@@ -600,7 +600,7 @@ invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     46 │ 
     47 │ // parentheses
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     43 43 │   'foo: \\${bar.' + baz + '.bat}';
     44 44 │   
@@ -624,7 +624,7 @@ invalid.js:49:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
     50 │ 
     51 │ ("a") + (b) + ("c");
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     47 47 │   // parentheses
     48 48 │   
@@ -648,7 +648,7 @@ invalid.js:51:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     52 │ 
     53 │ //a
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     49 49 │   const x = a + ("b") + c;
     50 50 │   
@@ -673,7 +673,7 @@ invalid.js:54:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^
     57 │ 
   
-  i Suggested fix: Use a template literal.
+  i Unsafe fix: Use a template literal.
   
     52 52 │   
     53 53 │   //a
