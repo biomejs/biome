@@ -1007,6 +1007,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyCharacterClassInRegex": {
+					"description": "Disallow empty character classes in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveComplexity": {
 					"description": "Disallow functions that exceed a given Cognitive Complexity score.",
 					"anyOf": [
