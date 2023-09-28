@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_diagnostics_macros"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.0.2"
 
 [lib]
 proc-macro = true
