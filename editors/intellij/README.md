@@ -3,12 +3,11 @@
 
 -  See lints while you type
 -  Apply code fixes (from mouse-over, <kbd title="Option">⌥</kbd>+<kbd  title="Enter">⏎</kbd> or <kbd title="Alt">Alt</kbd>+<kbd title="Enter">Enter</kbd>)
--  Reformat your code with <kbd>⌥⇧</kbd>+<kbd title="Cmd">⌘</kbd>+<kbd  title="L">L</kbd> or <kbd title="Ctrl">Ctrl</kbd>+<kbd title="Alt">Alt</kbd>+<kbd  title="L">L</kbd>
+-  Reformat your code with <kbd>⌥⇧</kbd>+<kbd title="Cmd">⌘</kbd>+<kbd  title="L">L</kbd> or <kbd title="Ctrl">Ctrl</kbd>+<kbd title="Alt">Alt</kbd>+<kbd  title="L">L</kbd> (You can also format your [code on save](https://www.jetbrains.com/help/webstorm/reformat-and-rearrange-code.html#reformat-on-save))
 
 However, please note the following limitations:
 
 - Automatically applying code fixes on save
-- Reformat your code on save
 
 ## Installation
 
