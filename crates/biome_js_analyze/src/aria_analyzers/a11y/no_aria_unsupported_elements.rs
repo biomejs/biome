@@ -123,11 +123,11 @@ impl Rule for NoAriaUnsupportedElements {
         )
     }
 
-    fn action(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let element = _ctx.query();
         let mut mutation = _ctx.root().begin();
         let mut removed_attribute = "role".to_string();
-        
+
         element.attributes().iter().for_each(|attribute| {
             let attribute = attribute.as_jsx_attribute().unwrap();
             let attribute_name = attribute
@@ -139,11 +139,10 @@ impl Rule for NoAriaUnsupportedElements {
                 .value_token()
                 .ok()
                 .unwrap();
-            let attribute_name = attribute_name.to_string();      
+            let attribute_name = attribute_name.to_string();
             removed_attribute = attribute_name;
             mutation.remove_node(attribute.clone());
         });
-
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
