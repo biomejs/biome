@@ -29,7 +29,6 @@ smallvec               = { workspace = true }
 tracing                = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser   = { workspace = true, features = ["serde"] }
 expect-test       = "1.2.2"
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

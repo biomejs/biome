@@ -82,7 +82,6 @@ quickcheck        = "1.0.3"
 quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }
 rustc-hash        = "1.1.0"
-# pinning to avoid crate publishing failures
 schemars          = { version = "0.8.12" }
 serde             = { version = "1.0.164", features = ["derive"] }
 serde_json        = "1.0.99"

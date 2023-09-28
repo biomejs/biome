@@ -20,8 +20,8 @@ indexmap          = { workspace = true }
 parking_lot       = { version = "0.12.0", features = ["arc_lock"] }
 rayon             = "1.7.0"
 schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"], optional = true }
+serde             = { workspace = true }
 tracing           = { workspace = true }
 
 [features]
-serde = ["dep:serde", "schemars", "biome_diagnostics/schema"]
+serde = ["schemars", "biome_diagnostics/schema"]

@@ -28,8 +28,8 @@ tracing           = { workspace = true }
 unicode-width     = "0.1.9"
 
 [dev-dependencies]
-biome_js_parser = { workspace = true }
-biome_js_syntax = { workspace = true }
+biome_js_parser = { path = "../biome_js_parser" }
+biome_js_syntax = { path = "../biome_js_syntax" }
 insta           = { workspace = true }
 
 [features]
