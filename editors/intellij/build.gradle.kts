@@ -75,7 +75,9 @@ tasks {
 				systemProperty("jbScreenMenuBar.enabled", "false")
 				systemProperty("apple.laf.useScreenMenuBar", "false")
 				systemProperty("idea.trust.all.projects", "true")
-				systemProperty( "ide.show.tips.on.startup.default.value", "false")
+				systemProperty("ide.show.tips.on.startup.default.value", "false")
+				systemProperty("eap.require.license", "false")
+
     }
 
 		test {
