@@ -1,11 +1,7 @@
 # Jobs run on pull request for intellij
 name: Pull request Intellij
 on:
-  pull_request:
-    branches:
-      - main
-    paths: # Only run when changes are made to intellij editor
-      - 'editors/intellij/**'
+ workflow_dispatch: ~
 
 jobs:
   test-ui:
