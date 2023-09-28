@@ -13,9 +13,9 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Require assignment operator shorthand where possible
+    /// Require assignment operator shorthand where possible.
     ///
-    /// JavaScript provides shorthand operators that combine variable assignment and some simple mathematical operations
+    /// JavaScript provides shorthand operators combining a variable assignment and simple mathematical operation.
     ///
     /// Source: https://eslint.org/docs/latest/rules/operator-assignment/
     ///
@@ -24,34 +24,28 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-
     /// a = a + 1;
     /// ```
     ///
     /// ```js,expect_diagnostic
-
     /// a = a - 1;
     /// ```
     ///
     ///  ```js,expect_diagnostic
-
     /// a = a * 1;
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-
     /// a += 1;
     /// ```
     ///
     /// ```js
-
     /// a -= 1;
     /// ```
     ///
     ///  ```js
-
     /// a *= 1;
     /// ```
     ///
@@ -86,15 +80,17 @@ impl Rule for UseShorthandAssign {
             return None;
         }
 
-        let left = node.left().ok();
-        let left_var_name = match left?.as_any_js_assignment()? {
+        let left = node.left().ok()?;
+        let right = node.right().ok()?;
+
+        let left_var_name = match left.as_any_js_assignment()? {
             AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.text(),
             AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.text(),
             AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.text(),
             _ => return None,
         };
 
-        let binary_expression = match node.right().ok()? {
+        let binary_expression = match right {
             AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
             AnyJsExpression::JsParenthesizedExpression(param) => {
                 JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?
@@ -131,7 +127,7 @@ impl Rule for UseShorthandAssign {
             rule_category!(),
             node.range(),
             markup! {
-                "Assignment "<Emphasis>"(=)"</Emphasis>" can be replaced with operator assignment "<Emphasis>""{shorthand_operator}""</Emphasis>""
+                "Assignment "<Emphasis>"(=)"</Emphasis>" can be replaced with operator assignment "<Emphasis>""{shorthand_operator}""</Emphasis>"."
             },
         ))
     }

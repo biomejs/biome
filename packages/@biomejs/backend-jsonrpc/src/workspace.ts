@@ -746,7 +746,7 @@ export interface Nursery {
 	 */
 	useIsArray?: RuleConfiguration;
 	/**
-	 * Require assignment operator shorthand where possible
+	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration;
 }

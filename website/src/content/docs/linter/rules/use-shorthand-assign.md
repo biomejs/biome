@@ -8,9 +8,9 @@ title: useShorthandAssign (since vnext)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Require assignment operator shorthand where possible
+Require assignment operator shorthand where possible.
 
-JavaScript provides shorthand operators that combine variable assignment and some simple mathematical operations
+JavaScript provides shorthand operators combining a variable assignment and simple mathematical operation.
 
 Source: https://eslint.org/docs/latest/rules/operator-assignment/
 
@@ -24,7 +24,7 @@ a = a + 1;
 
 <pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>+=</strong></span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>+=</strong></span><span style="color: Orange;">.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a = a + 1;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -44,7 +44,7 @@ a = a - 1;
 
 <pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>-=</strong></span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>-=</strong></span><span style="color: Orange;">.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a = a - 1;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -64,7 +64,7 @@ a = a * 1;
 
 <pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>*=</strong></span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>*=</strong></span><span style="color: Orange;">.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>a = a * 1;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

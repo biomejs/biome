@@ -2279,7 +2279,7 @@ pub struct Nursery {
     #[bpaf(long("use-is-array"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_is_array: Option<RuleConfiguration>,
-    #[doc = "Require assignment operator shorthand where possible"]
+    #[doc = "Require assignment operator shorthand where possible."]
     #[bpaf(long("use-shorthand-assign"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_assign: Option<RuleConfiguration>,
@@ -2334,7 +2334,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 19] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 20] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2354,6 +2354,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2587,7 +2588,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 11] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 19] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 20] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
