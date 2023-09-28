@@ -126,15 +126,16 @@ impl Rule for NoAriaUnsupportedElements {
     fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let element = _ctx.query();
         let mut mutation = _ctx.root().begin();
-        let mut removed_attribute = "role".to_string();
 
-        for attribute in element.attributes() {
-            let attribute = attribute.as_jsx_attribute()?;
-            let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
-            let attribute_name = attribute_name.to_string();
-            removed_attribute = attribute_name;
-            mutation.remove_node(attribute.clone());
-        }
+        let attribute = element.attributes().into_iter().find_map(|attribute| {
+            let jsx_attribute = attribute.as_jsx_attribute()?;
+            let attribute_name = jsx_attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
+            let attribute_name = attribute_name.text_trimmed();
+            (attribute_name.starts_with("aria-") || attribute_name == "role").then_some(attribute)
+        })?;
+
+        let removed_attribute = attribute.to_string();
+        mutation.remove_node(attribute.clone());
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,

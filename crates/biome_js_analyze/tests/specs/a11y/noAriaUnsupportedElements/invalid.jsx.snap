@@ -31,10 +31,10 @@ invalid.jsx:2:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-hidden attribute.
+  i Unsafe fix: Remove the aria-hidden="false"  attribute.
   
     2 │ → <meta·charset="UTF-8"·aria-hidden="false"·/>
-      │         ------------------------------------  
+      │                         --------------------  
 
 ```
 
@@ -52,10 +52,10 @@ invalid.jsx:3:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role attribute.
+  i Unsafe fix: Remove the role="meta"  attribute.
   
     3 │ → <meta·charset="UTF-8"·role="meta"·/>
-      │         ----------------------------  
+      │                         ------------  
 
 ```
 
@@ -73,7 +73,7 @@ invalid.jsx:4:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-required attribute.
+  i Unsafe fix: Remove the aria-required="true"  attribute.
   
     4 │ → <html·aria-required="true"·/>
       │         ---------------------  
@@ -94,7 +94,7 @@ invalid.jsx:5:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role attribute.
+  i Unsafe fix: Remove the role="html" attribute.
   
     5 │ → <html·role="html"></html>
       │         -----------        
@@ -115,7 +115,7 @@ invalid.jsx:6:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-label attribute.
+  i Unsafe fix: Remove the aria-label="script" attribute.
   
     6 │ → <script·aria-label="script"></script>
       │           -------------------          
@@ -136,7 +136,7 @@ invalid.jsx:7:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role attribute.
+  i Unsafe fix: Remove the role="script" attribute.
   
     7 │ → <script·role="script"></script>
       │           -------------          
@@ -178,7 +178,7 @@ invalid.jsx:9:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role attribute.
+  i Unsafe fix: Remove the role="style" attribute.
   
     9 │ → <style·role="style"></style>
       │          ------------         
