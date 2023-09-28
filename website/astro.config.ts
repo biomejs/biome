@@ -205,7 +205,10 @@ export default defineConfig({
 				{
 					label: "Recipes",
 					items: [
-						{ label: "Continuous Integration", link: "/recipes/continuous-integration" },
+						{
+							label: "Continuous Integration",
+							link: "/recipes/continuous-integration",
+						},
 					],
 				},
 				{
