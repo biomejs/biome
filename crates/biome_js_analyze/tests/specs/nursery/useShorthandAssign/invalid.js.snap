@@ -41,7 +41,7 @@ invalid.js:1:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     2 │ a = a - 1;
     3 │ a = a * 1;
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
      1    │ - a·=·a·+·1;
         1 │ + a·+=·a;
@@ -62,7 +62,7 @@ invalid.js:2:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     3 │ a = a * 1;
     4 │ a = 1 * a;
   
-  i Suggested fix: Use -= instead.
+  i Unsafe fix: Use -= instead.
   
      1  1 │   a = a + 1;
      2    │ - a·=·a·-·1;
@@ -85,7 +85,7 @@ invalid.js:3:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     4 │ a = 1 * a;
     5 │ a = a / 1;
   
-  i Suggested fix: Use *= instead.
+  i Unsafe fix: Use *= instead.
   
      1  1 │   a = a + 1;
      2  2 │   a = a - 1;
@@ -109,7 +109,7 @@ invalid.js:4:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     5 │ a = a / 1;
     6 │ a = a % 1;
   
-  i Suggested fix: Use *= instead.
+  i Unsafe fix: Use *= instead.
   
      2  2 │   a = a - 1;
      3  3 │   a = a * 1;
@@ -133,7 +133,7 @@ invalid.js:5:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     6 │ a = a % 1;
     7 │ a = a << 1;
   
-  i Suggested fix: Use /= instead.
+  i Unsafe fix: Use /= instead.
   
      3  3 │   a = a * 1;
      4  4 │   a = 1 * a;
@@ -157,7 +157,7 @@ invalid.js:6:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     7 │ a = a << 1;
     8 │ a = a >> 1;
   
-  i Suggested fix: Use %= instead.
+  i Unsafe fix: Use %= instead.
   
      4  4 │   a = 1 * a;
      5  5 │   a = a / 1;
@@ -181,7 +181,7 @@ invalid.js:7:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     8 │ a = a >> 1;
     9 │ a = a >>> 1;
   
-  i Suggested fix: Use <<= instead.
+  i Unsafe fix: Use <<= instead.
   
      5  5 │   a = a / 1;
      6  6 │   a = a % 1;
@@ -205,7 +205,7 @@ invalid.js:8:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
      9 │ a = a >>> 1;
     10 │ a = a & 1;
   
-  i Suggested fix: Use >>= instead.
+  i Unsafe fix: Use >>= instead.
   
      6  6 │   a = a % 1;
      7  7 │   a = a << 1;
@@ -229,7 +229,7 @@ invalid.js:9:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     10 │ a = a & 1;
     11 │ a = 1 & a;
   
-  i Suggested fix: Use >>>= instead.
+  i Unsafe fix: Use >>>= instead.
   
      7  7 │   a = a << 1;
      8  8 │   a = a >> 1;
@@ -253,7 +253,7 @@ invalid.js:10:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     11 │ a = 1 & a;
     12 │ a = a ^ 1;
   
-  i Suggested fix: Use &= instead.
+  i Unsafe fix: Use &= instead.
   
      8  8 │   a = a >> 1;
      9  9 │   a = a >>> 1;
@@ -277,7 +277,7 @@ invalid.js:11:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     12 │ a = a ^ 1;
     13 │ a = 1 ^ a;
   
-  i Suggested fix: Use &= instead.
+  i Unsafe fix: Use &= instead.
   
      9  9 │   a = a >>> 1;
     10 10 │   a = a & 1;
@@ -301,7 +301,7 @@ invalid.js:12:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     13 │ a = 1 ^ a;
     14 │ a = a | 1;
   
-  i Suggested fix: Use ^= instead.
+  i Unsafe fix: Use ^= instead.
   
     10 10 │   a = a & 1;
     11 11 │   a = 1 & a;
@@ -325,7 +325,7 @@ invalid.js:13:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     14 │ a = a | 1;
     15 │ a = 1 | a;
   
-  i Suggested fix: Use ^= instead.
+  i Unsafe fix: Use ^= instead.
   
     11 11 │   a = 1 & a;
     12 12 │   a = a ^ 1;
@@ -349,7 +349,7 @@ invalid.js:14:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     15 │ a = 1 | a;
     16 │ a = a ** 1;
   
-  i Suggested fix: Use |= instead.
+  i Unsafe fix: Use |= instead.
   
     12 12 │   a = a ^ 1;
     13 13 │   a = 1 ^ a;
@@ -373,7 +373,7 @@ invalid.js:15:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     16 │ a = a ** 1;
     17 │ this.a = this.a + 1;
   
-  i Suggested fix: Use |= instead.
+  i Unsafe fix: Use |= instead.
   
     13 13 │   a = 1 ^ a;
     14 14 │   a = a | 1;
@@ -397,7 +397,7 @@ invalid.js:16:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     17 │ this.a = this.a + 1;
     18 │ this.a = this.a + b
   
-  i Suggested fix: Use **= instead.
+  i Unsafe fix: Use **= instead.
   
     14 14 │   a = a | 1;
     15 15 │   a = 1 | a;
@@ -421,7 +421,7 @@ invalid.js:17:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     18 │ this.a = this.a + b
     19 │ this.a = this.a + this.b
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     15 15 │   a = 1 | a;
     16 16 │   a = a ** 1;
@@ -445,7 +445,7 @@ invalid.js:18:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     19 │ this.a = this.a + this.b
     20 │ a = (a) + 1;
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     16 16 │   a = a ** 1;
     17 17 │   this.a = this.a + 1;
@@ -469,7 +469,7 @@ invalid.js:19:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     20 │ a = (a) + 1;
     21 │ x = (x + y);
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     17 17 │   this.a = this.a + 1;
     18 18 │   this.a = this.a + b
@@ -493,7 +493,7 @@ invalid.js:20:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     21 │ x = (x + y);
     22 │ x[0] = x[0] - y
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     18 18 │   this.a = this.a + b
     19 19 │   this.a = this.a + this.b
@@ -517,7 +517,7 @@ invalid.js:21:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     22 │ x[0] = x[0] - y
     23 │ window.a = window.a + 1;
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     19 19 │   this.a = this.a + this.b
     20 20 │   a = (a) + 1;
@@ -541,7 +541,7 @@ invalid.js:22:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
     23 │ window.a = window.a + 1;
     24 │ 
   
-  i Suggested fix: Use -= instead.
+  i Unsafe fix: Use -= instead.
   
     20 20 │   a = (a) + 1;
     21 21 │   x = (x + y);
@@ -564,7 +564,7 @@ invalid.js:23:1 lint/nursery/useShorthandAssign  FIXABLE  ━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
   
-  i Suggested fix: Use += instead.
+  i Unsafe fix: Use += instead.
   
     21 21 │   x = (x + y);
     22 22 │   x[0] = x[0] - y
