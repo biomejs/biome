@@ -7,6 +7,7 @@ pub mod advice;
 pub mod context;
 pub mod diagnostic;
 pub mod display;
+pub mod display_github;
 pub mod error;
 pub mod location;
 pub mod panic;
@@ -33,6 +34,7 @@ pub use crate::diagnostic::{Diagnostic, DiagnosticTags, Severity};
 pub use crate::display::{
     set_bottom_frame, Backtrace, MessageAndDescription, PrintDescription, PrintDiagnostic,
 };
+pub use crate::display_github::PrintGitHubDiagnostic;
 pub use crate::error::{Error, Result};
 pub use crate::location::{LineIndex, LineIndexBuf, Location, Resource, SourceCode};
 use biome_console::fmt::{Formatter, Termcolor};

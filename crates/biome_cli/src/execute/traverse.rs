@@ -9,6 +9,7 @@ use crate::{
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
 };
 use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
@@ -575,6 +576,15 @@ fn process_messages(options: ProcessMessagesOptions) {
         if diagnostic.severity() >= *diagnostic_level {
             console.error(markup! {
                 {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+        }
+    }
+
+    if mode.is_ci() {
+        // TODO: Check for env var GITHUB_ACTIONS=true somewhere and pass it here
+        for diagnostic in diagnostics_to_print {
+            console.log(markup! {
+                {PrintGitHubDiagnostic::simple(&diagnostic)}
             });
         }
     }
