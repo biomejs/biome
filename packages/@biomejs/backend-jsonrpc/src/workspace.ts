@@ -678,6 +678,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
 	/**
+	 * Disallow empty character classes in regular expression literals.
+	 */
+	noEmptyCharacterClassInRegex?: RuleConfiguration;
+	/**
 	 * Disallow functions that exceed a given Cognitive Complexity score.
 	 */
 	noExcessiveComplexity?: RuleConfiguration;
@@ -1294,6 +1298,7 @@ export type Category =
 	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noEmptyCharacterClassInRegex"
 	| "lint/nursery/noExcessiveComplexity"
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"

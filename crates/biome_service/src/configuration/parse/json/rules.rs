@@ -2026,6 +2026,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noAccumulatingSpread",
                 "noConfusingVoidType",
                 "noDuplicateJsonKeys",
+                "noEmptyCharacterClassInRegex",
                 "noExcessiveComplexity",
                 "noFallthroughSwitchClause",
                 "noGlobalIsFinite",
@@ -2121,6 +2122,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_duplicate_json_keys = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noEmptyCharacterClassInRegex" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_empty_character_class_in_regex = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noEmptyCharacterClassInRegex",
+                        diagnostics,
+                    )?;
+                    self.no_empty_character_class_in_regex = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
