@@ -1,9 +1,9 @@
 use crate::{aria_services::Aria, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, ActionCategory};
+use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
-use biome_diagnostics::Applicability;
 
 declare_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -130,8 +130,16 @@ impl Rule for NoAriaUnsupportedElements {
         
         element.attributes().iter().for_each(|attribute| {
             let attribute = attribute.as_jsx_attribute().unwrap();
-            let attribute_name = attribute.name().ok().unwrap().as_jsx_name().unwrap().value_token().ok().unwrap();
-            let attribute_name = attribute_name.to_string();       
+            let attribute_name = attribute
+                .name()
+                .ok()
+                .unwrap()
+                .as_jsx_name()
+                .unwrap()
+                .value_token()
+                .ok()
+                .unwrap();
+            let attribute_name = attribute_name.to_string();      
             removed_attribute = attribute_name;
             mutation.remove_node(attribute.clone());
         });
@@ -140,8 +148,9 @@ impl Rule for NoAriaUnsupportedElements {
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
-                .to_owned(),
+            message:
+                markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
+                    .to_owned(),
             mutation,
         })
     }
