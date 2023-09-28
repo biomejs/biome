@@ -1,8 +1,9 @@
-use crate::aria_services::Aria;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use crate::{aria_services::Aria, JsRuleAction};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, ActionCategory};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_diagnostics::Applicability;
 
 declare_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -107,6 +108,7 @@ impl Rule for NoAriaUnsupportedElements {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let attribute_kind = state.attribute_kind.as_str();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -119,5 +121,28 @@ impl Rule for NoAriaUnsupportedElements {
                 "Using "{attribute_kind}" on elements that do not support them can cause issues with screen readers."
             }),
         )
+    }
+
+    fn action(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let element = _ctx.query();
+        let mut mutation = _ctx.root().begin();
+        let mut removed_attribute = "role".to_string();
+        
+        element.attributes().iter().for_each(|attribute| {
+            let attribute = attribute.as_jsx_attribute().unwrap();
+            let attribute_name = attribute.name().ok().unwrap().as_jsx_name().unwrap().value_token().ok().unwrap();
+            let attribute_name = attribute_name.to_string();       
+            removed_attribute = attribute_name;
+            mutation.remove_node(attribute.clone());
+        });
+
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
+                .to_owned(),
+            mutation,
+        })
     }
 }
