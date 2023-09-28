@@ -1,8 +1,9 @@
-use crate::aria_services::Aria;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use crate::{aria_services::Aria, JsRuleAction};
+use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -107,6 +108,7 @@ impl Rule for NoAriaUnsupportedElements {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let attribute_kind = state.attribute_kind.as_str();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -119,5 +121,34 @@ impl Rule for NoAriaUnsupportedElements {
                 "Using "{attribute_kind}" on elements that do not support them can cause issues with screen readers."
             }),
         )
+    }
+
+    fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let element = _ctx.query();
+        let mut mutation = _ctx.root().begin();
+
+        let attribute = element.attributes().into_iter().find_map(|attribute| {
+            let jsx_attribute = attribute.as_jsx_attribute()?;
+            let attribute_name = jsx_attribute
+                .name()
+                .ok()?
+                .as_jsx_name()?
+                .value_token()
+                .ok()?;
+            let attribute_name = attribute_name.text_trimmed();
+            (attribute_name.starts_with("aria-") || attribute_name == "role").then_some(attribute)
+        })?;
+
+        let removed_attribute = attribute.to_string();
+        mutation.remove_node(attribute.clone());
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message:
+                markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
+                    .to_owned(),
+            mutation,
+        })
     }
 }
