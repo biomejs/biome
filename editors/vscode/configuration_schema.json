@@ -1122,6 +1122,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useShorthandAssign": {
+					"description": "Require assignment operator shorthand where possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			}
 		},

@@ -13,6 +13,7 @@ pub(crate) mod use_arrow_function;
 pub(crate) mod use_collapsed_else_if;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
+pub(crate) mod use_shorthand_assign;
 
 declare_group! {
     pub (crate) Nursery {
@@ -29,6 +30,7 @@ declare_group! {
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_shorthand_assign :: UseShorthandAssign ,
         ]
      }
 }

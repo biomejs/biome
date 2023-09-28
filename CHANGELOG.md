@@ -70,6 +70,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule reports `else` clauses that can be omitted because their `if` branches break.
   Contributed by @Conaclos
 
+- Add [useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign) rule.
+  The rule enforce use of shorthand operators that combine variable assignment and some simple mathematical operations. For example, x = x + 4 can be shortened to x += 4.
+  Contributed by @victor-teles
+
 #### Enhancements
 
 - The following rules have now safe code fixes:

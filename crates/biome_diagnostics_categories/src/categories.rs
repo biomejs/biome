@@ -108,6 +108,7 @@ define_categories! {
     "lint/nursery/useHookAtTopLevel": "https://biomejs.dev/linter/rules/use-hook-at-top-level",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
+    "lint/nursery/useShorthandAssign": "https://biomejs.dev/lint/rules/use-shorthand-assign",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
     "lint/security/noDangerouslySetInnerHtmlWithChildren": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html-with-children",
