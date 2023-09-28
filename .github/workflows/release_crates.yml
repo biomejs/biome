@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  environment: carte-publish
+  environment: crate-publish
   release:
     name: Publish
     runs-on: ubuntu-latest

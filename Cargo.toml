@@ -83,8 +83,8 @@ quickcheck_macros = "1.0.0"
 quote             = { version = "1.0.28" }
 rustc-hash        = "1.1.0"
 schemars          = { version = "0.8.12" }
-serde             = { version = "1.0.164", features = ["derive"] }
-serde_json        = "1.0.99"
+serde             = { version = "1.0.163", features = ["derive"] }
+serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
