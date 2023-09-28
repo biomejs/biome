@@ -129,7 +129,12 @@ impl Rule for NoAriaUnsupportedElements {
 
         let attribute = element.attributes().into_iter().find_map(|attribute| {
             let jsx_attribute = attribute.as_jsx_attribute()?;
-            let attribute_name = jsx_attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
+            let attribute_name = jsx_attribute
+                .name()
+                .ok()?
+                .as_jsx_name()?
+                .value_token()
+                .ok()?;
             let attribute_name = attribute_name.text_trimmed();
             (attribute_name.starts_with("aria-") || attribute_name == "role").then_some(attribute)
         })?;
