@@ -131,7 +131,9 @@ impl Execution {
         // TODO: Move this init somewhere else
 
         let ci_detection_env_vars = ["GITHUB_ACTIONS"];
-        ci_detection_env_vars.iter().any(|var| std::env::var(var).is_ok())
+        ci_detection_env_vars
+            .iter()
+            .any(|var| std::env::var(var).is_ok())
     }
 
     pub(crate) fn traversal_mode(&self) -> &TraversalMode {
