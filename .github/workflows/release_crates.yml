@@ -8,10 +8,10 @@ on:
       - main
 
 jobs:
-  environment: crate-publish
   release:
     name: Publish
     runs-on: ubuntu-latest
+    environment: crate-publish
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
