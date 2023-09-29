@@ -1176,7 +1176,8 @@ fn is_short_argument(
             }
             AnyJsExpression::AnyJsLiteralExpression(literal) => match literal {
                 AnyJsLiteralExpression::JsRegexLiteralExpression(regex) => {
-                    regex.pattern()?.chars().count() <= threshold as usize
+                    let (pattern, _) = regex.decompose()?;
+                    pattern.text().chars().count() <= threshold as usize
                 }
                 AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
                     string.value_token()?.text_trimmed().len() <= threshold as usize

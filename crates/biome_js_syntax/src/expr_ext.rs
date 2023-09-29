@@ -14,7 +14,7 @@ use crate::{
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxResult,
-    TextRange, TokenText,
+    TextRange, TextSize, TokenText,
 };
 use core::iter;
 
@@ -621,28 +621,50 @@ impl JsTemplateExpression {
 }
 
 impl JsRegexLiteralExpression {
-    pub fn pattern(&self) -> SyntaxResult<String> {
+    /// Decompose a regular expression into its pattern and flags.
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken};
+    ///
+    /// let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &format!("/a+/igu"), [], []);
+    /// let regex = make::js_regex_literal_expression(token);
+    /// let (pattern, flags) = regex.decompose().unwrap();
+    /// assert_eq!(pattern.text(), "a+");
+    /// assert_eq!(flags.text(), "igu");
+    ///
+    /// let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &format!("/a+/"), [], []);
+    /// let regex = make::js_regex_literal_expression(token);
+    /// let (pattern, flags) = regex.decompose().unwrap();
+    /// assert_eq!(pattern.text(), "a+");
+    /// assert_eq!(flags.text(), "");
+    ///
+    /// let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &format!("/a+"), [], []);
+    /// let regex = make::js_regex_literal_expression(token);
+    /// let (pattern, flags) = regex.decompose().unwrap();
+    /// assert_eq!(pattern.text(), "a+");
+    /// assert_eq!(flags.text(), "");
+    /// ```
+    pub fn decompose(&self) -> SyntaxResult<(TokenText, TokenText)> {
         let token = self.value_token()?;
         let text_trimmed = token.text_trimmed();
-
-        // SAFETY: a valid regex literal must have a end slash
-        let end_slash_pos = text_trimmed
-            .rfind('/')
-            .expect("regex literal must have an end slash");
-
-        Ok(String::from(&text_trimmed[1..end_slash_pos]))
-    }
-
-    pub fn flags(&self) -> SyntaxResult<String> {
-        let token = self.value_token()?;
-        let text_trimmed = token.text_trimmed();
-
-        // SAFETY: a valid regex literal must have a end slash
-        let end_slash_pos = text_trimmed
-            .rfind('/')
-            .expect("regex literal must have an end slash");
-
-        Ok(String::from(&text_trimmed[end_slash_pos..]))
+        let token_text = token.token_text_trimmed();
+        let len = TextSize::from(text_trimmed.len() as u32);
+        let Some(end_slash_pos) = text_trimmed[1..].rfind('/').map(|x| x + 1) else {
+            return Ok((
+                token_text
+                    .clone()
+                    .slice(TextRange::new(TextSize::from(1), len)),
+                token_text.slice(TextRange::empty(len)),
+            ));
+        };
+        let end_slash_pos = end_slash_pos as u32;
+        let pattern = token_text.clone().slice(TextRange::new(
+            TextSize::from(1),
+            TextSize::from(end_slash_pos),
+        ));
+        let flags = token_text.slice(TextRange::new(TextSize::from(end_slash_pos + 1), len));
+        Ok((pattern, flags))
     }
 }
 

@@ -56,11 +56,11 @@ impl Rule for NoEmptyCharacterClassInRegex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut empty_classes = vec![];
         let regex = ctx.query();
-        let (Ok(regex_token), Ok(regex_flags)) = (regex.value_token(), regex.flags()) else {
+        let Ok((pattern, flags)) = regex.decompose() else {
             return empty_classes;
         };
-        let has_v_flag = regex_flags.contains('v');
-        let trimmed_text = regex_token.text_trimmed();
+        let has_v_flag = flags.text().contains('v');
+        let trimmed_text = pattern.text();
         let mut class_start_index = None;
         let mut is_negated_class = false;
         let mut enumerated_char_iter = trimmed_text.chars().enumerate();
@@ -114,8 +114,8 @@ impl Rule for NoEmptyCharacterClassInRegex {
             RuleDiagnostic::new(
                 rule_category!(),
                 TextRange::new(
-                    regex_token_range.start() + TextSize::from(empty_class_range.start as u32),
-                    regex_token_range.start() + TextSize::from((empty_class_range.end + 1) as u32),
+                    regex_token_range.start() + TextSize::from(empty_class_range.start as u32 + 1),
+                    regex_token_range.start() + TextSize::from((empty_class_range.end + 2) as u32),
                 ),
                 markup! {
                     "The regular expression includes this "<Emphasis>{maybe_negated}"empty character class"</Emphasis>"."
