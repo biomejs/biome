@@ -203,6 +203,15 @@ export default defineConfig({
 					],
 				},
 				{
+					label: "Recipes",
+					items: [
+						{
+							label: "Continuous Integration",
+							link: "/recipes/continuous-integration",
+						},
+					],
+				},
+				{
 					label: "Internals",
 					items: [
 						{ label: "Philosophy", link: "/internals/philosophy" },
