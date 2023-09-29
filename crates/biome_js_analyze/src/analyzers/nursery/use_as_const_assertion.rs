@@ -18,7 +18,7 @@ declare_rule! {
     /// In TypeScript, there are three common ways to specify that a value is of a specific type such as `2` and not a general type such as `number`:
     ///
     /// 1. `as const`: telling TypeScript to infer the literal type automatically
-    /// 2. `as` with a literal type: explicitly telling the literal type to TypeScript
+    /// 2. `as <literal>`: explicitly telling the literal type to TypeScript
     /// 4. type annotation: explicitly telling the literal type to TypeScript when declare variables
     ///
     /// The rule suggests to use `as const` when you're using `as` with a literal type or type annotation, since `as const` is simpler and doesn't require retyping the value.
