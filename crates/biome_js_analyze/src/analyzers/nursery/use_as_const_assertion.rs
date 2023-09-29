@@ -118,7 +118,7 @@ impl Rule for UseAsConstAssertion {
                     rule_category!(),
                     range,
                     markup! {
-                        "You should use "<Emphasis>"as const"</Emphasis>" instead of "<Emphasis>"as"</Emphasis>" with a literal type."
+                        "Use "<Emphasis>"as const"</Emphasis>" instead of "<Emphasis>"as"</Emphasis>" with a literal type."
                     },
                 ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."})
             ),
