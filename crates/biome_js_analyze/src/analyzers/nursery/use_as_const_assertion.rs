@@ -34,10 +34,6 @@ declare_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// let foo = <'bar'>'bar';
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
     /// let foo = { bar: 'baz' as 'baz' };
     /// ```
     ///
