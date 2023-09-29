@@ -15,7 +15,7 @@ use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, Triv
 declare_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
     ///
-    /// In TypeScript, there are three common ways to specify that a value is of a specific type (like '2') and not a general type (like 'number'):
+    /// In TypeScript, there are three common ways to specify that a value is of a specific type such as `2` and not a general type such as `number`:
     ///
     /// 1. `as const`: telling TypeScript to infer the literal type automatically
     /// 2. `as` with a literal type: explicitly telling the literal type to TypeScript
