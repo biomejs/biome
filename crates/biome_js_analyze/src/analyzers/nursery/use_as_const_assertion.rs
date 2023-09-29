@@ -6,10 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsLiteralExpression, AnyTsName, AnyTsType, JsPropertyClassMember, JsVariableDeclarator,
-    TsAsExpression, TsTypeAssertionExpression,
+    AnyJsExpression, AnyJsLiteralExpression, AnyTsName, AnyTsType, JsInitializerClause,
+    JsPropertyClassMember, JsSyntaxKind, JsVariableDeclarator, TsAsExpression,
+    TsTypeAssertionExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, TriviaPieceKind};
 
 declare_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
@@ -48,7 +49,6 @@ declare_rule! {
     /// let foo = 'bar' as const;
     /// let foo: 'bar' = 'bar' as const;
     /// let bar = 'bar' as string;
-    /// let foo = <string>'bar';
     /// let foo = { bar: 'baz' };
     /// ```
     ///
@@ -170,13 +170,23 @@ impl Rule for UseAsConstAssertion {
             }
             Query::TsTypeAssertionExpression(previous_expr) => {
                 let mut mutation = ctx.root().begin();
-                let new_as_expr = previous_expr.clone().with_ty(AnyTsType::from(
-                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
-                        make::js_reference_identifier(make::ident("const")),
-                    ))
-                    .build(),
-                ));
-                mutation.replace_node(previous_expr.clone(), new_as_expr);
+                let previous_initializer_clause = previous_expr.parent::<JsInitializerClause>()?;
+                let new_initializer_clause = make::js_initializer_clause(
+                    previous_initializer_clause.eq_token().ok()?,
+                    AnyJsExpression::TsAsExpression(make::ts_as_expression(
+                        previous_expr.clone().expression().ok()?,
+                        make::token(JsSyntaxKind::AS_KW)
+                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        AnyTsType::from(
+                            make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+                                make::js_reference_identifier(make::ident("const")),
+                            ))
+                            .build(),
+                        ),
+                    )),
+                );
+                mutation.replace_node(previous_initializer_clause, new_initializer_clause);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,

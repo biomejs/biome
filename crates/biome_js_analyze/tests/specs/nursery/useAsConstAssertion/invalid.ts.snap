@@ -187,7 +187,7 @@ invalid.ts:9:12 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
      7  7 │   let foo: 2 = 2;
      8  8 │   let foo: 'bar' = 'bar' as 'bar';
      9    │ - let·foo·=·<'bar'>'bar';
-        9 │ + let·foo·=·<const>'bar';
+        9 │ + let·foo·=·'bar'·as·const;
     10 10 │   let foo = <4>4;
     11 11 │   let foo = 'bar' as 'bar';
   
@@ -213,7 +213,7 @@ invalid.ts:10:12 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
      8  8 │   let foo: 'bar' = 'bar' as 'bar';
      9  9 │   let foo = <'bar'>'bar';
     10    │ - let·foo·=·<4>4;
-       10 │ + let·foo·=·<const>4;
+       10 │ + let·foo·=·4·as·const;
     11 11 │   let foo = 'bar' as 'bar';
     12 12 │   let foo = 5 as 5;
   
@@ -322,7 +322,7 @@ invalid.ts:23:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     21 21 │   
     22 22 │   class foo {
     23    │ - ··foo·=·<'bar'>'bar';
-       23 │ + ··foo·=·<const>'bar';
+       23 │ + ··foo·=·'bar'·as·const;
     24 24 │   }
     25 25 │   
   
