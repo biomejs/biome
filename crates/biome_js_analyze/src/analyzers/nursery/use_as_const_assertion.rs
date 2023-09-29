@@ -154,9 +154,7 @@ impl Rule for UseAsConstAssertion {
             .build(),
         );
 
-        let as_token_with_trivia = make::token(JsSyntaxKind::AS_KW)
-            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        let as_token_with_trivia = make::token_decorated_with_space(JsSyntaxKind::AS_KW);
 
         match query {
             Query::TsAsExpression(previous_as_expr) => {
