@@ -3,5 +3,6 @@ import { docsSchema } from "@astrojs/starlight/schema";
 import { defineCollection } from "astro:content";
 
 export const collections = {
+	// @ts-expect-error
 	docs: defineCollection({ schema: docsSchema() }),
 };
