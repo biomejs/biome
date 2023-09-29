@@ -20,13 +20,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-     steps:
-       - name: Checkout 
-         uses: actions/checkout@v4
-       - name: Setup Biome
-         uses: biomejs/setup-biome@v1
-         with:
-           version: 1.2.2
-       - name: Run Biome
-         run: biome ci .
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 1.2.2
+      - name: Run Biome
+        run: biome ci .
 ```
