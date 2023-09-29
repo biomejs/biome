@@ -55,7 +55,7 @@ declare_rule! {
     pub(crate) UseAsConstAssertion {
         version: "next",
         name: "useAsConstAssertion",
-        recommended: false,
+        recommended: true,
     }
 }
 
