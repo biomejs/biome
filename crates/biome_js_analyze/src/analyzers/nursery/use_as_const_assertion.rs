@@ -121,7 +121,7 @@ impl Rule for UseAsConstAssertion {
                     markup! {
                         "Use "<Emphasis>"as const"</Emphasis>" instead of "<Emphasis>"as"</Emphasis>" with a literal type."
                     },
-                ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."})
+                ).note(markup! {""<Emphasis>"as const"</Emphasis>" doesn't require any update when the asserted value is changed."})
             ),
             RuleState::AngleBracketAssertion(range) => {
                 Some(RuleDiagnostic::new(
