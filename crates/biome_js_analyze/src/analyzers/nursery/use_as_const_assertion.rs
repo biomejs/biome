@@ -134,7 +134,7 @@ impl Rule for UseAsConstAssertion {
                     markup! {
                         "You should use "<Emphasis>"as const"</Emphasis>" instead of angle bracket type assertion."
                     }
-                ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."}))
+                ).note(markup! {"The angle bracket assertion can occasionally be confused with JSX syntax, so using the "<Emphasis>"as const"</Emphasis>" is a more clear and preferable alternative."}))
             },
             RuleState::TypeAnnotation(range) => Some(
                 RuleDiagnostic::new(
@@ -150,20 +150,27 @@ impl Rule for UseAsConstAssertion {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let query = ctx.query();
+
+        let const_reference_type = AnyTsType::from(
+            make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+                make::js_reference_identifier(make::ident("const")),
+            ))
+            .build(),
+        );
+
+        let as_token_with_trivia = make::token(JsSyntaxKind::AS_KW)
+            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+
         match query {
             Query::TsAsExpression(previous_as_expr) => {
                 let mut mutation = ctx.root().begin();
-                let new_as_expr = previous_as_expr.clone().with_ty(AnyTsType::from(
-                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
-                        make::js_reference_identifier(make::ident("const")),
-                    ))
-                    .build(),
-                ));
+                let new_as_expr = previous_as_expr.clone().with_ty(const_reference_type);
                 mutation.replace_node(previous_as_expr.clone(), new_as_expr);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,
-                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>" ." }
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }
                         .to_owned(),
                     mutation,
                 })
@@ -175,28 +182,71 @@ impl Rule for UseAsConstAssertion {
                     previous_initializer_clause.eq_token().ok()?,
                     AnyJsExpression::TsAsExpression(make::ts_as_expression(
                         previous_expr.clone().expression().ok()?,
-                        make::token(JsSyntaxKind::AS_KW)
-                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        AnyTsType::from(
-                            make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
-                                make::js_reference_identifier(make::ident("const")),
-                            ))
-                            .build(),
-                        ),
+                        as_token_with_trivia,
+                        const_reference_type,
                     )),
                 );
                 mutation.replace_node(previous_initializer_clause, new_initializer_clause);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,
-                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>" ." }
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }
                         .to_owned(),
                     mutation,
                 })
             }
-            Query::JsVariableDeclarator(_) => None,
-            Query::JsPropertyClassMember(_) => None,
+            Query::JsVariableDeclarator(decl) => {
+                let mut mutation = ctx.root().begin();
+                let previous_initializer_clause = decl.initializer()?;
+                let new_decl = decl
+                    .clone()
+                    .with_variable_annotation(None)
+                    .with_initializer(Some(make::js_initializer_clause(
+                        previous_initializer_clause
+                            .eq_token()
+                            .ok()?
+                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        AnyJsExpression::TsAsExpression(make::ts_as_expression(
+                            previous_initializer_clause.expression().ok()?,
+                            as_token_with_trivia,
+                            const_reference_type,
+                        )),
+                    )));
+                mutation.replace_node(decl.clone(), new_decl);
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::Always,
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }
+                        .to_owned(),
+                    mutation,
+                })
+            }
+            Query::JsPropertyClassMember(member) => {
+                let mut mutation = ctx.root().begin();
+                let previous_initializer_clause = member.value()?;
+                let new_member = member
+                    .clone()
+                    .with_property_annotation(None)
+                    .with_value(Some(make::js_initializer_clause(
+                        previous_initializer_clause
+                            .eq_token()
+                            .ok()?
+                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        AnyJsExpression::TsAsExpression(make::ts_as_expression(
+                            previous_initializer_clause.expression().ok()?,
+                            as_token_with_trivia,
+                            const_reference_type,
+                        )),
+                    )));
+                mutation.replace_node(member.clone(), new_member);
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::Always,
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }
+                        .to_owned(),
+                    mutation,
+                })
+            }
         }
     }
 }

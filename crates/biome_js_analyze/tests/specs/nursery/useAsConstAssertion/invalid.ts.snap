@@ -54,7 +54,7 @@ invalid.ts:3:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      1  1 │   // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
      2  2 │   
@@ -79,7 +79,7 @@ invalid.ts:4:23 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      2  2 │   
      3  3 │   let foo = { bar: 'baz' as 'baz' };
@@ -92,7 +92,7 @@ invalid.ts:4:23 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:5:9 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:9 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You should use as const instead of type annotation.
   
@@ -105,11 +105,20 @@ invalid.ts:5:9 lint/nursery/useAsConstAssertion ━━━━━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
+  i Safe fix: Replace with as const.
+  
+     3  3 │   let foo = { bar: 'baz' as 'baz' };
+     4  4 │   let foo = { bar: 1 as 1 };
+     5    │ - let·[]:·'bar'·=·'bar';
+        5 │ + let·[]·=·'bar'·as·const;
+     6  6 │   let foo: 'bar' = 'bar';
+     7  7 │   let foo: 2 = 2;
+  
 
 ```
 
 ```
-invalid.ts:6:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You should use as const instead of type annotation.
   
@@ -122,11 +131,20 @@ invalid.ts:6:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
+  i Safe fix: Replace with as const.
+  
+     4  4 │   let foo = { bar: 1 as 1 };
+     5  5 │   let []: 'bar' = 'bar';
+     6    │ - let·foo:·'bar'·=·'bar';
+        6 │ + let·foo·=·'bar'·as·const;
+     7  7 │   let foo: 2 = 2;
+     8  8 │   let foo: 'bar' = 'bar' as 'bar';
+  
 
 ```
 
 ```
-invalid.ts:7:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You should use as const instead of type annotation.
   
@@ -138,6 +156,15 @@ invalid.ts:7:10 lint/nursery/useAsConstAssertion ━━━━━━━━━━�
     9 │ let foo = <'bar'>'bar';
   
   i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const.
+  
+     5  5 │   let []: 'bar' = 'bar';
+     6  6 │   let foo: 'bar' = 'bar';
+     7    │ - let·foo:·2·=·2;
+        7 │ + let·foo·=·2·as·const;
+     8  8 │   let foo: 'bar' = 'bar' as 'bar';
+     9  9 │   let foo = <'bar'>'bar';
   
 
 ```
@@ -156,7 +183,7 @@ invalid.ts:8:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      6  6 │   let foo: 'bar' = 'bar';
      7  7 │   let foo: 2 = 2;
@@ -180,9 +207,9 @@ invalid.ts:9:12 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
     10 │ let foo = <4>4;
     11 │ let foo = 'bar' as 'bar';
   
-  i as const is simpler and doesn't require retyping the value.
+  i The angle bracket assertion can occasionally be confused with JSX syntax, so using the as const is a more clear and preferable alternative.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      7  7 │   let foo: 2 = 2;
      8  8 │   let foo: 'bar' = 'bar' as 'bar';
@@ -206,9 +233,9 @@ invalid.ts:10:12 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     11 │ let foo = 'bar' as 'bar';
     12 │ let foo = 5 as 5;
   
-  i as const is simpler and doesn't require retyping the value.
+  i The angle bracket assertion can occasionally be confused with JSX syntax, so using the as const is a more clear and preferable alternative.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      8  8 │   let foo: 'bar' = 'bar' as 'bar';
      9  9 │   let foo = <'bar'>'bar';
@@ -234,7 +261,7 @@ invalid.ts:11:20 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
      9  9 │   let foo = <'bar'>'bar';
     10 10 │   let foo = <4>4;
@@ -260,7 +287,7 @@ invalid.ts:12:16 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
     10 10 │   let foo = <4>4;
     11 11 │   let foo = 'bar' as 'bar';
@@ -273,7 +300,7 @@ invalid.ts:12:16 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:15:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:15:8 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You should use as const instead of type annotation.
   
@@ -285,11 +312,20 @@ invalid.ts:15:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
+  i Safe fix: Replace with as const.
+  
+    13 13 │   
+    14 14 │   class foo {
+    15    │ - ··bar:·'baz'·=·'baz';
+       15 │ + ··bar·=·'baz'·as·const;
+    16 16 │   }
+    17 17 │   
+  
 
 ```
 
 ```
-invalid.ts:19:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:19:8 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! You should use as const instead of type annotation.
   
@@ -300,6 +336,15 @@ invalid.ts:19:8 lint/nursery/useAsConstAssertion ━━━━━━━━━━�
     21 │ 
   
   i as const is simpler and doesn't require retyping the value.
+  
+  i Safe fix: Replace with as const.
+  
+    17 17 │   
+    18 18 │   class foo {
+    19    │ - ··bar:·2·=·2;
+       19 │ + ··bar·=·2·as·const;
+    20 20 │   }
+    21 21 │   
   
 
 ```
@@ -315,9 +360,9 @@ invalid.ts:23:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     24 │ }
     25 │ 
   
-  i as const is simpler and doesn't require retyping the value.
+  i The angle bracket assertion can occasionally be confused with JSX syntax, so using the as const is a more clear and preferable alternative.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
     21 21 │   
     22 22 │   class foo {
@@ -342,7 +387,7 @@ invalid.ts:27:18 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
     25 25 │   
     26 26 │   class foo {
@@ -367,7 +412,7 @@ invalid.ts:31:14 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
   
   i as const is simpler and doesn't require retyping the value.
   
-  i Safe fix: Replace with as const .
+  i Safe fix: Replace with as const.
   
     29 29 │   
     30 30 │   class foo {
