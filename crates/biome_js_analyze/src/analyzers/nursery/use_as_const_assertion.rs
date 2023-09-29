@@ -51,6 +51,7 @@ declare_rule! {
         version: "next",
         name: "useAsConstAssertion",
         recommended: true,
+        fix_kind: FixKind::Safe,
     }
 }
 
