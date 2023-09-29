@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsLiteralExpression, AnyTsName, AnyTsType, JsPropertyClassMember,
-    JsVariableDeclarator, TsAsExpression,
+    AnyJsLiteralExpression, AnyTsName, AnyTsType, JsPropertyClassMember, JsVariableDeclarator,
+    TsAsExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
@@ -38,7 +38,7 @@ declare_rule! {
     ///
     /// ## Valid
     ///
-    /// ```js
+    /// ```ts
     /// let foo = 'bar';
     /// let foo = 'bar' as const;
     /// let foo: 'bar' = 'bar' as const;
@@ -129,25 +129,23 @@ impl Rule for UseAsConstAssertion {
         match query {
             Query::TsAsExpression(previous_as_expr) => {
                 let mut mutation = ctx.root().begin();
-                let new_as_expr = previous_as_expr
-                    .clone()
-                    .with_ty(AnyTsType::from(
-                        make::ts_reference_type(
-                            AnyTsName::JsReferenceIdentifier(make::js_reference_identifier(
-                                make::ident("const"),
-                            )),
-                        ).build()
-                    ));
+                let new_as_expr = previous_as_expr.clone().with_ty(AnyTsType::from(
+                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+                        make::js_reference_identifier(make::ident("const")),
+                    ))
+                    .build(),
+                ));
                 mutation.replace_node(previous_as_expr.to_owned(), new_as_expr);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,
-                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>" ." }.to_owned(),
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>" ." }
+                        .to_owned(),
                     mutation,
                 })
             }
             Query::JsVariableDeclarator(_) => None,
-            Query::JsPropertyClassMember(_) => None
+            Query::JsPropertyClassMember(_) => None,
         }
     }
 }
