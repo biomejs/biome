@@ -10,12 +10,11 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Enforce the use of `as const` over literal type and type annotation.
 
-In TypeScript, there are three common ways to specify that a value is of a specific type (like '2') and not a general type (like 'number'):
+In TypeScript, there are three common ways to specify that a value is of a specific type such as `2` and not a general type such as `number`:
 
 1. `as const`: telling TypeScript to infer the literal type automatically
-2. `as` with a literal type: explicitly telling the literal type to TypeScript
-3. angle bracket assertion: explicitly telling the literal type to TypeScript
-4. type annotation: explicitly telling the literal type to TypeScript when declare variables
+2. `as <literal>`: explicitly telling the literal type to TypeScript
+3. type annotation: explicitly telling the literal type to TypeScript when declare variables
 
 The rule suggests to use `as const` when you're using `as` with a literal type or type annotation, since `as const` is simpler and doesn't require retyping the value.
 
@@ -48,40 +47,18 @@ let bar: 2 = 2;
 </code></pre>
 
 ```ts
-let foo = <'bar'>'bar';
-```
-
-<pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:12 <a href="https://biomejs.dev/lint/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
-
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">You should use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of angle bracket type assertion.</span>
-  
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let foo = &lt;'bar'&gt;'bar';
-   <strong>   │ </strong>           <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>
-  
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The angle bracket assertion can occasionally be confused with JSX syntax, so using the </span><span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);"> is a more clear and preferable alternative.</span>
-  
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Replace with </span><span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);">.</span>
-  
-    <strong>1</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">l</span><span style="color: Tomato;">e</span><span style="color: Tomato;">t</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">f</span><span style="color: Tomato;">o</span><span style="color: Tomato;">o</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">=</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>&lt;</strong></span><span style="color: Tomato;"><strong>'</strong></span><span style="color: Tomato;"><strong>b</strong></span><span style="color: Tomato;"><strong>a</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>'</strong></span><span style="color: Tomato;"><strong>&gt;</strong></span><span style="color: Tomato;">'</span><span style="color: Tomato;">b</span><span style="color: Tomato;">a</span><span style="color: Tomato;">r</span><span style="color: Tomato;">'</span><span style="color: Tomato;">;</span>
-      <strong>1</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;">l</span><span style="color: MediumSeaGreen;">e</span><span style="color: MediumSeaGreen;">t</span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;">f</span><span style="color: MediumSeaGreen;">o</span><span style="color: MediumSeaGreen;">o</span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;">=</span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;">'</span><span style="color: MediumSeaGreen;">b</span><span style="color: MediumSeaGreen;">a</span><span style="color: MediumSeaGreen;">r</span><span style="color: MediumSeaGreen;">'</span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: MediumSeaGreen;"><strong>a</strong></span><span style="color: MediumSeaGreen;"><strong>s</strong></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: MediumSeaGreen;"><strong>c</strong></span><span style="color: MediumSeaGreen;"><strong>o</strong></span><span style="color: MediumSeaGreen;"><strong>n</strong></span><span style="color: MediumSeaGreen;"><strong>s</strong></span><span style="color: MediumSeaGreen;"><strong>t</strong></span><span style="color: MediumSeaGreen;">;</span>
-    <strong>2</strong> <strong>2</strong><strong> │ </strong>  
-  
-</code></pre>
-
-```ts
 let foo = { bar: 'baz' as 'baz' };
 ```
 
 <pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:27 <a href="https://biomejs.dev/lint/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">You should use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>as</strong></span><span style="color: Tomato;"> with a literal type.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>as</strong></span><span style="color: Tomato;"> with a literal type.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let foo = { bar: 'baz' as 'baz' };
    <strong>   │ </strong>                          <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);"> is simpler and doesn't require retyping the value.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);"> doesn't require any update when the asserted value is changed.</span>
   
 <strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Replace with </span><span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);">.</span>
   

@@ -43,7 +43,7 @@ class foo {
 ```
 invalid.ts:3:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
     1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
     2 │ 
@@ -52,7 +52,7 @@ invalid.ts:3:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
     4 │ let foo = { bar: 1 as 1 };
     5 │ let []: 'bar' = 'bar';
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -69,7 +69,7 @@ invalid.ts:3:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
 ```
 invalid.ts:4:23 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
     3 │ let foo = { bar: 'baz' as 'baz' };
   > 4 │ let foo = { bar: 1 as 1 };
@@ -77,7 +77,7 @@ invalid.ts:4:23 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
     5 │ let []: 'bar' = 'bar';
     6 │ let foo: 'bar' = 'bar';
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -172,7 +172,7 @@ invalid.ts:7:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
 ```
 invalid.ts:8:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
      6 │ let foo: 'bar' = 'bar';
      7 │ let foo: 2 = 2;
@@ -181,7 +181,7 @@ invalid.ts:8:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━
      9 │ let foo = <'bar'>'bar';
     10 │ let foo = <4>4;
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -250,7 +250,7 @@ invalid.ts:10:12 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:20 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
      9 │ let foo = <'bar'>'bar';
     10 │ let foo = <4>4;
@@ -259,7 +259,7 @@ invalid.ts:11:20 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     12 │ let foo = 5 as 5;
     13 │ 
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -276,7 +276,7 @@ invalid.ts:11:20 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
 ```
 invalid.ts:12:16 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
     10 │ let foo = <4>4;
     11 │ let foo = 'bar' as 'bar';
@@ -285,7 +285,7 @@ invalid.ts:12:16 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     13 │ 
     14 │ class foo {
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -377,7 +377,7 @@ invalid.ts:23:10 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
 ```
 invalid.ts:27:18 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
     26 │ class foo {
   > 27 │   foo = 'bar' as 'bar';
@@ -385,7 +385,7 @@ invalid.ts:27:18 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     28 │ }
     29 │ 
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   
@@ -402,7 +402,7 @@ invalid.ts:27:18 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
 ```
 invalid.ts:31:14 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! You should use as const instead of as with a literal type.
+  ! Use as const instead of as with a literal type.
   
     30 │ class foo {
   > 31 │   foo = 5 as 5;
@@ -410,7 +410,7 @@ invalid.ts:31:14 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
     32 │ }
     33 │ 
   
-  i as const is simpler and doesn't require retyping the value.
+  i as const doesn't require any update when the asserted value is changed.
   
   i Safe fix: Replace with as const.
   

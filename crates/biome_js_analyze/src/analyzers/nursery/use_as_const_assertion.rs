@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -113,35 +113,30 @@ impl Rule for UseAsConstAssertion {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state {
-            RuleState::AsAssertion(range) => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    range,
-                    markup! {
-                        "Use "<Emphasis>"as const"</Emphasis>" instead of "<Emphasis>"as"</Emphasis>" with a literal type."
-                    },
-                ).note(markup! {""<Emphasis>"as const"</Emphasis>" doesn't require any update when the asserted value is changed."})
+        let (range, message, note) = match state {
+            RuleState::AsAssertion(range) => (
+                range,
+                markup! {
+                    "Use "<Emphasis>"as const"</Emphasis>" instead of "<Emphasis>"as"</Emphasis>" with a literal type."
+                },
+                markup! {""<Emphasis>"as const"</Emphasis>" doesn't require any update when the asserted value is changed."},
             ),
-            RuleState::AngleBracketAssertion(range) => {
-                Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    range,
-                    markup! {
-                        "You should use "<Emphasis>"as const"</Emphasis>" instead of angle bracket type assertion."
-                    }
-                ).note(markup! {"The angle bracket assertion can occasionally be confused with JSX syntax, so using the "<Emphasis>"as const"</Emphasis>" is a more clear and preferable alternative."}))
-            },
-            RuleState::TypeAnnotation(range) => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    range,
-                    markup! {
-                        "You should use "<Emphasis>"as const"</Emphasis>" instead of type annotation."
-                    }
-                ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."})
+            RuleState::AngleBracketAssertion(range) => (
+                range,
+                markup! {
+                    "You should use "<Emphasis>"as const"</Emphasis>" instead of angle bracket type assertion."
+                },
+                markup! {"The angle bracket assertion can occasionally be confused with JSX syntax, so using the "<Emphasis>"as const"</Emphasis>" is a more clear and preferable alternative."},
             ),
-        }
+            RuleState::TypeAnnotation(range) => (
+                range,
+                markup! {
+                    "You should use "<Emphasis>"as const"</Emphasis>" instead of type annotation."
+                },
+                markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."},
+            ),
+        };
+        Some(RuleDiagnostic::new(rule_category!(), range, message).note(note))
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
