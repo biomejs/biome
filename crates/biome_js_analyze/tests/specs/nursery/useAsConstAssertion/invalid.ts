@@ -6,6 +6,8 @@ let []: 'bar' = 'bar';
 let foo: 'bar' = 'bar';
 let foo: 2 = 2;
 let foo: 'bar' = 'bar' as 'bar';
+let foo = <'bar'>'bar';
+let foo = <4>4;
 let foo = 'bar' as 'bar';
 let foo = 5 as 5;
 
@@ -15,6 +17,10 @@ class foo {
 
 class foo {
   bar: 2 = 2;
+}
+
+class foo {
+  foo = <'bar'>'bar';
 }
 
 class foo {

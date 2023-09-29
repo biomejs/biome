@@ -7,7 +7,7 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsLiteralExpression, AnyTsName, AnyTsType, JsPropertyClassMember, JsVariableDeclarator,
-    TsAsExpression,
+    TsAsExpression, TsTypeAssertionExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
@@ -18,7 +18,8 @@ declare_rule! {
     ///
     /// 1. `as const`: telling TypeScript to infer the literal type automatically
     /// 2. `as` with a literal type: explicitly telling the literal type to TypeScript
-    /// 3. type annotation: explicitly telling the literal type to TypeScript when declare variables
+    /// 3. angle bracket assertion: explicitly telling the literal type to TypeScript
+    /// 4. type annotation: explicitly telling the literal type to TypeScript when declare variables
     ///
     /// The rule suggests to use `as const` when you're using `as` with a literal type or type annotation, since `as const` is simpler and doesn't require retyping the value.
     ///
@@ -33,6 +34,10 @@ declare_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
+    /// let foo = <'bar'>'bar';
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
     /// let foo = { bar: 'baz' as 'baz' };
     /// ```
     ///
@@ -43,6 +48,7 @@ declare_rule! {
     /// let foo = 'bar' as const;
     /// let foo: 'bar' = 'bar' as const;
     /// let bar = 'bar' as string;
+    /// let foo = <string>'bar';
     /// let foo = { bar: 'baz' };
     /// ```
     ///
@@ -54,11 +60,13 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) Query = TsAsExpression | JsVariableDeclarator | JsPropertyClassMember
+    pub(crate) Query = TsAsExpression | TsTypeAssertionExpression | JsVariableDeclarator | JsPropertyClassMember
 }
 
 pub(crate) enum RuleState {
-    AsWithLiteralType(TextRange),
+    AsAssertion(TextRange),
+    /// The angle bracket assertion is useful when the JSX option is None in tsconfig.json.
+    AngleBracketAssertion(TextRange),
     TypeAnnotation(TextRange),
 }
 
@@ -76,7 +84,14 @@ impl Rule for UseAsConstAssertion {
                 let literal = literal.as_any_js_literal_expression()?;
                 let asserted_literal = expr.ty().ok()?;
                 let range = check_literal_match(literal, &asserted_literal)?;
-                Some(RuleState::AsWithLiteralType(range))
+                Some(RuleState::AsAssertion(range))
+            }
+            Query::TsTypeAssertionExpression(expr) => {
+                let literal = expr.expression().ok()?;
+                let literal = literal.as_any_js_literal_expression()?;
+                let asserted_literal = expr.ty().ok()?;
+                let range = check_literal_match(literal, &asserted_literal)?;
+                Some(RuleState::AngleBracketAssertion(range))
             }
             Query::JsVariableDeclarator(decl) => {
                 let literal = decl.initializer()?.expression().ok()?;
@@ -103,7 +118,7 @@ impl Rule for UseAsConstAssertion {
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
-            RuleState::AsWithLiteralType(range) => Some(
+            RuleState::AsAssertion(range) => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     range,
@@ -112,6 +127,15 @@ impl Rule for UseAsConstAssertion {
                     },
                 ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."})
             ),
+            RuleState::AngleBracketAssertion(range) => {
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    range,
+                    markup! {
+                        "You should use "<Emphasis>"as const"</Emphasis>" instead of angle bracket type assertion."
+                    }
+                ).note(markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."}))
+            },
             RuleState::TypeAnnotation(range) => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -136,6 +160,23 @@ impl Rule for UseAsConstAssertion {
                     .build(),
                 ));
                 mutation.replace_node(previous_as_expr.clone(), new_as_expr);
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::Always,
+                    message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>" ." }
+                        .to_owned(),
+                    mutation,
+                })
+            }
+            Query::TsTypeAssertionExpression(previous_expr) => {
+                let mut mutation = ctx.root().begin();
+                let new_as_expr = previous_expr.clone().with_ty(AnyTsType::from(
+                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+                        make::js_reference_identifier(make::ident("const")),
+                    ))
+                    .build(),
+                ));
+                mutation.replace_node(previous_expr.clone(), new_as_expr);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,
