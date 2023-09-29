@@ -135,7 +135,7 @@ impl Rule for UseAsConstAssertion {
                     ))
                     .build(),
                 ));
-                mutation.replace_node(previous_as_expr.to_owned(), new_as_expr);
+                mutation.replace_node(previous_as_expr.clone(), new_as_expr);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
                     applicability: Applicability::Always,
