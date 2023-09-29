@@ -105,8 +105,8 @@ impl Rule for UseShorthandAssign {
             parse_variable_reference_in_expression(&left_var_name, &binary_expression)?;
 
         let replacement_expression = match variable_position_in_expression {
-            VariablePosition::Left => binary_expression.left().ok()?,
-            VariablePosition::Right => binary_expression.right().ok()?,
+            VariablePosition::Left => binary_expression.right().ok()?,
+            VariablePosition::Right => binary_expression.left().ok()?,
         };
 
         if !is_commutative && matches!(variable_position_in_expression, VariablePosition::Right) {
