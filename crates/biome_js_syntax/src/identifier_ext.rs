@@ -1,4 +1,7 @@
-use crate::{JsIdentifierAssignment, JsReferenceIdentifier, JsSyntaxToken, JsxReferenceIdentifier};
+use crate::{
+    JsIdentifierAssignment, JsLiteralExportName, JsReferenceIdentifier, JsSyntaxToken,
+    JsxReferenceIdentifier,
+};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
 declare_node_union! {
@@ -12,5 +15,11 @@ impl AnyJsIdentifierUsage {
             AnyJsIdentifierUsage::JsIdentifierAssignment(node) => node.name_token(),
             AnyJsIdentifierUsage::JsxReferenceIdentifier(node) => node.value_token(),
         }
+    }
+}
+
+impl JsLiteralExportName {
+    pub fn is_default(&self) -> SyntaxResult<bool> {
+        Ok(self.value()?.text_trimmed() == "default")
     }
 }

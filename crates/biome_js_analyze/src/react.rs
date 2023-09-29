@@ -124,14 +124,14 @@ pub(crate) enum ReactLibrary {
 }
 
 impl ReactLibrary {
-    const fn import_name(self) -> &'static str {
+    pub const fn import_name(self) -> &'static str {
         match self {
             ReactLibrary::React => "react",
             ReactLibrary::ReactDOM => "react-dom",
         }
     }
 
-    const fn global_name(self) -> &'static str {
+    pub const fn global_name(self) -> &'static str {
         match self {
             ReactLibrary::React => "React",
             ReactLibrary::ReactDOM => "ReactDOM",

@@ -70,6 +70,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule reports `else` clauses that can be omitted because their `if` branches break.
   Contributed by @Conaclos
 
+- Add [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) rule.
+  The rule reports unused imports and suggests to remove them.
+  Contributed by @Conaclos
+
+  [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) reports also unused imports, but don't suggest their removal.
+  Once [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) stabilized,
+  [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) will not report unused imports.
+
 - Add [useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign) rule.
   The rule enforce use of shorthand operators that combine variable assignment and some simple mathematical operations. For example, x = x + 4 can be shortened to x += 4.
   Contributed by @victor-teles

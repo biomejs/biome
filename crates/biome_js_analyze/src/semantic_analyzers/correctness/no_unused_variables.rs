@@ -232,8 +232,8 @@ impl Rule for NoUnusedVariables {
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();
 
-        // Old code import React but do not used directly
-        // only indirectly after transpiling JSX.
+        // Legacy React framework requires to import `React`, even if it is not used.
+        // This is required for old versions of the Babel compiler.
         if name.starts_with('_') || name == "React" {
             return None;
         }
