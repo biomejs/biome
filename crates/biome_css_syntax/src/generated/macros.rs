@@ -211,6 +211,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusPattern::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_RULE => {
+                    let $pattern = unsafe { $crate::CssBogusRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_AT_KEYFRAMES_ITEM_LIST => {
                     let $pattern = unsafe { $crate::CssAtKeyframesItemList::new_unchecked(node) };
                     $body

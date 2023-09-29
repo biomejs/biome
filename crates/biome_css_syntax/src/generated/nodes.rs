@@ -2035,12 +2035,19 @@ impl AnyCssAtRule {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssRule {
     AnyCssAtRule(AnyCssAtRule),
+    CssBogusRule(CssBogusRule),
     CssRule(CssRule),
 }
 impl AnyCssRule {
     pub fn as_any_css_at_rule(&self) -> Option<&AnyCssAtRule> {
         match &self {
             AnyCssRule::AnyCssAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_rule(&self) -> Option<&CssBogusRule> {
+        match &self {
+            AnyCssRule::CssBogusRule(item) => Some(item),
             _ => None,
         }
     }
@@ -4306,6 +4313,11 @@ impl From<AnyCssAtRule> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusRule> for AnyCssRule {
+    fn from(node: CssBogusRule) -> AnyCssRule {
+        AnyCssRule::CssBogusRule(node)
+    }
+}
 impl From<CssRule> for AnyCssRule {
     fn from(node: CssRule) -> AnyCssRule {
         AnyCssRule::CssRule(node)
@@ -4313,16 +4325,19 @@ impl From<CssRule> for AnyCssRule {
 }
 impl AstNode for AnyCssRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssAtRule::KIND_SET.union(CssRule::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssAtRule::KIND_SET
+        .union(CssBogusRule::KIND_SET)
+        .union(CssRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_RULE => true,
+            CSS_BOGUS_RULE | CSS_RULE => true,
             k if AnyCssAtRule::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_RULE => AnyCssRule::CssBogusRule(CssBogusRule { syntax }),
             CSS_RULE => AnyCssRule::CssRule(CssRule { syntax }),
             _ => {
                 if let Some(any_css_at_rule) = AnyCssAtRule::cast(syntax) {
@@ -4335,12 +4350,14 @@ impl AstNode for AnyCssRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssRule::CssBogusRule(it) => &it.syntax,
             AnyCssRule::CssRule(it) => &it.syntax,
             AnyCssRule::AnyCssAtRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssRule::CssBogusRule(it) => it.syntax,
             AnyCssRule::CssRule(it) => it.syntax,
             AnyCssRule::AnyCssAtRule(it) => it.into_syntax(),
         }
@@ -4350,6 +4367,7 @@ impl std::fmt::Debug for AnyCssRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssRule::AnyCssAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssRule::CssBogusRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssRule::CssRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -4358,6 +4376,7 @@ impl From<AnyCssRule> for SyntaxNode {
     fn from(n: AnyCssRule) -> SyntaxNode {
         match n {
             AnyCssRule::AnyCssAtRule(it) => it.into(),
+            AnyCssRule::CssBogusRule(it) => it.into(),
             AnyCssRule::CssRule(it) => it.into(),
         }
     }
@@ -5063,6 +5082,63 @@ impl From<CssBogusPattern> for SyntaxNode {
 }
 impl From<CssBogusPattern> for SyntaxElement {
     fn from(n: CssBogusPattern) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusRule {
+    syntax: SyntaxNode,
+}
+impl CssBogusRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusRule")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusRule> for SyntaxNode {
+    fn from(n: CssBogusRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusRule> for SyntaxElement {
+    fn from(n: CssBogusRule) -> SyntaxElement {
         n.syntax.into()
     }
 }

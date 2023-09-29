@@ -265,6 +265,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS,
     CSS_BOGUS_PATTERN,
     CSS_BOGUS_BODY,
+    CSS_BOGUS_RULE,
     #[doc(hidden)]
     __LAST,
 }

@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+* , * {
+
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssUniversalSelectorPattern {
+                    star_token: STAR@0..2 "*" [] [Whitespace(" ")],
+                },
+                COMMA@2..4 "," [] [Whitespace(" ")],
+                CssUniversalSelectorPattern {
+                    star_token: STAR@4..6 "*" [] [Whitespace(" ")],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@7..10 "}" [Newline("\n"), Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@10..11 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..11
+  0: CSS_RULE_LIST@0..10
+    0: CSS_RULE@0..10
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_UNIVERSAL_SELECTOR_PATTERN@0..2
+          0: STAR@0..2 "*" [] [Whitespace(" ")]
+        1: COMMA@2..4 "," [] [Whitespace(" ")]
+        2: CSS_UNIVERSAL_SELECTOR_PATTERN@4..6
+          0: STAR@4..6 "*" [] [Whitespace(" ")]
+      1: CSS_BLOCK@6..10
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_LIST@7..7
+        2: R_CURLY@7..10 "}" [Newline("\n"), Newline("\n")] []
+  1: EOF@10..11 "" [Newline("\n")] []
+
+```
+
+
