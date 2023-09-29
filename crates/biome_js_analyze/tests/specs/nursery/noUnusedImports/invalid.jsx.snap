@@ -17,6 +17,12 @@ import React, { useEffect } from "x"
 import X, { default as React } from "react"
 import X, * as React from "react"
 
+// React import (no exception)
+import React from "react"
+import * as React from "react"
+import { default as React } from "react"
+import React, { useEffect } from "react"
+
 ```
 
 # Diagnostics
@@ -234,6 +240,7 @@ invalid.jsx:12:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   > 12 │ import X, * as React from "react"
        │        ^
     13 │ 
+    14 │ // React import (no exception)
   
   i Unused imports might be the result of an incomplete refactoring.
   
@@ -254,6 +261,7 @@ invalid.jsx:12:16 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━�
   > 12 │ import X, * as React from "react"
        │                ^^^^^
     13 │ 
+    14 │ // React import (no exception)
   
   i Unused imports might be the result of an incomplete refactoring.
   
@@ -261,6 +269,108 @@ invalid.jsx:12:16 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━�
   
     12 │ import·X,·*·as·React·from·"react"
        │         ------------             
+
+```
+
+```
+invalid.jsx:15:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    14 │ // React import (no exception)
+  > 15 │ import React from "react"
+       │        ^^^^^
+    16 │ import * as React from "react"
+    17 │ import { default as React } from "react"
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    15 │ import·React·from·"react"
+       │ -------------------------
+
+```
+
+```
+invalid.jsx:16:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    14 │ // React import (no exception)
+    15 │ import React from "react"
+  > 16 │ import * as React from "react"
+       │             ^^^^^
+    17 │ import { default as React } from "react"
+    18 │ import React, { useEffect } from "react"
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    16 │ import·*·as·React·from·"react"
+       │ ------------------------------
+
+```
+
+```
+invalid.jsx:17:21 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    15 │ import React from "react"
+    16 │ import * as React from "react"
+  > 17 │ import { default as React } from "react"
+       │                     ^^^^^
+    18 │ import React, { useEffect } from "react"
+    19 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    17 │ import·{·default·as·React·}·from·"react"
+       │ ----------------------------------------
+
+```
+
+```
+invalid.jsx:18:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    16 │ import * as React from "react"
+    17 │ import { default as React } from "react"
+  > 18 │ import React, { useEffect } from "react"
+       │        ^^^^^
+    19 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    18 │ import·React,·{·useEffect·}·from·"react"
+       │        -------                          
+
+```
+
+```
+invalid.jsx:18:17 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    16 │ import * as React from "react"
+    17 │ import { default as React } from "react"
+  > 18 │ import React, { useEffect } from "react"
+       │                 ^^^^^^^^^
+    19 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    18 │ import·React,·{·useEffect·}·from·"react"
+       │             ---------------             
 
 ```
 

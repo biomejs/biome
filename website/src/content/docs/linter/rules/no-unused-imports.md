@@ -14,11 +14,6 @@ Unused imports might be the result of an incomplete refactoring.
 The code fix can remove comments associated with an `import`.
 See the last invalid example.
 
-There is one exception to the rule: the `React` import.
-Importing the `React` variable was a mandatory pattern until some time ago:
-For the time being this rule will ignore it,
-but this **might change in the future releases**.
-
 ## Examples
 
 ### Invalid
@@ -124,16 +119,6 @@ import { A, type B } from 'mod';
 function f(arg: B): A {
     return new A(arg);
 }
-```
-
-```jsx
-import React from 'react';
-
-function foo() {
-    return <div />;
-};
-
-foo();
 ```
 
 ## Related links

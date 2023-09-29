@@ -1,16 +1,14 @@
-use crate::{
-    react::{is_global_react_import, ReactLibrary},
-    semantic_services::Semantic,
-    JsRuleAction,
+use crate::{semantic_services::Semantic, JsRuleAction};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsImportClause, JsFileSource, JsIdentifierBinding,
-    JsImport, JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
+    binding_ext::AnyJsBindingDeclaration, AnyJsImportClause, JsIdentifierBinding, JsImport,
+    JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, NodeOrToken, SyntaxResult,
@@ -22,11 +20,6 @@ declare_rule! {
     /// Unused imports might be the result of an incomplete refactoring.
     /// The code fix can remove comments associated with an `import`.
     /// See the last invalid example.
-    ///
-    /// There is one exception to the rule: the `React` import.
-    /// Importing the `React` variable was a mandatory pattern until some time ago:
-    /// For the time being this rule will ignore it,
-    /// but this **might change in the future releases**.
     ///
     /// ## Examples
     ///
@@ -70,20 +63,11 @@ declare_rule! {
     ///     return new A(arg);
     /// }
     /// ```
-    ///
-    /// ```jsx
-    /// import React from 'react';
-    ///
-    /// function foo() {
-    ///     return <div />;
-    /// };
-    ///
-    /// foo();
-    /// ```
     pub(crate) NoUnusedImports {
         version: "next",
         name: "noUnusedImports",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -98,15 +82,6 @@ impl Rule for NoUnusedImports {
         let declaration = binding.declaration()?;
         if !is_import(&declaration) {
             return None;
-        }
-
-        if ctx.source_type::<JsFileSource>().variant().is_jsx() {
-            let js_import = declaration.syntax().ancestors().find_map(JsImport::cast)?;
-            // Legacy React framework requires to import `React`, even if it is not used.
-            // This is required for old versions of the Babel compiler.
-            if is_global_react_import(&js_import, ReactLibrary::React).unwrap_or(false) {
-                return None;
-            }
         }
 
         let model = ctx.model();
@@ -227,10 +202,10 @@ fn transfer_leading_trivia_to_sibling(
     Some(())
 }
 
-fn is_import(declaration: &AnyJsBindingDeclaration) -> bool {
+const fn is_import(declaration: &AnyJsBindingDeclaration) -> bool {
     matches!(
         declaration,
-            AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+        AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
             | AnyJsBindingDeclaration::JsImportDefaultClause(_)
             | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
