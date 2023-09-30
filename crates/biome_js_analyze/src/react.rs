@@ -5,7 +5,7 @@ pub mod hooks;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
-    JsCallExpression, JsIdentifierBinding, JsImport, JsImportNamedClause,
+    AnyJsObjectMember, JsCallExpression, JsIdentifierBinding, JsImport, JsImportNamedClause,
     JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsObjectExpression,
     JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
 };
@@ -102,13 +102,14 @@ impl ReactApiCall for ReactCreateElementCall {
         self.props.as_ref().and_then(|props| {
             let members = props.members();
             members.iter().find_map(|member| {
-                let member = member.ok()?;
-                let property = member.as_js_property_object_member()?;
+                let AnyJsObjectMember::JsPropertyObjectMember(property) = member.ok()? else {
+                    return None;
+                };
                 let property_name = property.name().ok()?;
 
                 let property_name = property_name.as_js_literal_member_name()?;
                 if property_name.name().ok()? == prop_name {
-                    Some(property.clone())
+                    Some(property)
                 } else {
                     None
                 }

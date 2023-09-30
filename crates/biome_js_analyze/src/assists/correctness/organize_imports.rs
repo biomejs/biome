@@ -96,18 +96,18 @@ impl Rule for OrganizeImports {
                 }
             }
 
-            // If this is the first import in the group save the leading trivia
-            // and slot index
-            if first_node.is_none() {
-                first_node = Some(import.clone());
-            }
-
             let source = match import.import_clause().ok()? {
                 AnyJsImportClause::JsImportBareClause(clause) => clause.source().ok()?,
                 AnyJsImportClause::JsImportDefaultClause(clause) => clause.source().ok()?,
                 AnyJsImportClause::JsImportNamedClause(clause) => clause.source().ok()?,
                 AnyJsImportClause::JsImportNamespaceClause(clause) => clause.source().ok()?,
             };
+
+            // If this is the first import in the group save the leading trivia
+            // and slot index
+            if first_node.is_none() {
+                first_node = Some(import.clone());
+            }
 
             let key = source.inner_string_text().ok()?;
             match nodes.entry(ImportKey(key)) {

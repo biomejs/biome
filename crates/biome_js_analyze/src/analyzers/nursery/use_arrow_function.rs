@@ -147,8 +147,8 @@ impl Rule for UseArrowFunction {
         }
         let mut mutation = ctx.root().begin();
         mutation.replace_node(
-            AnyJsExpression::JsFunctionExpression(function_expression.clone()),
-            AnyJsExpression::JsArrowFunctionExpression(arrow_function_builder.build()),
+            AnyJsExpression::from(function_expression.clone()),
+            AnyJsExpression::from(arrow_function_builder.build()),
         );
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
@@ -258,29 +258,27 @@ impl Visitor for AnyThisScopeVisitor {
 fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
     let body_statements = body.statements();
     // () => { ... }
-    let mut result = AnyJsFunctionBody::from(body);
+    let early_result = AnyJsFunctionBody::from(body);
     let Some(AnyJsStatement::JsReturnStatement(return_statement)) = body_statements.iter().next()
     else {
-        return result;
+        return early_result;
     };
     let Some(return_arg) = return_statement.argument() else {
-        return result;
+        return early_result;
     };
     if body_statements.syntax().has_comments_direct()
         || return_statement.syntax().has_comments_direct()
         || return_arg.syntax().has_comments_direct()
     {
         // To keep comments, we keep the regular function body
-        return result;
+        return early_result;
+    }
+    if let Some(first_token) = return_arg.syntax().first_token() {
+        if first_token.kind() == T!['{'] {
+            // () => ({ ... })
+            return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
+        }
     }
     // () => expression
-    result = AnyJsFunctionBody::AnyJsExpression(return_arg.clone());
-    let Some(first_token) = return_arg.syntax().first_token() else {
-        return result;
-    };
-    if first_token.kind() == T!['{'] {
-        // () => ({ ... })
-        result = AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
-    }
-    result
+    AnyJsFunctionBody::AnyJsExpression(return_arg)
 }

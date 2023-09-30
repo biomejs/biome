@@ -111,12 +111,12 @@ impl MemberDefinition {
 
     fn node(&self) -> AnyJsObjectMember {
         match self {
-            MemberDefinition::Getter(getter) => AnyJsObjectMember::from(getter.clone()),
-            MemberDefinition::Setter(setter) => AnyJsObjectMember::from(setter.clone()),
-            MemberDefinition::Method(method) => AnyJsObjectMember::from(method.clone()),
-            MemberDefinition::Property(property) => AnyJsObjectMember::from(property.clone()),
+            MemberDefinition::Getter(getter) => getter.clone().into(),
+            MemberDefinition::Setter(setter) => setter.clone().into(),
+            MemberDefinition::Method(method) => method.clone().into(),
+            MemberDefinition::Property(property) => property.clone().into(),
             MemberDefinition::ShorthandProperty(shorthand_property) => {
-                AnyJsObjectMember::from(shorthand_property.clone())
+                shorthand_property.clone().into()
             }
         }
     }

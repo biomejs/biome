@@ -140,7 +140,7 @@ impl Rule for NoAriaUnsupportedElements {
         })?;
 
         let removed_attribute = attribute.to_string();
-        mutation.remove_node(attribute.clone());
+        mutation.remove_node(attribute);
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,

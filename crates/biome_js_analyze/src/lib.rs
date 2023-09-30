@@ -1,4 +1,4 @@
-#![warn(clippy::needless_pass_by_value)]
+#![warn(clippy::needless_pass_by_value, clippy::redundant_clone)]
 
 use crate::suppression_action::apply_suppression_comment;
 use biome_analyze::{

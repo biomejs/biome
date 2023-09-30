@@ -184,9 +184,10 @@ impl From<AnyJsStatement> for ConditionalStatement {
 // Gets a yield expression from the given statement
 fn get_yield_expression(stmt: &AnyJsStatement) -> Option<JsYieldExpression> {
     let stmt = stmt.as_js_expression_statement()?;
-    let expr = stmt.as_fields().expression.ok()?;
-    let expr = expr.as_js_yield_expression()?;
-    Some(expr.clone())
+    let Ok(AnyJsExpression::JsYieldExpression(expr)) = stmt.as_fields().expression else {
+        return None;
+    };
+    Some(expr)
 }
 
 fn get_statement_list(stmt: &AnyJsStatement) -> Option<JsStatementList> {
