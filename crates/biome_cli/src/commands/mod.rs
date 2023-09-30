@@ -244,7 +244,7 @@ impl BiomeCommand {
     pub fn is_verbose(&self) -> bool {
         match self {
             BiomeCommand::Version(_) => false,
-            BiomeCommand::Rage(_, ..) => false,
+            BiomeCommand::Rage(..) => false,
             BiomeCommand::Start => false,
             BiomeCommand::Stop => false,
             BiomeCommand::Check { cli_options, .. } => cli_options.verbose,
