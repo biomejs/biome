@@ -18,11 +18,17 @@ CssRoot {
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
-                CssClassSelectorPattern {
-                    dot_token: DOT@0..1 "." [] [],
-                    name: CssIdentifier {
-                        value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
-                    },
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
                 },
             ],
             block: CssBlock {
@@ -43,10 +49,14 @@ CssRoot {
   0: CSS_RULE_LIST@0..9
     0: CSS_RULE@0..9
       0: CSS_SELECTOR_LIST@0..8
-        0: CSS_CLASS_SELECTOR_PATTERN@0..8
-          0: DOT@0..1 "." [] []
-          1: CSS_IDENTIFIER@1..8
-            0: IDENT@1..8 "action" [] [Whitespace(" ")]
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_CLASS_SELECTOR@0..8
+              0: DOT@0..1 "." [] []
+              1: CSS_IDENTIFIER@1..8
+                0: IDENT@1..8 "action" [] [Whitespace(" ")]
       1: CSS_BLOCK@8..9
         0: L_CURLY@8..9 "{" [] []
         1: CSS_DECLARATION_LIST@9..9

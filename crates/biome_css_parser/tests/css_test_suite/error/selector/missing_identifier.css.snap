@@ -18,14 +18,26 @@ CssRoot {
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
-                CssClassSelectorPattern {
-                    dot_token: DOT@0..2 "." [] [Whitespace(" ")],
-                    name: missing (required),
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..2 "." [] [Whitespace(" ")],
+                            name: missing (required),
+                        },
+                    ],
                 },
                 COMMA@2..4 "," [] [Whitespace(" ")],
-                CssIdSelectorPattern {
-                    hash_token: HASH@4..6 "#" [] [Whitespace(" ")],
-                    name: missing (required),
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@4..6 "#" [] [Whitespace(" ")],
+                            name: missing (required),
+                        },
+                    ],
                 },
             ],
             block: CssBlock {
@@ -46,13 +58,21 @@ CssRoot {
   0: CSS_RULE_LIST@0..8
     0: CSS_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
-        0: CSS_CLASS_SELECTOR_PATTERN@0..2
-          0: DOT@0..2 "." [] [Whitespace(" ")]
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: (empty)
           1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..2
+            0: CSS_CLASS_SELECTOR@0..2
+              0: DOT@0..2 "." [] [Whitespace(" ")]
+              1: (empty)
         1: COMMA@2..4 "," [] [Whitespace(" ")]
-        2: CSS_ID_SELECTOR_PATTERN@4..6
-          0: HASH@4..6 "#" [] [Whitespace(" ")]
+        2: CSS_COMPOUND_SELECTOR@4..6
+          0: (empty)
           1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@4..6
+            0: CSS_ID_SELECTOR@4..6
+              0: HASH@4..6 "#" [] [Whitespace(" ")]
+              1: (empty)
       1: CSS_BLOCK@6..8
         0: L_CURLY@6..7 "{" [] []
         1: CSS_DECLARATION_LIST@7..7

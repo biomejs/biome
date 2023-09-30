@@ -14,9 +14,11 @@ impl SyntaxFactory for CssSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            CSS_BOGUS | CSS_BOGUS_BODY | CSS_BOGUS_PATTERN | CSS_BOGUS_RULE => {
-                RawSyntaxNode::new(kind, children.into_iter().map(Some))
-            }
+            CSS_BOGUS
+            | CSS_BOGUS_BODY
+            | CSS_BOGUS_RULE
+            | CSS_BOGUS_SELECTOR
+            | CSS_BOGUS_SUB_SELECTOR => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             CSS_ANY_FUNCTION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -627,7 +629,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_ATTRIBUTE_NAME, children)
             }
-            CSS_ATTRIBUTE_SELECTOR_PATTERN => {
+            CSS_ATTRIBUTE_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -647,11 +649,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_ATTRIBUTE_SELECTOR_PATTERN.to_bogus(),
+                        CSS_ATTRIBUTE_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_ATTRIBUTE_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_ATTRIBUTE_SELECTOR, children)
             }
             CSS_BLOCK => {
                 let mut elements = (&children).into_iter();
@@ -686,7 +688,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_BLOCK, children)
             }
-            CSS_CLASS_SELECTOR_PATTERN => {
+            CSS_CLASS_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -706,23 +708,49 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_CLASS_SELECTOR_PATTERN.to_bogus(),
+                        CSS_CLASS_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_CLASS_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_CLASS_SELECTOR, children)
             }
-            CSS_COMBINATOR_SELECTOR_PATTERN => {
+            CSS_COMPLEX_SELECTOR => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyCssSelectorPattern::can_cast(element.kind()) {
+                    if AnyCssSelector::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
                 }
                 slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssComplexSelectorCombinator::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssSelector::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_COMPLEX_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_COMPLEX_SELECTOR, children)
+            }
+            CSS_COMPLEX_SELECTOR_COMBINATOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [>] {
                         slots.mark_present();
@@ -751,8 +779,34 @@ impl SyntaxFactory for CssSyntaxFactory {
                     }
                 }
                 slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_COMPLEX_SELECTOR_COMBINATOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_COMPLEX_SELECTOR_COMBINATOR, children)
+            }
+            CSS_COMPOUND_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyCssSelectorPattern::can_cast(element.kind()) {
+                    if element.kind() == T ! [&] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnySimpleSelector::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssSubSelectorList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -760,11 +814,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_COMBINATOR_SELECTOR_PATTERN.to_bogus(),
+                        CSS_COMPOUND_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_COMBINATOR_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_COMPOUND_SELECTOR, children)
             }
             CSS_CUSTOM_PROPERTY => {
                 let mut elements = (&children).into_iter();
@@ -884,7 +938,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_DIMENSION, children)
             }
-            CSS_ID_SELECTOR_PATTERN => {
+            CSS_ID_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -904,11 +958,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_ID_SELECTOR_PATTERN.to_bogus(),
+                        CSS_ID_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_ID_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_ID_SELECTOR, children)
             }
             CSS_IDENTIFIER => {
                 let mut elements = (&children).into_iter();
@@ -1066,7 +1120,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PERCENTAGE, children)
             }
-            CSS_PSEUDO_CLASS_SELECTOR_PATTERN => {
+            CSS_PSEUDO_CLASS_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1085,7 +1139,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssPseudoClassSelectorPatternParameters::can_cast(element.kind()) {
+                    if CssPseudoClassSelectorParameters::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1093,13 +1147,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_PSEUDO_CLASS_SELECTOR_PATTERN.to_bogus(),
+                        CSS_PSEUDO_CLASS_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR, children)
             }
-            CSS_PSEUDO_CLASS_SELECTOR_PATTERN_PARAMETERS => {
+            CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1126,11 +1180,30 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_PSEUDO_CLASS_SELECTOR_PATTERN_PARAMETERS.to_bogus(),
+                        CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR_PATTERN_PARAMETERS, children)
+                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS, children)
+            }
+            CSS_PSEUDO_ELEMENT_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_ELEMENT_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_ELEMENT_SELECTOR, children)
             }
             CSS_RATIO => {
                 let mut elements = (&children).into_iter();
@@ -1263,7 +1336,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_STRING, children)
             }
-            CSS_TYPE_SELECTOR_PATTERN => {
+            CSS_TYPE_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1276,13 +1349,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_TYPE_SELECTOR_PATTERN.to_bogus(),
+                        CSS_TYPE_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_TYPE_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_TYPE_SELECTOR, children)
             }
-            CSS_UNIVERSAL_SELECTOR_PATTERN => {
+            CSS_UNIVERSAL_SELECTOR => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1295,11 +1368,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_UNIVERSAL_SELECTOR_PATTERN.to_bogus(),
+                        CSS_UNIVERSAL_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_UNIVERSAL_SELECTOR_PATTERN, children)
+                slots.into_node(CSS_UNIVERSAL_SELECTOR, children)
             }
             CSS_VAR_FUNCTION => {
                 let mut elements = (&children).into_iter();
@@ -1404,10 +1477,13 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                AnyCssSelectorPattern::can_cast,
+                AnyCssSelector::can_cast,
                 T ! [,],
                 false,
             ),
+            CSS_SUB_SELECTOR_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssSubSelector::can_cast)
+            }
             _ => unreachable!("Is {:?} a token?", kind),
         }
     }

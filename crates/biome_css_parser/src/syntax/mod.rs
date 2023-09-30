@@ -1,12 +1,9 @@
 mod parse_error;
-mod pattern;
+mod selector;
 
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expect_any_pattern, expect_block};
-use crate::syntax::pattern::{
-    parse_class_selector_pattern, parse_id_selector_pattern, parse_type_selector_pattern,
-    parse_universal_selector_pattern,
-};
+use crate::syntax::parse_error::{expect_any_selector, expect_block};
+use crate::syntax::selector::parse_compound_selector;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -16,7 +13,7 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, ParserProgress, TokenSet};
 
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![#], T![.], T![*], T![ident], T![:], T!['{']];
+    token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
@@ -40,7 +37,7 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
             .or_recover(
                 p,
                 &ParseRecovery::new(CSS_BOGUS_RULE, RULE_RECOVERY_SET),
-                expect_any_pattern,
+                expect_any_selector,
             )
             .is_err()
         {
@@ -72,6 +69,8 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(completed)
 }
 
+const SELECTOR_RECOVERY_SET: TokenSet<CssSyntaxKind> = RULE_RECOVERY_SET.union(token_set![T![,]]);
+
 pub(crate) struct CssSelectorList;
 
 impl ParseSeparatedList for CssSelectorList {
@@ -80,13 +79,7 @@ impl ParseSeparatedList for CssSelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        match p.cur() {
-            T![.] => parse_class_selector_pattern(p),
-            T![#] => parse_id_selector_pattern(p),
-            T![*] => parse_universal_selector_pattern(p),
-            _ if is_at_identifier(p) => parse_type_selector_pattern(p),
-            _ => Absent,
-        }
+        parse_compound_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -100,12 +93,9 @@ impl ParseSeparatedList for CssSelectorList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &ParseRecovery::new(
-                CSS_BOGUS_PATTERN,
-                RULE_RECOVERY_SET.union(token_set![T![,]]),
-            )
-            .enable_recovery_on_line_break(),
-            expect_any_pattern,
+            &ParseRecovery::new(CSS_BOGUS_SELECTOR, SELECTOR_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
+            expect_any_selector,
         )
     }
     fn separating_element_kind(&mut self) -> Self::Kind {

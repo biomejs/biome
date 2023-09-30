@@ -89,22 +89,29 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeName::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR_PATTERN => {
-                    let $pattern =
-                        unsafe { $crate::CssAttributeSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BLOCK => {
                     let $pattern = unsafe { $crate::CssBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_CLASS_SELECTOR_PATTERN => {
-                    let $pattern = unsafe { $crate::CssClassSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_CLASS_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssClassSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_COMBINATOR_SELECTOR_PATTERN => {
+                $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR_COMBINATOR => {
                     let $pattern =
-                        unsafe { $crate::CssCombinatorSelectorPattern::new_unchecked(node) };
+                        unsafe { $crate::CssComplexSelectorCombinator::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssCompoundSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_CUSTOM_PROPERTY => {
@@ -123,8 +130,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDimension::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ID_SELECTOR_PATTERN => {
-                    let $pattern = unsafe { $crate::CssIdSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_IDENTIFIER => {
@@ -151,15 +158,17 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PATTERN => {
-                    let $pattern =
-                        unsafe { $crate::CssPseudoClassSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssPseudoClassSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PATTERN_PARAMETERS => {
-                    let $pattern = unsafe {
-                        $crate::CssPseudoClassSelectorPatternParameters::new_unchecked(node)
-                    };
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassSelectorParameters::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssPseudoElementSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_RATIO => {
@@ -182,13 +191,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssString::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_TYPE_SELECTOR_PATTERN => {
-                    let $pattern = unsafe { $crate::CssTypeSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_TYPE_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_UNIVERSAL_SELECTOR_PATTERN => {
-                    let $pattern =
-                        unsafe { $crate::CssUniversalSelectorPattern::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_UNIVERSAL_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_VAR_FUNCTION => {
@@ -207,12 +215,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BOGUS_PATTERN => {
-                    let $pattern = unsafe { $crate::CssBogusPattern::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_BOGUS_RULE => {
                     let $pattern = unsafe { $crate::CssBogusRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssBogusSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_AT_KEYFRAMES_ITEM_LIST => {
@@ -245,6 +257,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUB_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssSubSelectorList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),
