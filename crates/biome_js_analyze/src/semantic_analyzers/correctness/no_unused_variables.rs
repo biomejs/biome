@@ -110,7 +110,7 @@ pub enum SuggestedFix {
 }
 
 fn is_function_that_is_ok_parameter_not_be_used(
-    parent_function: Option<JsAnyParameterParentFunction>,
+    parent_function: &Option<JsAnyParameterParentFunction>,
 ) -> bool {
     matches!(
         parent_function,
@@ -152,14 +152,14 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
         AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(parameter.parent_function()) {
+            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
                 None
             } else {
                 suggestion_for_binding(binding)
             }
         }
         AnyJsBindingDeclaration::JsRestParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(parameter.parent_function()) {
+            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
                 None
             } else {
                 suggestion_for_binding(binding)

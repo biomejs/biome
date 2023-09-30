@@ -401,7 +401,7 @@ fn is_logical_identity(node: AnyJsExpression, operator: JsLogicalOperator) -> bo
     use JsLogicalOperator::*;
     match node.omit_parentheses() {
         AnyJsLiteralExpression(node) => {
-            let boolean_value = get_boolean_value(node);
+            let boolean_value = get_boolean_value(&node);
             operator == LogicalOr && boolean_value || (operator == LogicalAnd && !boolean_value)
         }
         JsUnaryExpression(node) => {
@@ -468,7 +468,7 @@ fn is_logical_identity(node: AnyJsExpression, operator: JsLogicalOperator) -> bo
     }
 }
 
-fn get_boolean_value(node: AnyJsLiteralExpression) -> bool {
+fn get_boolean_value(node: &AnyJsLiteralExpression) -> bool {
     use AnyJsLiteralExpression::*;
     match node {
         JsRegexLiteralExpression(_) => true,
@@ -499,7 +499,7 @@ mod tests {
             .find_map(|js_statement| js_statement.cast::<AnyJsLiteralExpression>());
 
         assert_eq!(
-            get_boolean_value(literal_expression.expect("Not found AnyLiteralExpression.")),
+            get_boolean_value(&literal_expression.expect("Not found AnyLiteralExpression.")),
             value
         );
     }

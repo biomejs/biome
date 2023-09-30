@@ -402,7 +402,7 @@ struct AnyJsAssignmentExpressionLikeIterator {
 }
 
 impl AnyJsAssignmentExpressionLikeIterator {
-    fn from_static_member_expression(source: JsStaticMemberExpression) -> SyntaxResult<Self> {
+    fn from_static_member_expression(source: &JsStaticMemberExpression) -> SyntaxResult<Self> {
         Ok(Self {
             source_member: source.member().map(AnyNameLike::from)?,
             source_object: source.object()?,
@@ -411,7 +411,7 @@ impl AnyJsAssignmentExpressionLikeIterator {
         })
     }
 
-    fn from_static_member_assignment(source: JsStaticMemberAssignment) -> SyntaxResult<Self> {
+    fn from_static_member_assignment(source: &JsStaticMemberAssignment) -> SyntaxResult<Self> {
         Ok(Self {
             source_member: source.member().map(AnyNameLike::from)?,
             source_object: source.object()?,
@@ -420,7 +420,7 @@ impl AnyJsAssignmentExpressionLikeIterator {
         })
     }
 
-    fn from_computed_member_assignment(source: JsComputedMemberAssignment) -> SyntaxResult<Self> {
+    fn from_computed_member_assignment(source: &JsComputedMemberAssignment) -> SyntaxResult<Self> {
         Ok(Self {
             source_member: source.member().and_then(|expression| match expression {
                 AnyJsExpression::JsIdentifierExpression(node) => {
@@ -435,7 +435,7 @@ impl AnyJsAssignmentExpressionLikeIterator {
         })
     }
 
-    fn from_computed_member_expression(source: JsComputedMemberExpression) -> SyntaxResult<Self> {
+    fn from_computed_member_expression(source: &JsComputedMemberExpression) -> SyntaxResult<Self> {
         Ok(Self {
             source_member: source.member().and_then(|expression| match expression {
                 AnyJsExpression::JsIdentifierExpression(node) => {
@@ -623,8 +623,10 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                 )),
                 AnyJsExpression::JsStaticMemberExpression(right),
             ) => AnyAssignmentLike::StaticExpression {
-                left: AnyJsAssignmentExpressionLikeIterator::from_static_member_assignment(left)?,
-                right: AnyJsAssignmentExpressionLikeIterator::from_static_member_expression(right)?,
+                left: AnyJsAssignmentExpressionLikeIterator::from_static_member_assignment(&left)?,
+                right: AnyJsAssignmentExpressionLikeIterator::from_static_member_expression(
+                    &right,
+                )?,
             },
 
             (
@@ -633,9 +635,11 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                 ),
                 AnyJsExpression::JsComputedMemberExpression(right),
             ) => AnyAssignmentLike::StaticExpression {
-                left: AnyJsAssignmentExpressionLikeIterator::from_computed_member_assignment(left)?,
+                left: AnyJsAssignmentExpressionLikeIterator::from_computed_member_assignment(
+                    &left,
+                )?,
                 right: AnyJsAssignmentExpressionLikeIterator::from_computed_member_expression(
-                    right,
+                    &right,
                 )?,
             },
             _ => AnyAssignmentLike::None,

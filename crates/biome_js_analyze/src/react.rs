@@ -204,7 +204,7 @@ pub(crate) fn is_react_call_api(
             return false;
         }
         return match model.binding(&reference) {
-            Some(decl) => is_react_export(decl, lib),
+            Some(decl) => is_react_export(&decl, lib),
             None => reference.has_name(lib.global_name()),
         };
     }
@@ -212,7 +212,7 @@ pub(crate) fn is_react_call_api(
     if let Some(ident) = expr.as_js_reference_identifier() {
         return model
             .binding(&ident)
-            .and_then(|it| is_named_react_export(it, lib, api_name))
+            .and_then(|it| is_named_react_export(&it, lib, api_name))
             .unwrap_or(false);
     }
 
@@ -239,7 +239,7 @@ pub(crate) fn jsx_member_name_is_react_fragment(
 
     let lib = ReactLibrary::React;
     match model.binding(object) {
-        Some(declaration) => Some(is_react_export(declaration, lib)),
+        Some(declaration) => Some(is_react_export(&declaration, lib)),
         None => Some(object.value_token().ok()?.text_trimmed() == lib.global_name()),
     }
 }
@@ -255,7 +255,7 @@ pub(crate) fn jsx_reference_identifier_is_fragment(
     model: &SemanticModel,
 ) -> Option<bool> {
     match model.binding(name) {
-        Some(reference) => is_named_react_export(reference, ReactLibrary::React, "Fragment"),
+        Some(reference) => is_named_react_export(&reference, ReactLibrary::React, "Fragment"),
         None => {
             let value_token = name.value_token().ok()?;
             let is_fragment = value_token.text_trimmed() == "Fragment";
@@ -264,7 +264,7 @@ pub(crate) fn jsx_reference_identifier_is_fragment(
     }
 }
 
-fn is_react_export(binding: Binding, lib: ReactLibrary) -> bool {
+fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
     binding
         .syntax()
         .ancestors()
@@ -273,7 +273,7 @@ fn is_react_export(binding: Binding, lib: ReactLibrary) -> bool {
         .unwrap_or(false)
 }
 
-fn is_named_react_export(binding: Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
+fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
     let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {

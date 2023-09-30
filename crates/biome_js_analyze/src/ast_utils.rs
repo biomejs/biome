@@ -4,7 +4,7 @@ use biome_rowan::{AstNode, TriviaPiece};
 /// Add any leading and trailing trivia from given source node to the token.
 ///
 /// Adds whitespace trivia if needed for safe replacement of source node.
-pub fn token_with_source_trivia<T>(token: JsSyntaxToken, source: &T) -> JsSyntaxToken
+pub fn token_with_source_trivia<T>(token: &JsSyntaxToken, source: &T) -> JsSyntaxToken
 where
     T: AstNode<Language = JsLanguage>,
 {

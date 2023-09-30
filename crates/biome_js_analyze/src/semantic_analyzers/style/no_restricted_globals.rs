@@ -153,7 +153,7 @@ impl Rule for NoRestrictedGlobals {
                 } else {
                     vec![]
                 };
-                is_restricted(text, binding, denied_globals.as_slice())
+                is_restricted(text, &binding, denied_globals.as_slice())
                     .map(|text| (token.text_trimmed_range(), text))
             })
             .collect()
@@ -175,7 +175,7 @@ impl Rule for NoRestrictedGlobals {
     }
 }
 
-fn is_restricted(name: &str, binding: Option<Binding>, denied_globals: &[&str]) -> Option<String> {
+fn is_restricted(name: &str, binding: &Option<Binding>, denied_globals: &[&str]) -> Option<String> {
     if binding.is_none() && (RESTRICTED_GLOBALS.contains(&name) || denied_globals.contains(&name)) {
         Some(name.to_string())
     } else {

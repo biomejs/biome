@@ -369,8 +369,8 @@ mod tests {
         nok_rename_function_conflict, "function a() {} function b() {}",
     }
 
-    fn snap_diagnostic(test_name: &str, diagnostic: Error) {
-        let content = print_diagnostic_to_string(&diagnostic);
+    fn snap_diagnostic(test_name: &str, diagnostic: &Error) {
+        let content = print_diagnostic_to_string(diagnostic);
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
@@ -384,7 +384,7 @@ mod tests {
     fn cannot_find_declaration() {
         snap_diagnostic(
             "cannot_find_declaration",
-            RenameError::CannotFindDeclaration("async".to_string()).with_file_path("example.js"),
+            &RenameError::CannotFindDeclaration("async".to_string()).with_file_path("example.js"),
         )
     }
 
@@ -393,7 +393,7 @@ mod tests {
         let source_code = "async function f() {}";
         snap_diagnostic(
             "cannot_be_renamed",
-            RenameError::CannotBeRenamed {
+            &RenameError::CannotBeRenamed {
                 original_name: "async".to_string(),
                 original_range: TextRange::new(0.into(), 5.into()),
                 new_name: "await".to_string(),

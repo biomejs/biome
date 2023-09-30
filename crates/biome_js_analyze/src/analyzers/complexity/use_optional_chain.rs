@@ -567,8 +567,7 @@ impl LogicalOrLikeChain {
         if !is_right_empty_object {
             return None;
         }
-        let member =
-            LogicalOrLikeChain::get_chain_parent_member(AnyJsExpression::from(logical.clone()))?;
+        let member = LogicalOrLikeChain::get_chain_parent_member(logical)?;
         Some(LogicalOrLikeChain { member })
     }
 
@@ -576,7 +575,7 @@ impl LogicalOrLikeChain {
     /// E.g.
     /// `(foo ?? {}).bar` is inside `((foo ?? {}).bar || {}).baz;`
     fn is_inside_another_chain(&self) -> bool {
-        LogicalOrLikeChain::get_chain_parent(self.member.clone()).map_or(false, |parent| {
+        LogicalOrLikeChain::get_chain_parent(&self.member).map_or(false, |parent| {
             parent
                 .as_js_logical_expression()
                 .filter(|parent_expression| {
@@ -647,8 +646,8 @@ impl LogicalOrLikeChain {
     }
 
     /// Traversal by parent to find the parent member of a chain.
-    fn get_chain_parent_member(expression: AnyJsExpression) -> Option<AnyJsMemberExpression> {
-        iter::successors(expression.parent::<AnyJsExpression>(), |expression| {
+    fn get_chain_parent_member(logical: &JsLogicalExpression) -> Option<AnyJsMemberExpression> {
+        iter::successors(logical.parent::<AnyJsExpression>(), |expression| {
             if matches!(expression, AnyJsExpression::JsParenthesizedExpression(_)) {
                 expression.parent::<AnyJsExpression>()
             } else {
@@ -672,7 +671,7 @@ impl LogicalOrLikeChain {
 
     /// Traversal by parent to find the parent of a chain.
     /// This function is opposite to the `get_member` function.
-    fn get_chain_parent(expression: AnyJsMemberExpression) -> Option<AnyJsExpression> {
+    fn get_chain_parent(expression: &AnyJsMemberExpression) -> Option<AnyJsExpression> {
         iter::successors(expression.parent::<AnyJsExpression>(), |expression| {
             if matches!(
                 expression,

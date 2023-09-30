@@ -1,3 +1,5 @@
+#![warn(clippy::needless_pass_by_value)]
+
 use crate::suppression_action::apply_suppression_comment;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,

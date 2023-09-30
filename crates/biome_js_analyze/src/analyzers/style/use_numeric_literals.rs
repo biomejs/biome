@@ -90,7 +90,7 @@ impl Rule for UseNumericLiterals {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         let number = call.to_numeric_literal()?;
-        let number = ast_utils::token_with_source_trivia(number, node);
+        let number = ast_utils::token_with_source_trivia(&number, node);
         mutation.replace_node_discard_trivia(
             AnyJsExpression::JsCallExpression(node.clone()),
             AnyJsExpression::AnyJsLiteralExpression(

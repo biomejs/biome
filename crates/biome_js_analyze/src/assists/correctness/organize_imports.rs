@@ -87,7 +87,7 @@ impl Rule for OrganizeImports {
             let first_token = import.import_token().ok()?;
 
             // If this is not the first import in the group, check for a group break
-            if has_empty_line(first_token.leading_trivia()) {
+            if has_empty_line(&first_token.leading_trivia()) {
                 if let Some(first_node) = first_node.take() {
                     groups.push(ImportGroup {
                         first_node,
@@ -747,7 +747,7 @@ fn is_ascii_whitespace(piece: &SyntaxTriviaPiece<JsLanguage>) -> bool {
 }
 
 /// Returns true if the provided trivia contains an empty line (two consecutive newline pieces, ignoring whitespace)
-fn has_empty_line(trivia: SyntaxTrivia<JsLanguage>) -> bool {
+fn has_empty_line(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
     let mut was_newline = false;
     trivia
         .pieces()
