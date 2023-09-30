@@ -189,7 +189,6 @@ impl Rule for NoPositiveTabindex {
                         make::js_string_literal_expression(jsx_string_literal("0")),
                     ),
                 );
-
                 mutation.replace_node(prev_val, new_val);
             }
         };
