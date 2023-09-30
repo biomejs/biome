@@ -13,7 +13,7 @@ use crate::service::enumerate_pipes;
 use crate::{service, CliDiagnostic, CliSession, VERSION};
 
 /// Handler for the `rage` command
-pub(crate) fn rage(session: CliSession) -> Result<(), CliDiagnostic> {
+pub(crate) fn rage(session: CliSession, daemon_logs: bool) -> Result<(), CliDiagnostic> {
     let terminal_supports_colors = termcolor::BufferWriter::stdout(ColorChoice::Auto)
         .buffer()
         .supports_color();
@@ -36,17 +36,23 @@ pub(crate) fn rage(session: CliSession) -> Result<(), CliDiagnostic> {
 
     {RageConfiguration(&session.app.fs)}
     {WorkspaceRage(session.app.workspace.deref())}
-    {ConnectedClientServerLog(session.app.workspace.deref())}
     ));
 
-    if session.app.workspace.server_info().is_none() {
-        session
-            .app
-            .console
-            .log(markup!("Discovering running Biome servers..."));
-        session.app.console.log(markup!({ RunningRomeServer }));
+    match session.app.workspace.server_info() {
+        Some(_) if daemon_logs => {
+            session.app.console.log(markup!({
+                ConnectedClientServerLog(session.app.workspace.deref())
+            }));
+        }
+        None => {
+            session
+                .app
+                .console
+                .log(markup!("Discovering running Biome servers..."));
+            session.app.console.log(markup!({ RunningRomeServer }));
+        }
+        _ => {}
     }
-
     Ok(())
 }
 
@@ -130,7 +136,7 @@ impl Display for RunningRomeServer {
                     }
                 }
 
-                RomeServerLog.fmt(f)?;
+                BiomeServerLog.fmt(f)?;
             } else {
                 markup!("\n"<Emphasis>"Incompatible Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
 
@@ -250,9 +256,9 @@ impl Display for KeyValuePair<'_> {
     }
 }
 
-struct RomeServerLog;
+struct BiomeServerLog;
 
-impl Display for RomeServerLog {
+impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file() {
             markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"
@@ -276,7 +282,7 @@ struct ConnectedClientServerLog<'a>(&'a dyn Workspace);
 impl Display for ConnectedClientServerLog<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if self.0.server_info().is_some() {
-            RomeServerLog.fmt(fmt)
+            BiomeServerLog.fmt(fmt)
         } else {
             Ok(())
         }

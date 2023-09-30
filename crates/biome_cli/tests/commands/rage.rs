@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{CliSnapshot, SnapshotPayload};
+use crate::snap_test::{assert_cli_snapshot, CliSnapshot, SnapshotPayload};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::{FileSystem, MemoryFileSystem};
@@ -8,6 +8,28 @@ use bpaf::Args;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::{env, fs};
+
+#[test]
+fn rage_help() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("rage"), "--help"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_help",
+        fs,
+        console,
+        result,
+    ));
+}
 
 #[test]
 fn ok() {
@@ -97,7 +119,7 @@ fn with_server_logs() {
     let mut console = BufferConsole::default();
 
     let result = {
-        let log_dir = TestLogDir::new("rome-test-logs");
+        let log_dir = TestLogDir::new("biome-test-logs");
         fs::create_dir_all(&log_dir.path).expect("Failed to create test log directory");
 
         fs::write(log_dir.path.join("server.log.2022-10-14-16"), r#"
@@ -144,7 +166,7 @@ Not most recent log file
         run_cli(
             DynRef::Borrowed(&mut fs),
             &mut console,
-            Args::from([("rage")].as_slice()),
+            Args::from([("rage"), "--daemon-logs"].as_slice()),
         )
     };
 
@@ -165,7 +187,7 @@ fn run_rage<'app>(
     console: &'app mut dyn Console,
     args: Args,
 ) -> Result<(), CliDiagnostic> {
-    let _test_dir = TestLogDir::new("rome-rage-test");
+    let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)
 }
 
