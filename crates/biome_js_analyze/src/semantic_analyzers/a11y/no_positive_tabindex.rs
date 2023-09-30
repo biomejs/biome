@@ -196,7 +196,7 @@ impl Rule for NoPositiveTabindex {
         Some(JsRuleAction {
             category: biome_analyze::ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Change the "<Emphasis>"tableIndex"</Emphasis>" prop value to 0." }
+            message: markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value to 0." }
                 .to_owned(),
             mutation,
         })
