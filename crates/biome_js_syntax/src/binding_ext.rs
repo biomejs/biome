@@ -11,10 +11,10 @@ use crate::{
     TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
     TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
-    TsIndexSignatureParameter, TsInterfaceDeclaration, TsMethodSignatureClassMember,
-    TsMethodSignatureTypeMember, TsModuleDeclaration, TsPropertyParameter,
-    TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
-    TsTypeParameterName,
+    TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration, TsMappedType,
+    TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsModuleDeclaration,
+    TsPropertyParameter, TsSetterSignatureClassMember, TsSetterSignatureTypeMember,
+    TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
@@ -25,6 +25,8 @@ declare_node_union! {
         // parameters
             | JsFormalParameter | JsRestParameter | JsBogusParameter
             | TsIndexSignatureParameter | TsPropertyParameter
+        // type parameter
+            | TsInferType | TsMappedType | TsTypeParameter
         // functions
             | JsFunctionDeclaration | JsFunctionExpression
             | TsDeclareFunctionDeclaration
@@ -163,20 +165,18 @@ declare_node_union! {
 }
 
 fn declaration(node: &JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
-    use JsSyntaxKind::*;
-    let parent = node.parent()?;
-    let possible_declarator = parent.ancestors().find(|x| {
+    let possible_declarator = node.ancestors().skip(1).find(|x| {
         !matches!(
             x.kind(),
-            JS_BINDING_PATTERN_WITH_DEFAULT
-                | JS_OBJECT_BINDING_PATTERN
-                | JS_OBJECT_BINDING_PATTERN_REST
-                | JS_OBJECT_BINDING_PATTERN_PROPERTY
-                | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-                | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
-                | JS_ARRAY_BINDING_PATTERN
-                | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-                | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
+            JsSyntaxKind::JS_BINDING_PATTERN_WITH_DEFAULT
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
+                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
+                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT
         )
     })?;
 

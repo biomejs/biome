@@ -103,6 +103,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels) no longer reports unbreakable labeled statements. Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) now reports unused TypeScript's type parameters. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#294](https://github.com/biomejs/biome/issues/294). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) no longer reports false positives for return types. Contributed by @b4s36t4

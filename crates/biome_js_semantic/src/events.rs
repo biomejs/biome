@@ -12,7 +12,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList,
     JsxReferenceIdentifier, TextRange, TextSize, TsIdentifierBinding, TsTypeParameterName,
 };
-use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TokenText};
+use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 
 /// Events emitted by the [SemanticEventExtractor]. These events are later
 /// made into the Semantic Model.
@@ -368,27 +368,26 @@ impl SemanticEventExtractor {
 
         let (name_token, is_var) = match node.kind() {
             JS_IDENTIFIER_BINDING => {
-                let binding = node.clone().cast::<JsIdentifierBinding>()?;
+                let binding = JsIdentifierBinding::unwrap_cast(node.clone());
                 let name_token = binding.name_token().ok()?;
                 let is_var = Self::is_var(&binding);
                 (name_token, is_var)
             }
             TS_IDENTIFIER_BINDING => {
-                let binding = node.clone().cast::<TsIdentifierBinding>()?;
+                let binding = TsIdentifierBinding::unwrap_cast(node.clone());
                 let name_token = binding.name_token().ok()?;
                 let is_var = Self::is_var(&binding);
                 (name_token, is_var)
             }
             TS_TYPE_PARAMETER_NAME => {
-                let token = node.clone().cast::<TsTypeParameterName>()?;
-                let name_token = token.ident_token().ok()?;
+                let token = TsTypeParameterName::unwrap_cast(node.clone());
 
                 if token.in_infer_type() {
                     self.infers.push(token);
-
                     return None;
                 }
 
+                let name_token = token.ident_token().ok()?;
                 let is_var = Some(false);
                 (name_token, is_var)
             }
@@ -481,7 +480,7 @@ impl SemanticEventExtractor {
                 let reference = JsReferenceIdentifier::unwrap_cast(node.clone());
                 let name_token = reference.value_token().ok()?;
                 // skip `this` reference representing the class instance
-                if name_token.token_text_trimmed() == "this" {
+                if name_token.text_trimmed() == "this" {
                     return None;
                 }
                 (
@@ -514,7 +513,7 @@ impl SemanticEventExtractor {
             "specified node is not a identifier assignment (JS_IDENTIFIER_ASSIGNMENT)"
         );
 
-        let reference = node.clone().cast::<JsIdentifierAssignment>()?;
+        let reference = JsIdentifierAssignment::unwrap_cast(node.clone());
         let name_token = reference.name_token().ok()?;
         let name = name_token.token_text_trimmed();
 
@@ -530,7 +529,7 @@ impl SemanticEventExtractor {
     fn enter_js_call_expression(&mut self, node: &JsSyntaxNode) -> Option<()> {
         debug_assert!(matches!(node.kind(), JsSyntaxKind::JS_CALL_EXPRESSION));
 
-        let call = node.clone().cast::<JsCallExpression>()?;
+        let call = JsCallExpression::unwrap_cast(node.clone());
         let callee = call.callee().ok()?;
 
         if let JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION = callee.syntax().kind() {
@@ -1001,9 +1000,9 @@ impl SemanticEventExtractor {
     fn is_assignment_left_side_module_exports(&self, node: &JsSyntaxNode) -> bool {
         match node.kind() {
             JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                let expr = node.clone().cast::<JsAssignmentExpression>();
-                match expr.and_then(|x| x.left().ok()) {
-                    Some(AnyJsAssignmentPattern::AnyJsAssignment(
+                let expr = JsAssignmentExpression::unwrap_cast(node.clone());
+                match expr.left() {
+                    Ok(AnyJsAssignmentPattern::AnyJsAssignment(
                         AnyJsAssignment::JsStaticMemberAssignment(a),
                     )) => {
                         let first = a
@@ -1031,7 +1030,7 @@ impl SemanticEventExtractor {
                         }
                     }
                     // exports = ...
-                    Some(AnyJsAssignmentPattern::AnyJsAssignment(
+                    Ok(AnyJsAssignmentPattern::AnyJsAssignment(
                         AnyJsAssignment::JsIdentifierAssignment(ident),
                     )) => ident.syntax().text_trimmed() == "exports",
                     _ => false,

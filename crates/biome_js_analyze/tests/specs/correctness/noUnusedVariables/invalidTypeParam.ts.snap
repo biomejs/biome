@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeParam.ts
+---
+# Input
+```js
+export function f<T>() {}
+export class C<T> {}
+export type Alias<T> = number
+export type Mapped<T> = { [K in keyof T]: number }
+export type Inferred<T> = T extends (infer I)[] ? number : never;
+```
+
+# Diagnostics
+```
+invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter is unused.
+  
+  > 1 │ export function f<T>() {}
+      │                   ^
+    2 │ export class C<T> {}
+    3 │ export type Alias<T> = number
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1   │ - export·function·f<T>()·{}
+      1 │ + export·function·f<_T>()·{}
+    2 2 │   export class C<T> {}
+    3 3 │   export type Alias<T> = number
+  
+
+```
+
+```
+invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter is unused.
+  
+    1 │ export function f<T>() {}
+  > 2 │ export class C<T> {}
+      │                ^
+    3 │ export type Alias<T> = number
+    4 │ export type Mapped<T> = { [K in keyof T]: number }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1 1 │   export function f<T>() {}
+    2   │ - export·class·C<T>·{}
+      2 │ + export·class·C<_T>·{}
+    3 3 │   export type Alias<T> = number
+    4 4 │   export type Mapped<T> = { [K in keyof T]: number }
+  
+
+```
+
+```
+invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type parameter is unused.
+  
+    1 │ export function f<T>() {}
+    2 │ export class C<T> {}
+  > 3 │ export type Alias<T> = number
+      │                   ^
+    4 │ export type Mapped<T> = { [K in keyof T]: number }
+    5 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend T with an underscore.
+  
+    1 1 │   export function f<T>() {}
+    2 2 │   export class C<T> {}
+    3   │ - export·type·Alias<T>·=·number
+      3 │ + export·type·Alias<_T>·=·number
+    4 4 │   export type Mapped<T> = { [K in keyof T]: number }
+    5 5 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+
+```
+
+```
+invalidTypeParam.ts:4:28 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    2 │ export class C<T> {}
+    3 │ export type Alias<T> = number
+  > 4 │ export type Mapped<T> = { [K in keyof T]: number }
+      │                            ^
+    5 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend K with an underscore.
+  
+    2 2 │   export class C<T> {}
+    3 3 │   export type Alias<T> = number
+    4   │ - export·type·Mapped<T>·=·{·[K·in·keyof·T]:·number·}
+      4 │ + export·type·Mapped<T>·=·{·[_K·in·keyof·T]:·number·}
+    5 5 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+  
+
+```
+
+```
+invalidTypeParam.ts:5:44 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    3 │ export type Alias<T> = number
+    4 │ export type Mapped<T> = { [K in keyof T]: number }
+  > 5 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+      │                                            ^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend I with an underscore.
+  
+    3 3 │   export type Alias<T> = number
+    4 4 │   export type Mapped<T> = { [K in keyof T]: number }
+    5   │ - export·type·Inferred<T>·=·T·extends·(infer·I)[]·?·number·:·never;
+      5 │ + export·type·Inferred<T>·=·T·extends·(infer·_I)[]·?·number·:·never;
+  
+
+```
+
+
