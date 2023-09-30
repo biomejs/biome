@@ -135,6 +135,7 @@ impl Rule for NoUselessSwitchCase {
         let default_clause = ctx.query();
         let mut mutation = ctx.root().begin();
         let consequent = useless_case.consequent();
+        let useless_case = useless_case.clone();
         if consequent.len() > 0 {
             let default_clause_colon_token = default_clause.colon_token().ok()?;
             let new_default_clause = default_clause
@@ -145,11 +146,11 @@ impl Rule for NoUselessSwitchCase {
                 ));
             mutation.remove_node(default_clause.clone());
             mutation.replace_node(
-                AnyJsSwitchClause::from(useless_case.clone()),
+                AnyJsSwitchClause::from(useless_case),
                 new_default_clause.into(),
             );
         } else {
-            mutation.remove_node(useless_case.clone());
+            mutation.remove_node(useless_case);
         }
         Some(JsRuleAction {
             mutation,
