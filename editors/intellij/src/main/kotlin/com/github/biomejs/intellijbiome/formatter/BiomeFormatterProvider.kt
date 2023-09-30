@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull
 import java.nio.charset.StandardCharsets
 import java.util.EnumSet
 import com.intellij.execution.ExecutionException
+import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.openapi.progress.util.ProgressIndicatorBase
 
 class BiomeFormatterProvider : AsyncDocumentFormattingService() {
     override fun getFeatures(): MutableSet<Feature> = EnumSet.noneOf(Feature::class.java)
@@ -39,11 +41,11 @@ class BiomeFormatterProvider : AsyncDocumentFormattingService() {
         }
 
         try {
-            val commandLine: GeneralCommandLine = GeneralCommandLine()
-                .withExePath(exePath)
-                .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
-                .withInput(ioFile)
-                .withParameters(params)
+            val commandLine: GeneralCommandLine = BiomeUtils.createNodeCommandLine(project, exePath).apply {
+                withInput(ioFile)
+                addParameters(params)
+                withWorkDirectory(project.basePath)
+            }
 
             val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
             return object : FormattingTask {

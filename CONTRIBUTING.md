@@ -178,7 +178,7 @@ To start development from source, navigate to the `editors/intellij` directory.
 Build and run the plugin requires:
 
 - Java development kit 17+
-- IntelliJ IDEA (Ultimate edition or community edition)
+- IntelliJ IDEA Ultimate edition
 
 ### Running the plugin on IDEA
 ```bash
@@ -188,6 +188,16 @@ Build and run the plugin requires:
 ### Build the plugin
 ```bash
 ./gradlew buildPlugin
+```
+
+### UI Testing intellij plugin
+
+Before start testing the plugin you will need to start IDE by invoking the `./gradlew runIdeForUiTests &` and wait IDE startup
+
+You can now run the test task:
+
+```bash
+./gradlew test
 ```
 
 ## Node.js development
