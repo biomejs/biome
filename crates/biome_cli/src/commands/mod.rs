@@ -33,7 +33,7 @@ pub enum BiomeCommand {
     /// Prints information for debugging
     Rage(
         #[bpaf(external(cli_options), hide_usage)] CliOptions,
-        /// Prints information for debugging in details
+        /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
     ),
