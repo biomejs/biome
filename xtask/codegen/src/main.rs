@@ -115,7 +115,7 @@ SUBCOMMANDS:
 	aria            Generate aria bindings for lint rules
 	analyzer        Generate factory functions for the analyzer and the configuration of the analyzers
 	configuration    Generate the part of the configuration that depends on some metadata
-	schema          Generate the JSON schema for the Rome configuration file format
+	schema          Generate the JSON schema for the Biome configuration file format
 	bindings        Generate TypeScript definitions for the JavaScript bindings to the Workspace API
 	grammar         Transforms ungram files into AST
 	formatter       Generates formatters for each language
