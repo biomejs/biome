@@ -30,3 +30,15 @@ class foo {
 class foo {
   foo = 5 as 5;
 }
+
+class foo {
+	constructor(protected prop = 1 as 1) {}
+}
+
+function foo(param = 1 as 1) {}
+
+class foo {
+	constructor(protected prop = 'bar' as 'bar') {}
+}
+
+function foo(param = 'bar' as 'bar') {}

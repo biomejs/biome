@@ -37,6 +37,18 @@ class foo {
   foo = 5 as 5;
 }
 
+class foo {
+	constructor(protected prop = 1 as 1) {}
+}
+
+function foo(param = 1 as 1) {}
+
+class foo {
+	constructor(protected prop = 'bar' as 'bar') {}
+}
+
+function foo(param = 'bar' as 'bar') {}
+
 ```
 
 # Diagnostics
@@ -420,6 +432,106 @@ invalid.ts:31:14 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━�
        31 │ + ··foo·=·5·as·const;
     32 32 │   }
     33 33 │   
+  
+
+```
+
+```
+invalid.ts:35:36 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use as const instead of as with a literal type.
+  
+    34 │ class foo {
+  > 35 │ 	constructor(protected prop = 1 as 1) {}
+       │ 	                                  ^
+    36 │ }
+    37 │ 
+  
+  i as const doesn't require any update when the asserted value is changed.
+  
+  i Safe fix: Replace with as const.
+  
+    33 33 │   
+    34 34 │   class foo {
+    35    │ - → constructor(protected·prop·=·1·as·1)·{}
+       35 │ + → constructor(protected·prop·=·1·as·const)·{}
+    36 36 │   }
+    37 37 │   
+  
+
+```
+
+```
+invalid.ts:38:27 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use as const instead of as with a literal type.
+  
+    36 │ }
+    37 │ 
+  > 38 │ function foo(param = 1 as 1) {}
+       │                           ^
+    39 │ 
+    40 │ class foo {
+  
+  i as const doesn't require any update when the asserted value is changed.
+  
+  i Safe fix: Replace with as const.
+  
+    36 36 │   }
+    37 37 │   
+    38    │ - function·foo(param·=·1·as·1)·{}
+       38 │ + function·foo(param·=·1·as·const)·{}
+    39 39 │   
+    40 40 │   class foo {
+  
+
+```
+
+```
+invalid.ts:41:40 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use as const instead of as with a literal type.
+  
+    40 │ class foo {
+  > 41 │ 	constructor(protected prop = 'bar' as 'bar') {}
+       │ 	                                      ^^^^^
+    42 │ }
+    43 │ 
+  
+  i as const doesn't require any update when the asserted value is changed.
+  
+  i Safe fix: Replace with as const.
+  
+    39 39 │   
+    40 40 │   class foo {
+    41    │ - → constructor(protected·prop·=·'bar'·as·'bar')·{}
+       41 │ + → constructor(protected·prop·=·'bar'·as·const)·{}
+    42 42 │   }
+    43 43 │   
+  
+
+```
+
+```
+invalid.ts:44:31 lint/nursery/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use as const instead of as with a literal type.
+  
+    42 │ }
+    43 │ 
+  > 44 │ function foo(param = 'bar' as 'bar') {}
+       │                               ^^^^^
+    45 │ 
+  
+  i as const doesn't require any update when the asserted value is changed.
+  
+  i Safe fix: Replace with as const.
+  
+    42 42 │   }
+    43 43 │   
+    44    │ - function·foo(param·=·'bar'·as·'bar')·{}
+       44 │ + function·foo(param·=·'bar'·as·const)·{}
+    45 45 │   
   
 
 ```

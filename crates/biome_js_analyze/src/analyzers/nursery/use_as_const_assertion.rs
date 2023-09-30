@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsPropertyClassMember, JsSyntaxKind, JsVariableDeclarator, TsAsExpression,
     TsTypeAssertionExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
@@ -56,7 +56,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) Query = TsAsExpression | TsTypeAssertionExpression | JsVariableDeclarator | JsPropertyClassMember
+    pub(crate) Query = JsVariableDeclarator | JsPropertyClassMember | TsAsExpression | TsTypeAssertionExpression
 }
 
 pub(crate) enum RuleState {
@@ -75,20 +75,6 @@ impl Rule for UseAsConstAssertion {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
         match query {
-            Query::TsAsExpression(expr) => {
-                let literal = expr.expression().ok()?;
-                let literal = literal.as_any_js_literal_expression()?;
-                let asserted_literal = expr.ty().ok()?;
-                let range = check_literal_match(literal, &asserted_literal)?;
-                Some(RuleState::AsAssertion(range))
-            }
-            Query::TsTypeAssertionExpression(expr) => {
-                let literal = expr.expression().ok()?;
-                let literal = literal.as_any_js_literal_expression()?;
-                let asserted_literal = expr.ty().ok()?;
-                let range = check_literal_match(literal, &asserted_literal)?;
-                Some(RuleState::AngleBracketAssertion(range))
-            }
             Query::JsVariableDeclarator(decl) => {
                 let literal = decl.initializer()?.expression().ok()?;
                 let literal = literal.as_any_js_literal_expression()?;
@@ -108,6 +94,20 @@ impl Rule for UseAsConstAssertion {
                     .ok()?;
                 let range = check_literal_match(literal, &property_annotation)?;
                 Some(RuleState::TypeAnnotation(range))
+            }
+            Query::TsAsExpression(expr) => {
+                let literal = expr.expression().ok()?;
+                let literal = literal.as_any_js_literal_expression()?;
+                let asserted_literal = expr.ty().ok()?;
+                let range = check_literal_match(literal, &asserted_literal)?;
+                Some(RuleState::AsAssertion(range))
+            }
+            Query::TsTypeAssertionExpression(expr) => {
+                let literal = expr.expression().ok()?;
+                let literal = literal.as_any_js_literal_expression()?;
+                let asserted_literal = expr.ty().ok()?;
+                let range = check_literal_match(literal, &asserted_literal)?;
+                Some(RuleState::AngleBracketAssertion(range))
             }
         }
     }
@@ -139,69 +139,55 @@ impl Rule for UseAsConstAssertion {
         Some(RuleDiagnostic::new(rule_category!(), range, message).note(note))
     }
 
+    /// Replace type assertion or annotation with const assertion (`as const`).
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let query = ctx.query();
         let mut mutation = ctx.root().begin();
 
+        let as_token = make::token_decorated_with_space(JsSyntaxKind::AS_KW);
         let const_reference_type = AnyTsType::from(
             make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
                 make::js_reference_identifier(make::ident("const")),
             ))
             .build(),
         );
-        let as_token_with_trivia = make::token_decorated_with_space(JsSyntaxKind::AS_KW);
 
         match query {
-            Query::TsAsExpression(previous_as_expr) => {
-                mutation.replace_node(previous_as_expr.ty().ok()?, const_reference_type);
-            }
-            Query::TsTypeAssertionExpression(previous_expr) => {
-                let previous_initializer_clause = previous_expr.parent::<JsInitializerClause>()?;
-                let new_initializer_clause = make::js_initializer_clause(
-                    previous_initializer_clause.eq_token().ok()?,
+            Query::JsVariableDeclarator(previous_decl) => {
+                mutation.remove_node(previous_decl.variable_annotation()?);
+                let new_initializer = make::js_initializer_clause(
+                    make::token_decorated_with_space(JsSyntaxKind::EQ),
                     AnyJsExpression::TsAsExpression(make::ts_as_expression(
-                        previous_expr.clone().expression().ok()?,
-                        as_token_with_trivia,
+                        previous_decl.initializer()?.expression().ok()?,
+                        as_token,
                         const_reference_type,
                     )),
                 );
-                mutation.replace_node(previous_initializer_clause, new_initializer_clause);
+                mutation.replace_node_discard_trivia(previous_decl.initializer()?, new_initializer);
             }
-            Query::JsVariableDeclarator(decl) => {
-                let previous_initializer_clause = decl.initializer()?;
-                let new_decl = decl
-                    .clone()
-                    .with_variable_annotation(None)
-                    .with_initializer(Some(make::js_initializer_clause(
-                        previous_initializer_clause
-                            .eq_token()
-                            .ok()?
-                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        AnyJsExpression::TsAsExpression(make::ts_as_expression(
-                            previous_initializer_clause.expression().ok()?,
-                            as_token_with_trivia,
-                            const_reference_type,
-                        )),
-                    )));
-                mutation.replace_node(decl.clone(), new_decl);
+            Query::JsPropertyClassMember(previous_member) => {
+                mutation.remove_node(previous_member.property_annotation()?);
+                let new_initializer = make::js_initializer_clause(
+                    make::token_decorated_with_space(JsSyntaxKind::EQ),
+                    AnyJsExpression::TsAsExpression(make::ts_as_expression(
+                        previous_member.value()?.expression().ok()?,
+                        as_token,
+                        const_reference_type,
+                    )),
+                );
+                mutation.replace_node_discard_trivia(previous_member.value()?, new_initializer);
             }
-            Query::JsPropertyClassMember(member) => {
-                let previous_initializer_clause = member.value()?;
-                let new_member = member
-                    .clone()
-                    .with_property_annotation(None)
-                    .with_value(Some(make::js_initializer_clause(
-                        previous_initializer_clause
-                            .eq_token()
-                            .ok()?
-                            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        AnyJsExpression::TsAsExpression(make::ts_as_expression(
-                            previous_initializer_clause.expression().ok()?,
-                            as_token_with_trivia,
-                            const_reference_type,
-                        )),
-                    )));
-                mutation.replace_node(member.clone(), new_member);
+            Query::TsAsExpression(previous_expr) => {
+                mutation.replace_node(previous_expr.ty().ok()?, const_reference_type);
+            }
+            Query::TsTypeAssertionExpression(previous_expr) => {
+                let previous_initializer = previous_expr.parent::<JsInitializerClause>()?;
+                let new_expr = AnyJsExpression::TsAsExpression(make::ts_as_expression(
+                    previous_expr.expression().ok()?,
+                    as_token,
+                    const_reference_type,
+                ));
+                mutation.replace_node(previous_initializer.expression().ok()?, new_expr);
             }
         };
         Some(JsRuleAction {
