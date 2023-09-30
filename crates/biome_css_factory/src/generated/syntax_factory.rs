@@ -14,7 +14,7 @@ impl SyntaxFactory for CssSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            CSS_BOGUS | CSS_BOGUS_BODY | CSS_BOGUS_PATTERN => {
+            CSS_BOGUS | CSS_BOGUS_BODY | CSS_BOGUS_PATTERN | CSS_BOGUS_RULE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
             CSS_ANY_FUNCTION => {

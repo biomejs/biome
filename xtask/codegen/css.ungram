@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 CssBogus = SyntaxElement*
 CssBogusPattern =  SyntaxElement*
 CssBogusBody =  SyntaxElement*
+CssBogusRule =  SyntaxElement*
 
 CssRoot =
 	rules: CssRuleList
@@ -49,6 +50,7 @@ CssRuleList = AnyCssRule*
 AnyCssRule =
 	CssRule
 	| AnyCssAtRule
+	| CssBogusRule
 
 
 // .header { color: red }

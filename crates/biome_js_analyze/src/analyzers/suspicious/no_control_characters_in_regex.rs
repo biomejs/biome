@@ -131,9 +131,9 @@ fn add_control_character_to_vec(
 /// - Unicode code point escapes range from `\u{0}` to `\u{1F}`.
 ///     - The Unicode flag must be set as true in order for these Unicode code point escapes to work: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode.
 /// - Unescaped raw characters from U+0000 to U+001F.
-fn collect_control_characters(pattern: String, flags: Option<String>) -> Option<Vec<String>> {
+fn collect_control_characters(pattern: &str, flags: &str) -> Option<Vec<String>> {
     let mut control_characters: Vec<String> = Vec::new();
-    let is_unicode_flag_set = flags.unwrap_or_default().contains('u');
+    let is_unicode_flag_set = flags.contains('u');
     let mut iter = pattern.chars().peekable();
 
     while let Some(c) = iter.next() {
@@ -190,9 +190,10 @@ fn collect_control_characters_from_expression(
             .next()
             .and_then(|arg| arg.ok())
             .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
-            .map(|js_string_literal| js_string_literal.text());
+            .map(|js_string_literal| js_string_literal.text())
+            .unwrap_or_default();
 
-        return collect_control_characters(pattern, regexp_flags);
+        return collect_control_characters(&pattern, &regexp_flags);
     }
     None
 }
@@ -219,10 +220,8 @@ impl Rule for NoControlCharactersInRegex {
                 )
             }
             RegexExpressionLike::JsRegexLiteralExpression(js_regex_literal_expression) => {
-                collect_control_characters(
-                    js_regex_literal_expression.pattern().ok()?,
-                    js_regex_literal_expression.flags().ok(),
-                )
+                let (pattern, flags) = js_regex_literal_expression.decompose().ok()?;
+                collect_control_characters(pattern.text(), flags.text())
             }
         }
     }
@@ -249,7 +248,7 @@ mod tests {
     #[test]
     fn test_collect_control_characters() {
         assert_eq!(
-            collect_control_characters(String::from("\\x00\\x0F\\u0010\\u001F"), None),
+            collect_control_characters("\\x00\\x0F\\u0010\\u001F", ""),
             Some(vec![
                 String::from("\\x00"),
                 String::from("\\x0F"),
@@ -258,11 +257,11 @@ mod tests {
             ])
         );
         assert_eq!(
-            collect_control_characters(String::from("\\u{0}\\u{1F}"), Some(String::from("u"))),
+            collect_control_characters("\\u{0}\\u{1F}", "u"),
             Some(vec![String::from("\\u{0}"), String::from("\\u{1F}")])
         );
         assert_eq!(
-            collect_control_characters(String::from("\\x20\\u0020\\u{20}\\t\\n"), None),
+            collect_control_characters("\\x20\\u0020\\u{20}\\t\\n", ""),
             None
         );
     }

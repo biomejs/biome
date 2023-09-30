@@ -1,0 +1,97 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+. , # {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssClassSelectorPattern {
+                    dot_token: DOT@0..2 "." [] [Whitespace(" ")],
+                    name: missing (required),
+                },
+                COMMA@2..4 "," [] [Whitespace(" ")],
+                CssIdSelectorPattern {
+                    hash_token: HASH@4..6 "#" [] [Whitespace(" ")],
+                    name: missing (required),
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@7..8 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@8..9 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..9
+  0: CSS_RULE_LIST@0..8
+    0: CSS_RULE@0..8
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_CLASS_SELECTOR_PATTERN@0..2
+          0: DOT@0..2 "." [] [Whitespace(" ")]
+          1: (empty)
+        1: COMMA@2..4 "," [] [Whitespace(" ")]
+        2: CSS_ID_SELECTOR_PATTERN@4..6
+          0: HASH@4..6 "#" [] [Whitespace(" ")]
+          1: (empty)
+      1: CSS_BLOCK@6..8
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_LIST@7..7
+        2: R_CURLY@7..8 "}" [] []
+  1: EOF@8..9 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_identifier.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an identifier but instead found ','
+  
+  > 1 │ . , # {}
+      │   ^
+    2 │ 
+  
+  i Expected an identifier here
+  
+  > 1 │ . , # {}
+      │   ^
+    2 │ 
+  
+missing_identifier.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an identifier but instead found '{'
+  
+  > 1 │ . , # {}
+      │       ^
+    2 │ 
+  
+  i Expected an identifier here
+  
+  > 1 │ . , # {}
+      │       ^
+    2 │ 
+  
+```
+
+

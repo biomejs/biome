@@ -1,0 +1,32 @@
+---
+title: Continuous Integration
+description: Using Biome in a CI environment
+---
+
+Running Biome in a CI environment is easy. Check out the following examples for some inspiration.
+
+## GitHub Actions
+
+We provides a first-party [GitHub Action](https://github.com/marketplace/actions/setup-biome) to setup Biome in your runner.
+Here's what a simple workflow might look like:
+
+```yaml
+name: Code quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 1.2.2
+      - name: Run Biome
+        run: biome ci .
+```

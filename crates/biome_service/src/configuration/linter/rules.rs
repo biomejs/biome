@@ -2228,6 +2228,10 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_instantiator: Option<RuleConfiguration>,
+    #[doc = "Disallow unused imports."]
+    #[bpaf(long("no-unused-imports"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unused_imports: Option<RuleConfiguration>,
     #[doc = "Disallow else block when the if block breaks early."]
     #[bpaf(long("no-useless-else"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2306,6 +2310,7 @@ impl Nursery {
         "noGlobalIsNan",
         "noInvalidNewBuiltin",
         "noMisleadingInstantiator",
+        "noUnusedImports",
         "noUselessElse",
         "noVoid",
         "useArrowFunction",
@@ -2434,17 +2439,17 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_useless_else.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_void.as_ref() {
+        if let Some(rule) = self.no_useless_else.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.no_void.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
@@ -2543,17 +2548,17 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_useless_else.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_void.as_ref() {
+        if let Some(rule) = self.no_useless_else.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.no_void.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
@@ -2644,6 +2649,7 @@ impl Nursery {
             "noGlobalIsNan" => self.no_global_is_nan.as_ref(),
             "noInvalidNewBuiltin" => self.no_invalid_new_builtin.as_ref(),
             "noMisleadingInstantiator" => self.no_misleading_instantiator.as_ref(),
+            "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUselessElse" => self.no_useless_else.as_ref(),
             "noVoid" => self.no_void.as_ref(),
             "useArrowFunction" => self.use_arrow_function.as_ref(),

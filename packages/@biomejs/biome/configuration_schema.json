@@ -1056,6 +1056,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedImports": {
+					"description": "Disallow unused imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessElse": {
 					"description": "Disallow else block when the if block breaks early.",
 					"anyOf": [

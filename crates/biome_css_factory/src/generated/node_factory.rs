@@ -830,3 +830,13 @@ where
         slots,
     ))
 }
+pub fn css_bogus_rule<I>(slots: I) -> CssBogusRule
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_RULE,
+        slots,
+    ))
+}

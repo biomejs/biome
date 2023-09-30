@@ -706,6 +706,10 @@ export interface Nursery {
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
 	/**
+	 * Disallow unused imports.
+	 */
+	noUnusedImports?: RuleConfiguration;
+	/**
 	 * Disallow else block when the if block breaks early.
 	 */
 	noUselessElse?: RuleConfiguration;
@@ -1313,6 +1317,7 @@ export type Category =
 	| "lint/nursery/noGlobalIsNan"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
+	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useArrowFunction"

@@ -266,5 +266,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS",
         "CSS_BOGUS_PATTERN",
         "CSS_BOGUS_BODY",
+        "CSS_BOGUS_RULE",
     ],
 };

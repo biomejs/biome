@@ -70,6 +70,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule reports `else` clauses that can be omitted because their `if` branches break.
   Contributed by @Conaclos
 
+- Add [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) rule.
+  The rule reports unused imports and suggests to remove them.
+  Contributed by @Conaclos
+
+  [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) reports also unused imports, but don't suggest their removal.
+  Once [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) stabilized,
+  [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) will not report unused imports.
+
 - Add [useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign) rule.
   The rule enforce use of shorthand operators that combine variable assignment and some simple mathematical operations. For example, x = x + 4 can be shortened to x += 4.
   Contributed by @victor-teles
@@ -99,6 +107,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#383](https://github.com/biomejs/biome/issues/383). [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals) now provides correct code fixes when consecutive spaces are followed by a quantifier. Contributed by @Conaclos
 
 - Fix [#397](https://github.com/biomejs/biome/issues/397). [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals) now provides correct code fixes for signed numbers. Contributed by @Conaclos
+
+- Fix [452](https://github.com/biomejs/biome/pull/452). The linter panicked when it met a malformed regex (a regex not ending with a slash).
 
 ### Parser
 
