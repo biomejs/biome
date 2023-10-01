@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression, JsThisExpression, JsClassDeclaration, JsIdentifierBinding};
+use biome_js_syntax::{JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression, JsThisExpression, JsClassDeclaration};
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
