@@ -131,7 +131,7 @@ impl Rule for UseAsConstAssertion {
             RuleState::TypeAnnotation(range) => (
                 range,
                 markup! {
-                    "You should use "<Emphasis>"as const"</Emphasis>" instead of type annotation."
+                    "Use "<Emphasis>"as const"</Emphasis>" instead of type annotation."
                 },
                 markup! {""<Emphasis>"as const"</Emphasis>" is simpler and doesn't require retyping the value."},
             ),
