@@ -126,7 +126,7 @@ impl Rule for UseAsConstAssertion {
                 markup! {
                     "Use "<Emphasis>"as const"</Emphasis>" instead of angle bracket type assertion."
                 },
-                markup! {"The angle bracket assertion can occasionally be confused with JSX syntax, so using the "<Emphasis>"as const"</Emphasis>" is a more clear and preferable alternative."},
+                markup! {"The angle bracket assertion can occasionally be confused with JSX syntax, so using the "<Emphasis>"as const"</Emphasis>" is a preferable alternative."},
             ),
             RuleState::TypeAnnotation(range) => (
                 range,
