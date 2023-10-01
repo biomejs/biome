@@ -11,9 +11,8 @@ use biome_js_syntax::binding_ext::{
 };
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsAssignmentExpression, JsClassExpression, JsExpressionStatement,
-    JsFileSource, JsForStatement, JsFunctionExpression, JsIdentifierExpression,
-    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsSequenceExpression,
+    AnyJsExpression, JsClassExpression, JsExpressionStatement, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsParenthesizedExpression, JsSequenceExpression,
     JsSyntaxKind, JsSyntaxNode,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
@@ -61,6 +60,10 @@ declare_rule! {
     /// const foo = () => {
     ///     foo();
     /// };
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export function f<T>() {}
     /// ```
     ///
     /// # Valid
@@ -189,7 +192,11 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         }
 
         // Bindings under catch are never ok to be unused
-        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
+        AnyJsBindingDeclaration::JsCatchDeclaration(_)
+        // Type parameters are never ok to be unused
+        | AnyJsBindingDeclaration::TsInferType(_)
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsTypeParameter(_) => Some(SuggestedFix::PrefixUnderscore),
 
         // Bindings under unknown parameter are never ok to be unused
         AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -267,9 +274,12 @@ impl Rule for NoUnusedVariables {
                     let is_statement_like = ref_parent
                         .ancestors()
                         .find(|x| {
-                            JsAssignmentExpression::can_cast(x.kind())
-                                || JsPostUpdateExpression::can_cast(x.kind())
-                                || JsPreUpdateExpression::can_cast(x.kind())
+                            matches!(
+                                x.kind(),
+                                JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                                    | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                                    | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+                            )
                         })
                         .and_then(|x| is_unused_expression(&x).ok())
                         .unwrap_or(false);
@@ -285,9 +295,13 @@ impl Rule for NoUnusedVariables {
                 Some(ref_parent)
             })
             .all(|ref_parent| {
+                if declaration.kind() == JsSyntaxKind::TS_MAPPED_TYPE {
+                    // Type parameters declared in mapped types are only used in the mapped type.
+                    return false;
+                }
                 let mut is_unused = true;
-                for ref ancestor in ref_parent.ancestors() {
-                    if ancestor == declaration {
+                for ancestor in ref_parent.ancestors() {
+                    if &ancestor == declaration {
                         // inside the declaration
                         return is_unused;
                     }
@@ -308,7 +322,7 @@ impl Rule for NoUnusedVariables {
                             _ => {}
                         }
                 }
-                // Always false when teh ref is outside the declaration
+                // Always false when the ref is outside the declaration
                 false
             })
             .then_some(suggestion)
@@ -323,6 +337,7 @@ impl Rule for NoUnusedVariables {
             JsSyntaxKind::JS_CLASS_DECLARATION => "class",
             JsSyntaxKind::TS_INTERFACE_DECLARATION => "interface",
             JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => "type alias",
+            JsSyntaxKind::TS_TYPE_PARAMETER => "type parameter",
             _ => "variable",
         };
 

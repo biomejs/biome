@@ -438,7 +438,10 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-        | AnyJsBindingDeclaration::TsModuleDeclaration(_) => None,
+        | AnyJsBindingDeclaration::TsModuleDeclaration(_)
+        | AnyJsBindingDeclaration::TsInferType(_)
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
 
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
@@ -479,8 +482,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(capture),
 
-        // This should not be unreachable because of the test
-        // if the capture is imported
+        // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsImportDefaultClause(_)
         | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
         | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)

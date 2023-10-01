@@ -820,7 +820,11 @@ impl Named {
             AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_) => {
                 Some(Named::ImportSource)
             }
-            AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_) => None,
+            AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+            // Type parameters should be handled at call site
+            | AnyJsBindingDeclaration::TsInferType(_)
+            | AnyJsBindingDeclaration::TsMappedType(_)
+            | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
         }
     }
 
