@@ -1,4 +1,4 @@
-use crate::JsRuleAction;
+use crate::{utils::batch::JsBatchMutation, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -133,7 +133,7 @@ impl Rule for NoRedundantUseStrict {
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "Redundant "<Emphasis>{"use strict"}</Emphasis>" directive."
+                "Redundant "<Emphasis>"use strict"</Emphasis>" directive."
             },
         );
 
@@ -143,11 +143,11 @@ impl Rule for NoRedundantUseStrict {
                 markup! {"All parts of a class's body are already in strict mode."},
             ) ,
             AnyJsStrictModeNode::JsModule(_js_module) => diag= diag.note(
-                markup! {"The entire contents of "<Emphasis>{"JavaScript modules"}</Emphasis>" are automatically in strict mode, with no statement needed to initiate it."},
+                markup! {"The entire contents of "<Emphasis>"JavaScript modules"</Emphasis>" are automatically in strict mode, with no statement needed to initiate it."},
             ),
             AnyJsStrictModeNode::JsDirective(js_directive) => diag= diag.detail(
                 js_directive.range(),
-                markup! {"This outer "<Emphasis>{"use strict"}</Emphasis>" directive already enables strict mode."},
+                markup! {"This outer "<Emphasis>"use strict"</Emphasis>" directive already enables strict mode."},
             ),
         }
 
@@ -155,16 +155,17 @@ impl Rule for NoRedundantUseStrict {
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-        let root = ctx.root();
-        let mut batch = root.begin();
-
-        batch.remove_node(ctx.query().clone());
-
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+        mutation.transfer_leading_trivia_to_sibling(node.syntax());
+        mutation.remove_node(node.clone());
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
-            message: markup! { "Remove the redundant \"use strict\" directive" }.to_owned(),
-            mutation: batch,
+            message:
+                markup! { "Remove the redundant "<Emphasis>"use strict"</Emphasis>" directive." }
+                    .to_owned(),
+            mutation,
         })
     }
 }

@@ -21,6 +21,11 @@ pub trait JsBatchMutation {
     /// 1 - removes commas around the member to keep the list valid.
     fn remove_js_object_member(&mut self, parameter: &AnyJsObjectMember) -> bool;
 
+    /// Transfer leading trivia to the next sibling.
+    /// If there is no next sibling, then transfer to the previous sibling.
+    /// Otherwise do nothings.
+    fn transfer_leading_trivia_to_sibling(&mut self, node: &JsSyntaxNode);
+
     /// It attempts to add a new element after the given element
     ///
     /// The function appends the elements at the end if `after_element` isn't found
@@ -287,6 +292,27 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
         } else {
             false
         }
+    }
+
+    fn transfer_leading_trivia_to_sibling(&mut self, node: &JsSyntaxNode) {
+        let Some(pieces) = node.first_leading_trivia().map(|trivia| trivia.pieces()) else {
+            return;
+        };
+        let (sibling, new_sibling) =
+            if let Some(next_sibling) = node.last_token().and_then(|x| x.next_token()) {
+                (
+                    next_sibling.clone(),
+                    next_sibling.prepend_trivia_pieces(pieces),
+                )
+            } else if let Some(prev_sibling) = node.first_token().and_then(|x| x.prev_token()) {
+                (
+                    prev_sibling.clone(),
+                    prev_sibling.append_trivia_pieces(pieces),
+                )
+            } else {
+                return;
+            };
+        self.replace_token_discard_trivia(sibling, new_sibling);
     }
 }
 
