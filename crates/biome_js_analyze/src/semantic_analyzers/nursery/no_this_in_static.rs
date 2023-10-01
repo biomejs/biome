@@ -48,13 +48,12 @@ impl Rule for NoThisInStatic {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let this_or_super_expression = ctx.query();
+        let this_super_expression = ctx.query();
 
-        let static_method = this_or_super_expression
+        let static_method = this_super_expression
             .syntax()
             .ancestors()
-            .find(|ancestor| JsMethodClassMember::can_cast(ancestor.kind()))
-            .and_then(JsMethodClassMember::cast)
+            .find_map(JsMethodClassMember::cast)
             .filter(|member| {
                 member
                     .modifiers()
@@ -63,7 +62,7 @@ impl Rule for NoThisInStatic {
             });
             
             if  static_method.is_some() {
-                    this_or_super_expression
+                    this_super_expression
                         .syntax()
                         .ancestors()
                         .find_map(JsStaticMemberExpression::cast)
@@ -88,7 +87,6 @@ impl Rule for NoThisInStatic {
             .member()
             .unwrap()
             .text();
-
 
         let this_super_expression_str = reference
             .syntax()
