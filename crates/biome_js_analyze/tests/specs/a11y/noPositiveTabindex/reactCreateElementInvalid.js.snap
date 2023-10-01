@@ -24,7 +24,7 @@ reactCreateElementInvalid.js:1:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value with 0.
   
@@ -49,7 +49,7 @@ reactCreateElementInvalid.js:2:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value with 0.
   
@@ -76,7 +76,7 @@ reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value with 0.
   

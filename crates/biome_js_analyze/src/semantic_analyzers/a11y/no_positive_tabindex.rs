@@ -162,7 +162,7 @@ impl Rule for NoPositiveTabindex {
         )
         .note(
             markup!{
-                "You are recommended to only use 0 and -1 as "<Emphasis>"tabIndex"</Emphasis>" values. Avoid using "<Emphasis>"tabIndex"</Emphasis>" values greater than 0 and CSS properties that can change the order of focusable HTML elements."
+                "Use only 0 and -1 as "<Emphasis>"tabIndex"</Emphasis>" values. Avoid using "<Emphasis>"tabIndex"</Emphasis>" values greater than 0 and CSS properties that can change the order of focusable HTML elements."
             }
         );
 
