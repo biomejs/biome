@@ -1,15 +1,19 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
-    AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression, JsPropertyObjectMember,
-    JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
+    AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
+    JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property
@@ -153,11 +157,49 @@ impl Rule for NoPositiveTabindex {
         )
         .note(
             markup!{
-				"Elements with a positive "<Emphasis>"tabIndex"</Emphasis>" override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard."
-			}.to_owned(),
+                "Elements with a positive "<Emphasis>"tabIndex"</Emphasis>" override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard."
+            }.to_owned(),
+        )
+        .note(
+            markup!{
+                "Use only 0 and -1 as "<Emphasis>"tabIndex"</Emphasis>" values. Avoid using "<Emphasis>"tabIndex"</Emphasis>" values greater than 0 and CSS properties that can change the order of focusable HTML elements."
+            }
         );
 
         Some(diagnostic)
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let element = ctx.query();
+        let model = ctx.model();
+        let tabindex_attribute = element.find_tabindex_attribute(model)?;
+
+        let mut mutation = ctx.root().begin();
+        match tabindex_attribute {
+            TabindexProp::JsxAttribute(jsx_attribute) => {
+                let prev_val = jsx_attribute.initializer()?.value().ok()?;
+                let new_val = AnyJsxAttributeValue::JsxString(jsx_string(jsx_string_literal("0")));
+                mutation.replace_node(prev_val, new_val);
+            }
+            TabindexProp::JsPropertyObjectMember(js_object_member) => {
+                let prev_val = js_object_member.value().ok()?;
+                let new_val = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsStringLiteralExpression(
+                        make::js_string_literal_expression(jsx_string_literal("0")),
+                    ),
+                );
+                mutation.replace_node(prev_val, new_val);
+            }
+        };
+
+        Some(JsRuleAction {
+            category: biome_analyze::ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message:
+                markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
+                    .to_owned(),
+            mutation,
+        })
     }
 }
 
