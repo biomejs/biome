@@ -1,9 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{JsMethodClassMember, JsSuperExpression, JsThisExpression, AnyJsClass};
+use biome_js_syntax::{JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression, JsThisExpression, JsClassDeclaration, JsIdentifierBinding};
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
-
-use crate::analyzers::suspicious::no_duplicate_class_members::AnyClassMemberDefinition;
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -45,8 +43,8 @@ declare_node_union! {
 
 impl Rule for NoThisInStatic {
     type Query = Ast<JsThisSuperExpression>;
-    type State = AnyClassMemberDefinition;
-    type Signals = Vec<Self::State>;
+    type State = JsStaticMemberExpression;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -55,46 +53,59 @@ impl Rule for NoThisInStatic {
         let static_method = this_or_super_expression
             .syntax()
             .ancestors()
-            .filter_map(|ancestor| {
-                JsMethodClassMember::cast(ancestor).filter(|member| {
-                    member
-                        .modifiers()
-                        .iter()
-                        .any(|modifier| modifier.as_js_static_modifier().is_some())
-                })
-            })
-            .map(|member| AnyClassMemberDefinition::from(member)) // Add this line
-            .collect();
-
-        static_method
+            .find(|ancestor| JsMethodClassMember::can_cast(ancestor.kind()))
+            .and_then(JsMethodClassMember::cast)
+            .filter(|member| {
+                member
+                    .modifiers()
+                    .iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some())
+            });
+            
+            if  static_method.is_some() {
+                    this_or_super_expression
+                        .syntax()
+                        .ancestors()
+                        .find_map(JsStaticMemberExpression::cast)
+            } else {
+                None
+            }
     }
 
     fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
-        let class_name = reference
+        let class_name_str = reference
             .syntax()
             .ancestors()
-            .find_map(|ancestor| AnyJsClass::cast(ancestor))
-            .and_then(|class| class.as_js_class_declaration().map(|declaration| declaration.text()))
-            .unwrap_or_else(|| String::from("A"));
+            .find_map(JsClassDeclaration::cast)
+            .and_then(|declaration| Some(declaration.id()))?
+            .unwrap()
+            .text();
 
-        let function_used = reference .syntax()
+        let called_method_str = reference
+            .syntax()
+            .ancestors()
+            .find_map(JsStaticMemberExpression::cast)?
+            .member()
+            .unwrap()
+            .text();
+
+
+        let this_super_expression_str = reference
+            .syntax()
             .descendants()
-            .find_map(|descendant| JsMethodClassMember::cast(descendant))
-            .map(|method| {
-                let whole_expression = method.syntax().to_string();
-                whole_expression
-            })
-            .unwrap_or_else(|| String::from("unknown"));
+            .find_map(JsThisSuperExpression::cast)?
+            .text();
 
+        let recommendation_str = this_super_expression_str
+            .replace("this", &class_name_str)
+            .replace("super", &class_name_str);
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                reference.range(),
-                markup! {
-                    "Instead of "<Emphasis>{function_used}"()"</Emphasis>" use "<Emphasis>{class_name}</Emphasis>".something()."
-                },
-            )
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            reference.range(),
+            markup! {
+                "Instead of "<Emphasis>{this_super_expression_str}"."{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"."{called_method_str}"()"</Emphasis>"."
+            },
+        ))
     }
 }

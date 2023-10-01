@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+class A {
+    static foo() {
+        doSomething()
+    }
+
+    static bar() {
+        this.foo()
+    }
+
+    fax() {
+        return 'asd';
+    }
+}
+
+class B extends A {
+    static foo() {
+        super.foo()
+    }
+
+    fax() { 
+        return 'asd';
+    }
+}
+```
+
+# Diagnostics
+```
+invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Instead of this.foo() use A.foo().
+  
+    6 │     static bar() {
+  > 7 │         this.foo()
+      │         ^^^^^^^^
+    8 │     }
+    9 │ 
+  
+
+```
+
+```
+invalid.js:17:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Instead of super.foo() use B.foo().
+  
+    15 │ class B extends A {
+    16 │     static foo() {
+  > 17 │         super.foo()
+       │         ^^^^^^^^^
+    18 │     }
+    19 │ 
+  
+
+```
+
+

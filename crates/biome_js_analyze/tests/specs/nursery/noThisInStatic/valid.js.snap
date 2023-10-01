@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+class A {
+    static foo() {
+        doSomething()
+    }
+
+    static bar() {
+        A.foo()
+    }
+
+    fax() {
+        return 'asd';
+    }
+}
+
+class B extends A {
+    static foo() {
+        A.foo()
+    }
+
+    fax() { 
+        return 'asd';
+    }
+}
+```
+
+
