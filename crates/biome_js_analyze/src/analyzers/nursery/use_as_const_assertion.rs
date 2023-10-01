@@ -218,8 +218,8 @@ fn check_literal_match(
             AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
             AnyTsType::TsNumberLiteralType(specified_literal),
         ) => {
-            if literal.value_token().ok()?.token_text_trimmed()
-                == specified_literal.literal_token().ok()?.token_text_trimmed()
+            if literal.value_token().ok()?.text_trimmed()
+                == specified_literal.literal_token().ok()?.text_trimmed()
             {
                 return Some(specified_literal.range());
             }
