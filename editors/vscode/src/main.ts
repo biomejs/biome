@@ -351,7 +351,7 @@ async function getSocket(
 	outputChannel: OutputChannel,
 	command: string,
 ): Promise<string> {
-	const process = spawn(command, ["__print_socket"], {
+	const process = spawn(`"${command}"`, ["__print_socket"], {
 		stdio: [null, "pipe", "pipe"],
 		shell: true,
 	});
