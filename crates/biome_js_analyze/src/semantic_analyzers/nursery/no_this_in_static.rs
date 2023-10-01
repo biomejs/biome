@@ -1,7 +1,10 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, ActionCategory};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression, JsThisExpression, JsClassDeclaration};
-use biome_rowan::{declare_node_union, AstNode, AstNodeList};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstNodeExt, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -80,21 +83,9 @@ impl Rule for NoThisInStatic {
             .unwrap()
             .text();
 
-        let called_method_str = reference
-            .syntax()
-            .ancestors()
-            .find_map(JsStaticMemberExpression::cast)?
-            .member()
-            .unwrap()
-            .text();
+        let called_method_str = reference.text();
 
-        let this_super_expression_str = reference
-            .syntax()
-            .descendants()
-            .find_map(JsThisSuperExpression::cast)?
-            .text();
-
-        let recommendation_str = this_super_expression_str
+        let recommendation_str = called_method_str
             .replace("this", &class_name_str)
             .replace("super", &class_name_str);
 
@@ -102,8 +93,35 @@ impl Rule for NoThisInStatic {
             rule_category!(),
             reference.range(),
             markup! {
-                "Instead of "<Emphasis>{this_super_expression_str}"."{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"."{called_method_str}"()"</Emphasis>"."
+                "Instead of "<Emphasis>{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"()"</Emphasis>"."
             },
         ))
     }
+
+    // fn action(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<JsRuleAction> {
+    //     let class_name_str = reference
+    //         .syntax()
+    //         .ancestors()
+    //         .find_map(JsClassDeclaration::cast)
+    //         .and_then(|declaration| Some(declaration.id()))?
+    //         .unwrap()
+    //         .text();
+
+    //     let called_method_str = reference.text();
+
+    //     let recommendation_str = called_method_str
+    //         .replace("this", &class_name_str)
+    //         .replace("super", &class_name_str);
+
+    //     let mutation = ctx.query().begin(); // TODO: How does this work :(
+
+    //     Some(JsRuleAction {
+    //         category: ActionCategory::QuickFix,
+    //         applicability: Applicability::Always,
+    //         message: markup! {
+    //             "Replace "<Emphasis>{called_method_str}"()"</Emphasis>" with "<Emphasis>{recommendation_str}"()"</Emphasis>"."
+    //         }.to_owned(),
+    //         mutation,
+    //     })
+    // }
 }
