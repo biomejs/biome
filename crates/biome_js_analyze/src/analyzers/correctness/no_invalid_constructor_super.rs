@@ -61,10 +61,10 @@ pub(crate) enum NoInvalidConstructorSuperState {
 }
 
 impl NoInvalidConstructorSuperState {
-    fn range(&self) -> TextRange {
+    fn range(&self) -> &TextRange {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(range) => *range,
-            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => *super_range,
+            NoInvalidConstructorSuperState::UnexpectedSuper(range) => range,
+            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => super_range,
         }
     }
 

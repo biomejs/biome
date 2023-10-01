@@ -193,9 +193,9 @@ impl Reference {
         matches!(self, Reference::Read { .. })
     }
 
-    pub fn range(&self) -> TextRange {
+    pub fn range(&self) -> &TextRange {
         match self {
-            Reference::Read { range, .. } | Reference::Write { range } => *range,
+            Reference::Read { range, .. } | Reference::Write { range } => range,
         }
     }
 }
@@ -743,7 +743,7 @@ impl SemanticEventExtractor {
                     for reference in references {
                         self.stash.push_back(SemanticEvent::UnresolvedReference {
                             is_read: reference.is_read(),
-                            range: reference.range(),
+                            range: *reference.range(),
                         });
                     }
                 }

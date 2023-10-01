@@ -109,12 +109,12 @@ impl RuleState {
         }
     }
 
-    fn range(&self) -> TextRange {
+    fn range(&self) -> &TextRange {
         match self {
             RuleState::ClassMisleadingNew(range)
             | RuleState::InterfaceMisleadingNew(range)
             | RuleState::InterfaceMisleadingConstructor(range)
-            | RuleState::TypeAliasMisleadingConstructor(range) => *range,
+            | RuleState::TypeAliasMisleadingConstructor(range) => range,
         }
     }
 }
