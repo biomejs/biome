@@ -33,8 +33,7 @@ invalid.jsx:2:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -61,8 +60,7 @@ invalid.jsx:3:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -90,8 +88,7 @@ invalid.jsx:4:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -119,8 +116,7 @@ invalid.jsx:5:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -148,8 +144,7 @@ invalid.jsx:6:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -177,8 +172,7 @@ invalid.jsx:7:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -206,8 +200,7 @@ invalid.jsx:8:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -235,8 +228,7 @@ invalid.jsx:9:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
@@ -264,8 +256,7 @@ invalid.jsx:11:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━�
   
   i Elements with a positive tabIndex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
   
-  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements,
-                    doing so makes it difficult for people who rely on using keyboard for navigation or assistive technology to navigate and operate page content. Instead, write the document with the elements in a logical sequence.
+  i You are recommended to only use 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
   i Unsafe fix: Replace the tableIndex prop value to 0.
   
