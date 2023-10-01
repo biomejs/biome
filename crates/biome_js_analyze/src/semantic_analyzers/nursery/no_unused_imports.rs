@@ -1,4 +1,4 @@
-use crate::{semantic_services::Semantic, JsRuleAction};
+use crate::{semantic_services::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
@@ -8,7 +8,7 @@ use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsImportClause, JsIdentifierBinding, JsImport,
-    JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
+    JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, T,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, NodeOrToken, SyntaxResult,
@@ -111,7 +111,7 @@ impl Rule for NoUnusedImports {
             AnyJsBindingDeclaration::JsImportDefaultClause(_)
             | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => {
                 let import = declaration.parent::<JsImport>()?;
-                transfer_leading_trivia_to_sibling(&mut mutation, import.syntax());
+                mutation.transfer_leading_trivia_to_sibling(import.syntax());
                 mutation.remove_node(import);
             }
             AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
@@ -177,29 +177,10 @@ fn remove_named_import_from_import_clause(
             default_clause.into(),
         );
     } else if let Some(import) = import_clause.syntax().parent() {
-        transfer_leading_trivia_to_sibling(mutation, &import);
+        mutation.transfer_leading_trivia_to_sibling(&import);
         mutation.remove_element(NodeOrToken::Node(import));
     }
     Ok(())
-}
-
-fn transfer_leading_trivia_to_sibling(
-    mutation: &mut BatchMutation<JsLanguage>,
-    node: &JsSyntaxNode,
-) -> Option<()> {
-    let pieces = node.first_leading_trivia()?.pieces();
-    let (sibling, new_sibling) = if let Some(next_sibling) = node.next_sibling() {
-        let new_next_sibling = next_sibling.clone().prepend_trivia_pieces(pieces)?;
-        (next_sibling, new_next_sibling)
-    } else if let Some(prev_sibling) = node.prev_sibling() {
-        let new_prev_sibling = prev_sibling.clone().append_trivia_pieces(pieces)?;
-        (prev_sibling, new_prev_sibling)
-    } else {
-        return None;
-    };
-    mutation
-        .replace_element_discard_trivia(NodeOrToken::Node(sibling), NodeOrToken::Node(new_sibling));
-    Some(())
 }
 
 const fn is_import(declaration: &AnyJsBindingDeclaration) -> bool {

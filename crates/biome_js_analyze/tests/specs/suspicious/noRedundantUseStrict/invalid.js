@@ -1,5 +1,5 @@
 // js module
-"use strict";
+"use strict"; // Associated comment
 
 function foo() {
 	"use strict";

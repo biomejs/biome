@@ -24,13 +24,10 @@ invalid.ts:2:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━
   
   i The entire contents of JavaScript modules are automatically in strict mode, with no statement needed to initiate it.
   
-  i Safe fix: Remove the redundant "use strict" directive
+  i Safe fix: Remove the redundant use strict directive.
   
-    1 1 │   function test(): void {
-    2   │ - → "use·strict";
-    3 2 │   }
-    4 3 │   
-  
+    2 │ → "use·strict";
+      │   -------------
 
 ```
 
