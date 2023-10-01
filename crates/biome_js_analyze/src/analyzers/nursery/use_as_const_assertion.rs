@@ -133,7 +133,7 @@ impl Rule for UseAsConstAssertion {
                 markup! {
                     "Use "<Emphasis>"as const"</Emphasis>" instead of type annotation."
                 },
-                markup! {""<Emphasis>"as const"</Emphasis>"  doesn't require any update when the value is changed."},
+                markup! {""<Emphasis>"as const"</Emphasis>" doesn't require any update when the value is changed."},
             ),
         };
         Some(RuleDiagnostic::new(rule_category!(), range, message).note(note))

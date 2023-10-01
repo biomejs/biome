@@ -30,13 +30,13 @@ let bar: 2 = 2;
 
 <pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:10 <a href="https://biomejs.dev/lint/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">You should use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of type annotation.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of type annotation.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let bar: 2 = 2;
    <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);"> is simpler and doesn't require retyping the value.</span>
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);"> doesn't require any update when the value is changed.</span>
   
 <strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Replace with </span><span style="color: rgb(38, 148, 255);"><strong>as const</strong></span><span style="color: rgb(38, 148, 255);">.</span>
   
