@@ -84,7 +84,7 @@ self.addEventListener("message", async (e) => {
 					formatWithErrors: true,
 					lineWidth: lineWidth,
 					indentStyle: indentStyle === IndentStyle.Tab ? "tab" : "space",
-					indentSize: indentWidth,
+					indentWidth,
 				},
 
 				linter: {
