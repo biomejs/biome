@@ -2037,6 +2037,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noUselessElse",
                 "noVoid",
                 "useArrowFunction",
+                "useAsConstAssertion",
                 "useCollapsedElseIf",
                 "useExhaustiveDependencies",
                 "useGroupedTypeImport",
@@ -2377,6 +2378,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.use_arrow_function = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "useAsConstAssertion" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.use_as_const_assertion = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "useAsConstAssertion",
+                        diagnostics,
+                    )?;
+                    self.use_as_const_assertion = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

@@ -102,6 +102,7 @@ define_categories! {
     "lint/nursery/noUselessElse": "https://biomejs.dev/lint/rules/no-useless-else",
     "lint/nursery/noVoid": "https://biomejs.dev/linter/rules/no-void",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
+    "lint/nursery/useAsConstAssertion": "https://biomejs.dev/lint/rules/use-as-const-assertion",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/lint/rules/use-biome-suppression-comment",
     "lint/nursery/useCollapsedElseIf": "https://biomejs.dev/lint/rules/use-collapsed-else-if",
     "lint/nursery/useExhaustiveDependencies": "https://biomejs.dev/linter/rules/use-exhaustive-dependencies",

@@ -1088,6 +1088,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAsConstAssertion": {
+					"description": "Enforce the use of as const over literal type and type annotation.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useCollapsedElseIf": {
 					"description": "Enforce using else if instead of nested if in else clauses.",
 					"anyOf": [
