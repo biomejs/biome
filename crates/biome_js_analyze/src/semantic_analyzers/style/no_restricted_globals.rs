@@ -5,11 +5,9 @@ use biome_console::markup;
 use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_js_semantic::{Binding, BindingExtensions};
-use biome_js_syntax::{
-    JsIdentifierAssignment, JsReferenceIdentifier, JsxReferenceIdentifier, TextRange,
-};
+use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
 use biome_json_syntax::JsonLanguage;
-use biome_rowan::{declare_node_union, AstNode, SyntaxNode};
+use biome_rowan::{AstNode, SyntaxNode};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -56,10 +54,6 @@ declare_rule! {
         name: "noRestrictedGlobals",
         recommended: false,
     }
-}
-
-declare_node_union! {
-    pub(crate) AnyIdentifier = JsReferenceIdentifier | JsIdentifierAssignment | JsxReferenceIdentifier
 }
 
 const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
@@ -134,15 +128,15 @@ impl Rule for NoRestrictedGlobals {
         unresolved_reference_nodes
             .chain(global_references_nodes)
             .filter_map(|node| {
-                let node = AnyIdentifier::unwrap_cast(node);
+                let node = AnyJsIdentifierUsage::unwrap_cast(node);
                 let (token, binding) = match node {
-                    AnyIdentifier::JsReferenceIdentifier(node) => {
+                    AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
                         (node.value_token(), node.binding(model))
                     }
-                    AnyIdentifier::JsxReferenceIdentifier(node) => {
+                    AnyJsIdentifierUsage::JsxReferenceIdentifier(node) => {
                         (node.value_token(), node.binding(model))
                     }
-                    AnyIdentifier::JsIdentifierAssignment(node) => {
+                    AnyJsIdentifierUsage::JsIdentifierAssignment(node) => {
                         (node.name_token(), node.binding(model))
                     }
                 };
