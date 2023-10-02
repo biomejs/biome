@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/expression/member-chain/static_member-regex.js
+---
+
+# Input
+
+```js
+// 5-len regex
+z.string().min(2).max(200).regex(/[a-z]/gm, {
+	message: 'Only English alphabet symbols and hyphen allowed',
+})
+
+// <5-len regex
+z.string().min(2).max(200).regex(/\w+/gm, {
+	message: 'Only English alphabet symbols and hyphen allowed',
+})
+
+
+// >5-len regex
+z.string().min(2).max(200).regex(/^[a-zA-Z\-]+$/gm, {
+	message: 'Only English alphabet symbols and hyphen allowed',
+})
+
+const a = {
+  locales: z.record(
+    localeKeySchema,
+    z.string().min(2).regex(/^[a-zA-Z\-]+$/gm, {
+      message: 'Only English alphabet symbols and hyphen allowed',
+    })
+  ),
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+// 5-len regex
+z.string().min(2).max(200).regex(/[a-z]/gm, {
+	message: "Only English alphabet symbols and hyphen allowed",
+});
+
+// <5-len regex
+z.string().min(2).max(200).regex(/\w+/gm, {
+	message: "Only English alphabet symbols and hyphen allowed",
+});
+
+// >5-len regex
+z.string()
+	.min(2)
+	.max(200)
+	.regex(/^[a-zA-Z\-]+$/gm, {
+		message: "Only English alphabet symbols and hyphen allowed",
+	});
+
+const a = {
+	locales: z.record(
+		localeKeySchema,
+		z
+			.string()
+			.min(2)
+			.regex(/^[a-zA-Z\-]+$/gm, {
+				message: "Only English alphabet symbols and hyphen allowed",
+			}),
+	),
+};
+```
+
+

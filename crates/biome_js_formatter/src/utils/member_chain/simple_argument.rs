@@ -1,8 +1,8 @@
 use crate::utils::is_call_like_expression;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsName, AnyJsObjectMember,
-    AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread, JsStaticMemberExpressionFields,
-    JsTemplateExpression, JsUnaryOperator,
+    AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread,
+    JsStaticMemberExpressionFields, JsTemplateExpression, JsUnaryOperator,
 };
 use biome_rowan::{AstSeparatedList, SyntaxResult};
 
@@ -57,6 +57,7 @@ impl SimpleArgument {
         if depth >= 2 {
             return false;
         }
+
         if self.is_simple_literal() {
             return true;
         }
@@ -73,6 +74,7 @@ impl SimpleArgument {
                 .unwrap_or(false)
             || self.is_simple_call_like_expression(depth).unwrap_or(false)
             || self.is_simple_object_expression(depth)
+            || self.is_simple_regex_expression()
     }
 
     fn is_simple_call_like_expression(&self, depth: u8) -> SyntaxResult<bool> {
@@ -161,6 +163,19 @@ impl SimpleArgument {
         }
     }
 
+    fn is_simple_regex_expression(&self) -> bool {
+        if let SimpleArgument::Expression(AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
+        )) = self
+        {
+            if let Some((pattern, _)) = regex.decompose().ok() {
+                return pattern.text().len() <= 5;
+            }
+        }
+
+        false
+    }
+
     fn is_simple_array_expression(&self, depth: u8) -> bool {
         if let SimpleArgument::Expression(AnyJsExpression::JsArrayExpression(array_expression)) =
             self
@@ -193,13 +208,20 @@ impl SimpleArgument {
             return true;
         }
 
+        if let SimpleArgument::Expression(AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsRegexLiteralExpression(_),
+        )) = self
+        {
+            return false;
+        }
+
         matches!(
             self,
             SimpleArgument::Expression(
                 AnyJsExpression::AnyJsLiteralExpression(_)
                     | AnyJsExpression::JsThisExpression(_)
                     | AnyJsExpression::JsIdentifierExpression(_)
-                    | AnyJsExpression::JsSuperExpression(_),
+                    | AnyJsExpression::JsSuperExpression(_)
             )
         )
     }
