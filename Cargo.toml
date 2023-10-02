@@ -66,7 +66,7 @@ biome_flags          = { path = "./crates/biome_flags" }
 biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
-biome_project                = { path = "./crates/biome_project" }
+biome_project        = { path = "./crates/biome_project" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }

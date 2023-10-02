@@ -98,7 +98,7 @@ impl FileSystem for MemoryFileSystem {
     fn get_configuration_base_path(&self) -> Option<PathBuf> {
         let configuration = self.configuration_base_path.read();
         let configuration = configuration.as_ref();
-        configuration.map(|p| p.clone())
+        configuration.cloned()
     }
 
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {

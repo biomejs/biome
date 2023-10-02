@@ -17,7 +17,7 @@ pub trait Manifest: Default + Debug {
     type Language: Language;
 
     /// It loads the manifest of the project. It accepts the path where the manifest should be
-    fn deserialize_manifest(content: &SyntaxNode<Self::Language>) -> Deserialized<Self>;
+    fn deserialize_manifest(content: &<Self::Language as Language>::Root) -> Deserialized<Self>;
 }
 
 /// An internal representation of a project.
@@ -27,7 +27,7 @@ pub trait Project {
     /// Use this function to prepare the project, like loading the manifest.
     fn deserialize_manifest(
         &mut self,
-        root: &SyntaxNode<<<Self as Project>::Manifest as Manifest>::Language>,
+        root: &<<<Self as Project>::Manifest as Manifest>::Language as Language>::Root,
     );
 
     /// The home directory of the project

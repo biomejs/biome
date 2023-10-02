@@ -113,7 +113,7 @@ fn create_data(license_list: LicenseList) -> io::Result<TokenStream> {
 
         pub const LICENSE_LIST: LicenseList = LicenseList {
             license_list_version: #version,
-            license_list: &LICENSES,
+            license_list: LICENSES,
             release_date: #release_date,
         };
 
