@@ -164,7 +164,7 @@ pub struct SemanticEventExtractor {
     next_scope_id: usize,
     /// At any point this is the set of available bindings and
     /// the range of its declaration
-    bindings: FxHashMap<TokenText, BindingInfo>,
+    bindings: FxHashMap<BindingName, BindingInfo>,
     infers: Vec<TsTypeParameterName>,
 }
 
@@ -178,8 +178,8 @@ struct BindingInfo {
     declaration_kind: JsSyntaxKind,
 }
 
-#[derive(Debug)]
-struct Binding {
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
+struct BindingName {
     name: TokenText,
 }
 
@@ -212,13 +212,13 @@ struct Scope {
     scope_id: usize,
     started_at: TextSize,
     /// All bindings declared inside this scope
-    bindings: Vec<Binding>,
+    bindings: Vec<BindingName>,
     /// References that still needs to be bound and
     /// will be solved at the end of the scope
-    references: HashMap<TokenText, Vec<Reference>>,
+    references: HashMap<BindingName, Vec<Reference>>,
     /// All bindings that where shadowed and will be
     /// restored after this scope ends.
-    shadowed: Vec<(TokenText, BindingInfo)>,
+    shadowed: Vec<(BindingName, BindingInfo)>,
     /// If this scope allows declarations to be hoisted
     /// to parent scope or not
     hoisting: ScopeHoisting,
@@ -474,7 +474,10 @@ impl SemanticEventExtractor {
         };
 
         let current_scope = self.current_scope_mut();
-        let references = current_scope.references.entry(name).or_default();
+        let references = current_scope
+            .references
+            .entry(BindingName { name })
+            .or_default();
         references.push(Reference::Read {
             range: node.text_range(),
             is_exported,
@@ -487,7 +490,10 @@ impl SemanticEventExtractor {
         let name = reference.name_token().ok()?;
         let name = name.token_text_trimmed();
         let current_scope = self.current_scope_mut();
-        let references = current_scope.references.entry(name).or_default();
+        let references = current_scope
+            .references
+            .entry(BindingName { name })
+            .or_default();
         references.push(Reference::Write {
             range: reference.syntax().text_range(),
         });
@@ -716,7 +722,7 @@ impl SemanticEventExtractor {
 
             // Remove all bindings declared in this scope
             for binding in scope.bindings {
-                self.bindings.remove(&binding.name);
+                self.bindings.remove(&binding);
             }
 
             // Restore shadowed bindings
@@ -796,19 +802,19 @@ impl SemanticEventExtractor {
     ) {
         let name = name_token.token_text_trimmed();
         let declaration_range = name_token.text_range();
-
+        let binding = BindingName { name: name.clone() };
         // insert this name into the list of available names
         // and save shadowed names to be used later
         let shadowed = self
             .bindings
             .insert(
-                name.clone(),
+                binding.clone(),
                 BindingInfo {
                     text_range: declaration_range,
                     declaration_kind,
                 },
             )
-            .map(|shadowed_range| (name.clone(), shadowed_range));
+            .map(|shadowed_range| (binding, shadowed_range));
 
         let current_scope_id = self.current_scope_mut().scope_id;
         let binding_scope_id = hoisted_scope_id.unwrap_or(current_scope_id);
@@ -823,7 +829,7 @@ impl SemanticEventExtractor {
         debug_assert!(scope.is_some());
         let scope = scope.unwrap();
 
-        scope.bindings.push(Binding { name: name.clone() });
+        scope.bindings.push(BindingName { name: name.clone() });
         scope.shadowed.extend(shadowed);
 
         self.stash.push_back(SemanticEvent::DeclarationFound {
