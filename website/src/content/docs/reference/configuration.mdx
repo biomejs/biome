@@ -68,7 +68,7 @@ will use the configuration file `app/frontend/biome.json`;
 
 Allows to pass a path to a JSON schema file.
 
-Since version `11.0.0`, a JSON schema file for the `biome.json` is published.
+We publish a JSON schema file for the `biome.json`.
 
 You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
 
@@ -87,7 +87,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json"
 }
 ```
 
@@ -99,7 +99,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
@@ -107,7 +107,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -122,7 +122,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/12.1.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "linter": {
     "rules": {
       "complexity": {
