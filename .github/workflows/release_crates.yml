@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - Cargo.toml
+      - crates/**/Cargo.toml
 
 jobs:
   release:
