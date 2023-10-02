@@ -168,7 +168,7 @@ impl SimpleArgument {
             AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
         )) = self
         {
-            if let Some((pattern, _)) = regex.decompose().ok() {
+            if let Ok((pattern, _)) = regex.decompose() {
                 return pattern.text().len() <= 5;
             }
         }
