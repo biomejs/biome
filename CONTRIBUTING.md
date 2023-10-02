@@ -65,7 +65,21 @@ just install-tools
 
 And you're good to go hack with Biome and Rust! 🚀
 
-## Testing
+## Crates development
+
+### Analyzers and lint rules
+
+To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [internal page](https://docs.rs/biome_analyze/latest/biome_analyze/)
+
+### Parser
+
+To know the technical details of how our parser works and how to write test, please check our [internal page](https://docs.rs/biome_parser/latest/biome_parser/)
+
+### Formatter
+
+To know the technical details of how our formatter works and how to write test, please check our [internal page](https://docs.rs/biome_js_formatter/latest/biome_js_formatter/)
+
+### Testing
 
 To run the tests, just run
 
@@ -95,7 +109,7 @@ When a snapshot test fails, you can run:
 - `cargo insta reject` to reject all the changes;
 - `cargo insta review` to review snapshots singularly;
 
-## Checks
+### Checks
 
 When you finished your work, and you are ready to **commit and open a PR**,
 run the following command:
@@ -107,7 +121,47 @@ just ready
 This command will run the same commands of the CI: format, lint, tests and code generation.
 Eventually everything should be "green" 🟢 and commit all the code that was generated.
 
-## Language Server and VS Code Extension Development
+#### Generated files
+
+If you work on some parser and you create new nodes or modify existing ones, will need to run a command to update some files that are auto-generated.
+
+##### `cargo codegen grammar`
+
+This command will update the syntax of the parsers.
+
+The source is generated from the [`ungram` files](https://github.com/biomejs/biome/blob/main/xtask/codegen/js.ungram).
+
+##### `cargo codegen test`
+
+This command will create new tests for your parser. We currently have a neat infrastructure
+where tests for parser are generated com inline comments found inside
+the source code.
+
+
+##### `cargo codegen analyzer`
+
+This command will detect linter rules declared in the `analyzers` and `assists` directories in `biome_analyze`, regenerate the index modules `analyzers.rs` and `assists.rs` to import these files, and update the registry builder function in `registry.rs` to include all these rules.
+It will also regenerate the configuration of the rules.
+
+##### `cargo coverage`
+
+This command will check and report parser conformance against different test suites.
+We currently target the [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) and
+the [Typescript Test Suite](https://github.com/microsoft/TypeScript/tree/main/tests)
+
+The test suites are included as git submodules and can be pulled using:
+
+```bash
+git submodule update --init --recursive
+```
+
+### crate dependencies
+
+[Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
+
+Internal crates are loaded with `workspace = true` for each crate. About dev-dependencies, we use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) to avoid requiring these crates to be published when doing cargo publish.
+
+## VS Code extension development
 
 The Biome language server is the binary crate `biome` which can be built using the command:
 
@@ -171,7 +225,7 @@ If files specific to your local development environment should be ignored, pleas
 
 You can find more information on this process [here](https://help.github.com/en/github/using-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer).
 
-## Intellij plugin
+## Intellij plugin development
 
 To start development from source, navigate to the `editors/intellij` directory.
 
@@ -218,7 +272,7 @@ For testing and developing, you need to build these packages, following the step
 The tests are run against the compiled files, which means that you need to run the
 `build` command after you implemented features/bug fixes.
 
-## Website
+## Website development
 
 The [Biome website](https://biomejs.dev/) is built with [Astro](https://astro.build).
 To start a development server you can run the following commands:
@@ -227,41 +281,6 @@ To start a development server you can run the following commands:
 cd website
 pnpm install
 pnpm start
-```
-
-### Generated files
-
-If you work on some parser and you create new nodes or modify existing ones, will need to run a command to update some files that are auto-generated.
-
-#### `cargo codegen grammar`
-
-This command will update the syntax of the parsers.
-
-The source is generated from the [`ungram` files](https://github.com/biomejs/biome/blob/main/xtask/codegen/js.ungram).
-
-#### `cargo codegen test`
-
-This command will create new tests for your parser. We currently have a neat infrastructure
-where tests for parser are generated com inline comments found inside
-the source code. Please read [the proper chapter for more information](#write-tests-for-a-parser)
-
-It's strongly advised to **run this command before committing new changes**.
-
-#### `cargo codegen analyzer`
-
-This command will detect linter rules declared in the `analyzers` and `assists` directories in `biome_analyze`, regenerate the index modules `analyzers.rs` and `assists.rs` to import these files, and update the registry builder function in `registry.rs` to include all these rules.
-It will also regenerate the configuration of the rules.
-
-#### `cargo coverage`
-
-This command will check and report parser conformance against different test suites.
-We currently target the [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) and
-the [Typescript Test Suite](https://github.com/microsoft/TypeScript/tree/main/tests)
-
-The test suites are included as git submodules and can be pulled using:
-
-```bash
-git submodule update --init --recursive
 ```
 
 ## Commit messages
@@ -288,14 +307,14 @@ docs: fix link to website page
 test(lint): add more cases to handle invalid rules
 ```
 
-### Creating pull requests
+## Creating pull requests
 
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
 See the [dedicated section](#Commit-messages) about conventional commit format.
 
 Please use the template provided.
 
-#### Changelog
+### Changelog
 
 If the PR you're about to open is a bugfix/feature visible to Biome users, you CAN add a new bullet point to [CHANGELOG.md](./CHANGELOG.md). Although **not required**, we appreciate the effort.
 
@@ -351,7 +370,7 @@ Because the website displays the changelog, you should update the website using 
 just codegen-website
 ```
 
-##### Writing a changelog line
+#### Writing a changelog line
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
@@ -362,24 +381,16 @@ just codegen-website
 
 If in doubt, take a look to existing changelog lines.
 
-#### Documentation
+### Documentation
 
 If your PR requires some update on the website (new features, breaking changes, etc.), you should create a new PR once the previous PR is successfully merged.
 When adding new features, the documentation should be part of a new PR, which will be merged right before the release.
 
-#### Magic comments
+### Magic comments
 
 - `!bench_parser` benchmarks the parser's runtime performance and writes a comment with the results;
 - `!bench_formatter` benchmarks the formatter runtime performance and writes a comment with the results;
 - `!bench_analyzer` benchmarks the analyzer runtime performance and writes a comment with the results;
-
-### Analyzers and lint rules
-
-To know the technical details of how our analyzer works, how to create a rule and how to write tests, please check our [contribution page](https://github.com/biomejs/biome/blob/main/crates/biome_analyze/CONTRIBUTING.md)
-
-### Formatter
-
-To know the technical details of how our formatter works and how to write test, please check our [contribution page](https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/CONTRIBUTING.md)
 
 ### Versioning
 
@@ -387,10 +398,6 @@ We follow the specs suggested by [the official documentation](https://code.visua
 
 Odd minor versions are dedicated to pre-releases, e.g. `*.5.*` .
 Even minor versions are dedicated to official releases, e.g. `*.6.*`.
-
-### Playground
-
-- [run the playground locally](/website/playground/README.md)
 
 ## Releasing
 
