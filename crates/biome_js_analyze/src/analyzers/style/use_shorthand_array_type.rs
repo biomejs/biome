@@ -58,7 +58,7 @@ declare_rule! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum TsArrayKind {
     /// `Array<T>`
     Simple,
@@ -77,7 +77,7 @@ impl Rule for UseShorthandArrayType {
         let type_arguments = node.type_arguments()?;
 
         match get_array_kind_by_reference(node) {
-            Some(array_kind) => convert_to_array_type(type_arguments, array_kind),
+            Some(array_kind) => convert_to_array_type(&type_arguments, array_kind),
             None => None,
         }
     }
@@ -142,7 +142,7 @@ fn get_array_kind_by_reference(ty: &TsReferenceType) -> Option<TsArrayKind> {
 }
 
 fn convert_to_array_type(
-    type_arguments: TsTypeArguments,
+    type_arguments: &TsTypeArguments,
     array_kind: TsArrayKind,
 ) -> Option<AnyTsType> {
     if type_arguments.ts_type_argument_list().len() > 0 {
@@ -166,7 +166,7 @@ fn convert_to_array_type(
                     AnyTsType::TsReferenceType(ty) => match get_array_kind_by_reference(ty) {
                         Some(array_kind) => {
                             if let Some(type_arguments) = ty.type_arguments() {
-                                convert_to_array_type(type_arguments, array_kind)
+                                convert_to_array_type(&type_arguments, array_kind)
                             } else {
                                 Some(param)
                             }

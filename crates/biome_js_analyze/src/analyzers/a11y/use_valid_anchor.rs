@@ -120,11 +120,11 @@ impl UseValidAnchorState {
         }
     }
 
-    fn range(&self) -> TextRange {
+    fn range(&self) -> &TextRange {
         match self {
             UseValidAnchorState::MissingHrefAttribute(range)
             | UseValidAnchorState::CantBeAnchor(range)
-            | UseValidAnchorState::IncorrectHref(range) => *range,
+            | UseValidAnchorState::IncorrectHref(range) => range,
         }
     }
 }

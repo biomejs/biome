@@ -99,20 +99,16 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
     };
 
     let mut batch = r.tree().begin();
-    let batch_result =
-        if let Some(parameter) = node_to_remove.syntax().clone().cast::<JsFormalParameter>() {
-            batch.remove_js_formal_parameter(&parameter)
-        } else if let Some(declarator) = node_to_remove
-            .syntax()
-            .clone()
-            .cast::<JsVariableDeclarator>()
-        {
-            batch.remove_js_variable_declarator(&declarator)
-        } else if let Some(member) = node_to_remove.syntax().clone().cast::<AnyJsObjectMember>() {
-            batch.remove_js_object_member(&member)
-        } else {
-            panic!("Don't know how to remove this node: {:?}", node_to_remove);
-        };
+    let batch_result = if let Some(parameter) = JsFormalParameter::cast_ref(node_to_remove.syntax())
+    {
+        batch.remove_js_formal_parameter(&parameter)
+    } else if let Some(declarator) = JsVariableDeclarator::cast_ref(node_to_remove.syntax()) {
+        batch.remove_js_variable_declarator(&declarator)
+    } else if let Some(member) = AnyJsObjectMember::cast_ref(node_to_remove.syntax()) {
+        batch.remove_js_object_member(&member)
+    } else {
+        panic!("Don't know how to remove this node: {:?}", node_to_remove);
+    };
     assert!(batch_result);
     let root = batch.commit();
 

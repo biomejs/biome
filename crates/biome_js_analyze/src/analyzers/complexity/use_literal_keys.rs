@@ -9,7 +9,8 @@ use biome_js_factory::make::{
     js_static_member_expression, token,
 };
 use biome_js_syntax::{
-    AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression, AnyJsName, JsComputedMemberName,
+    AnyJsAssignment, AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName, JsComputedMemberName,
     JsLiteralMemberName, JsSyntaxKind, T,
 };
 use biome_js_unicode_table::is_js_ident;
@@ -128,9 +129,9 @@ impl Rule for UseLiteralKeys {
                             dot_token,
                             AnyJsName::JsName(member),
                         );
-                        mutation.replace_element(
-                            node.clone().into_syntax().into(),
-                            static_expression.into_syntax().into(),
+                        mutation.replace_node(
+                            AnyJsMemberExpression::from(node.clone()),
+                            static_expression.into(),
                         );
                     }
                     AnyJsComputedMember::JsComputedMemberAssignment(node) => {
@@ -139,9 +140,9 @@ impl Rule for UseLiteralKeys {
                             dot_token,
                             AnyJsName::JsName(member),
                         );
-                        mutation.replace_element(
-                            node.clone().into_syntax().into(),
-                            static_member.into_syntax().into(),
+                        mutation.replace_node(
+                            AnyJsAssignment::from(node.clone()),
+                            static_member.into(),
                         );
                     }
                 }
@@ -156,9 +157,9 @@ impl Rule for UseLiteralKeys {
                     make::js_string_literal(identifier)
                 };
                 let literal_member_name = js_literal_member_name(name_token);
-                mutation.replace_element(
-                    member.clone().into_syntax().into(),
-                    literal_member_name.into_syntax().into(),
+                mutation.replace_node(
+                    AnyJsObjectMemberName::from(member.clone()),
+                    literal_member_name.into(),
                 );
             }
         }

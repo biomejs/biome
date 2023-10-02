@@ -94,16 +94,14 @@ impl Rule for NoRedundantAlt {
                 match value.expression().ok()? {
                     AnyJsExpression::AnyJsLiteralExpression(
                         AnyJsLiteralExpression::JsStringLiteralExpression(expr),
-                    ) => {
-                        is_redundant_alt(expr.inner_string_text().ok()?.to_string()).then_some(alt)
-                    }
+                    ) => is_redundant_alt(expr.inner_string_text().ok()?.text()).then_some(alt),
                     AnyJsExpression::JsTemplateExpression(expr) => {
                         let contain_redundant_alt =
                             expr.elements().into_iter().any(|template_element| {
                                 match template_element {
                                     AnyJsTemplateElement::JsTemplateChunkElement(node) => {
                                         node.template_chunk_token().ok().map_or(false, |token| {
-                                            is_redundant_alt(token.text_trimmed().to_string())
+                                            is_redundant_alt(token.text_trimmed())
                                         })
                                     }
                                     AnyJsTemplateElement::JsTemplateElement(_) => false,
@@ -117,8 +115,8 @@ impl Rule for NoRedundantAlt {
                 }
             }
             AnyJsxAttributeValue::JsxString(ref value) => {
-                let text = value.inner_string_text().ok()?.to_string();
-                is_redundant_alt(text).then_some(alt)
+                let inner_string_text = value.inner_string_text().ok()?;
+                is_redundant_alt(inner_string_text.text()).then_some(alt)
             }
         }
     }
@@ -141,7 +139,7 @@ impl Rule for NoRedundantAlt {
 
 const REDUNDANT_WORDS: [&str; 3] = ["image", "photo", "picture"];
 
-fn is_redundant_alt(alt: String) -> bool {
+fn is_redundant_alt(alt: &str) -> bool {
     REDUNDANT_WORDS
         .into_iter()
         .any(|word| alt.split_whitespace().any(|x| x.to_lowercase() == word))

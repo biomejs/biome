@@ -67,14 +67,16 @@ impl Rule for UseFlatMap {
         let flat_member_expression =
             AnyJsMemberExpression::cast_ref(flat_call.callee().ok()?.syntax())?;
         if flat_member_expression.member_name()?.text() == "flat" {
-            let object = flat_member_expression.object().ok()?;
-            let map_call = object.as_js_call_expression()?;
+            let Ok(AnyJsExpression::JsCallExpression(map_call)) = flat_member_expression.object()
+            else {
+                return None;
+            };
             let map_call_arguments = map_call.arguments().ok()?.args();
             let map_member_expression =
                 AnyJsMemberExpression::cast_ref(map_call.callee().ok()?.syntax())?;
             if map_member_expression.member_name()?.text() == "map" && map_call_arguments.len() == 1
             {
-                return Some(map_call.clone());
+                return Some(map_call);
             }
         }
         None
@@ -95,20 +97,22 @@ impl Rule for UseFlatMap {
     fn action(ctx: &RuleContext<Self>, flat_call: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-
-        let flat_call = flat_call.clone();
-        let old_static_member_expression = flat_call.callee().ok()?;
-        let old_static_member_expression =
-            old_static_member_expression.as_js_static_member_expression()?;
+        let Ok(AnyJsExpression::JsStaticMemberExpression(old_static_member_expression)) =
+            flat_call.callee()
+        else {
+            return None;
+        };
         let member = js_name(ident("flatMap"));
 
-        let flat_map_member_expression = old_static_member_expression
-            .clone()
-            .with_member(AnyJsName::JsName(member));
+        let flat_map_member_expression =
+            old_static_member_expression.with_member(AnyJsName::JsName(member));
 
-        let flat_map_call = flat_call.with_callee(AnyJsExpression::JsStaticMemberExpression(
-            flat_map_member_expression,
-        ));
+        let flat_map_call =
+            flat_call
+                .clone()
+                .with_callee(AnyJsExpression::JsStaticMemberExpression(
+                    flat_map_member_expression,
+                ));
 
         mutation.replace_node(node.clone(), flat_map_call);
 

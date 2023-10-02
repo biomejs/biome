@@ -74,7 +74,7 @@ impl Rule for UseButtonType {
                         missing_prop: true,
                     });
                 };
-                inspect_jsx_type_attribute(attribute)
+                inspect_jsx_type_attribute(&attribute)
             }
             UseButtonTypeQuery::JsxOpeningElement(element) => {
                 let name = element.name().ok()?;
@@ -88,7 +88,7 @@ impl Rule for UseButtonType {
                         missing_prop: true,
                     });
                 };
-                inspect_jsx_type_attribute(attribute)
+                inspect_jsx_type_attribute(&attribute)
             }
             UseButtonTypeQuery::JsCallExpression(call_expression) => {
                 let model = ctx.model();
@@ -171,7 +171,7 @@ impl Rule for UseButtonType {
     }
 }
 
-fn inspect_jsx_type_attribute(attribute: JsxAttribute) -> Option<UseButtonTypeState> {
+fn inspect_jsx_type_attribute(attribute: &JsxAttribute) -> Option<UseButtonTypeState> {
     let Some(initializer) = attribute.initializer() else {
         return Some(UseButtonTypeState {
             range: attribute.range(),

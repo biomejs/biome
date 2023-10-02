@@ -4,8 +4,9 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
+    AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
     JsExportNamedFromSpecifier, JsExportNamedSpecifier, JsNamedImportSpecifier,
-    JsObjectBindingPatternProperty, JsSyntaxElement,
+    JsObjectBindingPatternProperty,
 };
 use biome_rowan::{declare_node_union, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
@@ -136,18 +137,12 @@ impl Rule for NoUselessRename {
             JsRenaming::JsExportNamedSpecifier(x) => {
                 let replacing =
                     make::js_export_named_shorthand_specifier(x.local_name().ok()?).build();
-                mutation.replace_element(
-                    JsSyntaxElement::Node(x.syntax().clone()),
-                    JsSyntaxElement::Node(replacing.syntax().clone()),
-                );
+                mutation.replace_node(AnyJsExportNamedSpecifier::from(x.clone()), replacing.into());
             }
             JsRenaming::JsNamedImportSpecifier(x) => {
                 let replacing =
                     make::js_shorthand_named_import_specifier(x.local_name().ok()?).build();
-                mutation.replace_element(
-                    JsSyntaxElement::Node(x.syntax().clone()),
-                    JsSyntaxElement::Node(replacing.syntax().clone()),
-                );
+                mutation.replace_node(AnyJsNamedImportSpecifier::from(x.clone()), replacing.into());
             }
             JsRenaming::JsObjectBindingPatternProperty(x) => {
                 let mut replacing_builder = make::js_object_binding_pattern_shorthand_property(
@@ -156,9 +151,9 @@ impl Rule for NoUselessRename {
                 if let Some(init) = x.init() {
                     replacing_builder = replacing_builder.with_init(init);
                 }
-                mutation.replace_element(
-                    JsSyntaxElement::Node(x.syntax().clone()),
-                    JsSyntaxElement::Node(replacing_builder.build().syntax().clone()),
+                mutation.replace_node(
+                    AnyJsObjectBindingPatternMember::from(x.clone()),
+                    replacing_builder.build().into(),
                 );
             }
         }

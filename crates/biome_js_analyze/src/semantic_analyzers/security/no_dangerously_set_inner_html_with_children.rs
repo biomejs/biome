@@ -59,9 +59,9 @@ enum ChildrenKind {
 }
 
 impl ChildrenKind {
-    fn range(&self) -> TextRange {
+    fn range(&self) -> &TextRange {
         match self {
-            ChildrenKind::Prop(range) | ChildrenKind::Direct(range) => *range,
+            ChildrenKind::Prop(range) | ChildrenKind::Direct(range) => range,
         }
     }
 }

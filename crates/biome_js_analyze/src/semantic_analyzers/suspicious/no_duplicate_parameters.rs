@@ -67,7 +67,7 @@ impl Rule for NoDuplicateParameters {
         // Traversing the parameters of the function in preorder and checking for duplicates,
         list.iter().find_map(|parameter| {
             let parameter = parameter.ok()?;
-            traverse_parameter(parameter, &mut set)
+            traverse_parameter(&parameter, &mut set)
         })
     }
 
@@ -89,7 +89,7 @@ impl Rule for NoDuplicateParameters {
 /// Traverse the parameter recursively and check if it is duplicated.
 /// Return `Some(JsIdentifierBinding)` if it is duplicated.
 fn traverse_parameter(
-    parameter: AnyParameter,
+    parameter: &AnyParameter,
     tracked_bindings: &mut FxHashSet<String>,
 ) -> Option<JsIdentifierBinding> {
     parameter

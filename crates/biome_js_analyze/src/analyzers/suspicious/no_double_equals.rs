@@ -70,7 +70,7 @@ impl Rule for NoDoubleEquals {
         }
 
         // TODO: Implement SyntaxResult helpers to make this cleaner
-        if is_null_literal(n.left()) || is_null_literal(n.right()) {
+        if is_null_literal(&n.left()) || is_null_literal(&n.right()) {
             return None;
         }
 
@@ -117,7 +117,7 @@ impl Rule for NoDoubleEquals {
     }
 }
 
-fn is_null_literal(res: SyntaxResult<AnyJsExpression>) -> bool {
+fn is_null_literal(res: &SyntaxResult<AnyJsExpression>) -> bool {
     matches!(
         res,
         Ok(AnyJsExpression::AnyJsLiteralExpression(

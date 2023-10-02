@@ -153,12 +153,12 @@ impl Rule for NoUselessElse {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let else_clause = ctx.query();
         let if_stmt = else_clause.parent::<JsIfStatement>()?;
-        if let Some(stmts_list) = JsStatementList::cast(if_stmt.syntax().parent()?) {
+        if let Some(stmts_list) = if_stmt.parent::<JsStatementList>() {
             let else_alternative = else_clause.alternate().ok()?;
             let if_pos = stmts_list
                 .iter()
                 .position(|x| x.syntax() == if_stmt.syntax())?;
-            let new_if_stmt = AnyJsStatement::JsIfStatement(if_stmt.clone().with_else_clause(None))
+            let new_if_stmt = AnyJsStatement::from(if_stmt.with_else_clause(None))
                 .with_trailing_trivia_pieces([])?;
             let prev_stmts = stmts_list.iter().take(if_pos).chain([new_if_stmt]);
             let next_stmts = stmts_list.iter().skip(if_pos + 1);

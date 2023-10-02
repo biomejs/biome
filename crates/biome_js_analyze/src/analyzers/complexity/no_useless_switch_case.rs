@@ -2,8 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{JsCaseClause, JsDefaultClause};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, SyntaxElement};
+use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 
 use crate::JsRuleAction;
 
@@ -135,6 +135,7 @@ impl Rule for NoUselessSwitchCase {
         let default_clause = ctx.query();
         let mut mutation = ctx.root().begin();
         let consequent = useless_case.consequent();
+        let useless_case = useless_case.clone();
         if consequent.len() > 0 {
             let default_clause_colon_token = default_clause.colon_token().ok()?;
             let new_default_clause = default_clause
@@ -144,12 +145,12 @@ impl Rule for NoUselessSwitchCase {
                     useless_case.colon_token().ok()?.trailing_trivia().pieces(),
                 ));
             mutation.remove_node(default_clause.clone());
-            mutation.replace_element(
-                SyntaxElement::Node(useless_case.syntax().clone()),
-                SyntaxElement::Node(new_default_clause.syntax().clone()),
+            mutation.replace_node(
+                AnyJsSwitchClause::from(useless_case),
+                new_default_clause.into(),
             );
         } else {
-            mutation.remove_node(useless_case.clone());
+            mutation.remove_node(useless_case);
         }
         Some(JsRuleAction {
             mutation,

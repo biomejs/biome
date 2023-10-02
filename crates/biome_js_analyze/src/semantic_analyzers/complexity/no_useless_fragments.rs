@@ -230,28 +230,22 @@ impl Rule for NoUselessFragments {
             let child = node.children().first();
             if let Some(child) = child {
                 let new_node = match child {
-                    AnyJsxChild::JsxElement(node) => Some(
-                        jsx_tag_expression(AnyJsxTag::JsxElement(node))
-                            .syntax()
-                            .clone(),
-                    ),
-                    AnyJsxChild::JsxFragment(node) => Some(
-                        jsx_tag_expression(AnyJsxTag::JsxFragment(node))
-                            .syntax()
-                            .clone(),
-                    ),
+                    AnyJsxChild::JsxElement(node) => {
+                        Some(jsx_tag_expression(AnyJsxTag::JsxElement(node)).into_syntax())
+                    }
+                    AnyJsxChild::JsxFragment(node) => {
+                        Some(jsx_tag_expression(AnyJsxTag::JsxFragment(node)).into_syntax())
+                    }
                     AnyJsxChild::JsxSelfClosingElement(node) => Some(
-                        jsx_tag_expression(AnyJsxTag::JsxSelfClosingElement(node))
-                            .syntax()
-                            .clone(),
+                        jsx_tag_expression(AnyJsxTag::JsxSelfClosingElement(node)).into_syntax(),
                     ),
                     AnyJsxChild::JsxText(text) => {
                         let new_value = format!("\"{}\"", text.value_token().ok()?);
-                        Some(jsx_string(ident(&new_value)).syntax().clone())
+                        Some(jsx_string(ident(&new_value)).into_syntax())
                     }
                     AnyJsxChild::JsxExpressionChild(child) => {
                         child.expression().map(|expression| {
-                            js_expression_statement(expression).build().syntax().clone()
+                            js_expression_statement(expression).build().into_syntax()
                         })
                     }
 

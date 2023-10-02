@@ -170,6 +170,7 @@ impl Rule for UseBlockStatements {
                 let mut leading_trivia = stmt
                     .syntax()
                     .first_leading_trivia()
+                    .as_ref()
                     .map(collect_to_first_newline)
                     .unwrap_or_else(Vec::new);
 
@@ -200,6 +201,7 @@ impl Rule for UseBlockStatements {
                     leading_trivia = node
                         .syntax()
                         .first_leading_trivia()
+                        .as_ref()
                         .map(collect_to_first_newline)
                         .unwrap_or_else(Vec::new);
                 }
@@ -290,7 +292,7 @@ impl Rule for UseBlockStatements {
 }
 
 /// Collect newline and comment trivia pieces in reverse order up to the first newline included
-fn collect_to_first_newline(trivia: JsSyntaxTrivia) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn collect_to_first_newline(trivia: &JsSyntaxTrivia) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut has_newline = false;
     trivia
         .pieces()

@@ -6,9 +6,10 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, TextRange,
+    AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, JsSyntaxToken,
+    TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 use std::str::FromStr;
 
 declare_rule! {
@@ -210,13 +211,13 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
 }
 
 impl NumberLiteral {
-    fn node(&self) -> JsLiteralMemberName {
+    fn token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::Decimal { node, .. } => node.clone(),
-            Self::Binary { node, .. } => node.clone(),
-            Self::FloatingPoint { node, .. } => node.clone(),
-            Self::Octal { node, .. } => node.clone(),
-            Self::Hexadecimal { node, .. } => node.clone(),
+            Self::Decimal { node, .. } => node.value(),
+            Self::Binary { node, .. } => node.value(),
+            Self::FloatingPoint { node, .. } => node.value(),
+            Self::Octal { node, .. } => node.value(),
+            Self::Hexadecimal { node, .. } => node.value(),
         }
     }
 
@@ -337,8 +338,8 @@ impl Rule for UseSimpleNumberKeys {
         RuleState(reason, literal): &Self::State,
     ) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let node = literal.node();
-        let token = node.value().ok()?;
+        let token = literal.token().ok()?;
+        let token_text = token.text_trimmed().to_string();
 
         let message = match reason {
             WrongNumberLiteralName::Binary
@@ -346,12 +347,12 @@ impl Rule for UseSimpleNumberKeys {
             | WrongNumberLiteralName::Hexadecimal => {
                 let text = literal.to_base_ten()?;
                 mutation.replace_token(token, make::js_number_literal(text));
-                markup! ("Replace "{ node.to_string() } " with "{text.to_string()}).to_owned()
+                markup! ("Replace "{ token_text } " with "{text.to_string()}).to_owned()
             }
             WrongNumberLiteralName::WithUnderscore | WrongNumberLiteralName::BigInt => {
                 let text = literal.value();
                 mutation.replace_token(token, make::js_number_literal(text));
-                markup! ("Replace "{ node.to_string() } " with "{text}).to_owned()
+                markup! ("Replace "{ token_text } " with "{text}).to_owned()
             }
         };
 

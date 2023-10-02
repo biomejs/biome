@@ -86,8 +86,8 @@ impl Rule for NoCommentText {
         );
 
         mutation.replace_node(
-            AnyJsxChild::JsxText(node.clone()),
-            AnyJsxChild::JsxExpressionChild(
+            AnyJsxChild::from(node.clone()),
+            AnyJsxChild::from(
                 make::jsx_expression_child(
                     make::token(T!['{']).with_trailing_trivia([(
                         TriviaPieceKind::MultiLineComment,

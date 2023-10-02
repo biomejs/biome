@@ -111,8 +111,8 @@ impl Rule for NoUnsafeNegation {
                     AnyJsExpression::JsParenthesizedExpression(next_parenthesis_expression),
                 );
                 mutation.replace_node(
-                    AnyJsExpression::JsInstanceofExpression(expr.clone()),
-                    AnyJsExpression::JsUnaryExpression(next_unary_expression),
+                    AnyJsExpression::from(expr.clone()),
+                    AnyJsExpression::from(next_unary_expression),
                 );
             }
             JsInOrInstanceOfExpression::JsInExpression(expr) => {
@@ -131,8 +131,8 @@ impl Rule for NoUnsafeNegation {
                     AnyJsExpression::JsParenthesizedExpression(next_parenthesis_expression),
                 );
                 mutation.replace_node(
-                    AnyJsExpression::JsInExpression(expr.clone()),
-                    AnyJsExpression::JsUnaryExpression(next_unary_expression),
+                    AnyJsExpression::from(expr.clone()),
+                    AnyJsExpression::from(next_unary_expression),
                 );
             }
         }
