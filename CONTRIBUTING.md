@@ -411,6 +411,8 @@ When releasing a new version of a Biome, follow these steps:
 1. [ ] Update `version` in [Biome's LSP package.json](./editors/vscode/package.json) if applicable.
    Note that the LSP follows a [distinct versioning scheme](https://biomejs.dev/internals/versioning/#visual-studio-code-extension).
 
+1. [ ] Update `version` in each published crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
+
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.

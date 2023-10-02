@@ -1,0 +1,21 @@
+name: Release crates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 2-6'
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Publish
+    runs-on: ubuntu-latest
+    environment: crate-publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Login to crate.io
+        run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
+      - name: Publish crates to crates.io
+        run: ./scripts/publish-crates.sh --execute

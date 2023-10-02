@@ -1,6 +1,5 @@
 /// Options to pass to the JavaScript parser
-#[derive(Debug, Clone, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct JsParserOptions {
     /// Whether the parsing of the class parameter decorators should happen.

@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_analyze"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.1.0"
 
 [dependencies]
 biome_analyze          = { workspace = true }
@@ -35,12 +35,12 @@ serde_json             = { workspace = true }
 smallvec               = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser  = { workspace = true, features = ["tests"] }
-biome_test_utils = { workspace = true }
-biome_text_edit  = { workspace = true }
+biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }
+biome_test_utils = { path = "../biome_test_utils" }
+biome_text_edit  = { path = "../biome_text_edit" }
 countme          = { workspace = true, features = ["enable"] }
 insta            = { workspace = true, features = ["glob"] }
-tests_macros     = { workspace = true }
+tests_macros     = { path = "../tests_macros" }
 
 [features]
 schema = ["schemars", "biome_deserialize/schema"]

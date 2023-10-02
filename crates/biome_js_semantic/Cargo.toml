@@ -7,9 +7,8 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_semantic"
-publish              = false
 repository.workspace = true
-version              = "0.0.0"
+version              = "0.1.0"
 
 [dependencies]
 biome_js_syntax = { workspace = true }
@@ -18,7 +17,7 @@ rust-lapper     = "1.0.1"
 rustc-hash      = { workspace = true }
 
 [dev-dependencies]
-biome_console     = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_js_parser   = { workspace = true }
-biome_markup      = { workspace = true }
+biome_console     = { path = "../biome_console" }
+biome_diagnostics = { path = "../biome_diagnostics" }
+biome_js_parser   = { path = "../biome_js_parser" }
+biome_markup      = { path = "../biome_markup" }

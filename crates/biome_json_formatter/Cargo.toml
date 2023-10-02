@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_json_formatter"
 repository.workspace = true
-version              = "0.0.1"
+version              = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,16 +20,16 @@ biome_rowan       = { workspace = true }
 biome_suppression = { workspace = true }
 
 [dev-dependencies]
-biome_formatter_test = { workspace = true }
-biome_fs             = { workspace = true }
-biome_json_factory   = { workspace = true }
-biome_json_parser    = { workspace = true }
-biome_parser         = { workspace = true }
+biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
+biome_json_factory   = { path = "../biome_json_factory" }
+biome_json_parser    = { path = "../biome_json_parser" }
+biome_parser         = { path = "../biome_parser" }
 countme              = { workspace = true, features = ["enable"] }
 insta                = { workspace = true, features = ["glob"] }
 serde                = { version = "1", features = ["derive"] }
 serde_json           = { workspace = true }
-tests_macros         = { workspace = true }
+tests_macros         = { path = "../tests_macros" }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
