@@ -74,7 +74,7 @@ impl Rule for NoThisInStatic {
             }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let class_name_str = reference
             .syntax()
             .ancestors()
