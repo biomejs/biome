@@ -31,7 +31,12 @@ pub enum BiomeCommand {
 
     #[bpaf(command)]
     /// Prints information for debugging
-    Rage(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+    Rage(
+        #[bpaf(external(cli_options), hide_usage)] CliOptions,
+        /// Prints the Biome daemon server logs
+        #[bpaf(long("daemon-logs"), switch)]
+        bool,
+    ),
     /// Start the Biome daemon server process
     #[bpaf(command)]
     Start,
@@ -199,7 +204,7 @@ impl BiomeCommand {
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self {
             BiomeCommand::Version(cli_options) => cli_options.colors.as_ref(),
-            BiomeCommand::Rage(cli_options) => cli_options.colors.as_ref(),
+            BiomeCommand::Rage(cli_options, ..) => cli_options.colors.as_ref(),
             BiomeCommand::Start => None,
             BiomeCommand::Stop => None,
             BiomeCommand::Check { cli_options, .. } => cli_options.colors.as_ref(),
@@ -217,7 +222,7 @@ impl BiomeCommand {
     pub const fn should_use_server(&self) -> bool {
         match self {
             BiomeCommand::Version(cli_options) => cli_options.use_server,
-            BiomeCommand::Rage(cli_options) => cli_options.use_server,
+            BiomeCommand::Rage(cli_options, ..) => cli_options.use_server,
             BiomeCommand::Start => false,
             BiomeCommand::Stop => false,
             BiomeCommand::Check { cli_options, .. } => cli_options.use_server,
@@ -239,7 +244,7 @@ impl BiomeCommand {
     pub fn is_verbose(&self) -> bool {
         match self {
             BiomeCommand::Version(_) => false,
-            BiomeCommand::Rage(_) => false,
+            BiomeCommand::Rage(..) => false,
             BiomeCommand::Start => false,
             BiomeCommand::Stop => false,
             BiomeCommand::Check { cli_options, .. } => cli_options.verbose,

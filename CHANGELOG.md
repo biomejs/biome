@@ -31,6 +31,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Add option `--indent-width`, and deprecated the option `--indent-size`. Contributed by @ematipico
 - Add option `--javascript-formatter-indent-width`, and deprecated the option `--javascript-formatter-indent-size`. Contributed by @ematipico
 - Add option `--json-formatter-indent-width`, and deprecated the option `--json-formatter-indent-size`. Contributed by @ematipico
+- Add option `--daemon-logs` to `biome rage`. The option is required to view Biome daemon server logs.  Contributed by @unvalley
 
 #### Enhancements
 - Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico

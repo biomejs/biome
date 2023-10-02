@@ -474,7 +474,7 @@ macro_rules! workspace_method {
 /// for each incoming connection accepted by the server
 #[derive(Default)]
 pub struct ServerFactory {
-    /// Synchronisation primitive used to broadcast a shutdown signal to all
+    /// Synchronization primitive used to broadcast a shutdown signal to all
     /// active connections
     cancellation: Arc<Notify>,
     /// Optional [Workspace] instance shared between all clients. Currently
