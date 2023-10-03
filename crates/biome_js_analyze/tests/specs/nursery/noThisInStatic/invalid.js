@@ -6,6 +6,10 @@ class A {
     static bar() {
         this.foo()
     }
+
+    static hello() {
+        this.faux()
+    }
     
     faux() { 
         return

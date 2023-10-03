@@ -1,12 +1,12 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
-    JsCallExpression, JsClassDeclaration, JsMethodClassMember, JsSuperExpression, JsThisExpression,
+    JsMethodClassMember, JsSuperExpression, JsThisExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
-///    # Disallow `this`/`super` in static methods (no-this-in-static)
+///# Disallow `this`/`super` in static methods (no-this-in-static)
 ///
 ///`this` keyword on static methods refers the class (the constructor) instance.
 ///However, probably it's confusing maintainers since this behavior is different to
@@ -26,15 +26,24 @@ declare_rule! {
 ///    }
 ///
 ///    static bar() {
-///        this.foo()   //ERROR: Unexpected 'this'.
+///        this.foo()   //ERROR: Instead of this.foo() use A.foo()
 ///    }
 ///}
+/// ```
 ///
-///class B extends A {
+/// ```js
+/// 
+/// class A {
 ///    static foo() {
-///        super.foo()  //ERROR: Unexpected 'super'.
+///        doSomething()
 ///    }
-///}
+/// }
+/// 
+/// class B extends A {
+///    static foo() {
+///        super.foo()  //ERROR: Instead of super.foo() use A.foo()
+///    }
+/// }
 ///```
 ///
 ///Examples of **correct** code for this rule:
@@ -45,15 +54,24 @@ declare_rule! {
 ///    static foo() {
 ///        doSomething()
 ///    }
-///
-///    static bar() {
-///        A.foo()
-///    }
 ///}
 ///
 ///class B extends A {
 ///    static foo() {
 ///        A.foo()
+///    }
+///}
+///```
+///
+/// ```js
+///
+///class A {
+///    static foo() {
+///        doSomething()
+///    }
+/// 
+///    bar() {
+///      A.foo()
 ///    }
 ///}
 ///```
@@ -98,40 +116,13 @@ impl Rule for NoThisInStatic {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let this_super_expression = ctx.query();
-
-        let call_expression = this_super_expression
-            .syntax()
-            .ancestors()
-            .find_map(JsCallExpression::cast)?;
-
-        let class_declaration = this_super_expression
-            .syntax()
-            .ancestors()
-            .find_map(JsClassDeclaration::cast)?;
-
-        let class_name_str = class_declaration.id().ok()?.text();
-        let call_expression_str = call_expression.text();
-
-        let extended_class_name = class_declaration
-            .extends_clause()
-            .and_then(|with_extends_clause| {
-                with_extends_clause.super_class().ok()
-            })
-            .map(|node| node.text());
     
-        let mut recommendation_str = call_expression_str
-            .replace("this", &class_name_str);
-
-        if let Some(extended_class_name_str) = extended_class_name {
-            recommendation_str = recommendation_str.replace("super", &extended_class_name_str);
-        }
-
         Some(RuleDiagnostic::new(
             rule_category!(),
-            call_expression.range(),
+            this_super_expression.range(),
             markup! {
-                "Instead of "<Emphasis>{call_expression_str}</Emphasis>" use "<Emphasis>{recommendation_str}</Emphasis>"."
-            })
+                "Unexpected "<Emphasis>{this_super_expression.text()}</Emphasis>"."
+            }),
         )
     }
 }

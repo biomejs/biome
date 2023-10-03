@@ -12,6 +12,10 @@ class A {
     static bar() {
         this.foo()
     }
+
+    static hello() {
+        this.faux()
+    }
     
     faux() { 
         return
@@ -33,28 +37,42 @@ class B extends A {
 ```
 invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Instead of this.foo() use A.foo().
+  ! Unexpected this.
   
     6 │     static bar() {
   > 7 │         this.foo()
-      │         ^^^^^^^^^^
+      │         ^^^^
     8 │     }
-    9 │     
+    9 │ 
   
 
 ```
 
 ```
-invalid.js:17:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Instead of super.foo() use A.foo().
+  ! Unexpected this.
   
-    15 │ class B extends A {
-    16 │     static foo() {
-  > 17 │         super.foo()
-       │         ^^^^^^^^^^^
-    18 │     }
-    19 │ 
+    10 │     static hello() {
+  > 11 │         this.faux()
+       │         ^^^^
+    12 │     }
+    13 │     
+  
+
+```
+
+```
+invalid.js:21:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected super.
+  
+    19 │ class B extends A {
+    20 │     static foo() {
+  > 21 │         super.foo()
+       │         ^^^^^
+    22 │     }
+    23 │ 
   
 
 ```
