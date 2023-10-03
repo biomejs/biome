@@ -14,7 +14,9 @@ use biome_rowan::{AstSeparatedList, SyntaxResult};
 ///
 /// Criteria are different:
 /// - *complex*: if the chain of simple arguments exceeds the depth 2 or higher
+/// - *complex*: if the argument is a [JsRegexLiteralExpression] with len() greater than 5
 /// - *simple*: the argument is a literal
+/// - *simple*: the argument is a [JsRegexLiteralExpression] with len() less than 5
 /// - *simple*: the argument is a [JsThisExpression]
 /// - *simple*: the argument is a [JsIdentifierExpression]
 /// - *simple*: the argument is a [JsSuperExpression]
