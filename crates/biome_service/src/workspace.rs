@@ -84,7 +84,7 @@ pub struct SupportsFeatureResult {
     pub reason: Option<SupportKind>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FileFeaturesResult {
     pub features_supported: HashMap<FeatureName, SupportKind>,
@@ -196,7 +196,7 @@ impl SupportsFeatureResult {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum SupportKind {
     /// The feature is enabled for the file
