@@ -1,15 +1,9 @@
-use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    JsClassDeclaration, JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression,
-    JsThisExpression,
+    JsCallExpression, JsClassDeclaration, JsMethodClassMember, JsSuperExpression, JsThisExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeExt, AstNodeList, BatchMutationExt};
-
-use crate::JsRuleAction;
+use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -79,10 +73,10 @@ impl Rule for NoThisInStatic {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let this_super_expression = ctx.query();
 
-        let expression = this_super_expression
+        let call_expression = this_super_expression
             .syntax()
             .ancestors()
-            .find_map(JsStaticMemberExpression::cast)?;
+            .find_map(JsCallExpression::cast)?;
 
         let class_name_str = this_super_expression
             .syntax()
@@ -92,7 +86,7 @@ impl Rule for NoThisInStatic {
             .ok()?
             .text();
 
-        let called_method_str = this_super_expression.text();
+        let called_method_str = call_expression.text();
 
         let recommendation_str = called_method_str
             .replace("this", &class_name_str)
@@ -100,9 +94,9 @@ impl Rule for NoThisInStatic {
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            expression.range(),
+            call_expression.range(),
             markup! {
-                "Instead of "<Emphasis>{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"()"</Emphasis>"."
+                "Instead of "<Emphasis>{called_method_str}</Emphasis>" use "<Emphasis>{recommendation_str}</Emphasis>"."
             },
         ))
     }

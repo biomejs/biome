@@ -37,7 +37,7 @@ invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━�
   
     6 │     static bar() {
   > 7 │         this.foo()
-      │         ^^^^^^^^
+      │         ^^^^^^^^^^
     8 │     }
     9 │ 
   
@@ -52,7 +52,7 @@ invalid.js:17:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━
     15 │ class B extends A {
     16 │     static foo() {
   > 17 │         super.foo()
-       │         ^^^^^^^^^
+       │         ^^^^^^^^^^^
     18 │     }
     19 │ 
   
