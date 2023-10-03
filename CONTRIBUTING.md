@@ -140,8 +140,7 @@ the source code.
 
 ##### `cargo codegen analyzer`
 
-This command will detect linter rules declared in the `analyzers` and `assists` directories in `biome_analyze`, regenerate the index modules `analyzers.rs` and `assists.rs` to import these files, and update the registry builder function in `registry.rs` to include all these rules.
-It will also regenerate the configuration of the rules.
+This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
 
 ##### `cargo coverage`
 
