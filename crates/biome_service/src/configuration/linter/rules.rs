@@ -2524,6 +2524,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -2611,6 +2616,11 @@ impl Nursery {
         if let Some(rule) = self.use_shorthand_assign.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
         index_set
