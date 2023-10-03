@@ -1,8 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{
-    JsMethodClassMember, JsSuperExpression, JsThisExpression,
-};
+use biome_js_syntax::{JsMethodClassMember, JsSuperExpression, JsThisExpression};
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
@@ -32,13 +30,13 @@ declare_rule! {
 /// ```
 ///
 /// ```js
-/// 
+///
 /// class A {
 ///    static foo() {
 ///        doSomething()
 ///    }
 /// }
-/// 
+///
 /// class B extends A {
 ///    static foo() {
 ///        super.foo()  //ERROR: Instead of super.foo() use A.foo()
@@ -69,13 +67,13 @@ declare_rule! {
 ///    static foo() {
 ///        doSomething()
 ///    }
-/// 
+///
 ///    bar() {
 ///      A.foo()
 ///    }
 ///}
 ///```
-///    
+///
     pub(crate) NoThisInStatic {
         version: "next",
         name: "noThisInStatic",
@@ -116,13 +114,13 @@ impl Rule for NoThisInStatic {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let this_super_expression = ctx.query();
-    
+
         Some(RuleDiagnostic::new(
             rule_category!(),
             this_super_expression.range(),
             markup! {
                 "Unexpected "<Emphasis>{this_super_expression.text()}</Emphasis>"."
-            }),
-        )
+            },
+        ))
     }
 }
