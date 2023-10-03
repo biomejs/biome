@@ -19,6 +19,12 @@ pub struct OrganizeImports {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub ignore: Option<StringSet>,
+
+    /// A list of Unix shell style patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 }
 
 impl Default for OrganizeImports {
@@ -26,6 +32,7 @@ impl Default for OrganizeImports {
         Self {
             enabled: Some(true),
             ignore: None,
+            include: None,
         }
     }
 }
@@ -45,6 +52,12 @@ impl MergeWith<OrganizeImports> for OrganizeImports {
         if let Some(enabled) = other.enabled {
             self.enabled = Some(enabled)
         }
+        if let Some(include) = other.include {
+            self.include = Some(include)
+        }
+        if let Some(ignore) = other.ignore {
+            self.ignore = Some(ignore)
+        }
     }
 }
 
@@ -52,13 +65,14 @@ impl TryFrom<OrganizeImports> for OrganizeImportsSettings {
     type Error = WorkspaceError;
 
     fn try_from(organize_imports: OrganizeImports) -> Result<Self, Self::Error> {
-        let mut matcher = Matcher::new(MatchOptions {
-            case_sensitive: true,
-            require_literal_leading_dot: false,
-            require_literal_separator: false,
-        });
+        let mut ignored_files = None;
         let is_disabled = organize_imports.is_disabled();
         if let Some(ignore) = organize_imports.ignore {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
             for pattern in ignore.index_set() {
                 matcher.add_pattern(pattern).map_err(|err| {
                     WorkspaceError::Configuration(
@@ -69,10 +83,34 @@ impl TryFrom<OrganizeImports> for OrganizeImportsSettings {
                     )
                 })?;
             }
+
+            ignored_files = Some(matcher);
+        }
+
+        let mut included_files = None;
+        if let Some(include) = organize_imports.include {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
+            for pattern in include.index_set() {
+                matcher.add_pattern(pattern).map_err(|err| {
+                    WorkspaceError::Configuration(
+                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                            pattern.to_string(),
+                            err.msg.to_string(),
+                        ),
+                    )
+                })?;
+            }
+
+            included_files = Some(matcher);
         }
         Ok(Self {
             enabled: !is_disabled,
-            ignored_files: matcher,
+            ignored_files,
+            included_files,
         })
     }
 }

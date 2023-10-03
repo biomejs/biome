@@ -262,11 +262,17 @@ pub struct FilesConfiguration {
     #[bpaf(long("files-max-size"), argument("NUMBER"))]
     pub max_size: Option<NonZeroU64>,
 
-    /// A list of Unix shell style patterns. Biome tools will ignore files/folders that will
+    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub ignore: Option<StringSet>,
+
+    /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 
     /// Tells Biome to not emit diagnostics when handling files that doesn't know
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -275,13 +281,16 @@ pub struct FilesConfiguration {
 }
 
 impl FilesConfiguration {
-    const KNOWN_KEYS: &'static [&'static str] = &["maxSize", "ignore", "ignoreUnknown"];
+    const KNOWN_KEYS: &'static [&'static str] = &["maxSize", "ignore", "include", "ignoreUnknown"];
 }
 
 impl MergeWith<FilesConfiguration> for FilesConfiguration {
     fn merge_with(&mut self, other: FilesConfiguration) {
         if let Some(ignore) = other.ignore {
             self.ignore = Some(ignore)
+        }
+        if let Some(include) = other.include {
+            self.include = Some(include)
         }
         if let Some(max_size) = other.max_size {
             self.max_size = Some(max_size)

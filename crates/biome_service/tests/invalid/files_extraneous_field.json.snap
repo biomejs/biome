@@ -17,6 +17,7 @@ files_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━
   
   - maxSize
   - ignore
+  - include
   - ignoreUnknown
   
 

@@ -34,6 +34,12 @@ pub struct LinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub ignore: Option<StringSet>,
+
+    /// A list of Unix shell style patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 }
 
 impl MergeWith<LinterConfiguration> for LinterConfiguration {
@@ -48,7 +54,8 @@ impl LinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
     }
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["enabled", "rules", "ignore"];
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
+        &["enabled", "rules", "include", "ignore"];
 }
 
 impl Default for LinterConfiguration {
@@ -57,6 +64,7 @@ impl Default for LinterConfiguration {
             enabled: Some(true),
             rules: Some(Rules::default()),
             ignore: None,
+            include: None,
         }
     }
 }
@@ -65,12 +73,13 @@ impl TryFrom<LinterConfiguration> for LinterSettings {
     type Error = WorkspaceError;
 
     fn try_from(conf: LinterConfiguration) -> Result<Self, Self::Error> {
-        let mut matcher = Matcher::new(MatchOptions {
-            case_sensitive: true,
-            require_literal_leading_dot: false,
-            require_literal_separator: false,
-        });
+        let mut ignored_files = None;
         if let Some(ignore) = conf.ignore {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
             for pattern in ignore.index_set() {
                 matcher.add_pattern(pattern).map_err(|err| {
                     WorkspaceError::Configuration(
@@ -81,11 +90,33 @@ impl TryFrom<LinterConfiguration> for LinterSettings {
                     )
                 })?;
             }
+            ignored_files = Some(matcher)
+        }
+
+        let mut included_files = None;
+        if let Some(include) = conf.include {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
+            for pattern in include.index_set() {
+                matcher.add_pattern(pattern).map_err(|err| {
+                    WorkspaceError::Configuration(
+                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                            pattern.to_string(),
+                            err.msg.to_string(),
+                        ),
+                    )
+                })?;
+            }
+            included_files = Some(matcher)
         }
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
-            ignored_files: matcher,
+            ignored_files,
+            included_files,
         })
     }
 }

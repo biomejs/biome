@@ -27,19 +27,19 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix [#319](https://github.com/biomejs/biome/issues/319). The command `biome lint` now shows the correct options. Contributed by @ematipico
-
 - Fix [#312](https://github.com/biomejs/biome/issues/312). Running `biome --version` now exits with status code `0` instead of `1`. Contributed by @nhedger
+- Fix a bug where the `extends` functionality doesn't carry over `organizeImports.ignore`. Contributed by @ematipico
 
 #### New features
 
 - Add support for `BIOME_BINARY` environment variable to override the location of the binary. Contributed by @ematipico
-
 - Add option `--indent-width`, and deprecated the option `--indent-size`. Contributed by @ematipico
 - Add option `--javascript-formatter-indent-width`, and deprecated the option `--javascript-formatter-indent-size`. Contributed by @ematipico
 - Add option `--json-formatter-indent-width`, and deprecated the option `--json-formatter-indent-size`. Contributed by @ematipico
 - Add option `--daemon-logs` to `biome rage`. The option is required to view Biome daemon server logs.  Contributed by @unvalley
 
 #### Enhancements
+
 - Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
 - Biome doesn't check anymore the presence of the `.git` folder when VCS support is enabled. Contributed by @ematipico
 
@@ -50,6 +50,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Add option `formatter.indentWidth`, and deprecated the option `formatter.indentSize`. Contributed by @ematipico
 - Add option `javascript.formatter.indentWidth`, and deprecated the option `javascript.formatter.indentSize`. Contributed by @ematipico
 - Add option `json.formatter.indentWidth`, and deprecated the option `json.formatter.indentSize`. Contributed by @ematipico
+- Add option `include` to multiple sections of the configuration
+  - `files.include`;
+  - `formatter.include`;
+  - `linter.include`;
+  - `organizeImports.include`;
+  When `include` and `ignore` are both specified, `ignore` takes **precedence** over `include`
 
 
 ### Editors

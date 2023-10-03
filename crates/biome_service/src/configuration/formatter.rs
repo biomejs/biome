@@ -49,6 +49,12 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub ignore: Option<StringSet>,
+
+    /// A list of Unix shell style patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 }
 
 impl FormatterConfiguration {
@@ -63,6 +69,7 @@ impl FormatterConfiguration {
         "indentWidth",
         "lineWidth",
         "ignore",
+        "include",
     ];
 }
 
@@ -76,6 +83,7 @@ impl Default for FormatterConfiguration {
             indent_style: Some(PlainIndentStyle::default()),
             line_width: Some(LineWidth::default()),
             ignore: None,
+            include: None,
         }
     }
 }
@@ -113,6 +121,10 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
         if let Some(ignore) = other.ignore {
             self.ignore = Some(ignore)
         }
+
+        if let Some(include) = other.include {
+            self.include = Some(include)
+        }
     }
 }
 
@@ -130,13 +142,14 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             .map(Into::into)
             .or(conf.indent_size.map(Into::into))
             .unwrap_or_default();
-        let mut matcher = Matcher::new(MatchOptions {
-            case_sensitive: true,
-            require_literal_leading_dot: false,
-            require_literal_separator: false,
-        });
+        let mut ignored_files = None;
 
         if let Some(ignore) = conf.ignore {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
             for pattern in ignore.index_set() {
                 matcher.add_pattern(pattern).map_err(|err| {
                     WorkspaceError::Configuration(
@@ -147,6 +160,27 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
                     )
                 })?;
             }
+            ignored_files = Some(matcher)
+        }
+
+        let mut included_files = None;
+        if let Some(include) = conf.include {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
+            for pattern in include.index_set() {
+                matcher.add_pattern(pattern).map_err(|err| {
+                    WorkspaceError::Configuration(
+                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                            pattern.to_string(),
+                            err.msg.to_string(),
+                        ),
+                    )
+                })?;
+            }
+            included_files = Some(matcher)
         }
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
@@ -154,7 +188,8 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             indent_width: Some(indent_width),
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
-            ignored_files: matcher,
+            ignored_files,
+            included_files,
         })
     }
 }

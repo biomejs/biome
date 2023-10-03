@@ -3,4 +3,4 @@
 
 mod biome_json_support;
 mod config_extends;
-mod ignored_files;
+mod included_files;

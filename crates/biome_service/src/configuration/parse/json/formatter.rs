@@ -33,6 +33,11 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }
+            "include" => {
+                self.include = self
+                    .map_to_index_set_string(&value, name_text, diagnostics)
+                    .map(StringSet::new);
+            }
 
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
