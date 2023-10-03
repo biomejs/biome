@@ -6,9 +6,9 @@ class A {
     static bar() {
         this.foo()
     }
-
-    fax() {
-        return 'asd';
+    
+    faux() { 
+        return
     }
 }
 
@@ -17,7 +17,7 @@ class B extends A {
         super.foo()
     }
 
-    fax() { 
-        return 'asd';
+    faux() { 
+        return
     }
 }

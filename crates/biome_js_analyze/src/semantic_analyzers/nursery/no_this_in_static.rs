@@ -6,32 +6,58 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
-    /// Succinct description of the rule.
-    ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/rule-name
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
-    /// ```
-    ///
-    /// ## Valid
-    ///
-    /// ```js
-    /// var a = 1;
-    /// ```
-    ///
+///    # Disallow `this`/`super` in static methods (no-this-in-static)
+///
+///`this` keyword on static methods refers the class (the constructor) instance.
+///However, probably it's confusing maintainers since this behavior is different to
+///most other languages.
+///
+///This rule enforces a use of class itself to access static methods.
+///
+///## Rule Details
+///
+///Examples of **incorrect** code for this rule:
+///
+///```js
+///
+///class A {
+///    static foo() {
+///        doSomething()
+///    }
+///
+///    static bar() {
+///        this.foo()   //ERROR: Unexpected 'this'.
+///    }
+///}
+///
+///class B extends A {
+///    static foo() {
+///        super.foo()  //ERROR: Unexpected 'super'.
+///    }
+///}
+///```
+///
+///Examples of **correct** code for this rule:
+///
+///```js
+///
+///class A {
+///    static foo() {
+///        doSomething()
+///    }
+///
+///    static bar() {
+///        A.foo()
+///    }
+///}
+///
+///class B extends A {
+///    static foo() {
+///        A.foo()
+///    }
+///}
+///```
+///    
     pub(crate) NoThisInStatic {
         version: "next",
         name: "noThisInStatic",
@@ -83,29 +109,29 @@ impl Rule for NoThisInStatic {
             .ancestors()
             .find_map(JsClassDeclaration::cast)?;
 
-        let class_name_str = class_declaration
-            .id()
-            .ok()?
-            .text();
+        let class_name_str = class_declaration.id().ok()?.text();
+        let call_expression_str = call_expression.text();
 
-        let called_method_str = call_expression.text();
-
-        let extended_class_name_str = class_declaration
-            .extends_clause()?
-            .super_class()
-            .ok()?
-            .text();
+        let extended_class_name = class_declaration
+            .extends_clause()
+            .and_then(|with_extends_clause| {
+                with_extends_clause.super_class().ok()
+            })
+            .map(|node| node.text());
     
-        let recommendation_str = called_method_str
-            .replace("this", &class_name_str)
-            .replace("super", &extended_class_name_str);
+        let mut recommendation_str = call_expression_str
+            .replace("this", &class_name_str);
+
+        if let Some(extended_class_name_str) = extended_class_name {
+            recommendation_str = recommendation_str.replace("super", &extended_class_name_str);
+        }
 
         Some(RuleDiagnostic::new(
             rule_category!(),
             call_expression.range(),
             markup! {
-                "Instead of "<Emphasis>{called_method_str}</Emphasis>" use "<Emphasis>{recommendation_str}</Emphasis>"."
-            },
-        ))
+                "Instead of "<Emphasis>{call_expression_str}</Emphasis>" use "<Emphasis>{recommendation_str}</Emphasis>"."
+            })
+        )
     }
 }

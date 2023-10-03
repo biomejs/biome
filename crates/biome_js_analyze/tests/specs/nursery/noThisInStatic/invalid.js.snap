@@ -12,9 +12,9 @@ class A {
     static bar() {
         this.foo()
     }
-
-    fax() {
-        return 'asd';
+    
+    faux() { 
+        return
     }
 }
 
@@ -23,13 +23,27 @@ class B extends A {
         super.foo()
     }
 
-    fax() { 
-        return 'asd';
+    faux() { 
+        return
     }
 }
 ```
 
 # Diagnostics
+```
+invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Instead of this.foo() use A.foo().
+  
+    6 │     static bar() {
+  > 7 │         this.foo()
+      │         ^^^^^^^^^^
+    8 │     }
+    9 │     
+  
+
+```
+
 ```
 invalid.js:17:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
