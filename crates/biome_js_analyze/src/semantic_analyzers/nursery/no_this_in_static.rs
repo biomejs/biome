@@ -1,8 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, ActionCategory};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression, JsThisExpression, JsClassDeclaration};
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstNodeExt, BatchMutationExt};
+use biome_js_syntax::{
+    JsClassDeclaration, JsMethodClassMember, JsStaticMemberExpression, JsSuperExpression,
+    JsThisExpression,
+};
+use biome_rowan::{declare_node_union, AstNode, AstNodeExt, AstNodeList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
@@ -63,19 +68,19 @@ impl Rule for NoThisInStatic {
                     .iter()
                     .any(|modifier| modifier.as_js_static_modifier().is_some())
             });
-            
-            if  static_method.is_some() {
-                    this_super_expression
-                        .syntax()
-                        .ancestors()
-                        .find_map(JsStaticMemberExpression::cast)
-            } else {
-                None
-            }
+
+        if static_method.is_some() {
+            this_super_expression
+                .syntax()
+                .ancestors()
+                .find_map(JsStaticMemberExpression::cast)
+        } else {
+            None
+        }
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let class_name_str = reference
+        let class_name_str = state
             .syntax()
             .ancestors()
             .find_map(JsClassDeclaration::cast)
@@ -83,7 +88,7 @@ impl Rule for NoThisInStatic {
             .unwrap()
             .text();
 
-        let called_method_str = reference.text();
+        let called_method_str = state.text();
 
         let recommendation_str = called_method_str
             .replace("this", &class_name_str)
@@ -91,15 +96,15 @@ impl Rule for NoThisInStatic {
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            reference.range(),
+            state.range(),
             markup! {
                 "Instead of "<Emphasis>{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"()"</Emphasis>"."
             },
         ))
     }
 
-    // fn action(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<JsRuleAction> {
-    //     let class_name_str = reference
+    // fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    //     let class_name_str = state
     //         .syntax()
     //         .ancestors()
     //         .find_map(JsClassDeclaration::cast)
@@ -107,7 +112,7 @@ impl Rule for NoThisInStatic {
     //         .unwrap()
     //         .text();
 
-    //     let called_method_str = reference.text();
+    //     let called_method_str = state.text();
 
     //     let recommendation_str = called_method_str
     //         .replace("this", &class_name_str)
