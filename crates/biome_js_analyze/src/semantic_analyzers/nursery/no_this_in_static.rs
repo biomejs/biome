@@ -51,7 +51,7 @@ declare_node_union! {
 
 impl Rule for NoThisInStatic {
     type Query = Ast<JsThisSuperExpression>;
-    type State = JsStaticMemberExpression;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -70,25 +70,29 @@ impl Rule for NoThisInStatic {
             });
 
         if static_method.is_some() {
-            this_super_expression
-                .syntax()
-                .ancestors()
-                .find_map(JsStaticMemberExpression::cast)
+            Some(())
         } else {
             None
         }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let class_name_str = state
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let this_super_expression = ctx.query();
+
+        let expression = this_super_expression
+            .syntax()
+            .ancestors()
+            .find_map(JsStaticMemberExpression::cast)?;
+
+        let class_name_str = this_super_expression
             .syntax()
             .ancestors()
             .find_map(JsClassDeclaration::cast)
             .and_then(|declaration| Some(declaration.id()))?
-            .unwrap()
+            .ok()?
             .text();
 
-        let called_method_str = state.text();
+        let called_method_str = this_super_expression.text();
 
         let recommendation_str = called_method_str
             .replace("this", &class_name_str)
@@ -96,37 +100,10 @@ impl Rule for NoThisInStatic {
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.range(),
+            expression.range(),
             markup! {
                 "Instead of "<Emphasis>{called_method_str}"()"</Emphasis>" use "<Emphasis>{recommendation_str}"()"</Emphasis>"."
             },
         ))
     }
-
-    // fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-    //     let class_name_str = state
-    //         .syntax()
-    //         .ancestors()
-    //         .find_map(JsClassDeclaration::cast)
-    //         .and_then(|declaration| Some(declaration.id()))?
-    //         .unwrap()
-    //         .text();
-
-    //     let called_method_str = state.text();
-
-    //     let recommendation_str = called_method_str
-    //         .replace("this", &class_name_str)
-    //         .replace("super", &class_name_str);
-
-    //     let mutation = ctx.query().begin(); // TODO: How does this work :(
-
-    //     Some(JsRuleAction {
-    //         category: ActionCategory::QuickFix,
-    //         applicability: Applicability::Always,
-    //         message: markup! {
-    //             "Replace "<Emphasis>{called_method_str}"()"</Emphasis>" with "<Emphasis>{recommendation_str}"()"</Emphasis>"."
-    //         }.to_owned(),
-    //         mutation,
-    //     })
-    // }
 }
