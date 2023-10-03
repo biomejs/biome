@@ -78,19 +78,27 @@ impl Rule for NoThisInStatic {
             .ancestors()
             .find_map(JsCallExpression::cast)?;
 
-        let class_name_str = this_super_expression
+        let class_declaration = this_super_expression
             .syntax()
             .ancestors()
-            .find_map(JsClassDeclaration::cast)
-            .and_then(|declaration| Some(declaration.id()))?
+            .find_map(JsClassDeclaration::cast)?;
+
+        let class_name_str = class_declaration
+            .id()
             .ok()?
             .text();
 
         let called_method_str = call_expression.text();
 
+        let extended_class_name_str = class_declaration
+            .extends_clause()?
+            .super_class()
+            .ok()?
+            .text();
+    
         let recommendation_str = called_method_str
             .replace("this", &class_name_str)
-            .replace("super", &class_name_str);
+            .replace("super", &extended_class_name_str);
 
         Some(RuleDiagnostic::new(
             rule_category!(),

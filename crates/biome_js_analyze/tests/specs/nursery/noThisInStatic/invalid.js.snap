@@ -31,23 +31,9 @@ class B extends A {
 
 # Diagnostics
 ```
-invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Instead of this.foo() use A.foo().
-  
-    6 │     static bar() {
-  > 7 │         this.foo()
-      │         ^^^^^^^^^^
-    8 │     }
-    9 │ 
-  
-
-```
-
-```
 invalid.js:17:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Instead of super.foo() use B.foo().
+  ! Instead of super.foo() use A.foo().
   
     15 │ class B extends A {
     16 │     static foo() {
