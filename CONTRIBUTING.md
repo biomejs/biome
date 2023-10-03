@@ -133,26 +133,15 @@ The source is generated from the [`ungram` files](https://github.com/biomejs/bio
 
 ##### `cargo codegen test`
 
-This command will create new tests for your parser. We currently have a neat infrastructure
-where tests for parser are generated com inline comments found inside
-the source code.
+This command will create new tests for JS or JSON parser.
+These tests are generated from inline comments found inside the source code. 
+
+On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
 
 
 ##### `cargo codegen analyzer`
 
 This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
-
-##### `cargo coverage`
-
-This command will check and report parser conformance against different test suites.
-We currently target the [Official ECMAScript Conformance Test Suite](https://github.com/tc39/test262) and
-the [Typescript Test Suite](https://github.com/microsoft/TypeScript/tree/main/tests)
-
-The test suites are included as git submodules and can be pulled using:
-
-```bash
-git submodule update --init --recursive
-```
 
 ### crate dependencies
 
