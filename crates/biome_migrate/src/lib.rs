@@ -6,7 +6,7 @@ use crate::registry::visit_migration_registry;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, InspectMatcher,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
@@ -92,6 +92,8 @@ where
 {
     analyze_with_inspect_matcher(root, configuration_file_path, |_| {}, emit_signal)
 }
+
+pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
 
 #[cfg(test)]
 mod test {

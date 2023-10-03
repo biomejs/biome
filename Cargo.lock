@@ -626,11 +626,17 @@ name = "biome_migrate"
 version = "0.0.0"
 dependencies = [
  "biome_analyze",
+ "biome_console",
  "biome_diagnostics",
+ "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "biome_service",
+ "biome_test_utils",
+ "insta",
  "lazy_static",
+ "tests_macros",
 ]
 
 [[package]]
