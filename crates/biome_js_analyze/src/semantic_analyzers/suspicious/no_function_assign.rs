@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::{Reference, ReferencesExtensions};
+use biome_js_semantic::Reference;
 use biome_js_syntax::{JsFunctionDeclaration, JsIdentifierBinding};
 use biome_rowan::AstNode;
 
@@ -117,7 +117,7 @@ impl Rule for NoFunctionAssign {
 
         let id = declaration.id().ok()?;
         let id = id.as_js_identifier_binding()?;
-        let all_writes: Vec<Reference> = id.all_writes(model).collect();
+        let all_writes: Vec<_> = model.all_writes(id).collect();
 
         if all_writes.is_empty() {
             None

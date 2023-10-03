@@ -61,12 +61,12 @@ impl<T: HasDeclarationAstNode> CanBeImportedExported for T {
     type Result = Option<bool>;
 
     fn is_exported(&self, model: &SemanticModel) -> Self::Result {
-        let range = self.binding(model)?.syntax().text_range();
+        let range = model.binding(self)?.syntax().text_range();
         Some(model.data.is_exported(range))
     }
 
     fn is_imported(&self, model: &SemanticModel) -> Self::Result {
-        let binding = self.binding(model)?;
+        let binding = model.binding(self)?;
         let node = binding.syntax();
         Some(is_imported(node))
     }

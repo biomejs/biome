@@ -6,7 +6,7 @@ use biome_console::markup;
 
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
+use biome_js_semantic::{Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
@@ -180,7 +180,7 @@ fn check_binding_can_be_const(
     has_initializer: bool,
     model: &SemanticModel,
 ) -> Option<ConstCheckResult> {
-    let mut writes = binding.all_writes(model);
+    let mut writes = model.all_writes(binding);
 
     // In a for-in or for-of loop or if it has an initializer
     if in_for_in_or_of_loop || has_initializer {

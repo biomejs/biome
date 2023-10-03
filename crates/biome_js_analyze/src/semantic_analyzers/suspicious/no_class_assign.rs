@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::{Reference, ReferencesExtensions};
+use biome_js_semantic::Reference;
 use biome_js_syntax::AnyJsClass;
 
 use crate::semantic_services::Semantic;
@@ -84,7 +84,7 @@ impl Rule for NoClassAssign {
 
         if let Ok(Some(id)) = node.id() {
             if let Some(id_binding) = id.as_js_identifier_binding() {
-                return id_binding.all_writes(model).collect();
+                return model.all_writes(id_binding).collect();
             }
         }
 

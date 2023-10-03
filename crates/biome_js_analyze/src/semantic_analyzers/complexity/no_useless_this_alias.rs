@@ -5,7 +5,6 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, JsArrowFunctionExpression,
     JsAssignmentExpression, JsExpressionStatement, JsIdentifierBinding, JsIdentifierExpression,
@@ -86,7 +85,7 @@ impl Rule for NoUselessThisAlias {
             .syntax()
             .ancestors()
             .find_map(AnyJsControlFlowRoot::cast)?;
-        for write in id.all_writes(model) {
+        for write in model.all_writes(&id) {
             let assign = JsAssignmentExpression::cast(write.syntax().parent()?)?;
             let assign_right = assign.right().ok()?.omit_parentheses();
             if !JsThisExpression::can_cast(assign_right.syntax().kind()) {
@@ -98,7 +97,7 @@ impl Rule for NoUselessThisAlias {
         if !is_this_alias {
             return None;
         }
-        for reference in id.all_references(model) {
+        for reference in model.all_references(&id) {
             let current_this_scope = reference
                 .syntax()
                 .ancestors()
@@ -140,7 +139,7 @@ impl Rule for NoUselessThisAlias {
         };
         let mut mutation = ctx.root().begin();
         let this_expr = AnyJsExpression::from(make::js_this_expression(make::token(T![this])));
-        for read in id.all_reads(model) {
+        for read in model.all_reads(id) {
             let syntax = read.syntax();
             let syntax = syntax.parent()?;
             let Some(expr) = JsIdentifierExpression::cast(syntax) else {
@@ -148,7 +147,7 @@ impl Rule for NoUselessThisAlias {
             };
             mutation.replace_node(expr.into(), this_expr.clone());
         }
-        for write in id.all_writes(model) {
+        for write in model.all_writes(id) {
             let syntax = write.syntax();
             let syntax = syntax.parent()?;
             let Some(statement) = JsExpressionStatement::cast(syntax.parent()?) else {

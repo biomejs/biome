@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::{AllBindingWriteReferencesIter, Reference, ReferencesExtensions};
+use biome_js_semantic::Reference;
 use biome_js_syntax::{AnyJsBinding, AnyJsBindingPattern, AnyJsFormalParameter, AnyJsParameter};
 use biome_rowan::AstNode;
 
@@ -65,7 +65,7 @@ declare_rule! {
 impl Rule for NoParameterAssign {
     type Query = Semantic<AnyJsParameter>;
     type State = Reference;
-    type Signals = AllBindingWriteReferencesIter;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -74,10 +74,10 @@ impl Rule for NoParameterAssign {
         if let Some(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(binding))) =
             binding_of(param)
         {
-            return binding.all_writes(model);
+            return model.all_writes(&binding).collect();
         }
         // Empty iterator that conforms to `AllBindingWriteReferencesIter` type.
-        std::iter::successors(None, |_| None)
+        vec![]
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {

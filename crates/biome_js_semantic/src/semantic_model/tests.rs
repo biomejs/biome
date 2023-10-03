@@ -171,7 +171,7 @@ mod test {
 
         match node.kind() {
             JsSyntaxKind::JS_IDENTIFIER_BINDING => {
-                let binding = JsIdentifierBinding::cast(node).unwrap();
+                let binding = JsIdentifierBinding::unwrap_cast(node);
                 // These do the same thing, but with different APIs
                 assert!(
                     is_exported == model.is_exported(&binding),
@@ -185,7 +185,7 @@ mod test {
                 );
             }
             JsSyntaxKind::TS_IDENTIFIER_BINDING => {
-                let binding = TsIdentifierBinding::cast(node).unwrap();
+                let binding = TsIdentifierBinding::unwrap_cast(node);
                 // These do the same thing, but with different APIs
                 assert!(
                     is_exported == model.is_exported(&binding),
@@ -199,7 +199,7 @@ mod test {
                 );
             }
             JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
-                let reference = JsReferenceIdentifier::cast(node).unwrap();
+                let reference = JsReferenceIdentifier::unwrap_cast(node);
                 // These do the same thing, but with different APIs
                 assert!(
                     is_exported == model.is_exported(&reference).unwrap(),

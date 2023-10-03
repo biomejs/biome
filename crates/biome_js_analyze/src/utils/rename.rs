@@ -1,7 +1,7 @@
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
-use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TextRange,
@@ -270,7 +270,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
         // We can rename references, if there is no conflicts in any scope
         // until the root.
 
-        let all_references: Vec<_> = prev_binding.all_references(model).collect();
+        let all_references: Vec<_> = model.all_references(&prev_binding).collect();
         let mut changes = Vec::with_capacity(all_references.len());
 
         for reference in all_references {

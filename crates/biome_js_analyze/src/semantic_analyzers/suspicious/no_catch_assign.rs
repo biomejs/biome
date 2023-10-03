@@ -1,7 +1,6 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::JsCatchClause;
 use biome_rowan::{AstNode, TextRange};
 
@@ -70,7 +69,7 @@ impl Rule for NoCatchAssign {
                     .as_js_identifier_binding()?;
                 let catch_binding_syntax = catch_binding.syntax();
                 let mut invalid_assignment = vec![];
-                for reference in identifier_binding.all_writes(model) {
+                for reference in model.all_writes(identifier_binding) {
                     invalid_assignment.push((
                         reference.syntax().text_trimmed_range(),
                         catch_binding_syntax.text_trimmed_range(),

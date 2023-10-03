@@ -1,10 +1,11 @@
 use crate::{
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsClass, AnyJsClassMember, AnyJsClassMemberName,
-    AnyJsFunction, AnyJsFunctionBody, AnyTsPropertyAnnotation, AnyTsVariableAnnotation,
-    JsClassMemberList, JsDecoratorList, JsExtendsClause, JsSyntaxToken, TsImplementsClause,
+    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsBindingPattern, AnyJsClass, AnyJsClassMember,
+    AnyJsClassMemberName, AnyJsFunction, AnyJsFunctionBody, AnyTsPropertyAnnotation,
+    AnyTsVariableAnnotation, JsClassMemberList, JsDecoratorList, JsExtendsClause,
+    JsInitializerClause, JsSyntaxToken, JsVariableDeclarator, TsImplementsClause,
     TsReturnTypeAnnotation, TsTypeAnnotation, TsTypeParameters,
 };
-use biome_rowan::{AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult};
 
 impl AnyJsClass {
     pub fn decorators(&self) -> JsDecoratorList {
@@ -187,6 +188,24 @@ impl AnyJsFunction {
             AnyJsFunction::JsFunctionExpression(expr) => Ok(expr.id()),
             AnyJsFunction::JsFunctionDeclaration(declaration) => declaration.id().map(Some),
             AnyJsFunction::JsFunctionExportDefaultDeclaration(declaration) => Ok(declaration.id()),
+        }
+    }
+
+    pub fn callable_id(&self) -> Option<AnyJsBinding> {
+        match self {
+            AnyJsFunction::JsFunctionDeclaration(declaration) => declaration.id().ok(),
+            AnyJsFunction::JsFunctionExportDefaultDeclaration(declaration) => declaration.id(),
+            AnyJsFunction::JsArrowFunctionExpression(_)
+            | AnyJsFunction::JsFunctionExpression(_) => {
+                let parent = self
+                    .parent::<JsInitializerClause>()?
+                    .parent::<JsVariableDeclarator>()?;
+                match parent.id().ok()? {
+                    AnyJsBindingPattern::AnyJsBinding(binding) => Some(binding),
+                    AnyJsBindingPattern::JsArrayBindingPattern(_)
+                    | AnyJsBindingPattern::JsObjectBindingPattern(_) => None,
+                }
+            }
         }
     }
 

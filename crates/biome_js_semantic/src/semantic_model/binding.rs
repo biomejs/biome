@@ -1,9 +1,12 @@
+use crate::BindingKind;
+
 use super::*;
 use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypeParameterName};
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
 pub(crate) struct SemanticModelBindingData {
+    pub kind: BindingKind,
     pub id: BindingIndex,
     pub range: TextRange,
     pub references: Vec<SemanticModelReference>,
@@ -35,13 +38,6 @@ impl SemanticModelReference {
     }
 }
 
-pub type AllBindingReferencesIter =
-    std::iter::Successors<Reference, fn(&Reference) -> Option<Reference>>;
-pub type AllBindingReadReferencesIter =
-    std::iter::Successors<Reference, fn(&Reference) -> Option<Reference>>;
-pub type AllBindingWriteReferencesIter =
-    std::iter::Successors<Reference, fn(&Reference) -> Option<Reference>>;
-
 /// Provides access to all semantic data of a specific binding.
 pub struct Binding {
     pub(crate) data: Rc<SemanticModelData>,
@@ -65,6 +61,11 @@ impl Binding {
         }
     }
 
+    /// Returns the binding's kind
+    pub fn kind(&self) -> BindingKind {
+        self.data.binding(self.index).kind
+    }
+
     /// Returns the syntax node associated with this binding.
     pub fn syntax(&self) -> &JsSyntaxNode {
         let binding = self.data.binding(self.index);
@@ -80,7 +81,7 @@ impl Binding {
     }
 
     /// Returns an iterator to all references of this binding.
-    pub fn all_references(&self) -> AllBindingReferencesIter {
+    pub fn all_references(&self) -> impl Iterator<Item = Reference> {
         let binding = self.data.binding(self.index);
         let first = binding.references.first().map(|reference| Reference {
             data: self.data.clone(),
@@ -90,7 +91,7 @@ impl Binding {
     }
 
     /// Returns an iterator to all reads references of this binding.
-    pub fn all_reads(&self) -> AllBindingReadReferencesIter {
+    pub fn all_reads(&self) -> impl Iterator<Item = Reference> {
         let binding = self.data.binding(self.index);
         let first = binding
             .references
@@ -104,7 +105,7 @@ impl Binding {
     }
 
     /// Returns an iterator to all write references of this binding.
-    pub fn all_writes(&self) -> AllBindingWriteReferencesIter {
+    pub fn all_writes(&self) -> impl Iterator<Item = Reference> {
         let binding = self.data.binding(self.index);
         let first = binding
             .references

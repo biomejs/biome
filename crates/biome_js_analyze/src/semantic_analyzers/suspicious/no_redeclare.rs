@@ -122,39 +122,45 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
             let name = id_binding.text();
+            let range = id_binding.syntax().text_trimmed_range();
             if let Some((first_text_range, first_decl)) = declarations.get(&name) {
                 // Do not report:
+                // - Two bindings that are associated to a same entity
+                //   e.g. a class is associated to a value binding and a type binding
                 // - mergeable declarations.
                 //   e.g. a `function` and a `namespace`
                 // - when both are parameter-like.
                 //   A parameter can override a previous parameter.
                 // - when index signature parameters have the different type annotation or are not in the same type member
-
-                if !(first_decl.is_mergeable(&decl)
-                    || first_decl.is_parameter_like() && decl.is_parameter_like())
+                let is_value_type_entity = first_text_range == &range;
+                if is_value_type_entity
+                    || first_decl.is_mergeable(&decl)
+                    || (first_decl.is_parameter_like() && decl.is_parameter_like())
                 {
-                    match (first_decl, &decl) {
-                        (
-                            AnyJsBindingDeclaration::TsIndexSignatureParameter(first),
-                            AnyJsBindingDeclaration::TsIndexSignatureParameter(second),
-                        ) => {
-                            if are_index_signature_params_same_type_and_member(first, second) {
-                                redeclarations.push(Redeclaration {
-                                    name,
-                                    declaration: *first_text_range,
-                                    redeclaration: id_binding.syntax().text_trimmed_range(),
-                                })
-                            }
+                    continue;
+                }
+
+                match (first_decl, &decl) {
+                    (
+                        AnyJsBindingDeclaration::TsIndexSignatureParameter(first),
+                        AnyJsBindingDeclaration::TsIndexSignatureParameter(second),
+                    ) => {
+                        if are_index_signature_params_same_type_and_member(first, second) {
+                            redeclarations.push(Redeclaration {
+                                name,
+                                declaration: *first_text_range,
+                                redeclaration: range,
+                            })
                         }
-                        _ => redeclarations.push(Redeclaration {
-                            name,
-                            declaration: *first_text_range,
-                            redeclaration: id_binding.syntax().text_trimmed_range(),
-                        }),
                     }
+                    _ => redeclarations.push(Redeclaration {
+                        name,
+                        declaration: *first_text_range,
+                        redeclaration: range,
+                    }),
                 }
             } else {
-                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                declarations.insert(name, (range, decl));
             }
         }
     }

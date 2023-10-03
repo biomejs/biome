@@ -3,7 +3,6 @@ use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::HooksOption
 use crate::{react::hooks::react_hook_configuration, semantic_services::Semantic};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::CallsExtensions;
 use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsFunctionBody, JsSyntaxKind, TextRange};
 use biome_rowan::AstNode;
 
@@ -134,13 +133,13 @@ impl Rule for UseHookAtTopLevel {
 
                 if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call)
                 {
-                    if let Some(calls_iter) = enclosing_function.all_calls(model) {
-                        for call in calls_iter {
-                            calls.push(CallPath {
-                                call: call.tree(),
-                                path: path.clone(),
-                            });
-                        }
+                    let function_id = enclosing_function.callable_id()?;
+                    let function_id = function_id.as_js_identifier_binding()?;
+                    for call in model.all_calls(function_id) {
+                        calls.push(CallPath {
+                            call: call.tree(),
+                            path: path.clone(),
+                        });
                     }
                 } else {
                     return Some(Suggestion::None {

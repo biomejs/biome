@@ -1,7 +1,6 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsImportDefaultClause,
     JsImportNamespaceClause, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
@@ -90,7 +89,7 @@ impl Rule for NoImportAssign {
             .and_then(|binding| {
                 let ident_binding = binding.as_js_identifier_binding()?;
                 let model = ctx.model();
-                for reference in ident_binding.all_writes(model) {
+                for reference in model.all_writes(ident_binding) {
                     invalid_assign_list.push((
                         JsIdentifierAssignment::cast(reference.syntax().clone())?,
                         ident_binding.clone(),

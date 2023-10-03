@@ -156,6 +156,7 @@ impl SemanticModelBuilder {
                 debug_assert!(binding_id == self.bindings.len());
 
                 self.bindings.push(SemanticModelBindingData {
+                    kind,
                     id: binding_id.into(),
                     range,
                     references: vec![],

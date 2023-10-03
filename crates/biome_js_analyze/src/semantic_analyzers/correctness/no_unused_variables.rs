@@ -5,7 +5,6 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::binding_ext::{
     AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction,
 };
@@ -264,8 +263,8 @@ impl Rule for NoUnusedVariables {
         // We need to check if all uses of this binding are somehow recursive or unused
         let declaration = binding.declaration()?;
         let declaration = declaration.syntax();
-        binding
-            .all_references(model)
+        model
+            .all_references(binding)
             .filter_map(|reference| {
                 let ref_parent = reference.syntax().parent()?;
                 if reference.is_write() {

@@ -1,6 +1,5 @@
-use biome_js_syntax::{AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression};
-
 use super::*;
+use biome_js_syntax::{AnyJsIdentifierUsage, JsCallExpression};
 use std::rc::Rc;
 
 /// Provides all information regarding to a specific reference.
@@ -103,7 +102,7 @@ impl Reference {
     }
 
     /// Returns this reference as a [FunctionCall] if possible
-    pub fn as_call(&self) -> Option<FunctionCall> {
+    pub fn as_call(self) -> Option<FunctionCall> {
         let call = self.syntax().ancestors().find(|x| {
             !matches!(
                 x.kind(),
@@ -113,7 +112,7 @@ impl Reference {
 
         match call {
             Some(node) if node.kind() == JsSyntaxKind::JS_CALL_EXPRESSION => Some(FunctionCall {
-                data: self.data.clone(),
+                data: self.data,
                 index: self.index,
             }),
             _ => None,
@@ -156,24 +155,6 @@ impl FunctionCall {
     }
 }
 
-pub struct AllCallsIter {
-    pub(crate) references: AllBindingReadReferencesIter,
-}
-
-impl Iterator for AllCallsIter {
-    type Item = FunctionCall;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for reference in self.references.by_ref() {
-            if let Some(call) = reference.as_call() {
-                return Some(call);
-            }
-        }
-
-        None
-    }
-}
-
 #[derive(Debug)]
 pub struct SemanticModelUnresolvedReference {
     pub(crate) range: TextRange,
@@ -212,40 +193,3 @@ pub trait HasDeclarationAstNode: AstNode<Language = JsLanguage> {
 impl HasDeclarationAstNode for JsReferenceIdentifier {}
 impl HasDeclarationAstNode for JsIdentifierAssignment {}
 impl HasDeclarationAstNode for JsxReferenceIdentifier {}
-
-/// Extension method to allow any node that is a declaration to easily
-/// get all of its references.
-pub trait ReferencesExtensions {
-    fn all_references(&self, model: &SemanticModel) -> AllBindingReferencesIter
-    where
-        Self: IsBindingAstNode,
-    {
-        model.as_binding(self).all_references()
-    }
-
-    fn all_reads(&self, model: &SemanticModel) -> AllBindingReadReferencesIter
-    where
-        Self: IsBindingAstNode,
-    {
-        model.as_binding(self).all_reads()
-    }
-
-    fn all_writes(&self, model: &SemanticModel) -> AllBindingWriteReferencesIter
-    where
-        Self: IsBindingAstNode,
-    {
-        model.as_binding(self).all_writes()
-    }
-}
-
-impl<T: IsBindingAstNode> ReferencesExtensions for T {}
-
-pub trait CallsExtensions {
-    fn all_calls(&self, model: &SemanticModel) -> Option<AllCallsIter>;
-}
-
-impl CallsExtensions for AnyJsFunction {
-    fn all_calls(&self, model: &SemanticModel) -> Option<AllCallsIter> {
-        model.all_calls(self)
-    }
-}

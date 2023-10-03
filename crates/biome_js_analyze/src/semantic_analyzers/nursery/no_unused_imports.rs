@@ -5,7 +5,6 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsImportClause, JsIdentifierBinding, JsImport,
     JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, T,
@@ -85,7 +84,7 @@ impl Rule for NoUnusedImports {
         }
 
         let model = ctx.model();
-        binding.all_references(model).next().is_none().then_some(())
+        model.all_references(binding).next().is_none().then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

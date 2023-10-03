@@ -1,7 +1,6 @@
-use crate::BindingKind;
-
 use super::*;
-use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsInitializerClause, JsVariableDeclarator};
+use crate::BindingKind;
+use biome_js_syntax::AnyJsRoot;
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct BindingIndex(usize);
@@ -93,6 +92,7 @@ impl SemanticModelData {
     pub fn is_exported(&self, range: TextRange) -> bool {
         self.bindings_by_range
             .get(&(BindingKind::Value, range))
+            .or_else(|| Some(&self.bindings_by_range[&(BindingKind::Type, range)]))
             .map_or(false, |id| self.exported.contains(id))
     }
 }
@@ -222,10 +222,7 @@ impl SemanticModel {
     }
 
     /// Returns an iterator of all the globals references in the program
-    pub fn all_global_references(
-        &self,
-    ) -> std::iter::Successors<GlobalReference, fn(&GlobalReference) -> Option<GlobalReference>>
-    {
+    pub fn all_global_references(&self) -> impl Iterator<Item = GlobalReference> {
         let first = self
             .data
             .globals
@@ -266,12 +263,7 @@ impl SemanticModel {
     }
 
     /// Returns an iterator of all the unresolved references in the program
-    pub fn all_unresolved_references(
-        &self,
-    ) -> std::iter::Successors<
-        UnresolvedReference,
-        fn(&UnresolvedReference) -> Option<UnresolvedReference>,
-    > {
+    pub fn all_unresolved_references(&self) -> impl Iterator<Item = UnresolvedReference> {
         let first = self
             .data
             .unresolved_references
@@ -335,52 +327,107 @@ impl SemanticModel {
 
     pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
         let range = binding.syntax().text_range();
-        let id = &self.data.bindings_by_range[&(BindingKind::Value, range)];
+        let id = if let Some(id) = self
+            .data
+            .bindings_by_range
+            .get(&(BindingKind::Value, range))
+        {
+            id
+        } else {
+            &self.data.bindings_by_range[&(BindingKind::Type, range)]
+        };
         Binding {
             data: self.data.clone(),
             index: (*id).into(),
         }
     }
 
-    /// Returns all [FunctionCall] of a [AnyJsFunction].
-    ///
-    /// ```rust
-    /// use biome_js_parser::JsParserOptions;
-    /// use biome_rowan::{AstNode, SyntaxNodeCast};
-    /// use biome_js_syntax::{JsFileSource, AnyJsFunction};
-    /// use biome_js_semantic::{semantic_model, CallsExtensions, SemanticModelOptions};
-    ///
-    /// let r = biome_js_parser::parse("function f(){} f() f()", JsFileSource::js_module(), JsParserOptions::default());
-    /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
-    ///
-    /// let f_declaration = r
-    ///     .syntax()
-    ///     .descendants()
-    ///     .filter_map(AnyJsFunction::cast)
-    ///     .next()
-    ///     .unwrap();
-    ///
-    /// let all_calls_to_f = model.all_calls(&f_declaration);
-    /// assert_eq!(2, all_calls_to_f.unwrap().count());
-    /// // or
-    /// let all_calls_to_f = f_declaration.all_calls(&model);
-    /// assert_eq!(2, all_calls_to_f.unwrap().count());
-    /// ```
-    pub fn all_calls(&self, function: &AnyJsFunction) -> Option<AllCallsIter> {
-        let identifier = match function {
-            AnyJsFunction::JsFunctionDeclaration(declaration) => declaration.id().ok()?,
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(declaration) => declaration.id()?,
-            AnyJsFunction::JsArrowFunctionExpression(_)
-            | AnyJsFunction::JsFunctionExpression(_) => {
-                let parent = function
-                    .parent::<JsInitializerClause>()?
-                    .parent::<JsVariableDeclarator>()?;
-                parent.id().ok()?.as_any_js_binding()?.clone()
-            }
-        };
-
-        Some(AllCallsIter {
-            references: identifier.as_js_identifier_binding()?.all_reads(self),
+    pub fn as_value_binding(&self, binding: &impl IsBindingAstNode) -> Option<Binding> {
+        let range = binding.syntax().text_range();
+        let id = self
+            .data
+            .bindings_by_range
+            .get(&(BindingKind::Value, range))?;
+        Some(Binding {
+            data: self.data.clone(),
+            index: (*id).into(),
         })
+    }
+
+    pub fn as_type_binding(&self, binding: &impl IsBindingAstNode) -> Option<Binding> {
+        let range = binding.syntax().text_range();
+        let id = self
+            .data
+            .bindings_by_range
+            .get(&(BindingKind::Type, range))?;
+        Some(Binding {
+            data: self.data.clone(),
+            index: (*id).into(),
+        })
+    }
+
+    pub fn all_references(
+        &self,
+        binding: &impl IsBindingAstNode,
+    ) -> impl Iterator<Item = Reference> {
+        self.all_value_references(binding)
+            .chain(self.all_type_references(binding))
+    }
+
+    pub fn all_value_references(
+        &self,
+        binding: &impl IsBindingAstNode,
+    ) -> impl Iterator<Item = Reference> {
+        let value_binding = self.as_value_binding(binding);
+        value_binding
+            .into_iter()
+            .flat_map(|binding| binding.all_references())
+    }
+
+    pub fn all_type_references(
+        &self,
+        binding: &impl IsBindingAstNode,
+    ) -> impl Iterator<Item = Reference> {
+        let type_binding = self.as_type_binding(binding);
+        type_binding
+            .into_iter()
+            .flat_map(|binding| binding.all_references())
+    }
+
+    pub fn all_reads(&self, binding: &impl IsBindingAstNode) -> impl Iterator<Item = Reference> {
+        self.all_value_reads(binding)
+            .chain(self.all_type_reads(binding))
+    }
+
+    pub fn all_value_reads(
+        &self,
+        binding: &impl IsBindingAstNode,
+    ) -> impl Iterator<Item = Reference> {
+        let value_binding = self.as_value_binding(binding);
+        value_binding
+            .into_iter()
+            .flat_map(|binding| binding.all_reads())
+    }
+
+    pub fn all_type_reads(
+        &self,
+        binding: &impl IsBindingAstNode,
+    ) -> impl Iterator<Item = Reference> {
+        let type_binding = self.as_type_binding(binding);
+        type_binding
+            .into_iter()
+            .flat_map(|binding| binding.all_reads())
+    }
+
+    pub fn all_writes(&self, binding: &impl IsBindingAstNode) -> impl Iterator<Item = Reference> {
+        let value_binding = self.as_value_binding(binding);
+        value_binding
+            .into_iter()
+            .flat_map(|binding| binding.all_writes())
+    }
+
+    pub fn all_calls(&self, binding: &impl IsBindingAstNode) -> impl Iterator<Item = FunctionCall> {
+        self.all_value_reads(binding)
+            .filter_map(|reference| reference.as_call())
     }
 }
