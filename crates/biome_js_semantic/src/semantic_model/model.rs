@@ -40,13 +40,13 @@ pub(crate) struct SemanticModelData {
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range in the code to its bindings (usize points to bindings vec)
-    pub(crate) declared_at_by_range: FxHashMap<TextRange, usize>,
+    pub(crate) bindings_by_reference_range: FxHashMap<TextRange, usize>,
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
     // Index bindings by range
     pub(crate) bindings_by_range: FxHashMap<TextRange, usize>,
     // All bindings that were exported
-    pub(crate) exported: FxHashSet<TextRange>,
+    pub(crate) exported: FxHashSet<usize>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
     /// All globals references
@@ -89,7 +89,9 @@ impl SemanticModelData {
     }
 
     pub fn is_exported(&self, range: TextRange) -> bool {
-        self.exported.contains(&range)
+        self.bindings_by_range
+            .get(&range)
+            .map_or(false, |id| self.exported.contains(id))
     }
 }
 
@@ -210,7 +212,7 @@ impl SemanticModel {
     pub fn binding(&self, reference: &impl HasDeclarationAstNode) -> Option<Binding> {
         let reference = reference.node();
         let range = reference.syntax().text_range();
-        let id = *self.data.declared_at_by_range.get(&range)?;
+        let id = *self.data.bindings_by_reference_range.get(&range)?;
         Some(Binding {
             data: self.data.clone(),
             index: id.into(),

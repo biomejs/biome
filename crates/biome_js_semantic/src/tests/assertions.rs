@@ -7,7 +7,9 @@ use biome_diagnostics::{
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
 use biome_rowan::{AstNode, NodeOrToken};
+use rustc_hash::FxHashMap;
 use std::collections::{BTreeMap, HashMap};
+use std::ops::Index;
 
 /// This method helps testing scope resolution. It does this
 /// iterating [SemanticEventIterator] and storing where each scope start and end. Later it iterates
@@ -124,18 +126,11 @@ pub fn assert(code: &str, test_name: &str) {
 
     let mut events_by_pos: HashMap<TextSize, Vec<SemanticEvent>> = HashMap::new();
     for event in semantic_events(r.syntax()) {
-        let pos = match &event {
-            SemanticEvent::DeclarationFound { range, .. } => range.start(),
-            SemanticEvent::ScopeStarted { range, .. } => range.start(),
-            SemanticEvent::ScopeEnded { range, .. } => range.end(),
-            SemanticEvent::Read { range, .. } => range.start(),
-            SemanticEvent::HoistedRead { range, .. } => range.start(),
-            SemanticEvent::Write { range, .. } => range.start(),
-            SemanticEvent::HoistedWrite { range, .. } => range.start(),
-            SemanticEvent::UnresolvedReference { range, .. } => range.start(),
-            SemanticEvent::Exported { range } => range.start(),
+        let pos = if let SemanticEvent::ScopeEnded { range, .. } = event {
+            range.end()
+        } else {
+            event.range().start()
         };
-
         let v = events_by_pos.entry(pos).or_default();
         v.push(event);
     }
@@ -449,12 +444,16 @@ impl SemanticAssertions {
         test_name: &str,
         events_by_pos: HashMap<TextSize, Vec<SemanticEvent>>,
     ) {
+        let mut binding_range = FxHashMap::default();
         // Check every declaration assertion is ok
 
         for (_, assertion) in self.declarations_assertions.iter() {
             if let Some(events) = events_by_pos.get(&assertion.range.start()) {
                 match &events[0] {
-                    SemanticEvent::DeclarationFound { .. } => {
+                    SemanticEvent::DeclarationFound {
+                        range, binding_id, ..
+                    } => {
+                        binding_range.insert(binding_id, range);
                         // OK because we are attached to a declaration
                     }
                     _ => {
@@ -501,28 +500,17 @@ impl SemanticAssertions {
             };
 
             let mut unused_match = None;
-            let at_least_one_match = events.iter().any(|e| {
-                let declaration_at_range = match &e {
-                    SemanticEvent::Read {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    SemanticEvent::HoistedRead {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    _ => None,
-                };
-
-                if let Some(declaration_at_range) = declaration_at_range {
+            let at_least_one_match = events.iter().any(|e| match e {
+                SemanticEvent::Read { binding_id, .. }
+                | SemanticEvent::HoistedRead { binding_id, .. } => {
+                    let declaration_at_range = **binding_range.index(binding_id);
                     unused_match = Some(format!(
                         "{} != {}",
                         &code[declaration_at_range], &code[decl.range]
                     ));
                     code[declaration_at_range] == code[decl.range]
-                } else {
-                    false
                 }
+                _ => false,
             });
 
             if !at_least_one_match {
@@ -567,24 +555,13 @@ impl SemanticAssertions {
                 }
             };
 
-            let at_least_one_match = events.iter().any(|e| {
-                let declaration_at_range = match &e {
-                    SemanticEvent::Write {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    SemanticEvent::HoistedWrite {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    _ => None,
-                };
-
-                if let Some(declaration_at_range) = declaration_at_range {
+            let at_least_one_match = events.iter().any(|e| match e {
+                SemanticEvent::Write { binding_id, .. }
+                | SemanticEvent::HoistedWrite { binding_id, .. } => {
+                    let declaration_at_range = **binding_range.index(binding_id);
                     code[declaration_at_range] == code[decl.range]
-                } else {
-                    false
                 }
+                _ => false,
             });
 
             if !at_least_one_match {
