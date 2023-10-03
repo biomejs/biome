@@ -123,7 +123,7 @@ Eventually everything should be "green" 🟢 and commit all the code that was ge
 
 #### Generated files
 
-If you work on some parser and you create new nodes or modify existing ones, will need to run a command to update some files that are auto-generated.
+If you work on some parser and create new nodes or modify existing ones, you must run a command to update some auto-generated files.
 
 ##### `cargo codegen grammar`
 
