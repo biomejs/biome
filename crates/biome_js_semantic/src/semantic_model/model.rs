@@ -1,3 +1,5 @@
+use crate::BindingKind;
+
 use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsInitializerClause, JsVariableDeclarator};
 
@@ -44,7 +46,7 @@ pub(crate) struct SemanticModelData {
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
     // Index bindings by range
-    pub(crate) bindings_by_range: FxHashMap<TextRange, usize>,
+    pub(crate) bindings_by_range: FxHashMap<(BindingKind, TextRange), usize>,
     // All bindings that were exported
     pub(crate) exported: FxHashSet<usize>,
     /// All references that could not be resolved
@@ -90,7 +92,7 @@ impl SemanticModelData {
 
     pub fn is_exported(&self, range: TextRange) -> bool {
         self.bindings_by_range
-            .get(&range)
+            .get(&(BindingKind::Value, range))
             .map_or(false, |id| self.exported.contains(id))
     }
 }
@@ -333,7 +335,7 @@ impl SemanticModel {
 
     pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
         let range = binding.syntax().text_range();
-        let id = &self.data.bindings_by_range[&range];
+        let id = &self.data.bindings_by_range[&(BindingKind::Value, range)];
         Binding {
             data: self.data.clone(),
             index: (*id).into(),
