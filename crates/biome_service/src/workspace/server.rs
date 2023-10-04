@@ -38,6 +38,8 @@ pub(super) struct WorkspaceServer {
     documents: DashMap<RomePath, Document>,
     /// Stores the result of the parser (syntax tree + diagnostics) for a given URL
     syntax: DashMap<RomePath, AnyParse>,
+    /// Stores the features supported for each file
+    file_features: DashMap<RomePath, FileFeaturesResult>,
 }
 
 /// The `Workspace` object is long lived, so we want it to be able to cross
@@ -68,6 +70,7 @@ impl WorkspaceServer {
             settings: RwLock::default(),
             documents: DashMap::default(),
             syntax: DashMap::default(),
+            file_features: DashMap::default(),
         }
     }
 
@@ -202,31 +205,40 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
-        let language = Language::from_path(&params.path);
-        let settings = self.settings.read().unwrap();
-        let mut file_features = FileFeaturesResult::new()
-            .with_capabilities(&capabilities)
-            .with_settings_and_language(&settings, &language);
+        let file_features_result = self.file_features.entry(params.path.clone());
+        match file_features_result {
+            Entry::Occupied(entry) => {
+                let result = entry.get();
+                Ok(result.clone())
+            }
+            Entry::Vacant(entry) => {
+                let capabilities = self.get_capabilities(&params.path);
+                let language = Language::from_path(&params.path);
+                let settings = self.settings.read().unwrap();
+                let mut file_features = FileFeaturesResult::new()
+                    .with_capabilities(&capabilities)
+                    .with_settings_and_language(&settings, &language);
 
-        if settings.files.ignore_unknown {
-            let language = self.get_language(&params.path);
-            if language == Language::Unknown {
-                file_features.ignore_not_supported();
+                if settings.files.ignore_unknown {
+                    let language = self.get_language(&params.path);
+                    if language == Language::Unknown {
+                        file_features.ignore_not_supported();
+                    }
+                }
+
+                for feature in params.feature {
+                    let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
+                        rome_path: params.path.clone(),
+                        feature: feature.clone(),
+                    })?;
+
+                    if is_ignored {
+                        file_features.ignored(feature);
+                    }
+                }
+                Ok(entry.insert(file_features).clone())
             }
         }
-
-        for feature in params.feature {
-            let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
-                rome_path: params.path.clone(),
-                feature: feature.clone(),
-            })?;
-
-            if is_ignored {
-                file_features.ignored(feature);
-            }
-        }
-        Ok(file_features)
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
@@ -288,6 +300,8 @@ impl Workspace for WorkspaceServer {
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut settings = self.settings.write().unwrap();
         settings.merge_with_configuration(params.configuration)?;
+        // settings changed, hence everything that is computed from the settings needs to be purged
+        self.file_features.clear();
         Ok(())
     }
 
