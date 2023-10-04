@@ -7,8 +7,8 @@ expression: invalid.jsx
 var a = <input className="" aria-labell="" />;
 var a = <div aria-="foobar" />;
 var a = <div aria-labeledby="foobar" />;
-var a = <div aria-skldjfaria-klajsd="foobar" />;
-var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+var a = <div aria-skldjfaria-foo1="foobar" />;
+var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
 
 ```
 
@@ -30,7 +30,7 @@ invalid.jsx:1:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     2 │ var a = <div aria-="foobar" />;
     3 │ var a = <div aria-labeledby="foobar" />;
   
-  i Unsafe fix: Remove all the invalid aria-* attribute. 
+  i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
     1 │ var·a·=·<input·className=""·aria-labell=""·/>;
@@ -47,7 +47,7 @@ invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
   > 2 │ var a = <div aria-="foobar" />;
       │         ^^^^^^^^^^^^^^^^^^^^^^
     3 │ var a = <div aria-labeledby="foobar" />;
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
   
   i aria- is not a valid ARIA attribute.
   
@@ -55,9 +55,9 @@ invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
   > 2 │ var a = <div aria-="foobar" />;
       │              ^^^^^^^^^^^^^^
     3 │ var a = <div aria-labeledby="foobar" />;
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
   
-  i Unsafe fix: Remove all the invalid aria-* attribute. 
+  i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
     2 │ var·a·=·<div·aria-="foobar"·/>;
@@ -74,8 +74,8 @@ invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     2 │ var a = <div aria-="foobar" />;
   > 3 │ var a = <div aria-labeledby="foobar" />;
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+    5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
   
   i aria-labeledby is not a valid ARIA attribute.
   
@@ -83,10 +83,10 @@ invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     2 │ var a = <div aria-="foobar" />;
   > 3 │ var a = <div aria-labeledby="foobar" />;
       │              ^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+    5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
   
-  i Unsafe fix: Remove all the invalid aria-* attribute. 
+  i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
     3 │ var·a·=·<div·aria-labeledby="foobar"·/>;
@@ -101,25 +101,25 @@ invalid.jsx:4:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
   
     2 │ var a = <div aria-="foobar" />;
     3 │ var a = <div aria-labeledby="foobar" />;
-  > 4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+  > 4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
     6 │ 
   
-  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
+  i aria-skldjfaria-foo1 is not a valid ARIA attribute.
   
     2 │ var a = <div aria-="foobar" />;
     3 │ var a = <div aria-labeledby="foobar" />;
-  > 4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
+  > 4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
     6 │ 
   
-  i Unsafe fix: Remove all the invalid aria-* attribute. 
+  i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
-    4 │ var·a·=·<div·aria-skldjfaria-klajsd="foobar"·/>;
-      │              --------------------------------   
+    4 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·/>;
+      │              ------------------------------   
 
 ```
 
@@ -129,32 +129,51 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
   ! The element contains invalid ARIA attribute(s)
   
     3 │ var a = <div aria-labeledby="foobar" />;
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
+  i aria-skldjfaria-foo1 is not a valid ARIA attribute.
   
     3 │ var a = <div aria-labeledby="foobar" />;
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
-      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i aria-skldjfaria-klajsd is not a valid ARIA attribute.
-  
-    3 │ var a = <div aria-labeledby="foobar" />;
-    4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
-  > 5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
-      │                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-  
-  i Unsafe fix: Remove all the invalid aria-* attribute. 
+  i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
-    5 │ var·a·=·<div·aria-skldjfaria-klajsd="foobar"·aria-skldjfaria-klajsd="foobar"·/>;
-      │              ----------------------------------------------------------------   
+    5 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·aria-skldjfaria-foo222="foobar"·/>;
+      │                              ------------------------------                   
+
+```
+
+```
+invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element contains invalid ARIA attribute(s)
+  
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i aria-skldjfaria-foo222 is not a valid ARIA attribute.
+  
+    3 │ var a = <div aria-labeledby="foobar" />;
+    4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+  > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
+      │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    5 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·aria-skldjfaria-foo222="foobar"·/>;
+      │                                            --------------------------------   
 
 ```
 
