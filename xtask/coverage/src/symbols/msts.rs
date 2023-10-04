@@ -94,7 +94,8 @@ impl TestCase for SymbolsMicrosoftTestCase {
                     | SemanticEvent::Read { .. }
                     | SemanticEvent::HoistedRead { .. }
                     | SemanticEvent::Write { .. }
-                    | SemanticEvent::HoistedWrite { .. } => {
+                    | SemanticEvent::HoistedWrite { .. }
+                    | SemanticEvent::UnresolvedReference { .. } => {
                         let name = x.str(&code);
                         !name.contains('\"') && !name.contains('\'')
                     }

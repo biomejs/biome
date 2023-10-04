@@ -1,4 +1,7 @@
-use crate::{inner_string_text, AnyJsImportClause, JsImport, JsModuleSource};
+use crate::{
+    inner_string_text, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport, JsModuleSource,
+    JsSyntaxToken,
+};
 use biome_rowan::{SyntaxResult, TokenText};
 
 impl JsImport {
@@ -26,6 +29,16 @@ impl JsImport {
         }?;
 
         Ok(source.inner_string_text()?.text() == source_to_check)
+    }
+}
+
+impl AnyJsNamedImportSpecifier {
+    pub fn type_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsBogusNamedImportSpecifier(_) => None,
+            Self::JsNamedImportSpecifier(specifier) => specifier.type_token(),
+            Self::JsShorthandNamedImportSpecifier(specifier) => specifier.type_token(),
+        }
     }
 }
 

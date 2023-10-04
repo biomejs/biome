@@ -6,12 +6,12 @@ use std::collections::{HashMap, VecDeque};
 use std::mem;
 
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, JsAssignmentExpression, JsForVariableDeclaration,
-    JsIdentifierAssignment, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize,
-    TsTypeParameterName,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsNamedImportSpecifier, JsAssignmentExpression,
+    JsForVariableDeclaration, JsIdentifierAssignment, JsImportDefaultClause, JsImportNamedClause,
+    JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize, TsTypeParameterName,
 };
-use biome_js_syntax::AnyTsType;
+use biome_js_syntax::{AnyJsExportNamedSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 
 /// Events emitted by the [SemanticEventExtractor]. These events are later
@@ -193,16 +193,47 @@ struct BindingName {
     name: TokenText,
 }
 
+impl BindingName {
+    fn dual(self) -> Self {
+        let name = self.name;
+        match self.kind {
+            BindingKind::Type => Self {
+                kind: BindingKind::Value,
+                name,
+            },
+            BindingKind::Value => Self {
+                kind: BindingKind::Type,
+                name,
+            },
+        }
+    }
+}
+
 #[derive(Debug)]
 enum Reference {
-    Read { range: TextRange, is_exported: bool },
-    Write { range: TextRange },
+    /// Read and export a type, a value, or both.
+    Export {
+        range: TextRange,
+    },
+    /// Read and export only a type
+    ExportType {
+        range: TextRange,
+    },
+    Read {
+        range: TextRange,
+    },
+    Write {
+        range: TextRange,
+    },
 }
 
 impl Reference {
     pub fn range(&self) -> &TextRange {
         match self {
-            Reference::Read { range, .. } | Reference::Write { range } => range,
+            Reference::Export { range }
+            | Reference::ExportType { range }
+            | Reference::Read { range }
+            | Reference::Write { range } => range,
         }
     }
 }
@@ -484,17 +515,50 @@ impl SemanticEventExtractor {
             TS_INFER_TYPE | TS_MAPPED_TYPE | TS_TYPE_PARAMETER => {
                 self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
             }
-            JS_DEFAULT_IMPORT_SPECIFIER
-            | JS_IMPORT_DEFAULT_CLAUSE
-            | JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
-            | JS_NAMED_IMPORT_SPECIFIER
-            | TS_IMPORT_EQUALS_DECLARATION => {
-                // TODO check for `type` modifier
+            JS_IMPORT_DEFAULT_CLAUSE => {
+                let clause = JsImportDefaultClause::unwrap_cast(parent);
+                if clause.type_token().is_none() {
+                    self.push_binding_into_scope(
+                        None,
+                        &name_token,
+                        parent_kind,
+                        BindingKind::Value,
+                    );
+                }
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+            }
+            TS_IMPORT_EQUALS_DECLARATION => {
                 self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Value);
                 self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
             }
-            //JS_NAMED_IMPORT_SPECIFIER
-            // JS_IMPORT_NAMED_CLAUSE
+            JS_DEFAULT_IMPORT_SPECIFIER => {
+                let clause = JsImportNamedClause::cast(parent.parent()?)?;
+                if clause.type_token().is_none() {
+                    self.push_binding_into_scope(
+                        None,
+                        &name_token,
+                        parent_kind,
+                        BindingKind::Value,
+                    );
+                }
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+            }
+            JS_NAMED_IMPORT_SPECIFIER | JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
+                let specifier = AnyJsNamedImportSpecifier::unwrap_cast(parent);
+                if specifier.type_token().is_none()
+                    && JsImportNamedClause::cast(specifier.syntax().ancestors().nth(3)?)?
+                        .type_token()
+                        .is_none()
+                {
+                    self.push_binding_into_scope(
+                        None,
+                        &name_token,
+                        parent_kind,
+                        BindingKind::Value,
+                    );
+                }
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+            }
             _ => {
                 self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Value);
             }
@@ -517,43 +581,55 @@ impl SemanticEventExtractor {
                 // SAFETY: kind check above
                 let reference = JsReferenceIdentifier::unwrap_cast(node.clone());
                 let name_token = reference.value_token().ok()?;
-                // skip `this` reference representing the class instance
-                if name_token.text_trimmed() == "this" {
-                    return None;
-                }
-                let is_exported = self.is_js_reference_identifier_exported(node);
                 let current_scope = self.current_scope_mut();
-                let kind = if matches!(
-                    node.parent()?.kind(),
-                    JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS
-                ) {
-                    BindingKind::Type
-                } else {
-                    BindingKind::Value
-                };
                 let name = name_token.token_text_trimmed();
-                let references = current_scope
-                    .references
-                    .entry(BindingName {
-                        kind,
-                        name: name.clone(),
-                    })
-                    .or_default();
-                references.push(Reference::Read {
-                    range: node.text_range(),
-                    is_exported,
-                });
-                if is_exported {
+                let exported_kind = Self::is_js_reference_identifier_exported(&reference);
+                if let Some(kind) = exported_kind {
                     let references = current_scope
                         .references
                         .entry(BindingName {
                             kind: BindingKind::Type,
-                            name,
+                            name: name.clone(),
+                        })
+                        .or_default();
+                    if kind == BindingKind::Value {
+                        references.push(Reference::Export {
+                            range: node.text_range(),
+                        });
+                        let references = current_scope
+                            .references
+                            .entry(BindingName {
+                                kind,
+                                name: name.clone(),
+                            })
+                            .or_default();
+                        references.push(Reference::Export {
+                            range: node.text_range(),
+                        });
+                    } else {
+                        references.push(Reference::ExportType {
+                            range: node.text_range(),
+                        });
+                    }
+                } else {
+                    let kind = match node.parent()?.kind() {
+                        JsSyntaxKind::TS_REFERENCE_TYPE
+                        | JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS => BindingKind::Type,
+                        // ignore imported types using `import()`
+                        // e.g. `type X = import("").prefix.X;`
+                        JsSyntaxKind::TS_QUALIFIED_NAME
+                        | JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => return None,
+                        _ => BindingKind::Value,
+                    };
+                    let references = current_scope
+                        .references
+                        .entry(BindingName {
+                            kind,
+                            name: name.clone(),
                         })
                         .or_default();
                     references.push(Reference::Read {
                         range: node.text_range(),
-                        is_exported,
                     });
                 }
             }
@@ -572,7 +648,6 @@ impl SemanticEventExtractor {
                     .or_default();
                 references.push(Reference::Read {
                     range: node.text_range(),
-                    is_exported: false,
                 });
             }
             _ => return None,
@@ -717,12 +792,22 @@ impl SemanticEventExtractor {
                         let declaration_before_reference =
                             declared_binding.text_range.start() < reference.range().start();
                         let e = match (declaration_before_reference, &reference) {
-                            (true, Reference::Read { range, .. }) => SemanticEvent::Read {
+                            (
+                                true,
+                                Reference::Export { range }
+                                | Reference::ExportType { range }
+                                | Reference::Read { range },
+                            ) => SemanticEvent::Read {
                                 range: *range,
                                 binding_id: declared_binding.binding_id,
                                 scope_id: scope.scope_id,
                             },
-                            (false, Reference::Read { range, .. }) => SemanticEvent::HoistedRead {
+                            (
+                                false,
+                                Reference::Export { range }
+                                | Reference::ExportType { range }
+                                | Reference::Read { range },
+                            ) => SemanticEvent::HoistedRead {
                                 range: *range,
                                 binding_id: declared_binding.binding_id,
                                 scope_id: scope.scope_id,
@@ -741,7 +826,7 @@ impl SemanticEventExtractor {
                         self.stash.push_back(e);
 
                         match reference {
-                            Reference::Read { is_exported, .. } if *is_exported => {
+                            Reference::Export { .. } | Reference::ExportType { .. } => {
                                 // Check shadowed bindings to find an exportable binding
                                 let find_exportable_binding = scope.shadowed.iter().find_map(
                                     |(shadowed_ident_name, shadowed_binding_info)| {
@@ -788,10 +873,16 @@ impl SemanticEventExtractor {
                     let parent_references = parent.references.entry(name).or_default();
                     parent_references.append(&mut references);
                 } else {
+                    let has_dual_binding = self.bindings.get(&name.dual()).is_some();
                     // ... or raise UnresolvedReference if this is the global scope.
                     for reference in references {
+                        if has_dual_binding && matches!(reference, Reference::Export { .. }) {
+                            // An export can export both a value and a type.
+                            // If a dual binding exists, then it exports the dual binding.
+                            continue;
+                        }
                         self.stash.push_back(SemanticEvent::UnresolvedReference {
-                            is_read: matches!(reference, Reference::Read { .. }),
+                            is_read: !matches!(reference, Reference::Write { .. }),
                             range: *reference.range(),
                         });
                     }
@@ -965,7 +1056,7 @@ impl SemanticEventExtractor {
         ));
         let is_module_exports = declaration_expression
             .parent()
-            .map(|x| self.is_assignment_left_side_module_exports(&x))
+            .map(Self::is_assignment_left_side_module_exports)
             .unwrap_or(false);
         if is_module_exports {
             self.stash.push_back(SemanticEvent::Exported {
@@ -1028,83 +1119,82 @@ impl SemanticEventExtractor {
     }
 
     // Check if a reference is exported and raise the [Exported] event.
-    fn is_js_reference_identifier_exported(&mut self, reference: &JsSyntaxNode) -> bool {
-        debug_assert!(matches!(
-            reference.kind(),
-            JsSyntaxKind::JS_REFERENCE_IDENTIFIER
-        ));
-        let reference_parent = reference.parent();
-        let reference_greatparent = reference_parent.as_ref().and_then(|p| p.parent());
-
-        // check export keyword
-        matches!(
-            reference_parent.kind(),
-            Some(
-                JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER
-                    | JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER
-            )
-        ) | {
-            // check "export default" keyword
-            matches!(
-                reference_greatparent.kind(),
-                Some(JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE)
-            )
-        } | {
-            // check module.exports
-            match reference_parent.map(|x| x.kind()) {
-                Some(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION) => reference_greatparent
-                    .map(|x| self.is_assignment_left_side_module_exports(&x))
-                    .unwrap_or(false),
-                Some(JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER) => reference_greatparent
-                    .and_then(|g| g.grand_parent())
-                    .map(|x| self.is_assignment_left_side_module_exports(&x))
-                    .unwrap_or(false),
-                _ => false,
+    fn is_js_reference_identifier_exported(
+        reference: &JsReferenceIdentifier,
+    ) -> Option<BindingKind> {
+        let parent = reference.syntax().parent()?;
+        match parent.kind() {
+            JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER
+            | JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER => {
+                let specifier = AnyJsExportNamedSpecifier::unwrap_cast(parent);
+                if specifier.type_token().is_some() {
+                    Some(BindingKind::Type)
+                } else {
+                    Some(BindingKind::Value)
+                }
             }
+            JsSyntaxKind::JS_IDENTIFIER_EXPRESSION => {
+                let grandparent = parent.parent()?;
+                // check "export default" keyword
+                if matches!(
+                    grandparent.kind(),
+                    JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
+                        | JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE
+                ) {
+                    return Some(BindingKind::Value);
+                }
+                // check module.exports = X
+                Self::is_assignment_left_side_module_exports(grandparent)
+                    .then_some(BindingKind::Value)
+            }
+            JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
+                let maybe_assignment = parent.ancestors().nth(3)?;
+                // check module.exports = { X }
+                Self::is_assignment_left_side_module_exports(maybe_assignment)
+                    .then_some(BindingKind::Value)
+            }
+            _ => None,
         }
     }
 
-    fn is_assignment_left_side_module_exports(&self, node: &JsSyntaxNode) -> bool {
-        match node.kind() {
-            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                let expr = JsAssignmentExpression::unwrap_cast(node.clone());
-                match expr.left() {
-                    Ok(AnyJsAssignmentPattern::AnyJsAssignment(
-                        AnyJsAssignment::JsStaticMemberAssignment(a),
-                    )) => {
-                        let first = a
-                            .object()
-                            .ok()
-                            .and_then(|x| x.as_js_identifier_expression().cloned())
-                            .and_then(|x| x.name().ok())
-                            .and_then(|x| x.value_token().ok())
-                            .map(|x| x.token_text_trimmed());
-
-                        match first {
-                            Some(first) if first == "module" => {
-                                let second = a
-                                    .member()
-                                    .ok()
-                                    .and_then(|x| x.as_js_name().cloned())
-                                    .and_then(|x| x.value_token().ok())
-                                    .map(|x| x.token_text_trimmed());
-                                // module.exports = ..
-                                matches!(second, Some(second) if second == "exports")
-                            }
-                            // exports.<anything> = ..
-                            Some(first) if first == "exports" => true,
-                            _ => false,
+    fn is_assignment_left_side_module_exports(node: JsSyntaxNode) -> bool {
+        if let Some(expr) = JsAssignmentExpression::cast(node) {
+            return match expr.left() {
+                Ok(AnyJsAssignmentPattern::AnyJsAssignment(
+                    AnyJsAssignment::JsStaticMemberAssignment(member),
+                )) => {
+                    let Some(first) = member
+                        .object()
+                        .ok()
+                        .and_then(|x| x.as_js_reference_identifier()?.value_token().ok())
+                    else {
+                        return false;
+                    };
+                    match first.text_trimmed() {
+                        // module.exports = ..
+                        "module" => {
+                            let Some(second) = member
+                                .member()
+                                .ok()
+                                .and_then(|x| x.as_js_name()?.value_token().ok())
+                            else {
+                                return false;
+                            };
+                            second.text_trimmed() == "exports"
                         }
+                        // exports.<anything> = ..
+                        "exports" => true,
+                        _ => false,
                     }
-                    // exports = ...
-                    Ok(AnyJsAssignmentPattern::AnyJsAssignment(
-                        AnyJsAssignment::JsIdentifierAssignment(ident),
-                    )) => ident.syntax().text_trimmed() == "exports",
-                    _ => false,
                 }
-            }
-            _ => false,
+                // exports = ...
+                Ok(AnyJsAssignmentPattern::AnyJsAssignment(
+                    AnyJsAssignment::JsIdentifierAssignment(ident),
+                )) => ident.syntax().text_trimmed() == "exports",
+                _ => false,
+            };
         }
+        false
     }
 }
 

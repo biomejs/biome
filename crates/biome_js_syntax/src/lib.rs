@@ -7,6 +7,7 @@ mod generated;
 pub mod binding_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
+pub mod export_ext;
 pub mod expr_ext;
 pub mod file_source;
 pub mod function_ext;
