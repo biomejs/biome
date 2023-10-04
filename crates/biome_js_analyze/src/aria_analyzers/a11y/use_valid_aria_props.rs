@@ -1,9 +1,11 @@
 use crate::aria_services::Aria;
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Ensures that ARIA properties `aria-*` are all valid.
@@ -90,5 +92,29 @@ impl Rule for UseValidAriaProps {
         }
 
         Some(diagnostic)
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let element = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        for attribute in element.attributes() {
+            let attribute = attribute.as_jsx_attribute()?;
+            let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
+
+            if attribute_name.text_trimmed().starts_with("aria-") {
+                mutation.remove_node(attribute.clone());
+            }
+        }
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message:
+                markup! { "Remove all the invalid "<Emphasis>"aria-*"</Emphasis>" attribute. 
+                Check the list of all "<Hyperlink href="https://developer.mozilla.org/en-US/docs/web/Accessibility/ARIA/Attributes#aria_attribute_types">"valid"</Hyperlink>" aria-* attributes." }
+                    .to_owned(),
+            mutation,
+        })
     }
 }
