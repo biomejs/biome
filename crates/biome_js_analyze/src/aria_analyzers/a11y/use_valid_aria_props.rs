@@ -97,12 +97,17 @@ impl Rule for UseValidAriaProps {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let element = ctx.query();
         let mut mutation = ctx.root().begin();
+        let aria_properties = ctx.aria_properties();
 
         for attribute in element.attributes() {
             let attribute = attribute.as_jsx_attribute()?;
             let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
 
-            if attribute_name.text_trimmed().starts_with("aria-") {
+            if attribute_name.text_trimmed().starts_with("aria-")
+                && aria_properties
+                    .get_property(attribute_name.text_trimmed())
+                    .is_none()
+            {
                 mutation.remove_node(attribute.clone());
             }
         }
