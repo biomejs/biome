@@ -5,7 +5,8 @@ use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
+use biome_js_syntax::JsxAttribute;
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_rule! {
     /// Ensures that ARIA properties `aria-*` are all valid.
@@ -19,7 +20,7 @@ declare_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div aria-lorem="foobar"  aria-ipsum="foobar" />;
+    /// <div aria-lorem="foobar" />;
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -33,8 +34,8 @@ declare_rule! {
 
 impl Rule for UseValidAriaProps {
     type Query = Aria<AnyJsxElement>;
-    type State = Vec<(TextRange, String)>;
-    type Signals = Option<Self::State>;
+    type State = JsxAttribute;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -55,68 +56,46 @@ impl Rule for UseValidAriaProps {
                             .get_property(attribute_name.text_trimmed())
                             .is_none()
                     {
-                        Some((attribute.range(), attribute_name.to_string()))
+                        Some(attribute.clone())
                     } else {
                         None
                     }
                 })
                 .collect();
 
-            if attributes.is_empty() {
-                None
-            } else {
-                Some(attributes)
-            }
+            attributes
         } else {
-            None
+            vec![]
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, attributes: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, attribute: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let mut diagnostic = RuleDiagnostic::new(
+        let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
+        Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
             markup! {
                 "The element contains invalid ARIA attribute(s)"
             },
-        );
-
-        for (range, attribute_name) in attributes {
-            diagnostic = diagnostic.detail(
-                range,
-                markup! {
-                    <Emphasis>{attribute_name}</Emphasis>" is not a valid ARIA attribute."
+        ).detail(
+            attribute.range(),
+            markup! {
+                    <Emphasis>{attribute_name.text_trimmed()}</Emphasis>" is not a valid ARIA attribute."
                 },
-            );
-        }
-
-        Some(diagnostic)
+        ))
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let element = ctx.query();
+    fn action(ctx: &RuleContext<Self>, attribute: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let aria_properties = ctx.aria_properties();
 
-        for attribute in element.attributes() {
-            let attribute = attribute.as_jsx_attribute()?;
-            let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
-
-            if attribute_name.text_trimmed().starts_with("aria-")
-                && aria_properties
-                    .get_property(attribute_name.text_trimmed())
-                    .is_none()
-            {
-                mutation.remove_node(attribute.clone());
-            }
-        }
+        mutation.remove_node(attribute.clone());
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
             message:
-                markup! { "Remove all the invalid "<Emphasis>"aria-*"</Emphasis>" attribute. 
+                markup! { "Remove the invalid "<Emphasis>"aria-*"</Emphasis>" attribute.
                 Check the list of all "<Hyperlink href="https://developer.mozilla.org/en-US/docs/web/Accessibility/ARIA/Attributes#aria_attribute_types">"valid"</Hyperlink>" aria-* attributes." }
                     .to_owned(),
             mutation,
