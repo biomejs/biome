@@ -200,16 +200,18 @@ You're now ready to commit the changes [using `git`](#commit-your-work)!
 
 ### Document the rule
 
-The doc-comment for the rule is mandatory and is used to generate the
-documentation page for the rule on the website.
-Importantly, the tool used to generate those pages also runs tests on the
-code blocks included in the documentation written in languages supported by
-the _Biome_ toolchain (JavaScript, JSX, TypeScript, ...) similar to how
-`rustdoc` generates tests from code blocks written in Rust. Because code
-blocks in Rust doc-comments are assumed to be written in Rust by default
-the language of the test must be explicitly specified, for instance:
+The documentation needs to adhere to the following rules:
+- The **first** paragraph of the documentation is used as brief description of the rule, and it **must** be written in one single line. Breaking the paragraph in multiple lines will break the table content of the rules page.
+- The next paragraphs can be used to further document the rule with as many details as you see fit.
+- The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`. `### Invalid` must go first because we need to show when the rule is triggered.
+- Each code block must have a _language_ defined.
+- When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
+- When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
+- You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
 
-````rust,ignore
+Here's an example of how the documentation could look like:
+
+```rust,ignore
 use biome_analyze::declare_rule;
 declare_rule! {
     /// Disallow the use of `var`.
@@ -228,6 +230,10 @@ declare_rule! {
     /// var foo = 1;
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// var bar = 1;
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -240,30 +246,7 @@ declare_rule! {
         recommended: false,
     }
 }
-````
-
-Additionally, it's possible to declare that a test should emit a diagnostic
-by adding `expect_diagnostic` to the language metadata:
-
-````rust,ignore
-use biome_analyze::declare_rule;
- declare_rule! {
-    ///  Disallow the use of `var`.
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```js,expect_diagnostic
-    /// var foo = 1;
-    /// ```
-    pub(crate) NoVar {
-        version: "next",
-        name: "noVar",
-        recommended: false,
-    }
- }
-````
+```
 
 This will cause the documentation generator to ensure the rule does emit
 exactly one diagnostic for this code, and to include a snapshot for the
@@ -360,7 +343,7 @@ of deprecation can be multiple.
 
 In order to do, the macro allows adding additional field to add the reason for deprecation
 
-````rust,ignore
+```rust,ignore
 use biome_analyze::declare_rule;
 
 declare_rule! {
@@ -380,7 +363,7 @@ declare_rule! {
         recommended: false,
     }
 }
-````
+```
 
 ### Custom Visitors
 
