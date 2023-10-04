@@ -82,7 +82,7 @@ jobs:
           hyperfine -w 2 --export-markdown benchmark_format.md \
             -n "biome format (main)" "./biome_main $FORMAT_BENCH_COMMAND" \
             -n "biome format (pr)" "./biome_pr $FORMAT_BENCH_COMMAND"
-          hyperfine -w 2 --export-markdown benchmark_check.md \
+          hyperfine -w 2 --export-markdown --ignore-failure benchmark_check.md \
             -n "biome check (main)" "./biome_main check $CHECK_BENCH_COMMAND" \
             -n "biome check (pr)" "./biome_pr check $CHECK_BENCH_COMMAND"
           cat benchmark_format.md >> benchmark.md
