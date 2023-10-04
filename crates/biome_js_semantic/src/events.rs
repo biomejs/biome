@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize,
     TsTypeParameterName,
 };
-use biome_js_syntax::{AnyTsType, TsPropertySignatureTypeMember};
+use biome_js_syntax::AnyTsType;
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 
 /// Events emitted by the [SemanticEventExtractor]. These events are later
@@ -523,18 +523,10 @@ impl SemanticEventExtractor {
                 }
                 let is_exported = self.is_js_reference_identifier_exported(node);
                 let current_scope = self.current_scope_mut();
-                // FIXME: We should not check if the ref is under TsPropertySignatureTypeMember.
-                // ref should be under a TsReferenceType even when it is a computed member name in a ts signature!
-                // This should be fixed in the parser.
-                // See https://biomejs.dev/playground/?code=ZQB4AHAAbwByAHQAIABpAG4AdABlAHIAZgBhAGMAZQAgAEkAPABUAD4AIAB7AAoACQBbAGAAJAB7AFQAfQBgAF0AOgAgAHYAbwBpAGQAOwAKAH0ACgA%3D
                 let kind = if matches!(
                     node.parent()?.kind(),
                     JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS
-                ) || node
-                    .ancestors()
-                    .find_map(TsPropertySignatureTypeMember::cast)
-                    .is_some()
-                {
+                ) {
                     BindingKind::Type
                 } else {
                     BindingKind::Value

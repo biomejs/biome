@@ -1,10 +1,12 @@
 use biome_js_semantic::SemanticEvent;
 use biome_js_syntax::JsFileSource;
+use biome_rowan::TextSize;
 
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};
 use crate::check_file_encoding;
 use crate::runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite};
 use biome_js_parser::JsParserOptions;
+use std::collections::HashSet;
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -79,7 +81,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             options.clone(),
         );
 
-        let mut prev_range = None;
+        let mut prev_starts: HashSet<TextSize> = HashSet::default();
         let r = biome_js_parser::parse(&code, JsFileSource::tsx(), options);
         let mut actual: Vec<_> = biome_js_semantic::semantic_events(r.syntax())
             .into_iter()
@@ -100,19 +102,12 @@ impl TestCase for SymbolsMicrosoftTestCase {
                 }
             })
             .filter(|x| {
-                // Ignore the current event if the previous one cover the same range.
-                // This allows removing one of the two bindings associated to entities
-                // that are botha value and a type.
-                let range = *x.range();
-                let kept = prev_range
-                    .map(|prev_range| prev_range != range)
-                    .unwrap_or(true);
-                prev_range = Some(range);
-                kept
+                // Ignore the current event if one was already processed for the same range.
+                // This allows removing several events emitted for the same symbol.
+                prev_starts.insert(x.range().start())
             })
             .collect();
         actual.sort_unstable_by_key(|x| x.range().start());
-
         // Print to debug! detailed information
         // on symbols that are different from the
         // expected
