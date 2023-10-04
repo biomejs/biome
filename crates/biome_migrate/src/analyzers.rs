@@ -1,8 +1,8 @@
-use crate::analyzers::rule_set::RuleSet;
+use crate::analyzers::indent_size::IndentSize;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
-mod rule_set;
+mod indent_size;
 
 pub(crate) struct MigrationGroup;
 pub(crate) struct MigrationCategory;
@@ -14,8 +14,8 @@ impl RuleGroup for MigrationGroup {
 
     fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
         // Order here is important, rules should be added from the most old, to the most recent
-        // v13.0.0
-        registry.record_rule::<RuleSet>();
+        // v1.3.0
+        registry.record_rule::<IndentSize>();
     }
 }
 
