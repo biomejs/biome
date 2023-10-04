@@ -77,7 +77,7 @@ jobs:
         working-directory: benchmark/target
         env:
           FORMAT_BENCH_COMMAND: "format webpack/lib webpack/examples webpack/declarations webpack/benchmark prettier/src prettier/scripts --write"
-          CHECK_BENCH_COMMAND: "--max-diagnostics=0 eslint/lib eslint/messages eslint/tests/lib eslint/tests/performance eslint/tools webpack/lib"
+          CHECK_BENCH_COMMAND: "--max-diagnostics=0 eslint/lib eslint/messages eslint/tests/lib eslint/tests/performance eslint/tools webpack/lib --no-errors-on-unmatched"
         run: |
           hyperfine -w 2 --export-markdown benchmark_format.md \
             -n "biome format (main)" "./biome_main $FORMAT_BENCH_COMMAND" \
