@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsx
 ---
 # Input
@@ -15,7 +14,7 @@ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
 
 # Diagnostics
 ```
-invalid.jsx:1:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The element contains invalid ARIA attribute(s)
   
@@ -31,11 +30,16 @@ invalid.jsx:1:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━
     2 │ var a = <div aria-="foobar" />;
     3 │ var a = <div aria-labeledby="foobar" />;
   
+  i Unsafe fix: Remove all the invalid aria-* attribute. 
+                    Check the list of all valid aria-* attributes.
+  
+    1 │ var·a·=·<input·className=""·aria-labell=""·/>;
+      │                             ---------------   
 
 ```
 
 ```
-invalid.jsx:2:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The element contains invalid ARIA attribute(s)
   
@@ -53,11 +57,16 @@ invalid.jsx:2:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━
     3 │ var a = <div aria-labeledby="foobar" />;
     4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
   
+  i Unsafe fix: Remove all the invalid aria-* attribute. 
+                    Check the list of all valid aria-* attributes.
+  
+    2 │ var·a·=·<div·aria-="foobar"·/>;
+      │              ---------------   
 
 ```
 
 ```
-invalid.jsx:3:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The element contains invalid ARIA attribute(s)
   
@@ -77,11 +86,16 @@ invalid.jsx:3:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━
     4 │ var a = <div aria-skldjfaria-klajsd="foobar" />;
     5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
   
+  i Unsafe fix: Remove all the invalid aria-* attribute. 
+                    Check the list of all valid aria-* attributes.
+  
+    3 │ var·a·=·<div·aria-labeledby="foobar"·/>;
+      │              ------------------------   
 
 ```
 
 ```
-invalid.jsx:4:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The element contains invalid ARIA attribute(s)
   
@@ -101,11 +115,16 @@ invalid.jsx:4:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━
     5 │ var a = <div aria-skldjfaria-klajsd="foobar" aria-skldjfaria-klajsd="foobar" />;
     6 │ 
   
+  i Unsafe fix: Remove all the invalid aria-* attribute. 
+                    Check the list of all valid aria-* attributes.
+  
+    4 │ var·a·=·<div·aria-skldjfaria-klajsd="foobar"·/>;
+      │              --------------------------------   
 
 ```
 
 ```
-invalid.jsx:5:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The element contains invalid ARIA attribute(s)
   
@@ -131,6 +150,11 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps ━━━━━━━━━━━━
       │                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
+  i Unsafe fix: Remove all the invalid aria-* attribute. 
+                    Check the list of all valid aria-* attributes.
+  
+    5 │ var·a·=·<div·aria-skldjfaria-klajsd="foobar"·aria-skldjfaria-klajsd="foobar"·/>;
+      │              ----------------------------------------------------------------   
 
 ```
 
