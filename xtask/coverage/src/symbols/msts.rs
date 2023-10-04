@@ -79,6 +79,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             options.clone(),
         );
 
+        let mut prev_range = None;
         let r = biome_js_parser::parse(&code, JsFileSource::tsx(), options);
         let mut actual: Vec<_> = biome_js_semantic::semantic_events(r.syntax())
             .into_iter()
@@ -98,8 +99,19 @@ impl TestCase for SymbolsMicrosoftTestCase {
                     _ => false,
                 }
             })
+            .filter(|x| {
+                // Ignore the current event if the previous one cover the same range.
+                // This allows removing one of the two bindings associated to entities
+                // that are botha value and a type.
+                let range = *x.range();
+                let kept = prev_range
+                    .map(|prev_range| prev_range != range)
+                    .unwrap_or(true);
+                prev_range = Some(range);
+                kept
+            })
             .collect();
-        actual.sort_by_key(|x| x.range().start());
+        actual.sort_unstable_by_key(|x| x.range().start());
 
         // Print to debug! detailed information
         // on symbols that are different from the
