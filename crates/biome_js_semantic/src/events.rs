@@ -5,13 +5,13 @@ use rustc_hash::FxHashMap;
 use std::collections::{HashMap, VecDeque};
 use std::mem;
 
-use biome_js_syntax::AnyTsType;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, JsAssignmentExpression, JsForVariableDeclaration,
     JsIdentifierAssignment, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize,
     TsTypeParameterName,
 };
+use biome_js_syntax::{AnyTsType, TsPropertySignatureTypeMember};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 
 /// Events emitted by the [SemanticEventExtractor]. These events are later
@@ -200,10 +200,6 @@ enum Reference {
 }
 
 impl Reference {
-    fn is_read(&self) -> bool {
-        matches!(self, Reference::Read { .. })
-    }
-
     pub fn range(&self) -> &TextRange {
         match self {
             Reference::Read { range, .. } | Reference::Write { range } => range,
@@ -363,7 +359,7 @@ impl SemanticEventExtractor {
             AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
                 if binding.in_infer_type() {
                     self.infers.push(binding.clone());
-                    return None;
+                    return Some(());
                 }
                 binding.ident_token()
             }
@@ -406,13 +402,11 @@ impl SemanticEventExtractor {
                     BindingKind::Value,
                 );
                 self.export_declaration_expression(node, &parent, binding_id);
+                let binding_id =
+                    self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+                self.export_declaration_expression(node, &parent, binding_id);
             }
-            JS_CLASS_DECLARATION
-            | JS_CLASS_EXPORT_DEFAULT_DECLARATION
-            | TS_ENUM_DECLARATION
-            | TS_INTERFACE_DECLARATION
-            | TS_MODULE_DECLARATION
-            | TS_TYPE_ALIAS_DECLARATION => {
+            JS_CLASS_DECLARATION | JS_CLASS_EXPORT_DEFAULT_DECLARATION | TS_ENUM_DECLARATION => {
                 let parent_scope = self.scopes.get(self.scopes.len() - 2);
                 let parent_scope = parent_scope.map(|scope| scope.scope_id);
                 let binding_id = self.push_binding_into_scope(
@@ -420,6 +414,35 @@ impl SemanticEventExtractor {
                     &name_token,
                     parent_kind,
                     BindingKind::Value,
+                );
+                self.export_declaration(node, &parent, binding_id);
+                let binding_id = self.push_binding_into_scope(
+                    parent_scope,
+                    &name_token,
+                    parent_kind,
+                    BindingKind::Type,
+                );
+                self.export_declaration(node, &parent, binding_id);
+            }
+            TS_MODULE_DECLARATION => {
+                let parent_scope = self.scopes.get(self.scopes.len() - 2);
+                let parent_scope = parent_scope.map(|scope| scope.scope_id);
+                let binding_id = self.push_binding_into_scope(
+                    parent_scope,
+                    &name_token,
+                    parent_kind,
+                    BindingKind::Value,
+                );
+                self.export_declaration(node, &parent, binding_id);
+            }
+            TS_INTERFACE_DECLARATION | TS_TYPE_ALIAS_DECLARATION => {
+                let parent_scope = self.scopes.get(self.scopes.len() - 2);
+                let parent_scope = parent_scope.map(|scope| scope.scope_id);
+                let binding_id = self.push_binding_into_scope(
+                    parent_scope,
+                    &name_token,
+                    parent_kind,
+                    BindingKind::Type,
                 );
                 self.export_declaration(node, &parent, binding_id);
             }
@@ -458,6 +481,20 @@ impl SemanticEventExtractor {
                     self.export_variable_declarator(node, &possible_declarator, binding_id);
                 }
             }
+            TS_INFER_TYPE | TS_MAPPED_TYPE | TS_TYPE_PARAMETER => {
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+            }
+            JS_DEFAULT_IMPORT_SPECIFIER
+            | JS_IMPORT_DEFAULT_CLAUSE
+            | JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
+            | JS_NAMED_IMPORT_SPECIFIER
+            | TS_IMPORT_EQUALS_DECLARATION => {
+                // TODO check for `type` modifier
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Value);
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
+            }
+            //JS_NAMED_IMPORT_SPECIFIER
+            // JS_IMPORT_NAMED_CLAUSE
             _ => {
                 self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Value);
             }
@@ -475,7 +512,7 @@ impl SemanticEventExtractor {
             "specified node is not a reference identifier (JS_REFERENCE_IDENTIFIER, JSX_REFERENCE_IDENTIFIER)"
         );
 
-        let (name, is_exported) = match node.kind() {
+        match node.kind() {
             JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
                 // SAFETY: kind check above
                 let reference = JsReferenceIdentifier::unwrap_cast(node.clone());
@@ -484,32 +521,70 @@ impl SemanticEventExtractor {
                 if name_token.text_trimmed() == "this" {
                     return None;
                 }
-                (
-                    name_token.token_text_trimmed(),
-                    self.is_js_reference_identifier_exported(node),
-                )
+                let is_exported = self.is_js_reference_identifier_exported(node);
+                let current_scope = self.current_scope_mut();
+                // FIXME: We should not check if the ref is under TsPropertySignatureTypeMember.
+                // ref should be under a TsReferenceType even when it is a computed member name in a ts signature!
+                // This should be fixed in the parser.
+                // See https://biomejs.dev/playground/?code=ZQB4AHAAbwByAHQAIABpAG4AdABlAHIAZgBhAGMAZQAgAEkAPABUAD4AIAB7AAoACQBbAGAAJAB7AFQAfQBgAF0AOgAgAHYAbwBpAGQAOwAKAH0ACgA%3D
+                let kind = if matches!(
+                    node.parent()?.kind(),
+                    JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_NAME_WITH_TYPE_ARGUMENTS
+                ) || node
+                    .ancestors()
+                    .find_map(TsPropertySignatureTypeMember::cast)
+                    .is_some()
+                {
+                    BindingKind::Type
+                } else {
+                    BindingKind::Value
+                };
+                let name = name_token.token_text_trimmed();
+                let references = current_scope
+                    .references
+                    .entry(BindingName {
+                        kind,
+                        name: name.clone(),
+                    })
+                    .or_default();
+                references.push(Reference::Read {
+                    range: node.text_range(),
+                    is_exported,
+                });
+                if is_exported {
+                    let references = current_scope
+                        .references
+                        .entry(BindingName {
+                            kind: BindingKind::Type,
+                            name,
+                        })
+                        .or_default();
+                    references.push(Reference::Read {
+                        range: node.text_range(),
+                        is_exported,
+                    });
+                }
             }
             JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => {
                 // SAFETY: kind check above
                 let reference = JsxReferenceIdentifier::unwrap_cast(node.clone());
                 let name_token = reference.value_token().ok()?;
-                (name_token.token_text_trimmed(), false)
+                let name = name_token.token_text_trimmed();
+                let current_scope = self.current_scope_mut();
+                let references = current_scope
+                    .references
+                    .entry(BindingName {
+                        kind: BindingKind::Value,
+                        name,
+                    })
+                    .or_default();
+                references.push(Reference::Read {
+                    range: node.text_range(),
+                    is_exported: false,
+                });
             }
             _ => return None,
-        };
-
-        let current_scope = self.current_scope_mut();
-        let references = current_scope
-            .references
-            .entry(BindingName {
-                kind: BindingKind::Value,
-                name,
-            })
-            .or_default();
-        references.push(Reference::Read {
-            range: node.text_range(),
-            is_exported,
-        });
+        }
 
         Some(())
     }
@@ -605,7 +680,7 @@ impl SemanticEventExtractor {
             let parent_kind = infer.syntax().parent().map(|parent| parent.kind());
 
             if let (Some(name_token), Some(parent_kind)) = (name_token, parent_kind) {
-                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Value);
+                self.push_binding_into_scope(None, &name_token, parent_kind, BindingKind::Type);
             }
         }
     }
@@ -724,7 +799,7 @@ impl SemanticEventExtractor {
                     // ... or raise UnresolvedReference if this is the global scope.
                     for reference in references {
                         self.stash.push_back(SemanticEvent::UnresolvedReference {
-                            is_read: reference.is_read(),
+                            is_read: matches!(reference, Reference::Read { .. }),
                             range: *reference.range(),
                         });
                     }
@@ -868,14 +943,14 @@ impl SemanticEventExtractor {
         function_declaration: &JsSyntaxNode,
         binding_id: usize,
     ) {
-        use JsSyntaxKind::*;
         debug_assert!(matches!(
             function_declaration.kind(),
-            JS_FUNCTION_DECLARATION | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            JsSyntaxKind::JS_FUNCTION_DECLARATION
+                | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
         ));
         let is_exported = matches!(
             function_declaration.parent().kind(),
-            Some(JS_EXPORT | JS_EXPORT_DEFAULT_DECLARATION_CLAUSE)
+            Some(JsSyntaxKind::JS_EXPORT | JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE)
         );
         if is_exported {
             self.stash.push_back(SemanticEvent::Exported {
@@ -892,10 +967,9 @@ impl SemanticEventExtractor {
         declaration_expression: &JsSyntaxNode,
         binding_id: usize,
     ) {
-        use JsSyntaxKind::*;
         debug_assert!(matches!(
             declaration_expression.kind(),
-            JS_FUNCTION_EXPRESSION | JS_CLASS_EXPRESSION
+            JsSyntaxKind::JS_FUNCTION_EXPRESSION | JsSyntaxKind::JS_CLASS_EXPRESSION
         ));
         let is_module_exports = declaration_expression
             .parent()
@@ -963,28 +1037,33 @@ impl SemanticEventExtractor {
 
     // Check if a reference is exported and raise the [Exported] event.
     fn is_js_reference_identifier_exported(&mut self, reference: &JsSyntaxNode) -> bool {
-        use JsSyntaxKind::*;
-        debug_assert!(matches!(reference.kind(), JS_REFERENCE_IDENTIFIER));
+        debug_assert!(matches!(
+            reference.kind(),
+            JsSyntaxKind::JS_REFERENCE_IDENTIFIER
+        ));
         let reference_parent = reference.parent();
         let reference_greatparent = reference_parent.as_ref().and_then(|p| p.parent());
 
         // check export keyword
         matches!(
             reference_parent.kind(),
-            Some(JS_EXPORT_NAMED_SHORTHAND_SPECIFIER | JS_EXPORT_NAMED_SPECIFIER)
+            Some(
+                JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER
+                    | JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER
+            )
         ) | {
             // check "export default" keyword
             matches!(
                 reference_greatparent.kind(),
-                Some(JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE)
+                Some(JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE)
             )
         } | {
             // check module.exports
             match reference_parent.map(|x| x.kind()) {
-                Some(JS_IDENTIFIER_EXPRESSION) => reference_greatparent
+                Some(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION) => reference_greatparent
                     .map(|x| self.is_assignment_left_side_module_exports(&x))
                     .unwrap_or(false),
-                Some(JS_SHORTHAND_PROPERTY_OBJECT_MEMBER) => reference_greatparent
+                Some(JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER) => reference_greatparent
                     .and_then(|g| g.grand_parent())
                     .map(|x| self.is_assignment_left_side_module_exports(&x))
                     .unwrap_or(false),

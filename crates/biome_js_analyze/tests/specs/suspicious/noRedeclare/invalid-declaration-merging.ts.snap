@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid-declaration-merging.ts
 ---
 # Input
@@ -59,6 +58,52 @@ invalid-declaration-merging.ts:8:7 lint/suspicious/noRedeclare ━━━━━�
        │       ^^^^^
      9 │ 	prop: number;
     10 │ }
+  
+  i 'Order' is defined here:
+  
+    1 │ // Type and value merging
+  > 2 │ export type Order = -1 | 0 | 1;
+      │             ^^^^^
+    3 │ 
+    4 │ interface Order {
+  
+
+```
+
+```
+invalid-declaration-merging.ts:8:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'Order'. Consider to delete it or rename it.
+  
+     6 │ }
+     7 │ 
+   > 8 │ class Order {
+       │       ^^^^^
+     9 │ 	prop: number;
+    10 │ }
+  
+  i 'Order' is defined here:
+  
+    1 │ // Type and value merging
+  > 2 │ export type Order = -1 | 0 | 1;
+      │             ^^^^^
+    3 │ 
+    4 │ interface Order {
+  
+
+```
+
+```
+invalid-declaration-merging.ts:12:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'Order'. Consider to delete it or rename it.
+  
+    10 │ }
+    11 │ 
+  > 12 │ enum Order {
+       │      ^^^^^
+    13 │ 	Lower = -1,
+    14 │ 	Equal = 0,
   
   i 'Order' is defined here:
   
