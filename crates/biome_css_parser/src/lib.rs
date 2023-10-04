@@ -30,7 +30,7 @@ pub fn parse_css_with_cache(
     cache: &mut NodeCache,
     config: CssParserOptions,
 ) -> CssParse {
-    tracing::debug_span!("parse").in_scope(move || {
+    tracing::debug_span!("Parsing phase").in_scope(move || {
         let mut parser = CssParser::new(source, config);
 
         parse_root(&mut parser);

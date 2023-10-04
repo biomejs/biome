@@ -40,14 +40,17 @@ dashmap              = { workspace = true }
 hdrhistogram         = { version = "7.5.0", default-features = false }
 indexmap             = { workspace = true }
 lazy_static          = { workspace = true }
+log                  = { workspace = true }
 rayon                = "1.5.1"
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tokio                = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing              = { workspace = true }
 tracing-appender     = "0.2"
+tracing-log          = "0.1.3"
 tracing-subscriber   = { version = "0.3.16", features = ["env-filter"] }
 tracing-tree         = "0.2.2"
+time = { version = "0.3.28", features = ['formatting'] }
 
 [target.'cfg(unix)'.dependencies]
 libc  = "0.2.127"

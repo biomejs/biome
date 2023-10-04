@@ -27,7 +27,7 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::trace;
+use tracing::{info, info_span, trace};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application

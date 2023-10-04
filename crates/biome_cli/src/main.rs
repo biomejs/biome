@@ -5,8 +5,8 @@
 //! [website]: https://biomejs.dev
 
 use biome_cli::{
-    biome_command, open_transport, setup_panic_handler, to_color_mode, BiomeCommand, CliDiagnostic,
-    CliSession,
+    biome_command, open_transport, setup_cli_subscriber, setup_panic_handler, to_color_mode,
+    BiomeCommand, CliDiagnostic, CliSession, LoggingLevel,
 };
 use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{set_bottom_frame, PrintDiagnostic};
@@ -33,6 +33,8 @@ fn main() -> ExitCode {
         Ok(command) => {
             let color_mode = to_color_mode(command.get_color());
             console.set_color(color_mode);
+            setup_cli_subscriber(command.log_level());
+
             let is_verbose = command.is_verbose();
             let result = run_workspace(&mut console, command);
             match result {

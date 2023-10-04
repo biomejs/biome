@@ -1,3 +1,4 @@
+use crate::LoggingLevel;
 use bpaf::Bpaf;
 use std::str::FromStr;
 
@@ -44,6 +45,9 @@ pub struct CliOptions {
     /// Reports information using the JSON format
     #[bpaf(long("json"), switch, hide_usage, hide)]
     pub json: bool,
+
+    #[bpaf(long("log-level"))]
+    pub log_level: Option<LoggingLevel>,
 }
 
 #[derive(Debug, Clone)]
