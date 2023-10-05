@@ -39,7 +39,7 @@ try {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>catch parameter</strong></span><span style="color: rgb(38, 148, 255);"> is declared here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>catch parameter</strong></span><span style="color: lightgreen;"> is declared here:</span>
   
     <strong>1 │ </strong>try {
     <strong>2 │ </strong>
@@ -48,7 +48,7 @@ try {
     <strong>4 │ </strong>  e;
     <strong>5 │ </strong>  e = 10;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Use a local variable instead.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a local variable instead.</span>
   
 </code></pre>
 

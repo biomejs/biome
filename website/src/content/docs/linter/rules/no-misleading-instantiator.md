@@ -42,7 +42,7 @@ interface I {
     <strong>3 │ </strong>  constructor(): void;
     <strong>4 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>new</strong></span><span style="color: lightgreen;"> in an interface suggests it's instantiable, which is incorrect. The returned type should different from the constructor's type.</span>
   
 </code></pre>
 
@@ -62,7 +62,7 @@ class C {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>new</strong></span><span style="color: rgb(38, 148, 255);"> is typically used to instantiate objects. In classes, its usage can be misleading.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>new</strong></span><span style="color: lightgreen;"> is typically used to instantiate objects. In classes, its usage can be misleading.</span>
   
 </code></pre>
 

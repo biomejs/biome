@@ -34,7 +34,7 @@ let variable: any = 1;
    <strong>   │ </strong>              <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>any</strong></span><span style="color: rgb(38, 148, 255);"> disables many type checking rules. Its use should be avoided.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> disables many type checking rules. Its use should be avoided.</span>
   
 </code></pre>
 
@@ -54,7 +54,7 @@ class SomeClass {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>any</strong></span><span style="color: rgb(38, 148, 255);"> disables many type checking rules. Its use should be avoided.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> disables many type checking rules. Its use should be avoided.</span>
   
 </code></pre>
 
@@ -70,7 +70,7 @@ function fn(param: Array<any>): void {}
    <strong>   │ </strong>                         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>any</strong></span><span style="color: rgb(38, 148, 255);"> disables many type checking rules. Its use should be avoided.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> disables many type checking rules. Its use should be avoided.</span>
   
 </code></pre>
 

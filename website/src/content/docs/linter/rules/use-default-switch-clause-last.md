@@ -48,7 +48,7 @@ switch (foo) {
     <strong>4 │ </strong>    case 0:
     <strong>5 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The following </span><span style="color: rgb(38, 148, 255);"><strong>case</strong></span><span style="color: rgb(38, 148, 255);"> clause is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The following </span><span style="color: lightgreen;"><strong>case</strong></span><span style="color: lightgreen;"> clause is here:</span>
   
     <strong>2 │ </strong>    default:
     <strong>3 │ </strong>        break;
@@ -59,7 +59,7 @@ switch (foo) {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Regardless its position, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause should be the last </span><span style="color: rgb(38, 148, 255);"><strong>switch</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Regardless its position, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause should be the last </span><span style="color: lightgreen;"><strong>switch</strong></span><span style="color: lightgreen;"> clause.</span>
   
 </code></pre>
 
@@ -84,7 +84,7 @@ switch (foo) {
     <strong>4 │ </strong>    case 0:
     <strong>5 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The following </span><span style="color: rgb(38, 148, 255);"><strong>case</strong></span><span style="color: rgb(38, 148, 255);"> clause is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The following </span><span style="color: lightgreen;"><strong>case</strong></span><span style="color: lightgreen;"> clause is here:</span>
   
     <strong>2 │ </strong>    default:
     <strong>3 │ </strong>        f();
@@ -95,7 +95,7 @@ switch (foo) {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Regardless its position, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause should be the last </span><span style="color: rgb(38, 148, 255);"><strong>switch</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Regardless its position, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause should be the last </span><span style="color: lightgreen;"><strong>switch</strong></span><span style="color: lightgreen;"> clause.</span>
   
 </code></pre>
 
@@ -120,7 +120,7 @@ switch (foo) {
     <strong>5 │ </strong>    case 1:
     <strong>6 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The following </span><span style="color: rgb(38, 148, 255);"><strong>case</strong></span><span style="color: rgb(38, 148, 255);"> clause is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The following </span><span style="color: lightgreen;"><strong>case</strong></span><span style="color: lightgreen;"> clause is here:</span>
   
     <strong>3 │ </strong>        break;
     <strong>4 │ </strong>    default:
@@ -131,7 +131,7 @@ switch (foo) {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Regardless its position, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: rgb(38, 148, 255);"><strong>default</strong></span><span style="color: rgb(38, 148, 255);"> clause should be the last </span><span style="color: rgb(38, 148, 255);"><strong>switch</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Regardless its position, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause is always executed when there is no match. To avoid confusion, the </span><span style="color: lightgreen;"><strong>default</strong></span><span style="color: lightgreen;"> clause should be the last </span><span style="color: lightgreen;"><strong>switch</strong></span><span style="color: lightgreen;"> clause.</span>
   
 </code></pre>
 

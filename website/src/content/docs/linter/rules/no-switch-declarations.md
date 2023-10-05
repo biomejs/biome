@@ -44,7 +44,7 @@ switch (foo) {
     <strong>4 │ </strong>        break;
     <strong>5 │ </strong>    case 2:
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The declaration is defined in this </span><span style="color: rgb(38, 148, 255);"><strong>switch clause</strong></span><span style="color: rgb(38, 148, 255);">:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The declaration is defined in this </span><span style="color: lightgreen;"><strong>switch clause</strong></span><span style="color: lightgreen;">:</span>
   
     <strong>1 │ </strong>switch (foo) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    case 0:
@@ -55,7 +55,7 @@ switch (foo) {
     <strong>5 │ </strong>    case 2:
     <strong>6 │ </strong>        x; // `x` can be used while it is not initialized
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the </span><span style="color: rgb(38, 148, 255);"><strong>declaration</strong></span><span style="color: rgb(38, 148, 255);"> in a block.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Wrap the </span><span style="color: lightgreen;"><strong>declaration</strong></span><span style="color: lightgreen;"> in a block.</span>
   
     <strong>1</strong> <strong> 1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong>   <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">c</span><span style="color: Tomato;">a</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">0</span><span style="color: Tomato;">:</span>
@@ -93,7 +93,7 @@ switch (foo) {
     <strong>4 │ </strong>        break;
     <strong>5 │ </strong>    case 2:
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The declaration is defined in this </span><span style="color: rgb(38, 148, 255);"><strong>switch clause</strong></span><span style="color: rgb(38, 148, 255);">:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The declaration is defined in this </span><span style="color: lightgreen;"><strong>switch clause</strong></span><span style="color: lightgreen;">:</span>
   
     <strong>1 │ </strong>switch (foo) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    case 0:
@@ -104,7 +104,7 @@ switch (foo) {
     <strong>5 │ </strong>    case 2:
     <strong>6 │ </strong>        f(); // `f` can be called here
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the </span><span style="color: rgb(38, 148, 255);"><strong>declaration</strong></span><span style="color: rgb(38, 148, 255);"> in a block.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Wrap the </span><span style="color: lightgreen;"><strong>declaration</strong></span><span style="color: lightgreen;"> in a block.</span>
   
     <strong>1</strong> <strong> 1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong>   <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">c</span><span style="color: Tomato;">a</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">0</span><span style="color: Tomato;">:</span>
@@ -142,7 +142,7 @@ switch (foo) {
     <strong>4 │ </strong>        break;
     <strong>5 │ </strong>    default:
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The declaration is defined in this </span><span style="color: rgb(38, 148, 255);"><strong>switch clause</strong></span><span style="color: rgb(38, 148, 255);">:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The declaration is defined in this </span><span style="color: lightgreen;"><strong>switch clause</strong></span><span style="color: lightgreen;">:</span>
   
     <strong>1 │ </strong>switch (foo) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    case 0:
@@ -153,7 +153,7 @@ switch (foo) {
     <strong>5 │ </strong>    default:
     <strong>6 │ </strong>        new A(); // `A` can be instantiated here
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the </span><span style="color: rgb(38, 148, 255);"><strong>declaration</strong></span><span style="color: rgb(38, 148, 255);"> in a block.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Wrap the </span><span style="color: lightgreen;"><strong>declaration</strong></span><span style="color: lightgreen;"> in a block.</span>
   
     <strong>1</strong> <strong> 1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong>   <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">c</span><span style="color: Tomato;">a</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">0</span><span style="color: Tomato;">:</span>

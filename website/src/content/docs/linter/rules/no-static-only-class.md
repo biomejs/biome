@@ -45,7 +45,7 @@ class X {
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>5 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Prefer using simple functions instead of classes with only static members.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Prefer using simple functions instead of classes with only static members.</span>
   
 </code></pre>
 
@@ -125,7 +125,7 @@ export class Utilities {
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Prefer using simple functions instead of classes with only static members.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Prefer using simple functions instead of classes with only static members.</span>
   
 </code></pre>
 

@@ -28,15 +28,15 @@ function f(a = 0, b) {}
    <strong>   │ </strong>           <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The last </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The last </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> is here:</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function f(a = 0, b) {}
    <strong>   │ </strong>                  <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">A </span><span style="color: rgb(38, 148, 255);"><strong>default parameter</strong></span><span style="color: rgb(38, 148, 255);"> that precedes a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> cannot be omitted at call site.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A </span><span style="color: lightgreen;"><strong>default parameter</strong></span><span style="color: lightgreen;"> that precedes a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> cannot be omitted at call site.</span>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Turn the parameter into a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Turn the parameter into a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;">.</span>
   
 <strong>  </strong><strong>  1 │ </strong>function<span style="opacity: 0.8;">·</span>f(a<span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">=</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">0</span>,<span style="opacity: 0.8;">·</span>b)<span style="opacity: 0.8;">·</span>{}
 <strong>  </strong><strong>    │ </strong>            <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>       
@@ -54,15 +54,15 @@ function f(a, b = 0, c) {}
    <strong>   │ </strong>              <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The last </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The last </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> is here:</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function f(a, b = 0, c) {}
    <strong>   │ </strong>                     <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">A </span><span style="color: rgb(38, 148, 255);"><strong>default parameter</strong></span><span style="color: rgb(38, 148, 255);"> that precedes a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> cannot be omitted at call site.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A </span><span style="color: lightgreen;"><strong>default parameter</strong></span><span style="color: lightgreen;"> that precedes a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> cannot be omitted at call site.</span>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Turn the parameter into a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Turn the parameter into a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;">.</span>
   
 <strong>  </strong><strong>  1 │ </strong>function<span style="opacity: 0.8;">·</span>f(a,<span style="opacity: 0.8;">·</span>b<span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">=</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">0</span>,<span style="opacity: 0.8;">·</span>c)<span style="opacity: 0.8;">·</span>{}
 <strong>  </strong><strong>    │ </strong>               <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>       
@@ -80,15 +80,15 @@ function f(a: number, b?: number, c: number) {}
    <strong>   │ </strong>                      <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The last </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The last </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> is here:</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function f(a: number, b?: number, c: number) {}
    <strong>   │ </strong>                                  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">A </span><span style="color: rgb(38, 148, 255);"><strong>optional parameter</strong></span><span style="color: rgb(38, 148, 255);"> that precedes a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> cannot be omitted at call site.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A </span><span style="color: lightgreen;"><strong>optional parameter</strong></span><span style="color: lightgreen;"> that precedes a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> cannot be omitted at call site.</span>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Turn the parameter into a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Turn the parameter into a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;">.</span>
   
 <strong>  </strong><strong>  1 │ </strong>function<span style="opacity: 0.8;">·</span>f(a:<span style="opacity: 0.8;">·</span>number,<span style="opacity: 0.8;">·</span>b<span style="color: Tomato;">?</span>:<span style="opacity: 0.8;">·</span>number,<span style="opacity: 0.8;">·</span>c:<span style="opacity: 0.8;">·</span>number)<span style="opacity: 0.8;">·</span>{}
 <strong>  </strong><strong>    │ </strong>                       <span style="color: Tomato;">-</span>                       
@@ -110,7 +110,7 @@ class Foo {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The last </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> is here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The last </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> is here:</span>
   
     <strong>1 │ </strong>class Foo {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    constructor(readonly a = 10, readonly b: number) {}
@@ -118,9 +118,9 @@ class Foo {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">A </span><span style="color: rgb(38, 148, 255);"><strong>default parameter</strong></span><span style="color: rgb(38, 148, 255);"> that precedes a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);"> cannot be omitted at call site.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A </span><span style="color: lightgreen;"><strong>default parameter</strong></span><span style="color: lightgreen;"> that precedes a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;"> cannot be omitted at call site.</span>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Turn the parameter into a </span><span style="color: rgb(38, 148, 255);"><strong>required parameter</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Turn the parameter into a </span><span style="color: lightgreen;"><strong>required parameter</strong></span><span style="color: lightgreen;">.</span>
   
 <strong>  </strong><strong>  2 │ </strong><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span>constructor(readonly<span style="opacity: 0.8;">·</span>a<span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">=</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">1</span><span style="color: Tomato;">0</span>,<span style="opacity: 0.8;">·</span>readonly<span style="opacity: 0.8;">·</span>b:<span style="opacity: 0.8;">·</span>number)<span style="opacity: 0.8;">·</span>{}
 <strong>  </strong><strong>    │ </strong>                          <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>                        

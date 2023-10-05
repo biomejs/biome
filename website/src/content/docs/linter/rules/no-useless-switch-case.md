@@ -41,7 +41,7 @@ switch (foo) {
     <strong>3 │ </strong>    default:
     <strong>4 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">because the </span><span style="color: rgb(38, 148, 255);"><strong>default clause</strong></span><span style="color: rgb(38, 148, 255);"> is present:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">because the </span><span style="color: lightgreen;"><strong>default clause</strong></span><span style="color: lightgreen;"> is present:</span>
   
     <strong>1 │ </strong>switch (foo) {
     <strong>2 │ </strong>    case 0:
@@ -52,7 +52,7 @@ switch (foo) {
     <strong>5 │ </strong>    case 1:
     <strong>6 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Remove the useless </span><span style="color: rgb(38, 148, 255);"><strong>case</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the useless </span><span style="color: lightgreen;"><strong>case</strong></span><span style="color: lightgreen;">.</span>
   
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>a</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>0</strong></span><span style="color: Tomato;"><strong>:</strong></span>
@@ -86,7 +86,7 @@ switch (foo) {
     <strong>5 │ </strong>    case 1:
     <strong>6 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">because the </span><span style="color: rgb(38, 148, 255);"><strong>default clause</strong></span><span style="color: rgb(38, 148, 255);"> is present:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">because the </span><span style="color: lightgreen;"><strong>default clause</strong></span><span style="color: lightgreen;"> is present:</span>
   
     <strong>1 │ </strong>switch (foo) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    default:
@@ -94,7 +94,7 @@ switch (foo) {
     <strong>3 │ </strong>    case 0:
     <strong>4 │ </strong>        break;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Remove the useless </span><span style="color: rgb(38, 148, 255);"><strong>case</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the useless </span><span style="color: lightgreen;"><strong>case</strong></span><span style="color: lightgreen;">.</span>
   
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      default:

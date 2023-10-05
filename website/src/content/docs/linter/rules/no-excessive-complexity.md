@@ -56,7 +56,7 @@ function tooComplex() {
     <strong>2 │ </strong>    for (let x = 0; x &lt; 10; x++) {
     <strong>3 │ </strong>        for (let y = 0; y &lt; 10; y++) {
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.</span>
   
 </code></pre>
 

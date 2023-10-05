@@ -30,7 +30,7 @@ class A extends B {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If this is intentional, add an explicit throw statement in unsupported paths.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If this is intentional, add an explicit throw statement in unsupported paths.</span>
   
 </code></pre>
 
@@ -57,7 +57,7 @@ class A extends B {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">`</span><span style="color: rgb(38, 148, 255);"><strong>this</strong></span><span style="color: rgb(38, 148, 255);">` is accessed here:</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">`</span><span style="color: lightgreen;"><strong>this</strong></span><span style="color: lightgreen;">` is accessed here:</span>
   
     <strong>1 │ </strong>class A extends B {
     <strong>2 │ </strong>    constructor(value) {
@@ -66,7 +66,7 @@ class A extends B {
     <strong>4 │ </strong>        super();
     <strong>5 │ </strong>    }
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If this is intentional, add an explicit throw statement in unsupported paths.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If this is intentional, add an explicit throw statement in unsupported paths.</span>
   
 </code></pre>
 
@@ -95,7 +95,7 @@ class A extends B {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If this is intentional, add an explicit throw statement in unsupported paths.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If this is intentional, add an explicit throw statement in unsupported paths.</span>
   
 </code></pre>
 

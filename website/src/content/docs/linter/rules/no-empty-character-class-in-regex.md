@@ -32,9 +32,9 @@ Source: https://eslint.org/docs/latest/rules/no-empty-character-class/
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Empty character classes don't match anything.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">If you want to match against </span><span style="color: rgb(38, 148, 255);"><strong>[</strong></span><span style="color: rgb(38, 148, 255);">, escape it </span><span style="color: rgb(38, 148, 255);"><strong>\[</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">Otherwise, remove the character class or fill it.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty character classes don't match anything.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">If you want to match against </span><span style="color: lightgreen;"><strong>[</strong></span><span style="color: lightgreen;">, escape it </span><span style="color: lightgreen;"><strong>\[</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">Otherwise, remove the character class or fill it.</span>
   
 </code></pre>
 
@@ -50,9 +50,9 @@ Source: https://eslint.org/docs/latest/rules/no-empty-character-class/
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Negated empty character classes match anything.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">If you want to match against </span><span style="color: rgb(38, 148, 255);"><strong>[</strong></span><span style="color: rgb(38, 148, 255);">, escape it </span><span style="color: rgb(38, 148, 255);"><strong>\[</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">Otherwise, remove the character class or fill it.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Negated empty character classes match anything.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">If you want to match against </span><span style="color: lightgreen;"><strong>[</strong></span><span style="color: lightgreen;">, escape it </span><span style="color: lightgreen;"><strong>\[</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">Otherwise, remove the character class or fill it.</span>
   
 </code></pre>
 

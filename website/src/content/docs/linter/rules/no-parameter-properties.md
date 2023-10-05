@@ -33,7 +33,7 @@ class A {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>Parameter properties</strong></span><span style="color: rgb(38, 148, 255);"> are less explicit than other ways of declaring and initializing </span><span style="color: rgb(38, 148, 255);"><strong>class properties</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>Parameter properties</strong></span><span style="color: lightgreen;"> are less explicit than other ways of declaring and initializing </span><span style="color: lightgreen;"><strong>class properties</strong></span><span style="color: lightgreen;">.</span>
   
 </code></pre>
 

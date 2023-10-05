@@ -42,8 +42,6 @@ pub enum LoggingLevel {
     /// No logs should be shown
     #[default]
     None,
-    #[cfg(debug_assertions)]
-    Trace,
     Debug,
     Info,
     Warn,
@@ -58,8 +56,6 @@ impl LoggingLevel {
             LoggingLevel::Warn => Some(LevelFilter::WARN),
             LoggingLevel::Error => Some(LevelFilter::ERROR),
             LoggingLevel::Debug => Some(LevelFilter::DEBUG),
-            #[cfg(debug_assertions)]
-            LoggingLevel::Trace => Some(LevelFilter::TRACE),
         }
     }
 }
@@ -73,8 +69,6 @@ impl FromStr for LoggingLevel {
             "warn" => Ok(Self::Warn),
             "error" => Ok(Self::Error),
             "debug" => Ok(Self::Debug),
-            #[cfg(debug_assertions)]
-            "trace" => Ok(Self::Trace),
             _ => Err("Unexpected value".to_string()),
         }
     }
@@ -84,7 +78,6 @@ impl Display for LoggingLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             LoggingLevel::None => write!(f, "none"),
-            LoggingLevel::Trace => write!(f, "trace"),
             LoggingLevel::Debug => write!(f, "debug"),
             LoggingLevel::Info => write!(f, "info"),
             LoggingLevel::Warn => write!(f, "warn"),

@@ -31,7 +31,7 @@ Disallow two keys with the same name inside a JSON object.
     <strong>3 │ </strong>  &quot;title&quot;: &quot;Second title&quot;
     <strong>4 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This where a duplicated key was declared again.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This where a duplicated key was declared again.</span>
   
     <strong>1 │ </strong>{
     <strong>2 │ </strong>  &quot;title&quot;: &quot;New title&quot;,
@@ -40,7 +40,7 @@ Disallow two keys with the same name inside a JSON object.
     <strong>4 │ </strong>}
     <strong>5 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.</span>
   
 </code></pre>
 

@@ -40,7 +40,7 @@ try {
     <strong>5 │ </strong>}
     <strong>6 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">These unnecessary </span><span style="color: rgb(38, 148, 255);"><strong>catch</strong></span><span style="color: rgb(38, 148, 255);"> clauses can be confusing. It is recommended to remove them.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">These unnecessary </span><span style="color: lightgreen;"><strong>catch</strong></span><span style="color: lightgreen;"> clauses can be confusing. It is recommended to remove them.</span>
   
 </code></pre>
 
@@ -65,7 +65,7 @@ try {
     <strong>5 │ </strong>} finally {
     <strong>6 │ </strong>    doCleanUp();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">These unnecessary </span><span style="color: rgb(38, 148, 255);"><strong>catch</strong></span><span style="color: rgb(38, 148, 255);"> clauses can be confusing. It is recommended to remove them.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">These unnecessary </span><span style="color: lightgreen;"><strong>catch</strong></span><span style="color: lightgreen;"> clauses can be confusing. It is recommended to remove them.</span>
   
 </code></pre>
 
