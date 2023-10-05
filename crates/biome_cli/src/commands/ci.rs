@@ -2,8 +2,8 @@ use crate::cli_options::CliOptions;
 use crate::configuration::LoadedConfiguration;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{
-    configuration::load_configuration, execute_mode, CliDiagnostic, CliSession, Execution,
-    TraversalMode,
+    configuration::load_configuration, execute_mode, setup_cli_subscriber, CliDiagnostic,
+    CliSession, Execution, TraversalMode,
 };
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{FormatterConfiguration, LinterConfiguration};
@@ -22,6 +22,11 @@ pub(crate) struct CiCommandPayload {
 
 /// Handler for the "ci" command of the Biome CLI
 pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
+    setup_cli_subscriber(
+        payload.cli_options.log_level.clone(),
+        payload.cli_options.log_kind.clone(),
+    );
+
     let loaded_configuration =
         load_configuration(&mut session, &payload.cli_options)?.with_file_path();
 

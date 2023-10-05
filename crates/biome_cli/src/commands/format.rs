@@ -3,7 +3,9 @@ use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
 use crate::vcs::store_path_to_ignore_from_vcs;
-use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use crate::{
+    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
+};
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::json::JsonFormatter;
@@ -42,6 +44,8 @@ pub(crate) fn format(
         write,
         json_formatter,
     } = payload;
+    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+
     let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
 
     loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
