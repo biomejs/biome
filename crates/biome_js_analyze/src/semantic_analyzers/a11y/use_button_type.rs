@@ -159,7 +159,7 @@ impl Rule for UseButtonType {
             message
         )
             .note(markup! {
-                "The default  "<Emphasis>"type"</Emphasis>" of a button is "<Emphasis>"submit"</Emphasis>", which causes the submission of a form when placed inside a `form` element. "
+                "The default "<Emphasis>"type"</Emphasis>" of a button is "<Emphasis>"submit"</Emphasis>", which causes the submission of a form when placed inside a `form` element. "
                 "This is likely not the behaviour that you want inside a React application."
             })
             .note(
