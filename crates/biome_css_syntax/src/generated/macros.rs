@@ -105,11 +105,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR_COMBINATOR => {
-                    let $pattern =
-                        unsafe { $crate::CssComplexSelectorCombinator::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR => {
                     let $pattern = unsafe { $crate::CssCompoundSelector::new_unchecked(node) };
                     $body

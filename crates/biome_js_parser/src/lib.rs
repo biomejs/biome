@@ -131,7 +131,7 @@ mod token_source;
 use crate::prelude::*;
 pub(crate) use crate::ParsedSyntax::{Absent, Present};
 pub use crate::{
-    lexer::{LexContext, ReLexContext},
+    lexer::{JsLexContext, JsReLexContext},
     options::JsParserOptions,
     parse::*,
 };

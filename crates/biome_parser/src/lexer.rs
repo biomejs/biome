@@ -1,8 +1,67 @@
-use super::{LexContext, Lexer, LexerCheckpoint, ReLexContext, TextRange, TokenFlags};
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxKind::EOF};
-use biome_parser::diagnostic::ParseDiagnostic;
+use super::diagnostic::ParseDiagnostic;
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
+use bitflags::bitflags;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
+
+pub trait Lexer<'src> {
+    type Kind: SyntaxKind;
+    type LexContext: LexContext + Default;
+    type ReLexContext;
+
+    /// Returns the source code
+    fn source(&self) -> &'src str;
+
+    /// Returns the kind of the current token
+    fn current(&self) -> Self::Kind;
+
+    /// Returns the range of the current token (The token that was lexed by the last `next` call)
+
+    fn current_range(&self) -> TextRange;
+
+    /// Creates a checkpoint storing the current lexer state.
+    ///
+    /// Use `rewind` to restore the lexer to the state stored in the checkpoint.
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind>;
+
+    /// Lexes the next token.
+    ///
+    /// ## Return
+    /// Returns its kind and any potential error.
+    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind;
+
+    /// Lexes the current token again under the passed [Self::ReLexContext].
+    /// Useful in case a token can have different meaning depending on the context.
+    ///
+    /// For example, a `/` must either be lexed as a `/` token or as a regular expression if it
+    /// appears at the start of an expression. Re-lexing allows to always lex the `/` as a `/` token and
+    /// call into `re_lex` when the parser is at a valid regular expression position, to see if the
+    /// current token can be lexed out as a regular expression literal.
+    ///
+    /// ## Returns
+    /// The new token kind and any associated diagnostic if current token has a different meaning under
+    /// the passed [Self::ReLexContext].
+    ///
+    /// Returns the current kind without any diagnostic if not. Any cached lookahead remains valid in that case.
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind;
+
+    /// Returns `true` if a line break precedes the current token.
+    fn has_preceding_line_break(&self) -> bool;
+
+    /// Returns `true` if the current token is an identifier and it contains a unicode escape sequence (`\u...`).
+    fn has_unicode_escape(&self) -> bool;
+
+    /// Rewinds the lexer to the same state as when the passed in `checkpoint` was created.
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>);
+
+    fn finish(self) -> Vec<ParseDiagnostic>;
+
+    fn current_flags(&self) -> TokenFlags;
+}
+
+pub trait LexContext {
+    fn is_regular(&self) -> bool;
+}
 
 /// Wrapper around a [Lexer] that supports lookahead.
 ///
@@ -20,7 +79,7 @@ use std::iter::FusedIterator;
 ///   that any following token may turn out to be different as well, thus, it's necessary to clear the
 ///   lookahead cache.
 #[derive(Debug)]
-pub(crate) struct BufferedLexer<'l> {
+pub struct BufferedLexer<'l, Lex: Lexer<'l>> {
     /// Cache storing the lookahead tokens. That are, all tokens between the `current` token and
     /// the "current" of the [Lexer]. This is because the [Lexer]'s current token points to the
     /// furthest requested lookahead token.
@@ -35,18 +94,18 @@ pub(crate) struct BufferedLexer<'l> {
     /// * `lookahead`: [WHITESPACE, IDENT: 'a', WHITESPACE]. The tokens that have been lexed to
     ///    answer the "lookahead 4" request but haven't been returned yet.
     /// * [Lexer::current]: Points to `=`
-    lookahead: VecDeque<LexerCheckpoint>,
+    lookahead: VecDeque<LexerCheckpoint<Lex::Kind>>,
 
     /// Stores the information of the current token in case the `lexer` is at least one token ahead.
-    current: Option<LexerCheckpoint>,
+    current: Option<LexerCheckpoint<Lex::Kind>>,
 
     /// Underlying lexer. May be ahead if iterated with lookahead
-    inner: Lexer<'l>,
+    inner: Lex,
 }
 
-impl<'l> BufferedLexer<'l> {
+impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
     /// Creates a new [BufferedLexer] wrapping the passed in [Lexer].
-    pub fn new(lexer: Lexer<'l>) -> Self {
+    pub fn new(lexer: Lex) -> Self {
         Self {
             inner: lexer,
             current: None,
@@ -58,7 +117,7 @@ impl<'l> BufferedLexer<'l> {
     ///
     /// [See `Lexer.next_token`](Lexer::next_token)
     #[inline(always)]
-    pub fn next_token(&mut self, context: LexContext) -> JsSyntaxKind {
+    pub fn next_token(&mut self, context: Lex::LexContext) -> Lex::Kind {
         // Reset the lookahead if the context isn't the regular context because it's highly likely
         // that the lexer will return a different token.
         if !context.is_regular() {
@@ -88,7 +147,7 @@ impl<'l> BufferedLexer<'l> {
 
     /// Returns the kind of the current token
     #[inline(always)]
-    pub fn current(&self) -> JsSyntaxKind {
+    pub fn current(&self) -> Lex::Kind {
         if let Some(current) = &self.current {
             current.current_kind
         } else {
@@ -134,7 +193,7 @@ impl<'l> BufferedLexer<'l> {
 
     /// Creates a checkpoint representing the current lexer state. Allows rewinding
     /// the lexer to this position later on.
-    pub fn checkpoint(&self) -> LexerCheckpoint {
+    pub fn checkpoint(&self) -> LexerCheckpoint<Lex::Kind> {
         if let Some(current) = &self.current {
             current.clone()
         } else {
@@ -143,10 +202,7 @@ impl<'l> BufferedLexer<'l> {
     }
 
     /// Rewinds the lexer to the state stored in the checkpoint.
-    pub fn rewind(&mut self, checkpoint: LexerCheckpoint) {
-        // test_err js js_rewind_at_eof_token
-        // (([zAgRvz=[=(e{V{
-
+    pub fn rewind(&mut self, checkpoint: LexerCheckpoint<Lex::Kind>) {
         self.inner.rewind(checkpoint);
         self.lookahead.clear();
         self.current = None;
@@ -161,7 +217,7 @@ impl<'l> BufferedLexer<'l> {
 
     /// Re-lex the current token in the given context
     /// See [Lexer::re_lex]
-    pub fn re_lex(&mut self, context: ReLexContext) -> JsSyntaxKind {
+    pub fn re_lex(&mut self, context: Lex::ReLexContext) -> Lex::Kind {
         let current_kind = self.current();
         let current_checkpoint = self.inner.checkpoint();
 
@@ -187,7 +243,7 @@ impl<'l> BufferedLexer<'l> {
     /// Returns an iterator over the tokens following the current token to perform lookahead.
     /// For example, what's the 3rd token after the current token?
     #[inline(always)]
-    pub fn lookahead<'s>(&'s mut self) -> LookaheadIterator<'s, 'l> {
+    pub fn lookahead<'s>(&'s mut self) -> LookaheadIterator<'s, 'l, Lex> {
         LookaheadIterator::new(self)
     }
 
@@ -198,13 +254,13 @@ impl<'l> BufferedLexer<'l> {
 }
 
 #[derive(Debug)]
-pub(crate) struct LookaheadIterator<'l, 't> {
-    buffered: &'l mut BufferedLexer<'t>,
+pub struct LookaheadIterator<'l, 't, Lex: Lexer<'t>> {
+    buffered: &'l mut BufferedLexer<'t, Lex>,
     nth: usize,
 }
 
-impl<'l, 't> LookaheadIterator<'l, 't> {
-    fn new(lexer: &'l mut BufferedLexer<'t>) -> Self {
+impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
+    fn new(lexer: &'l mut BufferedLexer<'t, Lex>) -> Self {
         Self {
             buffered: lexer,
             nth: 0,
@@ -212,8 +268,8 @@ impl<'l, 't> LookaheadIterator<'l, 't> {
     }
 }
 
-impl<'l, 't> Iterator for LookaheadIterator<'l, 't> {
-    type Item = LookaheadToken;
+impl<'l, 't, Lex: Lexer<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
+    type Item = LookaheadToken<Lex::Kind>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -229,7 +285,7 @@ impl<'l, 't> Iterator for LookaheadIterator<'l, 't> {
         let lexer = &mut self.buffered.inner;
 
         // We're already at the end, calling next now only returns `EOF` again. End the iterator.
-        if lexer.current() == EOF {
+        if lexer.current() == SyntaxKind::EOF {
             return None;
         }
 
@@ -239,7 +295,7 @@ impl<'l, 't> Iterator for LookaheadIterator<'l, 't> {
             self.buffered.current = Some(lexer.checkpoint());
         }
 
-        let kind = lexer.next_token(LexContext::default());
+        let kind = lexer.next_token(Lex::LexContext::default());
         // Lex the next token and cache it in the lookahead cache. Needed to cache it right away
         // because of the diagnostic.
         let checkpoint = lexer.checkpoint();
@@ -247,21 +303,21 @@ impl<'l, 't> Iterator for LookaheadIterator<'l, 't> {
 
         Some(LookaheadToken {
             kind,
-            flags: lexer.current_flags,
+            flags: lexer.current_flags(),
         })
     }
 }
 
-impl<'l, 't> FusedIterator for LookaheadIterator<'l, 't> {}
+impl<'l, 't, Lex: Lexer<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
 
 #[derive(Debug)]
-pub struct LookaheadToken {
-    kind: JsSyntaxKind,
+pub struct LookaheadToken<Kind: SyntaxKind> {
+    kind: Kind,
     flags: TokenFlags,
 }
 
-impl LookaheadToken {
-    pub fn kind(&self) -> JsSyntaxKind {
+impl<Kind: SyntaxKind> LookaheadToken<Kind> {
+    pub fn kind(&self) -> Kind {
         self.kind
     }
 
@@ -270,8 +326,8 @@ impl LookaheadToken {
     }
 }
 
-impl From<&LexerCheckpoint> for LookaheadToken {
-    fn from(checkpoint: &LexerCheckpoint) -> Self {
+impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
+    fn from(checkpoint: &LexerCheckpoint<Kind>) -> Self {
         LookaheadToken {
             kind: checkpoint.current_kind,
             flags: checkpoint.current_flags,
@@ -279,98 +335,50 @@ impl From<&LexerCheckpoint> for LookaheadToken {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::BufferedLexer;
-    use crate::lexer::{LexContext, Lexer, TextRange, TextSize};
-    use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
-    use biome_js_syntax::T;
+/// Stores the state of the lexer so that it may later be restored to that position.
+#[derive(Debug, Clone)]
+pub struct LexerCheckpoint<Kind: SyntaxKind> {
+    pub position: TextSize,
+    pub current_start: TextSize,
+    pub current_kind: Kind,
+    pub current_flags: TokenFlags,
+    pub after_line_break: bool,
+    pub diagnostics_pos: u32,
+}
 
-    #[test]
-    fn without_lookahead() {
-        let lexer = Lexer::from_str("let a\n = 5");
-        let mut buffered = BufferedLexer::new(lexer);
-
-        buffered.next_token(LexContext::default());
-        assert_eq!(buffered.current(), T![let]);
-        assert!(!buffered.has_preceding_line_break());
-        assert_eq!(
-            buffered.current_range(),
-            TextRange::at(TextSize::from(0), TextSize::from(3))
-        );
-
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
-        assert_eq!(buffered.next_token(LexContext::default()), T![ident]);
-        assert_eq!(buffered.next_token(LexContext::default()), NEWLINE);
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
-        assert_eq!(buffered.next_token(LexContext::default()), T![=]);
-        assert!(buffered.has_preceding_line_break());
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
-        assert_eq!(
-            buffered.next_token(LexContext::default()),
-            JS_NUMBER_LITERAL
-        );
-        assert_eq!(buffered.next_token(LexContext::default()), T![EOF]);
+impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
+    /// Returns the byte offset of the current token.
+    pub fn current_start(&self) -> TextSize {
+        self.current_start
     }
 
-    #[test]
-    fn lookahead() {
-        let lexer = Lexer::from_str("let a\n = 5");
-        let mut buffered = BufferedLexer::new(lexer);
+    pub(crate) fn has_preceding_line_break(&self) -> bool {
+        self.current_flags.has_preceding_line_break()
+    }
 
-        buffered.next_token(LexContext::default());
-        assert_eq!(buffered.current(), T![let]);
-        assert!(!buffered.has_preceding_line_break());
-        assert_eq!(
-            buffered.current_range(),
-            TextRange::at(TextSize::from(0), TextSize::from(3))
-        );
+    pub(crate) fn has_unicode_escape(&self) -> bool {
+        self.current_flags.has_unicode_escape()
+    }
+}
 
-        {
-            let lookahead = buffered.lookahead().map(|l| l.kind).collect::<Vec<_>>();
+bitflags! {
+    /// Flags for a lexed token.
+    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+    pub struct TokenFlags: u8 {
+        /// Indicates that there has been a line break between the last non-trivia token
+        const PRECEDING_LINE_BREAK = 1 << 0;
 
-            assert_eq!(
-                lookahead,
-                vec![
-                    WHITESPACE,
-                    T![ident],
-                    NEWLINE,
-                    WHITESPACE,
-                    T![=],
-                    WHITESPACE,
-                    JS_NUMBER_LITERAL,
-                    T![EOF]
-                ]
-            );
-        }
+        /// Indicates that an identifier contains an unicode escape sequence
+        const UNICODE_ESCAPE = 1 << 1;
+    }
+}
 
-        assert_eq!(buffered.current(), T![let]);
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
+impl TokenFlags {
+    pub const fn has_preceding_line_break(&self) -> bool {
+        self.contains(TokenFlags::PRECEDING_LINE_BREAK)
+    }
 
-        {
-            let mut lookahead = buffered.lookahead();
-            let nth1 = lookahead.next().unwrap();
-            let nth2 = lookahead.next().unwrap();
-            let nth3 = lookahead.next().unwrap();
-            let nth4 = lookahead.next().unwrap();
-
-            assert_eq!(nth1.kind(), T![ident]);
-            assert_eq!(nth2.kind(), NEWLINE);
-            assert_eq!(nth3.kind(), WHITESPACE);
-            assert_eq!(nth4.kind(), T![=]);
-            assert!(nth4.has_preceding_line_break());
-        }
-
-        assert_eq!(buffered.next_token(LexContext::default()), T![ident]);
-        assert_eq!(buffered.next_token(LexContext::default()), NEWLINE);
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
-        assert_eq!(buffered.next_token(LexContext::default()), T![=]);
-        assert!(buffered.has_preceding_line_break());
-        assert_eq!(buffered.next_token(LexContext::default()), WHITESPACE);
-        assert_eq!(
-            buffered.next_token(LexContext::default()),
-            JS_NUMBER_LITERAL
-        );
-        assert_eq!(buffered.next_token(LexContext::default()), T![EOF]);
+    pub const fn has_unicode_escape(&self) -> bool {
+        self.contains(TokenFlags::UNICODE_ESCAPE)
     }
 }

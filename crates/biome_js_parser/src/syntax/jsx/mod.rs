@@ -6,7 +6,7 @@ use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
-use crate::lexer::{JsSyntaxKind, LexContext, ReLexContext, T};
+use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
 use crate::syntax::expr::{
     is_nth_at_identifier_or_keyword, parse_expression, parse_name, ExpressionContext,
 };
@@ -142,7 +142,7 @@ fn parse_any_jsx_opening_tag(p: &mut JsParser, in_expression: bool) -> Option<Op
         //   <
         //   /
         // >;
-        p.bump_with_context(T![>], LexContext::JsxChild);
+        p.bump_with_context(T![>], JsLexContext::JsxChild);
 
         return Some(OpeningElement::Fragment(
             m.complete(p, JSX_OPENING_FRAGMENT),
@@ -282,16 +282,16 @@ fn expect_closing_element(
 }
 
 /// Expects a JSX token that may be followed by JSX child content.
-/// Ensures that the child content is lexed with the [LexContext::JsxChild] context.
+/// Ensures that the child content is lexed with the [JsLexContext::JsxChild] context.
 fn expect_jsx_token(p: &mut JsParser, token: JsSyntaxKind, before_child_content: bool) {
     if !before_child_content {
         p.expect(token);
     } else if p.at(token) {
-        p.bump_with_context(token, LexContext::JsxChild);
+        p.bump_with_context(token, JsLexContext::JsxChild);
     } else {
         p.error(expected_token(token));
         // Re-lex the current token as a JSX child.
-        p.re_lex(ReLexContext::JsxChild);
+        p.re_lex(JsReLexContext::JsxChild);
     }
 }
 
@@ -465,7 +465,7 @@ fn parse_jsx_name_or_namespace(p: &mut JsParser) -> ParsedSyntax {
 }
 
 fn parse_jsx_name(p: &mut JsParser) -> ParsedSyntax {
-    p.re_lex(ReLexContext::JsxIdentifier);
+    p.re_lex(JsReLexContext::JsxIdentifier);
 
     if p.at(JSX_IDENT) {
         let name = p.start();
@@ -579,7 +579,7 @@ fn parse_jsx_attribute_initializer_clause(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![=], LexContext::JsxAttributeValue);
+    p.bump_with_context(T![=], JsLexContext::JsxAttributeValue);
 
     // test_err jsx jsx_element_attribute_missing_value
     // function f() {

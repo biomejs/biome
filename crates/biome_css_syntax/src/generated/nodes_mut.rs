@@ -440,42 +440,16 @@ impl CssComplexSelector {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_combinator(self, element: CssComplexSelectorCombinator) -> Self {
+    pub fn with_combinator_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
     pub fn with_right(self, element: AnyCssSelector) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl CssComplexSelectorCombinator {
-    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_plus_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_bitwise_not_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_css_space_literal_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
 }

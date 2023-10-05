@@ -364,31 +364,15 @@ pub fn css_class_selector(dot_token: SyntaxToken, name: CssIdentifier) -> CssCla
 }
 pub fn css_complex_selector(
     left: AnyCssSelector,
-    combinator: CssComplexSelectorCombinator,
+    combinator_token: SyntaxToken,
     right: AnyCssSelector,
 ) -> CssComplexSelector {
     CssComplexSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPLEX_SELECTOR,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Node(combinator.into_syntax())),
+            Some(SyntaxElement::Token(combinator_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
-}
-pub fn css_complex_selector_combinator(
-    r_angle_token: SyntaxToken,
-    plus_token: SyntaxToken,
-    bitwise_not_token: SyntaxToken,
-    css_space_literal_token: SyntaxToken,
-) -> CssComplexSelectorCombinator {
-    CssComplexSelectorCombinator::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_COMPLEX_SELECTOR_COMBINATOR,
-        [
-            Some(SyntaxElement::Token(r_angle_token)),
-            Some(SyntaxElement::Token(plus_token)),
-            Some(SyntaxElement::Token(bitwise_not_token)),
-            Some(SyntaxElement::Token(css_space_literal_token)),
         ],
     ))
 }

@@ -726,7 +726,10 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssComplexSelectorCombinator::can_cast(element.kind()) {
+                    if matches!(
+                        element.kind(),
+                        T ! [>] | T ! [+] | T ! [~] | T ! [||] | CSS_SPACE_LITERAL
+                    ) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -746,46 +749,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_COMPLEX_SELECTOR, children)
-            }
-            CSS_COMPLEX_SELECTOR_COMBINATOR => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [>] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [+] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [~] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == CSS_SPACE_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_COMPLEX_SELECTOR_COMBINATOR.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_COMPLEX_SELECTOR_COMBINATOR, children)
             }
             CSS_COMPOUND_SELECTOR => {
                 let mut elements = (&children).into_iter();

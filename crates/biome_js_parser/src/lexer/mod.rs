@@ -19,7 +19,6 @@
 mod errors;
 mod tests;
 
-pub mod buffered_lexer;
 #[cfg(feature = "highlight")]
 mod highlight;
 
@@ -34,7 +33,7 @@ use biome_js_unicode_table::{
     Dispatch::{self, *},
 };
 use biome_parser::diagnostic::ParseDiagnostic;
-pub(crate) use buffered_lexer::BufferedLexer;
+use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
@@ -57,7 +56,7 @@ const UNICODE_SPACES: [char; 19] = [
 
 /// Context in which the lexer should lex the next token
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
-pub enum LexContext {
+pub enum JsLexContext {
     /// Default context for if the lexer isn't in any specific other context
     #[default]
     Regular,
@@ -80,16 +79,16 @@ pub enum LexContext {
     JsxAttributeValue,
 }
 
-impl LexContext {
-    /// Returns true if this is [LexContext::Regular]
-    pub fn is_regular(&self) -> bool {
-        matches!(self, LexContext::Regular)
+impl LexContext for JsLexContext {
+    /// Returns true if this is [JsLexContext::Regular]
+    fn is_regular(&self) -> bool {
+        matches!(self, JsLexContext::Regular)
     }
 }
 
-/// Context in which the [LexContext]'s current should be re-lexed.
+/// Context in which the [JsLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum ReLexContext {
+pub enum JsReLexContext {
     /// Re-lexes a `/` or `/=` token as a regular expression.
     Regex,
     /// Re-lexes
@@ -105,35 +104,13 @@ pub enum ReLexContext {
     /// Re-lexes an identifier or keyword as a JSX identifier (that allows `-` tokens)
     JsxIdentifier,
 
-    /// See [LexContext::JsxChild]
+    /// See [JsLexContext::JsxChild]
     JsxChild,
-}
-
-bitflags! {
-    /// Flags for a lexed token.
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    pub(crate) struct TokenFlags: u8 {
-        /// Indicates that there has been a line break between the last non-trivia token
-        const PRECEDING_LINE_BREAK = 1 << 0;
-
-        /// Indicates that an identifier contains an unicode escape sequence
-        const UNICODE_ESCAPE = 1 << 1;
-    }
-}
-
-impl TokenFlags {
-    pub const fn has_preceding_line_break(&self) -> bool {
-        self.contains(TokenFlags::PRECEDING_LINE_BREAK)
-    }
-
-    pub const fn has_unicode_escape(&self) -> bool {
-        self.contains(TokenFlags::UNICODE_ESCAPE)
-    }
 }
 
 /// An extremely fast, lookup table based, lossless ECMAScript lexer
 #[derive(Debug)]
-pub(crate) struct Lexer<'src> {
+pub(crate) struct JsLexer<'src> {
     /// Source text
     source: &'src str,
 
@@ -156,53 +133,24 @@ pub(crate) struct Lexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 }
 
-impl<'src> Lexer<'src> {
-    /// Make a new lexer from a str, this is safe because strs are valid utf8
-    pub fn from_str(string: &'src str) -> Self {
-        Self {
-            source: string,
-            after_newline: false,
-            current_kind: TOMBSTONE,
-            current_start: TextSize::from(0),
-            current_flags: TokenFlags::empty(),
-            position: 0,
-            diagnostics: vec![],
-        }
-    }
+impl<'src> Lexer<'src> for JsLexer<'src> {
+    type Kind = JsSyntaxKind;
+    type LexContext = JsLexContext;
+    type ReLexContext = JsReLexContext;
 
-    /// Returns the source code
-    pub fn source(&self) -> &'src str {
+    fn source(&self) -> &'src str {
         self.source
     }
 
-    /// Returns the kind of the current token
-    #[inline]
-    pub const fn current(&self) -> JsSyntaxKind {
+    fn current(&self) -> Self::Kind {
         self.current_kind
     }
 
-    /// Returns the range of the current token (The token that was lexed by the last `next` call)
-    #[inline]
-    pub fn current_range(&self) -> TextRange {
+    fn current_range(&self) -> TextRange {
         TextRange::new(self.current_start, TextSize::from(self.position as u32))
     }
 
-    /// Returns true if a line break precedes the current token.
-    #[inline]
-    pub const fn has_preceding_line_break(&self) -> bool {
-        self.current_flags.has_preceding_line_break()
-    }
-
-    /// Returns `true` if the current token is an identifier and it contains a unicode escape sequence (`\u...`).
-    #[inline]
-    pub const fn has_unicode_escape(&self) -> bool {
-        self.current_flags.has_unicode_escape()
-    }
-
-    /// Creates a checkpoint storing the current lexer state.
-    ///
-    /// Use `rewind` to restore the lexer to the state stored in the checkpoint.
-    pub fn checkpoint(&self) -> LexerCheckpoint {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
         LexerCheckpoint {
             position: TextSize::from(self.position as u32),
             current_start: self.current_start,
@@ -213,8 +161,67 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    /// Rewinds the lexer to the same state as when the passed in `checkpoint` was created.
-    pub fn rewind(&mut self, checkpoint: LexerCheckpoint) {
+    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+        self.current_start = TextSize::from(self.position as u32);
+        self.current_flags = TokenFlags::empty();
+
+        let kind = if self.is_eof() {
+            EOF
+        } else {
+            match context {
+                JsLexContext::Regular => self.lex_token(),
+                JsLexContext::TemplateElement { tagged } => self.lex_template(tagged),
+                JsLexContext::JsxChild => self.lex_jsx_child_token(),
+                JsLexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
+            }
+        };
+
+        self.current_flags
+            .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
+        self.current_kind = kind;
+
+        if !kind.is_trivia() {
+            self.after_newline = false;
+        }
+
+        kind
+    }
+
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match context {
+            JsReLexContext::Regex if matches!(self.current(), T![/] | T![/=]) => self.read_regex(),
+            JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
+            JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
+            JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
+            JsReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
+            _ => self.current(),
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+
+    fn has_preceding_line_break(&self) -> bool {
+        self.current_flags.has_preceding_line_break()
+    }
+
+    fn has_unicode_escape(&self) -> bool {
+        self.current_flags.has_unicode_escape()
+    }
+
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
+        // test_err js js_rewind_at_eof_token
+        // (([zAgRvz=[=(e{V{
+
         let LexerCheckpoint {
             position,
             current_start,
@@ -234,74 +241,27 @@ impl<'src> Lexer<'src> {
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
 
-    pub fn finish(self) -> Vec<ParseDiagnostic> {
+    fn finish(self) -> Vec<ParseDiagnostic> {
         self.diagnostics
     }
 
-    /// Lexes the next token.
-    ///
-    /// ## Return
-    /// Returns its kind and any potential error.
-    pub fn next_token(&mut self, context: LexContext) -> JsSyntaxKind {
-        self.current_start = TextSize::from(self.position as u32);
-        self.current_flags = TokenFlags::empty();
-
-        let kind = if self.is_eof() {
-            EOF
-        } else {
-            match context {
-                LexContext::Regular => self.lex_token(),
-                LexContext::TemplateElement { tagged } => self.lex_template(tagged),
-                LexContext::JsxChild => self.lex_jsx_child_token(),
-                LexContext::JsxAttributeValue => self.lex_jsx_attribute_value(),
-            }
-        };
-
+    fn current_flags(&self) -> TokenFlags {
         self.current_flags
-            .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
-        self.current_kind = kind;
-
-        if !kind.is_trivia() {
-            self.after_newline = false;
-        }
-
-        kind
     }
+}
 
-    /// Lexes the current token again under the passed [ReLexContext].
-    /// Useful in case a token can have different meaning depending on the context.
-    ///
-    /// For example, a `/` must either be lexed as a `/` token or as a regular expression if it
-    /// appears at the start of an expression. Re-lexing allows to always lex the `/` as a `/` token and
-    /// call into `re_lex` when the parser is at a valid regular expression position, to see if the
-    /// current token can be lexed out as a regular expression literal.
-    ///
-    /// ## Returns
-    /// The new token kind and any associated diagnostic if current token has a different meaning under
-    /// the passed [ReLexContext].
-    ///
-    /// Returns the current kind without any diagnostic if not. Any cached lookahead remains valid in that case.
-    pub fn re_lex(&mut self, context: ReLexContext) -> JsSyntaxKind {
-        let old_position = self.position;
-        self.position = u32::from(self.current_start) as usize;
-
-        let re_lexed_kind = match context {
-            ReLexContext::Regex if matches!(self.current(), T![/] | T![/=]) => self.read_regex(),
-            ReLexContext::BinaryOperator => self.re_lex_binary_operator(),
-            ReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
-            ReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(old_position),
-            ReLexContext::JsxChild if !self.is_eof() => self.lex_jsx_child_token(),
-            _ => self.current(),
-        };
-
-        if self.current() == re_lexed_kind {
-            // Didn't re-lex anything. Return existing token again
-            self.position = old_position;
-        } else {
-            self.current_kind = re_lexed_kind;
+impl<'src> JsLexer<'src> {
+    /// Make a new lexer from a str, this is safe because strs are valid utf8
+    pub fn from_str(source: &'src str) -> Self {
+        Self {
+            source,
+            after_newline: false,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            current_flags: TokenFlags::empty(),
+            position: 0,
+            diagnostics: vec![],
         }
-
-        re_lexed_kind
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -2027,30 +1987,4 @@ impl<'src> Lexer<'src> {
 /// Check if a char is a JS linebreak
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
-}
-
-/// Stores the state of the lexer so that it may later be restored to that position.
-#[derive(Debug, Clone)]
-pub(crate) struct LexerCheckpoint {
-    pub(crate) position: TextSize,
-    pub(crate) current_start: TextSize,
-    pub(crate) current_kind: JsSyntaxKind,
-    pub(crate) current_flags: TokenFlags,
-    pub(crate) after_line_break: bool,
-    pub(crate) diagnostics_pos: u32,
-}
-
-impl LexerCheckpoint {
-    /// Returns the byte offset of the current token.
-    pub fn current_start(&self) -> TextSize {
-        self.current_start
-    }
-
-    pub(crate) fn has_preceding_line_break(&self) -> bool {
-        self.current_flags.has_preceding_line_break()
-    }
-
-    pub(crate) fn has_unicode_escape(&self) -> bool {
-        self.current_flags.has_unicode_escape()
-    }
 }

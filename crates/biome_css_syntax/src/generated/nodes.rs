@@ -988,8 +988,8 @@ impl CssComplexSelector {
     pub fn left(&self) -> SyntaxResult<AnyCssSelector> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn combinator(&self) -> SyntaxResult<CssComplexSelectorCombinator> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn combinator(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn right(&self) -> SyntaxResult<AnyCssSelector> {
         support::required_node(&self.syntax, 2usize)
@@ -1007,59 +1007,8 @@ impl Serialize for CssComplexSelector {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssComplexSelectorFields {
     pub left: SyntaxResult<AnyCssSelector>,
-    pub combinator: SyntaxResult<CssComplexSelectorCombinator>,
+    pub combinator: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssSelector>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssComplexSelectorCombinator {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssComplexSelectorCombinator {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssComplexSelectorCombinatorFields {
-        CssComplexSelectorCombinatorFields {
-            r_angle_token: self.r_angle_token(),
-            plus_token: self.plus_token(),
-            bitwise_not_token: self.bitwise_not_token(),
-            css_space_literal_token: self.css_space_literal_token(),
-        }
-    }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn plus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn bitwise_not_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn css_space_literal_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssComplexSelectorCombinator {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssComplexSelectorCombinatorFields {
-    pub r_angle_token: SyntaxResult<SyntaxToken>,
-    pub plus_token: SyntaxResult<SyntaxToken>,
-    pub bitwise_not_token: SyntaxResult<SyntaxToken>,
-    pub css_space_literal_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCompoundSelector {
@@ -3283,56 +3232,6 @@ impl From<CssComplexSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssComplexSelectorCombinator {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPLEX_SELECTOR_COMBINATOR as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_COMPLEX_SELECTOR_COMBINATOR
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssComplexSelectorCombinator {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssComplexSelectorCombinator")
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field("plus_token", &support::DebugSyntaxResult(self.plus_token()))
-            .field(
-                "bitwise_not_token",
-                &support::DebugSyntaxResult(self.bitwise_not_token()),
-            )
-            .field(
-                "css_space_literal_token",
-                &support::DebugSyntaxResult(self.css_space_literal_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssComplexSelectorCombinator> for SyntaxNode {
-    fn from(n: CssComplexSelectorCombinator) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssComplexSelectorCombinator> for SyntaxElement {
-    fn from(n: CssComplexSelectorCombinator) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssCompoundSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5182,11 +5081,6 @@ impl std::fmt::Display for CssClassSelector {
     }
 }
 impl std::fmt::Display for CssComplexSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssComplexSelectorCombinator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

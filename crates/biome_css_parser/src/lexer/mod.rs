@@ -2,92 +2,176 @@
 #[rustfmt::skip]
 mod tests;
 
-use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 use std::char::REPLACEMENT_CHARACTER;
-use std::iter::FusedIterator;
 
-pub struct Token {
-    kind: CssSyntaxKind,
-    range: TextRange,
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub enum CssLexContext {
+    /// Default context for if the lexer isn't in any specific other context
+    #[default]
+    Regular,
+    /// For lexing the elements of a CSS selector.
+    /// Doesn't skip whitespace trivia for a combinator.
+    Selector,
 }
 
-impl Token {
-    pub fn kind(&self) -> CssSyntaxKind {
-        self.kind
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.range
+impl LexContext for CssLexContext {
+    /// Returns true if this is [CssLexContext::Regular]
+    fn is_regular(&self) -> bool {
+        matches!(self, CssLexContext::Regular)
     }
 }
+
+/// Context in which the [CssLexContext]'s current should be re-lexed.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum CssReLexContext {}
 
 /// An extremely fast, lookup table based, lossless CSS lexer
 #[derive(Debug)]
-pub(crate) struct Lexer<'src> {
+pub(crate) struct CssLexer<'src> {
     /// Source text
     source: &'src str,
 
     /// The start byte position in the source text of the next token.
     position: usize,
 
-    diagnostics: Vec<ParseDiagnostic>,
+    /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
+    after_newline: bool,
 
-    config: CssParserOptions,
+    /// Byte offset of the current token from the start of the source
+    /// The range of the current token can be computed by `self.position - self.current_start`
+    current_start: TextSize,
+
+    /// The kind of the current token
+    current_kind: CssSyntaxKind,
+
+    /// Flags for the current token
+    current_flags: TokenFlags,
+
+    diagnostics: Vec<ParseDiagnostic>,
 }
 
-impl<'src> Lexer<'src> {
+impl<'src> Lexer<'src> for CssLexer<'src> {
+    type Kind = CssSyntaxKind;
+    type LexContext = CssLexContext;
+    type ReLexContext = CssReLexContext;
+
+    fn source(&self) -> &'src str {
+        self.source
+    }
+
+    fn current(&self) -> Self::Kind {
+        self.current_kind
+    }
+
+    fn current_range(&self) -> TextRange {
+        TextRange::new(self.current_start, TextSize::from(self.position as u32))
+    }
+
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
+    }
+
+    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+        self.current_start = self.text_position();
+        self.current_flags = TokenFlags::empty();
+
+        let kind = match self.current_byte() {
+            Some(current) => match context {
+                CssLexContext::Regular => self.lex_token(current),
+                CssLexContext::Selector => self.lex_selector_token(current),
+            },
+            None => EOF,
+        };
+
+        self.current_flags
+            .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
+        self.current_kind = kind;
+
+        if !kind.is_trivia() {
+            self.after_newline = false;
+        }
+
+        kind
+    }
+
+    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match self.current_byte() {
+            Some(current) => self.lex_selector_token(current),
+            None => EOF,
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+
+    fn has_preceding_line_break(&self) -> bool {
+        self.current_flags.has_preceding_line_break()
+    }
+
+    fn has_unicode_escape(&self) -> bool {
+        self.current_flags.has_unicode_escape()
+    }
+
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
+        let LexerCheckpoint {
+            position,
+            current_start,
+            current_flags,
+            current_kind,
+            after_line_break,
+            diagnostics_pos,
+        } = checkpoint;
+
+        let new_pos = u32::from(position) as usize;
+
+        self.position = new_pos;
+        self.current_kind = current_kind;
+        self.current_start = current_start;
+        self.current_flags = current_flags;
+        self.after_newline = after_line_break;
+        self.diagnostics.truncate(diagnostics_pos as usize);
+    }
+
+    fn finish(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    fn current_flags(&self) -> TokenFlags {
+        self.current_flags
+    }
+}
+
+impl<'src> CssLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
         Self {
             source,
+            after_newline: false,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            config: CssParserOptions::default(),
-        }
-    }
-
-    pub(crate) fn with_config(mut self, config: CssParserOptions) -> Self {
-        self.config = config;
-        self
-    }
-
-    /// Returns the source code
-    pub fn source(&self) -> &'src str {
-        self.source
-    }
-
-    pub fn finish(self) -> Vec<ParseDiagnostic> {
-        self.diagnostics
-    }
-
-    /// Lexes the next token.
-    ///
-    /// ## Return
-    /// Returns its kind.
-    pub(crate) fn next_token(&mut self) -> Option<Token> {
-        let start = self.text_position();
-
-        match self.current_byte() {
-            Some(current) => {
-                let kind = self.lex_token(current);
-
-                debug_assert!(start < self.text_position(), "Lexer did not progress");
-                Some(Token {
-                    kind,
-                    range: TextRange::new(start, self.text_position()),
-                })
-            }
-            None if self.position == self.source.len() => {
-                self.advance(1);
-                Some(Token {
-                    kind: EOF,
-                    range: TextRange::new(start, start),
-                })
-            }
-            None => None,
         }
     }
 
@@ -167,6 +251,7 @@ impl<'src> Lexer<'src> {
     /// Must be called at a valid UT8 char boundary
     fn consume_newline_or_whitespaces(&mut self) -> CssSyntaxKind {
         if self.consume_newline() {
+            self.after_newline = true;
             NEWLINE
         } else {
             self.consume_whitespaces();
@@ -219,6 +304,13 @@ impl<'src> Lexer<'src> {
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
         self.source.as_bytes().get(self.position + offset).copied()
+    }
+
+    /// Advances the position by one and returns the next byte value
+    #[inline]
+    fn next_byte(&mut self) -> Option<u8> {
+        self.advance(1);
+        self.current_byte()
     }
 
     /// Asserts that the lexer is at a UTF8 char boundary
@@ -385,8 +477,18 @@ impl<'src> Lexer<'src> {
             BTO => self.eat_byte(T!('[')),
             BTC => self.eat_byte(T![']']),
             COM => self.eat_byte(T![,]),
+            MOR => self.eat_byte(T![>]),
+            TLD => self.eat_byte(T![~]),
+            PIP => self.lex_pipe(),
 
             _ => self.eat_unexpected_character(),
+        }
+    }
+
+    fn lex_selector_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b' ' => self.eat_byte(CSS_SPACE_LITERAL),
+            _ => self.lex_token(current),
         }
     }
 
@@ -659,6 +761,7 @@ impl<'src> Lexer<'src> {
                             self.advance(2);
 
                             if has_newline {
+                                self.after_newline = true;
                                 return MULTILINE_COMMENT;
                             } else {
                                 return COMMENT;
@@ -700,6 +803,14 @@ impl<'src> Lexer<'src> {
                 COMMENT
             }
             _ => self.eat_unexpected_character(),
+        }
+    }
+
+    #[inline]
+    fn lex_pipe(&mut self) -> CssSyntaxKind {
+        match self.next_byte() {
+            Some(b'|') => self.eat_byte(T![||]),
+            _ => T![|],
         }
     }
 
@@ -788,17 +899,6 @@ impl<'src> Lexer<'src> {
         }
     }
 }
-
-impl Iterator for Lexer<'_> {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next_token()
-    }
-}
-
-impl FusedIterator for Lexer<'_> {}
-
 #[derive(Copy, Clone, Debug)]
 enum LexStringState {
     /// String that contains an invalid escape sequence
