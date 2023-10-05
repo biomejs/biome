@@ -325,23 +325,6 @@ impl SemanticModel {
         is_constant::is_constant(expr)
     }
 
-    pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
-        let range = binding.syntax().text_range();
-        let id = if let Some(id) = self
-            .data
-            .bindings_by_range
-            .get(&(BindingKind::Value, range))
-        {
-            id
-        } else {
-            &self.data.bindings_by_range[&(BindingKind::Type, range)]
-        };
-        Binding {
-            data: self.data.clone(),
-            index: (*id).into(),
-        }
-    }
-
     pub fn as_value_binding(&self, binding: &impl IsBindingAstNode) -> Option<Binding> {
         let range = binding.syntax().text_range();
         let id = self
