@@ -20,11 +20,17 @@ CssRoot {
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
-                CssClassSelectorPattern {
-                    dot_token: DOT@0..1 "." [] [],
-                    name: CssIdentifier {
-                        value_token: IDENT@1..9 "selector" [] [],
-                    },
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@1..9 "selector" [] [],
+                            },
+                        },
+                    ],
                 },
                 COMMA@9..11 "," [] [Whitespace(" ")],
                 missing element,
@@ -47,10 +53,14 @@ CssRoot {
   0: CSS_RULE_LIST@0..15
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..11
-        0: CSS_CLASS_SELECTOR_PATTERN@0..9
-          0: DOT@0..1 "." [] []
-          1: CSS_IDENTIFIER@1..9
-            0: IDENT@1..9 "selector" [] []
+        0: CSS_COMPOUND_SELECTOR@0..9
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..9
+            0: CSS_CLASS_SELECTOR@0..9
+              0: DOT@0..1 "." [] []
+              1: CSS_IDENTIFIER@1..9
+                0: IDENT@1..9 "selector" [] []
         1: COMMA@9..11 "," [] [Whitespace(" ")]
         2: (empty)
       1: CSS_BLOCK@11..15
@@ -66,14 +76,14 @@ CssRoot {
 ```
 traling_comma.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a selector pattern but instead found '{'
+  × expected a selector but instead found '{'
   
   > 1 │ .selector, {
       │            ^
     2 │ 
     3 │ }
   
-  i Expected a selector pattern here
+  i Expected a selector here
   
   > 1 │ .selector, {
       │            ^

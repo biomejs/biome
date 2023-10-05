@@ -327,12 +327,12 @@ pub fn css_attribute_name(css_string: CssString) -> CssAttributeName {
         [Some(SyntaxElement::Node(css_string.into_syntax()))],
     ))
 }
-pub fn css_attribute_selector_pattern(
+pub fn css_attribute_selector(
     name: CssIdentifier,
     attribute_list: CssAttributeList,
-) -> CssAttributeSelectorPattern {
-    CssAttributeSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR_PATTERN,
+) -> CssAttributeSelector {
+    CssAttributeSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Node(attribute_list.into_syntax())),
@@ -353,37 +353,78 @@ pub fn css_block(
         ],
     ))
 }
-pub fn css_class_selector_pattern(
-    dot_token: SyntaxToken,
-    name: CssIdentifier,
-) -> CssClassSelectorPattern {
-    CssClassSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CLASS_SELECTOR_PATTERN,
+pub fn css_class_selector(dot_token: SyntaxToken, name: CssIdentifier) -> CssClassSelector {
+    CssClassSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CLASS_SELECTOR,
         [
             Some(SyntaxElement::Token(dot_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
 }
-pub fn css_combinator_selector_pattern(
-    left: AnyCssSelectorPattern,
-    combinator_token: SyntaxToken,
-    plus_token: SyntaxToken,
-    bitwise_not_token: SyntaxToken,
-    css_space_literal_token: SyntaxToken,
-    right: AnyCssSelectorPattern,
-) -> CssCombinatorSelectorPattern {
-    CssCombinatorSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_COMBINATOR_SELECTOR_PATTERN,
+pub fn css_complex_selector(
+    left: AnyCssSelector,
+    combinator: CssComplexSelectorCombinator,
+    right: AnyCssSelector,
+) -> CssComplexSelector {
+    CssComplexSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPLEX_SELECTOR,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(combinator_token)),
-            Some(SyntaxElement::Token(plus_token)),
-            Some(SyntaxElement::Token(bitwise_not_token)),
-            Some(SyntaxElement::Token(css_space_literal_token)),
+            Some(SyntaxElement::Node(combinator.into_syntax())),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
+}
+pub fn css_complex_selector_combinator(
+    r_angle_token: SyntaxToken,
+    plus_token: SyntaxToken,
+    bitwise_not_token: SyntaxToken,
+    css_space_literal_token: SyntaxToken,
+) -> CssComplexSelectorCombinator {
+    CssComplexSelectorCombinator::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPLEX_SELECTOR_COMBINATOR,
+        [
+            Some(SyntaxElement::Token(r_angle_token)),
+            Some(SyntaxElement::Token(plus_token)),
+            Some(SyntaxElement::Token(bitwise_not_token)),
+            Some(SyntaxElement::Token(css_space_literal_token)),
+        ],
+    ))
+}
+pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
+    CssCompoundSelectorBuilder {
+        sub_selectors,
+        nesting_selector_token: None,
+        simple_selector: None,
+    }
+}
+pub struct CssCompoundSelectorBuilder {
+    sub_selectors: CssSubSelectorList,
+    nesting_selector_token: Option<SyntaxToken>,
+    simple_selector: Option<AnySimpleSelector>,
+}
+impl CssCompoundSelectorBuilder {
+    pub fn with_nesting_selector_token(mut self, nesting_selector_token: SyntaxToken) -> Self {
+        self.nesting_selector_token = Some(nesting_selector_token);
+        self
+    }
+    pub fn with_simple_selector(mut self, simple_selector: AnySimpleSelector) -> Self {
+        self.simple_selector = Some(simple_selector);
+        self
+    }
+    pub fn build(self) -> CssCompoundSelector {
+        CssCompoundSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_COMPOUND_SELECTOR,
+            [
+                self.nesting_selector_token
+                    .map(|token| SyntaxElement::Token(token)),
+                self.simple_selector
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.sub_selectors.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn css_custom_property(value_token: SyntaxToken) -> CssCustomProperty {
     CssCustomProperty::unwrap_cast(SyntaxNode::new_detached(
@@ -452,12 +493,9 @@ pub fn css_dimension(value: CssNumber, unit: CssIdentifier) -> CssDimension {
         ],
     ))
 }
-pub fn css_id_selector_pattern(
-    hash_token: SyntaxToken,
-    name: CssIdentifier,
-) -> CssIdSelectorPattern {
-    CssIdSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ID_SELECTOR_PATTERN,
+pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
+    CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ID_SELECTOR,
         [
             Some(SyntaxElement::Token(hash_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
@@ -521,29 +559,29 @@ pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPerce
         ],
     ))
 }
-pub fn css_pseudo_class_selector_pattern(
+pub fn css_pseudo_class_selector(
     colon_token: SyntaxToken,
     name: CssIdentifier,
-) -> CssPseudoClassSelectorPatternBuilder {
-    CssPseudoClassSelectorPatternBuilder {
+) -> CssPseudoClassSelectorBuilder {
+    CssPseudoClassSelectorBuilder {
         colon_token,
         name,
         parameters: None,
     }
 }
-pub struct CssPseudoClassSelectorPatternBuilder {
+pub struct CssPseudoClassSelectorBuilder {
     colon_token: SyntaxToken,
     name: CssIdentifier,
-    parameters: Option<CssPseudoClassSelectorPatternParameters>,
+    parameters: Option<CssPseudoClassSelectorParameters>,
 }
-impl CssPseudoClassSelectorPatternBuilder {
-    pub fn with_parameters(mut self, parameters: CssPseudoClassSelectorPatternParameters) -> Self {
+impl CssPseudoClassSelectorBuilder {
+    pub fn with_parameters(mut self, parameters: CssPseudoClassSelectorParameters) -> Self {
         self.parameters = Some(parameters);
         self
     }
-    pub fn build(self) -> CssPseudoClassSelectorPattern {
-        CssPseudoClassSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PATTERN,
+    pub fn build(self) -> CssPseudoClassSelector {
+        CssPseudoClassSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR,
             [
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.name.into_syntax())),
@@ -553,18 +591,24 @@ impl CssPseudoClassSelectorPatternBuilder {
         ))
     }
 }
-pub fn css_pseudo_class_selector_pattern_parameters(
+pub fn css_pseudo_class_selector_parameters(
     l_paren_token: SyntaxToken,
     parameter: AnyCssValue,
     r_paren_token: SyntaxToken,
-) -> CssPseudoClassSelectorPatternParameters {
-    CssPseudoClassSelectorPatternParameters::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PATTERN_PARAMETERS,
+) -> CssPseudoClassSelectorParameters {
+    CssPseudoClassSelectorParameters::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS,
         [
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(parameter.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
+    ))
+}
+pub fn css_pseudo_element_selector(name: CssIdentifier) -> CssPseudoElementSelector {
+    CssPseudoElementSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_SELECTOR,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
 pub fn css_ratio(numerator: CssNumber, denominator: CssNumber) -> CssRatio {
@@ -616,15 +660,15 @@ pub fn css_string(value_token: SyntaxToken) -> CssString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_type_selector_pattern(ident: CssIdentifier) -> CssTypeSelectorPattern {
-    CssTypeSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TYPE_SELECTOR_PATTERN,
+pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelector {
+    CssTypeSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TYPE_SELECTOR,
         [Some(SyntaxElement::Node(ident.into_syntax()))],
     ))
 }
-pub fn css_universal_selector_pattern(star_token: SyntaxToken) -> CssUniversalSelectorPattern {
-    CssUniversalSelectorPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_UNIVERSAL_SELECTOR_PATTERN,
+pub fn css_universal_selector(star_token: SyntaxToken) -> CssUniversalSelector {
+    CssUniversalSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNIVERSAL_SELECTOR,
         [Some(SyntaxElement::Token(star_token))],
     ))
 }
@@ -784,7 +828,7 @@ where
 }
 pub fn css_selector_list<I, S>(items: I, separators: S) -> CssSelectorList
 where
-    I: IntoIterator<Item = AnyCssSelectorPattern>,
+    I: IntoIterator<Item = AnyCssSelector>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -801,6 +845,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_sub_selector_list<I>(items: I) -> CssSubSelectorList
+where
+    I: IntoIterator<Item = AnyCssSubSelector>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssSubSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUB_SELECTOR_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_bogus<I>(slots: I) -> CssBogus
@@ -820,16 +876,6 @@ where
         slots,
     ))
 }
-pub fn css_bogus_pattern<I>(slots: I) -> CssBogusPattern
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusPattern::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_PATTERN,
-        slots,
-    ))
-}
 pub fn css_bogus_rule<I>(slots: I) -> CssBogusRule
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -837,6 +883,26 @@ where
 {
     CssBogusRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_RULE,
+        slots,
+    ))
+}
+pub fn css_bogus_selector<I>(slots: I) -> CssBogusSelector
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_sub_selector<I>(slots: I) -> CssBogusSubSelector
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
         slots,
     ))
 }

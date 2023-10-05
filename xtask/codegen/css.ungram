@@ -12,8 +12,8 @@
 //   A B         				-- sequence
 //   A | B       				-- alternation
 //   A*          				-- zero or more repetition
-//   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
-//   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
 //   A?          				-- zero or one repetition
 //   (A)         				-- same as A
 //   label:A     				-- suggested name for field of AST node
@@ -37,7 +37,8 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
-CssBogusPattern =  SyntaxElement*
+CssBogusSelector = SyntaxElement*
+CssBogusSubSelector = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
@@ -62,17 +63,43 @@ CssRule =
 
 // .header, .app {}
 // ^^^^^^^^^^^^^
-CssSelectorList = (AnyCssSelectorPattern (',' AnyCssSelectorPattern)*)
+CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
 
-AnyCssSelectorPattern =
-	CssIdSelectorPattern
-	| CssClassSelectorPattern
-	| CssUniversalSelectorPattern
-	| CssAttributeSelectorPattern
-	| CssPseudoClassSelectorPattern
-	| CssTypeSelectorPattern
-	| CssCombinatorSelectorPattern
-	| CssBogusPattern
+AnyCssSelector =
+	CssComplexSelector
+	| CssCompoundSelector
+	| CssBogusSelector
+
+// div a {}
+// ^^^^^
+// div > a {}
+// ^^^^^^^
+CssComplexSelector =
+	left: AnyCssSelector
+	combinator: CssComplexSelectorCombinator
+	right: AnyCssSelector
+
+CssComplexSelectorCombinator =
+	'>' | '+' | '~' | 'css_space_literal'
+
+CssCompoundSelector =
+	nesting_selector: '&'?
+	simple_selector: AnySimpleSelector?
+	sub_selectors: CssSubSelectorList
+
+CssSubSelectorList = AnyCssSubSelector*
+
+AnySimpleSelector =
+	CssUniversalSelector
+	| CssTypeSelector
+
+AnyCssSubSelector =
+	CssIdSelector
+	| CssClassSelector
+	| CssAttributeSelector
+	| CssPseudoClassSelector
+	| CssPseudoElementSelector
+	| CssBogusSubSelector
 
 /////////////
 /// SELECTORS
@@ -81,24 +108,24 @@ AnyCssSelectorPattern =
 
 // #app {}
 // ^^^^
-CssIdSelectorPattern =
+CssIdSelector =
 	'#'
 	name: CssIdentifier
 
 // .app {}
 // ^^^^
-CssClassSelectorPattern =
+CssClassSelector =
 	'.'
 	name: CssIdentifier
 
 // * {}
 // ^
-CssUniversalSelectorPattern =
+CssUniversalSelector =
 	'*'
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
-CssAttributeSelectorPattern =
+CssAttributeSelector =
 	name: CssIdentifier
 	attribute_list: CssAttributeList
 
@@ -124,31 +151,25 @@ CssAttributeMatcher =
 
 CssAttributeModifier = 'i'
 
-
 // :nth-type(2) {}
 // ^^^^^^^^^^^^
-CssPseudoClassSelectorPattern =
+CssPseudoClassSelector =
 	':'
 	name: CssIdentifier
-	parameters: CssPseudoClassSelectorPatternParameters?
+	parameters: CssPseudoClassSelectorParameters?
 
-CssPseudoClassSelectorPatternParameters =
+CssPseudoClassSelectorParameters =
 	'('
 	parameter: AnyCssValue
 	')'
 
 // div {}
 // ^^^
-CssTypeSelectorPattern = ident: CssIdentifier
+CssTypeSelector = ident: CssIdentifier
 
-// div a {}
-// ^^^^^
-// div > a {}
-// ^^^^^^^
-CssCombinatorSelectorPattern =
-	left: AnyCssSelectorPattern
-	combinator: '>' | '+' | '~' | 'css_space_literal'
-	right: AnyCssSelectorPattern
+// TODO: add support for pseudo-elements
+CssPseudoElementSelector =
+	name: CssIdentifier
 
 CssBlock =
 	'{'
