@@ -9,7 +9,7 @@ use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
-use tracing::{debug, info};
+use tracing::debug;
 
 pub(crate) fn format<'ctx>(ctx: &'ctx SharedTraversalOptions<'ctx, '_>, path: &Path) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
@@ -20,7 +20,7 @@ pub(crate) fn format_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    tracing::info_span!("Formatting phase", path =? workspace_file.path.display()).in_scope(
+    tracing::info_span!("Processes formatting", path =? workspace_file.path.display()).in_scope(
         move || {
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
             debug!("Pulling diagnostics from parsed file");

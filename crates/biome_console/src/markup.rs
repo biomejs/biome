@@ -24,6 +24,8 @@ pub enum MarkupElement<'fmt> {
     Success,
     Warn,
     Info,
+    Debug,
+    Trace,
     Inverse,
     Hyperlink { href: Cow<'fmt, str> },
 }
@@ -72,6 +74,12 @@ impl<'fmt> MarkupElement<'fmt> {
                 color.set_fg(Some(Color::Yellow));
             }
             MarkupElement::Info => {
+                color.set_fg(Some(Color::Green));
+            }
+            MarkupElement::Trace => {
+                color.set_fg(Some(Color::Magenta));
+            }
+            MarkupElement::Debug => {
                 // Blue is really difficult to see on the standard windows command line
                 #[cfg(windows)]
                 const BLUE: Color = Color::Cyan;
@@ -95,6 +103,8 @@ impl<'fmt> MarkupElement<'fmt> {
             MarkupElement::Success => MarkupElement::Success,
             MarkupElement::Warn => MarkupElement::Warn,
             MarkupElement::Info => MarkupElement::Info,
+            MarkupElement::Debug => MarkupElement::Debug,
+            MarkupElement::Trace => MarkupElement::Trace,
             MarkupElement::Inverse => MarkupElement::Inverse,
             MarkupElement::Hyperlink { href } => MarkupElement::Hyperlink {
                 href: Cow::Owned(match href {

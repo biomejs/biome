@@ -39,7 +39,9 @@ fn push_styles<W: io::Write>(fmt: &mut W, elements: &MarkupElements) -> io::Resu
                 MarkupElement::Error => write!(fmt, "<span style=\"color: Tomato;\">")?,
                 MarkupElement::Success => write!(fmt, "<span style=\"color: MediumSeaGreen;\">")?,
                 MarkupElement::Warn => write!(fmt, "<span style=\"color: Orange;\">")?,
-                MarkupElement::Info => write!(fmt, "<span style=\"color: rgb(38, 148, 255);\">")?,
+                MarkupElement::Debug => write!(fmt, "<span style=\"color: rgb(38, 148, 255);\">")?,
+                MarkupElement::Info => write!(fmt, "<span style=\"color: lightgreen;\">")?,
+                MarkupElement::Trace => write!(fmt, "<span style=\"color: fuchsia;\">")?,
                 MarkupElement::Inverse => {
                     write!(fmt, "<span style=\"color: #000; background-color: #ddd;\">")?
                 }
@@ -62,6 +64,8 @@ fn pop_styles<W: io::Write>(fmt: &mut W, elements: &MarkupElements) -> io::Resul
                 | MarkupElement::Error
                 | MarkupElement::Success
                 | MarkupElement::Warn
+                | MarkupElement::Debug
+                | MarkupElement::Trace
                 | MarkupElement::Info
                 | MarkupElement::Inverse => write!(fmt, "</span>")?,
                 MarkupElement::Hyperlink { .. } => write!(fmt, "</a>")?,

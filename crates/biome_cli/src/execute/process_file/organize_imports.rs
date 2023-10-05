@@ -10,27 +10,31 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let sorted = workspace_file
-        .guard()
-        .organize_imports()
-        .with_file_path_and_code(
-            workspace_file.path.display().to_string(),
-            category!("organizeImports"),
-        )?;
+    tracing::info_span!("Processes import sorting", path =? workspace_file.path.display()).in_scope(
+        move || {
+            let sorted = workspace_file
+                .guard()
+                .organize_imports()
+                .with_file_path_and_code(
+                    workspace_file.path.display().to_string(),
+                    category!("organizeImports"),
+                )?;
 
-    let input = workspace_file.input()?;
-    if sorted.code != input {
-        if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
-            workspace_file.update_file(sorted.code)?;
-        } else {
-            return Ok(FileStatus::Message(Message::Diff {
-                file_name: workspace_file.path.display().to_string(),
-                old: input,
-                new: sorted.code,
-                diff_kind: DiffKind::OrganizeImports,
-            }));
-        }
-    }
+            let input = workspace_file.input()?;
+            if sorted.code != input {
+                if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
+                    workspace_file.update_file(sorted.code)?;
+                } else {
+                    return Ok(FileStatus::Message(Message::Diff {
+                        file_name: workspace_file.path.display().to_string(),
+                        old: input,
+                        new: sorted.code,
+                        diff_kind: DiffKind::OrganizeImports,
+                    }));
+                }
+            }
 
-    Ok(FileStatus::Success)
+            Ok(FileStatus::Success)
+        },
+    )
 }

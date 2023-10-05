@@ -33,11 +33,35 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### New features
 
 - Add support for `BIOME_BINARY` environment variable to override the location of the binary. Contributed by @ematipico
-
 - Add option `--indent-width`, and deprecated the option `--indent-size`. Contributed by @ematipico
 - Add option `--javascript-formatter-indent-width`, and deprecated the option `--javascript-formatter-indent-size`. Contributed by @ematipico
 - Add option `--json-formatter-indent-width`, and deprecated the option `--json-formatter-indent-size`. Contributed by @ematipico
 - Add option `--daemon-logs` to `biome rage`. The option is required to view Biome daemon server logs.  Contributed by @unvalley
+- Add support for logging. By default, Biome doesn't log anything other than diagnostics. Logging can be enabled with the new option `--log-level`:
+
+  ```shell
+  biome format --log-level=info ./src
+  ```
+  There are four different levels of logging, from the most verbose to the least verbose: `debug`, `info`, `warn` and `error`. Here's how an `INFO` log will look like:
+
+  ```
+  2023-10-05T08:27:01.954727Z  INFO  Analyze file ./website/src/playground/components/Resizable.tsx
+    at crates/biome_service/src/file_handlers/javascript.rs:298 on biome::worker_5
+    in Pulling diagnostics with categories: RuleCategories(SYNTAX)
+    in Processes formatting with path: "./website/src/playground/components/Resizable.tsx"
+    in Process check with path: "./website/src/playground/components/Resizable.tsx"
+  ```
+
+  You can customize how the log will look like with a new option `--log-kind`. The supported kinds are: `pretty`, `compact` and `json`.
+
+  `pretty` is the default logging. Here's how a `compact` log will look like:
+
+  ```
+  2023-10-05T08:29:04.864247Z  INFO biome::worker_2 Process check:Processes linting:Pulling diagnostics: crates/biome_service/src/file_handlers/javascript.rs: Analyze file ./website/src/playground/components/Resizable.tsx path="./website/src/playground/components/Resizable.tsx" path="./website/src/playground/components/Resizable.tsx" categories=RuleCategories(LINT)
+  2023-10-05T08:29:04.864290Z  INFO biome::worker_7 Process check:Processes formatting: crates/biome_service/src/file_handlers/javascript.rs: Format file ./website/src/playground/components/Tabs.tsx path="./website/src/playground/components/Tabs.tsx" path="./website/src/playground/components/Tabs.tsx"
+  2023-10-05T08:29:04.879332Z  INFO biome::worker_2 Process check:Processes formatting:Pulling diagnostics: crates/biome_service/src/file_handlers/javascript.rs: Analyze file ./website/src/playground/components/Resizable.tsx path="./website/src/playground/components/Resizable.tsx" path="./website/src/playground/components/Resizable.tsx" categories=RuleCategories(SYNTAX)
+  2023-10-05T08:29:04.879383Z  INFO biome::worker_2 Process check:Processes formatting: crates/biome_service/src/file_handlers/javascript.rs: Format file ./website/src/playground/components/Resizable.tsx path="./website/src/playground/components/Resizable.tsx" path="./website/src/playground/components/Resizable.tsx"
+  ```
 
 #### Enhancements
 - Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
