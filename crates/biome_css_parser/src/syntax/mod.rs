@@ -1,9 +1,10 @@
 mod parse_error;
 mod selector;
 
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expect_any_selector, expect_block};
-use crate::syntax::selector::parse_compound_selector;
+use crate::syntax::selector::parse_selector;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -79,7 +80,7 @@ impl ParseSeparatedList for CssSelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_compound_selector(p)
+        parse_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -116,20 +117,28 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, CSS_BLOCK))
 }
-
 #[inline]
-pub(super) fn parse_identifier(p: &mut CssParser, kind: CssSyntaxKind) -> ParsedSyntax {
+pub(super) fn parse_identifier(
+    p: &mut CssParser,
+    kind: CssSyntaxKind,
+    context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump_remap(T![ident]);
+    p.do_bump_with_context(T![ident], context);
     let identifier = m.complete(p, kind);
 
     Present(identifier)
 }
 #[inline]
 pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
-    matches!(p.cur(), T![ident]) || p.cur().is_contextual_keyword()
+    is_nth_at_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
 }

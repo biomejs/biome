@@ -256,6 +256,7 @@ use std::path::Path;
 
 pub mod diagnostic;
 pub mod event;
+pub mod lexer;
 mod marker;
 pub mod parse_lists;
 pub mod parse_recovery;

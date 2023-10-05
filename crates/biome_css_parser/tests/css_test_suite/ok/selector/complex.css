@@ -1,0 +1,33 @@
+.div > .div {}
+
+.class > div > #id {
+
+}
+
+.div + .div {}
+
+.class + div + #id {
+
+}
+
+.div ~ .div {}
+
+.class ~ div ~ #id {
+
+}
+
+.div || .div {}
+
+.class || div || #id {
+
+}
+
+.class > div + #id ~ span.class #another {
+
+}
+
+.div .div {}
+
+.class  div  #id {
+
+}

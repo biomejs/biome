@@ -76,12 +76,13 @@ AnyCssSelector =
 // ^^^^^^^
 CssComplexSelector =
 	left: AnyCssSelector
-	combinator: CssComplexSelectorCombinator
+	combinator: ('>' | '+' | '~' | '||' | 'css_space_literal')
 	right: AnyCssSelector
 
-CssComplexSelectorCombinator =
-	'>' | '+' | '~' | 'css_space_literal'
-
+// .class {}
+// ^^^^^^^
+// a.class {}
+// ^^^^^^^
 CssCompoundSelector =
 	nesting_selector: '&'?
 	simple_selector: AnySimpleSelector?

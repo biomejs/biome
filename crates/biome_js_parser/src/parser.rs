@@ -7,7 +7,7 @@ use biome_parser::*;
 pub(crate) mod rewrite_parser;
 pub(crate) mod single_token_parse_recovery;
 
-use crate::lexer::ReLexContext;
+use crate::lexer::JsReLexContext;
 pub(crate) use crate::parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{ChangeParserState, ParserStateGuard};
@@ -75,7 +75,7 @@ impl<'source> JsParser<'source> {
 
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
-    pub fn re_lex(&mut self, context: ReLexContext) -> JsSyntaxKind {
+    pub fn re_lex(&mut self, context: JsReLexContext) -> JsSyntaxKind {
         self.source_mut().re_lex(context)
     }
 
@@ -205,7 +205,7 @@ impl<'source> Parser for JsParser<'source> {
     }
 
     fn do_bump(&mut self, kind: Self::Kind) {
-        self.do_bump_with_context(kind, LexContext::Regular)
+        self.do_bump_with_context(kind, JsLexContext::Regular)
     }
 }
 

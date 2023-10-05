@@ -128,7 +128,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#". {}"#;
+    let code = r#".div + .div {}"#;
     let root = parse_css(code, CssParserOptions::default());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());

@@ -16,6 +16,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         ("#", "HASH"),
         ("&", "AMP"),
         ("|", "PIPE"),
+        ("||", "PIPE2"),
         ("+", "PLUS"),
         ("*", "STAR"),
         ("/", "SLASH"),
@@ -252,7 +253,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // Selectors nodes
         "CSS_ANY_SELECTOR_LIST",
         "CSS_COMPLEX_SELECTOR",
-        "CSS_COMPLEX_SELECTOR_COMBINATOR",
         "CSS_COMPOUND_SELECTOR",
         "CSS_SUB_SELECTOR_LIST",
         "CSS_ID_SELECTOR",

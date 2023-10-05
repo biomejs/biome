@@ -646,6 +646,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
+ "bitflags 2.3.1",
  "drop_bomb",
 ]
 
