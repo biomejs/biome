@@ -686,6 +686,10 @@ export interface Nursery {
 	 */
 	noAccumulatingSpread?: RuleConfiguration;
 	/**
+	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+	 */
+	noApproximativeNumericConstant?: RuleConfiguration;
+	/**
 	 * Disallow void type outside of generic or return types.
 	 */
 	noConfusingVoidType?: RuleConfiguration;
@@ -1324,6 +1328,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccumulatingSpread"
+	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyCharacterClassInRegex"

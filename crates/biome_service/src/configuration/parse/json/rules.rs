@@ -2024,6 +2024,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "recommended",
                 "all",
                 "noAccumulatingSpread",
+                "noApproximativeNumericConstant",
                 "noConfusingVoidType",
                 "noDuplicateJsonKeys",
                 "noEmptyCharacterClassInRegex",
@@ -2079,6 +2080,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_accumulating_spread = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noApproximativeNumericConstant" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_approximative_numeric_constant = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noApproximativeNumericConstant",
+                        diagnostics,
+                    )?;
+                    self.no_approximative_numeric_constant = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
