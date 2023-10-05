@@ -1,15 +1,21 @@
 use super::*;
-use crate::BindingKind;
 use biome_js_syntax::AnyJsRoot;
 
-#[derive(Copy, Clone, Debug)]
-pub(crate) struct BindingIndex(usize);
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub(crate) struct BindingIdentifier(TextSize);
 
-impl From<usize> for BindingIndex {
-    fn from(v: usize) -> Self {
-        BindingIndex(v)
+impl BindingIdentifier {
+    pub(crate) fn value_identifier_from(name_range: &TextRange) -> Self {
+        Self(name_range.start())
+    }
+
+    pub(crate) fn type_identifier_from(name_range: &TextRange) -> Self {
+        Self(name_range.end())
     }
 }
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct BindingIndex(pub(crate) usize);
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct ReferenceIndex(usize, usize);
@@ -41,13 +47,13 @@ pub(crate) struct SemanticModelData {
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range in the code to its bindings (usize points to bindings vec)
-    pub(crate) bindings_by_reference_range: FxHashMap<TextRange, usize>,
+    pub(crate) bindings_by_reference_range: FxHashMap<TextSize, BindingIndex>,
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
     // Index bindings by range
-    pub(crate) bindings_by_range: FxHashMap<(BindingKind, TextRange), usize>,
+    pub(crate) bindings_by_range: Vec<BindingIdentifier>,
     // All bindings that were exported
-    pub(crate) exported: FxHashSet<usize>,
+    pub(crate) exported: FxHashSet<BindingIndex>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
     /// All globals references
@@ -57,6 +63,10 @@ pub(crate) struct SemanticModelData {
 impl SemanticModelData {
     pub(crate) fn binding(&self, index: BindingIndex) -> &SemanticModelBindingData {
         &self.bindings[index.0]
+    }
+
+    pub(crate) fn binding_index(&self, identifier: BindingIdentifier) -> Option<BindingIndex> {
+        self.bindings_by_range.binary_search(&identifier).map(BindingIndex).ok()
     }
 
     pub(crate) fn reference(&self, index: ReferenceIndex) -> &SemanticModelReference {
@@ -90,10 +100,9 @@ impl SemanticModelData {
     }
 
     pub fn is_exported(&self, range: TextRange) -> bool {
-        self.bindings_by_range
-            .get(&(BindingKind::Value, range))
-            .or_else(|| Some(&self.bindings_by_range[&(BindingKind::Type, range)]))
-            .map_or(false, |id| self.exported.contains(id))
+        self.binding_index(BindingIdentifier::value_identifier_from(&range))
+            .or_else(|| self.binding_index(BindingIdentifier::type_identifier_from(&range)))
+            .map_or(false, |id| self.exported.contains(&id))
     }
 }
 
@@ -184,7 +193,7 @@ impl SemanticModel {
     pub fn all_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.bindings.iter().map(|x| Binding {
             data: self.data.clone(),
-            index: x.id,
+            index: x.index,
         })
     }
 
@@ -214,7 +223,7 @@ impl SemanticModel {
     pub fn binding(&self, reference: &impl HasDeclarationAstNode) -> Option<Binding> {
         let reference = reference.node();
         let range = reference.syntax().text_range();
-        let id = *self.data.bindings_by_reference_range.get(&range)?;
+        let id = *self.data.bindings_by_reference_range.get(&range.start())?;
         Some(Binding {
             data: self.data.clone(),
             index: id.into(),
@@ -327,25 +336,19 @@ impl SemanticModel {
 
     pub fn as_value_binding(&self, binding: &impl IsBindingAstNode) -> Option<Binding> {
         let range = binding.syntax().text_range();
-        let id = self
-            .data
-            .bindings_by_range
-            .get(&(BindingKind::Value, range))?;
+        let index = self.data.binding_index(BindingIdentifier::value_identifier_from(&range))?;
         Some(Binding {
             data: self.data.clone(),
-            index: (*id).into(),
+            index,
         })
     }
 
     pub fn as_type_binding(&self, binding: &impl IsBindingAstNode) -> Option<Binding> {
         let range = binding.syntax().text_range();
-        let id = self
-            .data
-            .bindings_by_range
-            .get(&(BindingKind::Type, range))?;
+        let index = self.data.binding_index(BindingIdentifier::type_identifier_from(&range))?;
         Some(Binding {
             data: self.data.clone(),
-            index: (*id).into(),
+            index,
         })
     }
 

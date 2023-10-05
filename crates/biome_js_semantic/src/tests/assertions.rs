@@ -451,9 +451,9 @@ impl SemanticAssertions {
             if let Some(events) = events_by_pos.get(&assertion.range.start()) {
                 match &events[0] {
                     SemanticEvent::DeclarationFound {
-                        range, binding_id, ..
+                        range, binding_index, ..
                     } => {
-                        binding_range.insert(binding_id, range);
+                        binding_range.insert(binding_index, range);
                         // OK because we are attached to a declaration
                     }
                     _ => {
@@ -501,9 +501,9 @@ impl SemanticAssertions {
 
             let mut unused_match = None;
             let at_least_one_match = events.iter().any(|e| match e {
-                SemanticEvent::Read { binding_id, .. }
-                | SemanticEvent::HoistedRead { binding_id, .. } => {
-                    let declaration_at_range = **binding_range.index(binding_id);
+                SemanticEvent::Read { binding_index, .. }
+                | SemanticEvent::HoistedRead { binding_index, .. } => {
+                    let declaration_at_range = **binding_range.index(binding_index);
                     unused_match = Some(format!(
                         "{} != {}",
                         &code[declaration_at_range], &code[decl.range]
@@ -556,9 +556,9 @@ impl SemanticAssertions {
             };
 
             let at_least_one_match = events.iter().any(|e| match e {
-                SemanticEvent::Write { binding_id, .. }
-                | SemanticEvent::HoistedWrite { binding_id, .. } => {
-                    let declaration_at_range = **binding_range.index(binding_id);
+                SemanticEvent::Write { binding_index, .. }
+                | SemanticEvent::HoistedWrite { binding_index, .. } => {
+                    let declaration_at_range = **binding_range.index(binding_index);
                     code[declaration_at_range] == code[decl.range]
                 }
                 _ => false,

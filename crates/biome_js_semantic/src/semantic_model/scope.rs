@@ -13,9 +13,9 @@ pub(crate) struct SemanticModelScopeData {
     // All children scope of this scope
     pub(crate) children: Vec<usize>,
     // All bindings of this scope (points to SemanticModelData::bindings)
-    pub(crate) bindings: Vec<usize>,
+    pub(crate) bindings: Vec<BindingIndex>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub(crate) bindings_by_name: FxHashMap<TokenText, usize>,
+    pub(crate) bindings_by_name: FxHashMap<TokenText, BindingIndex>,
     // All read references of a scope
     pub(crate) read_references: Vec<SemanticModelScopeReference>,
     // All write references of a scope
@@ -127,7 +127,7 @@ impl Scope {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub(crate) struct SemanticModelScopeReference {
     // Points to [SemanticModel]::bindings vec
-    pub(crate) binding_id: usize,
+    pub(crate) binding_index: BindingIndex,
     // Points do [SemanticModelBinding]::references vec
     pub(crate) reference_id: usize,
 }

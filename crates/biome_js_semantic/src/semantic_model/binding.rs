@@ -7,7 +7,7 @@ use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypePara
 #[derive(Debug)]
 pub(crate) struct SemanticModelBindingData {
     pub kind: BindingKind,
-    pub id: BindingIndex,
+    pub index: BindingIndex,
     pub range: TextRange,
     pub references: Vec<SemanticModelReference>,
 }

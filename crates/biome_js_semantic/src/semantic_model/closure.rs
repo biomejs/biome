@@ -83,7 +83,7 @@ pub struct Capture {
     data: Rc<SemanticModelData>,
     ty: CaptureType,
     node: JsSyntaxNode,
-    binding_id: BindingIndex,
+    binding_index: BindingIndex,
 }
 
 impl Capture {
@@ -101,7 +101,7 @@ impl Capture {
     pub fn binding(&self) -> Binding {
         Binding {
             data: self.data.clone(),
-            index: self.binding_id,
+            index: self.binding_index,
         }
     }
 
@@ -112,7 +112,7 @@ impl Capture {
     /// self.declaration().text_range()
     /// ```
     pub fn declaration_range(&self) -> &TextRange {
-        let binding = self.data.binding(self.binding_id);
+        let binding = self.data.binding(self.binding_index);
         &binding.range
     }
 }
@@ -130,14 +130,14 @@ impl Iterator for AllCapturesIter {
     fn next(&mut self) -> Option<Self::Item> {
         'references: loop {
             while let Some(reference) = self.references.pop() {
-                let binding = &self.data.bindings[reference.binding_id];
+                let binding = &self.data.bindings[reference.binding_index.0];
                 if self.closure_range.intersect(binding.range).is_none() {
                     let reference = &binding.references[reference.reference_id];
                     return Some(Capture {
                         data: self.data.clone(),
                         node: self.data.node_by_range[&reference.range].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
-                        binding_id: binding.id,
+                        binding_index: binding.index,
                     });
                 }
             }
