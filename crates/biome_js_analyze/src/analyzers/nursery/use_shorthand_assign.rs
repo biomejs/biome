@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
+    AnyJsExpression, BinaryExpressionNodePosition, JsAssignmentExpression, JsAssignmentOperator,
     JsBinaryExpression, JsBinaryOperator, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -61,12 +61,6 @@ pub struct RuleState {
     replacement_expression: AnyJsExpression,
 }
 
-#[derive(Clone)]
-enum VariablePosition {
-    Left,
-    Right,
-}
-
 impl Rule for UseShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = RuleState;
@@ -83,13 +77,6 @@ impl Rule for UseShorthandAssign {
         let left = node.left().ok()?;
         let right = node.right().ok()?;
 
-        let left_var_name = match left.as_any_js_assignment()? {
-            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.text(),
-            AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.text(),
-            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.text(),
-            _ => return None,
-        };
-
         let binary_expression = match right {
             AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
             AnyJsExpression::JsParenthesizedExpression(param) => {
@@ -101,15 +88,19 @@ impl Rule for UseShorthandAssign {
         let operator = binary_expression.operator().ok()?;
         let shorthand_operator = get_shorthand(operator)?;
         let is_commutative = is_commutative(operator);
-        let variable_position_in_expression =
-            parse_variable_reference_in_expression(&left_var_name, &binary_expression)?;
+        let variable_position_in_expression = binary_expression.get_node_position(left.syntax())?;
 
         let replacement_expression = match variable_position_in_expression {
-            VariablePosition::Left => binary_expression.right().ok()?,
-            VariablePosition::Right => binary_expression.left().ok()?,
+            BinaryExpressionNodePosition::Left => binary_expression.right().ok()?,
+            BinaryExpressionNodePosition::Right => binary_expression.left().ok()?,
         };
 
-        if !is_commutative && matches!(variable_position_in_expression, VariablePosition::Right) {
+        if !is_commutative
+            && matches!(
+                variable_position_in_expression,
+                BinaryExpressionNodePosition::Right
+            )
+        {
             return None;
         }
 
@@ -158,26 +149,6 @@ impl Rule for UseShorthandAssign {
                 .to_owned(),
             mutation,
         })
-    }
-}
-
-fn parse_variable_reference_in_expression(
-    variable_name: &str,
-    binary_expression: &JsBinaryExpression,
-) -> Option<VariablePosition> {
-    let present_on_left = variable_name == binary_expression.left().ok()?.omit_parentheses().text();
-
-    if present_on_left {
-        return Some(VariablePosition::Left);
-    }
-
-    let present_on_right =
-        variable_name == binary_expression.right().ok()?.omit_parentheses().text();
-
-    if present_on_right {
-        Some(VariablePosition::Right)
-    } else {
-        None
     }
 }
 

@@ -23,7 +23,7 @@ Source: https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op
 a += a + b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation</span>
   
@@ -31,13 +31,19 @@ a += a + b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This assignment might be result of a wrong refactoring, use </span><span style="color: rgb(38, 148, 255);"><strong>a += b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Use </span><span style="color: rgb(38, 148, 255);"><strong>a += b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>a<span style="opacity: 0.8;">·</span>+=<span style="opacity: 0.8;">·</span><span style="color: Tomato;">a</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">+</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>b
+<strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span> 
 </code></pre>
 
 ```jsx
 a -= a - b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation</span>
   
@@ -45,13 +51,19 @@ a -= a - b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This assignment might be result of a wrong refactoring, use </span><span style="color: rgb(38, 148, 255);"><strong>a -= b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Use </span><span style="color: rgb(38, 148, 255);"><strong>a -= b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>a<span style="opacity: 0.8;">·</span>-=<span style="opacity: 0.8;">·</span><span style="color: Tomato;">a</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">-</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>b
+<strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span> 
 </code></pre>
 
 ```jsx
 a *= a * b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation</span>
   
@@ -59,6 +71,12 @@ a *= a * b
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This assignment might be result of a wrong refactoring, use </span><span style="color: rgb(38, 148, 255);"><strong>a *= b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Use </span><span style="color: rgb(38, 148, 255);"><strong>a *= b</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>a<span style="opacity: 0.8;">·</span>*=<span style="opacity: 0.8;">·</span><span style="color: Tomato;">a</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">*</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>b
+<strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span> 
 </code></pre>
 
 ## Valid

@@ -8,7 +8,7 @@ use crate::{
     JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
     JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
     JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence,
     TsStringLiteralType, T,
 };
@@ -211,6 +211,12 @@ impl JsBinaryOperator {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum BinaryExpressionNodePosition {
+    Left,
+    Right,
+}
+
 impl JsBinaryExpression {
     pub fn operator(&self) -> SyntaxResult<JsBinaryOperator> {
         let kind = match self.operator_token()?.kind() {
@@ -282,6 +288,22 @@ impl JsBinaryExpression {
                 .map_or(false, |x| x.is_null_or_undefined()))
         } else {
             Ok(false)
+        }
+    }
+
+    pub fn get_node_position(&self, node: &JsSyntaxNode) -> Option<BinaryExpressionNodePosition> {
+        let node_name = node.text_trimmed().to_string();
+        let present_on_left = node_name == self.left().ok()?.omit_parentheses().text();
+        if present_on_left {
+            return Some(BinaryExpressionNodePosition::Left);
+        }
+
+        let present_on_right = node_name == self.right().ok()?.omit_parentheses().text();
+
+        if present_on_right {
+            Some(BinaryExpressionNodePosition::Right)
+        } else {
+            None
         }
     }
 }

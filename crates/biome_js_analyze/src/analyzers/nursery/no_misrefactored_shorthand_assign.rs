@@ -1,9 +1,14 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic};
-use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsAssignment, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
-use biome_rowan::AstNode;
+use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_syntax::{
+    AnyJsExpression, BinaryExpressionNodePosition, JsAssignmentExpression, JsAssignmentOperator,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow shorthand assign when variable appears on both sides.
@@ -51,7 +56,9 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {}
+pub struct RuleState {
+    replacement_expression: AnyJsExpression,
+}
 
 impl Rule for NoMisrefactoredShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
@@ -67,6 +74,14 @@ impl Rule for NoMisrefactoredShorthandAssign {
         }
 
         let right = node.right().ok()?;
+        let operator_token = node
+            .operator_token()
+            .ok()?
+            .kind()
+            .to_string()?
+            .split('=')
+            .nth(0)?;
+
         let binary_expression = right.as_js_binary_expression()?;
         let bin_operator = binary_expression
             .operator_token()
@@ -74,53 +89,67 @@ impl Rule for NoMisrefactoredShorthandAssign {
             .kind()
             .to_string()?;
 
-        let operator_token = node
-            .operator_token()
-            .ok()?
-            .kind()
-            .to_string()?
-            .split_once('=')?;
+        let not_same_operator_from_shorthand = operator_token != bin_operator;
+
+        if not_same_operator_from_shorthand {
+            return None;
+        }
 
         let left = node.left().ok()?;
-        let left_var_name = get_assignment_variable_name(left.as_any_js_assignment()?)?;
-        let all_variables: Vec<String> = find_all_variables(node);
+        let variable_position_in_expression = binary_expression.get_node_position(left.syntax())?;
 
-        if operator_token.0 == bin_operator && all_variables.contains(&left_var_name) {
-            Some(RuleState {})
-        } else {
-            None
-        }
-    }
+        let replacement_expression = match variable_position_in_expression {
+            BinaryExpressionNodePosition::Left => binary_expression.right().ok()?,
+            BinaryExpressionNodePosition::Right => binary_expression.left().ok()?,
+        };
 
-    fn diagnostic(node: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.query().range(),
-            markup! {
-                "Variable appears on both sides of an assignment operation"
-            },
-        ))
-    }
-}
-
-fn get_assignment_variable_name(assignment: &AnyJsAssignment) -> Option<String> {
-    match assignment {
-        AnyJsAssignment::JsComputedMemberAssignment(assignment) => Some(assignment.text()),
-        AnyJsAssignment::JsIdentifierAssignment(assignment) => Some(assignment.text()),
-        AnyJsAssignment::JsStaticMemberAssignment(assignment) => Some(assignment.text()),
-        _ => None,
-    }
-}
-
-fn find_all_variables(node: &JsAssignmentExpression) -> Vec<String> {
-    node.syntax()
-        .children()
-        .filter_map(JsBinaryExpression::cast)
-        .fold(vec![], |mut acc, x| {
-            if let (Some(left), Some(right)) = (x.left().ok(), x.right().ok()) {
-                acc.push(left.text());
-                acc.push(right.text());
-            }
-            acc
+        Some(RuleState {
+            replacement_expression,
         })
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+
+        let replacement_text = node
+            .clone()
+            .with_right(state.replacement_expression.clone())
+            .syntax()
+            .text_trimmed()
+            .to_string();
+
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Variable appears on both sides of an assignment operation"
+                },
+            )
+            .note(markup! {
+                "This assignment might be result of a wrong refactoring, use "<Emphasis>""{replacement_text}""</Emphasis>" instead."
+            }),
+        )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        let replacement_node = node
+            .clone()
+            .with_right(state.replacement_expression.clone());
+
+        let replacement_text = replacement_node.clone().syntax().text_trimmed().to_string();
+
+        mutation.replace_node(node.clone(), replacement_node);
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            mutation,
+            message: markup! { "Use "<Emphasis>""{replacement_text}""</Emphasis>" instead." }
+                .to_owned(),
+        })
+    }
 }

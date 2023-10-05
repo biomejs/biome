@@ -33,7 +33,7 @@ a ^= a ^ b
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -42,11 +42,17 @@ invalid.js:1:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━
     2 │ 
     3 │ a -= a - b
   
+  i This assignment might be result of a wrong refactoring, use a += b instead.
+  
+  i Unsafe fix: Use a += b instead.
+  
+    1 │ a·+=·a·+·b
+      │      ---- 
 
 ```
 
 ```
-invalid.js:3:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -57,11 +63,17 @@ invalid.js:3:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━
     4 │ 
     5 │ a *= a * b
   
+  i This assignment might be result of a wrong refactoring, use a -= b instead.
+  
+  i Unsafe fix: Use a -= b instead.
+  
+    3 │ a·-=·a·-·b
+      │      ---- 
 
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -72,11 +84,17 @@ invalid.js:5:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━
     6 │ 
     7 │ a /= a / b
   
+  i This assignment might be result of a wrong refactoring, use a *= b instead.
+  
+  i Unsafe fix: Use a *= b instead.
+  
+    5 │ a·*=·a·*·b
+      │      ---- 
 
 ```
 
 ```
-invalid.js:7:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -87,11 +105,17 @@ invalid.js:7:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━
     8 │ 
     9 │ a %= a % b
   
+  i This assignment might be result of a wrong refactoring, use a /= b instead.
+  
+  i Unsafe fix: Use a /= b instead.
+  
+    7 │ a·/=·a·/·b
+      │      ---- 
 
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -102,11 +126,17 @@ invalid.js:9:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━
     10 │ 
     11 │ a **= a ** b
   
+  i This assignment might be result of a wrong refactoring, use a %= b instead.
+  
+  i Unsafe fix: Use a %= b instead.
+  
+    9 │ a·%=·a·%·b
+      │      ---- 
 
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -117,11 +147,17 @@ invalid.js:11:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     12 │ 
     13 │ a >>= a >> b
   
+  i This assignment might be result of a wrong refactoring, use a **= b instead.
+  
+  i Unsafe fix: Use a **= b instead.
+  
+    11 │ a·**=·a·**·b
+       │       ----- 
 
 ```
 
 ```
-invalid.js:13:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -132,11 +168,17 @@ invalid.js:13:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     14 │ 
     15 │ a <<= a << b
   
+  i This assignment might be result of a wrong refactoring, use a >>= b instead.
+  
+  i Unsafe fix: Use a >>= b instead.
+  
+    13 │ a·>>=·a·>>·b
+       │       ----- 
 
 ```
 
 ```
-invalid.js:15:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -147,11 +189,17 @@ invalid.js:15:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     16 │ 
     17 │ a >>>= a >>> b
   
+  i This assignment might be result of a wrong refactoring, use a <<= b instead.
+  
+  i Unsafe fix: Use a <<= b instead.
+  
+    15 │ a·<<=·a·<<·b
+       │       ----- 
 
 ```
 
 ```
-invalid.js:17:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -162,11 +210,17 @@ invalid.js:17:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     18 │ 
     19 │ a &= a & b
   
+  i This assignment might be result of a wrong refactoring, use a >>>= b instead.
+  
+  i Unsafe fix: Use a >>>= b instead.
+  
+    17 │ a·>>>=·a·>>>·b
+       │        ------ 
 
 ```
 
 ```
-invalid.js:19:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -177,11 +231,17 @@ invalid.js:19:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     20 │ 
     21 │ a |= a | b
   
+  i This assignment might be result of a wrong refactoring, use a &= b instead.
+  
+  i Unsafe fix: Use a &= b instead.
+  
+    19 │ a·&=·a·&·b
+       │      ---- 
 
 ```
 
 ```
-invalid.js:21:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -192,11 +252,17 @@ invalid.js:21:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
     22 │ 
     23 │ a ^= a ^ b
   
+  i This assignment might be result of a wrong refactoring, use a |= b instead.
+  
+  i Unsafe fix: Use a |= b instead.
+  
+    21 │ a·|=·a·|·b
+       │      ---- 
 
 ```
 
 ```
-invalid.js:23:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/nursery/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable appears on both sides of an assignment operation
   
@@ -206,6 +272,12 @@ invalid.js:23:1 lint/nursery/noMisrefactoredShorthandAssign ━━━━━━�
        │ ^^^^^^^^^^
     24 │ 
   
+  i This assignment might be result of a wrong refactoring, use a ^= b instead.
+  
+  i Unsafe fix: Use a ^= b instead.
+  
+    23 │ a·^=·a·^·b
+       │      ---- 
 
 ```
 
