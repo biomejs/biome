@@ -102,7 +102,7 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
-        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attrigbute
+        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
         let Some(role_attribute) = node.find_attribute_by_name("role") else {
             return Some(());
         };
@@ -143,8 +143,7 @@ impl Rule for NoSvgWithoutTitle {
                 },
             )
             .note(markup! {
-                "For accessibility purposes, "<Emphasis>"SVGs"</Emphasis>" should have an alternative text,
-            provided via "<Emphasis>"title"</Emphasis>" element. If the svg element has role=\"img\", you should add the "<Emphasis>"aria-label"</Emphasis>" or "<Emphasis>"aria-labelledby"</Emphasis>" attribute."
+                "For accessibility purposes, "<Emphasis>"SVGs"</Emphasis>" should have an alternative text, provided via "<Emphasis>"title"</Emphasis>" element. If the svg element has role=\"img\", you should add the "<Emphasis>"aria-label"</Emphasis>" or "<Emphasis>"aria-labelledby"</Emphasis>" attribute."
             });
         Some(diagnostic)
     }
