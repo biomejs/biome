@@ -10,7 +10,10 @@
   > pre[class*=language-] {
     margin: 0;
     height: 100%;
-    background-color: #282c34 !important;
+
+    @include dark-mode {
+      background-color: #282c34 !important;
+    }
   }
 
   > iframe {
@@ -37,9 +40,8 @@
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
-  background-color: var(--container-color);
   font-size: 14px;
-  border-bottom: 1px solid var(--playground-border);
+  background-color: rgba(0, 0, 0, 0.1);
 
   @include dark-mode {
     background-color: rgba(255, 255, 255, 0.2);

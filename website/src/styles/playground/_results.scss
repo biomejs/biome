@@ -72,6 +72,13 @@
   height: 100%;
 }
 
+.cm-gutters {
+  @include dark-mode {
+    background-color: #2b313d;
+    border-right: 1px solid #313744;
+  }
+}
+
 .cm-focused {
   outline: none !important;
 }
