@@ -2,14 +2,13 @@
 
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsIdentifierUsage, AnyJsVariableDeclaration,
-    JsAssignmentExpression, JsExportNamedClause, JsLanguage, JsReferenceIdentifier, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TextRange, TextSize,
-    TsImportEqualsDeclaration, TsTypeParameterName,
-};
-use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyTsType, JsImportDefaultClause,
     JsImportNamedClause,
+};
+use biome_js_syntax::{
+    AnyJsIdentifierUsage, AnyJsVariableDeclaration, JsExportNamedClause, JsLanguage,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator,
+    TextRange, TextSize, TsImportEqualsDeclaration, TsTypeParameterName,
 };
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
@@ -397,7 +396,6 @@ impl SemanticEventExtractor {
             }
             JS_CLASS_EXPRESSION | JS_FUNCTION_EXPRESSION => {
                 self.push_binding_into_scope(None, &name_token, DeclarationKind::Both);
-                self.export_declaration_expression(node, &parent);
             }
             JS_CLASS_DECLARATION
             | JS_CLASS_EXPORT_DEFAULT_DECLARATION
@@ -880,27 +878,6 @@ impl SemanticEventExtractor {
         }
     }
 
-    // Check if a function or class expression is exported and raise the [Exported] event.
-    fn export_declaration_expression(
-        &mut self,
-        binding: &JsSyntaxNode,
-        declaration_expression: &JsSyntaxNode,
-    ) {
-        debug_assert!(matches!(
-            declaration_expression.kind(),
-            JS_FUNCTION_EXPRESSION | JS_CLASS_EXPRESSION
-        ));
-        let is_module_exports = declaration_expression
-            .parent()
-            .map(Self::is_assignment_left_side_module_exports)
-            .unwrap_or(false);
-        if is_module_exports {
-            self.stash.push_back(SemanticEvent::Exported {
-                range: binding.text_range(),
-            });
-        }
-    }
-
     // Check if a class, type alias, enum, interface, module is exported and raise the [Exported] event.
     fn export_declaration(&mut self, binding: &JsSyntaxNode, declaration: &JsSyntaxNode) {
         debug_assert!(matches!(
@@ -968,58 +945,10 @@ impl SemanticEventExtractor {
                 ) {
                     return Some(Reference::Export(range));
                 }
-                // check module.exports = X
-                Self::is_assignment_left_side_module_exports(grandparent)
-                    .then_some(Reference::Export(range))
-            }
-            JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
-                let maybe_assignment = parent.ancestors().nth(3)?;
-                // check module.exports = { X }
-                Self::is_assignment_left_side_module_exports(maybe_assignment)
-                    .then_some(Reference::Export(range))
+                None
             }
             _ => None,
         }
-    }
-
-    fn is_assignment_left_side_module_exports(node: JsSyntaxNode) -> bool {
-        if let Some(expr) = JsAssignmentExpression::cast(node) {
-            return match expr.left() {
-                Ok(AnyJsAssignmentPattern::AnyJsAssignment(
-                    AnyJsAssignment::JsStaticMemberAssignment(member),
-                )) => {
-                    let Some(first) = member
-                        .object()
-                        .ok()
-                        .and_then(|x| x.as_js_reference_identifier()?.value_token().ok())
-                    else {
-                        return false;
-                    };
-                    match first.text_trimmed() {
-                        // module.exports = ..
-                        "module" => {
-                            let Some(second) = member
-                                .member()
-                                .ok()
-                                .and_then(|x| x.as_js_name()?.value_token().ok())
-                            else {
-                                return false;
-                            };
-                            second.text_trimmed() == "exports"
-                        }
-                        // exports.<anything> = ..
-                        "exports" => true,
-                        _ => false,
-                    }
-                }
-                // exports = ...
-                Ok(AnyJsAssignmentPattern::AnyJsAssignment(
-                    AnyJsAssignment::JsIdentifierAssignment(ident),
-                )) => ident.syntax().text_trimmed() == "exports",
-                _ => false,
-            };
-        }
-        false
     }
 }
 

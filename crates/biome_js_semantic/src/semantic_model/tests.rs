@@ -216,10 +216,6 @@ mod test {
         assert_is_exported(true, "A", "const A = 1; export {A}");
         assert_is_exported(false, "A", "const A = 1; export {type A}");
         assert_is_exported(false, "A", "const A = 1; export type {A}");
-        assert_is_exported(true, "A", "const A = 1; module.exports = A;");
-        assert_is_exported(true, "A", "const A = 1; module.exports = {A};");
-        assert_is_exported(true, "A", "const A = 1; exports = A;");
-        assert_is_exported(true, "A", "const A = 1; exports.A = A;");
 
         // Functions
         assert_is_exported(false, "f", "function f() {}");
@@ -230,13 +226,6 @@ mod test {
         assert_is_exported(false, "f", "function f() {} export {type f}");
         assert_is_exported(false, "f", "function f() {} export type {f}");
         assert_is_exported(true, "f", "function f() {} export {f as g}");
-        assert_is_exported(true, "f", "module.exports = function f() {}");
-        assert_is_exported(true, "f", "exports = function f() {}");
-        assert_is_exported(true, "f", "exports.f = function f() {}");
-        assert_is_exported(true, "f", "function f() {} module.exports = f");
-        assert_is_exported(true, "f", "function f() {} module.exports = {f}");
-        assert_is_exported(true, "f", "function f() {} exports = f");
-        assert_is_exported(true, "f", "function f() {} exports.f = f");
 
         // Classes
         assert_is_exported(false, "A", "class A{}");
@@ -247,11 +236,6 @@ mod test {
         assert_is_exported(true, "A", "class A{} export {type A}");
         assert_is_exported(true, "A", "class A{} export {A as B}");
         assert_is_exported(true, "A", "class A{} export {type A as B}");
-        assert_is_exported(true, "A", "module.exports = class A{}");
-        assert_is_exported(true, "A", "exports = class A{}");
-        assert_is_exported(true, "A", "class A{} module.exports = A");
-        assert_is_exported(true, "A", "class A{} exports = A");
-        assert_is_exported(true, "A", "class A{} exports.A = A");
 
         // Interfaces
         assert_is_exported(false, "A", "interface A{}");
@@ -263,9 +247,6 @@ mod test {
         assert_is_exported(true, "A", "interface A{} export type {A}");
         assert_is_exported(true, "A", "interface A{} export {A as B}");
         assert_is_exported(true, "A", "interface A{} export {type A as B}");
-        assert_is_exported(true, "A", "interface A{} module.exports = A");
-        assert_is_exported(true, "A", "interface A{} exports = A");
-        assert_is_exported(true, "A", "interface A{} exports.A = A");
 
         // Type Aliases
         assert_is_exported(false, "A", "type A = number;");
@@ -276,9 +257,6 @@ mod test {
         assert_is_exported(true, "A", "type A = number; export type {A}");
         assert_is_exported(true, "A", "type A = number; export {A as B}");
         assert_is_exported(true, "A", "type A = number; export {type A as B}");
-        assert_is_exported(true, "A", "type A = number; module.exports = A");
-        assert_is_exported(true, "A", "type A = number; exports = A");
-        assert_is_exported(true, "A", "type A = number; exports.A = A");
 
         // Enums
         assert_is_exported(false, "A", "enum A {};");
@@ -289,9 +267,6 @@ mod test {
         assert_is_exported(true, "A", "enum A {}; export type {A}");
         assert_is_exported(true, "A", "enum A {}; export {A as B}");
         assert_is_exported(true, "A", "enum A {}; export {type A as B}");
-        assert_is_exported(true, "A", "enum A {}; module.exports = A");
-        assert_is_exported(true, "A", "enum A {}; exports = A");
-        assert_is_exported(true, "A", "enum A {}; exports.A = A");
     }
 
     #[test]
