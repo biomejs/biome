@@ -13,7 +13,8 @@ use std::sync::RwLock;
 pub struct Matcher {
     patterns: Vec<Pattern>,
     options: MatchOptions,
-    already_ignored: RwLock<HashMap<String, bool>>,
+    /// Whether the string was already checked
+    already_checked: RwLock<HashMap<String, bool>>,
 }
 
 impl Matcher {
@@ -24,7 +25,7 @@ impl Matcher {
         Self {
             patterns: Vec::new(),
             options,
-            already_ignored: RwLock::new(HashMap::default()),
+            already_checked: RwLock::new(HashMap::default()),
         }
     }
 
@@ -39,7 +40,7 @@ impl Matcher {
     ///
     /// It returns [true] if there's at least a match
     pub fn matches(&self, source: &str) -> bool {
-        let mut already_ignored = self.already_ignored.write().unwrap();
+        let mut already_ignored = self.already_checked.write().unwrap();
         if let Some(matches) = already_ignored.get(source) {
             return *matches;
         }
@@ -57,10 +58,10 @@ impl Matcher {
     ///
     /// It returns [true] if there's a lest a match
     pub fn matches_path(&self, source: &Path) -> bool {
-        let mut already_ignored = self.already_ignored.write().unwrap();
+        let mut already_checked = self.already_checked.write().unwrap();
         let source_as_string = source.to_str();
         if let Some(source_as_string) = source_as_string {
-            if let Some(matches) = already_ignored.get(source_as_string) {
+            if let Some(matches) = already_checked.get(source_as_string) {
                 return *matches;
             }
         }
@@ -84,7 +85,7 @@ impl Matcher {
         };
 
         if let Some(source_as_string) = source_as_string {
-            already_ignored.insert(source_as_string.to_string(), matches);
+            already_checked.insert(source_as_string.to_string(), matches);
         }
 
         matches

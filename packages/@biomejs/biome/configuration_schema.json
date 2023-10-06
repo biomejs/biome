@@ -664,12 +664,16 @@
 			"type": "object",
 			"properties": {
 				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome tools will ignore files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"type": ["boolean", "null"]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -693,6 +697,10 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"indentSize": {
@@ -955,6 +963,10 @@
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
 				"rules": {
 					"description": "List of rules",
 					"default": { "recommended": true },
@@ -1156,6 +1168,10 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				}
 			},

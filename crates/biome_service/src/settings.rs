@@ -168,8 +168,10 @@ pub struct FormatSettings {
     pub indent_style: Option<IndentStyle>,
     pub indent_width: Option<IndentWidth>,
     pub line_width: Option<LineWidth>,
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
+    /// List of ignore paths/files
+    pub ignored_files: Option<Matcher>,
+    /// List of included paths/files
+    pub included_files: Option<Matcher>,
 }
 
 impl Default for FormatSettings {
@@ -180,11 +182,8 @@ impl Default for FormatSettings {
             indent_style: Some(IndentStyle::default()),
             indent_width: Some(IndentWidth::default()),
             line_width: Some(LineWidth::default()),
-            ignored_files: Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            }),
+            ignored_files: None,
+            included_files: None,
         }
     }
 }
@@ -198,8 +197,11 @@ pub struct LinterSettings {
     /// List of rules
     pub rules: Option<Rules>,
 
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
+    /// List of ignored paths/files to match
+    pub ignored_files: Option<Matcher>,
+
+    /// List of included paths/files to match
+    pub included_files: Option<Matcher>,
 }
 
 impl Default for LinterSettings {
@@ -207,11 +209,8 @@ impl Default for LinterSettings {
         Self {
             enabled: true,
             rules: Some(Rules::default()),
-            ignored_files: Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            }),
+            ignored_files: None,
+            included_files: None,
         }
     }
 }
@@ -222,19 +221,19 @@ pub struct OrganizeImportsSettings {
     /// Enabled by default
     pub enabled: bool,
 
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
+    /// List of ignored paths/files to match
+    pub ignored_files: Option<Matcher>,
+
+    /// List of ignored paths/files to match
+    pub included_files: Option<Matcher>,
 }
 
 impl Default for OrganizeImportsSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            ignored_files: Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            }),
+            ignored_files: None,
+            included_files: None,
         }
     }
 }
@@ -298,7 +297,10 @@ pub struct FilesSettings {
     pub max_size: NonZeroU64,
 
     /// List of paths/files to matcher
-    pub ignored_files: Matcher,
+    pub ignored_files: Option<Matcher>,
+
+    /// List of paths/files to matcher
+    pub included_files: Option<Matcher>,
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: bool,
@@ -313,11 +315,8 @@ impl Default for FilesSettings {
     fn default() -> Self {
         Self {
             max_size: DEFAULT_FILE_SIZE_LIMIT,
-            ignored_files: Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            }),
+            ignored_files: None,
+            included_files: None,
             ignore_unknown: false,
         }
     }
@@ -327,12 +326,13 @@ impl TryFrom<FilesConfiguration> for FilesSettings {
     type Error = WorkspaceError;
 
     fn try_from(config: FilesConfiguration) -> Result<Self, Self::Error> {
-        let mut matcher = Matcher::new(MatchOptions {
-            case_sensitive: true,
-            require_literal_leading_dot: false,
-            require_literal_separator: false,
-        });
+        let mut ignored_files = None;
         if let Some(ignore) = config.ignore {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
             for pattern in ignore.index_set() {
                 matcher.add_pattern(pattern).map_err(|err| {
                     WorkspaceError::Configuration(
@@ -343,10 +343,31 @@ impl TryFrom<FilesConfiguration> for FilesSettings {
                     )
                 })?;
             }
+            ignored_files = Some(matcher);
+        }
+        let mut included_files = None;
+        if let Some(include) = config.include {
+            let mut matcher = Matcher::new(MatchOptions {
+                case_sensitive: true,
+                require_literal_leading_dot: false,
+                require_literal_separator: false,
+            });
+            for pattern in include.index_set() {
+                matcher.add_pattern(pattern).map_err(|err| {
+                    WorkspaceError::Configuration(
+                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                            pattern.to_string(),
+                            err.msg.to_string(),
+                        ),
+                    )
+                })?;
+            }
+            included_files = Some(matcher);
         }
         Ok(Self {
             max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
-            ignored_files: matcher,
+            ignored_files,
+            included_files,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })
     }

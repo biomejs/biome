@@ -165,6 +165,42 @@ match these patterns.
 }
 ```
 
+
+### `files.include`
+
+A list of Unix shell style patterns. Biome handles only the files and folders that
+match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "files": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+:::
+
+Given the following example:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "files": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "exclude": ["scripts/**/*.js"]
+  }
+}
+```
+
+Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
+`scripts/**/*.js` will be ignored.
+
  ### `files.allowUnknown`
 
 Biome won't emit diagnostics if it encounters files that can't handle.
@@ -231,6 +267,42 @@ An array of Unix shell style patterns.
   }
 }
 ```
+
+
+### `linter.include`
+
+A list of Unix shell style patterns. Biome handles only the files and folders that
+match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+:::
+
+Given the following example:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "exclude": ["scripts/**/*.js"]
+  }
+}
+```
+
+Only the files that match the patter `src/**/*.js` will be linted, while the files that match the pattern
+`scripts/**/*.js` will be ignored.
 
 ### `linter.rules.recommended`
 
@@ -355,6 +427,41 @@ An array of Unix shell style patterns.
 }
 ```
 
+### `formatter.include`
+
+A list of Unix shell style patterns. Biome handles only the files and folders that
+match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+:::
+
+Given the following example:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "exclude": ["scripts/**/*.js"]
+  }
+}
+```
+
+Only the files that match the patter `src/**/*.js` will be formatted, while the files that match the pattern
+`scripts/**/*.js` will be ignored.
+
 ### `formatter.formatWithErrors`
 
 Allows to format a document that has syntax errors.
@@ -414,12 +521,47 @@ match these patterns.
 ```json
 {
   "organizeImports": {
-    "enabled": true,
     "ignore": ["scripts/*.js"]
   }
 }
 ```
-> Default: `false`
+
+
+### `organizeImports.include`
+
+A list of Unix shell style patterns. Biome handles only the files and folders that
+match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "organizeImports": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+:::
+
+Given the following example:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "organizeImports": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "exclude": ["scripts/**/*.js"]
+  }
+}
+```
+
+Only the files that match the patter `src/**/*.js` will have their imports sorted, while the files that match the pattern
+`scripts/**/*.js` will be ignored.
+
 
 ## `javascript`
 

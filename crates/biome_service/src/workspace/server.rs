@@ -26,6 +26,7 @@ use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
+use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
 use tracing::trace;
 
@@ -198,6 +199,30 @@ impl WorkspaceServer {
             }
         }
     }
+
+    fn is_ignored_by_main_config(&self, path: &Path) -> bool {
+        let settings = self.settings();
+
+        let is_ignored_by_file_config = settings
+            .as_ref()
+            .files
+            .ignored_files
+            .as_ref()
+            .map(|matcher| matcher.matches_path(path));
+        let is_included_by_file_config = settings
+            .as_ref()
+            .files
+            .included_files
+            .as_ref()
+            .map(|matcher| matcher.matches_path(path));
+        if let Some(ignored) = is_ignored_by_file_config {
+            ignored
+        } else if let Some(included) = is_included_by_file_config {
+            !included
+        } else {
+            false
+        }
+    }
 }
 
 impl Workspace for WorkspaceServer {
@@ -243,50 +268,54 @@ impl Workspace for WorkspaceServer {
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         let settings = self.settings();
-        let is_ignored_by_file_config = settings
-            .as_ref()
-            .files
-            .ignored_files
-            .matches_path(params.rome_path.as_path());
+        let path = params.rome_path.as_path();
 
         Ok(match params.feature {
             FeatureName::Format => {
-                let section_ignored = settings
-                    .as_ref()
-                    .formatter
-                    .ignored_files
-                    .matches_path(params.rome_path.as_path());
-                if section_ignored {
-                    section_ignored
-                } else {
-                    is_ignored_by_file_config
+                if let Some(matcher) = settings.as_ref().formatter.ignored_files.as_ref() {
+                    let ignored = matcher.matches_path(path);
+                    if ignored {
+                        return Ok(ignored);
+                    }
+                } else if let Some(matcher) = settings.as_ref().formatter.included_files.as_ref() {
+                    let included = matcher.matches_path(path);
+                    if included {
+                        return Ok(!included);
+                    }
                 }
+                self.is_ignored_by_main_config(path)
             }
             FeatureName::Lint => {
-                let section_ignored = settings
-                    .as_ref()
-                    .linter
-                    .ignored_files
-                    .matches_path(params.rome_path.as_path());
-
-                if section_ignored {
-                    section_ignored
-                } else {
-                    is_ignored_by_file_config
+                if let Some(matcher) = settings.as_ref().linter.ignored_files.as_ref() {
+                    let ignored = matcher.matches_path(path);
+                    if ignored {
+                        return Ok(ignored);
+                    }
+                } else if let Some(matcher) = settings.as_ref().linter.included_files.as_ref() {
+                    let included = matcher.matches_path(path);
+                    if included {
+                        return Ok(!included);
+                    }
                 }
+
+                self.is_ignored_by_main_config(path)
             }
             FeatureName::OrganizeImports => {
-                let section_ignored = settings
-                    .as_ref()
-                    .organize_imports
-                    .ignored_files
-                    .matches_path(params.rome_path.as_path());
-
-                if section_ignored {
-                    section_ignored
-                } else {
-                    is_ignored_by_file_config
+                if let Some(matcher) = settings.as_ref().organize_imports.ignored_files.as_ref() {
+                    let ignored = matcher.matches_path(path);
+                    if ignored {
+                        return Ok(ignored);
+                    }
+                } else if let Some(matcher) =
+                    settings.as_ref().organize_imports.included_files.as_ref()
+                {
+                    let included = matcher.matches_path(path);
+                    if included {
+                        return Ok(!included);
+                    }
                 }
+
+                self.is_ignored_by_main_config(path)
             }
         })
     }

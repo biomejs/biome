@@ -66,13 +66,17 @@ export type StringSet = string[];
  */
 export interface FilesConfiguration {
 	/**
-	 * A list of Unix shell style patterns. Biome tools will ignore files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
 	ignore?: StringSet;
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
 	ignoreUnknown?: boolean;
+	/**
+	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
+	 */
+	include?: StringSet;
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -91,6 +95,10 @@ export interface FormatterConfiguration {
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
 	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
@@ -151,6 +159,10 @@ export interface LinterConfiguration {
 	 */
 	ignore?: StringSet;
 	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
+	/**
 	 * List of rules
 	 */
 	rules?: Rules;
@@ -164,6 +176,10 @@ export interface OrganizeImports {
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
 	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
 }
 /**
  * Set of properties to integrate Biome with a VCS software.

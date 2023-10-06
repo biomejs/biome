@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": { "enabled": false },
+  "linter": { "enabled": false },
+  "organizeImports": {
+    "include": ["test.js", "test2.js"],
+    "ignore": ["test.js"]
+  }
+}
+```
+
+## `test.js`
+
+```js
+import * as something from "../something";
+import { lorem, foom, bar } from "foo";
+```
+
+## `test2.js`
+
+```js
+import { bar, foom, lorem } from "foo";
+import * as something from "../something";
+```
+
+# Emitted Messages
+
+```block
+Fixed 1 file(s) in <TIME>
+```
+
+

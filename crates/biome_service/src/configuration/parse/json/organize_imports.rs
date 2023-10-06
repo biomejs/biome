@@ -10,7 +10,7 @@ impl VisitNode<JsonLanguage> for OrganizeImports {
         node: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        has_only_known_keys(node, &["enabled", "ignore"], diagnostics)
+        has_only_known_keys(node, &["enabled", "include", "ignore"], diagnostics)
     }
 
     fn visit_map(
@@ -27,6 +27,11 @@ impl VisitNode<JsonLanguage> for OrganizeImports {
             }
             "ignore" => {
                 self.ignore = self
+                    .map_to_index_set_string(&value, name_text, diagnostics)
+                    .map(StringSet::new);
+            }
+            "include" => {
+                self.include = self
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }

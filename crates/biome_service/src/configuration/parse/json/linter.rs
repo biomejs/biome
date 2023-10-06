@@ -31,6 +31,11 @@ impl VisitNode<JsonLanguage> for LinterConfiguration {
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }
+            "include" => {
+                self.include = self
+                    .map_to_index_set_string(&value, name_text, diagnostics)
+                    .map(StringSet::new);
+            }
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
             }
