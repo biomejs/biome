@@ -1,0 +1,295 @@
+use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
+use crate::configuration::linter::rules;
+use crate::configuration::{javascript_configuration, json_configuration, JavascriptConfiguration, JsonConfiguration, PlainIndentStyle, javascript};
+use crate::settings::{to_matcher, OverrideFormatSettings, OverrideLinterSettings, OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, LanguageSettings, LanguagesSettings};
+use crate::{MergeWith, Rules, WorkspaceError};
+use biome_deserialize::StringSet;
+use biome_formatter::{IndentStyle, LineWidth};
+use bpaf::Bpaf;
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use biome_js_syntax::JsLanguage;
+
+#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct Overrides {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[bpaf(hide)]
+    pub list: Vec<OverridePattern>,
+}
+
+impl FromStr for Overrides {
+    type Err = String;
+
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::default())
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct OverridePattern {
+    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub ignore: Option<StringSet>,
+
+    /// A list of Unix shell style patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
+
+    /// Specific configuration for the JavaScript language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(javascript_configuration), optional, hide)]
+    pub javascript: Option<JavascriptConfiguration>,
+
+    /// Specific configuration for the Json language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(json_configuration), optional, hide)]
+    pub json: Option<JsonConfiguration>,
+
+    /// Specific configuration for the Json language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(override_formatter_configuration), optional, hide)]
+    pub formatter: Option<OverrideFormatterConfiguration>,
+
+    /// Specific configuration for the Json language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(override_linter_configuration), optional, hide)]
+    pub linter: Option<OverrideLinterConfiguration>,
+
+    /// Specific configuration for the Json language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(override_organize_imports_configuration), optional, hide)]
+    pub organize_imports: Option<OverrideOrganizeImportsConfiguration>,
+}
+impl OverridePattern {
+    pub const KNOWN_KEYS: &'static [&'static str] = &[
+        "ignore",
+        "include",
+        "formatter",
+        "linter",
+        "organizeImports",
+        "javascript",
+        "json",
+    ];
+}
+
+impl FromStr for OverridePattern {
+    type Err = String;
+
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::default())
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct OverrideFormatterConfiguration {
+    // if `false`, it disables the feature. `true` by default
+    #[bpaf(hide)]
+    pub enabled: Option<bool>,
+
+    /// Stores whether formatting should be allowed to proceed if a given file
+    /// has syntax errors
+    #[bpaf(hide)]
+    pub format_with_errors: Option<bool>,
+
+    /// The indent style.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("indent-style"), argument("tab|space"), optional)]
+    pub indent_style: Option<PlainIndentStyle>,
+
+    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
+    pub indent_size: Option<u8>,
+
+    /// The size of the indentation, 2 by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
+    pub indent_width: Option<u8>,
+
+    /// What's the max width of a line. Defaults to 80.
+    #[serde(
+        deserialize_with = "deserialize_line_width",
+        serialize_with = "serialize_line_width"
+    )]
+    #[bpaf(long("line-width"), argument("NUMBER"), optional)]
+    pub line_width: Option<LineWidth>,
+}
+
+impl OverrideFormatterConfiguration {
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
+        "enabled",
+        "formatWithErrors",
+        "indentStyle",
+        "indentSize",
+        "indentWidth",
+        "lineWidth",
+    ];
+}
+
+impl MergeWith<OverrideFormatterConfiguration> for OverrideFormatterConfiguration {
+    fn merge_with(&mut self, other: OverrideFormatterConfiguration) {
+        if let Some(enabled) = other.enabled {
+            self.enabled = Some(enabled);
+        }
+        if let Some(indent_size) = other.indent_size {
+            self.indent_width = Some(indent_size);
+        }
+        if let Some(indent_width) = other.indent_width {
+            self.indent_width = Some(indent_width);
+        }
+        if let Some(indent_style) = other.indent_style {
+            self.indent_style = Some(indent_style);
+        }
+
+        if let Some(line_width) = other.line_width {
+            self.line_width = Some(line_width);
+        }
+
+        if let Some(format_with_errors) = other.format_with_errors {
+            self.format_with_errors = Some(format_with_errors);
+        }
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct OverrideLinterConfiguration {
+    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub enabled: Option<bool>,
+
+    /// List of rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external, optional, hide)]
+    pub rules: Option<Rules>,
+}
+
+impl OverrideLinterConfiguration {
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["enabled", "rules"];
+}
+
+impl MergeWith<OverrideLinterConfiguration> for OverrideLinterConfiguration {
+    fn merge_with(&mut self, other: OverrideLinterConfiguration) {
+        if let Some(enabled) = other.enabled {
+            self.enabled = Some(enabled);
+        }
+        if let Some(rules) = other.rules {
+            self.rules = Some(rules);
+        }
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct OverrideOrganizeImportsConfiguration {
+    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub enabled: Option<bool>,
+}
+
+impl OverrideOrganizeImportsConfiguration {
+    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["enabled"];
+}
+
+impl MergeWith<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsConfiguration {
+    fn merge_with(&mut self, other: OverrideOrganizeImportsConfiguration) {
+        if let Some(enabled) = other.enabled {
+            self.enabled = Some(enabled);
+        }
+    }
+}
+
+impl TryFrom<Overrides> for OverrideSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(overrides: Overrides) -> Result<Self, Self::Error> {
+        let mut override_settings = OverrideSettings::default();
+        for mut pattern in overrides.list {
+            let formatter = pattern.formatter.take().unwrap_or_default();
+            let formatter = OverrideFormatSettings::try_from(formatter)?;
+
+            let linter = pattern.linter.take().unwrap_or_default();
+            let linter = OverrideLinterSettings::try_from(linter)?;
+
+            let organize_imports = pattern.organize_imports.take().unwrap_or_default();
+            let organize_imports = OverrideOrganizeImportsSettings::try_from(organize_imports)?;
+
+            let mut languages = LanguagesSettings::default();
+            
+            languages.javascript.formatter.
+
+            let pattern_setting = OverrideSettingPattern {
+                include: to_matcher(pattern.include.as_ref())?,
+                exclude: to_matcher(pattern.ignore.as_ref())?,
+                formatter,
+                linter,
+                organize_imports,
+                languages: Default::default(),
+            };
+
+            override_settings.patterns.push(pattern_setting);
+        }
+
+        Ok(override_settings)
+    }
+}
+
+impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
+        let indent_style = match conf.indent_style {
+            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
+            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            None => IndentStyle::default(),
+        };
+        let indent_width = conf
+            .indent_width
+            .map(Into::into)
+            .or(conf.indent_size.map(Into::into))
+            .unwrap_or_default();
+
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            indent_style: Some(indent_style),
+            indent_width: Some(indent_width),
+            line_width: conf.line_width,
+            format_with_errors: conf.format_with_errors.unwrap_or_default(),
+        })
+    }
+}
+
+impl TryFrom<OverrideLinterConfiguration> for OverrideLinterSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            rules: conf.rules,
+        })
+    }
+}
+
+impl TryFrom<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideOrganizeImportsConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+        })
+    }
+}

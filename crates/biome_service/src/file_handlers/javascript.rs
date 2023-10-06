@@ -4,6 +4,7 @@ use super::{
 };
 use crate::configuration::to_analyzer_configuration;
 use crate::file_handlers::{is_diagnostic_error, Features, FixAllParams, Language as LanguageId};
+use crate::settings::OverrideSettings;
 use crate::workspace::OrganizeImportsResult;
 use crate::{
     settings::{FormatSettings, Language, LanguageSettings, LanguagesSettings, SettingsHandle},
@@ -95,34 +96,37 @@ impl Language for JsLanguage {
 
     fn resolve_format_options(
         global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-        JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_quote_style(language.quote_style.unwrap_or_default())
-            .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
-            .with_quote_properties(language.quote_properties.unwrap_or_default())
-            .with_trailing_comma(language.trailing_comma.unwrap_or_default())
-            .with_semicolons(language.semicolons.unwrap_or_default())
-            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+        overrides.js_format_options(path).unwrap_or_else(|| {
+            let indent_style = if let Some(indent_style) = language.indent_style {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            };
+            let line_width = if let Some(line_width) = language.line_width {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            };
+            let indent_width = if let Some(indent_width) = language.indent_width {
+                indent_width
+            } else {
+                global.indent_width.unwrap_or_default()
+            };
+            JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_quote_style(language.quote_style.unwrap_or_default())
+                .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
+                .with_quote_properties(language.quote_properties.unwrap_or_default())
+                .with_trailing_comma(language.trailing_comma.unwrap_or_default())
+                .with_semicolons(language.semicolons.unwrap_or_default())
+                .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+        })
     }
 }
 
@@ -579,8 +583,10 @@ fn format(
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
+    dbg!(&settings);
     let options = settings.format_options::<JsLanguage>(rome_path);
 
+    dbg!(&options);
     debug!("Options used for format: \n{}", options);
 
     let tree = parse.syntax();

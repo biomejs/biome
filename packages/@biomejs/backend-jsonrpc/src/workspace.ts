@@ -56,6 +56,10 @@ export interface Configuration {
 	 */
 	organizeImports?: OrganizeImports;
 	/**
+	 * A list of granular patterns that should be applied only to a sub set of files
+	 */
+	overrides?: Overrides;
+	/**
 	 * The configuration of the VCS integration
 	 */
 	vcs?: VcsConfiguration;
@@ -180,6 +184,9 @@ export interface OrganizeImports {
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
 	include?: StringSet;
+}
+export interface Overrides {
+	list: OverridePattern[];
 }
 /**
  * Set of properties to integrate Biome with a VCS software.
@@ -324,6 +331,36 @@ export interface Rules {
 	security?: Security;
 	style?: Style;
 	suspicious?: Suspicious;
+}
+export interface OverridePattern {
+	/**
+	 * Specific configuration for the Json language
+	 */
+	formatter?: OverrideFormatterConfiguration;
+	/**
+	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 */
+	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
+	/**
+	 * Specific configuration for the JavaScript language
+	 */
+	javascript?: JavascriptConfiguration;
+	/**
+	 * Specific configuration for the Json language
+	 */
+	json?: JsonConfiguration;
+	/**
+	 * Specific configuration for the Json language
+	 */
+	linter?: OverrideLinterConfiguration;
+	/**
+	 * Specific configuration for the Json language
+	 */
+	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -1117,6 +1154,45 @@ export interface Suspicious {
 	 * This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions
 	 */
 	useValidTypeof?: RuleConfiguration;
+}
+export interface OverrideFormatterConfiguration {
+	enabled?: boolean;
+	/**
+	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
+	 */
+	formatWithErrors?: boolean;
+	/**
+	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
+	 */
+	indentSize?: number;
+	/**
+	 * The indent style.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation, 2 by default
+	 */
+	indentWidth?: number;
+	/**
+	 * What's the max width of a line. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
+export interface OverrideLinterConfiguration {
+	/**
+	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
+	 */
+	enabled?: boolean;
+	/**
+	 * List of rules
+	 */
+	rules?: Rules;
+}
+export interface OverrideOrganizeImportsConfiguration {
+	/**
+	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
+	 */
+	enabled?: boolean;
 }
 export type RuleConfiguration = RulePlainConfiguration | RuleWithOptions;
 export type RulePlainConfiguration = "warn" | "error" | "off";

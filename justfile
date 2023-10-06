@@ -21,6 +21,7 @@ upgrade-tools:
 codegen:
   cargo codegen all
   cargo codegen-configuration
+  cargo lintdoc
   just codegen-bindings
   cargo codegen-website
   cargo format

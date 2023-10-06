@@ -1,6 +1,7 @@
 use crate::configuration::merge::MergeWith;
-use crate::settings::FormatSettings;
-use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use crate::configuration::overrides::OverrideFormatterConfiguration;
+use crate::settings::{to_matcher, FormatSettings};
+use crate::WorkspaceError;
 use biome_deserialize::StringSet;
 use biome_formatter::{IndentStyle, LineWidth};
 use bpaf::Bpaf;
@@ -151,54 +152,42 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             .map(Into::into)
             .or(conf.indent_size.map(Into::into))
             .unwrap_or_default();
-        let mut ignored_files = None;
 
-        if let Some(ignore) = conf.ignore {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in ignore.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            ignored_files = Some(matcher)
-        }
-
-        let mut included_files = None;
-        if let Some(include) = conf.include {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in include.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            included_files = Some(matcher)
-        }
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
-            ignored_files,
-            included_files,
+            ignored_files: to_matcher(conf.ignore.as_ref())?,
+            included_files: to_matcher(conf.include.as_ref())?,
+        })
+    }
+}
+
+impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
+        let indent_style = match conf.indent_style {
+            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
+            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            None => IndentStyle::default(),
+        };
+        let indent_width = conf
+            .indent_width
+            .map(Into::into)
+            .or(conf.indent_size.map(Into::into))
+            .unwrap_or_default();
+
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            indent_style: Some(indent_style),
+            indent_width: Some(indent_width),
+            line_width: conf.line_width,
+            format_with_errors: conf.format_with_errors.unwrap_or_default(),
+            ignored_files: None,
+            included_files: None,
         })
     }
 }

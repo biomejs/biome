@@ -3,8 +3,9 @@ mod rules;
 
 pub use crate::configuration::linter::rules::{rules, Rules};
 use crate::configuration::merge::MergeWith;
-use crate::settings::LinterSettings;
-use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use crate::configuration::overrides::OverrideLinterConfiguration;
+use crate::settings::{to_matcher, LinterSettings};
+use crate::WorkspaceError;
 use biome_deserialize::StringSet;
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::{possible_options, PossibleOptions};
@@ -82,55 +83,29 @@ impl TryFrom<LinterConfiguration> for LinterSettings {
     type Error = WorkspaceError;
 
     fn try_from(conf: LinterConfiguration) -> Result<Self, Self::Error> {
-        let mut ignored_files = None;
-        if let Some(ignore) = conf.ignore {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in ignore.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            ignored_files = Some(matcher)
-        }
-
-        let mut included_files = None;
-        if let Some(include) = conf.include {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in include.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            included_files = Some(matcher)
-        }
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
-            ignored_files,
-            included_files,
+            ignored_files: to_matcher(conf.ignore.as_ref())?,
+            included_files: to_matcher(conf.include.as_ref())?,
         })
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            rules: conf.rules,
+            ignored_files: None,
+            included_files: None,
+        })
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
@@ -223,7 +198,7 @@ impl FromStr for RulePlainConfiguration {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions {

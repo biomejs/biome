@@ -220,7 +220,7 @@ impl Default for ReactExtensiveDependenciesOptions {
 }
 
 /// Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
@@ -237,7 +237,7 @@ impl FromStr for HooksOptions {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Hooks {

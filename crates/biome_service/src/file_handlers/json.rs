@@ -7,7 +7,7 @@ use crate::file_handlers::{
 };
 use crate::file_handlers::{DebugCapabilities, Language as LanguageId};
 use crate::settings::{
-    FormatSettings, Language, LanguageSettings, LanguagesSettings, SettingsHandle,
+    FormatSettings, Language, LanguageSettings, LanguagesSettings, OverrideSettings, SettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
@@ -49,28 +49,31 @@ impl Language for JsonLanguage {
 
     fn resolve_format_options(
         global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        _path: &RomePath,
+        path: &RomePath,
     ) -> Self::FormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-        JsonFormatOptions::default()
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
+        overrides.json_format_options(path).unwrap_or_else(|| {
+            let indent_style = if let Some(indent_style) = language.indent_style {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            };
+            let line_width = if let Some(line_width) = language.line_width {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            };
+            let indent_width = if let Some(indent_width) = language.indent_width {
+                indent_width
+            } else {
+                global.indent_width.unwrap_or_default()
+            };
+            JsonFormatOptions::new(path.as_path().try_into().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+        })
     }
 }
 

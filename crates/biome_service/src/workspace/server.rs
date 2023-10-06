@@ -200,7 +200,8 @@ impl WorkspaceServer {
         }
     }
 
-    fn is_ignored_by_main_config(&self, path: &Path) -> bool {
+    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
 
         let is_ignored_by_file_config = settings
@@ -270,6 +271,22 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings();
         let path = params.rome_path.as_path();
 
+        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
+        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
+
+        // Overrides have top priority
+        if let Some(excluded_by_override) = excluded_by_override {
+            if excluded_by_override {
+                return Ok(true);
+            }
+        }
+
+        if let Some(included_by_override) = included_by_override {
+            if included_by_override {
+                return Ok(!included_by_override);
+            }
+        }
+
         Ok(match params.feature {
             FeatureName::Format => {
                 if let Some(matcher) = settings.as_ref().formatter.ignored_files.as_ref() {
@@ -283,7 +300,7 @@ impl Workspace for WorkspaceServer {
                         return Ok(!included);
                     }
                 }
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
             FeatureName::Lint => {
                 if let Some(matcher) = settings.as_ref().linter.ignored_files.as_ref() {
@@ -298,7 +315,7 @@ impl Workspace for WorkspaceServer {
                     }
                 }
 
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
             FeatureName::OrganizeImports => {
                 if let Some(matcher) = settings.as_ref().organize_imports.ignored_files.as_ref() {
@@ -315,7 +332,7 @@ impl Workspace for WorkspaceServer {
                     }
                 }
 
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
         })
     }

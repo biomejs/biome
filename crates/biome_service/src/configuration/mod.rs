@@ -10,6 +10,7 @@ pub mod json;
 pub mod linter;
 mod merge;
 pub mod organize_imports;
+mod overrides;
 mod parse;
 pub mod vcs;
 
@@ -18,6 +19,7 @@ use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
+use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
 use crate::settings::{LanguagesSettings, LinterSettings};
 use crate::{DynRef, WorkspaceError, VERSION};
@@ -92,6 +94,11 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub extends: Option<StringSet>,
+
+    /// A list of granular patterns that should be applied only to a sub set of files
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub overrides: Option<Overrides>,
 }
 
 impl Default for Configuration {
@@ -109,6 +116,7 @@ impl Default for Configuration {
             vcs: None,
             extends: None,
             json: None,
+            overrides: None,
         }
     }
 }
@@ -124,6 +132,7 @@ impl Configuration {
         "$schema",
         "organizeImports",
         "extends",
+        "overrides",
     ];
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter

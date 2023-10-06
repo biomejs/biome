@@ -1,13 +1,18 @@
+use crate::configuration::JavascriptConfiguration;
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
     Matcher, Rules, WorkspaceError,
 };
+use biome_deserialize::StringSet;
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use biome_fs::RomePath;
+use biome_js_formatter::context::JsFormatOptions;
 use biome_js_syntax::JsLanguage;
+use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
+use std::path::Path;
 use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
@@ -26,6 +31,8 @@ pub struct WorkspaceSettings {
     pub files: FilesSettings,
     /// Analyzer settings
     pub organize_imports: OrganizeImportsSettings,
+    /// overrides
+    pub override_settings: OverrideSettings,
 }
 
 impl WorkspaceSettings {
@@ -57,7 +64,7 @@ impl WorkspaceSettings {
     }
 
     /// The (configuration)[Configuration] is merged into the workspace
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
@@ -81,39 +88,14 @@ impl WorkspaceSettings {
             self.organize_imports = OrganizeImportsSettings::try_from(organize_imports)?;
         }
 
+        if let Some(overrides) = configuration.overrides {
+            self.override_settings = OverrideSettings::try_from(overrides)?;
+        }
+
         // javascript settings
         let javascript = configuration.javascript;
         if let Some(javascript) = javascript {
-            self.languages.javascript.globals = javascript.globals.map(|g| g.into_index_set());
-            let formatter = javascript.formatter;
-            if let Some(formatter) = formatter {
-                self.languages.javascript.formatter.quote_style = formatter.quote_style;
-                self.languages.javascript.formatter.jsx_quote_style = formatter.jsx_quote_style;
-                self.languages.javascript.formatter.quote_properties = formatter.quote_properties;
-                self.languages.javascript.formatter.trailing_comma = formatter.trailing_comma;
-                self.languages.javascript.formatter.semicolons = formatter.semicolons;
-                self.languages.javascript.formatter.arrow_parentheses = formatter.arrow_parentheses;
-                self.languages.javascript.formatter.enabled = formatter.enabled;
-                self.languages.javascript.formatter.line_width = formatter.line_width;
-                self.languages.javascript.formatter.indent_width = formatter
-                    .indent_width
-                    .map(Into::into)
-                    .or(formatter.indent_size.map(Into::into));
-                self.languages.javascript.formatter.indent_style =
-                    formatter.indent_style.map(Into::into);
-            }
-
-            if let Some(parser) = javascript.parser {
-                self.languages
-                    .javascript
-                    .parser
-                    .parse_class_parameter_decorators = parser
-                    .unsafe_parameter_decorators_enabled
-                    .unwrap_or_default();
-            }
-
-            let organize_imports = javascript.organize_imports;
-            if let Some(_organize_imports) = organize_imports {}
+            self.languages.javascript = javascript.into();
         }
 
         // json settings
@@ -188,6 +170,19 @@ impl Default for FormatSettings {
     }
 }
 
+/// Formatter settings for the entire workspace
+#[derive(Debug)]
+pub struct OverrideFormatSettings {
+    /// Enabled by default
+    pub enabled: bool,
+    /// Stores whether formatting should be allowed to proceed if a given file
+    /// has syntax errors
+    pub format_with_errors: bool,
+    pub indent_style: Option<IndentStyle>,
+    pub indent_width: Option<IndentWidth>,
+    pub line_width: Option<LineWidth>,
+}
+
 /// Linter settings for the entire workspace
 #[derive(Debug)]
 pub struct LinterSettings {
@@ -217,6 +212,16 @@ impl Default for LinterSettings {
 
 /// Linter settings for the entire workspace
 #[derive(Debug)]
+pub struct OverrideLinterSettings {
+    /// Enabled by default
+    pub enabled: bool,
+
+    /// List of rules
+    pub rules: Option<Rules>,
+}
+
+/// Linter settings for the entire workspace
+#[derive(Debug)]
 pub struct OrganizeImportsSettings {
     /// Enabled by default
     pub enabled: bool,
@@ -238,6 +243,13 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
+/// Linter settings for the entire workspace
+#[derive(Debug)]
+pub struct OverrideOrganizeImportsSettings {
+    /// Enabled by default
+    pub enabled: bool,
+}
+
 /// Static map of language names to language-specific settings
 #[derive(Debug, Default)]
 pub struct LanguagesSettings {
@@ -245,6 +257,38 @@ pub struct LanguagesSettings {
     pub json: LanguageSettings<JsonLanguage>,
 }
 
+impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
+    fn from(javascript: JavascriptConfiguration) -> Self {
+        let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+        let formatter = javascript.formatter;
+        if let Some(formatter) = formatter {
+            language_setting.formatter.quote_style = formatter.quote_style;
+            language_setting.formatter.jsx_quote_style = formatter.jsx_quote_style;
+            language_setting.formatter.quote_properties = formatter.quote_properties;
+            language_setting.formatter.trailing_comma = formatter.trailing_comma;
+            language_setting.formatter.semicolons = formatter.semicolons;
+            language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter
+                .indent_width
+                .map(Into::into)
+                .or(formatter.indent_size.map(Into::into));
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+
+        if let Some(parser) = javascript.parser {
+            language_setting.parser.parse_class_parameter_decorators = parser
+                .unsafe_parameter_decorators_enabled
+                .unwrap_or_default();
+        }
+
+        let organize_imports = javascript.organize_imports;
+        if let Some(_organize_imports) = organize_imports {}
+
+        language_setting
+    }
+}
 pub trait Language: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
@@ -267,6 +311,7 @@ pub trait Language: biome_rowan::Language {
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
         global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &RomePath,
     ) -> Self::FormatOptions;
@@ -326,48 +371,10 @@ impl TryFrom<FilesConfiguration> for FilesSettings {
     type Error = WorkspaceError;
 
     fn try_from(config: FilesConfiguration) -> Result<Self, Self::Error> {
-        let mut ignored_files = None;
-        if let Some(ignore) = config.ignore {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in ignore.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            ignored_files = Some(matcher);
-        }
-        let mut included_files = None;
-        if let Some(include) = config.include {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in include.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-            included_files = Some(matcher);
-        }
         Ok(Self {
             max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
-            ignored_files,
-            included_files,
+            ignored_files: to_matcher(config.ignore.as_ref())?,
+            included_files: to_matcher(config.include.as_ref())?,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })
     }
@@ -402,8 +409,141 @@ impl<'a> SettingsHandle<'a> {
     {
         L::resolve_format_options(
             &self.inner.formatter,
+            &self.inner.override_settings,
             &L::lookup_settings(&self.inner.languages).formatter,
             path,
         )
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct OverrideSettings {
+    pub patterns: Vec<OverrideSettingPattern>,
+}
+
+impl OverrideSettings {
+    /// Checks whether at least one override excludes the provided `path`
+    pub fn is_path_excluded(&self, path: &Path) -> Option<bool> {
+        for pattern in &self.patterns {
+            if let Some(exclude) = pattern.exclude.as_ref() {
+                if exclude.matches_path(path) {
+                    return Some(true);
+                }
+            }
+        }
+        None
+    }
+    /// Checks whether at least one override include the provided `path`
+    pub fn is_path_included(&self, path: &Path) -> Option<bool> {
+        for pattern in &self.patterns {
+            if let Some(include) = pattern.include.as_ref() {
+                if include.matches_path(path) {
+                    return Some(true);
+                }
+            }
+        }
+        None
+    }
+
+    /// It scans the current override rules and return the formatting options that of the first override is matched
+    pub fn js_format_options(&self, path: &Path) -> Option<JsFormatOptions> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                let js_formatter = &pattern.languages.javascript.formatter;
+                return Some(
+                    JsFormatOptions::new(path.try_into().unwrap_or_default())
+                        .with_indent_style(
+                            pattern
+                                .formatter
+                                .indent_style
+                                .unwrap_or(js_formatter.indent_style.unwrap_or_default()),
+                        )
+                        .with_indent_width(
+                            pattern
+                                .formatter
+                                .indent_width
+                                .unwrap_or(js_formatter.indent_width.unwrap_or_default()),
+                        )
+                        .with_line_width(
+                            pattern
+                                .formatter
+                                .line_width
+                                .unwrap_or(js_formatter.line_width.unwrap_or_default()),
+                        )
+                        .with_quote_style(js_formatter.quote_style.unwrap_or_default())
+                        .with_jsx_quote_style(js_formatter.jsx_quote_style.unwrap_or_default())
+                        .with_quote_properties(js_formatter.quote_properties.unwrap_or_default())
+                        .with_trailing_comma(js_formatter.trailing_comma.unwrap_or_default())
+                        .with_semicolons(js_formatter.semicolons.unwrap_or_default())
+                        .with_arrow_parentheses(js_formatter.arrow_parentheses.unwrap_or_default()),
+                );
+            }
+        }
+
+        None
+    }
+
+    /// It scans the current override rules and return the formatting options that of the first override is matched
+    pub fn json_format_options(&self, path: &Path) -> Option<JsonFormatOptions> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                let formatter = &pattern.formatter;
+                let json_formatter = &pattern.languages.json.formatter;
+
+                return Some(
+                    JsonFormatOptions::new(path.try_into().unwrap_or_default())
+                        .with_indent_style(formatter.indent_style.unwrap_or_default())
+                        .with_indent_width(formatter.indent_width.unwrap_or_default())
+                        .with_line_width(formatter.line_width.unwrap_or_default()),
+                );
+            }
+        }
+
+        None
+    }
+}
+#[derive(Debug)]
+pub struct OverrideSettingPattern {
+    pub exclude: Option<Matcher>,
+    pub include: Option<Matcher>,
+    /// Formatter settings applied to all files in the workspaces
+    pub formatter: OverrideFormatSettings,
+    /// Linter settings applied to all files in the workspace
+    pub linter: OverrideLinterSettings,
+    /// Linter settings applied to all files in the workspace
+    pub organize_imports: OverrideOrganizeImportsSettings,
+    /// Language specific settings
+    pub languages: LanguagesSettings,
+}
+
+/// Creates a [Matcher] from a [StringSet]
+///
+/// ## Errors
+///
+/// It can raise an error if the patterns aren't valid
+pub fn to_matcher(string_set: Option<&StringSet>) -> Result<Option<Matcher>, WorkspaceError> {
+    if let Some(string_set) = string_set {
+        let mut matcher = Matcher::new(MatchOptions {
+            case_sensitive: true,
+            require_literal_leading_dot: false,
+            require_literal_separator: false,
+        });
+        for pattern in string_set.index_set() {
+            matcher.add_pattern(pattern).map_err(|err| {
+                WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                    pattern.to_string(),
+                    err.msg.to_string(),
+                ))
+            })?;
+        }
+        Ok(Some(matcher))
+    } else {
+        Ok(None)
     }
 }

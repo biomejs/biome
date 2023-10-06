@@ -4,3 +4,4 @@
 mod biome_json_support;
 mod config_extends;
 mod included_files;
+mod overrides_formatter;

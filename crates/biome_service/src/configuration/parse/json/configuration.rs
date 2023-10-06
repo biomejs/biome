@@ -1,5 +1,6 @@
 use crate::configuration::json::JsonConfiguration;
 use crate::configuration::organize_imports::OrganizeImports;
+use crate::configuration::overrides::Overrides;
 use crate::configuration::parse::json::vcs::validate_vcs_configuration;
 use crate::configuration::vcs::VcsConfiguration;
 use crate::configuration::{
@@ -72,6 +73,11 @@ impl VisitNode<JsonLanguage> for Configuration {
                 self.extends = self
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
+            }
+            "overrides" => {
+                let mut overrides = Overrides::default();
+                self.map_to_array(&value, name_text, &mut overrides, diagnostics)?;
+                self.overrides = Some(overrides);
             }
             _ => {}
         }

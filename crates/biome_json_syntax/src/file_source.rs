@@ -2,13 +2,13 @@ use crate::JsonLanguage;
 use biome_rowan::{FileSource, FileSourceError};
 use std::path::Path;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct JsonFileSource {
     #[allow(dead_code)]
     variant: JsonVariant,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 enum JsonVariant {
     #[default]
     Standard,
