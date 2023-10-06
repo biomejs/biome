@@ -146,10 +146,6 @@ assert_semantics! {
         r#"function f/*#F*/() {} console.log(f/*READ F*/);"#,
     ok_write_function,
         r#"function f/*#F*/() {} f/*WRITE F*/ = null;"#,
-    ok_read_self_invoking_function,
-        r#"(function f/*#F*/(){console.log(1)})/*READ F*/()"#,
-    ok_read_self_invoking_function2,
-        r#"(1,2,3,function f/*#F*/(){console.log(1)})/*READ F*/()"#,
 
     ok_scope_function_expression_read,
         "var f/*#F1*/ = function f/*#F2*/() {console.log(f/*READ F2*/);}; f/*READ F1*/();",
