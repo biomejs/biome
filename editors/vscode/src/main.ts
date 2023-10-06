@@ -25,8 +25,8 @@ import { StatusBar } from "./statusBar";
 import { setContextValue } from "./utils";
 
 import resolveImpl = require("resolve/async");
-import type * as resolve from "resolve";
 import { createRequire } from "module";
+import type * as resolve from "resolve";
 
 const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
 	resolveImpl,
