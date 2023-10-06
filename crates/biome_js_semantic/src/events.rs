@@ -1,17 +1,16 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
-use biome_rowan::SyntaxResult;
 use rustc_hash::FxHashMap;
 use std::collections::{HashMap, VecDeque};
 use std::mem;
 
 use biome_js_syntax::AnyTsType;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression,
-    JsCallExpression, JsForVariableDeclaration, JsIdentifierAssignment, JsLanguage,
-    JsParenthesizedExpression, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize, TsTypeParameterName,
+    AnyJsAssignment, AnyJsAssignmentPattern, JsAssignmentExpression, JsForVariableDeclaration,
+    JsIdentifierAssignment, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsVariableDeclaration, JsxReferenceIdentifier, TextRange, TextSize,
+    TsTypeParameterName,
 };
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 
@@ -224,19 +223,6 @@ struct Scope {
     hoisting: ScopeHoisting,
 }
 
-/// Returns the node that defines the result of the expression
-fn result_of(expr: &JsParenthesizedExpression) -> SyntaxResult<AnyJsExpression> {
-    let mut expr = expr.expression();
-    loop {
-        expr = match expr? {
-            AnyJsExpression::JsParenthesizedExpression(expr) => expr.expression(),
-            AnyJsExpression::JsSequenceExpression(expr) => expr.right(),
-            AnyJsExpression::JsAssignmentExpression(expr) => expr.right(),
-            expr => return Ok(expr),
-        }
-    }
-}
-
 impl SemanticEventExtractor {
     pub fn new() -> Self {
         Self {
@@ -264,9 +250,6 @@ impl SemanticEventExtractor {
                 self.enter_js_identifier_assignment(&JsIdentifierAssignment::unwrap_cast(
                     node.clone(),
                 ));
-            }
-            JS_CALL_EXPRESSION => {
-                self.enter_js_call_expression(&JsCallExpression::unwrap_cast(node.clone()));
             }
 
             JS_MODULE | JS_SCRIPT => self.push_scope(
@@ -497,25 +480,6 @@ impl SemanticEventExtractor {
         references.push(Reference::Write {
             range: reference.syntax().text_range(),
         });
-
-        Some(())
-    }
-
-    fn enter_js_call_expression(&mut self, node: &JsCallExpression) -> Option<()> {
-        let callee = node.callee().ok()?;
-
-        if callee.syntax().kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
-            let expr = callee.as_js_parenthesized_expression()?;
-            let range = expr.syntax().text_range();
-            if let Ok(AnyJsExpression::JsFunctionExpression(expr)) = result_of(expr) {
-                let id = expr.id()?;
-                self.stash.push_back(SemanticEvent::Read {
-                    range,
-                    declared_at: id.syntax().text_range(),
-                    scope_id: self.scopes.last().unwrap().scope_id,
-                });
-            }
-        }
 
         Some(())
     }
