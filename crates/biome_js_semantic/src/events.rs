@@ -159,8 +159,8 @@ pub struct SemanticEventExtractor {
     /// Number of generated scopes
     /// This allows assigning a unique scope id to every scope.
     scope_count: usize,
-    /// At any point this is the set of available bindings in the current scope
-    bindings: FxHashMap<BindingName, BindingInfo>,
+    /// At any point this is the set of available bindings and their range in the current scope
+    bindings: FxHashMap<BindingName, TextRange>,
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
 }
@@ -196,15 +196,6 @@ impl BindingName {
             Self::Value(name) => Self::Type(name),
         }
     }
-}
-
-/// Holds the [TextRange] of the token along with the kind of declaration
-#[derive(Debug)]
-struct BindingInfo {
-    /// Range of the identifier binding.
-    name_range: TextRange,
-    /// Syntax kind of the declaration associated to the binding
-    declaration_syntax_kind: JsSyntaxKind,
 }
 
 /// This type allows reporting a reference and bind to a binding (if any) later.
@@ -271,7 +262,7 @@ struct Scope {
     /// References that still needs to be bound and will be solved at the end of the scope
     references: HashMap<BindingName, Vec<Reference>>,
     /// All bindings that where shadowed and will be restored after this scope ends.
-    shadowed: Vec<(BindingName, BindingInfo)>,
+    shadowed: Vec<(BindingName, TextRange)>,
     /// If this scope allows declarations to be hoisted to parent scope or not
     hoisting: ScopeHoisting,
 }
@@ -396,26 +387,16 @@ impl SemanticEventExtractor {
                 } else {
                     None
                 };
-                self.push_binding_into_scope(
-                    hoisted_scope_id,
-                    &name_token,
-                    parent_kind,
-                    DeclarationKind::Value,
-                );
+                self.push_binding_into_scope(hoisted_scope_id, &name_token, DeclarationKind::Value);
                 self.export_variable_declaration(node, &declaration);
             }
             JS_FUNCTION_DECLARATION | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
                 let hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
-                self.push_binding_into_scope(
-                    hoisted_scope_id,
-                    &name_token,
-                    parent_kind,
-                    DeclarationKind::Value,
-                );
+                self.push_binding_into_scope(hoisted_scope_id, &name_token, DeclarationKind::Value);
                 self.export_function_declaration(node, &parent);
             }
             JS_CLASS_EXPRESSION | JS_FUNCTION_EXPRESSION => {
-                self.push_binding_into_scope(None, &name_token, parent_kind, DeclarationKind::Both);
+                self.push_binding_into_scope(None, &name_token, DeclarationKind::Both);
                 self.export_declaration_expression(node, &parent);
             }
             JS_CLASS_DECLARATION
@@ -433,7 +414,7 @@ impl SemanticEventExtractor {
                 };
                 let parent_scope = self.scopes.get(self.scopes.len() - 2);
                 let parent_scope = parent_scope.map(|scope| scope.scope_id);
-                self.push_binding_into_scope(parent_scope, &name_token, parent_kind, binding_kind);
+                self.push_binding_into_scope(parent_scope, &name_token, binding_kind);
                 self.export_declaration(node, &parent);
             }
             JS_BINDING_PATTERN_WITH_DEFAULT
@@ -445,12 +426,7 @@ impl SemanticEventExtractor {
             | JS_ARRAY_BINDING_PATTERN
             | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
             | JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
-                self.push_binding_into_scope(
-                    None,
-                    &name_token,
-                    parent_kind,
-                    DeclarationKind::Value,
-                );
+                self.push_binding_into_scope(None, &name_token, DeclarationKind::Value);
 
                 let possible_declaration = parent.ancestors().find(|x| {
                     !matches!(
@@ -474,7 +450,7 @@ impl SemanticEventExtractor {
                 );
             }
             TS_INFER_TYPE | TS_MAPPED_TYPE | TS_TYPE_PARAMETER => {
-                self.push_binding_into_scope(None, &name_token, parent_kind, DeclarationKind::Type);
+                self.push_binding_into_scope(None, &name_token, DeclarationKind::Type);
             }
             JS_IMPORT_DEFAULT_CLAUSE => {
                 let clause = JsImportDefaultClause::unwrap_cast(parent);
@@ -483,7 +459,7 @@ impl SemanticEventExtractor {
                 } else {
                     DeclarationKind::Both
                 };
-                self.push_binding_into_scope(None, &name_token, parent_kind, binding_kind);
+                self.push_binding_into_scope(None, &name_token, binding_kind);
             }
             TS_IMPORT_EQUALS_DECLARATION => {
                 let declaration = TsImportEqualsDeclaration::unwrap_cast(parent);
@@ -492,7 +468,7 @@ impl SemanticEventExtractor {
                 } else {
                     DeclarationKind::Both
                 };
-                self.push_binding_into_scope(None, &name_token, parent_kind, binding_kind);
+                self.push_binding_into_scope(None, &name_token, binding_kind);
             }
             JS_DEFAULT_IMPORT_SPECIFIER => {
                 let clause = JsImportNamedClause::cast(parent.parent()?)?;
@@ -501,7 +477,7 @@ impl SemanticEventExtractor {
                 } else {
                     DeclarationKind::Both
                 };
-                self.push_binding_into_scope(None, &name_token, parent_kind, binding_kind);
+                self.push_binding_into_scope(None, &name_token, binding_kind);
             }
             JS_NAMED_IMPORT_SPECIFIER | JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
                 let specifier = AnyJsNamedImportSpecifier::unwrap_cast(parent);
@@ -514,15 +490,10 @@ impl SemanticEventExtractor {
                 } else {
                     DeclarationKind::Both
                 };
-                self.push_binding_into_scope(None, &name_token, parent_kind, binding_kind);
+                self.push_binding_into_scope(None, &name_token, binding_kind);
             }
             _ => {
-                self.push_binding_into_scope(
-                    None,
-                    &name_token,
-                    parent_kind,
-                    DeclarationKind::Value,
-                );
+                self.push_binding_into_scope(None, &name_token, DeclarationKind::Value);
             }
         }
 
@@ -658,11 +629,8 @@ impl SemanticEventExtractor {
 
         let infers = mem::take(&mut self.infers);
         for infer in infers {
-            let name_token = infer.ident_token().ok();
-            let parent_kind = infer.syntax().parent().map(|parent| parent.kind());
-
-            if let (Some(name_token), Some(parent_kind)) = (name_token, parent_kind) {
-                self.push_binding_into_scope(None, &name_token, parent_kind, DeclarationKind::Type);
+            if let Ok(name_token) = infer.ident_token() {
+                self.push_binding_into_scope(None, &name_token, DeclarationKind::Type);
             }
         }
     }
@@ -702,10 +670,7 @@ impl SemanticEventExtractor {
         // Match references and declarations
         for (name, mut references) in scope.references {
             // If we know the declaration of these reference push the correct events...
-            if let Some(declared_binding) = self.bindings.get(&name) {
-                let declared_at = declared_binding.name_range;
-                let declaration_syntax_kind = declared_binding.declaration_syntax_kind;
-
+            if let Some(&declared_at) = self.bindings.get(&name) {
                 for reference in &references {
                     let declaration_before_reference =
                         declared_at.start() < reference.range().start();
@@ -746,36 +711,6 @@ impl SemanticEventExtractor {
                     self.stash.push_back(event);
 
                     if reference.is_any_export() {
-                        // Check shadowed bindings to find an exportable binding
-                        let find_exportable_binding = scope.shadowed.iter().find_map(
-                            |(shadowed_ident_name, shadowed_binding_info)| {
-                                if shadowed_ident_name != &name {
-                                    return None;
-                                }
-
-                                // The order of interface and other bindings is valid in either order
-                                match (
-                                    declaration_syntax_kind,
-                                    shadowed_binding_info.declaration_syntax_kind,
-                                ) {
-                                    (
-                                        JS_VARIABLE_DECLARATOR | JS_CLASS_DECLARATION,
-                                        TS_INTERFACE_DECLARATION,
-                                    )
-                                    | (
-                                        TS_INTERFACE_DECLARATION,
-                                        JS_VARIABLE_DECLARATOR | JS_CLASS_DECLARATION,
-                                    ) => Some(shadowed_binding_info),
-                                    _ => None,
-                                }
-                            },
-                        );
-                        if let Some(binding_info) = find_exportable_binding {
-                            self.stash.push_back(SemanticEvent::Exported {
-                                range: binding_info.name_range,
-                            });
-                        }
-
                         self.stash
                             .push_back(SemanticEvent::Exported { range: declared_at });
                     }
@@ -878,7 +813,6 @@ impl SemanticEventExtractor {
         &mut self,
         hoisted_scope_id: Option<usize>,
         name_token: &JsSyntaxToken,
-        declaration_syntax_kind: JsSyntaxKind,
         declaration_kind: DeclarationKind,
     ) {
         let name = name_token.token_text_trimmed();
@@ -901,24 +835,16 @@ impl SemanticEventExtractor {
         } else {
             BindingName::Value(name.clone())
         };
-        let binding_info = BindingInfo {
-            name_range,
-            declaration_syntax_kind,
-        };
         // insert this name into the list of available names
         // and save shadowed names to be used later
-        if let Some(shadowed) = self.bindings.insert(binding_name.clone(), binding_info) {
+        if let Some(shadowed) = self.bindings.insert(binding_name.clone(), name_range) {
             scope.shadowed.push((binding_name.clone(), shadowed));
         }
         scope.bindings.push(binding_name);
 
         if declaration_kind == DeclarationKind::Both {
             let binding_name = BindingName::Type(name.clone());
-            let binding_info = BindingInfo {
-                name_range,
-                declaration_syntax_kind,
-            };
-            if let Some(shadowed) = self.bindings.insert(binding_name.clone(), binding_info) {
+            if let Some(shadowed) = self.bindings.insert(binding_name.clone(), name_range) {
                 scope.shadowed.push((binding_name.clone(), shadowed));
             }
             scope.bindings.push(binding_name);
