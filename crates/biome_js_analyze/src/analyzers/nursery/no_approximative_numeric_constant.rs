@@ -99,6 +99,8 @@ fn get_approximative_literal_diagnostic(
 /// Returns `false` if the number of significant figures in `value` are
 /// less than `min_digits`; otherwise, returns true if `value` is equal
 /// to `constant`, rounded to the number of digits present in `value`.
+/// Taken from rust-clippy/clippy_lints:
+/// https://github.com/rust-lang/rust-clippy/blob/9554e477c29e6ddca9e5cdce71524341ef9d48e8/clippy_lints/src/approx_const.rs#L118-L132
 fn is_approx_const(constant: f64, value: &str, min_digits: usize) -> bool {
     if value.len() <= min_digits {
         false
