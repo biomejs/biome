@@ -42,7 +42,7 @@ while (x > 0) {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This </span><span style="color: rgb(38, 148, 255);"><strong>if</strong></span><span style="color: rgb(38, 148, 255);"> statement uses an early breaking statement.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
   
     <strong>1 │ </strong>while (x &gt; 0) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (f(x)) {
@@ -55,7 +55,7 @@ while (x > 0) {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (f(x)) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          break;
@@ -92,7 +92,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This </span><span style="color: rgb(38, 148, 255);"><strong>if</strong></span><span style="color: rgb(38, 148, 255);"> statement uses an early breaking statement.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
   
     <strong>1 │ </strong>function f() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
@@ -105,7 +105,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          return 0;
@@ -142,7 +142,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This </span><span style="color: rgb(38, 148, 255);"><strong>if</strong></span><span style="color: rgb(38, 148, 255);"> statement uses an early breaking statement.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
   
     <strong>1 │ </strong>function f() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
@@ -155,7 +155,7 @@ function f() {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Omit the </span><span style="color: rgb(38, 148, 255);"><strong>else</strong></span><span style="color: rgb(38, 148, 255);"> clause.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
   
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          throw new RangeError();

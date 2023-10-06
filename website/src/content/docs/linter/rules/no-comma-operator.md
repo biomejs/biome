@@ -34,7 +34,7 @@ const foo = (doSomething(), 0);
    <strong>   │ </strong>                          <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Its use is often confusing and obscures side effects.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Its use is often confusing and obscures side effects.</span>
   
 </code></pre>
 
@@ -50,7 +50,7 @@ for (; doSomething(), !!test; ) {}
    <strong>   │ </strong>                    <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Its use is often confusing and obscures side effects.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Its use is often confusing and obscures side effects.</span>
   
 </code></pre>
 
@@ -70,7 +70,7 @@ a = 1, b = 2;
    <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Its use is often confusing and obscures side effects.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Its use is often confusing and obscures side effects.</span>
   
 </code></pre>
 

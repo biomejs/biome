@@ -30,7 +30,7 @@ A = 0;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>3 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'A' is defined here.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'A' is defined here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>class A {}
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong>
@@ -53,7 +53,7 @@ class A {}
     <strong>2 │ </strong>class A {}
     <strong>3 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'A' is defined here.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'A' is defined here.</span>
   
     <strong>1 │ </strong>A = 0;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>class A {}
@@ -81,7 +81,7 @@ class A {
     <strong>4 │ </strong>	}
     <strong>5 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'A' is defined here.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'A' is defined here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>class A {
    <strong>   │ </strong>      <strong><span style="color: Tomato;">^</span></strong>
@@ -110,7 +110,7 @@ let A = class A {
     <strong>4 │ </strong>		// `let A` is shadowed by the class name.
     <strong>5 │ </strong>	}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'A' is defined here.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'A' is defined here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>let A = class A {
    <strong>   │ </strong>              <strong><span style="color: Tomato;">^</span></strong>

@@ -32,7 +32,7 @@ var f = function(a, b, b) {}
    <strong>   │ </strong>                       <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The parameter overrides a preceding parameter by using the same name.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The parameter overrides a preceding parameter by using the same name.</span>
   
 </code></pre>
 
@@ -48,7 +48,7 @@ function b(a, b, b) {}
    <strong>   │ </strong>                 <strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The parameter overrides a preceding parameter by using the same name.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The parameter overrides a preceding parameter by using the same name.</span>
   
 </code></pre>
 

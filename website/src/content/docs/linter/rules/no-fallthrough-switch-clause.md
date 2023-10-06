@@ -40,7 +40,7 @@ switch (bar) {
     <strong>4 │ </strong>	case 1:
     <strong>5 │ </strong>		b();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Add a `break` or `return` statement to the end of this case to prevent fallthrough.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Add a `break` or `return` statement to the end of this case to prevent fallthrough.</span>
   
 </code></pre>
 

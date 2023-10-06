@@ -35,9 +35,9 @@ function Component1({ a }) {
     <strong>4 │ </strong>    }
     <strong>5 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.</span>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level</span>
   
 </code></pre>
 

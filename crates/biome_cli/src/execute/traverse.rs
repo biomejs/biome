@@ -89,7 +89,7 @@ pub(crate) fn traverse(
 
     let duration = thread::scope(|s| {
         thread::Builder::new()
-            .name(String::from("rome::console"))
+            .name(String::from("biome::console"))
             .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
                     execution: &execution,
@@ -231,7 +231,7 @@ fn init_thread_pool() {
     static INIT_ONCE: Once = Once::new();
     INIT_ONCE.call_once(|| {
         rayon::ThreadPoolBuilder::new()
-            .thread_name(|index| format!("rome::worker_{index}"))
+            .thread_name(|index| format!("biome::worker_{index}"))
             .build_global()
             .expect("failed to initialize the global thread pool");
     });

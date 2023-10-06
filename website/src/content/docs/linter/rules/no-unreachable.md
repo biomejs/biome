@@ -32,7 +32,7 @@ function example() {
     <strong>4 │ </strong>}
     <strong>5 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">... because this statement will return from the function beforehand</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">... because this statement will return from the function beforehand</span>
   
     <strong>1 │ </strong>function example() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    return;
@@ -60,7 +60,7 @@ function example() {
     <strong>3 │ </strong>        break;
     <strong>4 │ </strong>    }
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">... because this statement will break the flow of the code beforehand</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">... because this statement will break the flow of the code beforehand</span>
   
     <strong>1 │ </strong>function example() {
     <strong>2 │ </strong>    for(let i = 0; i &lt; 10; ++i) {
@@ -91,7 +91,7 @@ function example() {
     <strong>5 │ </strong>    }
     <strong>6 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">... because this statement will continue the loop beforehand</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">... because this statement will continue the loop beforehand</span>
   
     <strong>1 │ </strong>function example() {
     <strong>2 │ </strong>    for(const key in value) {

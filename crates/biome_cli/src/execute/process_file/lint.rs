@@ -17,69 +17,76 @@ pub(crate) fn lint_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let mut errors = 0;
-    let mut input = workspace_file.input()?;
+    tracing::info_span!("Processes linting", path =? workspace_file.path.display()).in_scope(
+        move || {
+            let mut errors = 0;
+            let mut input = workspace_file.input()?;
 
-    if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
-        let fixed = workspace_file
-            .guard()
-            .fix_file(*fix_mode, false)
-            .with_file_path_and_code(
-                workspace_file.path.display().to_string(),
-                category!("lint"),
-            )?;
+            if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
+                let fixed = workspace_file
+                    .guard()
+                    .fix_file(*fix_mode, false)
+                    .with_file_path_and_code(
+                        workspace_file.path.display().to_string(),
+                        category!("lint"),
+                    )?;
 
-        ctx.push_message(Message::SkippedFixes {
-            skipped_suggested_fixes: fixed.skipped_suggested_fixes,
-        });
+                ctx.push_message(Message::SkippedFixes {
+                    skipped_suggested_fixes: fixed.skipped_suggested_fixes,
+                });
 
-        if fixed.code != input {
-            workspace_file.update_file(fixed.code)?;
-            input = workspace_file.input()?;
-        }
-        errors = fixed.errors;
-    }
+                if fixed.code != input {
+                    workspace_file.update_file(fixed.code)?;
+                    input = workspace_file.input()?;
+                }
+                errors = fixed.errors;
+            }
 
-    let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
-    let pull_diagnostics_result = workspace_file
-        .guard()
-        .pull_diagnostics(RuleCategories::LINT, max_diagnostics.into())
-        .with_file_path_and_code(workspace_file.path.display().to_string(), category!("lint"))?;
-
-    let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
-        && pull_diagnostics_result.skipped_diagnostics == 0;
-    errors += pull_diagnostics_result.errors;
-
-    if !no_diagnostics {
-        ctx.push_message(Message::Diagnostics {
-            name: workspace_file.path.display().to_string(),
-            content: input,
-            diagnostics: pull_diagnostics_result
-                .diagnostics
-                .into_iter()
-                .map(Error::from)
-                .collect(),
-            skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics,
-        });
-    }
-
-    if errors > 0 {
-        if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
-            Ok(FileStatus::Message(Message::ApplyError(
-                CliDiagnostic::file_check_apply_error(
+            let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
+            let pull_diagnostics_result = workspace_file
+                .guard()
+                .pull_diagnostics(RuleCategories::LINT, max_diagnostics.into())
+                .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
                     category!("lint"),
-                ),
-            )))
-        } else {
-            Ok(FileStatus::Message(Message::ApplyError(
-                CliDiagnostic::file_check_error(
-                    workspace_file.path.display().to_string(),
-                    category!("lint"),
-                ),
-            )))
-        }
-    } else {
-        Ok(FileStatus::Success)
-    }
+                )?;
+
+            let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
+                && pull_diagnostics_result.skipped_diagnostics == 0;
+            errors += pull_diagnostics_result.errors;
+
+            if !no_diagnostics {
+                ctx.push_message(Message::Diagnostics {
+                    name: workspace_file.path.display().to_string(),
+                    content: input,
+                    diagnostics: pull_diagnostics_result
+                        .diagnostics
+                        .into_iter()
+                        .map(Error::from)
+                        .collect(),
+                    skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics,
+                });
+            }
+
+            if errors > 0 {
+                if ctx.execution.is_check_apply() || ctx.execution.is_check_apply_unsafe() {
+                    Ok(FileStatus::Message(Message::ApplyError(
+                        CliDiagnostic::file_check_apply_error(
+                            workspace_file.path.display().to_string(),
+                            category!("lint"),
+                        ),
+                    )))
+                } else {
+                    Ok(FileStatus::Message(Message::ApplyError(
+                        CliDiagnostic::file_check_error(
+                            workspace_file.path.display().to_string(),
+                            category!("lint"),
+                        ),
+                    )))
+                }
+            } else {
+                Ok(FileStatus::Success)
+            }
+        },
+    )
 }

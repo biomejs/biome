@@ -1506,6 +1506,8 @@ export type MarkupElement =
 	| "Success"
 	| "Warn"
 	| "Info"
+	| "Debug"
+	| "Trace"
 	| "Inverse"
 	| { Hyperlink: { href: string } };
 export type CompressedOp =

@@ -36,7 +36,7 @@ function component() {
     <strong>6 │ </strong>        console.log(a);
     <strong>7 │ </strong>    });
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This dependency is not specified in the hook dependency list.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
   
     <strong>4 │ </strong>    let a = 1;
     <strong>5 │ </strong>    useEffect(() =&gt; {
@@ -68,7 +68,7 @@ function component() {
     <strong>6 │ </strong>    }, [b]);
     <strong>7 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This dependency can be removed from the list.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency can be removed from the list.</span>
   
     <strong>4 │ </strong>    let b = 1;
     <strong>5 │ </strong>    useEffect(() =&gt; {
@@ -102,7 +102,7 @@ function component() {
     <strong>6 │ </strong>        console.log(name);
     <strong>7 │ </strong>        setName(&quot;&quot;);
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This dependency can be removed from the list.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency can be removed from the list.</span>
   
      <strong>6 │ </strong>        console.log(name);
      <strong>7 │ </strong>        setName(&quot;&quot;);
@@ -136,7 +136,7 @@ function component() {
     <strong>7 │ </strong>        console.log(b);
     <strong>8 │ </strong>    });
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">This dependency is not specified in the hook dependency list.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
   
     <strong>5 │ </strong>    const b = a + 1;
     <strong>6 │ </strong>    useEffect(() =&gt; {

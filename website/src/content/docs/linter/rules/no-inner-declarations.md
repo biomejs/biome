@@ -43,8 +43,8 @@ if (test) {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>function</strong></span><span style="color: rgb(38, 148, 255);"> is accessible in the whole body of the </span><span style="color: rgb(38, 148, 255);"><strong>script</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">To avoid confusion, it should be declared at the root of the </span><span style="color: rgb(38, 148, 255);"><strong>script</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>function</strong></span><span style="color: lightgreen;"> is accessible in the whole body of the </span><span style="color: lightgreen;"><strong>script</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">To avoid confusion, it should be declared at the root of the </span><span style="color: lightgreen;"><strong>script</strong></span><span style="color: lightgreen;">.</span>
   
 </code></pre>
 
@@ -64,8 +64,8 @@ if (test) {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>var</strong></span><span style="color: rgb(38, 148, 255);"> is accessible in the whole body of the </span><span style="color: rgb(38, 148, 255);"><strong>module</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">To avoid confusion, it should be declared at the root of the </span><span style="color: rgb(38, 148, 255);"><strong>module</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>var</strong></span><span style="color: lightgreen;"> is accessible in the whole body of the </span><span style="color: lightgreen;"><strong>module</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">To avoid confusion, it should be declared at the root of the </span><span style="color: lightgreen;"><strong>module</strong></span><span style="color: lightgreen;">.</span>
   
 </code></pre>
 
@@ -88,8 +88,8 @@ function f() {
     <strong>4 │ </strong>    }
     <strong>5 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>function</strong></span><span style="color: rgb(38, 148, 255);"> is accessible in the whole body of the </span><span style="color: rgb(38, 148, 255);"><strong>enclosing function</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">To avoid confusion, it should be declared at the root of the </span><span style="color: rgb(38, 148, 255);"><strong>enclosing function</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>function</strong></span><span style="color: lightgreen;"> is accessible in the whole body of the </span><span style="color: lightgreen;"><strong>enclosing function</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">To avoid confusion, it should be declared at the root of the </span><span style="color: lightgreen;"><strong>enclosing function</strong></span><span style="color: lightgreen;">.</span>
   
 </code></pre>
 
@@ -112,8 +112,8 @@ function f() {
     <strong>4 │ </strong>    }
     <strong>5 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>var</strong></span><span style="color: rgb(38, 148, 255);"> is accessible in the whole body of the </span><span style="color: rgb(38, 148, 255);"><strong>enclosing function</strong></span><span style="color: rgb(38, 148, 255);">.
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">To avoid confusion, it should be declared at the root of the </span><span style="color: rgb(38, 148, 255);"><strong>enclosing function</strong></span><span style="color: rgb(38, 148, 255);">.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>var</strong></span><span style="color: lightgreen;"> is accessible in the whole body of the </span><span style="color: lightgreen;"><strong>enclosing function</strong></span><span style="color: lightgreen;">.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">To avoid confusion, it should be declared at the root of the </span><span style="color: lightgreen;"><strong>enclosing function</strong></span><span style="color: lightgreen;">.</span>
   
 </code></pre>
 

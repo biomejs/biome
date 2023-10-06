@@ -44,14 +44,14 @@ foo.f(); // Runtime Error: Cannot read properties of undefined.
     <strong>6 │ </strong>
     <strong>7 │ </strong>const foo = new Foo();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The </span><span style="color: rgb(38, 148, 255);"><strong>interface</strong></span><span style="color: rgb(38, 148, 255);"> is declared here.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The </span><span style="color: lightgreen;"><strong>interface</strong></span><span style="color: lightgreen;"> is declared here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>interface Foo {
    <strong>   │ </strong>          <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>    f(): void
     <strong>3 │ </strong>}
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class.</span>
   
 </code></pre>
 

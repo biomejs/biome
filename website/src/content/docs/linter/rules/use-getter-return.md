@@ -78,7 +78,7 @@ class Option {
      <strong>9 │ </strong>}
     <strong>10 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Expected an identifier, a string literal, a number literal, a private field name, or a computed name here</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Expected an identifier, a string literal, a number literal, a private field name, or a computed name here</span>
   
      <strong>6 │ </strong>            return null;
      <strong>7 │ </strong>        }

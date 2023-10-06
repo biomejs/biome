@@ -32,7 +32,7 @@ switch (foo) {
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Unsafe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Wrap the statements in a block.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Wrap the statements in a block.</span>
   
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  switch (foo) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      case true:

@@ -42,7 +42,7 @@ use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use tracing::{debug, trace};
+use tracing::{debug, error, info, trace};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -295,6 +295,7 @@ fn lint(params: LintParams) -> LintResults {
 
     let has_lint = params.filter.categories.contains(RuleCategories::LINT);
 
+    info!("Analyze file {}", params.path.display());
     let (_, analyze_diagnostics) = analyze(
         &tree,
         params.filter,
@@ -386,7 +387,7 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse))]
+#[tracing::instrument(level = "trace", skip(parse))]
 fn code_actions(
     parse: AnyParse,
     range: TextRange,
@@ -572,7 +573,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse))]
+#[tracing::instrument(level = "trace", skip(parse))]
 fn format(
     rome_path: &RomePath,
     parse: AnyParse,
@@ -580,17 +581,20 @@ fn format(
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(rome_path);
 
-    debug!("Format with the following options: \n{}", options);
+    debug!("Options used for format: \n{}", options);
 
     let tree = parse.syntax();
+    info!("Format file {}", rome_path.display());
     let formatted = format_node(options, &tree)?;
-
     match formatted.print() {
         Ok(printed) => Ok(printed),
-        Err(error) => Err(WorkspaceError::FormatError(error.into())),
+        Err(error) => {
+            error!("The file {} couldn't be formatted", rome_path.display());
+            Err(WorkspaceError::FormatError(error.into()))
+        }
     }
 }
-
+#[tracing::instrument(level = "trace", skip(parse))]
 fn format_range(
     rome_path: &RomePath,
     parse: AnyParse,
@@ -604,6 +608,7 @@ fn format_range(
     Ok(printed)
 }
 
+#[tracing::instrument(level = "trace", skip(parse))]
 fn format_on_type(
     rome_path: &RomePath,
     parse: AnyParse,

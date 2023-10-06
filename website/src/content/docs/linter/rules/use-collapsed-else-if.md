@@ -43,7 +43,7 @@ if (condition) {
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Use collapsed </span><span style="color: rgb(38, 148, 255);"><strong>else if</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use collapsed </span><span style="color: lightgreen;"><strong>else if</strong></span><span style="color: lightgreen;"> instead.</span>
   
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  if (condition) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      // ...
@@ -87,7 +87,7 @@ if (condition) {
      <strong>9 │ </strong>}
     <strong>10 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">Safe fix</span><span style="color: rgb(38, 148, 255);">: </span><span style="color: rgb(38, 148, 255);">Use collapsed </span><span style="color: rgb(38, 148, 255);"><strong>else if</strong></span><span style="color: rgb(38, 148, 255);"> instead.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use collapsed </span><span style="color: lightgreen;"><strong>else if</strong></span><span style="color: lightgreen;"> instead.</span>
   
     <strong> 1</strong> <strong>1</strong><strong> │ </strong>  if (condition) {
     <strong> 2</strong> <strong>2</strong><strong> │ </strong>      // ...

@@ -205,7 +205,7 @@ pub(super) fn rome_log_dir() -> PathBuf {
 /// - All spans and events at level debug in crates whose name starts with `biome`
 struct LoggingFilter;
 
-/// Tracing filter used for spans emitted by `rome*` crates
+/// Tracing filter used for spans emitted by `biome*` crates
 const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
     LevelFilter::TRACE
 } else {
@@ -214,8 +214,7 @@ const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
 
 impl LoggingFilter {
     fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        // TODO: keep "rome" until all internal crates are moved to "biome_"
-        let filter = if meta.target().starts_with("rome") || meta.target().starts_with("biome") {
+        let filter = if meta.target().starts_with("biome") {
             SELF_FILTER
         } else {
             LevelFilter::INFO

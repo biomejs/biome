@@ -28,7 +28,7 @@ use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::trace;
+use tracing::{info_span, trace};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -450,28 +450,30 @@ impl Workspace for WorkspaceServer {
         {
             let rules = settings.linter().rules.as_ref();
             let mut rule_filter_list = self.build_rule_filter_list(rules);
-            if settings.organize_imports.enabled {
+            if settings.organize_imports.enabled && !params.categories.is_syntax() {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;
 
-            trace!("Analyzer filter to apply to lint: {:?}", &filter);
+            info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
+                trace!("Analyzer filter to apply to lint: {:?}", &filter);
 
-            let results = lint(LintParams {
-                parse,
-                filter,
-                rules,
-                settings: self.settings(),
-                max_diagnostics: params.max_diagnostics,
-                path: &params.path,
-            });
+                let results = lint(LintParams {
+                    parse,
+                    filter,
+                    rules,
+                    settings: self.settings(),
+                    max_diagnostics: params.max_diagnostics,
+                    path: &params.path,
+                });
 
-            (
-                results.diagnostics,
-                results.errors,
-                results.skipped_diagnostics,
-            )
+                (
+                    results.diagnostics,
+                    results.errors,
+                    results.skipped_diagnostics,
+                )
+            })
         } else {
             let parse_diagnostics = parse.into_diagnostics();
             let errors = parse_diagnostics

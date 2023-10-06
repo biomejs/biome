@@ -30,7 +30,7 @@ function f() {
     <strong>3 │ </strong>}
     <strong>4 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);"><strong>arguments</strong></span><span style="color: rgb(38, 148, 255);"> does not have </span><span style="color: rgb(38, 148, 255);"><strong>Array.prototype</strong></span><span style="color: rgb(38, 148, 255);"> methods and can be inconvenient to use.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>arguments</strong></span><span style="color: lightgreen;"> does not have </span><span style="color: lightgreen;"><strong>Array.prototype</strong></span><span style="color: lightgreen;"> methods and can be inconvenient to use.</span>
   
 </code></pre>
 

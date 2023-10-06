@@ -1,5 +1,6 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
-use crate::VERSION;
+use crate::logging::LoggingKind;
+use crate::{LoggingLevel, VERSION};
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
@@ -256,6 +257,41 @@ impl BiomeCommand {
             BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
             BiomeCommand::RunServer { .. } => false,
             BiomeCommand::PrintSocket => false,
+        }
+    }
+
+    pub fn log_level(&self) -> LoggingLevel {
+        match self {
+            BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::LspProxy(cli_options)
+            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_level.clone(),
+            BiomeCommand::Version(_)
+            | BiomeCommand::Rage(..)
+            | BiomeCommand::Start
+            | BiomeCommand::Stop
+            | BiomeCommand::Init
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::PrintSocket => LoggingLevel::default(),
+        }
+    }
+    pub fn log_kind(&self) -> LoggingKind {
+        match self {
+            BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::LspProxy(cli_options)
+            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_kind.clone(),
+            BiomeCommand::Version(_)
+            | BiomeCommand::Rage(..)
+            | BiomeCommand::Start
+            | BiomeCommand::Stop
+            | BiomeCommand::Init
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::PrintSocket => LoggingKind::default(),
         }
     }
 }

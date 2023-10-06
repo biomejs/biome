@@ -32,7 +32,7 @@ void 0;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">If you use </span><span style="color: rgb(38, 148, 255);"><strong>void</strong></span><span style="color: rgb(38, 148, 255);"> to alter the return type of a function or return `undefined`, use the global `undefined` instead.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If you use </span><span style="color: lightgreen;"><strong>void</strong></span><span style="color: lightgreen;"> to alter the return type of a function or return `undefined`, use the global `undefined` instead.</span>
   
 </code></pre>
 

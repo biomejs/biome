@@ -1,3 +1,5 @@
+use crate::logging::LoggingKind;
+use crate::LoggingLevel;
 use bpaf::Bpaf;
 use std::str::FromStr;
 
@@ -44,6 +46,26 @@ pub struct CliOptions {
     /// Reports information using the JSON format
     #[bpaf(long("json"), switch, hide_usage, hide)]
     pub json: bool,
+
+    #[bpaf(
+        long("log-level"),
+        argument("none|debug|info|warn|error"),
+        fallback(LoggingLevel::default()),
+        display_fallback
+    )]
+    /// The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
+    pub log_level: LoggingLevel,
+
+    /// How the log should look like.
+    #[bpaf(
+        long("log-kind"),
+        argument("pretty|compact|json"),
+        fallback(LoggingKind::default()),
+        display_fallback
+    )]
+    pub log_kind: LoggingKind,
 }
 
 #[derive(Debug, Clone)]

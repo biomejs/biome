@@ -38,8 +38,8 @@ function f() {
     <strong>5 │ </strong>}
     <strong>6 │ </strong>
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">The with statement is potentially problematic because it adds members of an object to the current
-</span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">  </span><span style="color: rgb(38, 148, 255);">scope, making it impossible to tell what a variable inside the block actually refers to.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The with statement is potentially problematic because it adds members of an object to the current
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">scope, making it impossible to tell what a variable inside the block actually refers to.</span>
   
 </code></pre>
 

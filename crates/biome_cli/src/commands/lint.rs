@@ -1,7 +1,9 @@
 use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
-use crate::{execute_mode, CliDiagnostic, CliSession, Execution, TraversalMode};
+use crate::{
+    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
+};
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{FilesConfiguration, LinterConfiguration};
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
@@ -35,6 +37,7 @@ pub(crate) fn lint(
         vcs_configuration,
         files_configuration,
     } = payload;
+    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
     let fix_file_mode = if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(

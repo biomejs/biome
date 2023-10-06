@@ -2,7 +2,7 @@ use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{execute_mode, Execution, TraversalMode};
-use crate::{CliDiagnostic, CliSession};
+use crate::{setup_cli_subscriber, CliDiagnostic, CliSession};
 
 /// Handler for the "check" command of the Biome CLI
 pub(crate) fn migrate(
@@ -16,6 +16,8 @@ pub(crate) fn migrate(
         directory_path,
         file_path,
     } = load_configuration(&mut session, &cli_options)?;
+    setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
+
     if let (Some(path), Some(directory_path)) = (file_path, directory_path) {
         execute_mode(
             Execution::new(TraversalMode::Migrate {

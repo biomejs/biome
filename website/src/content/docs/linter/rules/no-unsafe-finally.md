@@ -42,7 +42,7 @@ which is considered as unexpected behavior.
     <strong>8 │ </strong>    }
     <strong>9 │ </strong>})();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
   
 </code></pre>
 
@@ -67,7 +67,7 @@ which is considered as unexpected behavior.
     <strong>6 │ </strong>    }
     <strong>7 │ </strong>})();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'return' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
   
 </code></pre>
 
@@ -94,7 +94,7 @@ which is considered as unexpected behavior.
     <strong>8 │ </strong>    }
     <strong>9 │ </strong>})();
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'throw' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'throw' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
   
 </code></pre>
 
@@ -120,7 +120,7 @@ which is considered as unexpected behavior.
     <strong>6 │ </strong>    }
     <strong>7 │ </strong>    return 1;
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
   
 </code></pre>
 
@@ -153,7 +153,7 @@ function a() {
      <strong>9 │ </strong>      }
     <strong>10 │ </strong>    }
   
-<strong><span style="color: rgb(38, 148, 255);">  </span></strong><strong><span style="color: rgb(38, 148, 255);">ℹ</span></strong> <span style="color: rgb(38, 148, 255);">'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">'break' in 'finally' overwrites the control flow statements inside 'try' and 'catch'.</span>
   
 </code></pre>
 
