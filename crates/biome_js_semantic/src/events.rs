@@ -311,7 +311,10 @@ impl SemanticEventExtractor {
     }
 
     fn is_var(declarator: &JsSyntaxNode) -> Option<bool> {
-        debug_assert!(declarator.kind() == JsSyntaxKind::JS_VARIABLE_DECLARATOR);
+        debug_assert!(
+            declarator.kind() == JsSyntaxKind::JS_VARIABLE_DECLARATOR,
+            "specified node is not a variable declarator (JS_VARIABLE_DECLARATOR)"
+        );
         let declarator_parent = declarator.parent()?;
         Some(match declarator_parent.kind() {
             JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST => {
