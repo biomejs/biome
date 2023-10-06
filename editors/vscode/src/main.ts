@@ -1,6 +1,6 @@
 import { type ChildProcess, spawn } from "child_process";
 import { type Socket, connect } from "net";
-import { isAbsolute } from "path";
+import { dirname, isAbsolute } from "path";
 import { TextDecoder, promisify } from "util";
 import {
 	ExtensionContext,
@@ -25,6 +25,7 @@ import { StatusBar } from "./statusBar";
 import { setContextValue } from "./utils";
 
 import resolveImpl = require("resolve/async");
+import { createRequire } from "module";
 import type * as resolve from "resolve";
 
 const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
@@ -243,16 +244,34 @@ async function getWorkspaceDependency(
 	outputChannel: OutputChannel,
 ): Promise<string | undefined> {
 	for (const workspaceFolder of workspace.workspaceFolders) {
-		const path = Uri.joinPath(
-			workspaceFolder.uri,
-			"node_modules",
-			".bin",
-			"biome",
-		);
+		// To resolve the @biomejs/cli-*, which is a transitive dependency of the
+		// @biomejs/biome package, we need to create a custom require function that
+		// is scoped to @biomejs/biome. This allows us to reliably resolve the
+		// package regardless of the package manager used by the user.
+		try {
+			const requireFromBiome = createRequire(
+				require.resolve("@biomejs/biome/package.json", {
+					paths: [workspaceFolder.uri.fsPath],
+				}),
+			);
+			const binaryPackage = dirname(
+				requireFromBiome.resolve(
+					`@biomejs/cli-${process.platform}-${process.arch}/package.json`,
+				),
+			);
 
-		if (await fileExists(path)) {
-			return path.fsPath;
+			const biomePath = Uri.file(
+				`${binaryPackage}/biome${process.platform === "win32" ? ".exe" : ""}`,
+			);
+
+			if (await fileExists(biomePath)) {
+				return biomePath.fsPath;
+			}
+		} catch {
+			return undefined;
 		}
+
+		return undefined;
 	}
 
 	window.showWarningMessage(
@@ -351,9 +370,8 @@ async function getSocket(
 	outputChannel: OutputChannel,
 	command: string,
 ): Promise<string> {
-	const process = spawn(`"${command}"`, ["__print_socket"], {
+	const process = spawn(command, ["__print_socket"], {
 		stdio: [null, "pipe", "pipe"],
-		shell: true,
 	});
 
 	const stdout = { content: "" };
