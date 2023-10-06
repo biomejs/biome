@@ -77,6 +77,22 @@ impl AnyJsNamedImportSpecifier {
     }
 }
 
+impl AnyJsNamedImportSpecifier {
+    /// Type token of the import specifier.
+    ///
+    /// ```ts
+    /// import { type X }
+    ///          ^^^^
+    /// ```
+    pub fn type_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsBogusNamedImportSpecifier(_) => None,
+            Self::JsNamedImportSpecifier(specifier) => specifier.type_token(),
+            Self::JsShorthandNamedImportSpecifier(specifier) => specifier.type_token(),
+        }
+    }
+}
+
 impl JsModuleSource {
     /// Get the inner text of a string not including the quotes
     /// ## Examples
