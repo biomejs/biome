@@ -248,24 +248,30 @@ async function getWorkspaceDependency(
 		// @biomejs/biome package, we need to create a custom require function that
 		// is scoped to @biomejs/biome. This allows us to reliably resolve the
 		// package regardless of the package manager used by the user.
-		const requireFromBiome = createRequire(
-			require.resolve("@biomejs/biome/package.json", {
-				paths: [workspaceFolder.uri.fsPath],
-			}),
-		);
-		const binaryPackage = dirname(
-			requireFromBiome.resolve(
-				`@biomejs/cli-${process.platform}-${process.arch}/package.json`,
-			),
-		);
+		try {
+			const requireFromBiome = createRequire(
+				require.resolve("@biomejs/biome/package.json", {
+					paths: [workspaceFolder.uri.fsPath],
+				}),
+			);
+			const binaryPackage = dirname(
+				requireFromBiome.resolve(
+					`@biomejs/cli-${process.platform}-${process.arch}/package.json`,
+				),
+			);
 
-		const biomePath = Uri.file(
-			`${binaryPackage}/biome${process.platform === "win32" ? ".exe" : ""}`,
-		);
+			const biomePath = Uri.file(
+				`${binaryPackage}/biome${process.platform === "win32" ? ".exe" : ""}`,
+			);
 
-		if (await fileExists(biomePath)) {
-			return biomePath.fsPath;
+			if (await fileExists(biomePath)) {
+				return biomePath.fsPath;
+			}
+		} catch {
+			return undefined;
 		}
+
+		return undefined;
 	}
 
 	window.showWarningMessage(
