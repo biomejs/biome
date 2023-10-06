@@ -276,7 +276,7 @@ jobs:
   build-intellij:
     name: Build Intellij LSP
     runs-on: ubuntu-latest
-    needs: [check, test-ui-intellij]
+    needs: [check]
     env:
       version: ${{ needs.check.outputs.intellij_version }}
       prerelease: ${{ needs.check.outputs.prerelease }}
