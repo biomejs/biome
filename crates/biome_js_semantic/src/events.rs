@@ -79,6 +79,7 @@ pub enum SemanticEvent {
     /// - Blocks
     /// - Function body
     ScopeStarted {
+        /// Scope range
         range: TextRange,
         scope_id: usize,
         parent_scope_id: Option<usize>,
@@ -90,8 +91,8 @@ pub enum SemanticEvent {
     /// - Blocks
     /// - Function body
     ScopeEnded {
+        /// Scope range
         range: TextRange,
-        started_at: TextSize,
         scope_id: usize,
     },
 
@@ -730,7 +731,6 @@ impl SemanticEventExtractor {
 
         self.stash.push_back(SemanticEvent::ScopeEnded {
             range,
-            started_at: scope.started_at,
             scope_id: scope.scope_id,
         });
     }
@@ -784,13 +784,11 @@ impl SemanticEventExtractor {
         let name_range = name_token.text_range();
         let current_scope_id = self.current_scope_mut().scope_id;
         let binding_scope_id = hoisted_scope_id.unwrap_or(current_scope_id);
-
         let scope = self
             .scopes
             .iter_mut()
             .rev()
             .find(|s| s.scope_id == binding_scope_id);
-
         // A scope will always be found
         debug_assert!(scope.is_some());
         let scope = scope.unwrap();
