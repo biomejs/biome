@@ -1,9 +1,12 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxElement;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
@@ -117,7 +120,33 @@ impl Rule for UseAnchorContent {
             markup! {
                 "All links on a page should have content that is accessible to screen readers."
             }
+        ).note(
+            markup! {
+                "Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies."
+            }
+        ).note(
+            markup! {
+                "Follow the links for more information,\n "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">"WCAG 2.4.4"</Hyperlink>"\n "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">"WCAG 4.1.2"</Hyperlink>""
+            }
         ))
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        if node.has_truthy_attribute("aria-hidden") {
+            let aria_hidden = node.find_attribute_by_name("aria-hidden")?;
+            mutation.remove_node(aria_hidden);
+
+            return Some(JsRuleAction {
+                category: ActionCategory::QuickFix,
+                applicability: Applicability::MaybeIncorrect,
+                message: markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute to allow the anchor element and its content visible to assistive technologies." }.to_owned(),
+                mutation,
+            });
+        }
+        None
     }
 }
 
