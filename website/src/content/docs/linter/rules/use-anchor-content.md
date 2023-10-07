@@ -33,7 +33,7 @@ Refer to the references to learn about why this is important.
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow the links for more information,
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow these links for more information,
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">WCAG 2.4.4</a></span><span style="color: lightgreen;">
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">WCAG 4.1.2</a></span>
   
@@ -55,7 +55,7 @@ Refer to the references to learn about why this is important.
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow the links for more information,
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow these links for more information,
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">WCAG 2.4.4</a></span><span style="color: lightgreen;">
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">WCAG 4.1.2</a></span>
   
@@ -77,7 +77,7 @@ Refer to the references to learn about why this is important.
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow the links for more information,
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow these links for more information,
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">WCAG 2.4.4</a></span><span style="color: lightgreen;">
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">WCAG 4.1.2</a></span>
   
@@ -99,7 +99,7 @@ Refer to the references to learn about why this is important.
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow the links for more information,
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow these links for more information,
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">WCAG 2.4.4</a></span><span style="color: lightgreen;">
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">WCAG 4.1.2</a></span>
   
@@ -125,7 +125,7 @@ Refer to the references to learn about why this is important.
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.</span>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow the links for more information,
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Follow these links for more information,
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context">WCAG 2.4.4</a></span><span style="color: lightgreen;">
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> </span><span style="color: lightgreen;"><a href="https://www.w3.org/WAI/WCAG21/Understanding/name-role-value">WCAG 4.1.2</a></span>
   
