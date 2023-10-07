@@ -90,13 +90,13 @@ impl TestCase for SymbolsMicrosoftTestCase {
                 // We do the same below because TS classifies some string literals as symbols and we also
                 // filter them below.
                 match x {
-                    SemanticEvent::DeclarationFound { range, .. }
-                    | SemanticEvent::Read { range, .. }
-                    | SemanticEvent::HoistedRead { range, .. }
-                    | SemanticEvent::Write { range, .. }
-                    | SemanticEvent::HoistedWrite { range, .. }
-                    | SemanticEvent::UnresolvedReference { range, .. } => {
-                        let name = &code[*range];
+                    SemanticEvent::DeclarationFound { .. }
+                    | SemanticEvent::Read { .. }
+                    | SemanticEvent::HoistedRead { .. }
+                    | SemanticEvent::Write { .. }
+                    | SemanticEvent::HoistedWrite { .. }
+                    | SemanticEvent::UnresolvedReference { .. } => {
+                        let name = &code[x.range()];
                         !name.contains('\"') && !name.contains('\'')
                     }
                     SemanticEvent::ScopeStarted { .. }
@@ -135,12 +135,12 @@ impl TestCase for SymbolsMicrosoftTestCase {
             debug_text.push_str(" - actual: ");
 
             if let Some(actual) = actual {
-                let name = &code[*actual.range()].trim();
+                let name = &code[actual.range()].trim();
                 write!(debug_text, "[{}]", name).unwrap();
             }
 
             match (expected, actual) {
-                (Some(expected), Some(actual)) if expected.name != code[*actual.range()].trim() => {
+                (Some(expected), Some(actual)) if expected.name != code[actual.range()].trim() => {
                     debug_text.push_str(" <<<<<<<<<<<<<<<<<<<< Diff here");
                 }
                 _ => {}
@@ -156,7 +156,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             }
         } else {
             for (expected, actual) in expected.symbols.iter().zip(actual) {
-                let are_names_eq = expected.name == code[*actual.range()].trim();
+                let are_names_eq = expected.name == code[actual.range()].trim();
                 if !are_names_eq {
                     return TestRunOutcome::IncorrectlyErrored {
                         files: t,

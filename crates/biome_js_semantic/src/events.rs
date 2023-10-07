@@ -5,8 +5,8 @@ use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyTsType, JsImportNamedClause,
 };
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsLanguage, JsReferenceIdentifier, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, TextRange, TextSize, TsTypeParameterName,
+    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TextRange,
+    TsTypeParameterName,
 };
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
@@ -25,11 +25,9 @@ pub enum SemanticEvent {
     /// - Functions parameters
     /// - Type parameters
     DeclarationFound {
-        range: TextRange,
-        scope_started_at: TextSize,
+        name_token: JsSyntaxToken,
         scope_id: usize,
         hoisted_scope_id: Option<usize>,
-        name: TokenText,
     },
 
     /// Tracks where a symbol is read, but only if its declaration is before this reference.
@@ -102,17 +100,17 @@ pub enum SemanticEvent {
 }
 
 impl SemanticEvent {
-    pub fn range(&self) -> &TextRange {
+    pub fn range(&self) -> TextRange {
         match self {
-            Self::DeclarationFound { range, .. }
-            | Self::ScopeStarted { range, .. }
+            Self::DeclarationFound { name_token, .. } => name_token.text_range(),
+            Self::ScopeStarted { range, .. }
             | Self::ScopeEnded { range, .. }
             | Self::Read { range, .. }
             | Self::HoistedRead { range, .. }
             | Self::Write { range, .. }
             | Self::HoistedWrite { range, .. }
             | Self::UnresolvedReference { range, .. }
-            | Self::Exported { range } => range,
+            | Self::Exported { range } => *range,
         }
     }
 }
@@ -161,17 +159,6 @@ pub struct SemanticEventExtractor {
     bindings: FxHashMap<BindingName, TextRange>,
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
-}
-
-/// A declaration is either a type, a value, or both.
-///
-/// For example a class is botha  type and a value in TypeScript.
-/// A variable declaration is always a value, and a type alias is always a type.
-#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-enum DeclarationKind {
-    Type,
-    Value,
-    Both,
 }
 
 /// A binding name is either a type or a value.
@@ -250,7 +237,6 @@ enum ScopeHoisting {
 #[derive(Debug)]
 struct Scope {
     scope_id: usize,
-    started_at: TextSize,
     /// All bindings declared inside this scope
     bindings: Vec<BindingName>,
     /// References that still needs to be bound and will be solved at the end of the scope
@@ -358,117 +344,152 @@ impl SemanticEventExtractor {
 
     fn enter_identifier_binding(&mut self, node: &AnyJsIdentifierBinding) -> Option<()> {
         let name_token = node.name_token().ok()?;
-        let Some(declaration) = node.declaration() else {
+        let name = name_token.token_text_trimmed();
+        let name_range = name_token.text_range();
+        let mut hoisted_scope_id = None;
+        let is_exported = if let Some(declaration) = node.declaration() {
+            let is_exported = declaration.export().is_some();
+            match declaration {
+                AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                    hoisted_scope_id = if declarator.declaration()?.is_var() {
+                        self.scope_index_to_hoist_declarations(0)
+                    } else {
+                        None
+                    };
+                    self.push_binding(hoisted_scope_id, BindingName::Value(name), name_range);
+                }
+                AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
+                    hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
+                    self.push_binding(hoisted_scope_id, BindingName::Value(name), name_range);
+                }
+                AnyJsBindingDeclaration::JsClassExpression(_)
+                | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
+                    self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                    self.push_binding(None, BindingName::Type(name), name_range);
+                }
+                AnyJsBindingDeclaration::JsClassDeclaration(_)
+                | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+                | AnyJsBindingDeclaration::TsEnumDeclaration(_) => {
+                    // These declarations have their own scope.
+                    // Thus we need to hoist the declaration to the parent scope.
+                    hoisted_scope_id = self
+                        .scopes
+                        .get(self.scopes.len() - 2)
+                        .map(|scope| scope.scope_id);
+                    self.push_binding(
+                        hoisted_scope_id,
+                        BindingName::Value(name.clone()),
+                        name_range,
+                    );
+                    self.push_binding(hoisted_scope_id, BindingName::Type(name), name_range);
+                }
+                AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+                | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => {
+                    // These declarations have their own scope.
+                    // Thus we need to hoist the declaration to the parent scope.
+                    hoisted_scope_id = self
+                        .scopes
+                        .get(self.scopes.len() - 2)
+                        .map(|scope| scope.scope_id);
+                    self.push_binding(hoisted_scope_id, BindingName::Type(name), name_range);
+                }
+                AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
+                    // This declarations has its own scope.
+                    // Thus we need to hoist the declaration to the parent scope.
+                    hoisted_scope_id = self
+                        .scopes
+                        .get(self.scopes.len() - 2)
+                        .map(|scope| scope.scope_id);
+                    self.push_binding(
+                        hoisted_scope_id,
+                        BindingName::Value(name.clone()),
+                        name_range,
+                    );
+                }
+                AnyJsBindingDeclaration::TsMappedType(_)
+                | AnyJsBindingDeclaration::TsTypeParameter(_) => {
+                    self.push_binding(None, BindingName::Type(name), name_range);
+                }
+                AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
+                    if clause.type_token().is_some() {
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    } else {
+                        self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    }
+                }
+                AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
+                    if clause.type_token().is_some() {
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    } else {
+                        self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    }
+                }
+                AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
+                    if declaration.type_token().is_some() {
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    } else {
+                        self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    }
+                }
+                AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+                | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+                    let clause = declaration.parent::<JsImportNamedClause>()?;
+                    if clause.type_token().is_some() {
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    } else {
+                        self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    }
+                }
+                AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+                | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
+                    let specifier =
+                        AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
+                    if specifier.is_type_only() {
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    } else {
+                        self.push_binding(None, BindingName::Value(name.clone()), name_range);
+                        self.push_binding(None, BindingName::Type(name), name_range);
+                    }
+                }
+                AnyJsBindingDeclaration::JsBogusParameter(_)
+                | AnyJsBindingDeclaration::JsFormalParameter(_)
+                | AnyJsBindingDeclaration::JsRestParameter(_)
+                | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+                | AnyJsBindingDeclaration::TsPropertyParameter(_)
+                | AnyJsBindingDeclaration::JsCatchDeclaration(_) => {
+                    self.push_binding(None, BindingName::Value(name), name_range);
+                }
+                AnyJsBindingDeclaration::TsInferType(_) => {
+                    // Delay the declaration of parameter types that are inferred.
+                    // Their scope corresponds to the true branch of the conditional type.
+                    self.infers
+                        .push(TsTypeParameterName::unwrap_cast(node.syntax().clone()));
+                    return Some(());
+                }
+            }
+            is_exported
+        } else {
             // Handle identifiers in bogus statements,
             // and arrow function with a single parameter without parentheses.
             // TODO: The AST should be modified.
             // In `a => ...` the binding `a` should be wrapped in a JSFormalParameter.
-            self.push_binding_into_scope(None, &name_token, DeclarationKind::Value);
-            return Some(());
+            self.push_binding(None, BindingName::Value(name), name_range);
+            false
         };
-        let is_exported = declaration.export().is_some();
-        match declaration {
-            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                let declaration = declarator.declaration()?;
-                let hoisted_scope_id = if declaration.is_var() {
-                    self.scope_index_to_hoist_declarations(0)
-                } else {
-                    None
-                };
-                self.push_binding_into_scope(hoisted_scope_id, &name_token, DeclarationKind::Value);
-            }
-            AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-            | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
-            | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-            | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
-                let hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
-                self.push_binding_into_scope(hoisted_scope_id, &name_token, DeclarationKind::Value);
-            }
-            AnyJsBindingDeclaration::JsClassExpression(_)
-            | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
-                self.push_binding_into_scope(None, &name_token, DeclarationKind::Both);
-            }
-            AnyJsBindingDeclaration::JsClassDeclaration(_)
-            | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
-            | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-            | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-            | AnyJsBindingDeclaration::TsEnumDeclaration(_)
-            | AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
-                let binding_kind = match declaration.syntax().kind() {
-                    JS_CLASS_DECLARATION
-                    | JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                    | TS_ENUM_DECLARATION => DeclarationKind::Both,
-                    TS_INTERFACE_DECLARATION | TS_TYPE_ALIAS_DECLARATION => DeclarationKind::Type,
-                    _ => DeclarationKind::Value,
-                };
-                // These declarations have their own scope.
-                // Thus we need to hoist the declaration to the parent scope.
-                let parent_scope = self.scopes.get(self.scopes.len() - 2);
-                let parent_scope = parent_scope.map(|scope| scope.scope_id);
-                self.push_binding_into_scope(parent_scope, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::TsInferType(_) => {
-                self.infers
-                    .push(TsTypeParameterName::unwrap_cast(node.syntax().clone()));
-            }
-            AnyJsBindingDeclaration::TsMappedType(_)
-            | AnyJsBindingDeclaration::TsTypeParameter(_) => {
-                self.push_binding_into_scope(None, &name_token, DeclarationKind::Type);
-            }
-            AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
-                let binding_kind = if clause.type_token().is_some() {
-                    DeclarationKind::Type
-                } else {
-                    DeclarationKind::Both
-                };
-                self.push_binding_into_scope(None, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
-                let binding_kind = if clause.type_token().is_some() {
-                    DeclarationKind::Type
-                } else {
-                    DeclarationKind::Both
-                };
-                self.push_binding_into_scope(None, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
-                let binding_kind = if declaration.type_token().is_some() {
-                    DeclarationKind::Type
-                } else {
-                    DeclarationKind::Both
-                };
-                self.push_binding_into_scope(None, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-                let clause = declaration.parent::<JsImportNamedClause>()?;
-                let binding_kind = if clause.type_token().is_some() {
-                    DeclarationKind::Type
-                } else {
-                    DeclarationKind::Both
-                };
-                self.push_binding_into_scope(None, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
-                let specifier = AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
-                let binding_kind = if specifier.is_type_only() {
-                    DeclarationKind::Type
-                } else {
-                    DeclarationKind::Both
-                };
-                self.push_binding_into_scope(None, &name_token, binding_kind);
-            }
-            AnyJsBindingDeclaration::JsBogusParameter(_)
-            | AnyJsBindingDeclaration::JsFormalParameter(_)
-            | AnyJsBindingDeclaration::JsRestParameter(_)
-            | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-            | AnyJsBindingDeclaration::TsPropertyParameter(_)
-            | AnyJsBindingDeclaration::JsCatchDeclaration(_) => {
-                self.push_binding_into_scope(None, &name_token, DeclarationKind::Value);
-            }
-        }
+        let scope_id = self.current_scope_mut().scope_id;
+        self.stash.push_back(SemanticEvent::DeclarationFound {
+            scope_id,
+            hoisted_scope_id,
+            name_token,
+        });
         if is_exported {
             self.stash.push_back(SemanticEvent::Exported {
                 range: node.syntax().text_range(),
@@ -483,60 +504,53 @@ impl SemanticEventExtractor {
             return;
         };
         let name = name_token.token_text_trimmed();
-        let current_scope = self.current_scope_mut();
-        let (binding_name, reference) = match node {
+        match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
-                match Self::is_js_reference_identifier_exported(&node) {
-                    Some(reference @ Reference::ExportType(_)) => {
-                        (BindingName::Type(name), reference)
+                if let Some(specifier) = node.parent::<AnyJsExportNamedSpecifier>() {
+                    if specifier.is_type_only() {
+                        self.push_reference(BindingName::Type(name), Reference::ExportType(range));
+                    } else {
+                        self.push_reference(
+                            BindingName::Value(name.clone()),
+                            Reference::Export(range),
+                        );
+                        self.push_reference(BindingName::Type(name), Reference::Export(range));
                     }
-                    Some(reference @ Reference::Export(_)) => {
-                        // A regular `export` can export both a type binding and a value binding.
-                        // ```js
-                        // type X = number;
-                        // const X = "";
-                        // export { X }
-                        // ```
-                        // Thus, we add two references
-                        let references = current_scope
-                            .references
-                            .entry(BindingName::Value(name.clone()))
-                            .or_default();
-                        references.push(reference.clone());
-                        (BindingName::Type(name), reference)
+                } else if matches!(
+                    node.syntax().grand_parent().kind(),
+                    Some(JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE | TS_EXPORT_ASSIGNMENT_CLAUSE)
+                ) {
+                    self.push_reference(BindingName::Value(name.clone()), Reference::Export(range));
+                    self.push_reference(BindingName::Type(name), Reference::Export(range));
+                } else {
+                    if name.text() == "this" {
+                        // Ignore `this` in typeof position. e.g. `typeof this.prop`.
+                        return;
                     }
-                    _ => {
-                        if name.text() == "this" {
-                            // Ignore `this` in typeof position. e.g. `typeof this.prop`.
-                            return;
+                    let binding_name = match node
+                        .syntax()
+                        .ancestors()
+                        .skip(1)
+                        .find(|x| x.kind() != TS_QUALIFIED_NAME)
+                        .kind()
+                    {
+                        Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
+                            BindingName::Type(name)
                         }
-                        let binding_name = match node
-                            .syntax()
-                            .ancestors()
-                            .skip(1)
-                            .find(|x| x.kind() != TS_QUALIFIED_NAME)
-                            .kind()
-                        {
-                            Some(TS_REFERENCE_TYPE | TS_NAME_WITH_TYPE_ARGUMENTS) => {
-                                BindingName::Type(name)
-                            }
-                            // ignore binding `<X>` from `import().<X>`
-                            Some(TS_IMPORT_TYPE_QUALIFIER) => return,
-                            _ => BindingName::Value(name),
-                        };
-                        (binding_name, Reference::Read(range))
-                    }
+                        // ignore binding `<X>` from `import().<X>`
+                        Some(TS_IMPORT_TYPE_QUALIFIER) => return,
+                        _ => BindingName::Value(name),
+                    };
+                    self.push_reference(binding_name, Reference::Read(range));
                 }
             }
             AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
-                (BindingName::Value(name), Reference::Read(range))
+                self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
             AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
-                (BindingName::Value(name), Reference::Write(range))
+                self.push_reference(BindingName::Value(name), Reference::Write(range));
             }
-        };
-        let references = current_scope.references.entry(binding_name).or_default();
-        references.push(reference);
+        }
     }
 
     /// See [SemanticEvent] for a more detailed description
@@ -608,7 +622,15 @@ impl SemanticEventExtractor {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
-                self.push_binding_into_scope(None, &name_token, DeclarationKind::Type);
+                let name = name_token.token_text_trimmed();
+                let name_range = name_token.text_range();
+                self.push_binding(None, BindingName::Type(name), name_range);
+                let scope_id = self.current_scope_mut().scope_id;
+                self.stash.push_back(SemanticEvent::DeclarationFound {
+                    scope_id,
+                    hoisted_scope_id: None,
+                    name_token,
+                });
             }
         }
     }
@@ -624,7 +646,6 @@ impl SemanticEventExtractor {
         });
         self.scopes.push(Scope {
             scope_id,
-            started_at: range.start(),
             bindings: vec![],
             references: FxHashMap::default(),
             shadowed: vec![],
@@ -774,14 +795,13 @@ impl SemanticEventExtractor {
             .filter(|scope_id| self.current_scope_mut().scope_id != *scope_id)
     }
 
-    fn push_binding_into_scope(
+    /// Push the binding `binding` into the hoisted scope if it exists, or into the current scope.
+    fn push_binding(
         &mut self,
         hoisted_scope_id: Option<usize>,
-        name_token: &JsSyntaxToken,
-        declaration_kind: DeclarationKind,
+        binding_name: BindingName,
+        name_range: TextRange,
     ) {
-        let name = name_token.token_text_trimmed();
-        let name_range = name_token.text_range();
         let current_scope_id = self.current_scope_mut().scope_id;
         let binding_scope_id = hoisted_scope_id.unwrap_or(current_scope_id);
         let scope = self
@@ -793,52 +813,21 @@ impl SemanticEventExtractor {
         debug_assert!(scope.is_some());
         let scope = scope.unwrap();
 
-        let binding_name = if declaration_kind == DeclarationKind::Type {
-            BindingName::Type(name.clone())
-        } else {
-            BindingName::Value(name.clone())
-        };
         // insert this name into the list of available names
         // and save shadowed names to be used later
         if let Some(shadowed) = self.bindings.insert(binding_name.clone(), name_range) {
             scope.shadowed.push((binding_name.clone(), shadowed));
         }
         scope.bindings.push(binding_name);
-
-        if declaration_kind == DeclarationKind::Both {
-            let binding_name = BindingName::Type(name.clone());
-            if let Some(shadowed) = self.bindings.insert(binding_name.clone(), name_range) {
-                scope.shadowed.push((binding_name.clone(), shadowed));
-            }
-            scope.bindings.push(binding_name);
-        }
-
-        self.stash.push_back(SemanticEvent::DeclarationFound {
-            range: name_range,
-            scope_started_at: scope.started_at,
-            scope_id: current_scope_id,
-            hoisted_scope_id,
-            name,
-        });
     }
 
-    // Returns an export reference if `reference` is exported.
-    fn is_js_reference_identifier_exported(reference: &JsReferenceIdentifier) -> Option<Reference> {
-        let range = reference.syntax().text_range();
-        if let Some(specifier) = AnyJsExportNamedSpecifier::cast(reference.syntax().parent()?) {
-            if specifier.is_type_only() {
-                Some(Reference::ExportType(range))
-            } else {
-                Some(Reference::Export(range))
-            }
-        } else if matches!(
-            reference.syntax().grand_parent()?.kind(),
-            JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE | TS_EXPORT_ASSIGNMENT_CLAUSE
-        ) {
-            Some(Reference::Export(range))
-        } else {
-            None
-        }
+    /// Push the reference `reference` of the binding `binding_name` into the current scope.
+    fn push_reference(&mut self, binding_name: BindingName, reference: Reference) {
+        self.current_scope_mut()
+            .references
+            .entry(binding_name)
+            .or_default()
+            .push(reference);
     }
 }
 

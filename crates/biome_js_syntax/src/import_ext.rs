@@ -1,8 +1,8 @@
 use crate::{
-    inner_string_text, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport, JsModuleSource,
-    JsSyntaxToken, JsImportNamedClause,
+    inner_string_text, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport, JsImportNamedClause,
+    JsModuleSource, JsSyntaxToken,
 };
-use biome_rowan::{SyntaxResult, TokenText, AstNode};
+use biome_rowan::{AstNode, SyntaxResult, TokenText};
 
 impl JsImport {
     /// It checks if the source of an import against the string `source_to_check`
@@ -99,7 +99,11 @@ impl AnyJsNamedImportSpecifier {
 
     /// Returns `true` if this specifier or its import clause has a type modifier.
     pub fn is_type_only(&self) -> bool {
-        self.type_token().is_some() || self.import_named_clause().and_then(|x| x.type_token()).is_some()
+        self.type_token().is_some()
+            || self
+                .import_named_clause()
+                .and_then(|x| x.type_token())
+                .is_some()
     }
 }
 

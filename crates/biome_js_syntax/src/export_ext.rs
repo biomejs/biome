@@ -23,6 +23,10 @@ impl AnyJsExportNamedSpecifier {
 
     /// Returns `true` if this specifier or its export clause has a type modifier.
     pub fn is_type_only(&self) -> bool {
-        self.type_token().is_some() || self.export_named_clause().and_then(|x| x.type_token()).is_some()
+        self.type_token().is_some()
+            || self
+                .export_named_clause()
+                .and_then(|x| x.type_token())
+                .is_some()
     }
 }
