@@ -153,6 +153,9 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsFunctionExpression(_) => None,
 
         // Some parameters are ok to not be used
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
+            suggestion_for_binding(binding)
+        }
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
         AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
             if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {

@@ -459,7 +459,8 @@ impl SemanticEventExtractor {
                         self.push_binding(None, BindingName::Type(name), name_range);
                     }
                 }
-                AnyJsBindingDeclaration::JsBogusParameter(_)
+                AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                | AnyJsBindingDeclaration::JsBogusParameter(_)
                 | AnyJsBindingDeclaration::JsFormalParameter(_)
                 | AnyJsBindingDeclaration::JsRestParameter(_)
                 | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
@@ -477,10 +478,7 @@ impl SemanticEventExtractor {
             }
             is_exported
         } else {
-            // Handle identifiers in bogus statements,
-            // and arrow function with a single parameter without parentheses.
-            // TODO: The AST should be modified.
-            // In `a => ...` the binding `a` should be wrapped in a JSFormalParameter.
+            // Handle identifiers in bogus nodes,
             self.push_binding(None, BindingName::Value(name), name_range);
             false
         };

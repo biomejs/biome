@@ -23,7 +23,7 @@ declare_node_union! {
         // variable
             JsVariableDeclarator
         // parameters
-            | JsFormalParameter | JsRestParameter | JsBogusParameter
+            | JsArrowFunctionExpression | JsFormalParameter | JsRestParameter | JsBogusParameter
             | TsIndexSignatureParameter | TsPropertyParameter
         // type parameter
             | TsInferType | TsMappedType | TsTypeParameter
@@ -152,7 +152,8 @@ impl AnyJsBindingDeclaration {
     pub const fn is_parameter_like(&self) -> bool {
         matches!(
             self,
-            AnyJsBindingDeclaration::JsFormalParameter(_)
+            AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                | AnyJsBindingDeclaration::JsFormalParameter(_)
                 | AnyJsBindingDeclaration::JsRestParameter(_)
                 | AnyJsBindingDeclaration::JsBogusParameter(_)
                 | AnyJsBindingDeclaration::TsPropertyParameter(_)
@@ -269,12 +270,7 @@ impl AnyJsIdentifierBinding {
     }
 
     pub fn declaration(&self) -> Option<AnyJsBindingDeclaration> {
-        let node = match self {
-            AnyJsIdentifierBinding::JsIdentifierBinding(binding) => &binding.syntax,
-            AnyJsIdentifierBinding::TsIdentifierBinding(binding) => &binding.syntax,
-            AnyJsIdentifierBinding::TsTypeParameterName(binding) => &binding.syntax,
-        };
-        declaration(node)
+        declaration(self.syntax())
     }
 
     pub fn is_under_pattern_binding(&self) -> Option<bool> {
