@@ -1,5 +1,6 @@
 use crate::test_case::TestCase;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_css_parser::CssParserOptions;
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_js_analyze::analyze;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
@@ -15,6 +16,7 @@ use criterion::black_box;
 pub enum Parse<'a> {
     JavaScript(JsFileSource, &'a str),
     Json(&'a str),
+    Css(&'a str),
 }
 
 impl<'a> Parse<'a> {
@@ -23,6 +25,7 @@ impl<'a> Parse<'a> {
             Ok(source_type) => Some(Parse::JavaScript(source_type, case.code())),
             Err(_) => match case.extension() {
                 "json" => Some(Parse::Json(case.code())),
+                "css" => Some(Parse::Css(case.code())),
                 _ => None,
             },
         }
@@ -37,6 +40,10 @@ impl<'a> Parse<'a> {
             Parse::Json(code) => Parsed::Json(biome_json_parser::parse_json(
                 code,
                 JsonParserOptions::default(),
+            )),
+            Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css(
+                code,
+                CssParserOptions::default().with_allow_single_line_comments(),
             )),
         }
     }
@@ -57,6 +64,11 @@ impl<'a> Parse<'a> {
                 cache,
                 JsonParserOptions::default(),
             )),
+            Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css_with_cache(
+                code,
+                cache,
+                CssParserOptions::default().with_allow_single_line_comments(),
+            )),
         }
     }
 }
@@ -64,6 +76,7 @@ impl<'a> Parse<'a> {
 pub enum Parsed {
     JavaScript(biome_js_parser::Parse<AnyJsRoot>, JsFileSource),
     Json(biome_json_parser::JsonParse),
+    Css(biome_css_parser::CssParse),
 }
 
 impl Parsed {
@@ -73,6 +86,7 @@ impl Parsed {
                 Some(FormatNode::JavaScript(parse.syntax(), *source_type))
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
+            Parsed::Css(_) => None,
         }
     }
 
@@ -80,6 +94,7 @@ impl Parsed {
         match self {
             Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
             Parsed::Json(_) => None,
+            Parsed::Css(_) => None,
         }
     }
 
@@ -87,6 +102,7 @@ impl Parsed {
         match self {
             Parsed::JavaScript(parse, _) => parse.into_diagnostics(),
             Parsed::Json(parse) => parse.into_diagnostics(),
+            Parsed::Css(parse) => parse.into_diagnostics(),
         }
     }
 }
