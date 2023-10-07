@@ -160,7 +160,7 @@ impl AnyJsBindingDeclaration {
         )
     }
 
-    // Returns the export statement if this declaration is directly exported.
+    /// Returns the export statement if this declaration is directly exported.
     pub fn export(&self) -> Option<JsExport> {
         let maybe_export = match self {
             Self::JsVariableDeclarator(_) => self.syntax().ancestors().nth(4),

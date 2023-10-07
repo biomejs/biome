@@ -92,13 +92,13 @@ impl AnyJsNamedImportSpecifier {
         }
     }
 
-    // Returns the import clause that includes this specifier.
+    /// Returns the import clause that includes this specifier.
     pub fn import_named_clause(&self) -> Option<JsImportNamedClause> {
         JsImportNamedClause::cast(self.syntax().ancestors().nth(3)?)
     }
 
-    /// Returns `true` if this specifier or its import clause has a type modifier.
-    pub fn is_type_only(&self) -> bool {
+    /// Returns `true` if this specifier or its import clause has **only** a type modifier.
+    pub fn imports_only_types(&self) -> bool {
         self.type_token().is_some()
             || self
                 .import_named_clause()

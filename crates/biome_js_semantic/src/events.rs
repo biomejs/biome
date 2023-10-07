@@ -173,16 +173,6 @@ enum BindingName {
     Value(TokenText),
 }
 
-impl BindingName {
-    /// Returns a binding with the same name, but the other kind.
-    fn dual(self) -> Self {
-        match self {
-            Self::Type(name) => Self::Value(name),
-            Self::Value(name) => Self::Type(name),
-        }
-    }
-}
-
 /// This type allows reporting a reference and bind to a binding (if any) later.
 /// The range is the range of the referenced binding.
 #[derive(Debug, Clone)]
@@ -215,6 +205,10 @@ enum Reference {
 impl Reference {
     const fn is_write(&self) -> bool {
         matches!(self, Self::Write { .. })
+    }
+
+    const fn is_export(&self) -> bool {
+        matches!(self, Self::Export { .. })
     }
 
     /// Range of the referenced binding
@@ -452,7 +446,7 @@ impl SemanticEventExtractor {
                 | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
                     let specifier =
                         AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
-                    if specifier.is_type_only() {
+                    if specifier.imports_only_types() {
                         self.push_binding(None, BindingName::Type(name), name_range);
                     } else {
                         self.push_binding(None, BindingName::Value(name.clone()), name_range);
@@ -505,7 +499,7 @@ impl SemanticEventExtractor {
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
                 if let Some(specifier) = node.parent::<AnyJsExportNamedSpecifier>() {
-                    if specifier.is_type_only() {
+                    if specifier.exports_only_types() {
                         self.push_reference(BindingName::Type(name), Reference::ExportType(range));
                     } else {
                         self.push_reference(
@@ -724,10 +718,10 @@ impl SemanticEventExtractor {
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
             } else {
-                let has_dual_binding = self.bindings.get(&name.dual()).is_some();
                 // ... or raise UnresolvedReference if this is the global scope.
+                let has_dual_binding = self.has_dual_binding(name);
                 for reference in references {
-                    if has_dual_binding && matches!(reference, Reference::Export { .. }) {
+                    if has_dual_binding && reference.is_export() {
                         // An export can export both a value and a type.
                         // If a dual binding exists, then it exports the dual binding.
                         continue;
@@ -752,6 +746,14 @@ impl SemanticEventExtractor {
             range,
             scope_id: scope.scope_id,
         });
+    }
+
+    fn has_dual_binding(&self, binding_name: BindingName) -> bool {
+        let dual_binding_name = match binding_name {
+            BindingName::Type(name) => BindingName::Value(name),
+            BindingName::Value(name) => BindingName::Type(name),
+        };
+        self.bindings.contains_key(&dual_binding_name)
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {

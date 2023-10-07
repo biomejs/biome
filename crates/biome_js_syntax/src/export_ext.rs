@@ -16,13 +16,13 @@ impl AnyJsExportNamedSpecifier {
         }
     }
 
-    // Returns the export clause that includes this specifier.
+    /// Returns the export clause that includes this specifier.
     pub fn export_named_clause(&self) -> Option<JsExportNamedClause> {
         JsExportNamedClause::cast(self.syntax().grand_parent()?)
     }
 
-    /// Returns `true` if this specifier or its export clause has a type modifier.
-    pub fn is_type_only(&self) -> bool {
+    /// Returns `true` if this specifier or its export clause has **only** a type modifier.
+    pub fn exports_only_types(&self) -> bool {
         self.type_token().is_some()
             || self
                 .export_named_clause()
