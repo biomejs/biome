@@ -2,7 +2,7 @@ use crate::{
     JsArrowFunctionExpression, JsBogusNamedImportSpecifier, JsBogusParameter, JsCatchDeclaration,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
     JsConstructorClassMember, JsConstructorParameterList, JsConstructorParameters,
-    JsDefaultImportSpecifier, JsFormalParameter, JsFunctionDeclaration,
+    JsDefaultImportSpecifier, JsExport, JsFormalParameter, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsIdentifierBinding,
     JsImportDefaultClause, JsImportNamespaceClause, JsMethodClassMember, JsMethodObjectMember,
     JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsParameterList, JsParameters,
@@ -157,6 +157,32 @@ impl AnyJsBindingDeclaration {
                 | AnyJsBindingDeclaration::JsBogusParameter(_)
                 | AnyJsBindingDeclaration::TsPropertyParameter(_)
         )
+    }
+
+    // Returns the export statement if this declaration is directly exported.
+    pub fn export(&self) -> Option<JsExport> {
+        let maybe_export = match self {
+            Self::JsVariableDeclarator(_) => self.syntax().ancestors().nth(4),
+            Self::JsFunctionDeclaration(_)
+            | Self::JsClassDeclaration(_)
+            | Self::TsTypeAliasDeclaration(_)
+            | Self::TsEnumDeclaration(_)
+            | Self::TsModuleDeclaration(_) => self.syntax().parent(),
+            Self::TsInterfaceDeclaration(_) => {
+                // interfaces can be in a default export clause
+                // `export default interface I {}`
+                self.syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find(|x| x.kind() != JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE)
+            }
+            Self::JsClassExportDefaultDeclaration(_)
+            | Self::JsFunctionExportDefaultDeclaration(_)
+            | Self::TsDeclareFunctionDeclaration(_)
+            | Self::TsDeclareFunctionExportDefaultDeclaration(_) => self.syntax().grand_parent(),
+            _ => None,
+        };
+        maybe_export.and_then(JsExport::cast)
     }
 }
 
