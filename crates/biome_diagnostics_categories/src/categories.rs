@@ -89,6 +89,7 @@ define_categories! {
     "lint/correctness/useValidForDirection": "https://biomejs.dev/linter/rules/use-valid-for-direction",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
+    "lint/nursery/noApproximativeNumericConstant": "https://biomejs.dev/lint/rules/no-approximative-numeric-constant",
     "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noEmptyCharacterClassInRegex": "https://biomejs.dev/lint/rules/no-empty-character-class-in-regex",

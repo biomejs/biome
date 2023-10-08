@@ -1005,6 +1005,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noApproximativeNumericConstant": {
+					"description": "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConfusingVoidType": {
 					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [

@@ -26,6 +26,9 @@
 	"engines": {
 		"vscode": "^1.80.0"
 	},
+	"sponsor": {
+		"url": "https://github.com/sponsors/biomejs"
+	},
 	"capabilities": {
 		"untrustedWorkspaces": {
 			"supported": "limited",
