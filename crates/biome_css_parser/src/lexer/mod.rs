@@ -404,35 +404,7 @@ impl<'src> CssLexer<'src> {
 
             DIG => self.lex_number(current),
 
-            MIN => {
-                if self.is_number_start() {
-                    return self.lex_number(current);
-                }
-
-                // GREATER-THAN SIGN (->), consume them and return a CDC.
-                if self.peek_byte() == Some(b'-') {
-                    if self.byte_at(2) == Some(b'>') {
-                        self.advance(3);
-                        return CDC;
-                    }
-
-                    // --custom-property
-                    if self.is_ident_start() {
-                        self.advance(2);
-                        self.lex_identifier();
-
-                        return CSS_CUSTOM_PROPERTY;
-                    }
-                }
-
-                // -identifier
-                if self.is_ident_start() {
-                    self.advance(1);
-                    return self.lex_identifier();
-                }
-
-                self.eat_byte(T![-])
-            }
+            MIN => self.lex_min(current),
 
             PLS => {
                 if self.is_number_start() {
@@ -450,24 +422,15 @@ impl<'src> CssLexer<'src> {
                 }
             }
 
-            LSS => {
-                // If the next 3 input code points are U+0021 EXCLAMATION MARK U+002D
-                // HYPHEN-MINUS U+002D HYPHEN-MINUS (!--), consume them and return a CDO.
-                if self.peek_byte() == Some(b'!')
-                    && self.byte_at(2) == Some(b'-')
-                    && self.byte_at(3) == Some(b'-')
-                {
-                    self.advance(4);
-                    return CDO;
-                }
-
-                self.eat_byte(T![<])
-            }
+            LSS => self.lex_lss(),
 
             IDT | UNI | BSL if self.is_ident_start() => self.lex_identifier(),
 
-            MUL => self.eat_byte(T![*]),
-            COL => self.eat_byte(T![:]),
+            IDT if self.next_byte() == Some(b'=') => self.eat_byte(T!["$="]),
+
+            MUL => self.lex_mul(),
+            CRT => self.lex_ctr(),
+            COL => self.lex_col(),
             AT_ => self.eat_byte(T![@]),
             HAS => self.eat_byte(T![#]),
             PNO => self.eat_byte(T!['(']),
@@ -478,8 +441,9 @@ impl<'src> CssLexer<'src> {
             BTC => self.eat_byte(T![']']),
             COM => self.eat_byte(T![,]),
             MOR => self.eat_byte(T![>]),
-            TLD => self.eat_byte(T![~]),
+            TLD => self.lex_tilda(),
             PIP => self.lex_pipe(),
+            EQL => self.eat_byte(T![=]),
 
             _ => self.eat_unexpected_character(),
         }
@@ -530,39 +494,7 @@ impl<'src> CssLexer<'src> {
                         }
 
                         Some(c) if c.is_ascii_hexdigit() => {
-                            // SAFETY: We know that the current byte is a hex digit.
-                            let mut hex = (c as char).to_digit(16).unwrap();
-                            self.advance(1);
-
-                            // Consume as many hex digits as possible, but no more than 5.
-                            // Note that this means 1-6 hex digits have been consumed in total.
-                            for _ in 0..5 {
-                                let Some(digit) = self.current_byte().and_then(|c| {
-                                    if c.is_ascii_hexdigit() {
-                                        (c as char).to_digit(16)
-                                    } else {
-                                        None
-                                    }
-                                }) else {
-                                    break;
-                                };
-                                self.advance(1);
-
-                                hex = hex * 16 + digit;
-                            }
-
-                            // Interpret the hex digits as a hexadecimal number. If this number is zero, or
-                            // is for a surrogate, or is greater than the maximum allowed code point, return
-                            // U+FFFD REPLACEMENT CHARACTER (�).
-                            let hex = match hex {
-                                // If this number is zero
-                                0 => REPLACEMENT_CHARACTER,
-                                // or is for a surrogate
-                                55_296..=57_343 => REPLACEMENT_CHARACTER,
-                                // or is greater than the maximum allowed code point
-                                1_114_112.. => REPLACEMENT_CHARACTER,
-                                _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
-                            };
+                            let hex = self.consume_escape_sequence(c);
 
                             if hex == REPLACEMENT_CHARACTER {
                                 state = LexStringState::InvalidEscapeSequence;
@@ -612,6 +544,46 @@ impl<'src> CssLexer<'src> {
                 ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+        }
+    }
+
+    // SAFETY: The current byte is a hex digit.
+    fn consume_escape_sequence(&mut self, current: u8) -> char {
+        let mut hex = (current as char).to_digit(16).unwrap();
+        self.advance(1);
+        // Consume as many hex digits as possible, but no more than 5.
+        // Note that this means 1-6 hex digits have been consumed in total.
+        for _ in 0..5 {
+            let Some(digit) = self.current_byte().and_then(|c| {
+                if c.is_ascii_hexdigit() {
+                    (c as char).to_digit(16)
+                } else {
+                    None
+                }
+            }) else {
+                break;
+            };
+            self.advance(1);
+
+            hex = hex * 16 + digit;
+        }
+
+        // If the next input code point is whitespace, consume it as well.
+        if matches!(self.current_byte(), Some(b'\t' | b' ')) {
+            self.advance(1);
+        }
+
+        // Interpret the hex digits as a hexadecimal number. If this number is zero, or
+        // is for a surrogate, or is greater than the maximum allowed code point, return
+        // U+FFFD REPLACEMENT CHARACTER (�).
+        match hex {
+            // If this number is zero
+            0 => REPLACEMENT_CHARACTER,
+            // or is for a surrogate
+            55_296..=57_343 => REPLACEMENT_CHARACTER,
+            // or is greater than the maximum allowed code point
+            1_114_112.. => REPLACEMENT_CHARACTER,
+            _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
         }
     }
 
@@ -683,7 +655,8 @@ impl<'src> CssLexer<'src> {
             b"and" => AND_KW,
             b"only" => ONLY_KW,
             b"or" => OR_KW,
-            b"i" => I_KW,
+            b"i" | b"I" => I_KW,
+            b"s" | b"S" => S_KW,
             b"important" => IMPORTANT_KW,
             b"from" => FROM_KW,
             b"to" => TO_KW,
@@ -699,50 +672,96 @@ impl<'src> CssLexer<'src> {
         let mut idx = 0;
         let mut is_first = true;
         // Repeatedly consume the next input code point from the stream.
-        loop {
-            let Some(current) = self.current_byte() else {
-                break;
-            };
+        while let Some(current) = self.current_byte() {
+            if let Some(part) = self.consume_ident_part(current, is_first) {
+                is_first = false;
 
-            let dispatched = lookup_byte(current);
-
-            let chr = match dispatched {
-                // name code point
-                UNI | IDT => {
-                    // SAFETY: We know that the current byte is a valid unicode code point
-                    let chr = self.current_char_unchecked();
-                    let is_id = if is_first {
-                        is_first = false;
-                        is_id_start(chr)
-                    } else {
-                        is_id_continue(chr)
-                    };
-
-                    if is_id {
-                        chr
-                    } else {
-                        break;
-                    }
+                if let Some(buf) = buf.get_mut(idx..idx + 4) {
+                    let res = part.encode_utf8(buf);
+                    idx += res.len();
                 }
-                // SAFETY: We know that the current byte is a number and we can use cast.
-                DIG | ZER if !is_first => current as char,
-                // U+005C REVERSE SOLIDUS (\)
-                // If the first and second code points are a valid escape, continue consume.
-                // Otherwise, break.
-                BSL if self.is_valid_escape_at(1) => '\\',
-                _ => break,
-            };
-
-            let len = chr.len_utf8();
-            self.advance(len);
-
-            if let Some(buf) = buf.get_mut(idx..idx + 4) {
-                let res = chr.encode_utf8(buf);
-                idx += res.len();
+            } else {
+                break;
             }
         }
 
         idx
+    }
+
+    fn consume_ident_part(&mut self, current: u8, is_first: bool) -> Option<char> {
+        let dispatched = lookup_byte(current);
+
+        let chr = match dispatched {
+            MIN => {
+                self.advance(1);
+                '-'
+            }
+            // name code point
+            UNI | IDT => {
+                // SAFETY: We know that the current byte is a valid unicode code point
+                let chr = self.current_char_unchecked();
+                let is_id = if is_first {
+                    is_id_start(chr)
+                } else {
+                    is_id_continue(chr)
+                };
+
+                if is_id {
+                    self.advance(chr.len_utf8());
+                    chr
+                } else {
+                    return None;
+                }
+            }
+            // SAFETY: We know that the current byte is a number and we can use cast.
+            DIG | ZER if !is_first => {
+                self.advance(1);
+                current as char
+            }
+            // U+005C REVERSE SOLIDUS (\)
+            // If the first and second code points are a valid escape, continue consume.
+            // Otherwise, break.
+            // BSL if self.is_valid_escape_at(1) => '\\',
+            BSL if self.is_valid_escape_at(1) => {
+                let escape_start = self.text_position();
+                self.advance(1);
+
+                match self.current_byte() {
+                    Some(c) if c.is_ascii_hexdigit() => {
+                        let hex = self.consume_escape_sequence(c);
+
+                        if hex == REPLACEMENT_CHARACTER {
+                            let diagnostic = ParseDiagnostic::new(
+                                "Invalid escape sequence",
+                                escape_start..self.text_position(),
+                            );
+                            self.diagnostics.push(diagnostic);
+                        }
+
+                        hex
+                    }
+
+                    Some(_) => {
+                        let chr = self.current_char_unchecked();
+                        self.advance(chr.len_utf8());
+                        chr
+                    }
+
+                    None => {
+                        let diagnostic = ParseDiagnostic::new(
+                            "Invalid escape sequence",
+                            escape_start..self.text_position(),
+                        );
+                        self.diagnostics.push(diagnostic);
+
+                        return None;
+                    }
+                }
+            }
+            _ => return None,
+        };
+
+        Some(chr)
     }
 
     /// Lexes a comment.
@@ -810,8 +829,85 @@ impl<'src> CssLexer<'src> {
     fn lex_pipe(&mut self) -> CssSyntaxKind {
         match self.next_byte() {
             Some(b'|') => self.eat_byte(T![||]),
+            Some(b'=') => self.eat_byte(T![|=]),
             _ => T![|],
         }
+    }
+
+    #[inline]
+    fn lex_tilda(&mut self) -> CssSyntaxKind {
+        match self.next_byte() {
+            Some(b'=') => self.eat_byte(T![~=]),
+            _ => T![~],
+        }
+    }
+
+    #[inline]
+    fn lex_col(&mut self) -> CssSyntaxKind {
+        match self.next_byte() {
+            Some(b':') => self.eat_byte(T![::]),
+            _ => T![:],
+        }
+    }
+
+    #[inline]
+    fn lex_mul(&mut self) -> CssSyntaxKind {
+        match self.next_byte() {
+            Some(b'=') => self.eat_byte(T![*=]),
+            _ => T![*],
+        }
+    }
+
+    #[inline]
+    fn lex_ctr(&mut self) -> CssSyntaxKind {
+        match self.next_byte() {
+            Some(b'=') => self.eat_byte(T![^=]),
+            _ => T![^],
+        }
+    }
+
+    #[inline]
+    fn lex_lss(&mut self) -> CssSyntaxKind {
+        // If the next 3 input code points are U+0021 EXCLAMATION MARK U+002D
+        // HYPHEN-MINUS U+002D HYPHEN-MINUS (!--), consume them and return a CDO.
+        if self.peek_byte() == Some(b'!')
+            && self.byte_at(2) == Some(b'-')
+            && self.byte_at(3) == Some(b'-')
+        {
+            self.advance(4);
+            return CDO;
+        }
+
+        self.eat_byte(T![<])
+    }
+
+    #[inline]
+    fn lex_min(&mut self, current: u8) -> CssSyntaxKind {
+        if self.is_number_start() {
+            return self.lex_number(current);
+        }
+
+        // GREATER-THAN SIGN (->), consume them and return a CDC.
+        if self.peek_byte() == Some(b'-') {
+            if self.byte_at(2) == Some(b'>') {
+                self.advance(3);
+                return CDC;
+            }
+
+            // --custom-property
+            if self.is_ident_start() {
+                self.advance(2);
+                return self.lex_identifier();
+            }
+        }
+
+        // -identifier
+        if self.is_ident_start() {
+            self.advance(1);
+            return self.lex_identifier();
+        }
+
+        self.eat_byte(T![-])
     }
 
     #[inline]

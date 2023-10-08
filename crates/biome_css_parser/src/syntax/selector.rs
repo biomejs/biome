@@ -1,7 +1,11 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expect_any_selector, expected_identifier};
-use crate::syntax::{is_at_identifier, parse_error, parse_identifier};
+use crate::syntax::parse_error::{
+    expect_any_attribute_matcher_name, expect_any_selector, expected_identifier,
+};
+use crate::syntax::{
+    is_at_identifier, parse_css_string, parse_error, parse_identifier, parse_regular_identifier,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -23,11 +27,11 @@ pub(crate) fn try_parse_complex_selector(p: &mut CssParser, left: CompletedMarke
 
     loop {
         progress.assert_progressing(p);
-        let combinator = p.cur();
 
-        if is_complex_selector_combinator(combinator) {
+        if is_at_complex_selector_combinator(p) {
             let complex_selector = left.precede(p);
-            p.expect(combinator);
+            // bump combinator
+            p.bump(p.cur());
             parse_compound_selector(p).or_add_diagnostic(p, expect_any_selector);
             left = complex_selector.complete(p, CSS_COMPLEX_SELECTOR)
         } else {
@@ -38,35 +42,43 @@ pub(crate) fn try_parse_complex_selector(p: &mut CssParser, left: CompletedMarke
 
 const COMBINATOR_SET: TokenSet<CssSyntaxKind> =
     token_set![T![>], T![+], T![~], T![||], CSS_SPACE_LITERAL];
-pub(crate) fn is_complex_selector_combinator(kind: CssSyntaxKind) -> bool {
-    COMBINATOR_SET.contains(kind)
+pub(crate) fn is_at_complex_selector_combinator(p: &mut CssParser) -> bool {
+    p.at_ts(COMBINATOR_SET)
 }
 #[inline]
 pub(crate) fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
-
-    let nesting_selector = p.eat(T![&]);
-
-    let simple_selector = parse_simple_selector(p);
-
-    if p.at_ts(CssSubSelectorList::START_SET) || nesting_selector || simple_selector.is_present() {
-        CssSubSelectorList.parse_list(p);
-    } else {
-        // If we don't have any selectors, we can't have a compound selector
-        m.abandon(p);
+    if !is_at_compound_selector(p) {
         return Absent;
     }
+
+    let m = p.start();
+
+    p.eat(T![&]);
+    parse_simple_selector(p).ok();
+    CssSubSelectorList.parse_list(p);
 
     Present(m.complete(p, CSS_COMPOUND_SELECTOR))
 }
 
+pub(crate) fn is_at_compound_selector(p: &mut CssParser) -> bool {
+    p.at(T![&]) || is_at_simple_selector(p) || p.at_ts(CssSubSelectorList::START_SET)
+}
+
 #[inline]
 pub(crate) fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_simple_selector(p) {
+        return Absent;
+    }
+
     match p.cur() {
         T![*] => parse_universal_selector(p),
         _ if is_at_identifier(p) => parse_type_selector(p),
         _ => Absent,
     }
+}
+
+pub(crate) fn is_at_simple_selector(p: &mut CssParser) -> bool {
+    p.at(T![*]) || is_at_identifier(p)
 }
 
 struct CssSubSelectorList;
@@ -101,6 +113,7 @@ pub(crate) fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
         T![.] => parse_class_selector(p),
         T![#] => parse_id_selector(p),
+        T!['['] => parse_attribute_selector(p),
         _ => Absent,
     }
 }
@@ -110,10 +123,10 @@ pub(crate) fn parse_class_selector(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![.]) {
         return Absent;
     }
+
     let m = p.start();
 
     p.bump(T![.]);
-
     parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_CLASS_SELECTOR))
@@ -124,10 +137,10 @@ pub(crate) fn parse_id_selector(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![#]) {
         return Absent;
     }
+
     let m = p.start();
 
     p.bump(T![#]);
-
     parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_ID_SELECTOR))
@@ -138,10 +151,11 @@ pub(crate) fn parse_universal_selector(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![*]) {
         return Absent;
     }
-    let m = p.start();
-    let context = selector_lex_context(p);
 
-    p.do_bump_with_context(T![*], context);
+    let m = p.start();
+
+    let context = selector_lex_context(p);
+    p.eat_with_context(T![*], context);
 
     Present(m.complete(p, CSS_UNIVERSAL_SELECTOR))
 }
@@ -151,16 +165,15 @@ pub(crate) fn parse_type_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
+
     let m = p.start();
-
     parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
-
     Present(m.complete(p, CSS_TYPE_SELECTOR))
 }
 
 pub(crate) fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
-    parse_identifier(p, CSS_IDENTIFIER, context)
+    parse_identifier(p, context)
 }
 
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> = COMBINATOR_SET.union(token_set![T!['{'], T![,]]);
@@ -170,4 +183,65 @@ pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     } else {
         CssLexContext::Selector
     }
+}
+
+pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T!['[']) {
+        return Absent;
+    }
+    let m = p.start();
+
+    p.bump(T!['[']);
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_attribute_matcher(p).ok();
+
+    let context = selector_lex_context(p);
+    p.expect_with_context(T![']'], context);
+
+    Present(m.complete(p, CSS_ATTRIBUTE_SELECTOR))
+}
+
+pub(crate) fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_matcher(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    // bump attribute matcher type
+    p.bump(p.cur());
+    parse_attribute_matcher_value(p).or_add_diagnostic(p, expect_any_attribute_matcher_name);
+
+    let modifier = p.cur();
+    if modifier.is_attribute_modifier_keyword() {
+        p.bump(modifier);
+    }
+
+    Present(m.complete(p, CSS_ATTRIBUTE_MATCHER))
+}
+
+pub(crate) fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_matcher_value(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.at(CSS_STRING_LITERAL) {
+        parse_css_string(p).ok();
+    } else {
+        parse_regular_identifier(p).ok();
+    }
+
+    Present(m.complete(p, CSS_ATTRIBUTE_MATCHER_VALUE))
+}
+
+pub(crate) fn is_at_attribute_matcher_value(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || p.at(CSS_STRING_LITERAL)
+}
+
+const ATTRIBUTE_MATCHER_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![~=], T![|=], T![^=], T!["$="], T![*=], T![=]];
+pub(crate) fn is_at_attribute_matcher(p: &mut CssParser) -> bool {
+    p.at_ts(ATTRIBUTE_MATCHER_SET)
 }

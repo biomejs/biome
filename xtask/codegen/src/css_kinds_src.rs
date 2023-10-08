@@ -193,6 +193,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "only",
         "or",
         "i",
+        "s",
         "important",
         "from",
         "to",
@@ -265,9 +266,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_SELECTOR",
         "CSS_ATTRIBUTE",
         "CSS_ATTRIBUTE_MATCHER",
-        "CSS_ATTRIBUTE_META",
-        "CSS_ATTRIBUTE_MODIFIER",
-        "CSS_ATTRIBUTE_NAME",
+        "CSS_ATTRIBUTE_MATCHER_VALUE",
         // Bogs nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BODY",

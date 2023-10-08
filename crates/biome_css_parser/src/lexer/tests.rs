@@ -331,17 +331,17 @@ fn identifier() {
 
     assert_lex! {
         "--property",
-        CSS_CUSTOM_PROPERTY:10
+        IDENT:10
     }
 
     assert_lex! {
         r"--prop\eerty",
-        CSS_CUSTOM_PROPERTY:12
+        IDENT:12
     }
 
     assert_lex! {
         r"--\pprop\eerty",
-        CSS_CUSTOM_PROPERTY:14
+        IDENT:14
     }
 }
 

@@ -224,120 +224,78 @@ pub fn css_at_media_query_range(
         ],
     ))
 }
-pub fn css_attribute(
-    l_brack_token: SyntaxToken,
-    attribute_name: CssAttributeName,
-    r_brack_token: SyntaxToken,
-) -> CssAttributeBuilder {
-    CssAttributeBuilder {
-        l_brack_token,
-        attribute_name,
-        r_brack_token,
-        attribute_meta: None,
+pub fn css_attribute_matcher(
+    operator_token: SyntaxToken,
+    value: CssAttributeMatcherValue,
+) -> CssAttributeMatcherBuilder {
+    CssAttributeMatcherBuilder {
+        operator_token,
+        value,
+        modifier_token: None,
     }
 }
-pub struct CssAttributeBuilder {
-    l_brack_token: SyntaxToken,
-    attribute_name: CssAttributeName,
-    r_brack_token: SyntaxToken,
-    attribute_meta: Option<CssAttributeMeta>,
+pub struct CssAttributeMatcherBuilder {
+    operator_token: SyntaxToken,
+    value: CssAttributeMatcherValue,
+    modifier_token: Option<SyntaxToken>,
 }
-impl CssAttributeBuilder {
-    pub fn with_attribute_meta(mut self, attribute_meta: CssAttributeMeta) -> Self {
-        self.attribute_meta = Some(attribute_meta);
+impl CssAttributeMatcherBuilder {
+    pub fn with_modifier_token(mut self, modifier_token: SyntaxToken) -> Self {
+        self.modifier_token = Some(modifier_token);
         self
     }
-    pub fn build(self) -> CssAttribute {
-        CssAttribute::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_ATTRIBUTE,
+    pub fn build(self) -> CssAttributeMatcher {
+        CssAttributeMatcher::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ATTRIBUTE_MATCHER,
+            [
+                Some(SyntaxElement::Token(self.operator_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.modifier_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn css_attribute_matcher_value(name: AnyCssAttributeMatcherValue) -> CssAttributeMatcherValue {
+    CssAttributeMatcherValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ATTRIBUTE_MATCHER_VALUE,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_attribute_selector(
+    l_brack_token: SyntaxToken,
+    name: CssIdentifier,
+    r_brack_token: SyntaxToken,
+) -> CssAttributeSelectorBuilder {
+    CssAttributeSelectorBuilder {
+        l_brack_token,
+        name,
+        r_brack_token,
+        matcher: None,
+    }
+}
+pub struct CssAttributeSelectorBuilder {
+    l_brack_token: SyntaxToken,
+    name: CssIdentifier,
+    r_brack_token: SyntaxToken,
+    matcher: Option<CssAttributeMatcher>,
+}
+impl CssAttributeSelectorBuilder {
+    pub fn with_matcher(mut self, matcher: CssAttributeMatcher) -> Self {
+        self.matcher = Some(matcher);
+        self
+    }
+    pub fn build(self) -> CssAttributeSelector {
+        CssAttributeSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR,
             [
                 Some(SyntaxElement::Token(self.l_brack_token)),
-                Some(SyntaxElement::Node(self.attribute_name.into_syntax())),
-                self.attribute_meta
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.matcher
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.r_brack_token)),
             ],
         ))
     }
-}
-pub fn css_attribute_matcher(
-    matcher_type_token: SyntaxToken,
-    exactly_or_hyphen_token: SyntaxToken,
-    prefix_token: SyntaxToken,
-    suffix_token: SyntaxToken,
-    times_assign_token: SyntaxToken,
-    eq_token: SyntaxToken,
-    matcher_name: CssString,
-    css_identifier: CssIdentifier,
-) -> CssAttributeMatcher {
-    CssAttributeMatcher::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_MATCHER,
-        [
-            Some(SyntaxElement::Token(matcher_type_token)),
-            Some(SyntaxElement::Token(exactly_or_hyphen_token)),
-            Some(SyntaxElement::Token(prefix_token)),
-            Some(SyntaxElement::Token(suffix_token)),
-            Some(SyntaxElement::Token(times_assign_token)),
-            Some(SyntaxElement::Token(eq_token)),
-            Some(SyntaxElement::Node(matcher_name.into_syntax())),
-            Some(SyntaxElement::Node(css_identifier.into_syntax())),
-        ],
-    ))
-}
-pub fn css_attribute_meta() -> CssAttributeMetaBuilder {
-    CssAttributeMetaBuilder {
-        attribute_matcher: None,
-        attribute_modifier: None,
-    }
-}
-pub struct CssAttributeMetaBuilder {
-    attribute_matcher: Option<CssAttributeMatcher>,
-    attribute_modifier: Option<CssAttributeModifier>,
-}
-impl CssAttributeMetaBuilder {
-    pub fn with_attribute_matcher(mut self, attribute_matcher: CssAttributeMatcher) -> Self {
-        self.attribute_matcher = Some(attribute_matcher);
-        self
-    }
-    pub fn with_attribute_modifier(mut self, attribute_modifier: CssAttributeModifier) -> Self {
-        self.attribute_modifier = Some(attribute_modifier);
-        self
-    }
-    pub fn build(self) -> CssAttributeMeta {
-        CssAttributeMeta::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_ATTRIBUTE_META,
-            [
-                self.attribute_matcher
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.attribute_modifier
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn css_attribute_modifier(i_token: SyntaxToken) -> CssAttributeModifier {
-    CssAttributeModifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_MODIFIER,
-        [Some(SyntaxElement::Token(i_token))],
-    ))
-}
-pub fn css_attribute_name(css_string: CssString) -> CssAttributeName {
-    CssAttributeName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_NAME,
-        [Some(SyntaxElement::Node(css_string.into_syntax()))],
-    ))
-}
-pub fn css_attribute_selector(
-    name: CssIdentifier,
-    attribute_list: CssAttributeList,
-) -> CssAttributeSelector {
-    CssAttributeSelector::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(attribute_list.into_syntax())),
-        ],
-    ))
 }
 pub fn css_block(
     l_curly_token: SyntaxToken,
@@ -739,18 +697,6 @@ where
                 Some(separators.next()?.into())
             }
         }),
-    ))
-}
-pub fn css_attribute_list<I>(items: I) -> CssAttributeList
-where
-    I: IntoIterator<Item = CssAttribute>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssAttributeList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ATTRIBUTE_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList

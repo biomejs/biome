@@ -40,6 +40,10 @@ expression: snapshot
 
 }
 
+[lang|="zh"] ~ [lang|="zh"] > [lang|="zh"] {
+
+}
+
 ```
 
 
@@ -550,16 +554,97 @@ CssRoot {
                 r_curly_token: R_CURLY@246..249 "}" [Newline("\n"), Newline("\n")] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssComplexSelector {
+                        left: CssCompoundSelector {
+                            nesting_selector_token: missing (optional),
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssAttributeSelector {
+                                    l_brack_token: L_BRACK@249..252 "[" [Newline("\n"), Newline("\n")] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@252..256 "lang" [] [],
+                                    },
+                                    matcher: CssAttributeMatcher {
+                                        operator: PIPEEQ@256..258 "|=" [] [],
+                                        value: CssAttributeMatcherValue {
+                                            name: CssString {
+                                                value_token: CSS_STRING_LITERAL@258..262 "\"zh\"" [] [],
+                                            },
+                                        },
+                                        modifier: missing (optional),
+                                    },
+                                    r_brack_token: R_BRACK@262..264 "]" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        combinator: TILDE@264..266 "~" [] [Whitespace(" ")],
+                        right: CssCompoundSelector {
+                            nesting_selector_token: missing (optional),
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssAttributeSelector {
+                                    l_brack_token: L_BRACK@266..267 "[" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@267..271 "lang" [] [],
+                                    },
+                                    matcher: CssAttributeMatcher {
+                                        operator: PIPEEQ@271..273 "|=" [] [],
+                                        value: CssAttributeMatcherValue {
+                                            name: CssString {
+                                                value_token: CSS_STRING_LITERAL@273..277 "\"zh\"" [] [],
+                                            },
+                                        },
+                                        modifier: missing (optional),
+                                    },
+                                    r_brack_token: R_BRACK@277..279 "]" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    },
+                    combinator: R_ANGLE@279..281 ">" [] [Whitespace(" ")],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssAttributeSelector {
+                                l_brack_token: L_BRACK@281..282 "[" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@282..286 "lang" [] [],
+                                },
+                                matcher: CssAttributeMatcher {
+                                    operator: PIPEEQ@286..288 "|=" [] [],
+                                    value: CssAttributeMatcherValue {
+                                        name: CssString {
+                                            value_token: CSS_STRING_LITERAL@288..292 "\"zh\"" [] [],
+                                        },
+                                    },
+                                    modifier: missing (optional),
+                                },
+                                r_brack_token: R_BRACK@292..294 "]" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@294..295 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@295..298 "}" [Newline("\n"), Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@249..250 "" [Newline("\n")] [],
+    eof_token: EOF@298..299 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..250
-  0: CSS_RULE_LIST@0..249
+0: CSS_ROOT@0..299
+  0: CSS_RULE_LIST@0..298
     0: CSS_RULE@0..14
       0: CSS_SELECTOR_LIST@0..12
         0: CSS_COMPLEX_SELECTOR@0..12
@@ -894,7 +979,62 @@ CssRoot {
         0: L_CURLY@245..246 "{" [] []
         1: CSS_DECLARATION_LIST@246..246
         2: R_CURLY@246..249 "}" [Newline("\n"), Newline("\n")] []
-  1: EOF@249..250 "" [Newline("\n")] []
+    11: CSS_RULE@249..298
+      0: CSS_SELECTOR_LIST@249..294
+        0: CSS_COMPLEX_SELECTOR@249..294
+          0: CSS_COMPLEX_SELECTOR@249..279
+            0: CSS_COMPOUND_SELECTOR@249..264
+              0: (empty)
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@249..264
+                0: CSS_ATTRIBUTE_SELECTOR@249..264
+                  0: L_BRACK@249..252 "[" [Newline("\n"), Newline("\n")] []
+                  1: CSS_IDENTIFIER@252..256
+                    0: IDENT@252..256 "lang" [] []
+                  2: CSS_ATTRIBUTE_MATCHER@256..262
+                    0: PIPEEQ@256..258 "|=" [] []
+                    1: CSS_ATTRIBUTE_MATCHER_VALUE@258..262
+                      0: CSS_STRING@258..262
+                        0: CSS_STRING_LITERAL@258..262 "\"zh\"" [] []
+                    2: (empty)
+                  3: R_BRACK@262..264 "]" [] [Whitespace(" ")]
+            1: TILDE@264..266 "~" [] [Whitespace(" ")]
+            2: CSS_COMPOUND_SELECTOR@266..279
+              0: (empty)
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@266..279
+                0: CSS_ATTRIBUTE_SELECTOR@266..279
+                  0: L_BRACK@266..267 "[" [] []
+                  1: CSS_IDENTIFIER@267..271
+                    0: IDENT@267..271 "lang" [] []
+                  2: CSS_ATTRIBUTE_MATCHER@271..277
+                    0: PIPEEQ@271..273 "|=" [] []
+                    1: CSS_ATTRIBUTE_MATCHER_VALUE@273..277
+                      0: CSS_STRING@273..277
+                        0: CSS_STRING_LITERAL@273..277 "\"zh\"" [] []
+                    2: (empty)
+                  3: R_BRACK@277..279 "]" [] [Whitespace(" ")]
+          1: R_ANGLE@279..281 ">" [] [Whitespace(" ")]
+          2: CSS_COMPOUND_SELECTOR@281..294
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@281..294
+              0: CSS_ATTRIBUTE_SELECTOR@281..294
+                0: L_BRACK@281..282 "[" [] []
+                1: CSS_IDENTIFIER@282..286
+                  0: IDENT@282..286 "lang" [] []
+                2: CSS_ATTRIBUTE_MATCHER@286..292
+                  0: PIPEEQ@286..288 "|=" [] []
+                  1: CSS_ATTRIBUTE_MATCHER_VALUE@288..292
+                    0: CSS_STRING@288..292
+                      0: CSS_STRING_LITERAL@288..292 "\"zh\"" [] []
+                  2: (empty)
+                3: R_BRACK@292..294 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@294..298
+        0: L_CURLY@294..295 "{" [] []
+        1: CSS_DECLARATION_LIST@295..295
+        2: R_CURLY@295..298 "}" [Newline("\n"), Newline("\n")] []
+  1: EOF@298..299 "" [Newline("\n")] []
 
 ```
 
