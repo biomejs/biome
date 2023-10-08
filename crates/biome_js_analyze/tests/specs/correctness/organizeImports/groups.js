@@ -6,3 +6,6 @@ import assert from "node:assert";
 import aunt from "../aunt";
 import { VERSION } from "https://deno.land/std/version.ts";
 import { mock, test } from "node:test";
+import { expect } from "bun:test";
+import { internal } from "#internal";
+import { secret } from "/absolute/path";
