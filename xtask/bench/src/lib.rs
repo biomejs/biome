@@ -104,7 +104,7 @@ pub fn run(args: RunArgs) {
         all_suites.insert("js", include_str!("libs-js.txt"));
         all_suites.insert("ts", include_str!("libs-ts.txt"));
         all_suites.insert("json", include_str!("libs-json.txt"));
-        all_suites.insert("css", include_str!("libs-css.txt"));
+        // all_suites.insert("css", include_str!("libs-css.txt"));
     }
 
     let mut libs = vec![];
