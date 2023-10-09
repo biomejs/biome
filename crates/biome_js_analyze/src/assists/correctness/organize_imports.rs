@@ -1,10 +1,4 @@
-use std::{
-    cell::Cell,
-    cmp::Ordering,
-    collections::{btree_map::Entry, BTreeMap},
-    iter,
-    mem::take,
-};
+use std::{cell::Cell, cmp::Ordering, collections::BTreeMap, iter, mem::take};
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
@@ -63,31 +57,24 @@ impl Rule for OrganizeImports {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let root = ctx.query();
-
         let mut groups = Vec::new();
-
         let mut first_node = None;
         let mut nodes = BTreeMap::new();
 
         for item in root.items() {
-            let import = match item {
-                AnyJsModuleItem::JsImport(import) => import,
-                AnyJsModuleItem::AnyJsStatement(_) | AnyJsModuleItem::JsExport(_) => {
-                    // If we have pending nodes and encounter a non-import node, append the nodes to a new group
-                    if let Some(first_node) = first_node.take() {
-                        groups.push(ImportGroup {
-                            first_node,
-                            nodes: take(&mut nodes),
-                        });
-                    }
-                    continue;
+            let AnyJsModuleItem::JsImport(import) = item else {
+                // If we have pending nodes and encounter a non-import node, append the nodes to a new group
+                if let Some(first_node) = first_node.take() {
+                    groups.push(ImportGroup {
+                        first_node,
+                        nodes: take(&mut nodes),
+                    });
                 }
+                continue;
             };
 
-            let first_token = import.import_token().ok()?;
-
             // If this is not the first import in the group, check for a group break
-            if has_empty_line(&first_token.leading_trivia()) {
+            if has_empty_line(&import.import_token().ok()?.leading_trivia()) {
                 if let Some(first_node) = first_node.take() {
                     groups.push(ImportGroup {
                         first_node,
@@ -96,28 +83,16 @@ impl Rule for OrganizeImports {
                 }
             }
 
-            let source = match import.import_clause().ok()? {
-                AnyJsImportClause::JsImportBareClause(clause) => clause.source().ok()?,
-                AnyJsImportClause::JsImportDefaultClause(clause) => clause.source().ok()?,
-                AnyJsImportClause::JsImportNamedClause(clause) => clause.source().ok()?,
-                AnyJsImportClause::JsImportNamespaceClause(clause) => clause.source().ok()?,
-            };
-
             // If this is the first import in the group save the leading trivia
             // and slot index
             if first_node.is_none() {
                 first_node = Some(import.clone());
             }
 
-            let key = source.inner_string_text().ok()?;
-            match nodes.entry(ImportKey(key)) {
-                Entry::Vacant(entry) => {
-                    entry.insert(vec![ImportNode::from(import)]);
-                }
-                Entry::Occupied(mut entry) => {
-                    entry.get_mut().push(ImportNode::from(import));
-                }
-            }
+            nodes
+                .entry(ImportKey(import.source_text().ok()?))
+                .or_default()
+                .push(ImportNode::from(import));
         }
 
         // Flush the remaining nodes
@@ -287,36 +262,21 @@ struct ImportGroup {
 impl ImportGroup {
     /// Returns true if the nodes in the group are already sorted in the file
     fn is_sorted(&self) -> bool {
-        // The imports are sorted if the start of each node in the `BTreeMap`
-        // (sorted in natural order) is higher or equal to the previous item in
+        // The imports are sorted if the text position of each node in the `BTreeMap`
+        // (sorted in natural order) is higher than the previous item in
         // the sequence
         let mut iter = self.nodes.values().flat_map(|nodes| nodes.iter());
-
         let Some(import_node) = iter.next() else {
             return true;
         };
-
-        if !import_node.is_sorted() {
-            return false;
-        }
-
-        let mut last = import_node.node.syntax().text_range().start();
-        iter.all(|import_node| {
-            let start = import_node.node.syntax().text_range().start();
-            if start < last {
-                return false;
-            }
-
-            // Only return false if the node has been fully inspected and was
-            // found to be unsorted, but continue visiting the remaining
-            // imports if the node was sorted or contained syntax errors
-            if !import_node.is_sorted() {
-                return false;
-            }
-
-            last = start;
-            true
-        })
+        let mut previous_start = import_node.node.syntax().text_range().end();
+        import_node.is_sorted()
+            && iter.all(|import_node| {
+                let start = import_node.node.syntax().text_range().end();
+                let is_sorted = previous_start < start && import_node.is_sorted();
+                previous_start = start;
+                is_sorted
+            })
     }
 }
 
@@ -337,11 +297,8 @@ impl From<JsImport> for ImportNode {
 
         let mut separator_count = 0;
         let specifiers = import_clause.and_then(|import_clause| {
-            let import_named_clause = match import_clause {
-                AnyJsImportClause::JsImportBareClause(_)
-                | AnyJsImportClause::JsImportDefaultClause(_)
-                | AnyJsImportClause::JsImportNamespaceClause(_) => return None,
-                AnyJsImportClause::JsImportNamedClause(import_clause) => import_clause,
+            let AnyJsImportClause::JsImportNamedClause(import_named_clause) = import_clause else {
+                return None;
             };
 
             let named_import = import_named_clause.named_import().ok()?;
@@ -354,7 +311,7 @@ impl From<JsImport> for ImportNode {
 
             for element in named_import_specifiers.specifiers().elements() {
                 let node = element.node.ok()?;
-                let key = import_specifier_name(&node)?;
+                let key = node.local_name()?.token_text_trimmed();
 
                 let trailing_separator = element.trailing_separator.ok()?;
                 separator_count += usize::from(trailing_separator.is_some());
@@ -380,18 +337,11 @@ impl ImportNode {
             .specifiers
             .values()
             .map(|(node, _)| node.syntax().text_range().start());
-
-        let Some(mut last) = iter.next() else {
-            return true;
-        };
-
-        iter.all(|value| {
-            if value < last {
-                return false;
-            }
-
-            last = value;
-            true
+        let mut previous_start = iter.next().unwrap_or_default();
+        iter.all(|start| {
+            let is_sorted = previous_start < start;
+            previous_start = start;
+            is_sorted
         })
     }
 
@@ -400,20 +350,14 @@ impl ImportNode {
         let import = self.node.clone().detach();
 
         let import_clause = import.import_clause();
-        let import_named_clause =
-            if let Ok(AnyJsImportClause::JsImportNamedClause(node)) = import_clause {
-                node
-            } else {
-                return import;
-            };
+        let Ok(AnyJsImportClause::JsImportNamedClause(import_named_clause)) = import_clause else {
+            return import;
+        };
 
         let named_import = import_named_clause.named_import();
-        let old_specifiers =
-            if let Ok(AnyJsNamedImport::JsNamedImportSpecifiers(node)) = named_import {
-                node
-            } else {
-                return import;
-            };
+        let Ok(AnyJsNamedImport::JsNamedImportSpecifiers(old_specifiers)) = named_import else {
+            return import;
+        };
 
         let element_count = self.specifiers.len();
         let last_element = element_count.saturating_sub(1);
@@ -428,9 +372,8 @@ impl ImportNode {
                 let is_last = index == last_element;
 
                 let mut node = node.clone().detach();
-                let prev_token = match node.syntax().last_token() {
-                    Some(last_token) => last_token,
-                    None => return node,
+                let Some(prev_token) = node.syntax().last_token() else {
+                    return node;
                 };
 
                 if let Some(sep) = sep {
@@ -546,29 +489,6 @@ impl ImportNode {
     }
 }
 
-/// Return the name associated with a given named import specifier
-///
-/// Currently named import specifiers are sorted using their import name,
-/// not the local name they get imported as
-fn import_specifier_name(import_specifier: &AnyJsNamedImportSpecifier) -> Option<TokenText> {
-    let token = match import_specifier {
-        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(import_specifier) => {
-            import_specifier.name().ok()?.value().ok()?
-        }
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(import_specifier) => {
-            import_specifier
-                .local_name()
-                .ok()?
-                .as_js_identifier_binding()?
-                .name_token()
-                .ok()?
-        }
-        AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => return None,
-    };
-
-    Some(token.token_text_trimmed())
-}
-
 /// Return a clone of `prev_token` with a newline trivia piece prepended to its
 /// leading trivia if it didn't have one already. This function will try to copy
 /// the newline trivia piece from the leading trivia of `newline_source` if its set
@@ -681,13 +601,50 @@ enum ImportCategory {
     /// may (incorrectly) include source imports through custom import mappings
     /// as well.
     Library,
-    /// Relative file imports.
     Relative,
     /// Any unrecognized protocols are grouped here. These may include custom
     /// protocols such as supported by bundlers.
     Other,
 }
 
+impl From<&str> for ImportCategory {
+    fn from(value: &str) -> Self {
+        if value.starts_with('.') {
+            Self::Relative
+        } else if let Some((protocol, _)) = value.split_once(':') {
+            match protocol {
+                "http" | "https" => Self::Url,
+                "node" => Self::NodeBuiltin,
+                "npm" => Self::Npm,
+                _ => Self::Other,
+            }
+        } else if NODE_BUILTINS.binary_search(&value).is_ok() {
+            Self::NodeBuiltin
+        } else {
+            Self::Library
+        }
+    }
+}
+
+/// Returns true is this trivia piece is "ASCII whitespace" (newline or whitespace)
+fn is_ascii_whitespace(piece: &SyntaxTriviaPiece<JsLanguage>) -> bool {
+    piece.is_newline() || piece.is_whitespace()
+}
+
+/// Returns true if the provided trivia contains an empty line (two consecutive newline pieces, ignoring whitespace)
+fn has_empty_line(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
+    let mut was_newline = false;
+    trivia
+        .pieces()
+        .filter(|piece| !piece.is_whitespace())
+        .any(|piece| {
+            let prev_newline = was_newline;
+            was_newline = piece.is_newline();
+            prev_newline && was_newline
+        })
+}
+
+/// Sorted array of Node builtin
 const NODE_BUILTINS: &[&str] = &[
     "assert",
     "buffer",
@@ -723,38 +680,9 @@ const NODE_BUILTINS: &[&str] = &[
     "zlib",
 ];
 
-impl From<&str> for ImportCategory {
-    fn from(value: &str) -> Self {
-        if value.starts_with("node:") || NODE_BUILTINS.contains(&value) {
-            Self::NodeBuiltin
-        } else if value.starts_with("npm:") {
-            Self::Npm
-        } else if value.starts_with("http:") || value.starts_with("https:") {
-            Self::Url
-        } else if value.starts_with('.') {
-            Self::Relative
-        } else if !value.contains(':') {
-            Self::Library
-        } else {
-            Self::Other
-        }
+#[test]
+fn test_order() {
+    for items in NODE_BUILTINS.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
-}
-
-/// Returns true is this trivia piece is "ASCII whitespace" (newline or whitespace)
-fn is_ascii_whitespace(piece: &SyntaxTriviaPiece<JsLanguage>) -> bool {
-    piece.is_newline() || piece.is_whitespace()
-}
-
-/// Returns true if the provided trivia contains an empty line (two consecutive newline pieces, ignoring whitespace)
-fn has_empty_line(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
-    let mut was_newline = false;
-    trivia
-        .pieces()
-        .filter(|piece| !piece.is_whitespace())
-        .any(|piece| {
-            let prev_newline = was_newline;
-            was_newline = piece.is_newline();
-            prev_newline && was_newline
-        })
 }
