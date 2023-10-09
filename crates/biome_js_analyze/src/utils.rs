@@ -158,7 +158,7 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "a";
-        let position = find_variable_position(&binary_expression.expect("not"), variable);
+        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
 
         assert_eq!(position, Some(VariablePosition::Left));
     }
@@ -178,7 +178,7 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "b";
-        let position = find_variable_position(&binary_expression.expect("not"), variable);
+        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
 
         assert_eq!(position, Some(VariablePosition::Right));
     }
@@ -198,7 +198,7 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "c";
-        let position = find_variable_position(&binary_expression.expect("not"), variable);
+        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
 
         assert_eq!(position, None);
     }
