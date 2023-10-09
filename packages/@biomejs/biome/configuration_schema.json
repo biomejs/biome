@@ -1096,6 +1096,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessLoneBlockStatements": {
+					"description": "Disallow unnecessary nested block statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
