@@ -588,6 +588,8 @@ impl PartialEq for ImportKey {
 /// are listed before imports closer to the source file.
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 enum ImportCategory {
+    /// Anything with an explicit `bun:` prefix.
+    Bun,
     /// Anything with an explicit `node:` prefix, or one of the recognized
     /// Node built-ins, such `"fs"`, `"child_process"`, etc..
     NodeBuiltin,
@@ -601,6 +603,12 @@ enum ImportCategory {
     /// may (incorrectly) include source imports through custom import mappings
     /// as well.
     Library,
+    /// Absolute file imports `/<path>`.
+    Absolute,
+    /// Node allows specifying an import map with name prefixed with `#`.
+    /// See https://nodejs.org/api/packages.html#subpath-imports
+    SharpImport,
+    /// Relative file imports `./<path>`.
     Relative,
     /// Any unrecognized protocols are grouped here. These may include custom
     /// protocols such as supported by bundlers.
@@ -613,11 +621,16 @@ impl From<&str> for ImportCategory {
             Self::Relative
         } else if let Some((protocol, _)) = value.split_once(':') {
             match protocol {
+                "bun" => Self::Bun,
                 "http" | "https" => Self::Url,
                 "node" => Self::NodeBuiltin,
                 "npm" => Self::Npm,
                 _ => Self::Other,
             }
+        } else if value.starts_with('#') {
+            Self::SharpImport
+        } else if value.starts_with('/') {
+            Self::Absolute
         } else if NODE_BUILTINS.binary_search(&value).is_ok() {
             Self::NodeBuiltin
         } else {

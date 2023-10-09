@@ -16,6 +16,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Import sorting is safe to apply now, and it will be applied when running `check --apply` instead of `check --apply-unsafe`.
 
+- Import sorting now handles Bun imports `bun:<name>`, absolute path imports `/<path>`, and [Node's subpath imports `#<name>`](https://nodejs.org/api/packages.html#subpath-imports). See [our documentation](https://biomejs.dev/analyzer/) for more details. Contributed by @Conaclos
+
 ### CLI
 
 #### Bug fixes
