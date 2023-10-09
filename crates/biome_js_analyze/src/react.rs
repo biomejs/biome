@@ -269,9 +269,8 @@ fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
     binding
         .syntax()
         .ancestors()
-        .find_map(|ancestor| JsImport::cast_ref(&ancestor))
-        .and_then(|js_import| js_import.source_is(lib.import_name()).ok())
-        .unwrap_or(false)
+        .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
+        .is_some_and(|source| source.text() == lib.import_name())
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
@@ -296,5 +295,5 @@ fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Op
     let import_clause = import_specifiers.parent::<JsImportNamedClause>()?;
     let import = import_clause.parent::<JsImport>()?;
 
-    import.source_is(lib.import_name()).ok()
+    Some(import.source_text().ok()?.text() == lib.import_name())
 }
