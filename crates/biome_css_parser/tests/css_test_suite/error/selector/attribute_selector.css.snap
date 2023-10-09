@@ -8,6 +8,8 @@ expression: snapshot
 ```css
 [ .class {}
 
+[title="foo" P] {}
+
 ```
 
 
@@ -43,16 +45,51 @@ CssRoot {
                 r_curly_token: R_CURLY@10..11 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
+                                CssIdentifier {
+                                    value_token: IDENT@14..19 "title" [] [],
+                                },
+                                CssBogus {
+                                    items: [
+                                        EQ@19..20 "=" [] [],
+                                        CssAttributeMatcherValue {
+                                            name: CssString {
+                                                value_token: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        IDENT@26..27 "P" [] [],
+                                    ],
+                                },
+                                R_BRACK@27..29 "]" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@29..30 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@30..31 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@11..12 "" [Newline("\n")] [],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..12
-  0: CSS_RULE_LIST@0..11
+0: CSS_ROOT@0..32
+  0: CSS_RULE_LIST@0..31
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
@@ -72,7 +109,28 @@ CssRoot {
         0: L_CURLY@9..10 "{" [] []
         1: CSS_DECLARATION_LIST@10..10
         2: R_CURLY@10..11 "}" [] []
-  1: EOF@11..12 "" [Newline("\n")] []
+    1: CSS_RULE@11..31
+      0: CSS_SELECTOR_LIST@11..29
+        0: CSS_COMPOUND_SELECTOR@11..29
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@11..29
+            0: CSS_BOGUS_SUB_SELECTOR@11..29
+              0: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] []
+              1: CSS_IDENTIFIER@14..19
+                0: IDENT@14..19 "title" [] []
+              2: CSS_BOGUS@19..27
+                0: EQ@19..20 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@20..26
+                  0: CSS_STRING@20..26
+                    0: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")]
+                2: IDENT@26..27 "P" [] []
+              3: R_BRACK@27..29 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@29..31
+        0: L_CURLY@29..30 "{" [] []
+        1: CSS_DECLARATION_LIST@30..30
+        2: R_CURLY@30..31 "}" [] []
+  1: EOF@31..32 "" [Newline("\n")] []
 
 ```
 
@@ -86,12 +144,32 @@ attribute_selector.css:1:3 parse ━━━━━━━━━━━━━━━�
   > 1 │ [ .class {}
       │   ^
     2 │ 
+    3 │ [title="foo" P] {}
   
   i Expected an identifier here
   
   > 1 │ [ .class {}
       │   ^
     2 │ 
+    3 │ [title="foo" P] {}
+  
+attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a s, a S, an i, or a I but instead found 'P'
+  
+    1 │ [ .class {}
+    2 │ 
+  > 3 │ [title="foo" P] {}
+      │              ^
+    4 │ 
+  
+  i Expected a s, a S, an i, or a I here
+  
+    1 │ [ .class {}
+    2 │ 
+  > 3 │ [title="foo" P] {}
+      │              ^
+    4 │ 
   
 ```
 

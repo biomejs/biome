@@ -1,7 +1,8 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
-    expect_any_attribute_matcher_name, expect_any_selector, expected_identifier,
+    expect_any_attribute_matcher_name, expect_any_attribute_modifier, expect_any_selector,
+    expected_identifier,
 };
 use crate::syntax::{
     is_at_identifier, parse_css_string, parse_error, parse_identifier, parse_regular_identifier,
@@ -16,14 +17,16 @@ use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet}
 
 #[inline]
 pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
-    parse_compound_selector(p).and_then(|selector| try_parse_complex_selector(p, selector))
+    // In CSS, we have compound selectors and complex selectors.
+    // Compound selectors are simple, unseparated chains of selectors,
+    // while complex selectors are compound selectors separated by combinators.
+    // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
+    parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
 }
 
 #[inline]
-pub(crate) fn try_parse_complex_selector(p: &mut CssParser, left: CompletedMarker) -> ParsedSyntax {
+pub(crate) fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> ParsedSyntax {
     let mut progress = ParserProgress::default();
-
-    let mut left = left;
 
     loop {
         progress.assert_progressing(p);
@@ -199,6 +202,10 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T!['[']);
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+
+    // `parse_attribute_matcher` method is invoked with `ok()`,
+    // which turns an `Err` into an `Ok` variant, because attribute matcher in a CSS attribute selector
+    // is optional. If it isn't present or fails to parse correctly, parsing can continue.
     parse_attribute_matcher(p).ok();
 
     let context = selector_lex_context(p);
@@ -222,6 +229,11 @@ pub(crate) fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
     let modifier = p.cur();
     if modifier.is_attribute_modifier_keyword() {
         p.bump(modifier);
+    } else if modifier != T![']'] {
+        // if we have an invalid modifier, we should add a diagnostic and bump it
+        let diagnostic = expect_any_attribute_modifier(p, p.cur_range());
+        p.error(diagnostic);
+        p.bump_any();
     }
 
     Present(m.complete(p, CSS_ATTRIBUTE_MATCHER))

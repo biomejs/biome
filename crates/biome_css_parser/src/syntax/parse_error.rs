@@ -32,6 +32,10 @@ pub(crate) fn expect_any_attribute_matcher_name(
     expected_any(&["identifier", "string literal"], range).into_diagnostic(p)
 }
 
+pub(crate) fn expect_any_attribute_modifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["s", "S", "i", "I"], range).into_diagnostic(p)
+}
+
 pub(crate) fn expect_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("body", range).into_diagnostic(p)
 }
