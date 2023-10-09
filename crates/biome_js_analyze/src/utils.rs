@@ -125,15 +125,16 @@ pub(crate) fn find_variable_position(
         .filter_map(AnyJsExpression::cast)
         .map(|child| child.omit_parentheses())
         .filter(|child| child.syntax().text_trimmed() == variable)
-        .find_map(|child| {
+        .map(|child| {
             if child.syntax().text_trimmed_range().end() < operator_range.start() {
-                return Some(VariablePosition::Left);
+                return VariablePosition::Left;
             } else if operator_range.end() < child.syntax().text_trimmed_range().start() {
-                return Some(VariablePosition::Right);
+                return VariablePosition::Right;
             }
 
             unreachable!("The node can't have the same range of the operator.")
         })
+        .next()
 }
 
 #[cfg(test)]
