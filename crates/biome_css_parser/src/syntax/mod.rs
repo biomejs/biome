@@ -49,6 +49,7 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
     rules.complete(p, CSS_RULE_LIST);
 }
 
+#[inline]
 pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 

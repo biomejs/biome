@@ -78,17 +78,17 @@ CssRoot {
 id_selector_err.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an identifier but instead found '.'
-
+  
   > 1 │ # .class {}
       │   ^
-    2 │
-
+    2 │ 
+  
   i Expected an identifier here
-
+  
   > 1 │ # .class {}
       │   ^
-    2 │
-
+    2 │ 
+  
 ```
 
 
