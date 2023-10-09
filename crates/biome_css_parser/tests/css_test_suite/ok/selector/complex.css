@@ -31,3 +31,7 @@
 .class  div  #id {
 
 }
+
+[lang|="zh"] ~ [lang|="zh"] > [lang|="zh"] {
+
+}

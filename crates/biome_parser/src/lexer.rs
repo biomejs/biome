@@ -4,62 +4,61 @@ use bitflags::bitflags;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 
+/// `Lexer` trait defines the necessary methods a lexer must implement.
+/// Lexer is responsible for dividing the source code into meaningful parsing units (kinds).
 pub trait Lexer<'src> {
+    /// A kind of syntax, as identified by the lexer.
     type Kind: SyntaxKind;
+    /// The specific context in which the lexer operates.
     type LexContext: LexContext + Default;
+    /// The special context for re-lexing the kinds.
     type ReLexContext;
 
-    /// Returns the source code
+    /// Returns the entire source code that lexer needs to tokenize.
     fn source(&self) -> &'src str;
 
-    /// Returns the kind of the current token
+    /// Returns the syntax kind of the current kind.
     fn current(&self) -> Self::Kind;
 
-    /// Returns the range of the current token (The token that was lexed by the last `next` call)
-
+    /// Provides the text range of the current kind.
     fn current_range(&self) -> TextRange;
 
-    /// Creates a checkpoint storing the current lexer state.
-    ///
-    /// Use `rewind` to restore the lexer to the state stored in the checkpoint.
+    /// Creating a checkpoint of the lexer's current state.
+    /// `rewind` can be used later to restore the lexer to the checkpoint's state.
     fn checkpoint(&self) -> LexerCheckpoint<Self::Kind>;
 
-    /// Lexes the next token.
-    ///
-    /// ## Return
-    /// Returns its kind and any potential error.
+    /// Tokenizes the next kind into a single coherent token within the given lexing context.
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind;
 
-    /// Lexes the current token again under the passed [Self::ReLexContext].
-    /// Useful in case a token can have different meaning depending on the context.
-    ///
-    /// For example, a `/` must either be lexed as a `/` token or as a regular expression if it
-    /// appears at the start of an expression. Re-lexing allows to always lex the `/` as a `/` token and
-    /// call into `re_lex` when the parser is at a valid regular expression position, to see if the
-    /// current token can be lexed out as a regular expression literal.
-    ///
-    /// ## Returns
-    /// The new token kind and any associated diagnostic if current token has a different meaning under
-    /// the passed [Self::ReLexContext].
-    ///
-    /// Returns the current kind without any diagnostic if not. Any cached lookahead remains valid in that case.
+    /// Re-lexes the current kind under a different lexing context.
+    /// Useful when a token can have different interpretations based on context.
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind;
 
-    /// Returns `true` if a line break precedes the current token.
+    /// Returns `true` if the current kind is preceded by a line break.
     fn has_preceding_line_break(&self) -> bool;
 
-    /// Returns `true` if the current token is an identifier and it contains a unicode escape sequence (`\u...`).
+    /// Returns if the current kind is an identifier that includes a unicode escape sequence (`\u...`).
     fn has_unicode_escape(&self) -> bool;
 
-    /// Rewinds the lexer to the same state as when the passed in `checkpoint` was created.
+    /// Restores lexer to the state of a previously created checkpoint.
     fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>);
 
+    /// Returns any parsing diagnostics upon finishing lexing all kinds.
     fn finish(self) -> Vec<ParseDiagnostic>;
 
+    /// Provides flags related to the current kind, containing the meta-information about the kind.
     fn current_flags(&self) -> TokenFlags;
 }
 
+/// `LexContext` is a trait that represents the context in
+/// which a parser is currently operating. It is used to specify
+/// and handle the variations in parsing requirements depending
+/// on the context (i.e., the grammatical structure being parsed).
 pub trait LexContext {
+    /// The `is_regular` method should return `true` if the context is
+    /// 'regular', indicating normal parsing rules apply.
+    /// Alternatively, `false` signals that the parser is within a special context,
+    /// suggesting that a different set of parsing rules or procedures may need to be used.
     fn is_regular(&self) -> bool;
 }
 

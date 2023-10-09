@@ -34,7 +34,7 @@ impl<'source> CssParser<'source> {
 
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
-    #[allow(dead_code)]
+    #[allow(dead_code)] //TODO remote this once we actually don't use it
     pub fn re_lex(&mut self, context: CssReLexContext) -> CssSyntaxKind {
         self.source_mut().re_lex(context)
     }

@@ -602,57 +602,6 @@ pub struct CssAtMediaQueryRangeFields {
     pub less_than_equal_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssAttribute {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssAttribute {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssAttributeFields {
-        CssAttributeFields {
-            l_brack_token: self.l_brack_token(),
-            attribute_name: self.attribute_name(),
-            attribute_meta: self.attribute_meta(),
-            r_brack_token: self.r_brack_token(),
-        }
-    }
-    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn attribute_name(&self) -> SyntaxResult<CssAttributeName> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn attribute_meta(&self) -> Option<CssAttributeMeta> {
-        support::node(&self.syntax, 2usize)
-    }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssAttribute {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssAttributeFields {
-    pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub attribute_name: SyntaxResult<CssAttributeName>,
-    pub attribute_meta: Option<CssAttributeMeta>,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeMatcher {
     pub(crate) syntax: SyntaxNode,
 }
@@ -668,39 +617,19 @@ impl CssAttributeMatcher {
     }
     pub fn as_fields(&self) -> CssAttributeMatcherFields {
         CssAttributeMatcherFields {
-            matcher_type_token: self.matcher_type_token(),
-            exactly_or_hyphen_token: self.exactly_or_hyphen_token(),
-            prefix_token: self.prefix_token(),
-            suffix_token: self.suffix_token(),
-            times_assign_token: self.times_assign_token(),
-            eq_token: self.eq_token(),
-            matcher_name: self.matcher_name(),
-            css_identifier: self.css_identifier(),
+            operator: self.operator(),
+            value: self.value(),
+            modifier: self.modifier(),
         }
     }
-    pub fn matcher_type_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn exactly_or_hyphen_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn value(&self) -> SyntaxResult<CssAttributeMatcherValue> {
+        support::required_node(&self.syntax, 1usize)
     }
-    pub fn prefix_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn suffix_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn times_assign_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
-    }
-    pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
-    }
-    pub fn matcher_name(&self) -> SyntaxResult<CssString> {
-        support::required_node(&self.syntax, 6usize)
-    }
-    pub fn css_identifier(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 7usize)
+    pub fn modifier(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -714,20 +643,15 @@ impl Serialize for CssAttributeMatcher {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssAttributeMatcherFields {
-    pub matcher_type_token: SyntaxResult<SyntaxToken>,
-    pub exactly_or_hyphen_token: SyntaxResult<SyntaxToken>,
-    pub prefix_token: SyntaxResult<SyntaxToken>,
-    pub suffix_token: SyntaxResult<SyntaxToken>,
-    pub times_assign_token: SyntaxResult<SyntaxToken>,
-    pub eq_token: SyntaxResult<SyntaxToken>,
-    pub matcher_name: SyntaxResult<CssString>,
-    pub css_identifier: SyntaxResult<CssIdentifier>,
+    pub operator: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssAttributeMatcherValue>,
+    pub modifier: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssAttributeMeta {
+pub struct CssAttributeMatcherValue {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssAttributeMeta {
+impl CssAttributeMatcherValue {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -737,94 +661,15 @@ impl CssAttributeMeta {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssAttributeMetaFields {
-        CssAttributeMetaFields {
-            attribute_matcher: self.attribute_matcher(),
-            attribute_modifier: self.attribute_modifier(),
-        }
+    pub fn as_fields(&self) -> CssAttributeMatcherValueFields {
+        CssAttributeMatcherValueFields { name: self.name() }
     }
-    pub fn attribute_matcher(&self) -> Option<CssAttributeMatcher> {
-        support::node(&self.syntax, 0usize)
-    }
-    pub fn attribute_modifier(&self) -> Option<CssAttributeModifier> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssAttributeMeta {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssAttributeMetaFields {
-    pub attribute_matcher: Option<CssAttributeMatcher>,
-    pub attribute_modifier: Option<CssAttributeModifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssAttributeModifier {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssAttributeModifier {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssAttributeModifierFields {
-        CssAttributeModifierFields {
-            i_token: self.i_token(),
-        }
-    }
-    pub fn i_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssAttributeModifier {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssAttributeModifierFields {
-    pub i_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssAttributeName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssAttributeName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssAttributeNameFields {
-        CssAttributeNameFields {
-            css_string: self.css_string(),
-        }
-    }
-    pub fn css_string(&self) -> SyntaxResult<CssString> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAttributeMatcherValue> {
         support::required_node(&self.syntax, 0usize)
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssAttributeName {
+impl Serialize for CssAttributeMatcherValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -833,8 +678,8 @@ impl Serialize for CssAttributeName {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssAttributeNameFields {
-    pub css_string: SyntaxResult<CssString>,
+pub struct CssAttributeMatcherValueFields {
+    pub name: SyntaxResult<AnyCssAttributeMatcherValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeSelector {
@@ -852,15 +697,23 @@ impl CssAttributeSelector {
     }
     pub fn as_fields(&self) -> CssAttributeSelectorFields {
         CssAttributeSelectorFields {
+            l_brack_token: self.l_brack_token(),
             name: self.name(),
-            attribute_list: self.attribute_list(),
+            matcher: self.matcher(),
+            r_brack_token: self.r_brack_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn attribute_list(&self) -> CssAttributeList {
-        support::list(&self.syntax, 1usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn matcher(&self) -> Option<CssAttributeMatcher> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -874,8 +727,10 @@ impl Serialize for CssAttributeSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssAttributeSelectorFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssIdentifier>,
-    pub attribute_list: CssAttributeList,
+    pub matcher: Option<CssAttributeMatcher>,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssBlock {
@@ -2098,6 +1953,26 @@ impl AnyCssAtRule {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssAttributeMatcherValue {
+    CssIdentifier(CssIdentifier),
+    CssString(CssString),
+}
+impl AnyCssAttributeMatcherValue {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssAttributeMatcherValue::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssAttributeMatcherValue::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssRule {
     AnyCssAtRule(AnyCssAtRule),
     CssBogusRule(CssBogusRule),
@@ -2828,59 +2703,6 @@ impl From<CssAtMediaQueryRange> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssAttribute {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTRIBUTE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssAttribute {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttribute")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field(
-                "attribute_name",
-                &support::DebugSyntaxResult(self.attribute_name()),
-            )
-            .field(
-                "attribute_meta",
-                &support::DebugOptionalElement(self.attribute_meta()),
-            )
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssAttribute> for SyntaxNode {
-    fn from(n: CssAttribute) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssAttribute> for SyntaxElement {
-    fn from(n: CssAttribute) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssAttributeMatcher {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2905,35 +2727,9 @@ impl AstNode for CssAttributeMatcher {
 impl std::fmt::Debug for CssAttributeMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssAttributeMatcher")
-            .field(
-                "matcher_type_token",
-                &support::DebugSyntaxResult(self.matcher_type_token()),
-            )
-            .field(
-                "exactly_or_hyphen_token",
-                &support::DebugSyntaxResult(self.exactly_or_hyphen_token()),
-            )
-            .field(
-                "prefix_token",
-                &support::DebugSyntaxResult(self.prefix_token()),
-            )
-            .field(
-                "suffix_token",
-                &support::DebugSyntaxResult(self.suffix_token()),
-            )
-            .field(
-                "times_assign_token",
-                &support::DebugSyntaxResult(self.times_assign_token()),
-            )
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field(
-                "matcher_name",
-                &support::DebugSyntaxResult(self.matcher_name()),
-            )
-            .field(
-                "css_identifier",
-                &support::DebugSyntaxResult(self.css_identifier()),
-            )
+            .field("operator", &support::DebugSyntaxResult(self.operator()))
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("modifier", &support::DebugOptionalElement(self.modifier()))
             .finish()
     }
 }
@@ -2947,12 +2743,12 @@ impl From<CssAttributeMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssAttributeMeta {
+impl AstNode for CssAttributeMatcherValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_META as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_MATCHER_VALUE as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTRIBUTE_META
+        kind == CSS_ATTRIBUTE_MATCHER_VALUE
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -2968,103 +2764,20 @@ impl AstNode for CssAttributeMeta {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssAttributeMeta {
+impl std::fmt::Debug for CssAttributeMatcherValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeMeta")
-            .field(
-                "attribute_matcher",
-                &support::DebugOptionalElement(self.attribute_matcher()),
-            )
-            .field(
-                "attribute_modifier",
-                &support::DebugOptionalElement(self.attribute_modifier()),
-            )
+        f.debug_struct("CssAttributeMatcherValue")
+            .field("name", &support::DebugSyntaxResult(self.name()))
             .finish()
     }
 }
-impl From<CssAttributeMeta> for SyntaxNode {
-    fn from(n: CssAttributeMeta) -> SyntaxNode {
+impl From<CssAttributeMatcherValue> for SyntaxNode {
+    fn from(n: CssAttributeMatcherValue) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssAttributeMeta> for SyntaxElement {
-    fn from(n: CssAttributeMeta) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssAttributeModifier {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_MODIFIER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTRIBUTE_MODIFIER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssAttributeModifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeModifier")
-            .field("i_token", &support::DebugSyntaxResult(self.i_token()))
-            .finish()
-    }
-}
-impl From<CssAttributeModifier> for SyntaxNode {
-    fn from(n: CssAttributeModifier) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssAttributeModifier> for SyntaxElement {
-    fn from(n: CssAttributeModifier) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssAttributeName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTRIBUTE_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssAttributeName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeName")
-            .field("css_string", &support::DebugSyntaxResult(self.css_string()))
-            .finish()
-    }
-}
-impl From<CssAttributeName> for SyntaxNode {
-    fn from(n: CssAttributeName) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssAttributeName> for SyntaxElement {
-    fn from(n: CssAttributeName) -> SyntaxElement {
+impl From<CssAttributeMatcherValue> for SyntaxElement {
+    fn from(n: CssAttributeMatcherValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -3092,8 +2805,16 @@ impl AstNode for CssAttributeSelector {
 impl std::fmt::Debug for CssAttributeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssAttributeSelector")
+            .field(
+                "l_brack_token",
+                &support::DebugSyntaxResult(self.l_brack_token()),
+            )
             .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("attribute_list", &self.attribute_list())
+            .field("matcher", &support::DebugOptionalElement(self.matcher()))
+            .field(
+                "r_brack_token",
+                &support::DebugSyntaxResult(self.r_brack_token()),
+            )
             .finish()
     }
 }
@@ -4482,6 +4203,65 @@ impl From<AnyCssAtRule> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssAttributeMatcherValue {
+    fn from(node: CssIdentifier) -> AnyCssAttributeMatcherValue {
+        AnyCssAttributeMatcherValue::CssIdentifier(node)
+    }
+}
+impl From<CssString> for AnyCssAttributeMatcherValue {
+    fn from(node: CssString) -> AnyCssAttributeMatcherValue {
+        AnyCssAttributeMatcherValue::CssString(node)
+    }
+}
+impl AstNode for AnyCssAttributeMatcherValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET.union(CssString::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | CSS_STRING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => AnyCssAttributeMatcherValue::CssIdentifier(CssIdentifier { syntax }),
+            CSS_STRING => AnyCssAttributeMatcherValue::CssString(CssString { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssAttributeMatcherValue::CssIdentifier(it) => &it.syntax,
+            AnyCssAttributeMatcherValue::CssString(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssAttributeMatcherValue::CssIdentifier(it) => it.syntax,
+            AnyCssAttributeMatcherValue::CssString(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAttributeMatcherValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssAttributeMatcherValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAttributeMatcherValue::CssString(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAttributeMatcherValue> for SyntaxNode {
+    fn from(n: AnyCssAttributeMatcherValue) -> SyntaxNode {
+        match n {
+            AnyCssAttributeMatcherValue::CssIdentifier(it) => it.into(),
+            AnyCssAttributeMatcherValue::CssString(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssAttributeMatcherValue> for SyntaxElement {
+    fn from(n: AnyCssAttributeMatcherValue) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusRule> for AnyCssRule {
     fn from(node: CssBogusRule) -> AnyCssRule {
         AnyCssRule::CssBogusRule(node)
@@ -4955,6 +4735,11 @@ impl std::fmt::Display for AnyCssAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssAttributeMatcherValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -5040,27 +4825,12 @@ impl std::fmt::Display for CssAtMediaQueryRange {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssAttribute {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssAttributeMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssAttributeMeta {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssAttributeModifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssAttributeName {
+impl std::fmt::Display for CssAttributeMatcherValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -5652,89 +5422,6 @@ impl IntoIterator for CssAtMediaQueryList {
 impl IntoIterator for &CssAtMediaQueryList {
     type Item = SyntaxResult<CssAtMediaQuery>;
     type IntoIter = AstSeparatedListNodesIterator<Language, CssAtMediaQuery>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct CssAttributeList {
-    syntax_list: SyntaxList,
-}
-impl CssAttributeList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for CssAttributeList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_ATTRIBUTE_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<CssAttributeList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(CssAttributeList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssAttributeList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for CssAttributeList {
-    type Language = Language;
-    type Node = CssAttribute;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for CssAttributeList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssAttributeList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &CssAttributeList {
-    type Item = CssAttribute;
-    type IntoIter = AstNodeListIterator<Language, CssAttribute>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for CssAttributeList {
-    type Item = CssAttribute;
-    type IntoIter = AstNodeListIterator<Language, CssAttribute>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

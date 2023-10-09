@@ -14,14 +14,14 @@ pub(crate) struct CssTokenSource<'src> {
 
     /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
     pub(super) trivia_list: Vec<Trivia>,
-    /// Cache for the non-trivia token lookahead. For example for the source `let a = 10;` if the
-    /// [TokenSource]'s currently positioned at the start of the file (`let`). The `nth(2)` non-trivia token,
-    /// as returned by the [TokenSource], is the `=` token but retrieving it requires skipping over the
-    /// two whitespace trivia tokens (first between `let` and `a`, second between `a` and `=`).
+    /// Cache for the non-trivia token lookahead. For example for the source `.class {};` if the
+    /// [TokenSource]'s currently positioned at the start of the file (`.`). The `nth(2)` non-trivia token,
+    /// as returned by the [TokenSource], is the `{` token but retrieving it requires skipping over the
+    /// one whitespace trivia tokens (between `class` and `{`).
     /// The [TokenSource] state then is:
     ///
-    /// * `non_trivia_lookahead`: [IDENT: 'a', EQ]
-    /// * `lookahead_offset`: 4 (the `=` is the 4th token after the `let` keyword)
+    /// * `non_trivia_lookahead`: [IDENT: 'class', L_CURLY]
+    /// * `lookahead_offset`: 3 (the `{` is the 3th token after the `.` keyword)
     non_trivia_lookahead: VecDeque<Lookahead>,
 
     /// Offset of the last cached lookahead token from the current [BufferedLexer] token.

@@ -69,24 +69,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAtMediaQueryRange::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE => {
-                    let $pattern = unsafe { $crate::CssAttribute::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_ATTRIBUTE_MATCHER => {
                     let $pattern = unsafe { $crate::CssAttributeMatcher::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE_META => {
-                    let $pattern = unsafe { $crate::CssAttributeMeta::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE_MODIFIER => {
-                    let $pattern = unsafe { $crate::CssAttributeModifier::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE_NAME => {
-                    let $pattern = unsafe { $crate::CssAttributeName::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_ATTRIBUTE_MATCHER_VALUE => {
+                    let $pattern = unsafe { $crate::CssAttributeMatcherValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR => {
@@ -228,10 +216,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_AT_MEDIA_QUERY_LIST => {
                     let $pattern = unsafe { $crate::CssAtMediaQueryList::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_ATTRIBUTE_LIST => {
-                    let $pattern = unsafe { $crate::CssAttributeList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_DECLARATION_LIST => {
