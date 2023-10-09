@@ -127,12 +127,12 @@ pub(crate) fn find_variable_position(
         .filter(|child| child.syntax().text_trimmed() == variable)
         .find_map(|child| {
             if child.syntax().text_trimmed_range().end() < operator_range.start() {
-                Some(VariablePosition::Left)
+                return Some(VariablePosition::Left);
             } else if operator_range.end() < child.syntax().text_trimmed_range().start() {
-                Some(VariablePosition::Right)
-            } else {
-                None
+                return Some(VariablePosition::Right);
             }
+
+            unreachable!("The node can't have the same range of the operator.")
         })
 }
 
@@ -158,7 +158,10 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "a";
-        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
+        let position = find_variable_position(
+            &binary_expression.expect("valid binary expression"),
+            variable,
+        );
 
         assert_eq!(position, Some(VariablePosition::Left));
     }
@@ -178,7 +181,10 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "b";
-        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
+        let position = find_variable_position(
+            &binary_expression.expect("valid binary expression"),
+            variable,
+        );
 
         assert_eq!(position, Some(VariablePosition::Right));
     }
@@ -198,7 +204,10 @@ mod test {
             .find_map(JsBinaryExpression::cast);
 
         let variable = "c";
-        let position = find_variable_position(&binary_expression.expect("valid binary expression"), variable);
+        let position = find_variable_position(
+            &binary_expression.expect("valid binary expression"),
+            variable,
+        );
 
         assert_eq!(position, None);
     }
