@@ -8,7 +8,7 @@ use crate::{
     JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
     JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
     JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence,
     TsStringLiteralType, T,
 };
@@ -209,12 +209,31 @@ impl JsBinaryOperator {
             JsBinaryOperator::BitwiseXor => OperatorPrecedence::BitwiseXor,
         }
     }
-}
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum BinaryExpressionNodePosition {
-    Left,
-    Right,
+    /// Determines whether a binary operator is commutative, meaning that the order of its operands
+    /// does not affect the result.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::JsBinaryOperator;
+    ///
+    /// let times = JsBinaryOperator::Times;
+    ///
+    /// assert!(times.is_commutative());
+    ///
+    ///  let plus = JsBinaryOperator::Plus; // Non-commutative operator
+    /// assert!(!plus.is_commutative());
+    /// ```
+    pub const fn is_commutative(&self) -> bool {
+        matches!(
+            self,
+            JsBinaryOperator::Times
+                | JsBinaryOperator::BitwiseAnd
+                | JsBinaryOperator::BitwiseOr
+                | JsBinaryOperator::BitwiseXor
+        )
+    }
 }
 
 impl JsBinaryExpression {
@@ -288,22 +307,6 @@ impl JsBinaryExpression {
                 .map_or(false, |x| x.is_null_or_undefined()))
         } else {
             Ok(false)
-        }
-    }
-
-    pub fn get_node_position(&self, node: &JsSyntaxNode) -> Option<BinaryExpressionNodePosition> {
-        let node_name = node.text_trimmed().to_string();
-        let present_on_left = node_name == self.left().ok()?.omit_parentheses().text();
-        if present_on_left {
-            return Some(BinaryExpressionNodePosition::Left);
-        }
-
-        let present_on_right = node_name == self.right().ok()?.omit_parentheses().text();
-
-        if present_on_right {
-            Some(BinaryExpressionNodePosition::Right)
-        } else {
-            None
         }
     }
 }

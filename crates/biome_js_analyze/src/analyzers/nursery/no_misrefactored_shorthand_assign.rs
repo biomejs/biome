@@ -4,16 +4,19 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    AnyJsExpression, BinaryExpressionNodePosition, JsAssignmentExpression, JsAssignmentOperator,
+    AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::JsRuleAction;
+use crate::{
+    utils::{find_variable_position, VariablePosition},
+    JsRuleAction,
+};
 
 declare_rule! {
     /// Disallow shorthand assign when variable appears on both sides.
     ///
-    /// This rule helps avoid potential bugs related to incorrect assignments or unintended
+    /// This rule helps to avoid potential bugs related to incorrect assignments or unintended
     /// side effects that may occur during refactoring.
     ///
     /// Source: https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op
@@ -56,13 +59,9 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {
-    replacement_expression: AnyJsExpression,
-}
-
 impl Rule for NoMisrefactoredShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
-    type State = RuleState;
+    type State = AnyJsExpression;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -74,60 +73,60 @@ impl Rule for NoMisrefactoredShorthandAssign {
         }
 
         let right = node.right().ok()?;
-        let operator_token = node
-            .operator_token()
-            .ok()?
-            .kind()
-            .to_string()?
-            .split('=')
-            .nth(0)?;
+        let operator = node.operator_token().ok()?;
+        let operator = operator.text_trimmed();
+        let operator = &operator[0..operator.len() - 1];
 
-        let binary_expression = right.as_js_binary_expression()?;
-        let bin_operator = binary_expression
-            .operator_token()
-            .ok()?
-            .kind()
-            .to_string()?;
+        let binary_expression = match right {
+            AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
+            AnyJsExpression::JsParenthesizedExpression(param) => {
+                JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?
+            }
+            _ => return None,
+        };
 
-        let not_same_operator_from_shorthand = operator_token != bin_operator;
+        let bin_operator = binary_expression.operator_token().ok()?;
+        let bin_operator = bin_operator.text_trimmed();
+
+        let not_same_operator_from_shorthand = operator != bin_operator;
 
         if not_same_operator_from_shorthand {
             return None;
         }
 
         let left = node.left().ok()?;
-        let variable_position_in_expression = binary_expression.get_node_position(left.syntax())?;
+        let left = left.as_any_js_assignment()?;
+        let left_text = left.text();
 
-        let replacement_expression = match variable_position_in_expression {
-            BinaryExpressionNodePosition::Left => binary_expression.right().ok()?,
-            BinaryExpressionNodePosition::Right => binary_expression.left().ok()?,
-        };
+        let variable_position_in_expression =
+            find_variable_position(&binary_expression, &left_text)?;
 
-        Some(RuleState {
-            replacement_expression,
-        })
+        if !binary_expression.operator().ok()?.is_commutative()
+            && matches!(variable_position_in_expression, VariablePosition::Right)
+        {
+            return None;
+        }
+
+        match variable_position_in_expression {
+            VariablePosition::Left => binary_expression.right(),
+            VariablePosition::Right => binary_expression.left(),
+        }
+        .ok()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
-        let replacement_text = node
-            .clone()
-            .with_right(state.replacement_expression.clone())
-            .syntax()
-            .text_trimmed()
-            .to_string();
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Variable appears on both sides of an assignment operation"
+                    "Variable appears on both sides of an assignment operation."
                 },
             )
             .note(markup! {
-                "This assignment might be result of a wrong refactoring, use "<Emphasis>""{replacement_text}""</Emphasis>" instead."
+                "This assignment might be the result of a wrong refactoring."
             }),
         )
     }
@@ -136,10 +135,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let replacement_node = node
-            .clone()
-            .with_right(state.replacement_expression.clone());
-
+        let replacement_node = node.clone().with_right(state.clone());
         let replacement_text = replacement_node.clone().syntax().text_trimmed().to_string();
 
         mutation.replace_node(node.clone(), replacement_node);

@@ -1,7 +1,7 @@
 use biome_js_factory::make;
 use biome_js_syntax::{
-    inner_string_text, AnyJsStatement, JsLanguage, JsModuleItemList, JsStatementList, JsSyntaxNode,
-    T,
+    inner_string_text, AnyJsExpression, AnyJsStatement, JsBinaryExpression, JsLanguage,
+    JsModuleItemList, JsStatementList, JsSyntaxNode, T,
 };
 use biome_rowan::{AstNode, BatchMutation, Direction, WalkEvent};
 use std::iter;
@@ -94,4 +94,112 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         }
     }
     true
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) enum VariablePosition {
+    Right,
+    Left,
+}
+
+/// Finds the position of a variable relative to a binary expression.
+///
+/// This function takes a reference to a JsBinaryExpression and the name of a variable as input.
+/// It determines whether the variable appears to the left or right of the binary operator within
+/// the expression and returns the result as an `Option<VariablePosition>`.
+///
+/// Depending on your specific expression and variable placement,
+/// the result may vary between Left, Right, or None.
+pub(crate) fn find_variable_position(
+    binary_expression: &JsBinaryExpression,
+    variable: &str,
+) -> Option<VariablePosition> {
+    let operator_range = binary_expression
+        .operator_token()
+        .ok()?
+        .text_trimmed_range();
+
+    binary_expression
+        .syntax()
+        .children()
+        .filter_map(AnyJsExpression::cast)
+        .map(|child| child.omit_parentheses())
+        .filter(|child| child.syntax().text_trimmed() == variable)
+        .find_map(|child| {
+            if child.syntax().text_trimmed_range().end() < operator_range.start() {
+                Some(VariablePosition::Left)
+            } else if operator_range.end() < child.syntax().text_trimmed_range().start() {
+                Some(VariablePosition::Right)
+            } else {
+                None
+            }
+        })
+}
+
+#[cfg(test)]
+mod test {
+    use crate::utils::{find_variable_position, VariablePosition};
+    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_syntax::{JsBinaryExpression, JsFileSource};
+    use biome_rowan::AstNode;
+
+    #[test]
+    fn find_variable_position_matches_on_left() {
+        let source = "(a) + b";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let binary_expression = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsBinaryExpression::cast);
+
+        let variable = "a";
+        let position = find_variable_position(&binary_expression.expect("not"), variable);
+
+        assert_eq!(position, Some(VariablePosition::Left));
+    }
+
+    #[test]
+    fn find_variable_position_matches_on_right() {
+        let source = "a + b";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let binary_expression = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsBinaryExpression::cast);
+
+        let variable = "b";
+        let position = find_variable_position(&binary_expression.expect("not"), variable);
+
+        assert_eq!(position, Some(VariablePosition::Right));
+    }
+
+    #[test]
+    fn find_variable_position_not_match() {
+        let source = "a + b";
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let binary_expression = parsed
+            .syntax()
+            .descendants()
+            .find_map(JsBinaryExpression::cast);
+
+        let variable = "c";
+        let position = find_variable_position(&binary_expression.expect("not"), variable);
+
+        assert_eq!(position, None);
+    }
 }
