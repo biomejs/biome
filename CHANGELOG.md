@@ -153,6 +153,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [452](https://github.com/biomejs/biome/pull/452). The linter panicked when it met a malformed regex (a regex not ending with a slash).
 
+- Fix [#104](https://github.com/biomejs/biome/issues/104). We now correctly handle types and values with the same name.
+
 ### Parser
 
 - Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov

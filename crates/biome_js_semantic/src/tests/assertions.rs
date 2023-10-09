@@ -7,6 +7,7 @@ use biome_diagnostics::{
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
 use biome_rowan::{AstNode, NodeOrToken};
+use rustc_hash::FxHashMap;
 use std::collections::{BTreeMap, HashMap};
 
 /// This method helps testing scope resolution. It does this
@@ -123,19 +124,17 @@ pub fn assert(code: &str, test_name: &str) {
     // Extract semantic events and index by range
 
     let mut events_by_pos: HashMap<TextSize, Vec<SemanticEvent>> = HashMap::new();
+    let mut scope_start_by_id: FxHashMap<usize, TextSize> = FxHashMap::default();
     for event in semantic_events(r.syntax()) {
-        let pos = match &event {
-            SemanticEvent::DeclarationFound { range, .. } => range.start(),
-            SemanticEvent::ScopeStarted { range, .. } => range.start(),
-            SemanticEvent::ScopeEnded { range, .. } => range.end(),
-            SemanticEvent::Read { range, .. } => range.start(),
-            SemanticEvent::HoistedRead { range, .. } => range.start(),
-            SemanticEvent::Write { range, .. } => range.start(),
-            SemanticEvent::HoistedWrite { range, .. } => range.start(),
-            SemanticEvent::UnresolvedReference { range, .. } => range.start(),
-            SemanticEvent::Exported { range } => range.start(),
+        let pos = if let SemanticEvent::ScopeEnded {
+            range, scope_id, ..
+        } = event
+        {
+            scope_start_by_id.insert(scope_id, range.start());
+            range.end()
+        } else {
+            event.range().start()
         };
-
         let v = events_by_pos.entry(pos).or_default();
         v.push(event);
     }
@@ -144,7 +143,7 @@ pub fn assert(code: &str, test_name: &str) {
 
     // check
 
-    assertions.check(code, test_name, events_by_pos);
+    assertions.check(code, test_name, events_by_pos, scope_start_by_id);
 }
 
 #[derive(Debug, Diagnostic)]
@@ -448,6 +447,7 @@ impl SemanticAssertions {
         code: &str,
         test_name: &str,
         events_by_pos: HashMap<TextSize, Vec<SemanticEvent>>,
+        scope_start: FxHashMap<usize, TextSize>,
     ) {
         // Check every declaration assertion is ok
 
@@ -607,12 +607,17 @@ impl SemanticAssertions {
                 // Needs to be a unique event for now
                 match &events[0] {
                     SemanticEvent::DeclarationFound {
-                        scope_started_at, ..
+                        scope_id,
+                        hoisted_scope_id,
+                        ..
                     } => match self
                         .scope_start_assertions
                         .get(&at_scope_assertion.scope_name)
                     {
                         Some(scope_start_assertion) => {
+                            let scope_started_at = scope_start
+                                .get(&hoisted_scope_id.unwrap_or(*scope_id))
+                                .unwrap();
                             if scope_start_assertion.range.start() != *scope_started_at {
                                 show_all_events(test_name, code, events_by_pos, is_scope_event);
                                 show_unmatched_assertion(
@@ -686,8 +691,8 @@ impl SemanticAssertions {
                 // At least one of the events should be a scope start starting
                 // where we expect
                 let e = events.iter().find(|event| match event {
-                    SemanticEvent::ScopeEnded { started_at, .. } => {
-                        *started_at == scope_start_assertions_range.start()
+                    SemanticEvent::ScopeEnded { range, .. } => {
+                        range.start() == scope_start_assertions_range.start()
                     }
                     _ => false,
                 });

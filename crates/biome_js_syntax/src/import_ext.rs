@@ -1,8 +1,8 @@
 use crate::{
-    inner_string_text, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport, JsModuleSource,
-    JsSyntaxToken,
+    inner_string_text, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport, JsImportNamedClause,
+    JsModuleSource, JsSyntaxToken,
 };
-use biome_rowan::{SyntaxResult, TokenText};
+use biome_rowan::{AstNode, SyntaxResult, TokenText};
 
 impl JsImport {
     /// It checks if the source of an import against the string `source_to_check`
@@ -74,6 +74,36 @@ impl AnyJsNamedImportSpecifier {
                 .ok(),
             AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => None,
         }
+    }
+}
+
+impl AnyJsNamedImportSpecifier {
+    /// Type token of the import specifier.
+    ///
+    /// ```ts
+    /// import { type X }
+    ///          ^^^^
+    /// ```
+    pub fn type_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsBogusNamedImportSpecifier(_) => None,
+            Self::JsNamedImportSpecifier(specifier) => specifier.type_token(),
+            Self::JsShorthandNamedImportSpecifier(specifier) => specifier.type_token(),
+        }
+    }
+
+    /// Returns the import clause that includes this specifier.
+    pub fn import_named_clause(&self) -> Option<JsImportNamedClause> {
+        JsImportNamedClause::cast(self.syntax().ancestors().nth(3)?)
+    }
+
+    /// Returns `true` if this specifier or its import clause has **only** a type modifier.
+    pub fn imports_only_types(&self) -> bool {
+        self.type_token().is_some()
+            || self
+                .import_named_clause()
+                .and_then(|x| x.type_token())
+                .is_some()
     }
 }
 

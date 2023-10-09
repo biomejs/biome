@@ -469,7 +469,8 @@ fn capture_needs_to_be_in_the_dependency_list(
         }
 
         // all others need to be in the dependency list
-        AnyJsBindingDeclaration::JsFormalParameter(_)
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFormalParameter(_)
         | AnyJsBindingDeclaration::JsRestParameter(_)
         | AnyJsBindingDeclaration::JsBogusParameter(_)
         | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
