@@ -479,7 +479,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if matches!(element.kind(), T![i] | T![s]) {
+                    if matches!(element.kind(), T![i] | T![I] | T![s] | T![S]) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
