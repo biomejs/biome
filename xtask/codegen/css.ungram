@@ -137,7 +137,7 @@ CssAttributeSelector =
 CssAttributeMatcher =
 	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
 	value: CssAttributeMatcherValue
-	modifier: ('i' | 'I' | 's' | 'S')?
+	modifier: ('i' | 's')?
 
 CssAttributeMatcherValue =
  name: AnyCssAttributeMatcherValue
