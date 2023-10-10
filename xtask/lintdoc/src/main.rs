@@ -99,7 +99,7 @@ fn main() -> Result<()> {
             self.number_or_rules += 1;
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
+                .or_default()
                 .insert(R::METADATA.name, R::METADATA);
         }
     }
@@ -120,7 +120,7 @@ fn main() -> Result<()> {
             self.number_or_rules += 1;
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
+                .or_default()
                 .insert(R::METADATA.name, R::METADATA);
         }
     }
@@ -170,8 +170,10 @@ fn main() -> Result<()> {
             "failed to generate documentation pages for the following rules:\n{}",
             errors
                 .into_iter()
-                .map(|(rule, err)| format!("- {rule}: {err:?}\n"))
-                .collect::<String>()
+                .fold(String::new(), |mut s, (rule, err)| {
+                    s.push_str(&format!("- {rule}: {err:?}\n"));
+                    s
+                })
         );
     }
     let recommended_rules_buffer = format!(

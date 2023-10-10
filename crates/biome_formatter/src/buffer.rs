@@ -123,7 +123,7 @@ impl BufferSnapshot {
                 Err(err) => {
                     panic!(
                         "Tried to unwrap snapshot of type {:?} as {:?}",
-                        err.type_id(),
+                        (*err).type_id(),
                         TypeId::of::<T>()
                     )
                 }
