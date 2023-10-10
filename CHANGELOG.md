@@ -127,6 +127,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule enforce use of `as const` assertion to infer literal types.
   Contributed by @unvalley
 
+- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
+  The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
+  Contributed by @victor-teles
+
 #### Enhancements
 
 - The following rules have now safe code fixes:

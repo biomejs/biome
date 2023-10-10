@@ -726,6 +726,10 @@ export interface Nursery {
 	 */
 	noMisleadingInstantiator?: RuleConfiguration;
 	/**
+	 * Disallow shorthand assign when variable appears on both sides.
+	 */
+	noMisrefactoredShorthandAssign?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1338,6 +1342,7 @@ export type Category =
 	| "lint/nursery/noGlobalIsNan"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
+	| "lint/nursery/noMisrefactoredShorthandAssign"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"

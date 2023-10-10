@@ -8,6 +8,7 @@ pub(crate) mod no_empty_character_class_in_regex;
 pub(crate) mod no_excessive_complexity;
 pub(crate) mod no_fallthrough_switch_clause;
 pub(crate) mod no_misleading_instantiator;
+pub(crate) mod no_misrefactored_shorthand_assign;
 pub(crate) mod no_useless_else;
 pub(crate) mod no_void;
 pub(crate) mod use_arrow_function;
@@ -27,6 +28,7 @@ declare_group! {
             self :: no_excessive_complexity :: NoExcessiveComplexity ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
+            self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_useless_else :: NoUselessElse ,
             self :: no_void :: NoVoid ,
             self :: use_arrow_function :: UseArrowFunction ,

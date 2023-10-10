@@ -209,6 +209,31 @@ impl JsBinaryOperator {
             JsBinaryOperator::BitwiseXor => OperatorPrecedence::BitwiseXor,
         }
     }
+
+    /// Determines whether a binary operator is commutative, meaning that the order of its operands
+    /// does not affect the result.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::JsBinaryOperator;
+    ///
+    /// let times = JsBinaryOperator::Times;
+    ///
+    /// assert!(times.is_commutative());
+    ///
+    ///  let plus = JsBinaryOperator::Plus; // Non-commutative operator
+    /// assert!(!plus.is_commutative());
+    /// ```
+    pub const fn is_commutative(&self) -> bool {
+        matches!(
+            self,
+            JsBinaryOperator::Times
+                | JsBinaryOperator::BitwiseAnd
+                | JsBinaryOperator::BitwiseOr
+                | JsBinaryOperator::BitwiseXor
+        )
+    }
 }
 
 impl JsBinaryExpression {
