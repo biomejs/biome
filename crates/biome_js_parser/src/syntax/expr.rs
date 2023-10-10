@@ -4,7 +4,7 @@
 //! See the [ECMAScript spec](https://www.ecma-international.org/ecma-262/5.1/#sec-11).
 
 use super::typescript::*;
-use crate::lexer::{LexContext, ReLexContext};
+use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser};
 use crate::parser::{JsParserCheckpoint, RecoveryResult};
 use crate::prelude::*;
@@ -173,7 +173,7 @@ pub(super) fn parse_literal_expression(p: &mut JsParser) -> ParsedSyntax {
             JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION
         }
         T![/] | T![/=] => {
-            if p.re_lex(ReLexContext::Regex) == JS_REGEX_LITERAL {
+            if p.re_lex(JsReLexContext::Regex) == JS_REGEX_LITERAL {
                 JS_REGEX_LITERAL_EXPRESSION
             } else {
                 return Absent;
@@ -488,7 +488,7 @@ fn parse_binary_or_logical_expression_recursive(
     loop {
         // test_err js js_right_shift_comments
         // 1 >> /* a comment */ > 2;
-        let op = p.re_lex(ReLexContext::BinaryOperator);
+        let op = p.re_lex(JsReLexContext::BinaryOperator);
 
         if (op == T![as] && p.has_preceding_line_break())
             || (op == T![satisfies] && p.has_preceding_line_break())
@@ -1603,7 +1603,7 @@ fn parse_template_literal(
     in_optional_chain: bool,
     tagged: bool,
 ) -> CompletedMarker {
-    p.bump_with_context(BACKTICK, LexContext::TemplateElement { tagged });
+    p.bump_with_context(BACKTICK, JsLexContext::TemplateElement { tagged });
 
     let elements_list = p.start();
     parse_template_elements(
@@ -1655,7 +1655,7 @@ pub(crate) fn parse_template_elements<P>(
         match p.cur() {
             TEMPLATE_CHUNK => {
                 let m = p.start();
-                p.bump_with_context(TEMPLATE_CHUNK, LexContext::TemplateElement { tagged });
+                p.bump_with_context(TEMPLATE_CHUNK, JsLexContext::TemplateElement { tagged });
                 m.complete(p, chunk_kind);
             },
             DOLLAR_CURLY => {
@@ -1674,13 +1674,13 @@ pub(crate) fn parse_template_elements<P>(
                     }
                 }
 
-                p.bump_with_context(T!['}'], LexContext::TemplateElement { tagged });
+                p.bump_with_context(T!['}'], JsLexContext::TemplateElement { tagged });
                 e.complete(p, element_kind);
             }
             ERROR_TOKEN => {
                 let err = p.err_builder("Invalid template literal",p.cur_range(), );
                 p.error(err);
-                p.bump_with_context(p.cur(), LexContext::TemplateElement { tagged });
+                p.bump_with_context(p.cur(), JsLexContext::TemplateElement { tagged });
             }
             t => unreachable!("Anything not template chunk or dollarcurly should have been eaten by the lexer, but {:?} was found", t),
         };

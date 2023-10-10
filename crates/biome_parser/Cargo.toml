@@ -15,4 +15,5 @@ version              = "0.1.0"
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
+bitflags          = { workspace = true }
 drop_bomb         = "0.1.5"

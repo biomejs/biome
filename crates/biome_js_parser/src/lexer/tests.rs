@@ -1,9 +1,12 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use super::{LexContext, Lexer, TextSize};
+use super::{JsLexContext, JsLexer, TextRange, TextSize};
 use crate::span::Span;
 use biome_js_syntax::JsSyntaxKind::{self, EOF};
+use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
+use biome_js_syntax::T;
+use biome_parser::lexer::{BufferedLexer, Lexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -13,14 +16,14 @@ use std::time::Duration;
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = Lexer::from_str($src);
+        let mut lexer = JsLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token(LexContext::default()) != EOF {
+        while lexer.next_token(JsLexContext::default()) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
@@ -72,10 +75,10 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = Lexer::from_str(&cloned);
+        let mut lexer = JsLexer::from_str(&cloned);
         let mut tokens = vec![];
 
-        while lexer.next_token(LexContext::default()) != EOF {
+        while lexer.next_token(JsLexContext::default()) != EOF {
             tokens.push(lexer.current_range());
         }
 
@@ -1348,8 +1351,8 @@ fn keywords() {
             "Expected `JsSyntaxKind::from_keyword` to return a kind for keyword {keyword}.",
         );
 
-        let mut lexer = Lexer::from_str(keyword);
-        lexer.next_token(LexContext::default());
+        let mut lexer = JsLexer::from_str(keyword);
+        lexer.next_token(JsLexContext::default());
 
         let lexed_kind = lexer.current();
         assert_eq!(
@@ -1367,6 +1370,94 @@ fn keywords() {
             lexed_range.len()
         );
 
-        assert_eq!(lexer.next_token(LexContext::default()), EOF);
+        assert_eq!(lexer.next_token(JsLexContext::default()), EOF);
     }
+}
+
+#[test]
+fn without_lookahead() {
+    let lexer = JsLexer::from_str("let a\n = 5");
+    let mut buffered = BufferedLexer::new(lexer);
+
+    buffered.next_token(JsLexContext::default());
+    assert_eq!(buffered.current(), T![let]);
+    assert!(!buffered.has_preceding_line_break());
+    assert_eq!(
+        buffered.current_range(),
+        TextRange::at(TextSize::from(0), TextSize::from(3))
+    );
+
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![ident]);
+    assert_eq!(buffered.next_token(JsLexContext::default()), NEWLINE);
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![=]);
+    assert!(buffered.has_preceding_line_break());
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+    assert_eq!(
+        buffered.next_token(JsLexContext::default()),
+        JS_NUMBER_LITERAL
+    );
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![EOF]);
+}
+
+#[test]
+fn lookahead() {
+    let lexer = JsLexer::from_str("let a\n = 5");
+    let mut buffered = BufferedLexer::new(lexer);
+
+    buffered.next_token(JsLexContext::default());
+    assert_eq!(buffered.current(), T![let]);
+    assert!(!buffered.has_preceding_line_break());
+    assert_eq!(
+        buffered.current_range(),
+        TextRange::at(TextSize::from(0), TextSize::from(3))
+    );
+
+    {
+        let lookahead = buffered.lookahead().map(|l| l.kind()).collect::<Vec<_>>();
+
+        assert_eq!(
+            lookahead,
+            vec![
+                WHITESPACE,
+                T![ident],
+                NEWLINE,
+                WHITESPACE,
+                T![=],
+                WHITESPACE,
+                JS_NUMBER_LITERAL,
+                T![EOF]
+            ]
+        );
+    }
+
+    assert_eq!(buffered.current(), T![let]);
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+
+    {
+        let mut lookahead = buffered.lookahead();
+        let nth1 = lookahead.next().unwrap();
+        let nth2 = lookahead.next().unwrap();
+        let nth3 = lookahead.next().unwrap();
+        let nth4 = lookahead.next().unwrap();
+
+        assert_eq!(nth1.kind(), T![ident]);
+        assert_eq!(nth2.kind(), NEWLINE);
+        assert_eq!(nth3.kind(), WHITESPACE);
+        assert_eq!(nth4.kind(), T![=]);
+        assert!(nth4.has_preceding_line_break());
+    }
+
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![ident]);
+    assert_eq!(buffered.next_token(JsLexContext::default()), NEWLINE);
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![=]);
+    assert!(buffered.has_preceding_line_break());
+    assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
+    assert_eq!(
+        buffered.next_token(JsLexContext::default()),
+        JS_NUMBER_LITERAL
+    );
+    assert_eq!(buffered.next_token(JsLexContext::default()), T![EOF]);
 }

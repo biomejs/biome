@@ -1,43 +1,50 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use super::{Lexer, TextSize};
+use super::{CssLexer, TextSize};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
+use biome_css_syntax::CssSyntaxKind::EOF;
+use biome_parser::lexer::Lexer;
+use crate::lexer::CssLexContext;
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = Lexer::from_str($src);
+        let mut lexer = CssLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
         let mut new_str = String::with_capacity($src.len());
-        let tokens: Vec<_> = lexer.collect();
+        let mut tokens = vec![];
+
+        while lexer.next_token(CssLexContext::default()) != EOF {
+            tokens.push((lexer.current(), lexer.current_range()));
+        }
 
         $(
             assert_eq!(
-                tokens[idx].kind,
+                tokens[idx].0,
                 biome_css_syntax::CssSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
-                tokens[idx].kind,
+                tokens[idx].0,
             );
 
             assert_eq!(
-                tokens[idx].range.len(),
+                tokens[idx].1.len(),
                 TextSize::from($len),
                 "expected token length of {}, but found {:?} for token {:?}",
                 $len,
-                tokens[idx].range.len(),
-                tokens[idx].kind,
+                tokens[idx].1.len(),
+                tokens[idx].0,
             );
 
-            new_str.push_str(&$src[tokens[idx].range]);
-            tok_idx += tokens[idx].range.len();
+            new_str.push_str(&$src[tokens[idx].1]);
+            tok_idx += tokens[idx].1.len();
 
             idx += 1;
         )*
@@ -47,7 +54,7 @@ macro_rules! assert_lex {
                 "expected {} tokens but lexer returned {}, first unexpected token is '{:?}'",
                 idx,
                 tokens.len(),
-                tokens[idx].kind
+                tokens[idx].0
             );
         } else {
             assert_eq!(idx, tokens.len());
@@ -66,8 +73,12 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = Lexer::from_str(&cloned);
-        let tokens: Vec<_> = lexer.map(|token| token.range).collect();
+        let mut lexer = CssLexer::from_str(&cloned);
+        let mut tokens = vec![];
+
+        while lexer.next_token(CssLexContext::default()) != EOF {
+            tokens.push(lexer.current_range());
+        }
 
         sender
             .send(tokens)
@@ -97,7 +108,6 @@ fn losslessness(string: String) -> bool {
 fn empty() {
     assert_lex! {
         "",
-        EOF:0
     }
 }
 
@@ -105,50 +115,43 @@ fn empty() {
 fn string() {
     assert_lex! {
         "'5098382'",
-        CSS_STRING_LITERAL:9,
-        EOF:0
+        CSS_STRING_LITERAL:9
     }
 
     // double quote
     assert_lex! {
         r#"'hel"lo"'"#,
-        CSS_STRING_LITERAL:9,
-        EOF:0
+        CSS_STRING_LITERAL:9
     }
 
     // escaped quote
     assert_lex! {
         r"'hel\'lo\''",
-        CSS_STRING_LITERAL:11,
-        EOF:0
+        CSS_STRING_LITERAL:11
     }
 
     // escaped quote
     assert_lex! {
         r#""hel\"lo\"""#,
-        CSS_STRING_LITERAL:11,
-        EOF:0
+        CSS_STRING_LITERAL:11
     }
 
     // unicode
     assert_lex! {
         "'юникод'",
-        CSS_STRING_LITERAL:14,
-        EOF:0
+        CSS_STRING_LITERAL:14
     }
 
     // missing single closing quote
     assert_lex! {
         "'he",
-        ERROR_TOKEN:3,
-        EOF:0
+        ERROR_TOKEN:3
     }
 
     // missing double closing quote
     assert_lex! {
         r#""he"#,
-        ERROR_TOKEN:3,
-        EOF:0
+        ERROR_TOKEN:3
     }
 
     // line break
@@ -157,8 +160,7 @@ fn string() {
     "#,
         ERROR_TOKEN:3,
         NEWLINE:1,
-        WHITESPACE:4,
-        EOF:0
+        WHITESPACE:4
     }
 
     // line break
@@ -168,27 +170,23 @@ fn string() {
         ERROR_TOKEN:3,
         NEWLINE:1,
         WHITESPACE:4,
-        ERROR_TOKEN:1,
-        EOF:0
+        ERROR_TOKEN:1
     }
 
     assert_lex! {
         r#""Escaped \n""#,
-        CSS_STRING_LITERAL:12,
-        EOF:0
+        CSS_STRING_LITERAL:12
     }
 
     assert_lex! {
         r#""Escaped \r""#,
-        CSS_STRING_LITERAL:12,
-        EOF:0
+        CSS_STRING_LITERAL:12
     }
 
     // invalid escape sequence
     assert_lex! {
         r"'\0'",
-        ERROR_TOKEN:4,
-        EOF:0
+        ERROR_TOKEN:4
     }
 }
 
@@ -196,74 +194,62 @@ fn string() {
 fn number() {
     assert_lex! {
         "5098382",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 
     assert_lex! {
         "509.382",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 
     assert_lex! {
         ".382",
-        CSS_NUMBER_LITERAL:4,
-        EOF:0
+        CSS_NUMBER_LITERAL:4
     }
 
     assert_lex! {
         "+123",
-        CSS_NUMBER_LITERAL:4,
-        EOF:0
+        CSS_NUMBER_LITERAL:4
     }
 
     assert_lex! {
         "-123",
-        CSS_NUMBER_LITERAL:4,
-        EOF:0
+        CSS_NUMBER_LITERAL:4
     }
 
     assert_lex! {
         "+123",
-        CSS_NUMBER_LITERAL:4,
-        EOF:0
+        CSS_NUMBER_LITERAL:4
     }
 
     assert_lex! {
         "123e10",
-        CSS_NUMBER_LITERAL:6,
-        EOF:0
+        CSS_NUMBER_LITERAL:6
     }
 
     assert_lex! {
         "123e+10",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 
     assert_lex! {
         "123e-10",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 
     assert_lex! {
         "123E10",
-        CSS_NUMBER_LITERAL:6,
-        EOF:0
+        CSS_NUMBER_LITERAL:6
     }
 
     assert_lex! {
         "123E+10",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 
     assert_lex! {
         "123E-10",
-        CSS_NUMBER_LITERAL:7,
-        EOF:0
+        CSS_NUMBER_LITERAL:7
     }
 }
 
@@ -274,7 +260,6 @@ fn cdo_and_cdc() {
         CDO:4,
         WHITESPACE:1,
         CDC:3
-        EOF:0
     }
 }
 
@@ -283,8 +268,7 @@ fn dimension() {
     assert_lex! {
         "100vh",
         CSS_NUMBER_LITERAL:3,
-        IDENT:2,
-        EOF:0
+        IDENT:2
     }
 }
 
@@ -298,8 +282,7 @@ fn keywords() {
         WHITESPACE:1,
         IMPORTANT_KW:9,
         WHITESPACE:1,
-        FROM_KW:4,
-        EOF:0
+        FROM_KW:4
     }
 }
 
@@ -308,68 +291,57 @@ fn identifier() {
     assert_lex! {
         "--",
         MINUS:1,
-        MINUS:1,
-        EOF:0
+        MINUS:1
     }
 
     assert_lex! {
         "i4f5g7",
-        IDENT:6,
-        EOF:0
+        IDENT:6
     }
 
     assert_lex! {
         "class",
-        IDENT:5,
-        EOF:0
+        IDENT:5
     }
 
     assert_lex! {
         r"cl\aass",
-        IDENT:7,
-        EOF:0
+        IDENT:7
     }
 
     assert_lex! {
         r"\ccl\aass",
-        IDENT:9,
-        EOF:0
+        IDENT:9
     }
 
     assert_lex! {
         "-class",
-        IDENT:6,
-        EOF:0
+        IDENT:6
     }
 
     assert_lex! {
         r"-cl\aass",
-        IDENT:8,
-        EOF:0
+        IDENT:8
     }
 
     assert_lex! {
         r"-\acl\aass",
-        IDENT:10,
-        EOF:0
+        IDENT:10
     }
 
     assert_lex! {
         "--property",
-        CSS_CUSTOM_PROPERTY:10,
-        EOF:0
+        IDENT:10
     }
 
     assert_lex! {
         r"--prop\eerty",
-        CSS_CUSTOM_PROPERTY:12,
-        EOF:0
+        IDENT:12
     }
 
     assert_lex! {
         r"--\pprop\eerty",
-        CSS_CUSTOM_PROPERTY:14,
-        EOF:0
+        IDENT:14
     }
 }
 
@@ -380,14 +352,12 @@ fn single_line_comments() {
     ",
         COMMENT:5,
         NEWLINE:1,
-        WHITESPACE:4,
-        EOF:0
+        WHITESPACE:4
     }
 
     assert_lex! {
         "//a",
-        COMMENT:3,
-        EOF:0
+        COMMENT:3
     }
 }
 
@@ -396,19 +366,16 @@ fn block_comment() {
     assert_lex! {
         "/*
         */",
-        MULTILINE_COMMENT:13,
-        EOF:0
+        MULTILINE_COMMENT:13
     }
 
     assert_lex! {
         "/* */",
-        COMMENT:5,
-        EOF:0
+        COMMENT:5
     }
 
     assert_lex! {
         "/* *",
-        COMMENT:4,
-        EOF:0
+        COMMENT:4
     }
 }

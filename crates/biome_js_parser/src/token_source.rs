@@ -1,14 +1,15 @@
-use crate::lexer::{BufferedLexer, LexContext, Lexer, LexerCheckpoint, ReLexContext, TextRange};
+use crate::lexer::{JsLexContext, JsLexer, JsReLexContext, TextRange};
 use crate::prelude::*;
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::EOF;
+use biome_parser::lexer::{BufferedLexer, LexContext, LexerCheckpoint};
 use biome_parser::token_source::Trivia;
 use biome_rowan::{TextSize, TriviaPieceKind};
 use std::collections::VecDeque;
 
 /// Token source for the parser that skips over any non-trivia token.
 pub struct JsTokenSource<'l> {
-    lexer: BufferedLexer<'l>,
+    lexer: BufferedLexer<'l, JsLexer<'l>>,
 
     /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
     pub(super) trivia_list: Vec<Trivia>,
@@ -35,7 +36,7 @@ struct Lookahead {
 
 impl<'l> JsTokenSource<'l> {
     /// Creates a new token source.
-    pub(crate) fn new(lexer: BufferedLexer<'l>) -> JsTokenSource<'l> {
+    pub(crate) fn new(lexer: BufferedLexer<'l, JsLexer<'l>>) -> JsTokenSource<'l> {
         JsTokenSource {
             lexer,
             trivia_list: vec![],
@@ -46,16 +47,16 @@ impl<'l> JsTokenSource<'l> {
 
     /// Creates a new token source for the given string
     pub fn from_str(source: &'l str) -> JsTokenSource<'l> {
-        let lexer = Lexer::from_str(source);
+        let lexer = JsLexer::from_str(source);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);
 
-        source.next_non_trivia_token(LexContext::default(), true);
+        source.next_non_trivia_token(JsLexContext::default(), true);
         source
     }
 
     #[inline]
-    fn next_non_trivia_token(&mut self, context: LexContext, first_token: bool) {
+    fn next_non_trivia_token(&mut self, context: JsLexContext, first_token: bool) {
         let mut processed_tokens = 0;
         let mut trailing = !first_token;
 
@@ -139,7 +140,7 @@ impl<'l> JsTokenSource<'l> {
         None
     }
 
-    pub fn re_lex(&mut self, mode: ReLexContext) -> JsSyntaxKind {
+    pub fn re_lex(&mut self, mode: JsReLexContext) -> JsSyntaxKind {
         let current_kind = self.current();
 
         let new_kind = self.lexer.re_lex(mode);
@@ -204,11 +205,11 @@ impl<'source> TokenSource for JsTokenSource<'source> {
 
     #[inline(always)]
     fn bump(&mut self) {
-        self.bump_with_context(LexContext::Regular)
+        self.bump_with_context(JsLexContext::Regular)
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(LexContext::Regular)
+        self.skip_as_trivia_with_context(JsLexContext::Regular)
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
@@ -217,7 +218,7 @@ impl<'source> TokenSource for JsTokenSource<'source> {
 }
 
 impl<'source> BumpWithContext for JsTokenSource<'source> {
-    type Context = LexContext;
+    type Context = JsLexContext;
 
     #[inline(always)]
     fn bump_with_context(&mut self, context: Self::Context) {
@@ -232,7 +233,7 @@ impl<'source> BumpWithContext for JsTokenSource<'source> {
     }
 
     /// Skips the current token as skipped token trivia
-    fn skip_as_trivia_with_context(&mut self, context: LexContext) {
+    fn skip_as_trivia_with_context(&mut self, context: JsLexContext) {
         if self.current() != EOF {
             if !context.is_regular() {
                 self.lookahead_offset = 0;
@@ -275,7 +276,7 @@ impl<'source> NthToken for JsTokenSource<'source> {
 
 #[derive(Debug)]
 pub struct TokenSourceCheckpoint {
-    lexer: LexerCheckpoint,
+    lexer: LexerCheckpoint<JsSyntaxKind>,
     /// A `u32` should be enough because `TextSize` is also limited to `u32`.
     /// The worst case is a document where every character is its own token. This would
     /// result in `u32::MAX` tokens
