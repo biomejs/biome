@@ -64,7 +64,7 @@ pub trait AriaRoleDefinition: Debug {
 
     /// Returns a concrete type name.
     fn type_name(&self) -> &'static str {
-        return std::any::type_name::<Self>();
+        std::any::type_name::<Self>()
     }
 }
 

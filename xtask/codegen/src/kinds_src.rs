@@ -686,7 +686,6 @@ impl Field {
                 format_ident!("{}_token", name)
             }
             Field::Node { name, .. } => {
-                let name = name;
                 let (prefix, tail) = name.split_once('_').unwrap_or(("", name));
                 let final_name = if LANGUAGE_PREFIXES.contains(&prefix) {
                     tail

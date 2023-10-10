@@ -203,7 +203,7 @@ where
     fn enclosing_node(&self) -> &SyntaxNode<Style::Language> {
         let element = match self.following_node_index {
             None => self.parents.last(),
-            Some(index) if index == 0 => Some(&self.parents[0]),
+            Some(0) => Some(&self.parents[0]),
             Some(index) => Some(&self.parents[index - 1]),
         };
 

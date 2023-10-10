@@ -21,7 +21,6 @@ impl FormatNodeRule<TsInterfaceDeclaration> for FormatTsInterfaceDeclaration {
         let l_curly_token = l_curly_token?;
         let r_curly_token = r_curly_token?;
         let id = id?;
-        let type_parameters = type_parameters;
 
         let should_indent_extends_only = type_parameters.as_ref().map_or(false, |params| {
             !f.comments().has_trailing_line_comment(params.syntax())
