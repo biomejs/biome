@@ -1,3 +1,4 @@
+use crate::generate_schema::generate_configuration_schema;
 use biome_cli::biome_command;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -5,7 +6,7 @@ use biome_js_parser::{parse_module, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_service::VERSION;
 use std::fs;
-use xtask::{project_root, Result};
+use xtask::{project_root, Mode, Result};
 
 const VSCODE_FRONTMATTER: &str = r#"---
 title: VSCode extension
@@ -21,31 +22,17 @@ tableOfContents:
 ---
 "#;
 
-const SCHEMA_TEMPLATE: &str = r#"// Run `BIOME_VERSION=<version number> cargo codegen-website
-// to generate a new schema
-import {readFileSync} from "fs";
-import {join, resolve} from "path"
-
-export function get() {
-	const schemaPath = resolve(join("..", "packages", "@biomejs", "biome", "configuration_schema.json"));
-	const schema = readFileSync(schemaPath, "utf8")
-
-	return new Response(schema, {
-		status: 200,
-		headers: {
-			"content-type": "application/json"
-		}
-	})
-}"#;
-
 /// Generates
 pub(crate) fn generate_files() -> Result<()> {
+    generate_configuration_schema(Mode::Overwrite)?;
+    let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
     let readme = fs::read_to_string(project_root().join("editors/vscode/README.md"))?;
     let changelog = fs::read_to_string(project_root().join("CHANGELOG.md"))?;
     fs::remove_file(project_root().join("website/src/content/docs/reference/vscode.mdx")).ok();
     fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.mdx")).ok();
     let vscode = format!("{VSCODE_FRONTMATTER}{readme}");
     let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
+
     fs::write(
         project_root().join("website/src/content/docs/reference/vscode.mdx"),
         vscode,
@@ -87,7 +74,24 @@ pub(crate) fn generate_files() -> Result<()> {
             fs::remove_dir(schema_version_folder.clone())?;
         }
         fs::create_dir(schema_version_folder.clone())?;
-        let node = parse_module(&SCHEMA_TEMPLATE, JsParserOptions::default());
+        let mut content = String::new();
+        let schema_content = fs::read_to_string(schema_path_npm)?;
+        content.push_str(
+            r#"// Run `BIOME_VERSION=<version number> cargo codegen-website
+// to generate a new schema
+export function GET() {"#,
+        );
+        content.push_str(&format!("const schema  = {};", schema_content));
+        content.push_str(
+            r#"return new Response(schema, {
+            status: 200,
+            headers: {
+                "content-type": "application/json"
+            }
+        })
+    }"#,
+        );
+        let node = parse_module(&content, JsParserOptions::default());
         let result = format_node(
             JsFormatOptions::new(JsFileSource::js_module()),
             &node.syntax(),
