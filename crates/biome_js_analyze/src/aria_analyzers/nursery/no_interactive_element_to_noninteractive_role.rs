@@ -66,6 +66,13 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
                     return None;
                 }
 
+                // a tag without href is considered non-interactive
+                if element_name.text_trimmed() == "a"
+                    && node.find_attribute_by_name("href").is_none()
+                {
+                    return None;
+                }
+
                 return Some(());
             }
         }

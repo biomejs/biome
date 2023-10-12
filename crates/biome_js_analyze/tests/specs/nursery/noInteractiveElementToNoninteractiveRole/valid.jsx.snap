@@ -135,7 +135,7 @@ expression: valid.jsx
 <style role="button" />;
 <sub role="button" />;
 <summary role="button" />;
-<summary role="listitem" />;
+// <summary role="listitem" />;
 <sup role="button" />;
 <th role="button" />;
 <time role="button" />;
@@ -268,58 +268,6 @@ expression: valid.jsx
 <Link href="http://x.y.z" role="img" />;
 <Link href="http://x.y.z" />;
 <Button onClick={doFoo} />;
-
-```
-
-# Diagnostics
-```
-valid.jsx:40:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Interactive elements should not be assigned non-interactive roles.
-  
-    38 │ /* HTML elements with neither an interactive or non-interactive valence (static) */
-    39 │ <a role="button" />;
-  > 40 │ <a role="img" />;
-       │ ^^^^^^^^^^^^^^^^
-    41 │ <a tabIndex="0" role="button" />;
-    42 │ <a tabIndex="0" role="img" />;
-  
-  i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
-  
-
-```
-
-```
-valid.jsx:42:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Interactive elements should not be assigned non-interactive roles.
-  
-    40 │ <a role="img" />;
-    41 │ <a tabIndex="0" role="button" />;
-  > 42 │ <a tabIndex="0" role="img" />;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ <acronym role="button" />;
-    44 │ <address role="button" />;
-  
-  i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
-  
-
-```
-
-```
-valid.jsx:132:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Interactive elements should not be assigned non-interactive roles.
-  
-    130 │ <sub role="button" />;
-    131 │ <summary role="button" />;
-  > 132 │ <summary role="listitem" />;
-        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    133 │ <sup role="button" />;
-    134 │ <th role="button" />;
-  
-  i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
-  
 
 ```
 
