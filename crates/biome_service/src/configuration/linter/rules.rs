@@ -2219,7 +2219,7 @@ pub struct Nursery {
     #[bpaf(long("no-global-is-nan"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_global_is_nan: Option<RuleConfiguration>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements."]
     #[bpaf(
         long("no-interactive-element-to-noninteractive-role"),
         argument("on|off|warn"),

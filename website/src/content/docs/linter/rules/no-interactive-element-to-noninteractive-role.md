@@ -8,44 +8,42 @@ title: noInteractiveElementToNoninteractiveRole (since vnext)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Succinct description of the rule.
+Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 
-Put context and details about the rule.
-As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+Interactive HTML elements indicate controls in the user interface.
+Interactive elements include `<a href>`, `<button>`, `<input>`, `<select>`, `<textarea>`.
+Non-interactive HTML elements and non-interactive ARIA roles indicate content and containers in the user interface.
+Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
 
-Try to stay consistent with the descriptions of implemented rules.
+[WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert an interactive element to a non-interactive element.
+Non-interactive ARIA roles include `article`, `banner`, `complementary`, `img`, `listitem`, `main`, `region` and `tooltip`.
 
-Add a link to the corresponding ESLint rule (if any):
-
-Source: https://eslint.org/docs/latest/rules/rule-name
+Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-interactive-element-to-noninteractive-role.md
 
 ## Examples
 
 ### Invalid
 
 ```jsx
-var a = 1;
-a = 2;
+<input role="img" />;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noInteractiveElementToNoninteractiveRole.js:1:11 <a href="https://biomejs.dev/lint/rules/no-interactive-element-to-noninteractive-role">lint/nursery/noInteractiveElementToNoninteractiveRole</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noInteractiveElementToNoninteractiveRole.js:1:1 <a href="https://biomejs.dev/lint/rules/no-interactive-element-to-noninteractive-role">lint/nursery/noInteractiveElementToNoninteractiveRole</a> ━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable is read here.</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Interactive elements should not be assigned non-interactive roles.</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a = 1;
-   <strong>   │ </strong>          
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>a = 2;
-   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;input role=&quot;img&quot; /&gt;;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This note will give you more information.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Wrap your interactive element in a &lt;div&gt; with the desired role or put the content inside your interactive element.</span>
   
 </code></pre>
 
 ## Valid
 
 ```jsx
-var a = 1;
+<input role="button" />;
 ```
 
 ## Related links

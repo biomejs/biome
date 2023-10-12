@@ -1062,7 +1062,7 @@
 					]
 				},
 				"noInteractiveElementToNoninteractiveRole": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

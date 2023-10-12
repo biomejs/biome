@@ -718,7 +718,7 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
 	/**
