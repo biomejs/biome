@@ -83,7 +83,7 @@ export function GET() {"#,
         );
         content.push_str(&format!("const schema  = {};", schema_content));
         content.push_str(
-            r#"return new Response(schema, {
+            r#"return new Response(JSON.stringify(schema), {
             status: 200,
             headers: {
                 "content-type": "application/json"
