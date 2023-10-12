@@ -1,9 +1,10 @@
 mod parse_error;
 mod selector;
 
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expect_any_selector, expect_block};
-use crate::syntax::selector::parse_compound_selector;
+use crate::syntax::selector::parse_selector;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -48,6 +49,7 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
     rules.complete(p, CSS_RULE_LIST);
 }
 
+#[inline]
 pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
@@ -79,7 +81,7 @@ impl ParseSeparatedList for CssSelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_compound_selector(p)
+        parse_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -118,18 +120,40 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(super) fn parse_identifier(p: &mut CssParser, kind: CssSyntaxKind) -> ParsedSyntax {
+pub(super) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
+    parse_identifier(p, CssLexContext::Regular)
+}
+#[inline]
+pub(super) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump_remap(T![ident]);
-    let identifier = m.complete(p, kind);
+    p.bump_remap_with_context(T![ident], context);
+    let identifier = m.complete(p, CSS_IDENTIFIER);
 
     Present(identifier)
 }
 #[inline]
 pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
-    matches!(p.cur(), T![ident]) || p.cur().is_contextual_keyword()
+    is_nth_at_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
+}
+
+#[inline]
+pub(crate) fn parse_css_string(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(CSS_STRING_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(CSS_STRING_LITERAL);
+
+    Present(m.complete(p, CSS_STRING))
 }

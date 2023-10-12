@@ -2,10 +2,10 @@
 
 use crate::{
     AnyJsArrayAssignmentPatternElement, AnyJsAssignmentPattern, AnyJsSwitchClause,
-    JsForVariableDeclaration, JsStatementList, JsSyntaxToken as SyntaxToken, JsVariableDeclaration,
-    TsModuleDeclaration, T,
+    JsForVariableDeclaration, JsStatementList, JsSyntaxKind, JsSyntaxToken as SyntaxToken,
+    JsVariableDeclaration, JsVariableDeclarator, TsModuleDeclaration, T,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 impl AnyJsSwitchClause {
     pub fn clause_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -126,6 +126,17 @@ impl AnyJsVariableDeclaration {
             AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind().ok(),
             AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token().ok(),
         }
+    }
+}
+
+impl JsVariableDeclarator {
+    /// Variable declaration associated to this declarator.
+    pub fn declaration(&self) -> Option<AnyJsVariableDeclaration> {
+        self.syntax()
+            .ancestors()
+            .skip(1)
+            .find(|x| x.kind() != JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST)
+            .and_then(AnyJsVariableDeclaration::cast)
     }
 }
 

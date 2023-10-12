@@ -58,7 +58,7 @@ assert_semantics! {
     ",
     ok_type_parameter_interface, "
         export interface /*START A*/ EventHandler<Event /*# Event */ /*@ A */ extends string> {
-            [`on${ Event /*READ Event */ }`]: (event: Event /*READ Event */, data: unknown) => void;
+            on: (event: Event /*READ Event */, data: unknown) => void;
         } /*END A*/
     ",
 }

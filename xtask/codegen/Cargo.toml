@@ -59,4 +59,4 @@ schema = [
   "biome_json_parser",
   "biome_diagnostics",
 ]
-website = ["biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]
+website = ["schema", "biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]

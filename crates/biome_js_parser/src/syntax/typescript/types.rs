@@ -29,7 +29,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use bitflags::bitflags;
 use smallvec::SmallVec;
 
-use crate::lexer::{LexContext, ReLexContext};
+use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
 use crate::JsSyntaxFeature::TypeScript;
@@ -1548,7 +1548,7 @@ fn parse_ts_template_literal_type(p: &mut JsParser, context: TypeContext) -> Par
     }
 
     let m = p.start();
-    p.bump_with_context(BACKTICK, LexContext::TemplateElement { tagged: false });
+    p.bump_with_context(BACKTICK, JsLexContext::TemplateElement { tagged: false });
 
     let elements = p.start();
     parse_template_elements(
@@ -1978,7 +1978,7 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
     }
 
     try_parse(p, |p| {
-        p.re_lex(ReLexContext::TypeArgumentLessThan);
+        p.re_lex(JsReLexContext::TypeArgumentLessThan);
         let arguments = parse_ts_type_arguments_impl(p, TypeContext::default(), false);
 
         if p.last() == Some(T![>]) && can_follow_type_arguments_in_expr(p, context) {
@@ -2013,7 +2013,7 @@ pub(crate) fn parse_ts_type_arguments(p: &mut JsParser, context: TypeContext) ->
     // test ts ts_type_arguments_left_shift
     // type A<T> = T;
     // type B = A<<C>(c: C) => undefined>;
-    let current = p.re_lex(ReLexContext::TypeArgumentLessThan);
+    let current = p.re_lex(JsReLexContext::TypeArgumentLessThan);
     if current != T![<] {
         return Absent;
     }

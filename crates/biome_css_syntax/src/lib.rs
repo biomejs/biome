@@ -38,10 +38,17 @@ impl CssSyntaxKind {
         true
     }
 
-    /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)
+    /// Returns `true` for contextual keywords
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {
         (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (VAR_KW as u16)
+    }
+
+    /// Returns `true` for contextual attribute modifier keywords
+    #[inline]
+    pub const fn is_attribute_modifier_keyword(self) -> bool {
+        let k = self as u16;
+        k == (I_KW as u16) || k == (S_KW as u16)
     }
 
     /// Returns true for all non-contextual keywords (includes future reserved keywords)

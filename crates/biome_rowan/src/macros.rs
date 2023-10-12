@@ -140,7 +140,7 @@ macro_rules! declare_node_union {
     };
 }
 
-/// This trait is implemented for tuples of AstNode types of size 1 to 12 if
+/// This trait is implemented for tuples of AstNode types of size 1 to 32 if
 /// all node types share the same associated language (which is then aliased as
 /// the `Language` associated type on [UnionLanguage] itself)
 pub trait UnionLanguage {
@@ -164,5 +164,5 @@ macro_rules! impl_union_language {
 
 impl_union_language!(
     T00, T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18,
-    T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29
+    T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31
 );

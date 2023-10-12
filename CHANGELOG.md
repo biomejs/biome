@@ -16,6 +16,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Import sorting is safe to apply now, and it will be applied when running `check --apply` instead of `check --apply-unsafe`.
 
+- Import sorting now handles Bun imports `bun:<name>`, absolute path imports `/<path>`, and [Node's subpath imports `#<name>`](https://nodejs.org/api/packages.html#subpath-imports). See [our documentation](https://biomejs.dev/analyzer/) for more details. Contributed by @Conaclos
+
 ### CLI
 
 #### Bug fixes
@@ -125,6 +127,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule enforce use of `as const` assertion to infer literal types.
   Contributed by @unvalley
 
+- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
+  The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
+  Contributed by @victor-teles
+
 #### Enhancements
 
 - The following rules have now safe code fixes:
@@ -152,6 +158,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#397](https://github.com/biomejs/biome/issues/397). [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals) now provides correct code fixes for signed numbers. Contributed by @Conaclos
 
 - Fix [452](https://github.com/biomejs/biome/pull/452). The linter panicked when it met a malformed regex (a regex not ending with a slash).
+
+- Fix [#104](https://github.com/biomejs/biome/issues/104). We now correctly handle types and values with the same name.
 
 ### Parser
 

@@ -1,7 +1,36 @@
 ---
-import PackageManagerCommand from "@src/components/PackageManagerCommand.astro"
-let {command} = Astro.props;
-command = `biome ${command}`;
----
+import InlineSVG from "@src/components/InlineSVG.astro";
+interface Props {
+	command: string,
+}
 
-<PackageManagerCommand yarn={command} pnpm={command} npx={command} bunx={command} />
+const { command } = Astro.props;
+const biome = "@biomejs/biome"
+---
+<script>
+	import "@src/frontend-scripts/package-manager-commands"
+</script>
+
+<ul class="package-manager-selector">
+	<li data-name="npm" class="active">
+		<InlineSVG src="npm" />
+		<span>npm</span>
+	</li>
+	<li data-name="yarn">
+		<InlineSVG src="yarn" />
+		<span>yarn</span>
+	</li>
+	<li data-name="pnpm">
+		<InlineSVG src="pnpm" />
+		<span>pnpm</span>
+	</li>
+	<li data-name="bun">
+		<InlineSVG src="bun" />
+		<span>bun</span>
+	</li>
+</ul>
+
+<pre data-name="npm" class="package-manager-command language-shellsession active"><code>npx {biome} {command}</code></pre>
+<pre data-name="yarn" class="package-manager-command language-shellsession"><code>yarn dlx {biome} {command}</code></pre>
+<pre data-name="pnpm" class="package-manager-command language-shellsession"><code>pnpm dlx {biome} {command}</code></pre>
+<pre data-name="bun" class="package-manager-command language-shellsession"><code>bunx {biome} {command}</code></pre>

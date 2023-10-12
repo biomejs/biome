@@ -7,6 +7,7 @@ mod generated;
 pub mod binding_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
+pub mod export_ext;
 pub mod expr_ext;
 pub mod file_source;
 pub mod function_ext;
@@ -28,6 +29,7 @@ pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
     WalkEvent,
 };
+pub use export_ext::*;
 pub use expr_ext::*;
 pub use file_source::*;
 pub use function_ext::*;

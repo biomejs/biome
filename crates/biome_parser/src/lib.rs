@@ -256,6 +256,7 @@ use std::path::Path;
 
 pub mod diagnostic;
 pub mod event;
+pub mod lexer;
 mod marker;
 pub mod parse_lists;
 pub mod parse_recovery;
@@ -482,6 +483,17 @@ pub trait Parser: Sized {
         self.do_bump(kind)
     }
 
+    /// Consume any token but cast it as a different kind using the specified `context.
+    fn bump_remap_with_context(
+        &mut self,
+        kind: Self::Kind,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) where
+        Self::Source: BumpWithContext,
+    {
+        self.do_bump_with_context(kind, context);
+    }
+
     /// Consume any token but cast it as a different kind
     fn bump_remap(&mut self, kind: Self::Kind) {
         self.do_bump(kind);
@@ -545,6 +557,24 @@ pub trait Parser: Sized {
         }
     }
 
+    /// Consume the next token if `kind` matches using the specified `context.
+    fn eat_with_context(
+        &mut self,
+        kind: Self::Kind,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) -> bool
+    where
+        Self::Source: BumpWithContext,
+    {
+        if !self.at(kind) {
+            return false;
+        }
+
+        self.do_bump_with_context(kind, context);
+
+        true
+    }
+
     /// Consume the next token if `kind` matches.
     fn eat(&mut self, kind: Self::Kind) -> bool {
         if !self.at(kind) {
@@ -554,6 +584,24 @@ pub trait Parser: Sized {
         self.do_bump(kind);
 
         true
+    }
+
+    /// Try to eat a specific token kind, if the kind is not there then adds an error to the events stack
+    /// using the specified `context.
+    fn expect_with_context(
+        &mut self,
+        kind: Self::Kind,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) -> bool
+    where
+        Self::Source: BumpWithContext,
+    {
+        if self.eat_with_context(kind, context) {
+            true
+        } else {
+            self.error(expected_token(kind));
+            false
+        }
     }
 
     /// Try to eat a specific token kind, if the kind is not there then adds an error to the events stack.

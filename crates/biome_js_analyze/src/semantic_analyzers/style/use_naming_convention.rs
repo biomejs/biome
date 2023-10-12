@@ -791,7 +791,8 @@ impl Named {
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
                 Named::from_variable_declarator(var)
             }
-            AnyJsBindingDeclaration::JsBogusParameter(_)
+            AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+            | AnyJsBindingDeclaration::JsBogusParameter(_)
             | AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Named::FunctionParameter),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Named::CatchParameter),

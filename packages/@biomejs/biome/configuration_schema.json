@@ -1075,6 +1075,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisrefactoredShorthandAssign": {
+					"description": "Disallow shorthand assign when variable appears on both sides.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [

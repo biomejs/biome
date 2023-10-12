@@ -76,12 +76,13 @@ AnyCssSelector =
 // ^^^^^^^
 CssComplexSelector =
 	left: AnyCssSelector
-	combinator: CssComplexSelectorCombinator
+	combinator: ('>' | '+' | '~' | '||' | 'css_space_literal')
 	right: AnyCssSelector
 
-CssComplexSelectorCombinator =
-	'>' | '+' | '~' | 'css_space_literal'
-
+// .class {}
+// ^^^^^^^
+// a.class {}
+// ^^^^^^^
 CssCompoundSelector =
 	nesting_selector: '&'?
 	simple_selector: AnySimpleSelector?
@@ -126,30 +127,22 @@ CssUniversalSelector =
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
 CssAttributeSelector =
-	name: CssIdentifier
-	attribute_list: CssAttributeList
-
-CssAttributeList = CssAttribute*
-
-CssAttribute =
 	'['
-	attribute_name: CssAttributeName
-	attribute_meta: CssAttributeMeta?
+	name: CssIdentifier
+	matcher: CssAttributeMatcher?
 	']'
-
-CssAttributeName = CssString
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
-CssAttributeMeta =
-	attribute_matcher: CssAttributeMatcher?
-	attribute_modifier: CssAttributeModifier?
-
 CssAttributeMatcher =
-	matcher_type: '~=' | '|=' | '^=' | '$=' | '*=' | '='
-	matcher_name: CssString | CssIdentifier
+	operator: ('~=' | '|=' | '^=' | '$=' | '*=' | '=')
+	value: CssAttributeMatcherValue
+	modifier: ('i' | 's')?
 
-CssAttributeModifier = 'i'
+CssAttributeMatcherValue =
+ name: AnyCssAttributeMatcherValue
+
+AnyCssAttributeMatcherValue = CssString | CssIdentifier
 
 // :nth-type(2) {}
 // ^^^^^^^^^^^^

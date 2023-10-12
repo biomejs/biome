@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeValueWithSameName.ts
+---
+# Input
+```js
+const a = 0;
+export type { a }
+```
+
+# Diagnostics
+```
+invalidTypeValueWithSameName.ts:2:15 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The a variable is undeclared
+  
+    1 │ const a = 0;
+  > 2 │ export type { a }
+      │               ^
+  
+
+```
+
+

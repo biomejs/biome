@@ -1,3 +1,4 @@
+use crate::lexer::CssReLexContext;
 use crate::token_source::CssTokenSource;
 use biome_css_syntax::CssSyntaxKind;
 use biome_parser::diagnostic::merge_diagnostics;
@@ -29,6 +30,13 @@ impl<'source> CssParser<'source> {
             context: ParserContext::default(),
             source: CssTokenSource::from_str(source, config),
         }
+    }
+
+    /// Re-lexes the current token in the specified context. Returns the kind
+    /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
+    #[allow(dead_code)] //TODO remote this once we actually don't use it
+    pub fn re_lex(&mut self, context: CssReLexContext) -> CssSyntaxKind {
+        self.source_mut().re_lex(context)
     }
 
     pub fn finish(self) -> (Vec<Event<CssSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {

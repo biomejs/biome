@@ -1,10 +1,12 @@
 use biome_js_semantic::SemanticEvent;
 use biome_js_syntax::JsFileSource;
+use biome_rowan::TextSize;
 
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};
 use crate::check_file_encoding;
 use crate::runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite};
 use biome_js_parser::JsParserOptions;
+use std::collections::HashSet;
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -79,6 +81,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             options.clone(),
         );
 
+        let mut prev_starts: HashSet<TextSize> = HashSet::default();
         let r = biome_js_parser::parse(&code, JsFileSource::tsx(), options);
         let mut actual: Vec<_> = biome_js_semantic::semantic_events(r.syntax())
             .into_iter()
@@ -91,12 +94,19 @@ impl TestCase for SymbolsMicrosoftTestCase {
                     | SemanticEvent::Read { .. }
                     | SemanticEvent::HoistedRead { .. }
                     | SemanticEvent::Write { .. }
-                    | SemanticEvent::HoistedWrite { .. } => {
-                        let name = x.str(&code);
+                    | SemanticEvent::HoistedWrite { .. }
+                    | SemanticEvent::UnresolvedReference { .. } => {
+                        let name = &code[x.range()];
                         !name.contains('\"') && !name.contains('\'')
                     }
-                    _ => false,
+                    SemanticEvent::ScopeStarted { .. }
+                    | SemanticEvent::ScopeEnded { .. }
+                    | SemanticEvent::Exported { .. } => false,
                 }
+            })
+            .filter(|x| {
+                // Ignore the current event if one was already processed for the same range.
+                prev_starts.insert(x.range().start())
             })
             .collect();
         actual.sort_by_key(|x| x.range().start());
@@ -125,12 +135,12 @@ impl TestCase for SymbolsMicrosoftTestCase {
             debug_text.push_str(" - actual: ");
 
             if let Some(actual) = actual {
-                let name = actual.str(&code).trim();
+                let name = &code[actual.range()].trim();
                 write!(debug_text, "[{}]", name).unwrap();
             }
 
             match (expected, actual) {
-                (Some(expected), Some(actual)) if expected.name != actual.str(&code).trim() => {
+                (Some(expected), Some(actual)) if expected.name != code[actual.range()].trim() => {
                     debug_text.push_str(" <<<<<<<<<<<<<<<<<<<< Diff here");
                 }
                 _ => {}
@@ -146,7 +156,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             }
         } else {
             for (expected, actual) in expected.symbols.iter().zip(actual) {
-                let are_names_eq = expected.name == actual.str(&code).trim();
+                let are_names_eq = expected.name == code[actual.range()].trim();
                 if !are_names_eq {
                     return TestRunOutcome::IncorrectlyErrored {
                         files: t,
@@ -222,12 +232,7 @@ struct SymbolsFile {
 fn parse_symbol(input: &str) -> Option<Symbol> {
     let (input, _) = parse_str(input, ">")?;
     let (input, name) = parse_until_chr(input, |x| x.is_whitespace() || x == ':')?;
-    if name.contains('.')
-        || name.contains('[')
-        || name.contains('\"')
-        || name.contains('\'')
-        || name == "undefined"
-    {
+    if name.contains('.') || name.contains('[') || name.contains('\"') || name.contains('\'') {
         return None;
     }
     let (input, _) = parse_whitespace0(input);
