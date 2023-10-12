@@ -1061,6 +1061,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInteractiveElementToNoninteractiveRole": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidNewBuiltin": {
 					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
@@ -1108,7 +1115,7 @@
 					"type": ["boolean", "null"]
 				},
 				"useAriaActivedescendantTabindex": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -718,6 +718,10 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
+	/**
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration;
@@ -746,7 +750,7 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
 	 */
 	useAriaActivedescendantTabindex?: RuleConfiguration;
 	/**
@@ -1344,6 +1348,7 @@ export type Category =
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
+	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"

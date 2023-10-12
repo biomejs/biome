@@ -97,6 +97,7 @@ define_categories! {
     "lint/nursery/noFallthroughSwitchClause": "https://biomejs.dev/linter/rules/no-fallthrough-switch-clause",
     "lint/nursery/noGlobalIsFinite": "https://biomejs.dev/linter/rules/no-global-is-finite",
     "lint/nursery/noGlobalIsNan": "https://biomejs.dev/linter/rules/no-global-is-nan",
+    "lint/nursery/noInteractiveElementToNoninteractiveRole": "https://biomejs.dev/lint/rules/no-interactive-element-to-noninteractive-role",
     "lint/nursery/noInvalidNewBuiltin": "https://biomejs.dev/lint/rules/no-invalid-new-builtin",
     "lint/nursery/noMisleadingInstantiator": "https://biomejs.dev/linter/rules/no-misleading-instantiator",
     "lint/nursery/noMisrefactoredShorthandAssign": "https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign",
