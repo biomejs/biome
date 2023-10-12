@@ -126,6 +126,15 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
             self.include = Some(include)
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: FormatterConfiguration)
+    where
+        FormatterConfiguration: Default,
+    {
+        if other != FormatterConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 impl TryFrom<FormatterConfiguration> for FormatSettings {

@@ -42,6 +42,20 @@ impl MergeWith<JavascriptConfiguration> for JavascriptConfiguration {
             formatter.merge_with(other_formatter);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: JavascriptConfiguration)
+    where
+        JavascriptConfiguration: Default,
+    {
+        if let Some(other_formatter) = other.formatter {
+            if other_formatter != JavascriptFormatter::default() {
+                let formatter = self
+                    .formatter
+                    .get_or_insert_with(JavascriptFormatter::default);
+                formatter.merge_with(other_formatter);
+            }
+        }
+    }
 }
 
 impl MergeWith<Option<JavascriptFormatter>> for JavascriptConfiguration {
@@ -51,6 +65,20 @@ impl MergeWith<Option<JavascriptFormatter>> for JavascriptConfiguration {
                 .formatter
                 .get_or_insert_with(JavascriptFormatter::default);
             formatter.merge_with(other_formatter);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JavascriptFormatter>)
+    where
+        Option<JavascriptFormatter>: Default,
+    {
+        if let Some(other_formatter) = other {
+            if other_formatter != JavascriptFormatter::default() {
+                let formatter = self
+                    .formatter
+                    .get_or_insert_with(JavascriptFormatter::default);
+                formatter.merge_with(other_formatter);
+            }
         }
     }
 }
@@ -94,6 +122,20 @@ impl MergeWith<JavascriptParser> for JavascriptParser {
         if let Some(unsafe_parameter_decorators_enabled) = other.unsafe_parameter_decorators_enabled
         {
             self.unsafe_parameter_decorators_enabled = Some(unsafe_parameter_decorators_enabled);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: JavascriptParser)
+    where
+        JavascriptParser: Default,
+    {
+        if other != JavascriptParser::default() {
+            if let Some(unsafe_parameter_decorators_enabled) =
+                other.unsafe_parameter_decorators_enabled
+            {
+                self.unsafe_parameter_decorators_enabled =
+                    Some(unsafe_parameter_decorators_enabled);
+            }
         }
     }
 }

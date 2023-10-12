@@ -124,4 +124,13 @@ impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
             self.line_width = Some(line_width);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: JavascriptFormatter)
+    where
+        JavascriptFormatter: Default,
+    {
+        if other != JavascriptFormatter::default() {
+            self.merge_with(other)
+        }
+    }
 }
