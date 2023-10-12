@@ -2038,6 +2038,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noUnusedImports",
                 "noUselessElse",
                 "noVoid",
+                "useAriaActivedescendantTabindex",
                 "useArrowFunction",
                 "useAsConstAssertion",
                 "useCollapsedElseIf",
@@ -2403,6 +2404,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_void = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "useAriaActivedescendantTabindex" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.use_aria_activedescendant_tabindex = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "useAriaActivedescendantTabindex",
+                        diagnostics,
+                    )?;
+                    self.use_aria_activedescendant_tabindex = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

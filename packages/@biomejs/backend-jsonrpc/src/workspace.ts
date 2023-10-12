@@ -746,6 +746,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useAriaActivedescendantTabindex?: RuleConfiguration;
+	/**
 	 * Use arrow functions over function expressions.
 	 */
 	useArrowFunction?: RuleConfiguration;
@@ -1346,6 +1350,7 @@ export type Category =
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noVoid"
+	| "lint/nursery/useAriaActivedescendantTabindex"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useAsConstAssertion"
 	| "lint/nursery/useBiomeSuppressionComment"

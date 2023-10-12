@@ -1107,6 +1107,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useAriaActivedescendantTabindex": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.",
 					"anyOf": [
