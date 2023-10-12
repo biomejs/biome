@@ -88,10 +88,11 @@ Available options:
                               languages) files. Default to 2.
         --json-formatter-line-width=NUMBER  What's the max width of a line, applied to JSON (and its
                               super languages) files. Defaults to 80.
-        --stdin-file-path=PATH  A file name with its extension to pass when reading from standard in,
-                              e.g. echo 'let a;' | biome format --stdin-file-path=file.js".
+        --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
+                              print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension of
-                              the file. Based on the extension, Biome will use the appropriate tool.
+                              the file. Based on the extension, Biome knows how to format the code.
+                              Example: `echo 'let a;' | biome format --stdin-file-path=file.js`
         --write               Writes formatted files to file system.
     -h, --help                Prints help information
 
