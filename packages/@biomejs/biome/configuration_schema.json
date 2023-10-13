@@ -1129,7 +1129,7 @@
 					]
 				},
 				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified.",
+					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
