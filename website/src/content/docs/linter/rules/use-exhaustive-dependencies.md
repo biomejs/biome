@@ -10,9 +10,9 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Enforce all dependencies are correctly specified in a React hook.
 
-This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin) is meant to target projects that uses React.
+This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
 
-If your project _doesn't_ use React, **you're shouldn't use this rule**.
+If your project _doesn't_ use React, **you shouldn't use this rule**.
 
 The rule will inspect the following **known** hooks:
 
