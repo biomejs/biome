@@ -70,6 +70,15 @@ _Biome_ follows a naming convention according to what the rule do:
    When a rule's sole intention is to **mandate a single concept** - such as forcing the use of camel-casing - the rule should be named using the `use` prefix.
    For example, the rule to mandating the use of camel-cased variable names is named `useCamelCase`.
 
+### What a rule should say to the user
+
+A rule should be informative to the user, and give as much explanation as possible.
+
+When writing a rule, you must adhere to the following **pillars**:
+1. Explain to the user the error. Generally, this is the message of the diagnostic.
+2. Explain to the user **why** the error is triggered. Generally, this is implemented with an additional node.
+3. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
+
 ### Create and implement the rule
 
 Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
