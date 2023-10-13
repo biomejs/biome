@@ -2275,7 +2275,7 @@ pub struct Nursery {
     #[bpaf(long("use-collapsed-else-if"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_collapsed_else_if: Option<RuleConfiguration>,
-    #[doc = "Enforce all dependencies are correctly specified."]
+    #[doc = "Enforce all dependencies are correctly specified in a React hook."]
     #[bpaf(
         long("use-exhaustive-dependencies"),
         argument("on|off|warn"),

@@ -177,10 +177,6 @@ export default defineConfig({
 						{
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 					],
 				},
@@ -216,7 +212,14 @@ export default defineConfig({
 					items: [
 						{ label: "Philosophy", link: "/internals/philosophy" },
 						{ label: "Language support", link: "/internals/language-support" },
-						{ label: "Architecture", link: "/internals/architecture" },
+						{
+							label: "Architecture",
+							link: "/internals/architecture",
+							badge: {
+								text: "Updated",
+								variant: "note",
+							},
+						},
 						{ label: "Credits", link: "/internals/credits" },
 						{ label: "Versioning", link: "/internals/versioning" },
 						{ label: "Changelog", link: "/internals/changelog" },

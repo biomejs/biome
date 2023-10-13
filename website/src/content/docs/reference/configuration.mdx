@@ -201,7 +201,7 @@ Given the following example:
 Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
 `scripts/**/*.js` will be ignored.
 
- ### `files.allowUnknown`
+ ### `files.ignoreUnknown`
 
 Biome won't emit diagnostics if it encounters files that can't handle.
 
@@ -210,10 +210,12 @@ Biome won't emit diagnostics if it encounters files that can't handle.
 ```json
 {
   "files": {
-    "allowUnknown": true
+    "ignoreUnknown": true
   }
 }
 ```
+
+> Default: false
 
 ## `vcs`
 

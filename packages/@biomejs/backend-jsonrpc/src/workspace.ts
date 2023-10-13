@@ -758,7 +758,7 @@ export interface Nursery {
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
 	/**
-	 * Enforce all dependencies are correctly specified.
+	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration;
 	/**

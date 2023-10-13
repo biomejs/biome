@@ -8,7 +8,31 @@ title: useExhaustiveDependencies (since v1.0.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Enforce all dependencies are correctly specified.
+Enforce all dependencies are correctly specified in a React hook.
+
+This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin) is meant to target projects that uses React.
+
+If your project _doesn't_ use React, **you're shouldn't use this rule**.
+
+The rule will inspect the following **known** hooks:
+
+- `useEffect`
+- `useLayoutEffect`
+- `useInsertionEffect`
+- `useCallback`
+- `useMemo`
+- `useImperativeHandle`
+- `useState`
+- `useContext`
+- `useReducer`
+- `useRef`
+- `useDebugValue`
+- `useDeferredValue`
+- `useTransition`
+- `useId`
+- `useSyncExternalStore`
+
+If you want to add more hooks to the rule, check the [#options](options).
 
 ## Examples
 
