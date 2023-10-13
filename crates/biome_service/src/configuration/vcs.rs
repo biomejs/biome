@@ -6,7 +6,7 @@ use std::str::FromStr;
 const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(Debug, Default, Deserialize, Serialize, Clone, Bpaf)]
+#[derive(Debug, Default, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VcsConfiguration {
@@ -62,9 +62,18 @@ impl MergeWith<VcsConfiguration> for VcsConfiguration {
             self.root = Some(root);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: VcsConfiguration)
+    where
+        VcsConfiguration: Default,
+    {
+        if other != VcsConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
-#[derive(Debug, Default, Deserialize, Clone, Serialize)]
+#[derive(Debug, Default, Deserialize, Clone, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum VcsClientKind {

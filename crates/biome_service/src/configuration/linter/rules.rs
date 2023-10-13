@@ -8,7 +8,7 @@ use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
@@ -340,7 +340,7 @@ impl Rules {
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -950,7 +950,7 @@ impl A11y {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1450,7 +1450,7 @@ impl Complexity {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2135,7 +2135,7 @@ impl Correctness {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2720,7 +2720,7 @@ impl Nursery {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2816,7 +2816,7 @@ impl Performance {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2949,7 +2949,7 @@ impl Security {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3587,7 +3587,7 @@ impl Style {
         }
     }
 }
-#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Default, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default)]
 #[doc = r" A list of rules that belong to this group"]

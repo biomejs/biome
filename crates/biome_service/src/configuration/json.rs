@@ -35,6 +35,15 @@ impl MergeWith<JsonConfiguration> for JsonConfiguration {
             formatter.merge_with(other_formatter);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: JsonConfiguration)
+    where
+        JsonConfiguration: Default,
+    {
+        if other != JsonConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 /// Options that changes how the JSON parser behaves
@@ -64,6 +73,15 @@ impl MergeWith<JsonParser> for JsonParser {
         }
         if let Some(allow_trailing_commas) = other.allow_trailing_commas {
             self.allow_trailing_commas = Some(allow_trailing_commas);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: JsonParser)
+    where
+        JsonParser: Default,
+    {
+        if other != JsonParser::default() {
+            self.merge_with(other)
         }
     }
 }
@@ -127,6 +145,15 @@ impl MergeWith<JsonFormatter> for JsonFormatter {
             self.line_width = Some(line_width);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: JsonFormatter)
+    where
+        JsonFormatter: Default,
+    {
+        if other != JsonFormatter::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 impl MergeWith<Option<JsonFormatter>> for JsonConfiguration {
@@ -134,6 +161,18 @@ impl MergeWith<Option<JsonFormatter>> for JsonConfiguration {
         if let Some(other_formatter) = other {
             let formatter = self.formatter.get_or_insert_with(JsonFormatter::default);
             formatter.merge_with(other_formatter);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
+    where
+        Option<JsonFormatter>: Default,
+    {
+        if let Some(other_formatter) = other {
+            if other_formatter != JsonFormatter::default() {
+                let formatter = self.formatter.get_or_insert_with(JsonFormatter::default);
+                formatter.merge_with(other_formatter);
+            }
         }
     }
 }
