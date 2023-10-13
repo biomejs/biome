@@ -92,6 +92,7 @@ define_categories! {
     "lint/nursery/noApproximativeNumericConstant": "https://biomejs.dev/lint/rules/no-approximative-numeric-constant",
     "lint/nursery/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
+    "lint/nursery/noEmptyBlockStatements": "https://biomejs.dev/lint/rules/no-empty-block-statements",
     "lint/nursery/noEmptyCharacterClassInRegex": "https://biomejs.dev/lint/rules/no-empty-character-class-in-regex",
     "lint/nursery/noExcessiveComplexity": "https://biomejs.dev/linter/rules/no-excessive-complexity",
     "lint/nursery/noFallthroughSwitchClause": "https://biomejs.dev/linter/rules/no-fallthrough-switch-clause",

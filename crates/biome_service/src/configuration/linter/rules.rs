@@ -2184,6 +2184,15 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration>,
+    #[doc = "Disallow empty block statements and static blocks."]
+    #[bpaf(
+        long("no-empty-block-statements"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_empty_block_statements: Option<RuleConfiguration>,
     #[doc = "Disallow empty character classes in regular expression literals."]
     #[bpaf(
         long("no-empty-character-class-in-regex"),
@@ -2349,6 +2358,7 @@ impl Nursery {
         "noApproximativeNumericConstant",
         "noConfusingVoidType",
         "noDuplicateJsonKeys",
+        "noEmptyBlockStatements",
         "noEmptyCharacterClassInRegex",
         "noExcessiveComplexity",
         "noFallthroughSwitchClause",
@@ -2389,8 +2399,7 @@ impl Nursery {
     ];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 12] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
@@ -2465,27 +2474,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_character_class_in_regex.as_ref() {
+        if let Some(rule) = self.no_empty_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_excessive_complexity.as_ref() {
+        if let Some(rule) = self.no_empty_character_class_in_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
+        if let Some(rule) = self.no_excessive_complexity.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_global_is_finite.as_ref() {
+        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_global_is_nan.as_ref() {
+        if let Some(rule) = self.no_global_is_finite.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -2604,27 +2613,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_empty_character_class_in_regex.as_ref() {
+        if let Some(rule) = self.no_empty_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_excessive_complexity.as_ref() {
+        if let Some(rule) = self.no_empty_character_class_in_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
+        if let Some(rule) = self.no_excessive_complexity.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_global_is_finite.as_ref() {
+        if let Some(rule) = self.no_fallthrough_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_global_is_nan.as_ref() {
+        if let Some(rule) = self.no_global_is_finite.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -2759,6 +2768,7 @@ impl Nursery {
             "noApproximativeNumericConstant" => self.no_approximative_numeric_constant.as_ref(),
             "noConfusingVoidType" => self.no_confusing_void_type.as_ref(),
             "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
+            "noEmptyBlockStatements" => self.no_empty_block_statements.as_ref(),
             "noEmptyCharacterClassInRegex" => self.no_empty_character_class_in_regex.as_ref(),
             "noExcessiveComplexity" => self.no_excessive_complexity.as_ref(),
             "noFallthroughSwitchClause" => self.no_fallthrough_switch_clause.as_ref(),

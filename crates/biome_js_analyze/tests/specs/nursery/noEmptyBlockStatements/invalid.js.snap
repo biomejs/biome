@@ -1,0 +1,405 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function foo() {}
+
+const bar = () => {};
+
+function fooWithNestedEmptyFnBlock() {
+  let a = 1;
+
+  function shouldFail(){}
+
+  return a
+}
+
+
+const barWithNestedEmptyFnBlock = () => {
+  let a = 1;
+
+  const shouldFail = () => {}
+
+  return a
+}
+
+let someVar;
+if (someVar) {
+}
+
+while (someVar) {
+}
+
+switch(someVar) {
+}
+
+try {
+    doSomething();
+} catch(ex) {
+
+} finally {
+
+}
+
+class Foo {
+  static {}
+}
+
+for(let i; i>0; i++){}
+
+const ob = {}
+for (key in ob) {}
+
+const ar = []
+for (val of ar) {}
+
+function fooWithInternalEmptyBlocks(){
+  let someVar;
+  if (someVar) {}
+
+  while (someVar) {
+  }
+
+  switch(someVar) {
+  }
+
+  try {
+      doSomething();
+  } catch(ex) {
+
+  } finally {
+
+  }
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:16 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+  > 1 │ function foo() {}
+      │                ^^
+    2 │ 
+    3 │ const bar = () => {};
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:3:19 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    1 │ function foo() {}
+    2 │ 
+  > 3 │ const bar = () => {};
+      │                   ^^
+    4 │ 
+    5 │ function fooWithNestedEmptyFnBlock() {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:8:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+     6 │   let a = 1;
+     7 │ 
+   > 8 │   function shouldFail(){}
+       │                        ^^
+     9 │ 
+    10 │   return a
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:17:28 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    15 │   let a = 1;
+    16 │ 
+  > 17 │   const shouldFail = () => {}
+       │                            ^^
+    18 │ 
+    19 │   return a
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:23:14 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    22 │ let someVar;
+  > 23 │ if (someVar) {
+       │              ^
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ while (someVar) {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:26:17 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    24 │ }
+    25 │ 
+  > 26 │ while (someVar) {
+       │                 ^
+  > 27 │ }
+       │ ^
+    28 │ 
+    29 │ switch(someVar) {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:27:2 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    26 │ while (someVar) {
+  > 27 │ }
+       │  
+  > 28 │ 
+  > 29 │ switch(someVar) {
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ try {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:34:3 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    32 │ try {
+    33 │     doSomething();
+  > 34 │ } catch(ex) {
+       │   ^^^^^^^^^^^
+  > 35 │ 
+  > 36 │ } finally {
+       │ ^^
+    37 │ 
+    38 │ }
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:36:11 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    34 │ } catch(ex) {
+    35 │ 
+  > 36 │ } finally {
+       │           ^
+  > 37 │ 
+  > 38 │ }
+       │ ^
+    39 │ 
+    40 │ class Foo {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:40:12 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    38 │ }
+    39 │ 
+  > 40 │ class Foo {
+       │            
+  > 41 │   static {}
+       │   ^^^^^^^^^
+    42 │ }
+    43 │ 
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:44:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    42 │ }
+    43 │ 
+  > 44 │ for(let i; i>0; i++){}
+       │                     ^^
+    45 │ 
+    46 │ const ob = {}
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:47:17 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    46 │ const ob = {}
+  > 47 │ for (key in ob) {}
+       │                 ^^
+    48 │ 
+    49 │ const ar = []
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:50:17 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    49 │ const ar = []
+  > 50 │ for (val of ar) {}
+       │                 ^^
+    51 │ 
+    52 │ function fooWithInternalEmptyBlocks(){
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:54:16 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    52 │ function fooWithInternalEmptyBlocks(){
+    53 │   let someVar;
+  > 54 │   if (someVar) {}
+       │                ^^
+    55 │ 
+    56 │   while (someVar) {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:56:19 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    54 │   if (someVar) {}
+    55 │ 
+  > 56 │   while (someVar) {
+       │                   ^
+  > 57 │   }
+       │   ^
+    58 │ 
+    59 │   switch(someVar) {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:57:4 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    56 │   while (someVar) {
+  > 57 │   }
+       │    
+  > 58 │ 
+  > 59 │   switch(someVar) {
+  > 60 │   }
+       │   ^
+    61 │ 
+    62 │   try {
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:64:5 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    62 │   try {
+    63 │       doSomething();
+  > 64 │   } catch(ex) {
+       │     ^^^^^^^^^^^
+  > 65 │ 
+  > 66 │   } finally {
+       │   ^^
+    67 │ 
+    68 │   }
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+```
+invalid.js:66:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No empty blocks allowed.
+  
+    64 │   } catch(ex) {
+    65 │ 
+  > 66 │   } finally {
+       │             ^
+  > 67 │ 
+  > 68 │   }
+       │   ^
+    69 │ }
+  
+  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  
+
+```
+
+
