@@ -21,7 +21,7 @@ pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
-use crate::settings::{LanguagesSettings, LinterSettings};
+use crate::settings::{LanguageListSettings, LinterSettings};
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::{AnalyzerConfiguration, AnalyzerRules};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -177,6 +177,8 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with(other_configuration.organize_imports);
         // VCS
         self.merge_with(other_configuration.vcs);
+        // overrides
+        self.merge_with(other_configuration.overrides);
     }
 
     fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
@@ -195,6 +197,8 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with_if_not_default(other_configuration.organize_imports);
         // VCS
         self.merge_with_if_not_default(other_configuration.vcs);
+        // overrides
+        self.merge_with_if_not_default(other_configuration.overrides);
     }
 }
 
@@ -344,6 +348,22 @@ impl MergeWith<Option<JsonFormatter>> for Configuration {
     {
         let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
         javascript_configuration.merge_with_if_not_default(other);
+    }
+}
+
+impl MergeWith<Option<Overrides>> for Configuration {
+    fn merge_with(&mut self, other: Option<Overrides>) {
+        if let Some(other) = other {
+            let overrides = self.overrides.get_or_insert_with(Overrides::default);
+            overrides.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<Overrides>)
+    where
+        Option<Overrides>: Default,
+    {
+        self.merge_with(other)
     }
 }
 
@@ -572,7 +592,7 @@ pub fn create_config(
 ///
 /// ```rust
 /// use biome_service::configuration::to_analyzer_configuration;
-/// use biome_service::settings::{LanguagesSettings, WorkspaceSettings};
+/// use biome_service::settings::{LanguageListSettings, WorkspaceSettings};
 /// let mut settings = WorkspaceSettings::default();
 /// settings.languages.javascript.globals = Some(["jQuery".to_string(), "React".to_string()].into());
 /// // map globals from JS language
@@ -599,11 +619,11 @@ pub fn create_config(
 /// [configuration for the analyzer]: AnalyzerConfiguration
 pub fn to_analyzer_configuration<ToGlobals>(
     linter_settings: &LinterSettings,
-    language_settings: &LanguagesSettings,
+    language_settings: &LanguageListSettings,
     to_globals: ToGlobals,
 ) -> AnalyzerConfiguration
 where
-    ToGlobals: FnOnce(&LanguagesSettings) -> Vec<String>,
+    ToGlobals: FnOnce(&LanguageListSettings) -> Vec<String>,
 {
     let globals: Vec<String> = to_globals(language_settings);
 

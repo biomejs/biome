@@ -7,7 +7,7 @@ use crate::file_handlers::{is_diagnostic_error, Features, FixAllParams, Language
 use crate::settings::OverrideSettings;
 use crate::workspace::OrganizeImportsResult;
 use crate::{
-    settings::{FormatSettings, Language, LanguageSettings, LanguagesSettings, SettingsHandle},
+    settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
     workspace::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
@@ -90,7 +90,7 @@ impl Language for JsLanguage {
     type OrganizeImportsSettings = JsOrganizeImportsSettings;
     type ParserSettings = JsParserSettings;
 
-    fn lookup_settings(languages: &LanguagesSettings) -> &LanguageSettings<Self> {
+    fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
     }
 
@@ -583,10 +583,8 @@ fn format(
     parse: AnyParse,
     settings: SettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
-    dbg!(&settings);
     let options = settings.format_options::<JsLanguage>(rome_path);
 
-    dbg!(&options);
     debug!("Options used for format: \n{}", options);
 
     let tree = parse.syntax();

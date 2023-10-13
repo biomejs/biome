@@ -59,6 +59,7 @@ pub struct JsonFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_width: LineWidth,
+    #[allow(dead_code)]
     file_source: JsonFileSource,
 }
 

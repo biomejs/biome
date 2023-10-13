@@ -7,10 +7,15 @@ expression: content
 ```json
 {
   "overrides": [
-    { "include": ["test.js"], "formatter": { "lineWidth": 20 } },
+    {
+      "include": ["test.js"],
+      "formatter": { "lineWidth": 120 },
+      "javascript": { "formatter": { "quoteStyle": "single" } }
+    },
     {
       "include": ["test2.js"],
-      "formatter": { "lineWidth": 20, "indentStyle": "space" }
+      "formatter": { "lineWidth": 120, "indentStyle": "space" },
+      "javascript": { "formatter": { "semicolons": "asNeeded" } }
     }
   ]
 }
@@ -19,20 +24,14 @@ expression: content
 ## `test.js`
 
 ```js
-const a = [
-	"loreum",
-	"ipsum",
-];
+const a = ['loreum', 'ipsum'];
 
 ```
 
 ## `test2.js`
 
 ```js
-const a = [
-  "loreum",
-  "ipsum",
-];
+const a = ["loreum", "ipsum"]
 
 ```
 

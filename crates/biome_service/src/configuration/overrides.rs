@@ -1,14 +1,19 @@
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::linter::rules;
-use crate::configuration::{javascript_configuration, json_configuration, JavascriptConfiguration, JsonConfiguration, PlainIndentStyle, javascript};
-use crate::settings::{to_matcher, OverrideFormatSettings, OverrideLinterSettings, OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, LanguageSettings, LanguagesSettings};
+use crate::configuration::{
+    javascript_configuration, json_configuration, JavascriptConfiguration, JsonConfiguration,
+    PlainIndentStyle,
+};
+use crate::settings::{
+    to_matcher, LanguageListSettings, OverrideFormatSettings, OverrideLinterSettings,
+    OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings,
+};
 use crate::{MergeWith, Rules, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_formatter::{IndentStyle, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use biome_js_syntax::JsLanguage;
 
 #[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -24,6 +29,27 @@ impl FromStr for Overrides {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
+    }
+}
+
+impl MergeWith<Overrides> for Overrides {
+    fn merge_with(&mut self, other: Overrides) {
+        let mut self_iter = self.list.iter_mut();
+        let mut other_iter = other.list.into_iter();
+        while let (Some(self_item), Some(other_item)) = (self_iter.next(), other_iter.next()) {
+            self_item.merge_with(other_item);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Overrides)
+    where
+        Overrides: Default,
+    {
+        let mut self_iter = self.list.iter_mut();
+        let mut other_iter = other.list.into_iter();
+        while let (Some(self_item), Some(other_item)) = (self_iter.next(), other_iter.next()) {
+            self_item.merge_with_if_not_default(other_item);
+        }
     }
 }
 
@@ -85,6 +111,94 @@ impl FromStr for OverridePattern {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
+    }
+}
+
+impl MergeWith<OverridePattern> for OverridePattern {
+    fn merge_with(&mut self, other: OverridePattern) {
+        if let Some(other) = other.ignore {
+            let ignore = self.ignore.get_or_insert(StringSet::default());
+            ignore.extend(other.into_index_set());
+        }
+
+        if let Some(other) = other.include {
+            let include = self.include.get_or_insert(StringSet::default());
+            include.extend(other.into_index_set());
+        }
+
+        if let Some(other) = other.formatter {
+            let formatter = self
+                .formatter
+                .get_or_insert(OverrideFormatterConfiguration::default());
+            formatter.merge_with(other);
+        }
+        if let Some(other) = other.linter {
+            let linter = self
+                .linter
+                .get_or_insert(OverrideLinterConfiguration::default());
+            linter.merge_with(other);
+        }
+
+        if let Some(other) = other.organize_imports {
+            let organize_imports = self
+                .organize_imports
+                .get_or_insert(OverrideOrganizeImportsConfiguration::default());
+            organize_imports.merge_with(other);
+        }
+        if let Some(other) = other.javascript {
+            let javascript = self
+                .javascript
+                .get_or_insert(JavascriptConfiguration::default());
+            javascript.merge_with(other)
+        }
+        if let Some(other) = other.json {
+            let json = self.json.get_or_insert(JsonConfiguration::default());
+            json.merge_with(other)
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: OverridePattern)
+    where
+        OverridePattern: Default,
+    {
+        if let Some(other) = other.ignore {
+            let ignore = self.ignore.get_or_insert(StringSet::default());
+            ignore.extend(other.into_index_set());
+        }
+
+        if let Some(other) = other.include {
+            let include = self.include.get_or_insert(StringSet::default());
+            include.extend(other.into_index_set());
+        }
+
+        if let Some(other) = other.formatter {
+            let formatter = self
+                .formatter
+                .get_or_insert(OverrideFormatterConfiguration::default());
+            formatter.merge_with_if_not_default(other);
+        }
+        if let Some(other) = other.linter {
+            let linter = self
+                .linter
+                .get_or_insert(OverrideLinterConfiguration::default());
+            linter.merge_with_if_not_default(other);
+        }
+
+        if let Some(other) = other.organize_imports {
+            let organize_imports = self
+                .organize_imports
+                .get_or_insert(OverrideOrganizeImportsConfiguration::default());
+            organize_imports.merge_with_if_not_default(other);
+        }
+        if let Some(other) = other.javascript {
+            let javascript = self
+                .javascript
+                .get_or_insert(JavascriptConfiguration::default());
+            javascript.merge_with_if_not_default(other)
+        }
+        if let Some(other) = other.json {
+            let json = self.json.get_or_insert(JsonConfiguration::default());
+            json.merge_with_if_not_default(other)
+        }
     }
 }
 
@@ -159,6 +273,15 @@ impl MergeWith<OverrideFormatterConfiguration> for OverrideFormatterConfiguratio
             self.format_with_errors = Some(format_with_errors);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: OverrideFormatterConfiguration)
+    where
+        OverrideFormatterConfiguration: Default,
+    {
+        if other != OverrideFormatterConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
@@ -189,6 +312,15 @@ impl MergeWith<OverrideLinterConfiguration> for OverrideLinterConfiguration {
             self.rules = Some(rules);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: OverrideLinterConfiguration)
+    where
+        OverrideLinterConfiguration: Default,
+    {
+        if other != OverrideLinterConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
@@ -211,6 +343,15 @@ impl MergeWith<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImports
             self.enabled = Some(enabled);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: OverrideOrganizeImportsConfiguration)
+    where
+        OverrideOrganizeImportsConfiguration: Default,
+    {
+        if other != OverrideOrganizeImportsConfiguration::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 impl TryFrom<Overrides> for OverrideSettings {
@@ -228,9 +369,14 @@ impl TryFrom<Overrides> for OverrideSettings {
             let organize_imports = pattern.organize_imports.take().unwrap_or_default();
             let organize_imports = OverrideOrganizeImportsSettings::try_from(organize_imports)?;
 
-            let mut languages = LanguagesSettings::default();
-            
-            languages.javascript.formatter.
+            let mut languages = LanguageListSettings::default();
+            if let Some(javascript) = pattern.javascript {
+                languages.javascript = javascript.into();
+            }
+
+            if let Some(json) = pattern.json {
+                languages.json = json.into();
+            }
 
             let pattern_setting = OverrideSettingPattern {
                 include: to_matcher(pattern.include.as_ref())?,
@@ -238,7 +384,7 @@ impl TryFrom<Overrides> for OverrideSettings {
                 formatter,
                 linter,
                 organize_imports,
-                languages: Default::default(),
+                languages,
             };
 
             override_settings.patterns.push(pattern_setting);

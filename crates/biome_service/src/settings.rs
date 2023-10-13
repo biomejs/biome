@@ -1,4 +1,4 @@
-use crate::configuration::JavascriptConfiguration;
+use crate::configuration::{JavascriptConfiguration, JsonConfiguration};
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
     Matcher, Rules, WorkspaceError,
@@ -26,7 +26,7 @@ pub struct WorkspaceSettings {
     /// Linter settings applied to all files in the workspace
     pub linter: LinterSettings,
     /// Language specific settings
-    pub languages: LanguagesSettings,
+    pub languages: LanguageListSettings,
     /// Filesystem settings for the workspace
     pub files: FilesSettings,
     /// Analyzer settings
@@ -93,29 +93,12 @@ impl WorkspaceSettings {
         }
 
         // javascript settings
-        let javascript = configuration.javascript;
-        if let Some(javascript) = javascript {
+        if let Some(javascript) = configuration.javascript {
             self.languages.javascript = javascript.into();
         }
-
         // json settings
-        let json = configuration.json;
-        if let Some(json) = json {
-            if let Some(parser) = json.parser {
-                self.languages.json.parser.allow_comments =
-                    parser.allow_comments.unwrap_or_default();
-                self.languages.json.parser.allow_trailing_commas =
-                    parser.allow_trailing_commas.unwrap_or_default();
-            }
-            if let Some(formatter) = json.formatter {
-                self.languages.json.formatter.enabled = formatter.enabled;
-                self.languages.json.formatter.line_width = formatter.line_width;
-                self.languages.json.formatter.indent_width = formatter
-                    .indent_width
-                    .map(Into::into)
-                    .or(formatter.indent_size.map(Into::into));
-                self.languages.json.formatter.indent_style = formatter.indent_style.map(Into::into);
-            }
+        if let Some(json) = configuration.json {
+            self.languages.json = json.into();
         }
 
         Ok(())
@@ -252,7 +235,7 @@ pub struct OverrideOrganizeImportsSettings {
 
 /// Static map of language names to language-specific settings
 #[derive(Debug, Default)]
-pub struct LanguagesSettings {
+pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
 }
@@ -289,6 +272,27 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting
     }
 }
+
+impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
+    fn from(json: JsonConfiguration) -> Self {
+        let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
+        if let Some(parser) = json.parser {
+            language_setting.parser.allow_comments = parser.allow_comments.unwrap_or_default();
+            language_setting.parser.allow_trailing_commas =
+                parser.allow_trailing_commas.unwrap_or_default();
+        }
+        if let Some(formatter) = json.formatter {
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter
+                .indent_width
+                .map(Into::into)
+                .or(formatter.indent_size.map(Into::into));
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+        language_setting
+    }
+}
 pub trait Language: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
@@ -304,8 +308,8 @@ pub trait Language: biome_rowan::Language {
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
-    /// Read the settings type for this language from the [LanguagesSettings] map
-    fn lookup_settings(languages: &LanguagesSettings) -> &LanguageSettings<Self>;
+    /// Read the settings type for this language from the [LanguageListSettings] map
+    fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
@@ -493,14 +497,26 @@ impl OverrideSettings {
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                let formatter = &pattern.formatter;
+                let pattern_formatter = &pattern.formatter;
                 let json_formatter = &pattern.languages.json.formatter;
 
                 return Some(
                     JsonFormatOptions::new(path.try_into().unwrap_or_default())
-                        .with_indent_style(formatter.indent_style.unwrap_or_default())
-                        .with_indent_width(formatter.indent_width.unwrap_or_default())
-                        .with_line_width(formatter.line_width.unwrap_or_default()),
+                        .with_indent_style(
+                            json_formatter
+                                .indent_style
+                                .unwrap_or(pattern_formatter.indent_style.unwrap_or_default()),
+                        )
+                        .with_indent_width(
+                            json_formatter
+                                .indent_width
+                                .unwrap_or(pattern_formatter.indent_width.unwrap_or_default()),
+                        )
+                        .with_line_width(
+                            json_formatter
+                                .line_width
+                                .unwrap_or(pattern_formatter.line_width.unwrap_or_default()),
+                        ),
                 );
             }
         }
@@ -519,7 +535,7 @@ pub struct OverrideSettingPattern {
     /// Linter settings applied to all files in the workspace
     pub organize_imports: OverrideOrganizeImportsSettings,
     /// Language specific settings
-    pub languages: LanguagesSettings,
+    pub languages: LanguageListSettings,
 }
 
 /// Creates a [Matcher] from a [StringSet]

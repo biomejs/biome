@@ -159,7 +159,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use bpaf::Bpaf;
         use biome_diagnostics::{Category, Severity};
 
-        #[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq, Bpaf, Eq, PartialEq)]
+        #[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq, Bpaf)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
@@ -478,7 +478,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         )
     };
     quote! {
-        #[derive(Deserialize, Default, Serialize, Debug, Eq, PartialEq, Clone, Bpaf, Eq, PartialEq)]
+        #[derive(Deserialize, Default, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", default)]
         /// A list of rules that belong to this group

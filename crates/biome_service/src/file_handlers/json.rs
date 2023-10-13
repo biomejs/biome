@@ -7,7 +7,8 @@ use crate::file_handlers::{
 };
 use crate::file_handlers::{DebugCapabilities, Language as LanguageId};
 use crate::settings::{
-    FormatSettings, Language, LanguageSettings, LanguagesSettings, OverrideSettings, SettingsHandle,
+    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    SettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
@@ -43,7 +44,7 @@ impl Language for JsonLanguage {
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
-    fn lookup_settings(language: &LanguagesSettings) -> &LanguageSettings<Self> {
+    fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
     }
 
