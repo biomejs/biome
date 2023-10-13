@@ -1,8 +1,5 @@
 // Run `BIOME_VERSION=<version number> cargo codegen-website
 // to generate a new schema
-import { readFileSync } from "fs";
-import { join, resolve } from "path";
-
 export function GET() {
 	const schema = {
 		$schema: "http://json-schema.org/draft-07/schema#",
@@ -2002,7 +1999,7 @@ export function GET() {
 			},
 		},
 	};
-	return new Response(schema, {
+	return new Response(JSON.stringify(schema), {
 		status: 200,
 		headers: {
 			"content-type": "application/json",
