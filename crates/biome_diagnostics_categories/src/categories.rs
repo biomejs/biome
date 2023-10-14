@@ -104,7 +104,7 @@ define_categories! {
     "lint/nursery/noUnusedImports": "https://biomejs.dev/lint/rules/no-unused-imports",
     "lint/nursery/noUselessElse": "https://biomejs.dev/lint/rules/no-useless-else",
     "lint/nursery/noVoid": "https://biomejs.dev/linter/rules/no-void",
-    "lint/nursery/useAriaActivedescendantTabindex": "https://biomejs.dev/lint/rules/use-aria-activedescendant-tabindex",
+    "lint/nursery/useAriaActivedescendantWithTabindex": "https://biomejs.dev/lint/rules/use-aria-activedescendant-with-tabindex",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
     "lint/nursery/useAsConstAssertion": "https://biomejs.dev/lint/rules/use-as-const-assertion",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/lint/rules/use-biome-suppression-comment",

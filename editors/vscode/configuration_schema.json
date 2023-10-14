@@ -1114,7 +1114,7 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAriaActivedescendantTabindex": {
+				"useAriaActivedescendantWithTabindex": {
 					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

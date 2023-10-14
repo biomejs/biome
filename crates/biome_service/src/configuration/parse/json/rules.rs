@@ -2039,7 +2039,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noUnusedImports",
                 "noUselessElse",
                 "noVoid",
-                "useAriaActivedescendantTabindex",
+                "useAriaActivedescendantWithTabindex",
                 "useArrowFunction",
                 "useAsConstAssertion",
                 "useCollapsedElseIf",
@@ -2436,7 +2436,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                     ));
                 }
             },
-            "useAriaActivedescendantTabindex" => match value {
+            "useAriaActivedescendantWithTabindex" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
                     self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
@@ -2447,7 +2447,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                     rule_configuration.map_rule_configuration(
                         &value,
                         name_text,
-                        "useAriaActivedescendantTabindex",
+                        "useAriaActivedescendantWithTabindex",
                         diagnostics,
                     )?;
                     self.use_aria_activedescendant_tabindex = Some(rule_configuration);

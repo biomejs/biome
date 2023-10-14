@@ -2269,7 +2269,7 @@ pub struct Nursery {
     pub no_void: Option<RuleConfiguration>,
     #[doc = "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant."]
     #[bpaf(
-        long("use-aria-activedescendant-tabindex"),
+        long("use-aria-activedescendant-with-tabindex"),
         argument("on|off|warn"),
         optional,
         hide
@@ -2352,7 +2352,7 @@ impl Nursery {
         "noUnusedImports",
         "noUselessElse",
         "noVoid",
-        "useAriaActivedescendantTabindex",
+        "useAriaActivedescendantWithTabindex",
         "useArrowFunction",
         "useAsConstAssertion",
         "useCollapsedElseIf",
@@ -2752,7 +2752,9 @@ impl Nursery {
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUselessElse" => self.no_useless_else.as_ref(),
             "noVoid" => self.no_void.as_ref(),
-            "useAriaActivedescendantTabindex" => self.use_aria_activedescendant_tabindex.as_ref(),
+            "useAriaActivedescendantWithTabindex" => {
+                self.use_aria_activedescendant_tabindex.as_ref()
+            }
             "useArrowFunction" => self.use_arrow_function.as_ref(),
             "useAsConstAssertion" => self.use_as_const_assertion.as_ref(),
             "useCollapsedElseIf" => self.use_collapsed_else_if.as_ref(),

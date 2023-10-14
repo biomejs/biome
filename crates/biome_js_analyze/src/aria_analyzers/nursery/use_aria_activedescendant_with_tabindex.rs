@@ -42,14 +42,14 @@ declare_rule! {
     /// <input aria-activedescendant={someID} />
     /// ```
     ///
-    pub(crate) UseAriaActivedescendantTabindex {
+    pub(crate) UseAriaActivedescendantWithTabindex {
         version: "next",
-        name: "useAriaActivedescendantTabindex",
+        name: "useAriaActivedescendantWithTabindex",
         recommended: false,
     }
 }
 
-impl Rule for UseAriaActivedescendantTabindex {
+impl Rule for UseAriaActivedescendantWithTabindex {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
