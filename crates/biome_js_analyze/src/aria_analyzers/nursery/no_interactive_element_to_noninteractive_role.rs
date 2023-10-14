@@ -17,7 +17,7 @@ declare_rule! {
     ///
     /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-interactive-element-to-noninteractive-role.md
     ///
-    /// [WAI-ARIA roles]: https://www.w3.org/TR/wai-aria-1.1/#usage_intro
+    /// [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro)
     ///
     /// ## Examples
     ///
