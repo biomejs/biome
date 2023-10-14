@@ -2440,7 +2440,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
                     self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.use_aria_activedescendant_tabindex = Some(configuration);
+                    self.use_aria_activedescendant_with_tabindex = Some(configuration);
                 }
                 AnyJsonValue::JsonObjectValue(_) => {
                     let mut rule_configuration = RuleConfiguration::default();
@@ -2450,7 +2450,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                         "useAriaActivedescendantWithTabindex",
                         diagnostics,
                     )?;
-                    self.use_aria_activedescendant_tabindex = Some(rule_configuration);
+                    self.use_aria_activedescendant_with_tabindex = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

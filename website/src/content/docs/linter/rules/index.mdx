@@ -4,7 +4,6 @@ description: List of available lint rules.
 ---
 
 Below the list of rules supported by Biome, divided by group. Here's a legend of the emojis:
-
 - The emoji ✅ indicates that the rule is part of the recommended rules.
 - The emoji 🔧 indicates that the rule provides a code action (fix) that is **safe** to apply.
 - The emoji ⚠️ indicates that the rule provides a code action (fix) that is **unsafe** to apply.
@@ -12,12 +11,12 @@ Below the list of rules supported by Biome, divided by group. Here's a legend of
 ## Accessibility
 
 Rules focused on preventing accessibility problems.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noAccessKey](/linter/rules/no-access-key) | Enforce that the <code>accessKey</code> attribute is not used on any HTML element. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noAriaUnsupportedElements](/linter/rules/no-aria-unsupported-elements) | Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noAutofocus](/linter/rules/no-autofocus) | Enforce that autoFocus prop is not used on elements. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noBlankTarget](/linter/rules/no-blank-target) | Disallow <code>target=&quot;\_blank&quot;</code> attribute without <code>rel=&quot;noreferrer&quot;</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
+| [noBlankTarget](/linter/rules/no-blank-target) | Disallow <code>target=&quot;_blank&quot;</code> attribute without <code>rel=&quot;noreferrer&quot;</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noDistractingElements](/linter/rules/no-distracting-elements) | Enforces that no distracting elements are used. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noHeaderScope](/linter/rules/no-header-scope) | The scope prop should be used only on <code>&lt;th&gt;</code> elements. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noNoninteractiveElementToInteractiveRole](/linter/rules/no-noninteractive-element-to-interactive-role) | Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -30,25 +29,25 @@ Rules focused on preventing accessibility problems.
 | [useAnchorContent](/linter/rules/use-anchor-content) | Enforce that anchors have content and that the content is accessible to screen readers. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useAriaPropsForRole](/linter/rules/use-aria-props-for-role) | Enforce that elements with ARIA roles must have all required ARIA attributes for that role. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useButtonType](/linter/rules/use-button-type) | Enforces the usage of the attribute <code>type</code> for the element <code>button</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [useHeadingContent](/linter/rules/use-heading-content) | Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop. | |
+| [useHeadingContent](/linter/rules/use-heading-content) | Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop. |  |
 | [useHtmlLang](/linter/rules/use-html-lang) | Enforce that <code>html</code> element has <code>lang</code> attribute. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useIframeTitle](/linter/rules/use-iframe-title) | Enforces the usage of the attribute <code>title</code> for the element <code>iframe</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useKeyWithClickEvents](/linter/rules/use-key-with-click-events) | Enforce onClick is accompanied by at least one of the following: <code>onKeyUp</code>, <code>onKeyDown</code>, <code>onKeyPress</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useKeyWithMouseEvents](/linter/rules/use-key-with-mouse-events) | Enforce <code>onMouseOver</code> / <code>onMouseOut</code> are accompanied by <code>onFocus</code> / <code>onBlur</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useMediaCaption](/linter/rules/use-media-caption) | Enforces that <code>audio</code> and <code>video</code> elements must have a <code>track</code> for captions. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useValidAnchor](/linter/rules/use-valid-anchor) | Enforce that all anchors are valid, and they are navigable elements. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [useValidAriaProps](/linter/rules/use-valid-aria-props) | Ensures that ARIA properties <code>aria-\*</code> are all valid. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
+| [useValidAriaProps](/linter/rules/use-valid-aria-props) | Ensures that ARIA properties <code>aria-*</code> are all valid. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useValidAriaValues](/linter/rules/use-valid-aria-values) | Enforce that ARIA state and property values are valid. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useValidLang](/linter/rules/use-valid-lang) | Ensure that the attribute passed to the <code>lang</code> attribute is a correct ISO language and/or country. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 
 ## Complexity
 
 Rules that focus on inspecting complex code that could be simplified.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noBannedTypes](/linter/rules/no-banned-types) | Disallow primitive type aliases and misleading types. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noExtraBooleanCast](/linter/rules/no-extra-boolean-cast) | Disallow unnecessary boolean casts | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noForEach](/linter/rules/no-for-each) | Prefer <code>for...of</code> statement instead of <code>Array.forEach</code>. | |
+| [noForEach](/linter/rules/no-for-each) | Prefer <code>for...of</code> statement instead of <code>Array.forEach</code>. |  |
 | [noMultipleSpacesInRegularExpressionLiterals](/linter/rules/no-multiple-spaces-in-regular-expression-literals) | Disallow unclear usage of consecutive space characters in regular expression literals | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noStaticOnlyClass](/linter/rules/no-static-only-class) | This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noUselessCatch](/linter/rules/no-useless-catch) | Disallow unnecessary <code>catch</code> clauses. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -70,7 +69,7 @@ Rules that focus on inspecting complex code that could be simplified.
 ## Correctness
 
 Rules that detect code that is guaranteed to be incorrect or useless.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noChildrenProp](/linter/rules/no-children-prop) | Prevent passing of <strong>children</strong> as props. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noConstAssign](/linter/rules/no-const-assign) | Prevents from having <code>const</code> variables being re-assigned. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -88,10 +87,10 @@ Rules that detect code that is guaranteed to be incorrect or useless.
 | [noSetterReturn](/linter/rules/no-setter-return) | Disallow returning a value from a setter | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noStringCaseMismatch](/linter/rules/no-string-case-mismatch) | Disallow comparison of expressions modifying the string case with non-compliant value. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noSwitchDeclarations](/linter/rules/no-switch-declarations) | Disallow lexical declarations in <code>switch</code> clauses. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noUndeclaredVariables](/linter/rules/no-undeclared-variables) | Prevents the usage of variables that haven't been declared inside the document. | |
+| [noUndeclaredVariables](/linter/rules/no-undeclared-variables) | Prevents the usage of variables that haven't been declared inside the document. |  |
 | [noUnnecessaryContinue](/linter/rules/no-unnecessary-continue) | Avoid using unnecessary <code>continue</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noUnreachable](/linter/rules/no-unreachable) | Disallow unreachable code | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [noUnreachableSuper](/linter/rules/no-unreachable-super) | Ensures the <code>super()</code> constructor is called exactly once on every code path in a class constructor before <code>this</code> is accessed if the class has a superclass | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
+| [noUnreachableSuper](/linter/rules/no-unreachable-super) | Ensures the <code>super()</code> constructor is called exactly once on every code  path in a class constructor before <code>this</code> is accessed if the class has a superclass | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noUnsafeFinally](/linter/rules/no-unsafe-finally) | Disallow control flow statements in finally blocks. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noUnsafeOptionalChaining](/linter/rules/no-unsafe-optional-chaining) | Disallow the use of optional chaining in contexts where the undefined value is not allowed. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noUnusedLabels](/linter/rules/no-unused-labels) | Disallow unused labels. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -105,14 +104,14 @@ Rules that detect code that is guaranteed to be incorrect or useless.
 ## Performance
 
 Rules catching ways your code could be written to run faster, or generally be more efficient.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noDelete](/linter/rules/no-delete) | Disallow the use of the <code>delete</code> operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 
 ## Security
 
 Rules that detect potential security flaws.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noDangerouslySetInnerHtml](/linter/rules/no-dangerously-set-inner-html) | Prevent the usage of dangerous JSX props | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noDangerouslySetInnerHtmlWithChildren](/linter/rules/no-dangerously-set-inner-html-with-children) | Report when a DOM element or a component uses both <code>children</code> and <code>dangerouslySetInnerHTML</code> prop. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -120,18 +119,18 @@ Rules that detect potential security flaws.
 ## Style
 
 Rules enforcing a consistent and idiomatic way of writing your code.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noArguments](/linter/rules/no-arguments) | Disallow the use of <code>arguments</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noCommaOperator](/linter/rules/no-comma-operator) | Disallow comma operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noImplicitBoolean](/linter/rules/no-implicit-boolean) | Disallow implicit <code>true</code> values on JSX boolean attributes | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noInferrableTypes](/linter/rules/no-inferrable-types) | Disallow type annotations for variables, parameters, and class properties initialized with a literal expression. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
-| [noNamespace](/linter/rules/no-namespace) | Disallow the use of TypeScript's <code>namespace</code>s. | |
+| [noNamespace](/linter/rules/no-namespace) | Disallow the use of TypeScript's <code>namespace</code>s. |  |
 | [noNegationElse](/linter/rules/no-negation-else) | Disallow negation in the condition of an <code>if</code> statement if it has an <code>else</code> clause. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noNonNullAssertion](/linter/rules/no-non-null-assertion) | Disallow non-null assertions using the <code>!</code> postfix operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noParameterAssign](/linter/rules/no-parameter-assign) | Disallow reassigning <code>function</code> parameters. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [noParameterProperties](/linter/rules/no-parameter-properties) | Disallow the use of parameter properties in class constructors. | |
-| [noRestrictedGlobals](/linter/rules/no-restricted-globals) | This rule allows you to specify global variable names that you don’t want to use in your application. | |
+| [noParameterProperties](/linter/rules/no-parameter-properties) | Disallow the use of parameter properties in class constructors. |  |
+| [noRestrictedGlobals](/linter/rules/no-restricted-globals) | This rule allows you to specify global variable names that you don’t want to use in your application. |  |
 | [noShoutyConstants](/linter/rules/no-shouty-constants) | Disallow the use of constants which its value is the upper-case version of its name. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noUnusedTemplateLiteral](/linter/rules/no-unused-template-literal) | Disallow template literals if interpolation and special-character handling are not needed | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noVar](/linter/rules/no-var) | Disallow the use of <code>var</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -139,7 +138,7 @@ Rules enforcing a consistent and idiomatic way of writing your code.
 | [useConst](/linter/rules/use-const) | Require <code>const</code> declarations for variables that are never reassigned after declared. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [useDefaultParameterLast](/linter/rules/use-default-parameter-last) | Enforce default function parameters and optional function parameters to be last. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [useEnumInitializers](/linter/rules/use-enum-initializers) | Require that each enum member value be explicitly initialized. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [useExponentiationOperator](/linter/rules/use-exponentiation-operator) | Disallow the use of <code>Math.pow</code> in favor of the <code>\*\*</code> operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
+| [useExponentiationOperator](/linter/rules/use-exponentiation-operator) | Disallow the use of <code>Math.pow</code> in favor of the <code>**</code> operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [useFragmentSyntax](/linter/rules/use-fragment-syntax) | This rule enforces the use of <code>&lt;&gt;...&lt;/&gt;</code> over <code>&lt;Fragment&gt;...&lt;/Fragment&gt;</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [useLiteralEnumMembers](/linter/rules/use-literal-enum-members) | Require all enum members to be literal values. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [useNamingConvention](/linter/rules/use-naming-convention) | Enforce naming conventions for everything across a codebase. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
@@ -154,7 +153,7 @@ Rules enforcing a consistent and idiomatic way of writing your code.
 ## Suspicious
 
 Rules that detect code that is likely to be incorrect or useless.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noArrayIndexKey](/linter/rules/no-array-index-key) | Discourage the usage of Array index in keys. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noAssignInExpressions](/linter/rules/no-assign-in-expressions) | Disallow assignments in expressions. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -164,7 +163,7 @@ Rules that detect code that is likely to be incorrect or useless.
 | [noCommentText](/linter/rules/no-comment-text) | Prevent comments from being inserted as text nodes | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noCompareNegZero](/linter/rules/no-compare-neg-zero) | Disallow comparing against <code>-0</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noConfusingLabels](/linter/rules/no-confusing-labels) | Disallow labeled statements that are not loops. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
-| [noConsoleLog](/linter/rules/no-console-log) | Disallow the use of <code>console.log</code> | |
+| [noConsoleLog](/linter/rules/no-console-log) | Disallow the use of <code>console.log</code> |  |
 | [noConstEnum](/linter/rules/no-const-enum) | Disallow TypeScript <code>const enum</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noControlCharactersInRegex](/linter/rules/no-control-characters-in-regex) | Prevents from having control characters and some escape sequences that match control characters in regular expressions. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noDebugger](/linter/rules/no-debugger) | Disallow the use of <code>debugger</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -203,31 +202,31 @@ warning, depending on whether we intend for the rule to be recommended or not wh
 Nursery rules get promoted to other groups once they become stable or may be removed.
 
 Rules that belong to this group <strong>are not subject to semantic version</strong>.
-| Rule name | Properties | Description |
+| Rule name | Properties |  Description |
 | --- | --- | --- |
-| [noAccumulatingSpread](/linter/rules/no-accumulating-spread) | Disallow the use of spread (<code>...</code>) syntax on accumulators. | |
-| [noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) | Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type. | |
-| [noConfusingVoidType](/linter/rules/no-confusing-void-type) | Disallow <code>void</code> type outside of generic or return types. | |
-| [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys) | Disallow two keys with the same name inside a JSON object. | |
-| [noEmptyCharacterClassInRegex](/linter/rules/no-empty-character-class-in-regex) | Disallow empty character classes in regular expression literals. | |
-| [noExcessiveComplexity](/linter/rules/no-excessive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. | |
-| [noFallthroughSwitchClause](/linter/rules/no-fallthrough-switch-clause) | Disallow fallthrough of <code>switch</code> clauses. | |
+| [noAccumulatingSpread](/linter/rules/no-accumulating-spread) | Disallow the use of spread (<code>...</code>) syntax on accumulators. |  |
+| [noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) | Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type. |  |
+| [noConfusingVoidType](/linter/rules/no-confusing-void-type) | Disallow <code>void</code> type outside of generic or return types. |  |
+| [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys) | Disallow two keys with the same name inside a JSON object. |  |
+| [noEmptyCharacterClassInRegex](/linter/rules/no-empty-character-class-in-regex) | Disallow empty character classes in regular expression literals. |  |
+| [noExcessiveComplexity](/linter/rules/no-excessive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. |  |
+| [noFallthroughSwitchClause](/linter/rules/no-fallthrough-switch-clause) | Disallow fallthrough of <code>switch</code> clauses. |  |
 | [noGlobalIsFinite](/linter/rules/no-global-is-finite) | Use <code>Number.isFinite</code> instead of global <code>isFinite</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noGlobalIsNan](/linter/rules/no-global-is-nan) | Use <code>Number.isNaN</code> instead of global <code>isNaN</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noInteractiveElementToNoninteractiveRole](/linter/rules/no-interactive-element-to-noninteractive-role) | Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements. | |
+| [noInteractiveElementToNoninteractiveRole](/linter/rules/no-interactive-element-to-noninteractive-role) | Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements. |  |
 | [noInvalidNewBuiltin](/linter/rules/no-invalid-new-builtin) | Disallow <code>new</code> operators with global non-constructor functions. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noMisleadingInstantiator](/linter/rules/no-misleading-instantiator) | Enforce proper usage of <code>new</code> and <code>constructor</code>. | |
+| [noMisleadingInstantiator](/linter/rules/no-misleading-instantiator) | Enforce proper usage of <code>new</code> and <code>constructor</code>. |  |
 | [noMisrefactoredShorthandAssign](/linter/rules/no-misrefactored-shorthand-assign) | Disallow shorthand assign when variable appears on both sides. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noUnusedImports](/linter/rules/no-unused-imports) | Disallow unused imports. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noUselessElse](/linter/rules/no-useless-else) | Disallow <code>else</code> block when the <code>if</code> block breaks early. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [noVoid](/linter/rules/no-void) | Disallow the use of <code>void</code> operators, which is not a familiar operator. | |
-| [useAriaActivedescendantWithTabindex](/linter/rules/use-aria-activedescendant-with-tabindex) | Enforce that <code>tabIndex</code> is assigned to non-interactive HTML elements with <code>aria-activedescendant</code>. | |
+| [noVoid](/linter/rules/no-void) | Disallow the use of <code>void</code> operators, which is not a familiar operator. |  |
+| [useAriaActivedescendantWithTabindex](/linter/rules/use-aria-activedescendant-with-tabindex) | Enforce that <code>tabIndex</code> is assigned to non-interactive HTML elements with <code>aria-activedescendant</code>. |  |
 | [useArrowFunction](/linter/rules/use-arrow-function) | Use arrow functions over function expressions. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [useAsConstAssertion](/linter/rules/use-as-const-assertion) | Enforce the use of <code>as const</code> over literal type and type annotation. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [useCollapsedElseIf](/linter/rules/use-collapsed-else-if) | Enforce using <code>else if</code> instead of nested <code>if</code> in <code>else</code> clauses. | <span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
-| [useExhaustiveDependencies](/linter/rules/use-exhaustive-dependencies) | Enforce all dependencies are correctly specified. | |
+| [useExhaustiveDependencies](/linter/rules/use-exhaustive-dependencies) | Enforce all dependencies are correctly specified. |  |
 | [useGroupedTypeImport](/linter/rules/use-grouped-type-import) | Enforce the use of <code>import type</code> when an <code>import</code> only has specifiers with <code>type</code> qualifier. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [useHookAtTopLevel](/linter/rules/use-hook-at-top-level) | Enforce that all React hooks are being called from the Top Level component functions. | |
-| [useImportRestrictions](/linter/rules/use-import-restrictions) | Disallows package private imports. | |
+| [useHookAtTopLevel](/linter/rules/use-hook-at-top-level) | Enforce that all React hooks are being called from the Top Level component functions. |  |
+| [useImportRestrictions](/linter/rules/use-import-restrictions) | Disallows package private imports. |  |
 | [useIsArray](/linter/rules/use-is-array) | Use <code>Array.isArray()</code> instead of <code>instanceof Array</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
-| [useShorthandAssign](/linter/rules/use-shorthand-assign) | Require assignment operator shorthand where possible. | |
+| [useShorthandAssign](/linter/rules/use-shorthand-assign) | Require assignment operator shorthand where possible. |  |

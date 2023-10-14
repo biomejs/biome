@@ -85,6 +85,8 @@ invalid.jsx:2:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
     3 │ <a href="http://x.y.z" tabIndex="0" role="img" />;
     4 │ /* All flavors of input */
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -101,6 +103,8 @@ invalid.jsx:3:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ /* All flavors of input */
     5 │ <input role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -119,6 +123,8 @@ invalid.jsx:5:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
     6 │ <input type="img" role="img" />;
     7 │ <input type="checkbox" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -135,6 +141,8 @@ invalid.jsx:6:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ <input type="checkbox" role="img" />;
     8 │ <input type="color" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -153,6 +161,8 @@ invalid.jsx:7:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
     8 │ <input type="color" role="img" />;
     9 │ <input type="date" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -169,6 +179,8 @@ invalid.jsx:8:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <input type="date" role="img" />;
     10 │ <input type="datetime" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -187,6 +199,8 @@ invalid.jsx:9:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━�
     10 │ <input type="datetime" role="img" />;
     11 │ <input type="datetime-local" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -203,6 +217,8 @@ invalid.jsx:10:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <input type="datetime-local" role="img" />;
     12 │ <input type="email" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -221,6 +237,8 @@ invalid.jsx:11:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     12 │ <input type="email" role="img" />;
     13 │ <input type="file" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -237,6 +255,8 @@ invalid.jsx:12:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ <input type="file" role="img" />;
     14 │ <input type="image" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -255,6 +275,8 @@ invalid.jsx:13:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     14 │ <input type="image" role="img" />;
     15 │ <input type="month" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -271,6 +293,8 @@ invalid.jsx:14:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     15 │ <input type="month" role="img" />;
     16 │ <input type="number" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -289,6 +313,8 @@ invalid.jsx:15:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     16 │ <input type="number" role="img" />;
     17 │ <input type="password" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -305,6 +331,8 @@ invalid.jsx:16:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ <input type="password" role="img" />;
     18 │ <input type="radio" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -323,6 +351,8 @@ invalid.jsx:17:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     18 │ <input type="radio" role="img" />;
     19 │ <input type="range" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -339,6 +369,8 @@ invalid.jsx:18:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ <input type="range" role="img" />;
     20 │ <input type="reset" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -357,6 +389,8 @@ invalid.jsx:19:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     20 │ <input type="reset" role="img" />;
     21 │ <input type="search" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -373,6 +407,8 @@ invalid.jsx:20:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ <input type="search" role="img" />;
     22 │ <input type="submit" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -391,6 +427,8 @@ invalid.jsx:21:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     22 │ <input type="submit" role="img" />;
     23 │ <input type="tel" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -407,6 +445,8 @@ invalid.jsx:22:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     23 │ <input type="tel" role="img" />;
     24 │ <input type="text" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -425,6 +465,8 @@ invalid.jsx:23:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     24 │ <input type="text" role="img" />;
     25 │ <input type="time" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -441,6 +483,8 @@ invalid.jsx:24:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     25 │ <input type="time" role="img" />;
     26 │ <input type="url" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -459,6 +503,8 @@ invalid.jsx:25:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     26 │ <input type="url" role="img" />;
     27 │ <input type="week" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -475,6 +521,8 @@ invalid.jsx:26:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ <input type="week" role="img" />;
     28 │ /* End all flavors of input */
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -493,6 +541,8 @@ invalid.jsx:27:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     28 │ /* End all flavors of input */
     29 │ <menuitem role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -509,6 +559,8 @@ invalid.jsx:29:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     30 │ <option className="foo" role="img" />;
     31 │ <select className="foo" role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -527,6 +579,8 @@ invalid.jsx:30:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     31 │ <select className="foo" role="img" />;
     32 │ <textarea className="foo" role="img" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -543,6 +597,8 @@ invalid.jsx:31:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ <textarea className="foo" role="img" />;
     33 │ <tr role="img" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -561,6 +617,8 @@ invalid.jsx:32:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     33 │ <tr role="img" />;
     34 │ /* Interactive elements */
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -577,6 +635,8 @@ invalid.jsx:33:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^
     34 │ /* Interactive elements */
     35 │ <a href="http://x.y.z" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -595,6 +655,8 @@ invalid.jsx:35:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     36 │ <a href="http://x.y.z" tabIndex="0" role="listitem" />;
     37 │ /* All flavors of input */
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -611,6 +673,8 @@ invalid.jsx:36:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     37 │ /* All flavors of input */
     38 │ <input role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -629,6 +693,8 @@ invalid.jsx:38:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     39 │ <input type="listitem" role="listitem" />;
     40 │ <input type="checkbox" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -645,6 +711,8 @@ invalid.jsx:39:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ <input type="checkbox" role="listitem" />;
     41 │ <input type="color" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -663,6 +731,8 @@ invalid.jsx:40:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     41 │ <input type="color" role="listitem" />;
     42 │ <input type="date" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -679,6 +749,8 @@ invalid.jsx:41:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ <input type="date" role="listitem" />;
     43 │ <input type="datetime" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -697,6 +769,8 @@ invalid.jsx:42:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     43 │ <input type="datetime" role="listitem" />;
     44 │ <input type="datetime-local" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -713,6 +787,8 @@ invalid.jsx:43:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ <input type="datetime-local" role="listitem" />;
     45 │ <input type="email" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -731,6 +807,8 @@ invalid.jsx:44:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     45 │ <input type="email" role="listitem" />;
     46 │ <input type="file" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -747,6 +825,8 @@ invalid.jsx:45:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     46 │ <input type="file" role="listitem" />;
     47 │ <input type="image" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -765,6 +845,8 @@ invalid.jsx:46:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     47 │ <input type="image" role="listitem" />;
     48 │ <input type="month" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -781,6 +863,8 @@ invalid.jsx:47:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     48 │ <input type="month" role="listitem" />;
     49 │ <input type="number" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -799,6 +883,8 @@ invalid.jsx:48:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     49 │ <input type="number" role="listitem" />;
     50 │ <input type="password" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -815,6 +901,8 @@ invalid.jsx:49:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ <input type="password" role="listitem" />;
     51 │ <input type="radio" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -833,6 +921,8 @@ invalid.jsx:50:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     51 │ <input type="radio" role="listitem" />;
     52 │ <input type="range" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -849,6 +939,8 @@ invalid.jsx:51:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │ <input type="range" role="listitem" />;
     53 │ <input type="reset" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -867,6 +959,8 @@ invalid.jsx:52:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     53 │ <input type="reset" role="listitem" />;
     54 │ <input type="search" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -883,6 +977,8 @@ invalid.jsx:53:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     54 │ <input type="search" role="listitem" />;
     55 │ <input type="submit" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -901,6 +997,8 @@ invalid.jsx:54:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     55 │ <input type="submit" role="listitem" />;
     56 │ <input type="tel" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -917,6 +1015,8 @@ invalid.jsx:55:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     56 │ <input type="tel" role="listitem" />;
     57 │ <input type="text" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -935,6 +1035,8 @@ invalid.jsx:56:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     57 │ <input type="text" role="listitem" />;
     58 │ <input type="time" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -951,6 +1053,8 @@ invalid.jsx:57:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     58 │ <input type="time" role="listitem" />;
     59 │ <input type="url" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -969,6 +1073,8 @@ invalid.jsx:58:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     59 │ <input type="url" role="listitem" />;
     60 │ <input type="week" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -985,6 +1091,8 @@ invalid.jsx:59:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     60 │ <input type="week" role="listitem" />;
     61 │ /* End all flavors of input */
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -1003,6 +1111,8 @@ invalid.jsx:60:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     61 │ /* End all flavors of input */
     62 │ <menuitem role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -1019,6 +1129,8 @@ invalid.jsx:62:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     63 │ <option className="foo" role="listitem" />;
     64 │ <select className="foo" role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -1037,6 +1149,8 @@ invalid.jsx:63:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     64 │ <select className="foo" role="listitem" />;
     65 │ <textarea className="foo" role="listitem" />;
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -1053,6 +1167,8 @@ invalid.jsx:64:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     65 │ <textarea className="foo" role="listitem" />;
     66 │ <tr role="listitem" />;
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
@@ -1071,6 +1187,8 @@ invalid.jsx:65:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
     66 │ <tr role="listitem" />;
     67 │ 
   
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
+  
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
 
@@ -1086,6 +1204,8 @@ invalid.jsx:66:1 lint/nursery/noInteractiveElementToNoninteractiveRole ━━━
   > 66 │ <tr role="listitem" />;
        │ ^^^^^^^^^^^^^^^^^^^^^^
     67 │ 
+  
+  i WAI-ARIA roles should not be used to convert an interactive element to a non-interactive element.
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   

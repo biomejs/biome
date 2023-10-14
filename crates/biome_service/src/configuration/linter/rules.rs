@@ -2275,7 +2275,7 @@ pub struct Nursery {
         hide
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_aria_activedescendant_tabindex: Option<RuleConfiguration>,
+    pub use_aria_activedescendant_with_tabindex: Option<RuleConfiguration>,
     #[doc = "Use arrow functions over function expressions."]
     #[bpaf(long("use-arrow-function"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2514,7 +2514,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_tabindex.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
@@ -2648,7 +2648,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_tabindex.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
@@ -2753,7 +2753,7 @@ impl Nursery {
             "noUselessElse" => self.no_useless_else.as_ref(),
             "noVoid" => self.no_void.as_ref(),
             "useAriaActivedescendantWithTabindex" => {
-                self.use_aria_activedescendant_tabindex.as_ref()
+                self.use_aria_activedescendant_with_tabindex.as_ref()
             }
             "useArrowFunction" => self.use_arrow_function.as_ref(),
             "useAsConstAssertion" => self.use_as_const_assertion.as_ref(),

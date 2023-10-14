@@ -1,13 +1,12 @@
 use crate::aria_services::Aria;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
 declare_rule! {
     /// Enforce that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`.
     ///
-    /// `aria-activedescendant` is used to manage to focus within a [composite widget].
+    /// `aria-activedescendant` is used to manage to focus within a [composite widget](https://www.w3.org/TR/wai-aria/#composite).
     /// The element with the attribute `aria-activedescendant` retains the active document focus.
     ///
     /// It indicates which of its child elements has a secondary focus by assigning the ID of that
@@ -21,8 +20,6 @@ declare_rule! {
     /// it must either have an inherent tabIndex of zero or declare a tabIndex attribute.
     ///
     /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md
-    ///
-    /// [Composite widget](https://www.w3.org/TR/wai-aria/#composite)
     ///
     /// ## Examples
     ///
@@ -80,13 +77,13 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                markup! {
-                    "Enforce elements with aria-activedescendant are tabbable."
-                },
+                "Enforce elements with aria-activedescendant are tabbable."
             )
-            .note(markup! {
+            .note(
+                "aria-activedescendant is used to manage focus within a composite widget.\nThe element with the attribute aria-activedescendant retains the active document focus."
+            ).note(
                 "Add the tabIndex attribute to the element with a value greater than or equal to -1."
-            }),
+            ),
         )
     }
 }
