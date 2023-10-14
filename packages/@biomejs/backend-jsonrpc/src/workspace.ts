@@ -738,6 +738,10 @@ export interface Nursery {
 	 */
 	noUselessElse?: RuleConfiguration;
 	/**
+	 * Disallow unnecessary nested block statements.
+	 */
+	noUselessLoneBlockStatements?: RuleConfiguration;
+	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration;
@@ -1345,6 +1349,7 @@ export type Category =
 	| "lint/nursery/noMisrefactoredShorthandAssign"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
+	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/noVoid"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useAsConstAssertion"
