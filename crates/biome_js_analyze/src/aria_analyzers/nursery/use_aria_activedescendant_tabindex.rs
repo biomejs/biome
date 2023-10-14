@@ -22,7 +22,7 @@ declare_rule! {
     ///
     /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md
     ///
-    /// [composite widget]: https://www.w3.org/TR/wai-aria/#composite
+    /// [Composite widget](https://www.w3.org/TR/wai-aria/#composite)
     ///
     /// ## Examples
     ///
