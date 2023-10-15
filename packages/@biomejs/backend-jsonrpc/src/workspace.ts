@@ -718,6 +718,10 @@ export interface Nursery {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
+	 */
+	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
+	/**
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration;
@@ -749,6 +753,10 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	 */
+	useAriaActivedescendantWithTabindex?: RuleConfiguration;
 	/**
 	 * Use arrow functions over function expressions.
 	 */
@@ -1344,6 +1352,7 @@ export type Category =
 	| "lint/nursery/noFallthroughSwitchClause"
 	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noGlobalIsNan"
+	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"
@@ -1351,6 +1360,7 @@ export type Category =
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/noVoid"
+	| "lint/nursery/useAriaActivedescendantWithTabindex"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useAsConstAssertion"
 	| "lint/nursery/useBiomeSuppressionComment"

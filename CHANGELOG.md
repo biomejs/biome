@@ -135,6 +135,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
   Contributed by @victor-teles
 
+- Add [noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role) rule. The rule enforces the non-interactive ARIA roles are not assigned to interactive HTML elements. Contributed by @nissy-dev
+
+- Add [useAriaActivedescendantWithTabindex](https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex) rule. The rule enforces that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`. Contributed by @nissy-dev
+
 #### Enhancements
 
 - The following rules have now safe code fixes:
