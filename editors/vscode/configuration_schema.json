@@ -1061,6 +1061,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInteractiveElementToNoninteractiveRole": {
+					"description": "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidNewBuiltin": {
 					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
@@ -1096,6 +1103,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessLoneBlockStatements": {
+					"description": "Disallow unnecessary nested block statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
@@ -1106,6 +1120,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useAriaActivedescendantWithTabindex": {
+					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.",
@@ -1129,7 +1150,7 @@
 					]
 				},
 				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified.",
+					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

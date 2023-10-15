@@ -2032,12 +2032,15 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noFallthroughSwitchClause",
                 "noGlobalIsFinite",
                 "noGlobalIsNan",
+                "noInteractiveElementToNoninteractiveRole",
                 "noInvalidNewBuiltin",
                 "noMisleadingInstantiator",
                 "noMisrefactoredShorthandAssign",
                 "noUnusedImports",
                 "noUselessElse",
+                "noUselessLoneBlockStatements",
                 "noVoid",
+                "useAriaActivedescendantWithTabindex",
                 "useArrowFunction",
                 "useAsConstAssertion",
                 "useCollapsedElseIf",
@@ -2273,6 +2276,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                     ));
                 }
             },
+            "noInteractiveElementToNoninteractiveRole" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_interactive_element_to_noninteractive_role = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noInteractiveElementToNoninteractiveRole",
+                        diagnostics,
+                    )?;
+                    self.no_interactive_element_to_noninteractive_role = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
             "noInvalidNewBuiltin" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
@@ -2388,6 +2414,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                     ));
                 }
             },
+            "noUselessLoneBlockStatements" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_useless_lone_block_statements = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noUselessLoneBlockStatements",
+                        diagnostics,
+                    )?;
+                    self.no_useless_lone_block_statements = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
             "noVoid" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
@@ -2403,6 +2452,29 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_void = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "useAriaActivedescendantWithTabindex" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.use_aria_activedescendant_with_tabindex = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "useAriaActivedescendantWithTabindex",
+                        diagnostics,
+                    )?;
+                    self.use_aria_activedescendant_with_tabindex = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

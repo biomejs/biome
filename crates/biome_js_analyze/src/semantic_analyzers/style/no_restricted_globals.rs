@@ -59,7 +59,7 @@ declare_rule! {
 const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 
 /// Options for the rule `noRestrictedGlobals`.
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RestrictedGlobalsOptions {

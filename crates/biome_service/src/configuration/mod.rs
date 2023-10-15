@@ -43,7 +43,7 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Debug, Deserialize, Serialize, Clone, Bpaf)]
+#[derive(Debug, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
@@ -169,13 +169,23 @@ impl MergeWith<Configuration> for Configuration {
         // VCS
         self.merge_with(other_configuration.vcs);
     }
-}
 
-impl MergeWith<Option<Configuration>> for Configuration {
-    fn merge_with(&mut self, other_configuration: Option<Configuration>) {
-        if let Some(other_configuration) = other_configuration {
-            self.merge_with(other_configuration);
-        }
+    fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
+    where
+        Configuration: Default,
+    {
+        // files
+        self.merge_with_if_not_default(other_configuration.files);
+        // formatter
+        self.merge_with_if_not_default(other_configuration.formatter);
+        // javascript
+        self.merge_with_if_not_default(other_configuration.javascript);
+        // linter
+        self.merge_with_if_not_default(other_configuration.linter);
+        // organize imports
+        self.merge_with_if_not_default(other_configuration.organize_imports);
+        // VCS
+        self.merge_with_if_not_default(other_configuration.vcs);
     }
 }
 
@@ -185,6 +195,13 @@ impl MergeWith<Option<VcsConfiguration>> for Configuration {
             let vcs = self.vcs.get_or_insert_with(VcsConfiguration::default);
             vcs.merge_with(other_vcs);
         }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<VcsConfiguration>)
+    where
+        Option<VcsConfiguration>: Default,
+    {
+        self.merge_with(other)
     }
 }
 
@@ -197,6 +214,13 @@ impl MergeWith<Option<OrganizeImports>> for Configuration {
             organize_imports.merge_with(other_organize_imports);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: Option<OrganizeImports>)
+    where
+        Option<OrganizeImports>: Default,
+    {
+        self.merge_with(other)
+    }
 }
 
 impl MergeWith<Option<LinterConfiguration>> for Configuration {
@@ -206,12 +230,32 @@ impl MergeWith<Option<LinterConfiguration>> for Configuration {
             linter.merge_with(other_linter);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: Option<LinterConfiguration>)
+    where
+        Option<LinterConfiguration>: Default,
+    {
+        if let Some(other_linter) = other {
+            let linter = self.linter.get_or_insert_with(LinterConfiguration::default);
+            linter.merge_with_if_not_default(other_linter);
+        }
+    }
 }
 impl MergeWith<Option<FilesConfiguration>> for Configuration {
     fn merge_with(&mut self, other: Option<FilesConfiguration>) {
         if let Some(files_configuration) = other {
             let files = self.files.get_or_insert_with(FilesConfiguration::default);
             files.merge_with(files_configuration);
+        };
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<FilesConfiguration>)
+    where
+        Option<FilesConfiguration>: Default,
+    {
+        if let Some(files_configuration) = other {
+            let files = self.files.get_or_insert_with(FilesConfiguration::default);
+            files.merge_with_if_not_default(files_configuration);
         };
     }
 }
@@ -224,6 +268,18 @@ impl MergeWith<Option<JavascriptConfiguration>> for Configuration {
             js_configuration.merge_with(other);
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JavascriptConfiguration>)
+    where
+        Option<JavascriptConfiguration>: Default,
+    {
+        if let Some(other) = other {
+            let js_configuration = self
+                .javascript
+                .get_or_insert_with(JavascriptConfiguration::default);
+            js_configuration.merge_with_if_not_default(other);
+        }
+    }
 }
 impl MergeWith<Option<FormatterConfiguration>> for Configuration {
     fn merge_with(&mut self, other: Option<FormatterConfiguration>) {
@@ -232,6 +288,18 @@ impl MergeWith<Option<FormatterConfiguration>> for Configuration {
                 .formatter
                 .get_or_insert_with(FormatterConfiguration::default);
             formatter.merge_with(other_formatter);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<FormatterConfiguration>)
+    where
+        Option<FormatterConfiguration>: Default,
+    {
+        if let Some(other_formatter) = other {
+            let formatter = self
+                .formatter
+                .get_or_insert_with(FormatterConfiguration::default);
+            formatter.merge_with_if_not_default(other_formatter);
         }
     }
 }
@@ -243,6 +311,16 @@ impl MergeWith<Option<JavascriptFormatter>> for Configuration {
             .get_or_insert_with(JavascriptConfiguration::default);
         javascript_configuration.merge_with(other);
     }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JavascriptFormatter>)
+    where
+        Option<JavascriptFormatter>: Default,
+    {
+        let javascript_configuration = self
+            .javascript
+            .get_or_insert_with(JavascriptConfiguration::default);
+        javascript_configuration.merge_with_if_not_default(other);
+    }
 }
 
 impl MergeWith<Option<JsonFormatter>> for Configuration {
@@ -250,10 +328,18 @@ impl MergeWith<Option<JsonFormatter>> for Configuration {
         let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
         javascript_configuration.merge_with(other);
     }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
+    where
+        Option<JsonFormatter>: Default,
+    {
+        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+        javascript_configuration.merge_with_if_not_default(other);
+    }
 }
 
 /// The configuration of the filesystem
-#[derive(Default, Debug, Deserialize, Serialize, Clone, Bpaf)]
+#[derive(Default, Debug, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
@@ -297,6 +383,15 @@ impl MergeWith<FilesConfiguration> for FilesConfiguration {
         }
         if let Some(ignore_unknown) = other.ignore_unknown {
             self.ignore_unknown = Some(ignore_unknown)
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: FilesConfiguration)
+    where
+        FilesConfiguration: Default,
+    {
+        if other != FilesConfiguration::default() {
+            self.merge_with(other)
         }
     }
 }

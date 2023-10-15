@@ -59,6 +59,15 @@ impl MergeWith<OrganizeImports> for OrganizeImports {
             self.ignore = Some(ignore)
         }
     }
+
+    fn merge_with_if_not_default(&mut self, other: OrganizeImports)
+    where
+        OrganizeImports: Default,
+    {
+        if other != OrganizeImports::default() {
+            self.merge_with(other)
+        }
+    }
 }
 
 impl TryFrom<OrganizeImports> for OrganizeImportsSettings {

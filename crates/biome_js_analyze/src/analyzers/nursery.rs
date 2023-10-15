@@ -10,6 +10,7 @@ pub(crate) mod no_fallthrough_switch_clause;
 pub(crate) mod no_misleading_instantiator;
 pub(crate) mod no_misrefactored_shorthand_assign;
 pub(crate) mod no_useless_else;
+pub(crate) mod no_useless_lone_block_statements;
 pub(crate) mod no_void;
 pub(crate) mod use_arrow_function;
 pub(crate) mod use_as_const_assertion;
@@ -30,6 +31,7 @@ declare_group! {
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_useless_else :: NoUselessElse ,
+            self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_void :: NoVoid ,
             self :: use_arrow_function :: UseArrowFunction ,
             self :: use_as_const_assertion :: UseAsConstAssertion ,

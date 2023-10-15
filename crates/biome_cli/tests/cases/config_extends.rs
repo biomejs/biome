@@ -219,3 +219,50 @@ fn extends_resolves_when_using_config_path() {
         result,
     ));
 }
+
+#[test]
+fn applies_extended_values_in_current_config() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let format = Path::new("format.json");
+    fs.insert(
+        format.into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+
+    let rome_json = Path::new("biome.json");
+    fs.insert(
+        rome_json.into(),
+        r#"{ "extends": ["format.json"], "formatter": { "lineWidth": 20 } }"#,
+    );
+
+    let test_file = Path::new("test.js");
+    fs.insert(
+        test_file.into(),
+        r#"debugger; const a = ["lorem", "ipsum"]; "#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                test_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_extended_values_in_current_config",
+        fs,
+        console,
+        result,
+    ));
+}
