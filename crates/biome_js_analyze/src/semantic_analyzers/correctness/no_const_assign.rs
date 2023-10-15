@@ -1,14 +1,17 @@
 use crate::semantic_services::Semantic;
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
     JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,
-    JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsVariableDeclaration,
+    JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsSyntaxKind, JsVariableDeclaration,
     JsVariableDeclarator, JsVariableDeclaratorList,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Prevents from having `const` variables being re-assigned.
@@ -112,5 +115,59 @@ impl Rule for NoConstAssign {
                 markup! {"This is where the variable is defined as constant"},
             ),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let model = ctx.model();
+        let mut mutation = ctx.root().begin();
+
+        let declared_binding = model.binding(node)?;
+
+        if let Some(possible_declarator) = declared_binding.syntax().ancestors().find(|node| {
+            !AnyJsObjectBindingPatternMember::can_cast(node.kind())
+                && !JsObjectBindingPatternPropertyList::can_cast(node.kind())
+                && !AnyJsArrayBindingPatternElement::can_cast(node.kind())
+                && !JsArrayBindingPatternElementList::can_cast(node.kind())
+                && !JsIdentifierBinding::can_cast(node.kind())
+        }) {
+            if JsVariableDeclarator::can_cast(possible_declarator.kind()) {
+                let possible_declaration = possible_declarator.parent()?;
+                if let Some(js_variable_declaration) =
+                    JsVariableDeclaratorList::cast_ref(&possible_declaration)
+                        .and_then(|declaration| declaration.syntax().parent())
+                        .and_then(JsVariableDeclaration::cast)
+                {
+                    if js_variable_declaration.is_const() {
+                        let const_assign = js_variable_declaration.kind().ok()?;
+                        let let_assign = make::token(JsSyntaxKind::LET_KW);
+                        mutation.replace_token(const_assign, let_assign);
+                        return Some(JsRuleAction {
+                            category: ActionCategory::QuickFix,
+                            applicability: Applicability::MaybeIncorrect,
+                            message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
+                                .to_owned(),
+                            mutation,
+                        });
+                    }
+                } else if let Some(js_for_variable_declaration) =
+                    JsForVariableDeclaration::cast_ref(&possible_declaration)
+                {
+                    if js_for_variable_declaration.is_const() {
+                        let const_assign = js_for_variable_declaration.kind_token().ok()?;
+                        let let_assign = make::token(JsSyntaxKind::LET_KW);
+                        mutation.replace_token(const_assign, let_assign);
+                        return Some(JsRuleAction {
+                            category: ActionCategory::QuickFix,
+                            applicability: Applicability::MaybeIncorrect,
+                            message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
+                                .to_owned(),
+                            mutation,
+                        });
+                    }
+                }
+            }
+        }
+        None
     }
 }

@@ -63,7 +63,7 @@ r = 4;
 
 # Diagnostics
 ```
-invalid.js:2:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign a because it's a constant
   
@@ -80,11 +80,18 @@ invalid.js:2:1 lint/correctness/noConstAssign ━━━━━━━━━━━�
     2 │ a = 2;
     3 │ 
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     1    │ - const·a·=·1;
+        1 │ + let·a·=·1;
+     2  2 │   a = 2;
+     3  3 │   
+  
 
 ```
 
 ```
-invalid.js:5:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -103,11 +110,20 @@ invalid.js:5:1 lint/correctness/noConstAssign ━━━━━━━━━━━�
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:6:3 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:3 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -127,11 +143,20 @@ invalid.js:6:3 lint/correctness/noConstAssign ━━━━━━━━━━━�
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:7:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -151,11 +176,20 @@ invalid.js:7:1 lint/correctness/noConstAssign ━━━━━━━━━━━�
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:8:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -175,11 +209,20 @@ invalid.js:8:1 lint/correctness/noConstAssign ━━━━━━━━━━━�
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:10:2 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -199,11 +242,20 @@ invalid.js:10:2 lint/correctness/noConstAssign ━━━━━━━━━━━
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:13:2 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign b because it's a constant
   
@@ -223,11 +275,20 @@ invalid.js:13:2 lint/correctness/noConstAssign ━━━━━━━━━━━
     5 │ b = 4;
     6 │ ++b;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+     2  2 │   a = 2;
+     3  3 │   
+     4    │ - const·b·=·2,·c·=·43;
+        4 │ + let·b·=·2,·c·=·43;
+     5  5 │   b = 4;
+     6  6 │   ++b;
+  
 
 ```
 
 ```
-invalid.js:42:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign i because it's a constant
   
@@ -246,11 +307,20 @@ invalid.js:42:1 lint/correctness/noConstAssign ━━━━━━━━━━━
     40 │ 	j: { l },
     41 │ } = { i: 1, j: { l: 2 } };
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    36 36 │   };
+    37 37 │   
+    38    │ - const·{
+       38 │ + let·{
+    39 39 │   	i,
+    40 40 │   	j: { l },
+  
 
 ```
 
 ```
-invalid.js:43:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign l because it's a constant
   
@@ -270,11 +340,20 @@ invalid.js:43:1 lint/correctness/noConstAssign ━━━━━━━━━━━
     41 │ } = { i: 1, j: { l: 2 } };
     42 │ i = 4;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    36 36 │   };
+    37 37 │   
+    38    │ - const·{
+       38 │ + let·{
+    39 39 │   	i,
+    40 40 │   	j: { l },
+  
 
 ```
 
 ```
-invalid.js:46:2 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign k because it's a constant
   
@@ -293,11 +372,20 @@ invalid.js:46:2 lint/correctness/noConstAssign ━━━━━━━━━━━
     46 │ 	k = 4;
     47 │ }
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    43 43 │   l = 4;
+    44 44 │   
+    45    │ - for·(const·k·in·[1,·2])·{
+       45 │ + for·(let·k·in·[1,·2])·{
+    46 46 │   	k = 4;
+    47 47 │   }
+  
 
 ```
 
 ```
-invalid.js:50:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:50:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign p because it's a constant
   
@@ -316,11 +404,20 @@ invalid.js:50:1 lint/correctness/noConstAssign ━━━━━━━━━━━
     50 │ p = 3;
     51 │ q = 4;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    47 47 │   }
+    48 48 │   
+    49    │ - const·[p,·{·q·}]·=·[1,·{·q:·2·}];
+       49 │ + let·[p,·{·q·}]·=·[1,·{·q:·2·}];
+    50 50 │   p = 3;
+    51 51 │   q = 4;
+  
 
 ```
 
 ```
-invalid.js:51:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign q because it's a constant
   
@@ -340,11 +437,20 @@ invalid.js:51:1 lint/correctness/noConstAssign ━━━━━━━━━━━
     50 │ p = 3;
     51 │ q = 4;
   
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    47 47 │   }
+    48 48 │   
+    49    │ - const·[p,·{·q·}]·=·[1,·{·q:·2·}];
+       49 │ + let·[p,·{·q·}]·=·[1,·{·q:·2·}];
+    50 50 │   p = 3;
+    51 51 │   q = 4;
+  
 
 ```
 
 ```
-invalid.js:54:1 lint/correctness/noConstAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Can't assign r because it's a constant
   
@@ -361,6 +467,15 @@ invalid.js:54:1 lint/correctness/noConstAssign ━━━━━━━━━━━
        │         ^
     54 │ r = 4;
     55 │ 
+  
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    51 51 │   q = 4;
+    52 52 │   
+    53    │ - const·{·r,·...rest·}·=·s;
+       53 │ + let·{·r,·...rest·}·=·s;
+    54 54 │   r = 4;
+    55 55 │   
   
 
 ```
