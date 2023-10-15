@@ -15,7 +15,7 @@ use biome_service::{
 };
 use std::path::PathBuf;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct LoadedConfiguration {
     pub(crate) directory_path: Option<PathBuf>,
     pub(crate) file_path: Option<PathBuf>,
@@ -24,20 +24,38 @@ pub struct LoadedConfiguration {
 }
 
 impl LoadedConfiguration {
-    /// It updates the loaded configuration by resolving the `extends` field.
+    /// Consumes itself to generate a new [LoadedConfiguration] where the new `configuration`
+    /// is the result of its `extends` fields applied from left to right, and the last one element
+    /// applied is itself.
     ///
     /// If a configuration can't be resolved from the file system, the operation will fail.
-    pub fn apply_extends(&mut self, fs: &DynRef<dyn FileSystem>) -> Result<(), WorkspaceError> {
+    pub fn apply_extends(mut self, fs: &DynRef<dyn FileSystem>) -> Result<Self, WorkspaceError> {
         let deserialized = self.deserialize_extends(fs)?;
         let (configurations, errors): (Vec<_>, Vec<_>) =
             deserialized.into_iter().map(|d| d.consume()).unzip();
-        for c in configurations {
-            self.configuration.merge_with(c);
-        }
+
+        let extended_configuration = configurations.into_iter().reduce(
+            |mut previous_configuration, current_configuration| {
+                previous_configuration.merge_with(current_configuration);
+                previous_configuration
+            },
+        );
+        let configuration = if let Some(mut extended_configuration) = extended_configuration {
+            // Here we want to keep only the values that aren't a default
+            extended_configuration.merge_with_if_not_default(self.configuration);
+            extended_configuration
+        } else {
+            self.configuration
+        };
         self.diagnostics
             .extend(errors.into_iter().flatten().collect::<Vec<_>>());
 
-        Ok(())
+        Ok(Self {
+            configuration,
+            diagnostics: self.diagnostics,
+            file_path: self.file_path,
+            directory_path: self.directory_path,
+        })
     }
 
     fn deserialize_extends(
@@ -178,8 +196,6 @@ pub(crate) fn load_configuration(
 
     let fs = &session.app.fs;
     let config = load_config(fs, base_path)?;
-    let mut loaded_configuration = LoadedConfiguration::from(config);
-
-    loaded_configuration.apply_extends(fs)?;
-    Ok(loaded_configuration)
+    let loaded_configuration = LoadedConfiguration::from(config);
+    Ok(loaded_configuration.apply_extends(fs)?)
 }

@@ -20,7 +20,31 @@ use std::str::FromStr;
 use schemars::JsonSchema;
 
 declare_rule! {
-    /// Enforce all dependencies are correctly specified.
+    /// Enforce all dependencies are correctly specified in a React hook.
+    ///
+    /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
+    ///
+    /// If your project _doesn't_ use React, **you shouldn't use this rule**.
+    ///
+    /// The rule will inspect the following **known** hooks:
+    ///
+    /// - `useEffect`
+    /// - `useLayoutEffect`
+    /// - `useInsertionEffect`
+    /// - `useCallback`
+    /// - `useMemo`
+    /// - `useImperativeHandle`
+    /// - `useState`
+    /// - `useContext`
+    /// - `useReducer`
+    /// - `useRef`
+    /// - `useDebugValue`
+    /// - `useDeferredValue`
+    /// - `useTransition`
+    /// - `useId`
+    /// - `useSyncExternalStore`
+    ///
+    /// If you want to add more hooks to the rule, check the [#options](options).
     ///
     /// ## Examples
     ///
@@ -195,7 +219,7 @@ impl Default for ReactExtensiveDependenciesOptions {
 }
 
 /// Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
@@ -212,7 +236,7 @@ impl FromStr for HooksOptions {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Hooks {

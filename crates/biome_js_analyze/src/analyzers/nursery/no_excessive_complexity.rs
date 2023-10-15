@@ -373,7 +373,7 @@ pub struct ComplexityScore {
 }
 
 /// Options for the rule `noNestedModuleImports`.
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ComplexityOptions {

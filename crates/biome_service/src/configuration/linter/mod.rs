@@ -15,7 +15,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
@@ -46,6 +46,15 @@ impl MergeWith<LinterConfiguration> for LinterConfiguration {
     fn merge_with(&mut self, other: LinterConfiguration) {
         if let Some(enabled) = other.enabled {
             self.enabled = Some(enabled);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: LinterConfiguration)
+    where
+        LinterConfiguration: Default,
+    {
+        if other != LinterConfiguration::default() {
+            self.merge_with(other)
         }
     }
 }
@@ -121,7 +130,7 @@ impl TryFrom<LinterConfiguration> for LinterSettings {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
@@ -214,7 +223,7 @@ impl FromStr for RulePlainConfiguration {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions {
