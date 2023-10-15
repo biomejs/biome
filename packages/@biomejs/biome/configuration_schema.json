@@ -990,17 +990,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoEmptyBlockStatementsOptions": {
-			"description": "Rule's options.",
-			"type": "object",
-			"properties": {
-				"allowEmptyCatch": {
-					"description": "If `true`, then empty catch blocks are allowed",
-					"type": "boolean"
-				}
-			},
-			"additionalProperties": false
-		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1274,10 +1263,6 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
-				},
-				{
-					"description": "Options for `noEmptyBlockStatements` rule",
-					"allOf": [{ "$ref": "#/definitions/NoEmptyBlockStatementsOptions" }]
 				},
 				{ "description": "No options available", "type": "null" }
 			]

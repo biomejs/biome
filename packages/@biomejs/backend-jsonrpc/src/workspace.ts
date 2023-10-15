@@ -1129,7 +1129,6 @@ export type PossibleOptions =
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| NoEmptyBlockStatementsOptions
 	| null;
 /**
  * Options for the rule `noNestedModuleImports`.
@@ -1170,15 +1169,6 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals?: string[];
-}
-/**
- * Rule's options.
- */
-export interface NoEmptyBlockStatementsOptions {
-	/**
-	 * If `true`, then empty catch blocks are allowed
-	 */
-	allowEmptyCatch: boolean;
 }
 export interface Hooks {
 	/**

@@ -1,8 +1,5 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::nursery::no_empty_block_statements::{
-    no_empty_block_statements_options, NoEmptyBlockStatementsOptions,
-};
 use crate::analyzers::nursery::no_excessive_complexity::{complexity_options, ComplexityOptions};
 use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
@@ -37,10 +34,6 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
-    /// Options for `noEmptyBlockStatements` rule
-    NoEmptyBlockStatements(
-        #[bpaf(external(no_empty_block_statements_options), hide)] NoEmptyBlockStatementsOptions,
-    ),
     /// No options available
     #[default]
     NoOptions,
@@ -82,13 +75,6 @@ impl PossibleOptions {
                 let options = match self {
                     PossibleOptions::RestrictedGlobals(options) => options.clone(),
                     _ => RestrictedGlobalsOptions::default(),
-                };
-                RuleOptions::new(options)
-            }
-            "noEmptyBlockStatements" => {
-                let options: NoEmptyBlockStatementsOptions = match self {
-                    PossibleOptions::NoEmptyBlockStatements(options) => options.clone(),
-                    _ => NoEmptyBlockStatementsOptions::default(),
                 };
                 RuleOptions::new(options)
             }
@@ -147,14 +133,6 @@ impl PossibleOptions {
                     };
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
                     *self = PossibleOptions::RestrictedGlobals(options);
-                }
-                "allowEmptyCatch" => {
-                    let mut options = match self {
-                        PossibleOptions::NoEmptyBlockStatements(options) => options.clone(),
-                        _ => NoEmptyBlockStatementsOptions::default(),
-                    };
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::NoEmptyBlockStatements(options);
                 }
                 _ => (),
             }

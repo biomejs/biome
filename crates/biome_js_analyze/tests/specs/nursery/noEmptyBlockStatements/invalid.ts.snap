@@ -201,14 +201,14 @@ invalid.ts:27:2 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:35:3 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:35:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! No empty blocks allowed.
   
     33 │ try {
     34 │     doSomething();
   > 35 │ } catch(ex) {
-       │   ^^^^^^^^^^^
+       │             ^
   > 36 │ 
   > 37 │ } finally {
        │ ^^
@@ -365,14 +365,14 @@ invalid.ts:58:4 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:65:5 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:65:15 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! No empty blocks allowed.
   
     63 │   try {
     64 │       doSomething();
   > 65 │   } catch(ex) {
-       │     ^^^^^^^^^^^
+       │               ^
   > 66 │ 
   > 67 │   } finally {
        │   ^^

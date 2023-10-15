@@ -200,14 +200,14 @@ invalid.js:27:2 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:3 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! No empty blocks allowed.
   
     32 │ try {
     33 │     doSomething();
   > 34 │ } catch(ex) {
-       │   ^^^^^^^^^^^
+       │             ^
   > 35 │ 
   > 36 │ } finally {
        │ ^^
@@ -364,14 +364,14 @@ invalid.js:57:4 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 
 ```
-invalid.js:64:5 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:64:15 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! No empty blocks allowed.
   
     62 │   try {
     63 │       doSomething();
   > 64 │   } catch(ex) {
-       │     ^^^^^^^^^^^
+       │               ^
   > 65 │ 
   > 66 │   } finally {
        │   ^^
