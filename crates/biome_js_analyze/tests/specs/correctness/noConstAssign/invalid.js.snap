@@ -59,6 +59,9 @@ q = 4;
 const { r, ...rest } = s;
 r = 4;
 
+/*before*/const/*after*/ a = 0;
+a = 1;
+
 ```
 
 # Diagnostics
@@ -75,17 +78,21 @@ invalid.js:2:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
   
   i This is where the variable is defined as constant
   
-  > 1 │ const a = 1;
-      │       ^
-    2 │ a = 2;
-    3 │ 
+    54 │ r = 4;
+    55 │ 
+  > 56 │ /*before*/const/*after*/ a = 0;
+       │                          ^
+    57 │ a = 1;
+    58 │ 
   
   i Unsafe fix: Replace const with let if you assign it to a new value.
   
-     1    │ - const·a·=·1;
-        1 │ + let·a·=·1;
-     2  2 │   a = 2;
-     3  3 │   
+    54 54 │   r = 4;
+    55 55 │   
+    56    │ - /*before*/const/*after*/·a·=·0;
+       56 │ + /*before*/let/*after*/·a·=·0;
+    57 57 │   a = 1;
+    58 58 │   
   
 
 ```
@@ -458,6 +465,7 @@ invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
   > 54 │ r = 4;
        │ ^
     55 │ 
+    56 │ /*before*/const/*after*/ a = 0;
   
   i This is where the variable is defined as constant
   
@@ -476,6 +484,37 @@ invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
        53 │ + let·{·r,·...rest·}·=·s;
     54 54 │   r = 4;
     55 55 │   
+  
+
+```
+
+```
+invalid.js:57:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Can't assign a because it's a constant
+  
+    56 │ /*before*/const/*after*/ a = 0;
+  > 57 │ a = 1;
+       │ ^
+    58 │ 
+  
+  i This is where the variable is defined as constant
+  
+    54 │ r = 4;
+    55 │ 
+  > 56 │ /*before*/const/*after*/ a = 0;
+       │                          ^
+    57 │ a = 1;
+    58 │ 
+  
+  i Unsafe fix: Replace const with let if you assign it to a new value.
+  
+    54 54 │   r = 4;
+    55 55 │   
+    56    │ - /*before*/const/*after*/·a·=·0;
+       56 │ + /*before*/let/*after*/·a·=·0;
+    57 57 │   a = 1;
+    58 58 │   
   
 
 ```

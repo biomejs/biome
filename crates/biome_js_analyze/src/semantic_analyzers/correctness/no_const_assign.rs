@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self};
@@ -55,6 +55,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noConstAssign",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -138,33 +139,29 @@ impl Rule for NoConstAssign {
                         .and_then(|declaration| declaration.syntax().parent())
                         .and_then(JsVariableDeclaration::cast)
                 {
-                    if js_variable_declaration.is_const() {
-                        let const_assign = js_variable_declaration.kind().ok()?;
-                        let let_assign = make::token(JsSyntaxKind::LET_KW);
-                        mutation.replace_token(const_assign, let_assign);
-                        return Some(JsRuleAction {
+                    let const_assign = js_variable_declaration.kind().ok()?;
+                    let let_assign = make::token(JsSyntaxKind::LET_KW);
+                    mutation.replace_token(const_assign, let_assign);
+                    return Some(JsRuleAction {
                             category: ActionCategory::QuickFix,
                             applicability: Applicability::MaybeIncorrect,
                             message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
                                 .to_owned(),
                             mutation,
                         });
-                    }
                 } else if let Some(js_for_variable_declaration) =
                     JsForVariableDeclaration::cast_ref(&possible_declaration)
                 {
-                    if js_for_variable_declaration.is_const() {
-                        let const_assign = js_for_variable_declaration.kind_token().ok()?;
-                        let let_assign = make::token(JsSyntaxKind::LET_KW);
-                        mutation.replace_token(const_assign, let_assign);
-                        return Some(JsRuleAction {
+                    let const_assign = js_for_variable_declaration.kind_token().ok()?;
+                    let let_assign = make::token(JsSyntaxKind::LET_KW);
+                    mutation.replace_token(const_assign, let_assign);
+                    return Some(JsRuleAction {
                             category: ActionCategory::QuickFix,
                             applicability: Applicability::MaybeIncorrect,
                             message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
                                 .to_owned(),
                             mutation,
                         });
-                    }
                 }
             }
         }
