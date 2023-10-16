@@ -16,7 +16,7 @@ function booleanOperators2() {
 
 # Diagnostics
 ```
-booleanOperators2.js:1:10 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+booleanOperators2.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

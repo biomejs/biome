@@ -23,7 +23,7 @@ function functionalChain(array) {
 
 # Diagnostics
 ```
-functionalChain.js:4:24 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+functionalChain.js:4:24 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

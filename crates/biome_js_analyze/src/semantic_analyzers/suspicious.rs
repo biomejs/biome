@@ -8,6 +8,7 @@ pub(crate) mod no_class_assign;
 pub(crate) mod no_console_log;
 pub(crate) mod no_duplicate_parameters;
 pub(crate) mod no_function_assign;
+pub(crate) mod no_global_is_finite;
 pub(crate) mod no_global_is_nan;
 pub(crate) mod no_import_assign;
 pub(crate) mod no_label_var;
@@ -25,6 +26,7 @@ declare_group! {
             self :: no_console_log :: NoConsoleLog ,
             self :: no_duplicate_parameters :: NoDuplicateParameters ,
             self :: no_function_assign :: NoFunctionAssign ,
+            self :: no_global_is_finite :: NoGlobalIsFinite ,
             self :: no_global_is_nan :: NoGlobalIsNan ,
             self :: no_import_assign :: NoImportAssign ,
             self :: no_label_var :: NoLabelVar ,

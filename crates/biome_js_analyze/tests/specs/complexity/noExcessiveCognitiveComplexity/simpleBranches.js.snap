@@ -18,7 +18,7 @@ function simpleBranches() {
 
 # Diagnostics
 ```
-simpleBranches.js:1:10 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+simpleBranches.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

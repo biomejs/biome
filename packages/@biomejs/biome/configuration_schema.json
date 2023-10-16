@@ -1054,13 +1054,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noGlobalIsFinite": {
-					"description": "Use Number.isFinite instead of global isFinite.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noInteractiveElementToNoninteractiveRole": {
 					"description": "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
 					"anyOf": [
@@ -1730,6 +1723,13 @@
 				},
 				"noFunctionAssign": {
 					"description": "Disallow reassigning function declarations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noGlobalIsFinite": {
+					"description": "Use Number.isFinite instead of global isFinite.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

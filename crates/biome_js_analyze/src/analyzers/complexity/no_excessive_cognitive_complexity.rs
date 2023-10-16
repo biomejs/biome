@@ -78,14 +78,14 @@ declare_rule! {
     ///
     /// The allowed values range from 1 through 254. The default is 15.
     ///
-    pub(crate) NoExcessiveComplexity {
+    pub(crate) NoExcessiveCognitiveComplexity {
         version: "1.0.0",
-        name: "noExcessiveComplexity",
+        name: "noExcessiveCognitiveComplexity",
         recommended: false,
     }
 }
 
-impl Rule for NoExcessiveComplexity {
+impl Rule for NoExcessiveCognitiveComplexity {
     type Query = CognitiveComplexity;
     type State = ();
     type Signals = Option<Self::State>;
@@ -372,7 +372,7 @@ pub struct ComplexityScore {
     calculated_score: u8,
 }
 
-/// Options for the rule `noNestedModuleImports`.
+/// Options for the rule `noExcessiveCognitiveComplexity`.
 #[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

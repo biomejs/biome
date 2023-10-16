@@ -714,10 +714,6 @@ export interface Nursery {
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
 	/**
-	 * Use Number.isFinite instead of global isFinite.
-	 */
-	noGlobalIsFinite?: RuleConfiguration;
-	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
@@ -1050,6 +1046,10 @@ export interface Suspicious {
 	 */
 	noFunctionAssign?: RuleConfiguration;
 	/**
+	 * Use Number.isFinite instead of global isFinite.
+	 */
+	noGlobalIsFinite?: RuleConfiguration;
+	/**
 	 * Use Number.isNaN instead of global isNaN.
 	 */
 	noGlobalIsNan?: RuleConfiguration;
@@ -1355,7 +1355,6 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
-	| "lint/nursery/noGlobalIsFinite"
 	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
@@ -1427,6 +1426,7 @@ export type Category =
 	| "lint/suspicious/noExtraNonNullAssertion"
 	| "lint/suspicious/noFallthroughSwitchClause"
 	| "lint/suspicious/noFunctionAssign"
+	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"

@@ -28,7 +28,7 @@ localIsNaN(isFinite);
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -50,7 +50,7 @@ invalid.js:1:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:3:2 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -76,7 +76,7 @@ invalid.js:3:2 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -102,7 +102,7 @@ invalid.js:5:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -128,7 +128,7 @@ invalid.js:7:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -154,7 +154,7 @@ invalid.js:9:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:11:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -180,7 +180,7 @@ invalid.js:11:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:13:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -201,7 +201,7 @@ invalid.js:13:1 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:16:5 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:5 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
@@ -226,7 +226,7 @@ invalid.js:16:5 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:19:12 lint/nursery/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:12 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   

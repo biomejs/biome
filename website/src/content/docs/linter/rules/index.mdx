@@ -46,7 +46,7 @@ Rules that focus on inspecting complex code that could be simplified.
 | Rule name | Properties |  Description |
 | --- | --- | --- |
 | [noBannedTypes](/linter/rules/no-banned-types) | Disallow primitive type aliases and misleading types. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
-| [noExcessiveComplexity](/linter/rules/no-excessive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. |  |
+| [noExcessiveCognitiveComplexity](/linter/rules/no-excessive-cognitive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. |  |
 | [noExtraBooleanCast](/linter/rules/no-extra-boolean-cast) | Disallow unnecessary boolean casts | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noForEach](/linter/rules/no-for-each) | Prefer <code>for...of</code> statement instead of <code>Array.forEach</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noMultipleSpacesInRegularExpressionLiterals](/linter/rules/no-multiple-spaces-in-regular-expression-literals) | Disallow unclear usage of consecutive space characters in regular expression literals | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -185,6 +185,7 @@ Rules that detect code that is likely to be incorrect or useless.
 | [noExtraNonNullAssertion](/linter/rules/no-extra-non-null-assertion) | Prevents the wrong usage of the non-null assertion operator (<code>!</code>) in TypeScript files. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noFallthroughSwitchClause](/linter/rules/no-fallthrough-switch-clause) | Disallow fallthrough of <code>switch</code> clauses. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noFunctionAssign](/linter/rules/no-function-assign) | Disallow reassigning function declarations. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
+| [noGlobalIsFinite](/linter/rules/no-global-is-finite) | Use <code>Number.isFinite</code> instead of global <code>isFinite</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noGlobalIsNan](/linter/rules/no-global-is-nan) | Use <code>Number.isNaN</code> instead of global <code>isNaN</code>. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noImportAssign](/linter/rules/no-import-assign) | Disallow assigning to imported bindings | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noLabelVar](/linter/rules/no-label-var) | Disallow labels that share a name with a variable | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -218,7 +219,6 @@ Rules that belong to this group <strong>are not subject to semantic version</str
 | [noDuplicateJsonKeys](/linter/rules/no-duplicate-json-keys) | Disallow two keys with the same name inside a JSON object. |  |
 | [noEmptyBlockStatements](/linter/rules/no-empty-block-statements) | Disallow empty block statements and static blocks. |  |
 | [noEmptyCharacterClassInRegex](/linter/rules/no-empty-character-class-in-regex) | Disallow empty character classes in regular expression literals. |  |
-| [noGlobalIsFinite](/linter/rules/no-global-is-finite) | Use <code>Number.isFinite</code> instead of global <code>isFinite</code>. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noInteractiveElementToNoninteractiveRole](/linter/rules/no-interactive-element-to-noninteractive-role) | Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements. |  |
 | [noInvalidNewBuiltin](/linter/rules/no-invalid-new-builtin) | Disallow <code>new</code> operators with global non-constructor functions. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noMisleadingInstantiator](/linter/rules/no-misleading-instantiator) | Enforce proper usage of <code>new</code> and <code>constructor</code>. |  |

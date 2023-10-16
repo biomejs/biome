@@ -20,7 +20,7 @@ function nestedControlFlowStructures(num) {
 
 # Diagnostics
 ```
-nestedControlFlowStructures.js:1:10 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━
+nestedControlFlowStructures.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

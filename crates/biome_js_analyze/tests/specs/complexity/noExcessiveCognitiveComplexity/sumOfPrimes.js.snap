@@ -21,7 +21,7 @@ function sumOfPrimes(max) {
 
 # Diagnostics
 ```
-sumOfPrimes.js:1:10 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+sumOfPrimes.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

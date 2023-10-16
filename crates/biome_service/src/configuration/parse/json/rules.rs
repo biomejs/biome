@@ -777,7 +777,7 @@ impl VisitNode<JsonLanguage> for Complexity {
                 "recommended",
                 "all",
                 "noBannedTypes",
-                "noExcessiveComplexity",
+                "noExcessiveCognitiveComplexity",
                 "noExtraBooleanCast",
                 "noForEach",
                 "noMultipleSpacesInRegularExpressionLiterals",
@@ -840,21 +840,21 @@ impl VisitNode<JsonLanguage> for Complexity {
                     ));
                 }
             },
-            "noExcessiveComplexity" => match value {
+            "noExcessiveCognitiveComplexity" => match value {
                 AnyJsonValue::JsonStringValue(_) => {
                     let mut configuration = RuleConfiguration::default();
                     self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.no_excessive_complexity = Some(configuration);
+                    self.no_excessive_cognitive_complexity = Some(configuration);
                 }
                 AnyJsonValue::JsonObjectValue(_) => {
                     let mut rule_configuration = RuleConfiguration::default();
                     rule_configuration.map_rule_configuration(
                         &value,
                         name_text,
-                        "noExcessiveComplexity",
+                        "noExcessiveCognitiveComplexity",
                         diagnostics,
                     )?;
-                    self.no_excessive_complexity = Some(rule_configuration);
+                    self.no_excessive_cognitive_complexity = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
@@ -2123,7 +2123,6 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noDuplicateJsonKeys",
                 "noEmptyBlockStatements",
                 "noEmptyCharacterClassInRegex",
-                "noGlobalIsFinite",
                 "noInteractiveElementToNoninteractiveRole",
                 "noInvalidNewBuiltin",
                 "noMisleadingInstantiator",
@@ -2240,29 +2239,6 @@ impl VisitNode<JsonLanguage> for Nursery {
                         diagnostics,
                     )?;
                     self.no_empty_character_class_in_regex = Some(rule_configuration);
-                }
-                _ => {
-                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-                        "object or string",
-                        value.range(),
-                    ));
-                }
-            },
-            "noGlobalIsFinite" => match value {
-                AnyJsonValue::JsonStringValue(_) => {
-                    let mut configuration = RuleConfiguration::default();
-                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.no_global_is_finite = Some(configuration);
-                }
-                AnyJsonValue::JsonObjectValue(_) => {
-                    let mut rule_configuration = RuleConfiguration::default();
-                    rule_configuration.map_rule_configuration(
-                        &value,
-                        name_text,
-                        "noGlobalIsFinite",
-                        diagnostics,
-                    )?;
-                    self.no_global_is_finite = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
@@ -3502,6 +3478,7 @@ impl VisitNode<JsonLanguage> for Suspicious {
                 "noExtraNonNullAssertion",
                 "noFallthroughSwitchClause",
                 "noFunctionAssign",
+                "noGlobalIsFinite",
                 "noGlobalIsNan",
                 "noImportAssign",
                 "noLabelVar",
@@ -4081,6 +4058,29 @@ impl VisitNode<JsonLanguage> for Suspicious {
                         diagnostics,
                     )?;
                     self.no_function_assign = Some(rule_configuration);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                        "object or string",
+                        value.range(),
+                    ));
+                }
+            },
+            "noGlobalIsFinite" => match value {
+                AnyJsonValue::JsonStringValue(_) => {
+                    let mut configuration = RuleConfiguration::default();
+                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
+                    self.no_global_is_finite = Some(configuration);
+                }
+                AnyJsonValue::JsonObjectValue(_) => {
+                    let mut rule_configuration = RuleConfiguration::default();
+                    rule_configuration.map_rule_configuration(
+                        &value,
+                        name_text,
+                        "noGlobalIsFinite",
+                        diagnostics,
+                    )?;
+                    self.no_global_is_finite = Some(rule_configuration);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_incorrect_type(

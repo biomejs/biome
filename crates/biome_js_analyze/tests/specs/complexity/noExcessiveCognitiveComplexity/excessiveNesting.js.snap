@@ -36,7 +36,7 @@ function excessiveNesting() {
 
 # Diagnostics
 ```
-excessiveNesting.js:10:46 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+excessiveNesting.js:10:46 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

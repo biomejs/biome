@@ -104,7 +104,7 @@ function handleArrowDown(event: React.KeyboardEvent) {
 
 # Diagnostics
 ```
-complexEventHandler.ts:1:10 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+complexEventHandler.ts:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

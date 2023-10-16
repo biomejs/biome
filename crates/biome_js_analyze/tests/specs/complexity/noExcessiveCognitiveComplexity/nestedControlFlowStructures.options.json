@@ -3,10 +3,10 @@
 	"linter": {
 		"rules": {
 			"complexity": {
-				"noExcessiveComplexity": {
+				"noExcessiveCognitiveComplexity": {
 					"level": "error",
 					"options": {
-						"maxAllowedComplexity": 2
+						"maxAllowedComplexity": 8
 					}
 				}
 			}

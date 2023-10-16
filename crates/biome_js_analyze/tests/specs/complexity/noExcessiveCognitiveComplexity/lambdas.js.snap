@@ -38,7 +38,7 @@ function lambdas(array) {
 
 # Diagnostics
 ```
-lambdas.js:4:26 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lambdas.js:4:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   
@@ -55,7 +55,7 @@ lambdas.js:4:26 lint/complexity/noExcessiveComplexity ━━━━━━━━�
 ```
 
 ```
-lambdas.js:10:22 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lambdas.js:10:22 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   
@@ -72,7 +72,7 @@ lambdas.js:10:22 lint/complexity/noExcessiveComplexity ━━━━━━━━�
 ```
 
 ```
-lambdas.js:16:23 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lambdas.js:16:23 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   
@@ -89,7 +89,7 @@ lambdas.js:16:23 lint/complexity/noExcessiveComplexity ━━━━━━━━�
 ```
 
 ```
-lambdas.js:22:32 lint/complexity/noExcessiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lambdas.js:22:32 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Excessive complexity detected.
   

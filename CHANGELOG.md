@@ -99,6 +99,28 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### JavaScript APIs
 ### Linter
 
+#### Promoted rules
+
+- [complexity/noExcessiveCognitiveComplexity](https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity)
+- [complexity/noVoid](https://biomejs.dev/linter/rules/no-void)
+- [correctness/useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies)
+- [correctness/useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level)
+- [performance/noAccumulatingSpread](https://biomejs.dev/linter/rules/no-accumulating-spread)
+- [style/useCollapsedElseIf](https://biomejs.dev/linter/rules/use-collapsed-else-if)
+- [suspicious/noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type)
+- [suspicious/noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause)
+- [suspicious/noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite)
+- [suspicious/noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan)
+- [suspicious/useIsArray](https://biomejs.dev/linter/rules/use-is-array)
+
+The following rules are now recommended:
+
+- [noAccumulatingSpread](https://biomejs.dev/linter/rules/)
+- [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type)
+- [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause)
+- [noForEach](https://biomejs.dev/linter/rules/no-for-each)
+
+
 #### Bug fixes
 
 - Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
@@ -173,6 +195,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - [useAnchorContent](https://biomejs.dev/linter/rules/use-anchor-content) now provides an unsafe code fix that removes the `aria-hidden`` attribute. Contributed by @vasucp1207
 
 - [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) now provides an unsafe code fix that removes invalid properties. Contributed by @vasucp1207
+
+- `noExcessiveComplexity` was renamed to `noExcessiveCognitiveComplexity`
 
 #### Bug fixes
 
@@ -862,9 +886,9 @@ New rules are promoted, please check [#4750](https://github.com/rome/tools/discu
 
 The following rules are now recommended:
 
-- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/)
+**- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/)
 - [noRedundantUseStrict](https://biomejs.dev/linter/rules/no-redundant-use-strict/)
-- [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator/)
+- [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator/)**
 
 #### Other changes
 

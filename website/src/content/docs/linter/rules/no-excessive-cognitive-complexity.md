@@ -1,8 +1,8 @@
 ---
-title: noExcessiveComplexity (since v1.0.0)
+title: noExcessiveCognitiveComplexity (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/complexity/noExcessiveComplexity`**
+**Diagnostic Category: `lint/complexity/noExcessiveCognitiveComplexity`**
 
 Disallow functions that exceed a given Cognitive Complexity score.
 
@@ -43,7 +43,7 @@ function tooComplex() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noExcessiveComplexity.js:1:10 <a href="https://biomejs.dev/linter/rules/no-excessive-complexity">lint/complexity/noExcessiveComplexity</a> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noExcessiveCognitiveComplexity.js:1:10 <a href="https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity">lint/complexity/noExcessiveCognitiveComplexity</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Excessive complexity detected.</span>
   
