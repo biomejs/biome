@@ -722,10 +722,8 @@ fn assert_lint(
                 }
             }
 
-            if test.expect_diagnostic {
-                if rule_has_code_action && !has_fix_kind {
-                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
-                }
+            if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
+                bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
             }
 
             if test.expect_diagnostic {
@@ -798,10 +796,8 @@ fn assert_lint(
                     write_diagnostic(code, diagnostic)?;
                 }
 
-                if test.expect_diagnostic {
-                    if rule_has_code_action && !has_fix_kind {
-                        bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
-                    }
+                if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
+                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
                 }
             }
         }

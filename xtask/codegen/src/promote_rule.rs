@@ -82,11 +82,13 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
             new_rule_path.clone(),
             &file::CopyOptions::default(),
         )
-        .expect(&format!(
-            "To copy {} to {}",
-            rule_path.display(),
-            new_rule_path.display()
-        ));
+        .unwrap_or_else(|_| {
+            panic!(
+                "To copy {} to {}",
+                rule_path.display(),
+                new_rule_path.display()
+            )
+        });
         std::fs::write(categories_path, categories).unwrap();
 
         let old_test_path = current_dir
