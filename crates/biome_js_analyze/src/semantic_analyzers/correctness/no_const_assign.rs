@@ -7,7 +7,7 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember, AnyJsVariableDeclaration,
+    AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
     JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,
     JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsSyntaxKind, JsVariableDeclaration,
     JsVariableDeclarator, JsVariableDeclaratorList,
