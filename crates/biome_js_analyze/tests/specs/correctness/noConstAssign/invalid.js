@@ -52,3 +52,6 @@ q = 4;
 
 const { r, ...rest } = s;
 r = 4;
+
+/*before*/const/*after*/ a = 0;
+a = 1;

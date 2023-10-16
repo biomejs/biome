@@ -1,14 +1,18 @@
 use crate::semantic_services::Semantic;
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{self};
+use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsObjectBindingPatternMember,
     JsArrayBindingPatternElementList, JsForVariableDeclaration, JsIdentifierAssignment,
-    JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsVariableDeclaration,
+    JsIdentifierBinding, JsObjectBindingPatternPropertyList, JsSyntaxKind, JsVariableDeclaration,
     JsVariableDeclarator, JsVariableDeclaratorList,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Prevents from having `const` variables being re-assigned.
@@ -52,6 +56,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noConstAssign",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -112,5 +117,30 @@ impl Rule for NoConstAssign {
                 markup! {"This is where the variable is defined as constant"},
             ),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let model = ctx.model();
+        let mut mutation = ctx.root().begin();
+
+        let declared_binding = model.binding(node)?;
+
+        if let AnyJsBindingDeclaration::JsVariableDeclarator(possible_declarator) =
+            declared_binding.tree().declaration()?
+        {
+            let declaration = possible_declarator.declaration()?;
+            let const_token = declaration.kind_token()?;
+            let let_token = make::token(JsSyntaxKind::LET_KW);
+            mutation.replace_token(const_token, let_token);
+            return Some(JsRuleAction {
+                            category: ActionCategory::QuickFix,
+                            applicability: Applicability::MaybeIncorrect,
+                            message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
+                                .to_owned(),
+                            mutation,
+                        });
+        }
+        None
     }
 }
