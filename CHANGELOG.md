@@ -139,6 +139,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add [useAriaActivedescendantWithTabindex](https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex) rule. The rule enforces that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`. Contributed by @nissy-dev
 
+- Add [noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements) rule.
+  The rule reports standalone blocks that don't include any lexical scoped declaration.
+  Contributed by @emab
+
+- Add [noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin) rule.
+  The rule reports use of `new` on `Symbol` and `BigInt`. Contributed by @lucasweng
+
 #### Enhancements
 
 - The following rules have now safe code fixes:
@@ -151,9 +158,21 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
   - [useWhile](https://biomejs.dev/linter/rules/use-while)
 
+- [noAccumulatingSpread](https://biomejs.dev/linter/no-accumulating-spread) makes more check in order to reduce potential false positives. Contributed by @Vivalldi
+
+- [noConstAssign](https://biomejs.dev/linter/rules/no-const-assign) now provides an unsafe code fix that replaces `const` with `let`. Contributed by @vasucp1207
+
+- [noExcessiveComplexity](https://biomejs.dev/linter/rules/no-excessive-complexity) default complexity threshold is now `15`. Contributed by @arendjr
+
+- [noPositiveTabindexValue](https://biomejs.dev/linter/rules/no-positive-tabindex-value) now provides an unsafe code fix that set to `0` the tab index. Contributed by @vasucp1207
+
 - [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels) no longer reports unbreakable labeled statements. Contributed by @Conaclos
 
 - [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) now reports unused TypeScript's type parameters. Contributed by @Conaclos
+
+- [useAnchorContent](https://biomejs.dev/linter/rules/use-anchor-content) now provides an unsafe code fix that removes the `aria-hidden`` attribute. Contributed by @vasucp1207
+
+- [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) now provides an unsafe code fix that removes invalid properties. Contributed by @vasucp1207
 
 #### Bug fixes
 
