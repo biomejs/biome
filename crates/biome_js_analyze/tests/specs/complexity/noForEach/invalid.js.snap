@@ -36,7 +36,7 @@ invalid.js:1:1 lint/complexity/noForEach ━━━━━━━━━━━━━
     4 │ 
     5 │ (els.forEach)((el) => {
   
-  i forEach could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
   
 
 ```
@@ -56,7 +56,7 @@ invalid.js:5:1 lint/complexity/noForEach ━━━━━━━━━━━━━
     8 │ 
     9 │ els['forEach']((el) => {
   
-  i forEach could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
   
 
 ```
@@ -76,7 +76,7 @@ invalid.js:9:1 lint/complexity/noForEach ━━━━━━━━━━━━━
     12 │ 
     13 │ (els['forEach'])((el) => {
   
-  i forEach could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
   
 
 ```
@@ -95,7 +95,7 @@ invalid.js:13:1 lint/complexity/noForEach ━━━━━━━━━━━━�
        │ ^^
     16 │ 
   
-  i forEach could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
   
 
 ```

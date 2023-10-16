@@ -466,7 +466,7 @@ export interface Complexity {
 	/**
 	 * Disallow functions that exceed a given Cognitive Complexity score.
 	 */
-	noExcessiveComplexity?: RuleConfiguration;
+	noExcessiveCognitiveComplexity?: RuleConfiguration;
 	/**
 	 * Disallow unnecessary boolean casts
 	 */
@@ -1131,7 +1131,7 @@ export type PossibleOptions =
 	| RestrictedGlobalsOptions
 	| null;
 /**
- * Options for the rule `noNestedModuleImports`.
+ * Options for the rule `noExcessiveCognitiveComplexity`.
  */
 export interface ComplexityOptions {
 	/**
@@ -1299,7 +1299,7 @@ export type Category =
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
-	| "lint/complexity/noExcessiveComplexity"
+	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"

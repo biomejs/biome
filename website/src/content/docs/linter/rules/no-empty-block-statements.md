@@ -1,5 +1,5 @@
 ---
-title: noEmptyBlockStatements (since vnext)
+title: noEmptyBlockStatements (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noEmptyBlockStatements`**

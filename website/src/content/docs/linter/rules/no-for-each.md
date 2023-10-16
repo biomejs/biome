@@ -46,7 +46,7 @@ els.forEach(el => {
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>forEach</strong></span><span style="color: lightgreen;"> could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>forEach</strong></span><span style="color: lightgreen;"> could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.</span>
   
 </code></pre>
 
@@ -67,7 +67,7 @@ els['forEach'](el => {
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>forEach</strong></span><span style="color: lightgreen;"> could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>forEach</strong></span><span style="color: lightgreen;"> could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.</span>
   
 </code></pre>
 
