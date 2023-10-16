@@ -80,14 +80,14 @@ function fooWithInternalEmptyBlocksTs(){
 ```
 invalid.ts:1:23 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
   > 1 │ function fooEmptyTs() {}
       │                       ^^
     2 │ 
     3 │ const barEmptyTs = () => {};
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -95,7 +95,7 @@ invalid.ts:1:23 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 invalid.ts:3:26 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     1 │ function fooEmptyTs() {}
     2 │ 
@@ -104,7 +104,7 @@ invalid.ts:3:26 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
     4 │ 
     5 │ function fooWithNestedEmptyFnBlockTs() {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -112,7 +112,7 @@ invalid.ts:3:26 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 invalid.ts:8:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
      6 │   let a = 1;
      7 │ 
@@ -121,7 +121,7 @@ invalid.ts:8:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
      9 │ 
     10 │   return a
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -129,7 +129,7 @@ invalid.ts:8:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 invalid.ts:17:28 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     15 │   let a = 1;
     16 │ 
@@ -138,7 +138,7 @@ invalid.ts:17:28 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     18 │ 
     19 │   return a
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -146,7 +146,7 @@ invalid.ts:17:28 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:23:16 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     22 │ const someVarTs: string = '';
   > 23 │ if (someVarTs) {
@@ -156,7 +156,7 @@ invalid.ts:23:16 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     25 │ 
     26 │ while (someVarTs) {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -164,7 +164,7 @@ invalid.ts:23:16 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:26:19 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     24 │ }
     25 │ 
@@ -175,27 +175,26 @@ invalid.ts:26:19 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     28 │ 
     29 │ switch(someVarTs) {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
 
 ```
-invalid.ts:27:2 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:29:1 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
-    26 │ while (someVarTs) {
-  > 27 │ }
-       │  
-  > 28 │ 
+    27 │ }
+    28 │ 
   > 29 │ switch(someVarTs) {
+       │ ^^^^^^^^^^^^^^^^^^^
   > 30 │ }
        │ ^
     31 │ 
     32 │ const doSomething = () => null;
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -203,7 +202,7 @@ invalid.ts:27:2 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 invalid.ts:35:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     33 │ try {
     34 │     doSomething();
@@ -211,11 +210,11 @@ invalid.ts:35:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
        │             ^
   > 36 │ 
   > 37 │ } finally {
-       │ ^^
+       │ ^
     38 │ 
     39 │ }
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -223,7 +222,7 @@ invalid.ts:35:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:37:11 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     35 │ } catch(ex) {
     36 │ 
@@ -235,26 +234,23 @@ invalid.ts:37:11 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     40 │ 
     41 │ class FooEmptyStaticTs {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
 
 ```
-invalid.ts:41:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:42:3 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
-    39 │ }
-    40 │ 
-  > 41 │ class FooEmptyStaticTs {
-       │                         
+    41 │ class FooEmptyStaticTs {
   > 42 │   static {}
        │   ^^^^^^^^^
     43 │ }
     44 │ 
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -262,7 +258,7 @@ invalid.ts:41:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:45:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     43 │ }
     44 │ 
@@ -271,7 +267,7 @@ invalid.ts:45:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     46 │ 
     47 │ const obTs = {}
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -279,7 +275,7 @@ invalid.ts:45:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:48:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     47 │ const obTs = {}
   > 48 │ for (const key in obTs) {}
@@ -287,7 +283,7 @@ invalid.ts:48:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     49 │ 
     50 │ const arTs = []
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -295,7 +291,7 @@ invalid.ts:48:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:51:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     50 │ const arTs = []
   > 51 │ for (const val of arTs) {}
@@ -303,7 +299,7 @@ invalid.ts:51:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     52 │ 
     53 │ function fooWithInternalEmptyBlocksTs(){
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -311,7 +307,7 @@ invalid.ts:51:25 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:55:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     53 │ function fooWithInternalEmptyBlocksTs(){
     54 │   let someOtherVar: string = '';
@@ -320,7 +316,7 @@ invalid.ts:55:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     56 │ 
     57 │   while (someOtherVar) {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -328,7 +324,7 @@ invalid.ts:55:21 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:57:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     55 │   if (someOtherVar) {}
     56 │ 
@@ -339,27 +335,26 @@ invalid.ts:57:24 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
     59 │ 
     60 │   switch(someOtherVar) {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
 
 ```
-invalid.ts:58:4 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:60:3 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
-    57 │   while (someOtherVar) {
-  > 58 │   }
-       │    
-  > 59 │ 
+    58 │   }
+    59 │ 
   > 60 │   switch(someOtherVar) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^
   > 61 │   }
        │   ^
     62 │ 
     63 │   try {
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -367,7 +362,7 @@ invalid.ts:58:4 lint/nursery/noEmptyBlockStatements ━━━━━━━━━�
 ```
 invalid.ts:65:15 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     63 │   try {
     64 │       doSomething();
@@ -375,11 +370,11 @@ invalid.ts:65:15 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
        │               ^
   > 66 │ 
   > 67 │   } finally {
-       │   ^^
+       │   ^
     68 │ 
     69 │   }
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```
@@ -387,7 +382,7 @@ invalid.ts:65:15 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
 ```
 invalid.ts:67:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! No empty blocks allowed.
+  ! Unexpected empty block.
   
     65 │   } catch(ex) {
     66 │ 
@@ -398,7 +393,7 @@ invalid.ts:67:13 lint/nursery/noEmptyBlockStatements ━━━━━━━━━
        │   ^
     70 │ }
   
-  i Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
 ```

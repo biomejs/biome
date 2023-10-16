@@ -3,15 +3,15 @@ use biome_console::markup;
 use biome_js_syntax::{
     JsBlockStatement, JsFunctionBody, JsStaticInitializationBlockClassMember, JsSwitchStatement,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, TextRange};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
     /// Disallow empty block statements and static blocks.
     ///
     /// Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
     ///
-    /// This rule disallows empty block statements and static blocks. This rule ignores block statements which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
-    /// This rule also ignores static blocks which contain a comment.
+    /// This rule disallows empty block statements and static blocks.
+    /// This rule ignores block statements or static blocks which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
     ///
     /// Source: https://eslint.org/docs/latest/rules/no-empty-static-block/
     /// Source: https://eslint.org/docs/latest/rules/no-empty/
@@ -21,101 +21,36 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// function foo () {}
+    /// function emptyFunctionBody () {}
+    /// ```
     ///
-    /// const foo = () => {}
-    ///
-    /// function fooWithNestedEmptyBlock() {
-    ///     let a = 1;
-    ///     function shouldFail(){}
-    ///     return a
-    ///  }
-    ///
-    /// const fooWithNestedEmptyBlock = () => {
-    ///     let a = 1;
-    ///     const shouldFail = () => {}
-    ///     return a
-    ///  }
-    /// let someVar;
-    /// if (someVar) {
-    /// }
-    ///
-    /// while (someVar) {
-    /// }
-    ///
-    /// switch(someVar) {
-    /// }
+    /// ```js,expect_diagnostic
     /// try {
     ///     doSomething();
     /// } catch(ex) {
     ///
-    /// } finally {
-    ///
     /// }
+    /// ```
     ///
-    // class Foo {
-    //   static {}
-    // }
+    /// ```js,expect_diagnostic
+    /// class Foo {
+    ///   static {}
+    /// }
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// function foo () {let a;}
-    ///
-    /// const foo = () => {let a;}
-    ///
-    /// function fooWithComment() {
-    ///   // should work
+    /// function foo () {
+    ///     doSomething();
     /// }
+    /// ```
     ///
-    /// const barWithComment = () => {
-    ///   // should work
-    /// }
-    ///
-    /// function fooWithMultilineComment() {
-    ///   /**
-    ///    * this should also work
-    ///    */
-    /// }
-    ///
-    /// const barWithMultilineComment = () => {
-    ///   /**
-    ///    * this should also work
-    ///    */
-    /// }
-    ///
-    ///
-    /// if (foo) {
-    ///   // empty
-    /// }
-    ///
-    /// while (foo) {
-    ///   /* empty */
-    /// }
-    ///
+    /// ```js
     /// try {
     ///   doSomething();
     /// } catch (ex) {
     ///   // continue regardless of error
-    /// }
-    ///
-    /// try {
-    ///   doSomething();
-    /// } finally {
-    ///   /* continue regardless of error */
-    /// }
-    ///
-    /// class Foo {
-    ///   static {
-    ///       bar();
-    ///   }
-    /// }
-    ///
-    /// class Foo {
-    ///   static {
-    ///       // comment
-    ///   }
     /// }
     /// ```
     ///
@@ -132,7 +67,7 @@ declare_node_union! {
 
 impl Rule for NoEmptyBlockStatements {
     type Query = Ast<Query>;
-    type State = TextRange;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -140,26 +75,22 @@ impl Rule for NoEmptyBlockStatements {
         let query = ctx.query();
         let is_empty = is_empty(query);
         let has_comments = query.syntax().has_comments_descendants();
-        let text_range = query.syntax().text_range();
 
-        if is_empty && !has_comments {
-            return Some(text_range);
-        }
-
-        None
+        (is_empty && !has_comments).then_some(())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let query = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state,
+                query.range(),
                 markup! {
-                    "No empty blocks allowed."
+                    "Unexpected empty block."
                 },
             )
             .note(markup! {
-                "Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code."
+                "Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional."
             }),
         )
     }

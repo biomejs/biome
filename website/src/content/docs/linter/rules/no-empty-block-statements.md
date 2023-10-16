@@ -12,8 +12,8 @@ Disallow empty block statements and static blocks.
 
 Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
 
-This rule disallows empty block statements and static blocks. This rule ignores block statements which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
-This rule also ignores static blocks which contain a comment.
+This rule disallows empty block statements and static blocks.
+This rule ignores block statements or static blocks which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
 
 Source: https://eslint.org/docs/latest/rules/no-empty-static-block/
 Source: https://eslint.org/docs/latest/rules/no-empty/
@@ -23,124 +23,79 @@ Source: https://eslint.org/docs/latest/rules/no-empty/
 ### Invalid
 
 ```jsx
-function foo () {}
+function emptyFunctionBody () {}
+```
 
-const foo = () => {}
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-function fooWithNestedEmptyBlock() {
-    let a = 1;
-    function shouldFail(){}
-    return a
- }
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function emptyFunctionBody () {}
+   <strong>   │ </strong>                              <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.</span>
+  
+</code></pre>
 
-const fooWithNestedEmptyBlock = () => {
-    let a = 1;
-    const shouldFail = () => {}
-    return a
- }
-let someVar;
-if (someVar) {
-}
-
-while (someVar) {
-}
-
-switch(someVar) {
-}
+```jsx
 try {
     doSomething();
 } catch(ex) {
 
-} finally {
-
 }
-
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:1:17 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">No empty blocks allowed.</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function foo () {}
-   <strong>   │ </strong>                <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>
-    <strong>3 │ </strong>const foo = () =&gt; {}
+    <strong>1 │ </strong>try {
+    <strong>2 │ </strong>    doSomething();
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>} catch(ex) {
+   <strong>   │ </strong>            <strong><span style="color: Tomato;">^</span></strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>}
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>6 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.</span>
   
-nursery/noEmptyBlockStatements.js:3:19 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+</code></pre>
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">No empty blocks allowed.</span>
+```jsx
+class Foo {
+  static {}
+}
+```
+
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
-    <strong>1 │ </strong>function foo () {}
-    <strong>2 │ </strong>
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>const foo = () =&gt; {}
-   <strong>   │ </strong>                  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>1 │ </strong>class Foo {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>  static {}
+   <strong>   │ </strong>  <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>}
     <strong>4 │ </strong>
-    <strong>5 │ </strong>function fooWithNestedEmptyBlock() {
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.</span>
   
 </code></pre>
 
 ## Valid
 
 ```jsx
-function foo () {let a;}
-
-const foo = () => {let a;}
-
-function fooWithComment() {
-  // should work
+function foo () {
+    doSomething();
 }
+```
 
-const barWithComment = () => {
-  // should work
-}
-
-function fooWithMultilineComment() {
-  /**
-   * this should also work
-   */
-}
-
-const barWithMultilineComment = () => {
-  /**
-   * this should also work
-   */
-}
-
-
-if (foo) {
-  // empty
-}
-
-while (foo) {
-  /* empty */
-}
-
+```jsx
 try {
   doSomething();
 } catch (ex) {
   // continue regardless of error
-}
-
-try {
-  doSomething();
-} finally {
-  /* continue regardless of error */
-}
-
-class Foo {
-  static {
-      bar();
-  }
-}
-
-class Foo {
-  static {
-      // comment
-  }
 }
 ```
 
