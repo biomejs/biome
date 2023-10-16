@@ -70,7 +70,7 @@ impl Rule for NoForEach {
                 "Prefer for...of instead of Array.forEach"
             },
         ).note(markup!{
-            <Emphasis>"forEach"</Emphasis>" could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type."
+            <Emphasis>"forEach"</Emphasis>" could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type."
         }))
     }
 }
