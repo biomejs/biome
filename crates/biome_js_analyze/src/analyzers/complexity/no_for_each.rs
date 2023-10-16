@@ -43,7 +43,7 @@ declare_rule! {
     pub(crate) NoForEach {
         version: "1.0.0",
         name: "noForEach",
-        recommended: false,
+        recommended: true,
     }
 }
 
@@ -69,6 +69,8 @@ impl Rule for NoForEach {
             markup! {
                 "Prefer for...of instead of Array.forEach"
             },
-        ))
+        ).note(markup!{
+            <Emphasis>"forEach"</Emphasis>" could lead to performance issue when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type."
+        }))
     }
 }

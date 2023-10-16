@@ -46,7 +46,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoUselessLoneBlockStatements {
-        version: "next",
+        version: "1.3.0",
         name: "noUselessLoneBlockStatements",
         recommended: false,
         fix_kind: FixKind::Unsafe,

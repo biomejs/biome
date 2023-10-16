@@ -52,7 +52,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoInvalidNewBuiltin {
-        version: "next",
+        version: "1.3.0",
         name: "noInvalidNewBuiltin",
         recommended: true,
         fix_kind: FixKind::Unsafe,

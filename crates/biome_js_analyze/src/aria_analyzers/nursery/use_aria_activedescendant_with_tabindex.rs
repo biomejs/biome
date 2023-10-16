@@ -40,7 +40,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseAriaActivedescendantWithTabindex {
-        version: "next",
+        version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
         recommended: false,
     }

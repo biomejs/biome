@@ -52,7 +52,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoMisrefactoredShorthandAssign {
-        version: "next",
+        version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
         recommended: false,
         fix_kind: FixKind::Unsafe,

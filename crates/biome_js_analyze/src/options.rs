@@ -1,7 +1,9 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::nursery::no_excessive_complexity::{complexity_options, ComplexityOptions};
-use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{
+use crate::analyzers::complexity::no_excessive_complexity::{
+    complexity_options, ComplexityOptions,
+};
+use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
 };
 use crate::semantic_analyzers::style::no_restricted_globals::{

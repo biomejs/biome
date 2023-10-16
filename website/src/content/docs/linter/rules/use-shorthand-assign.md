@@ -1,5 +1,5 @@
 ---
-title: useShorthandAssign (since vnext)
+title: useShorthandAssign (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useShorthandAssign`**

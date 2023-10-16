@@ -224,8 +224,17 @@ fn generate_group(
                 "\t<li><a href='/linter/rules/{dashed_rule}'>{rule}</a></li>\n"
             ));
         }
+        let has_code_action = meta.fix_kind.is_some();
 
-        match generate_rule(root, group, rule, meta.docs, meta.version, is_recommended) {
+        match generate_rule(
+            root,
+            group,
+            rule,
+            meta.docs,
+            meta.version,
+            is_recommended,
+            has_code_action,
+        ) {
             Ok(summary) => {
                 let mut properties = String::new();
                 if is_recommended {
@@ -265,6 +274,7 @@ fn generate_rule(
     docs: &'static str,
     version: &'static str,
     is_recommended: bool,
+    has_fix_kind: bool,
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
 
@@ -296,7 +306,7 @@ fn generate_rule(
         writeln!(content)?;
     }
 
-    let summary = parse_documentation(group, rule, docs, &mut content)?;
+    let summary = parse_documentation(group, rule, docs, &mut content, has_fix_kind)?;
 
     writeln!(content, "## Related links")?;
     writeln!(content)?;
@@ -316,6 +326,7 @@ fn parse_documentation(
     rule: &'static str,
     docs: &'static str,
     content: &mut Vec<u8>,
+    has_fix_kind: bool,
 ) -> Result<Vec<Event<'static>>> {
     let parser = Parser::new(docs);
 
@@ -378,7 +389,7 @@ fn parse_documentation(
                         )?;
                     }
 
-                    assert_lint(group, rule, &test, &block, content)
+                    assert_lint(group, rule, &test, &block, content, has_fix_kind)
                         .context("snapshot test failed")?;
 
                     if test.expect_diagnostic {
@@ -585,6 +596,7 @@ fn assert_lint(
     test: &CodeBlockTest,
     code: &str,
     content: &mut Vec<u8>,
+    has_fix_kind: bool,
 ) -> Result<()> {
     let file = format!("{group}/{rule}.js");
 
@@ -645,6 +657,7 @@ fn assert_lint(
     if test.ignore {
         return Ok(());
     }
+    let mut rule_has_code_action = false;
     match test.block_type {
         BlockType::Js(source_type) => {
             let parse = biome_js_parser::parse(code, source_type, JsParserOptions::default());
@@ -682,6 +695,7 @@ fn assert_lint(
 
                             for action in signal.actions() {
                                 if !action.is_suppression() {
+                                    rule_has_code_action = true;
                                     diag = diag.add_code_suggestion(action.into());
                                 }
                             }
@@ -705,6 +719,12 @@ fn assert_lint(
                 // Result is Some(_) if analysis aborted with an error
                 for diagnostic in diagnostics {
                     write_diagnostic(code, diagnostic)?;
+                }
+            }
+
+            if test.expect_diagnostic {
+                if rule_has_code_action && !has_fix_kind {
+                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
                 }
             }
 
@@ -752,6 +772,7 @@ fn assert_lint(
 
                             for action in signal.actions() {
                                 if !action.is_suppression() {
+                                    rule_has_code_action = true;
                                     diag = diag.add_code_suggestion(action.into());
                                 }
                             }
@@ -775,6 +796,12 @@ fn assert_lint(
                 // Result is Some(_) if analysis aborted with an error
                 for diagnostic in diagnostics {
                     write_diagnostic(code, diagnostic)?;
+                }
+
+                if test.expect_diagnostic {
+                    if rule_has_code_action && !has_fix_kind {
+                        bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
+                    }
                 }
             }
         }
