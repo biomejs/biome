@@ -1026,6 +1026,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyBlockStatements": {
+					"description": "Disallow empty block statements and static blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyCharacterClassInRegex": {
 					"description": "Disallow empty character classes in regular expression literals.",
 					"anyOf": [

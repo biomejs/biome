@@ -134,7 +134,6 @@ impl PossibleOptions {
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
                     *self = PossibleOptions::RestrictedGlobals(options);
                 }
-
                 _ => (),
             }
         }

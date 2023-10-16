@@ -698,6 +698,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
 	/**
+	 * Disallow empty block statements and static blocks.
+	 */
+	noEmptyBlockStatements?: RuleConfiguration;
+	/**
 	 * Disallow empty character classes in regular expression literals.
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
@@ -1347,6 +1351,7 @@ export type Category =
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
 	| "lint/nursery/noExcessiveComplexity"
 	| "lint/nursery/noFallthroughSwitchClause"
