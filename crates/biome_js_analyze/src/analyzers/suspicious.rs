@@ -7,6 +7,7 @@ pub(crate) mod no_async_promise_executor;
 pub(crate) mod no_comment_text;
 pub(crate) mod no_compare_neg_zero;
 pub(crate) mod no_confusing_labels;
+pub(crate) mod no_confusing_void_type;
 pub(crate) mod no_const_enum;
 pub(crate) mod no_control_characters_in_regex;
 pub(crate) mod no_debugger;
@@ -18,6 +19,7 @@ pub(crate) mod no_duplicate_object_keys;
 pub(crate) mod no_empty_interface;
 pub(crate) mod no_explicit_any;
 pub(crate) mod no_extra_non_null_assertion;
+pub(crate) mod no_fallthrough_switch_clause;
 pub(crate) mod no_prototype_builtins;
 pub(crate) mod no_redundant_use_strict;
 pub(crate) mod no_self_compare;
@@ -38,6 +40,7 @@ declare_group! {
             self :: no_comment_text :: NoCommentText ,
             self :: no_compare_neg_zero :: NoCompareNegZero ,
             self :: no_confusing_labels :: NoConfusingLabels ,
+            self :: no_confusing_void_type :: NoConfusingVoidType ,
             self :: no_const_enum :: NoConstEnum ,
             self :: no_control_characters_in_regex :: NoControlCharactersInRegex ,
             self :: no_debugger :: NoDebugger ,
@@ -49,6 +52,7 @@ declare_group! {
             self :: no_empty_interface :: NoEmptyInterface ,
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
+            self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
             self :: no_prototype_builtins :: NoPrototypeBuiltins ,
             self :: no_redundant_use_strict :: NoRedundantUseStrict ,
             self :: no_self_compare :: NoSelfCompare ,

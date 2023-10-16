@@ -1,5 +1,7 @@
 use crate::{aria_services::Aria, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -37,6 +39,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

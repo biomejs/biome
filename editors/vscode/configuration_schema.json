@@ -273,6 +273,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveCognitiveComplexity": {
+					"description": "Disallow functions that exceed a given Cognitive Complexity score.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
@@ -364,6 +371,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVoid": {
+					"description": "Disallow the use of void operators, which is not a familiar operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noWith": {
 					"description": "Disallow with statements in non-strict contexts.",
 					"anyOf": [
@@ -413,7 +427,7 @@
 			}
 		},
 		"ComplexityOptions": {
-			"description": "Options for the rule `noNestedModuleImports`.",
+			"description": "Options for the rule `noExcessiveCognitiveComplexity`.",
 			"type": "object",
 			"required": ["maxAllowedComplexity"],
 			"properties": {
@@ -619,6 +633,20 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useExhaustiveDependencies": {
+					"description": "Enforce all dependencies are correctly specified in a React hook.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useHookAtTopLevel": {
+					"description": "Enforce that all React hooks are being called from the Top Level component functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useIsNan": {
 					"description": "Require calls to isNaN() when checking for NaN.",
@@ -998,22 +1026,8 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noAccumulatingSpread": {
-					"description": "Disallow the use of spread (...) syntax on accumulators.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noApproximativeNumericConstant": {
 					"description": "Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noConfusingVoidType": {
-					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1035,34 +1049,6 @@
 				},
 				"noEmptyCharacterClassInRegex": {
 					"description": "Disallow empty character classes in regular expression literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExcessiveComplexity": {
-					"description": "Disallow functions that exceed a given Cognitive Complexity score.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFallthroughSwitchClause": {
-					"description": "Disallow fallthrough of switch clauses.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noGlobalIsFinite": {
-					"description": "Use Number.isFinite instead of global isFinite.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noGlobalIsNan": {
-					"description": "Use Number.isNaN instead of global isNaN.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1117,13 +1103,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noVoid": {
-					"description": "Disallow the use of void operators, which is not a familiar operator.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -1149,20 +1128,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useCollapsedElseIf": {
-					"description": "Enforce using else if instead of nested if in else clauses.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useExhaustiveDependencies": {
-					"description": "Enforce all dependencies are correctly specified in a React hook.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [
@@ -1170,22 +1135,8 @@
 						{ "type": "null" }
 					]
 				},
-				"useHookAtTopLevel": {
-					"description": "Enforce that all React hooks are being called from the Top Level component functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useIsArray": {
-					"description": "Use Array.isArray() instead of instanceof Array.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1226,6 +1177,13 @@
 				"all": {
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
+				},
+				"noAccumulatingSpread": {
+					"description": "Disallow the use of spread (...) syntax on accumulators.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noDelete": {
 					"description": "Disallow the use of the delete operator.",
@@ -1487,6 +1445,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCollapsedElseIf": {
+					"description": "Enforce using else if instead of nested if in else clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are never reassigned after declared.",
 					"anyOf": [
@@ -1651,6 +1616,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConfusingVoidType": {
+					"description": "Disallow void type outside of generic or return types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsoleLog": {
 					"description": "Disallow the use of console.log",
 					"anyOf": [
@@ -1742,8 +1714,29 @@
 						{ "type": "null" }
 					]
 				},
+				"noFallthroughSwitchClause": {
+					"description": "Disallow fallthrough of switch clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFunctionAssign": {
 					"description": "Disallow reassigning function declarations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noGlobalIsFinite": {
+					"description": "Use Number.isFinite instead of global isFinite.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noGlobalIsNan": {
+					"description": "Use Number.isNaN instead of global isNaN.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1832,6 +1825,13 @@
 				},
 				"useGetterReturn": {
 					"description": "Enforce get methods to always return a value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useIsArray": {
+					"description": "Use Array.isArray() instead of instanceof Array.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

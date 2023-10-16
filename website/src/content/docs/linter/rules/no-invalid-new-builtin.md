@@ -1,5 +1,5 @@
 ---
-title: noInvalidNewBuiltin (since vnext)
+title: noInvalidNewBuiltin (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noInvalidNewBuiltin`**

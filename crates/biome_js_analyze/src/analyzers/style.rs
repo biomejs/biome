@@ -11,6 +11,7 @@ pub(crate) mod no_non_null_assertion;
 pub(crate) mod no_parameter_properties;
 pub(crate) mod no_unused_template_literal;
 pub(crate) mod use_block_statements;
+pub(crate) mod use_collapsed_else_if;
 pub(crate) mod use_default_parameter_last;
 pub(crate) mod use_enum_initializers;
 pub(crate) mod use_exponentiation_operator;
@@ -36,6 +37,7 @@ declare_group! {
             self :: no_parameter_properties :: NoParameterProperties ,
             self :: no_unused_template_literal :: NoUnusedTemplateLiteral ,
             self :: use_block_statements :: UseBlockStatements ,
+            self :: use_collapsed_else_if :: UseCollapsedElseIf ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,

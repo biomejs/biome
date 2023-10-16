@@ -48,7 +48,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseAsConstAssertion {
-        version: "next",
+        version: "1.3.0",
         name: "useAsConstAssertion",
         recommended: true,
         fix_kind: FixKind::Safe,

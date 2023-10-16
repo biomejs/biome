@@ -2102,49 +2102,6 @@ array.map((sentence) => sentence.split(" ")).flat();
 }
 
 #[test]
-fn should_not_enable_nursery_rules() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let configuration = r#"	{
-  "organizeImports": {
-    "enabled": false
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "nursery": {
-        "noAccumulatingSpread": "error"
-      }
-    }
-  }
-}"#;
-
-    let configuration_path = Path::new("biome.json");
-    fs.insert(configuration_path.into(), configuration.as_bytes());
-
-    let file_path = Path::new("fix.ts");
-    fs.insert(file_path.into(), r#"let confusingVoidType: void;"#);
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_not_enable_nursery_rules",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn apply_bogus_argument() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

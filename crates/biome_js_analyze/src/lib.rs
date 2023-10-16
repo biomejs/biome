@@ -226,7 +226,9 @@ mod tests {
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
     use std::slice;
 
-    use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{Hooks, HooksOptions};
+    use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
+        Hooks, HooksOptions,
+    };
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     #[ignore]

@@ -464,6 +464,10 @@ export interface Complexity {
 	 */
 	noBannedTypes?: RuleConfiguration;
 	/**
+	 * Disallow functions that exceed a given Cognitive Complexity score.
+	 */
+	noExcessiveCognitiveComplexity?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary boolean casts
 	 */
 	noExtraBooleanCast?: RuleConfiguration;
@@ -515,6 +519,10 @@ export interface Complexity {
 	 * Disallow using any or unknown as type constraint.
 	 */
 	noUselessTypeConstraint?: RuleConfiguration;
+	/**
+	 * Disallow the use of void operators, which is not a familiar operator.
+	 */
+	noVoid?: RuleConfiguration;
 	/**
 	 * Disallow with statements in non-strict contexts.
 	 */
@@ -661,6 +669,14 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
+	 * Enforce all dependencies are correctly specified in a React hook.
+	 */
+	useExhaustiveDependencies?: RuleConfiguration;
+	/**
+	 * Enforce that all React hooks are being called from the Top Level component functions.
+	 */
+	useHookAtTopLevel?: RuleConfiguration;
+	/**
 	 * Require calls to isNaN() when checking for NaN.
 	 */
 	useIsNan?: RuleConfiguration;
@@ -682,17 +698,9 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow the use of spread (...) syntax on accumulators.
-	 */
-	noAccumulatingSpread?: RuleConfiguration;
-	/**
 	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
-	/**
-	 * Disallow void type outside of generic or return types.
-	 */
-	noConfusingVoidType?: RuleConfiguration;
 	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
@@ -705,22 +713,6 @@ export interface Nursery {
 	 * Disallow empty character classes in regular expression literals.
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
-	/**
-	 * Disallow functions that exceed a given Cognitive Complexity score.
-	 */
-	noExcessiveComplexity?: RuleConfiguration;
-	/**
-	 * Disallow fallthrough of switch clauses.
-	 */
-	noFallthroughSwitchClause?: RuleConfiguration;
-	/**
-	 * Use Number.isFinite instead of global isFinite.
-	 */
-	noGlobalIsFinite?: RuleConfiguration;
-	/**
-	 * Use Number.isNaN instead of global isNaN.
-	 */
-	noGlobalIsNan?: RuleConfiguration;
 	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
@@ -750,10 +742,6 @@ export interface Nursery {
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
 	/**
-	 * Disallow the use of void operators, which is not a familiar operator.
-	 */
-	noVoid?: RuleConfiguration;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -770,29 +758,13 @@ export interface Nursery {
 	 */
 	useAsConstAssertion?: RuleConfiguration;
 	/**
-	 * Enforce using else if instead of nested if in else clauses.
-	 */
-	useCollapsedElseIf?: RuleConfiguration;
-	/**
-	 * Enforce all dependencies are correctly specified in a React hook.
-	 */
-	useExhaustiveDependencies?: RuleConfiguration;
-	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
 	useGroupedTypeImport?: RuleConfiguration;
 	/**
-	 * Enforce that all React hooks are being called from the Top Level component functions.
-	 */
-	useHookAtTopLevel?: RuleConfiguration;
-	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration;
-	/**
-	 * Use Array.isArray() instead of instanceof Array.
-	 */
-	useIsArray?: RuleConfiguration;
 	/**
 	 * Require assignment operator shorthand where possible.
 	 */
@@ -806,6 +778,10 @@ export interface Performance {
 	 * It enables ALL rules for this group.
 	 */
 	all?: boolean;
+	/**
+	 * Disallow the use of spread (...) syntax on accumulators.
+	 */
+	noAccumulatingSpread?: RuleConfiguration;
 	/**
 	 * Disallow the use of the delete operator.
 	 */
@@ -905,6 +881,10 @@ export interface Style {
 	 */
 	useBlockStatements?: RuleConfiguration;
 	/**
+	 * Enforce using else if instead of nested if in else clauses.
+	 */
+	useCollapsedElseIf?: RuleConfiguration;
+	/**
 	 * Require const declarations for variables that are never reassigned after declared.
 	 */
 	useConst?: RuleConfiguration;
@@ -1002,6 +982,10 @@ export interface Suspicious {
 	 */
 	noConfusingLabels?: RuleConfiguration;
 	/**
+	 * Disallow void type outside of generic or return types.
+	 */
+	noConfusingVoidType?: RuleConfiguration;
+	/**
 	 * Disallow the use of console.log
 	 */
 	noConsoleLog?: RuleConfiguration;
@@ -1054,9 +1038,21 @@ export interface Suspicious {
 	 */
 	noExtraNonNullAssertion?: RuleConfiguration;
 	/**
+	 * Disallow fallthrough of switch clauses.
+	 */
+	noFallthroughSwitchClause?: RuleConfiguration;
+	/**
 	 * Disallow reassigning function declarations.
 	 */
 	noFunctionAssign?: RuleConfiguration;
+	/**
+	 * Use Number.isFinite instead of global isFinite.
+	 */
+	noGlobalIsFinite?: RuleConfiguration;
+	/**
+	 * Use Number.isNaN instead of global isNaN.
+	 */
+	noGlobalIsNan?: RuleConfiguration;
 	/**
 	 * Disallow assigning to imported bindings
 	 */
@@ -1110,6 +1106,10 @@ export interface Suspicious {
 	 */
 	useGetterReturn?: RuleConfiguration;
 	/**
+	 * Use Array.isArray() instead of instanceof Array.
+	 */
+	useIsArray?: RuleConfiguration;
+	/**
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
 	useNamespaceKeyword?: RuleConfiguration;
@@ -1131,7 +1131,7 @@ export type PossibleOptions =
 	| RestrictedGlobalsOptions
 	| null;
 /**
- * Options for the rule `noNestedModuleImports`.
+ * Options for the rule `noExcessiveCognitiveComplexity`.
  */
 export interface ComplexityOptions {
 	/**
@@ -1299,6 +1299,7 @@ export type Category =
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
@@ -1312,6 +1313,7 @@ export type Category =
 	| "lint/complexity/noUselessSwitchCase"
 	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
+	| "lint/complexity/noVoid"
 	| "lint/complexity/noWith"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
@@ -1344,19 +1346,15 @@ export type Category =
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useExhaustiveDependencies"
+	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noAccumulatingSpread"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noConfusingVoidType"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
-	| "lint/nursery/noExcessiveComplexity"
-	| "lint/nursery/noFallthroughSwitchClause"
-	| "lint/nursery/noGlobalIsFinite"
-	| "lint/nursery/noGlobalIsNan"
 	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
@@ -1364,18 +1362,14 @@ export type Category =
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
-	| "lint/nursery/noVoid"
 	| "lint/nursery/useAriaActivedescendantWithTabindex"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useAsConstAssertion"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useCollapsedElseIf"
-	| "lint/nursery/useExhaustiveDependencies"
 	| "lint/nursery/useGroupedTypeImport"
-	| "lint/nursery/useHookAtTopLevel"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useIsArray"
 	| "lint/nursery/useShorthandAssign"
+	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
@@ -1393,6 +1387,7 @@ export type Category =
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noVar"
 	| "lint/style/useBlockStatements"
+	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
@@ -1415,6 +1410,7 @@ export type Category =
 	| "lint/suspicious/noCommentText"
 	| "lint/suspicious/noCompareNegZero"
 	| "lint/suspicious/noConfusingLabels"
+	| "lint/suspicious/noConfusingVoidType"
 	| "lint/suspicious/noConsoleLog"
 	| "lint/suspicious/noConstEnum"
 	| "lint/suspicious/noControlCharactersInRegex"
@@ -1428,7 +1424,10 @@ export type Category =
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noExplicitAny"
 	| "lint/suspicious/noExtraNonNullAssertion"
+	| "lint/suspicious/noFallthroughSwitchClause"
 	| "lint/suspicious/noFunctionAssign"
+	| "lint/suspicious/noGlobalIsFinite"
+	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noPrototypeBuiltins"
@@ -1441,6 +1440,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useGetterReturn"
+	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
 	| "files/missingHandler"

@@ -1,5 +1,5 @@
 ---
-title: noUselessLoneBlockStatements (since vnext)
+title: noUselessLoneBlockStatements (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noUselessLoneBlockStatements`**

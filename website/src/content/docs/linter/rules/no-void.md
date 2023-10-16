@@ -2,11 +2,7 @@
 title: noVoid (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noVoid`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/complexity/noVoid`**
 
 Disallow the use of `void` operators, which is not a familiar operator.
 
@@ -24,7 +20,7 @@ Source: https://eslint.org/docs/latest/rules/no-void
 void 0;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noVoid.js:1:1 <a href="https://biomejs.dev/linter/rules/no-void">lint/nursery/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noVoid.js:1:1 <a href="https://biomejs.dev/linter/rules/no-void">lint/complexity/noVoid</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">The use of </span><span style="color: Orange;"><strong>void</strong></span><span style="color: Orange;"> is not allowed.</span>
   

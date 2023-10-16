@@ -2,10 +2,10 @@
 title: noGlobalIsNan (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noGlobalIsNan`**
+**Diagnostic Category: `lint/suspicious/noGlobalIsNan`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Use `Number.isNaN` instead of global `isNaN`.
@@ -23,7 +23,7 @@ Therefore, it is a more reliable way to test whether a value is `NaN`.
 isNaN({}); // true
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noGlobalIsNan.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-is-nan">lint/nursery/noGlobalIsNan</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noGlobalIsNan.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-is-nan">lint/suspicious/noGlobalIsNan</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>isNaN</strong></span><span style="color: Tomato;"> is unsafe. It attempts a type coercion. Use </span><span style="color: Tomato;"><strong>Number.isNaN</strong></span><span style="color: Tomato;"> instead.</span>
   

@@ -23,7 +23,7 @@ use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 declare_transformation! {
     /// Transform a TypeScript [TsEnumDeclaration]
     pub(crate) TsEnum {
-        version: "next",
+        version: "1.3.0",
         name: "transformEnum",
     }
 }

@@ -1,7 +1,9 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::nursery::no_excessive_complexity::{complexity_options, ComplexityOptions};
-use crate::semantic_analyzers::nursery::use_exhaustive_dependencies::{
+use crate::analyzers::complexity::no_excessive_cognitive_complexity::{
+    complexity_options, ComplexityOptions,
+};
+use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
 };
 use crate::semantic_analyzers::style::no_restricted_globals::{
@@ -50,7 +52,7 @@ impl FromStr for PossibleOptions {
 impl PossibleOptions {
     pub fn extract_option(&self, rule_key: &RuleKey) -> RuleOptions {
         match rule_key.rule_name() {
-            "noExcessiveComplexity" => {
+            "noExcessiveCognitiveComplexity" => {
                 let options = match self {
                     PossibleOptions::Complexity(options) => options.clone(),
                     _ => ComplexityOptions::default(),

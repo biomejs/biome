@@ -1,5 +1,5 @@
 ---
-title: noMisrefactoredShorthandAssign (since vnext)
+title: noMisrefactoredShorthandAssign (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noMisrefactoredShorthandAssign`**

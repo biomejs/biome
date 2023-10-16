@@ -41,7 +41,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoEmptyCharacterClassInRegex {
-        version: "next",
+        version: "1.3.0",
         name: "noEmptyCharacterClassInRegex",
         recommended: true,
     }

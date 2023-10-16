@@ -1,5 +1,5 @@
 ---
-title: noMisleadingInstantiator (since vnext)
+title: noMisleadingInstantiator (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noMisleadingInstantiator`**

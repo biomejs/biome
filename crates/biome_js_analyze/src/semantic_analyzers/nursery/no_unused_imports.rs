@@ -64,7 +64,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoUnusedImports {
-        version: "next",
+        version: "1.3.0",
         name: "noUnusedImports",
         recommended: false,
         fix_kind: FixKind::Safe,

@@ -2,10 +2,10 @@
 title: useIsArray (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useIsArray`**
+**Diagnostic Category: `lint/suspicious/useIsArray`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Use `Array.isArray()` instead of `instanceof Array`.
@@ -28,7 +28,7 @@ const xs = [];
 if (xs instanceof Array) {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useIsArray.js:2:5 <a href="https://biomejs.dev/linter/rules/use-is-array">lint/nursery/useIsArray</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useIsArray.js:2:5 <a href="https://biomejs.dev/linter/rules/use-is-array">lint/suspicious/useIsArray</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>Array.isArray()</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>instanceof Array</strong></span><span style="color: Tomato;">.</span>
   

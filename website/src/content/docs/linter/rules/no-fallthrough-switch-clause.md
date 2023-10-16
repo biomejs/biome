@@ -2,10 +2,10 @@
 title: noFallthroughSwitchClause (since v1.0.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noFallthroughSwitchClause`**
+**Diagnostic Category: `lint/suspicious/noFallthroughSwitchClause`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow fallthrough of `switch` clauses.
@@ -28,9 +28,9 @@ switch (bar) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noFallthroughSwitchClause.js:2:2 <a href="https://biomejs.dev/linter/rules/no-fallthrough-switch-clause">lint/nursery/noFallthroughSwitchClause</a> ━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noFallthroughSwitchClause.js:2:2 <a href="https://biomejs.dev/linter/rules/no-fallthrough-switch-clause">lint/suspicious/noFallthroughSwitchClause</a> ━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This case is falling through to the next case.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This case is falling through to the next case.</span>
   
     <strong>1 │ </strong>switch (bar) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>	case 0:

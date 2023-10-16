@@ -1,5 +1,5 @@
 use case::CaseExt;
-use fs_extra::dir::{move_dir, CopyOptions};
+use fs_extra::dir::{create, move_dir, CopyOptions};
 use fs_extra::file;
 use fs_extra::file::move_file;
 use std::env;
@@ -74,7 +74,21 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         let new_lint_rule_text = lint_rules.join("\n");
         categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
 
-        move_file(rule_path, new_rule_path, &file::CopyOptions::default()).unwrap();
+        if !new_group_path.exists() {
+            create(new_rule_path.clone(), false).expect("To create the group folder");
+        }
+        move_file(
+            rule_path.clone(),
+            new_rule_path.clone(),
+            &file::CopyOptions::default(),
+        )
+        .unwrap_or_else(|_| {
+            panic!(
+                "To copy {} to {}",
+                rule_path.display(),
+                new_rule_path.display()
+            )
+        });
         std::fs::write(categories_path, categories).unwrap();
 
         let old_test_path = current_dir

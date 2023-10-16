@@ -1,5 +1,5 @@
 ---
-title: useAriaActivedescendantWithTabindex (since vnext)
+title: useAriaActivedescendantWithTabindex (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useAriaActivedescendantWithTabindex`**

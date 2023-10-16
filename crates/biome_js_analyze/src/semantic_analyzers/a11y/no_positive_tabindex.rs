@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -52,6 +52,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noPositiveTabindex",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 

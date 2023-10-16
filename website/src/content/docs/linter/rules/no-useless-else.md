@@ -1,5 +1,5 @@
 ---
-title: noUselessElse (since vnext)
+title: noUselessElse (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noUselessElse`**

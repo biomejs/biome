@@ -55,7 +55,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoEmptyBlockStatements {
-        version: "next",
+        version: "1.3.0",
         name: "noEmptyBlockStatements",
         recommended: false,
     }
