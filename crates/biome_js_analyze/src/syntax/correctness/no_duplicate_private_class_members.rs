@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 
 use biome_diagnostics::category;
 use biome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
@@ -20,8 +20,6 @@ declare_rule! {
     pub(crate) NoDuplicatePrivateClassMembers {
         version: "1.0.0",
         name: "noDuplicatePrivateClassMembers",
-        recommended: false,
-        fix_kind: FixKind::Unsafe,
     }
 }
 

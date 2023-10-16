@@ -20,7 +20,6 @@ declare_rule! {
     pub(crate) NoSuperWithoutExtends {
         version: "1.0.0",
         name: "noSuperWithoutExtends",
-        recommended: false,
     }
 }
 
