@@ -1,8 +1,8 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
-    expect_any_attribute_matcher_name, expect_any_attribute_modifier, expect_any_selector,
-    expected_identifier,
+    expect_any_attribute_matcher_name, expect_any_attribute_modifier, expect_any_pseudo_element,
+    expect_any_selector, expected_identifier,
 };
 use crate::syntax::{
     is_at_identifier, parse_css_string, parse_error, parse_identifier, parse_regular_identifier,
@@ -120,6 +120,7 @@ pub(crate) fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
         T![.] => parse_class_selector(p),
         T![#] => parse_id_selector(p),
         T!['['] => parse_attribute_selector(p),
+        T![::] => parse_pseudo_element_selector(p),
         _ => Absent,
     }
 }
@@ -183,7 +184,8 @@ pub(crate) fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, context)
 }
 
-const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> = COMBINATOR_SET.union(token_set![T!['{'], T![,]]);
+const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
+    COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')']]);
 #[inline]
 pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     if SELECTOR_LEX_SET.contains(p.nth(1)) {
@@ -266,4 +268,69 @@ const ATTRIBUTE_MATCHER_SET: TokenSet<CssSyntaxKind> =
 #[inline]
 pub(crate) fn is_at_attribute_matcher(p: &mut CssParser) -> bool {
     p.at_ts(ATTRIBUTE_MATCHER_SET)
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_selector(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![::]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![::]);
+    parse_pseudo_element(p).or_add_diagnostic(p, expect_any_pseudo_element);
+
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_SELECTOR))
+}
+#[inline]
+pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let pseudo_element_identifier =
+        parse_pseudo_element_identifier(p).or_add_diagnostic(p, expected_identifier);
+    let is_highlight =
+        pseudo_element_identifier.map_or(false, |m| m.kind(p) == CSS_HIGHLIGHT_ELEMENT_NAME);
+
+    if p.eat(T!['(']) {
+        if is_highlight {
+            parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+        } else {
+            parse_selector(p).or_add_diagnostic(p, expect_any_selector);
+        }
+
+        let context = selector_lex_context(p);
+        p.expect_with_context(T![')'], context);
+
+        let kind = if is_highlight {
+            CSS_PSEUDO_ELEMENT_HIGHLIGHT
+        } else {
+            CSS_PSEUDO_ELEMENT_FUNCTION
+        };
+
+        Present(m.complete(p, kind))
+    } else {
+        Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
+    }
+}
+
+#[inline]
+pub(super) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    if p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['(']) {
+        let m = p.start();
+
+        p.expect(HIGHLIGHT_KW);
+
+        Present(m.complete(p, CSS_HIGHLIGHT_ELEMENT_NAME))
+    } else {
+        parse_selector_identifier(p)
+    }
 }

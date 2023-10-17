@@ -671,6 +671,7 @@ impl<'src> CssLexer<'src> {
             b"from" => FROM_KW,
             b"to" => TO_KW,
             b"var" => VAR_KW,
+            b"highlight" => HIGHLIGHT_KW,
             _ => IDENT,
         }
     }

@@ -1,0 +1,6 @@
+::cue {}
+::cue(v[voice="Esme"]) {}
+::cue(   v[voice="Esme"]   ) {}
+video::cue {}
+video::cue(b) {}
+video::cue(#cue1) {}

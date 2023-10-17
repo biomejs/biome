@@ -637,6 +637,7 @@ impl Field {
                     ("...", _) => "dotdotdot",
                     ("=>", _) => "fat_arrow",
                     (":", _) => "colon",
+                    ("::", _) => "double_colon",
                     ("?", _) => "question_mark",
                     ("+", _) => "plus",
                     ("-", _) => "minus",

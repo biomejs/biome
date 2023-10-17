@@ -160,9 +160,46 @@ CssPseudoClassSelectorParameters =
 // ^^^
 CssTypeSelector = ident: CssIdentifier
 
-// TODO: add support for pseudo-elements
+// a::after {}
+//  ^^^^^^^^
+// video::cue(b) {}
+//      ^^^^^^^^
+// ::highlight(sample) {}
+// ^^^^^^^^^^^^^^^^^^^
 CssPseudoElementSelector =
+	'::'
+	element: AnyCssPseudoElement
+
+AnyCssPseudoElement =
+	CssPseudoElementIdentifier
+	| AnyCssPseudoElementFunction
+
+// a::after {}
+//    ^^^^^
+CssPseudoElementIdentifier =
+	ident: CssIdentifier
+
+AnyCssPseudoElementFunction =
+	CssPseudoElementFunction
+	| CssPseudoElementHighlight
+
+// video::cue-region(#scroll > .div) {}
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoElementFunction =
 	name: CssIdentifier
+	'('
+	parameter: AnyCssSelector
+	')'
+
+// ::highlight(sample) {}
+// ^^^^^^^^^^^^^^^^^^^
+CssPseudoElementHighlight =
+	name: CssHighlightElementName
+	'('
+	custom_highlight_name: CssIdentifier
+	')'
+
+CssHighlightElementName = value: 'highlight'
 
 CssBlock =
 	'{'

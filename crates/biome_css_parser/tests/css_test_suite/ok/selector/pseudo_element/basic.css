@@ -1,0 +1,34 @@
+a::after {}
+
+dialog::backdrop {}
+
+a::before {}
+
+video::cue {}
+video::cue(b) {}
+
+video::cue-region {}
+video::cue-region(#scroll > .div) {}
+
+::grammar-error {}
+
+::marker {}
+
+tabbed-custom-element::part(tab) {}
+
+::placeholder {}
+
+::selection {}
+
+::slotted(*) {}
+::slotted(span) {}
+
+::spelling-error {}
+
+::target-text {}
+
+.form-range::-webkit-slider-thumb {}
+
+a::bEfOrE {}
+
+a, b > .foo::before {}

@@ -1,0 +1,412 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+:: {}
+
+::mark( {}
+
+::mark( div {}
+
+::mark( + div {}
+
+::highlight(div + div) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@0..3 "::" [] [Whitespace(" ")],
+                            element: missing (required),
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@3..4 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@4..5 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@5..9 "::" [Newline("\n"), Newline("\n")] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@9..13 "mark" [] [],
+                                },
+                                l_paren_token: L_PAREN@13..15 "(" [] [Whitespace(" ")],
+                                parameter: missing (required),
+                                r_paren_token: missing (required),
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@15..16 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@16..17 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@17..21 "::" [Newline("\n"), Newline("\n")] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@21..25 "mark" [] [],
+                                },
+                                l_paren_token: L_PAREN@25..27 "(" [] [Whitespace(" ")],
+                                parameter: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@27..31 "div" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                                r_paren_token: missing (required),
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@31..32 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@32..33 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@33..37 "::" [Newline("\n"), Newline("\n")] [],
+                                element: CssPseudoElementFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@37..41 "mark" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@41..43 "(" [] [Whitespace(" ")],
+                                    parameter: missing (required),
+                                    r_paren_token: missing (required),
+                                },
+                            },
+                        ],
+                    },
+                    combinator: PLUS@43..45 "+" [] [Whitespace(" ")],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@45..49 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@49..50 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@50..51 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] [],
+                                element: CssPseudoElementHighlight {
+                                    name: CssHighlightElementName {
+                                        value_token: HIGHLIGHT_KW@55..64 "highlight" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@64..65 "(" [] [],
+                                    custom_highlight_name: CssIdentifier {
+                                        value_token: IDENT@65..69 "div" [] [Whitespace(" ")],
+                                    },
+                                    r_paren_token: missing (required),
+                                },
+                            },
+                        ],
+                    },
+                    combinator: PLUS@69..71 "+" [] [Whitespace(" ")],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@71..74 "div" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        R_PAREN@74..76 ")" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@76..77 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@77..78 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..79
+  0: CSS_RULE_LIST@0..78
+    0: CSS_RULE@0..5
+      0: CSS_SELECTOR_LIST@0..3
+        0: CSS_COMPOUND_SELECTOR@0..3
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..3
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@0..3
+              0: COLON2@0..3 "::" [] [Whitespace(" ")]
+              1: (empty)
+      1: CSS_BLOCK@3..5
+        0: L_CURLY@3..4 "{" [] []
+        1: CSS_DECLARATION_LIST@4..4
+        2: R_CURLY@4..5 "}" [] []
+    1: CSS_RULE@5..17
+      0: CSS_SELECTOR_LIST@5..15
+        0: CSS_COMPOUND_SELECTOR@5..15
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@5..15
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@5..15
+              0: COLON2@5..9 "::" [Newline("\n"), Newline("\n")] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@9..15
+                0: CSS_IDENTIFIER@9..13
+                  0: IDENT@9..13 "mark" [] []
+                1: L_PAREN@13..15 "(" [] [Whitespace(" ")]
+                2: (empty)
+                3: (empty)
+      1: CSS_BLOCK@15..17
+        0: L_CURLY@15..16 "{" [] []
+        1: CSS_DECLARATION_LIST@16..16
+        2: R_CURLY@16..17 "}" [] []
+    2: CSS_RULE@17..33
+      0: CSS_SELECTOR_LIST@17..31
+        0: CSS_COMPOUND_SELECTOR@17..31
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@17..31
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@17..31
+              0: COLON2@17..21 "::" [Newline("\n"), Newline("\n")] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@21..31
+                0: CSS_IDENTIFIER@21..25
+                  0: IDENT@21..25 "mark" [] []
+                1: L_PAREN@25..27 "(" [] [Whitespace(" ")]
+                2: CSS_COMPOUND_SELECTOR@27..31
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@27..31
+                    0: CSS_IDENTIFIER@27..31
+                      0: IDENT@27..31 "div" [] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@31..31
+                3: (empty)
+      1: CSS_BLOCK@31..33
+        0: L_CURLY@31..32 "{" [] []
+        1: CSS_DECLARATION_LIST@32..32
+        2: R_CURLY@32..33 "}" [] []
+    3: CSS_RULE@33..51
+      0: CSS_SELECTOR_LIST@33..49
+        0: CSS_COMPLEX_SELECTOR@33..49
+          0: CSS_COMPOUND_SELECTOR@33..43
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@33..43
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@33..43
+                0: COLON2@33..37 "::" [Newline("\n"), Newline("\n")] []
+                1: CSS_PSEUDO_ELEMENT_FUNCTION@37..43
+                  0: CSS_IDENTIFIER@37..41
+                    0: IDENT@37..41 "mark" [] []
+                  1: L_PAREN@41..43 "(" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: (empty)
+          1: PLUS@43..45 "+" [] [Whitespace(" ")]
+          2: CSS_COMPOUND_SELECTOR@45..49
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@45..49
+              0: CSS_IDENTIFIER@45..49
+                0: IDENT@45..49 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@49..49
+      1: CSS_BLOCK@49..51
+        0: L_CURLY@49..50 "{" [] []
+        1: CSS_DECLARATION_LIST@50..50
+        2: R_CURLY@50..51 "}" [] []
+    4: CSS_RULE@51..78
+      0: CSS_SELECTOR_LIST@51..76
+        0: CSS_COMPLEX_SELECTOR@51..74
+          0: CSS_COMPOUND_SELECTOR@51..69
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@51..69
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@51..69
+                0: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] []
+                1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@55..69
+                  0: CSS_HIGHLIGHT_ELEMENT_NAME@55..64
+                    0: HIGHLIGHT_KW@55..64 "highlight" [] []
+                  1: L_PAREN@64..65 "(" [] []
+                  2: CSS_IDENTIFIER@65..69
+                    0: IDENT@65..69 "div" [] [Whitespace(" ")]
+                  3: (empty)
+          1: PLUS@69..71 "+" [] [Whitespace(" ")]
+          2: CSS_COMPOUND_SELECTOR@71..74
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@71..74
+              0: CSS_IDENTIFIER@71..74
+                0: IDENT@71..74 "div" [] []
+            2: CSS_SUB_SELECTOR_LIST@74..74
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@74..76
+          0: R_PAREN@74..76 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@76..78
+        0: L_CURLY@76..77 "{" [] []
+        1: CSS_DECLARATION_LIST@77..77
+        2: R_CURLY@77..78 "}" [] []
+  1: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_element.css:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected an after, a backdrop, a before, a cue, a cue-region, a first-letter, a first-line, a file-selector-button, a grammar-error, a part, a placeholder, a selection, a slotted, a spelling-error, or a target-text but instead found '{'
+
+  > 1 │ :: {}
+      │    ^
+    2 │
+    3 │ ::mark( {}
+
+  i Expected an after, a backdrop, a before, a cue, a cue-region, a first-letter, a first-line, a file-selector-button, a grammar-error, a part, a placeholder, a selection, a slotted, a spelling-error, or a target-text here
+
+  > 1 │ :: {}
+      │    ^
+    2 │
+    3 │ ::mark( {}
+
+pseudo_element.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a selector but instead found '{'
+
+    1 │ :: {}
+    2 │
+  > 3 │ ::mark( {}
+      │         ^
+    4 │
+    5 │ ::mark( div {}
+
+  i Expected a selector here
+
+    1 │ :: {}
+    2 │
+  > 3 │ ::mark( {}
+      │         ^
+    4 │
+    5 │ ::mark( div {}
+
+pseudo_element.css:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+
+    3 │ ::mark( {}
+    4 │
+  > 5 │ ::mark( div {}
+      │             ^
+    6 │
+    7 │ ::mark( + div {}
+
+  i Remove {
+
+pseudo_element.css:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a selector but instead found '+'
+
+    5 │ ::mark( div {}
+    6 │
+  > 7 │ ::mark( + div {}
+      │         ^
+    8 │
+    9 │ ::highlight(div + div) {}
+
+  i Expected a selector here
+
+    5 │ ::mark( div {}
+    6 │
+  > 7 │ ::mark( + div {}
+      │         ^
+    8 │
+    9 │ ::highlight(div + div) {}
+
+pseudo_element.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `+`
+
+     7 │ ::mark( + div {}
+     8 │
+   > 9 │ ::highlight(div + div) {}
+       │                 ^
+    10 │
+
+  i Remove +
+
+pseudo_element.css:9:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+
+     7 │ ::mark( + div {}
+     8 │
+   > 9 │ ::highlight(div + div) {}
+       │                      ^
+    10 │
+
+  i Remove )
+
+```
+
+
