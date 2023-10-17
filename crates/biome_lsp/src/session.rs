@@ -15,8 +15,8 @@ use biome_service::{load_config, ConfigurationBasePath, Workspace};
 use biome_service::{DynRef, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
+use rustc_hash::FxHashMap;
 use serde_json::Value;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicU8;
 use std::sync::atomic::Ordering;
@@ -62,7 +62,7 @@ pub(crate) struct Session {
     /// File system to read files inside the workspace
     pub(crate) fs: DynRef<'static, dyn FileSystem>,
 
-    documents: RwLock<HashMap<lsp_types::Url, Document>>,
+    documents: RwLock<FxHashMap<lsp_types::Url, Document>>,
 
     pub(crate) cancellation: Arc<Notify>,
 }
@@ -104,7 +104,7 @@ pub(crate) type SessionHandle = Arc<Session>;
 /// instance and whether they are enabled or not
 #[derive(Default)]
 pub(crate) struct CapabilitySet {
-    registry: HashMap<&'static str, (&'static str, CapabilityStatus)>,
+    registry: FxHashMap<&'static str, (&'static str, CapabilityStatus)>,
 }
 
 /// Represents whether a capability is enabled or not, optionally holding the

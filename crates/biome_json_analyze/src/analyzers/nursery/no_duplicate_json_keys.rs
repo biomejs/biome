@@ -2,7 +2,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 declare_rule! {
     /// Disallow two keys with the same name inside a JSON object.
@@ -48,7 +48,7 @@ impl Rule for NoDuplicateJsonKeys {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
-        let mut names = HashMap::<String, Vec<TextRange>>::new();
+        let mut names = FxHashMap::<String, Vec<TextRange>>::default();
         let mut original_key = None;
         for (index, member) in query.json_member_list().iter().flatten().enumerate() {
             let name = member.name().ok()?;

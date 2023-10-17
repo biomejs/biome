@@ -12,8 +12,9 @@ use biome_js_syntax::{
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast};
 use bpaf::Bpaf;
+use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::BTreeMap;
 use std::str::FromStr;
 
 #[cfg(feature = "schemars")]
@@ -165,13 +166,13 @@ declare_rule! {
 
 #[derive(Debug, Clone)]
 pub struct ReactExtensiveDependenciesOptions {
-    pub(crate) hooks_config: HashMap<String, ReactHookConfiguration>,
-    pub(crate) stable_config: HashSet<StableReactHookConfiguration>,
+    pub(crate) hooks_config: FxHashMap<String, ReactHookConfiguration>,
+    pub(crate) stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
 impl Default for ReactExtensiveDependenciesOptions {
     fn default() -> Self {
-        let hooks_config = HashMap::from_iter([
+        let hooks_config = FxHashMap::from_iter([
             ("useEffect".to_string(), (0, 1).into()),
             ("useLayoutEffect".to_string(), (0, 1).into()),
             ("useInsertionEffect".to_string(), (0, 1).into()),
@@ -201,7 +202,7 @@ impl Default for ReactExtensiveDependenciesOptions {
             ),
         ]);
 
-        let stable_config: HashSet<StableReactHookConfiguration> = HashSet::from_iter([
+        let stable_config = FxHashSet::from_iter([
             StableReactHookConfiguration::new("useState", Some(1)),
             StableReactHookConfiguration::new("useReducer", Some(1)),
             StableReactHookConfiguration::new("useTransition", Some(1)),

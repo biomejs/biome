@@ -1,10 +1,9 @@
-use std::collections::{HashMap, HashSet};
-
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 
 use biome_diagnostics::category;
 use biome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
 use biome_rowan::AstNode;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_rule! {
     /// Catch a `SyntaxError` when defining duplicate private class members.
@@ -37,7 +36,7 @@ impl Rule for NoDuplicatePrivateClassMembers {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut defined_members: HashMap<String, HashSet<MemberType>> = HashMap::new();
+        let mut defined_members: FxHashMap<String, FxHashSet<MemberType>> = FxHashMap::default();
 
         let node = ctx.query();
         node.into_iter()
@@ -65,7 +64,10 @@ impl Rule for NoDuplicatePrivateClassMembers {
                         stored_members.insert(member_type);
                     }
                 } else {
-                    defined_members.insert(member_name, HashSet::from([member_type]));
+                    defined_members
+                        .entry(member_name)
+                        .or_default()
+                        .insert(member_type);
                 }
 
                 None

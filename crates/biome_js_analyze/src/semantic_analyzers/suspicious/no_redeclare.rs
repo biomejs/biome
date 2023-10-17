@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyTsType, TextRange, TsIndexSignatureParameter, TsIndexSignatureTypeMember, TsTypeMemberList,
 };
 use biome_rowan::AstNode;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 declare_rule! {
     /// Disallow variable, function, class, and type redeclarations in the same scope.
@@ -114,7 +114,7 @@ impl Rule for NoRedeclare {
 }
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
-    let mut declarations = HashMap::<String, (TextRange, AnyJsBindingDeclaration)>::default();
+    let mut declarations = FxHashMap::<String, (TextRange, AnyJsBindingDeclaration)>::default();
     for binding in scope.bindings() {
         let id_binding = binding.tree();
 

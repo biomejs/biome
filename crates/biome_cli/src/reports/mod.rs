@@ -4,8 +4,8 @@ use crate::reports::formatter::{FormatterReportFileDetail, FormatterReportSummar
 use biome_diagnostics::{Category, Severity};
 use biome_service::WorkspaceError;
 use formatter::FormatterReport;
+use rustc_hash::FxHashMap;
 use serde::Serialize;
-use std::collections::HashMap;
 
 #[derive(Debug, Default, Serialize)]
 pub struct Report {
@@ -15,7 +15,7 @@ pub struct Report {
     /// Diagnostics tracked during a generic traversal
     ///
     /// The key is the path of the file where the diagnostics occurred
-    diagnostics: HashMap<String, ReportErrorKind>,
+    diagnostics: FxHashMap<String, ReportErrorKind>,
 }
 
 #[derive(Debug, Serialize)]

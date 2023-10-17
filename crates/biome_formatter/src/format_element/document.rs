@@ -10,7 +10,6 @@ use crate::{
 };
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
-use std::collections::HashMap;
 use std::ops::Deref;
 
 /// A formatted document.
@@ -133,7 +132,7 @@ impl std::fmt::Display for Document {
 #[derive(Clone, Default, Debug)]
 struct IrFormatContext {
     /// The interned elements that have been printed to this point
-    printed_interned_elements: HashMap<Interned, usize>,
+    printed_interned_elements: FxHashMap<Interned, usize>,
 }
 
 impl FormatContext for IrFormatContext {

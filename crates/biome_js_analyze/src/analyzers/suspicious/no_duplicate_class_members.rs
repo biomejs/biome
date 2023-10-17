@@ -1,5 +1,3 @@
-use std::collections::{HashMap, HashSet};
-
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
@@ -7,6 +5,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode};
 use biome_rowan::{AstNodeList, TokenText};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_rule! {
     /// Disallow duplicate class members.
@@ -178,7 +177,8 @@ impl Rule for NoDuplicateClassMembers {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut defined_members: HashMap<MemberState, HashSet<MemberType>> = HashMap::new();
+        let mut defined_members: FxHashMap<MemberState, FxHashSet<MemberType>> =
+            FxHashMap::default();
 
         let node = ctx.query();
         node.into_iter()
@@ -201,7 +201,10 @@ impl Rule for NoDuplicateClassMembers {
                         stored_members.insert(member_type);
                     }
                 } else {
-                    defined_members.insert(member_state, HashSet::from([member_type]));
+                    defined_members
+                        .entry(member_state)
+                        .or_default()
+                        .insert(member_type);
                 }
 
                 None

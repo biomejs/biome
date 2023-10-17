@@ -24,7 +24,7 @@ use crossbeam::{
     channel::{unbounded, Receiver, Sender},
     select,
 };
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 use std::{
     ffi::OsString,
     io,
@@ -297,7 +297,7 @@ fn process_messages(options: ProcessMessagesOptions) {
         warnings,
     } = options;
 
-    let mut paths: HashSet<String> = HashSet::new();
+    let mut paths: FxHashSet<String> = FxHashSet::default();
     let mut printed_diagnostics: u16 = 0;
     let mut not_printed_diagnostics = 0;
     let mut total_skipped_suggested_fixes = 0;

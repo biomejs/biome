@@ -36,7 +36,7 @@ use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::ParserProgress;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};
 
@@ -601,7 +601,7 @@ fn parse_import_assertion(p: &mut JsParser) -> ParsedSyntax {
 
 #[derive(Default)]
 struct ImportAssertionList {
-    assertion_keys: HashMap<String, TextRange>,
+    assertion_keys: FxHashMap<String, TextRange>,
 }
 
 impl ParseSeparatedList for ImportAssertionList {
@@ -641,7 +641,7 @@ impl ParseSeparatedList for ImportAssertionList {
 
 fn parse_import_assertion_entry(
     p: &mut JsParser,
-    seen_assertion_keys: &mut HashMap<String, TextRange>,
+    seen_assertion_keys: &mut FxHashMap<String, TextRange>,
 ) -> ParsedSyntax {
     let m = p.start();
     let key_range = p.cur_range();

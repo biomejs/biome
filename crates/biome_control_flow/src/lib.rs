@@ -1,11 +1,9 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
-use std::{
-    collections::HashMap,
-    fmt::{self, Display, Formatter},
-};
+use std::fmt::{self, Display, Formatter};
 
 use biome_rowan::{Language, SyntaxElement, SyntaxNode};
+use rustc_hash::FxHashMap;
 
 pub mod builder;
 
@@ -180,7 +178,7 @@ impl<L: Language> Display for ControlFlowGraph<L> {
     fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
         writeln!(fmt, "flowchart TB")?;
 
-        let mut links = HashMap::new();
+        let mut links = FxHashMap::default();
         for (id, block) in self.blocks.iter().enumerate() {
             if fmt.alternate() {
                 writeln!(fmt, "    subgraph block_{id}")?;

@@ -14,3 +14,4 @@ version              = "0.1.0"
 
 [dependencies]
 biome_rowan = { workspace = true }
+rustc-hash  = { workspace = true }
