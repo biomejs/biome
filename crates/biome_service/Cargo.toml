@@ -42,6 +42,7 @@ schemars             = { workspace = true, features = ["indexmap1"], optional = 
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true, features = ["raw_value"] }
 tracing              = { workspace = true, features = ["attributes", "log"] }
+lazy_static = { workspace = true }
 
 [features]
 schema = [

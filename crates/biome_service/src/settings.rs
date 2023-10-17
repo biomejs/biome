@@ -1,12 +1,15 @@
-use crate::configuration::{JavascriptConfiguration, JsonConfiguration};
+// use crate::configuration::generated::push_to_analyzer_rules;
+use crate::configuration::{push_to_analyzer_rules, JavascriptConfiguration, JsonConfiguration};
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
     Matcher, Rules, WorkspaceError,
 };
+use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use biome_fs::RomePath;
+use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
@@ -119,6 +122,13 @@ impl WorkspaceSettings {
         } else {
             None
         }
+    }
+
+    pub fn as_rules(&self, path: &Path) -> Option<&Rules> {
+        let overrides = &self.override_settings;
+        overrides
+            .as_rules(path)
+            .or_else(|| self.linter.rules.as_ref())
     }
 }
 
@@ -521,6 +531,48 @@ impl OverrideSettings {
             }
         }
 
+        None
+    }
+
+    pub fn to_analyzer_rules_options(&self, path: &Path) -> Option<AnalyzerRules> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                if let Some(rules) = pattern.linter.rules.as_ref() {
+                    let mut analyzer_rules = AnalyzerRules::default();
+                    push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+                    return Some(analyzer_rules);
+                }
+            }
+        }
+        None
+    }
+
+    pub fn as_enabled_rules(&self, path: &Path) -> Option<IndexSet<RuleFilter>> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                if let Some(rules) = pattern.linter.rules.as_ref() {
+                    return Some(rules.as_enabled_rules());
+                }
+            }
+        }
+        None
+    }
+
+    pub fn as_rules(&self, path: &Path) -> Option<&Rules> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                return pattern.linter.rules.as_ref();
+            }
+        }
         None
     }
 }

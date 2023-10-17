@@ -1,11 +1,11 @@
-use biome_analyze::{AnalyzerAction, AnalyzerOptions};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_service::configuration::to_analyzer_configuration;
+use biome_service::configuration::to_analyzer_rules;
 use biome_service::settings::{Language, WorkspaceSettings};
 use biome_service::Configuration;
 use json_comments::StripComments;
@@ -58,8 +58,10 @@ pub fn create_analyzer_options(
             let configuration = deserialized.into_deserialized();
             let mut settings = WorkspaceSettings::default();
             settings.merge_with_configuration(configuration).unwrap();
-            let configuration =
-                to_analyzer_configuration(&settings.linter, &settings.languages, |_| vec![]);
+            let configuration = AnalyzerConfiguration {
+                rules: to_analyzer_rules(&settings, input_file),
+                globals: vec![],
+            };
             options = AnalyzerOptions {
                 configuration,
                 ..AnalyzerOptions::default()

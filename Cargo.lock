@@ -704,6 +704,7 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
+ "lazy_static",
  "rustc-hash",
  "schemars",
  "serde",

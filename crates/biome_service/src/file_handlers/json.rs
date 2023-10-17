@@ -1,5 +1,5 @@
 use super::{ExtensionHandler, Mime};
-use crate::configuration::to_analyzer_configuration;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::javascript::JsonParserSettings;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -14,7 +14,7 @@ use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::{Configuration, Rules, WorkspaceError};
-use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
@@ -368,11 +368,10 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
-    let configuration = to_analyzer_configuration(
-        settings.as_ref().linter(),
-        &settings.as_ref().languages,
-        |_| vec![],
-    );
+    let configuration = AnalyzerConfiguration {
+        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
+        globals: vec![],
+    };
     AnalyzerOptions {
         configuration,
         file_path,

@@ -15,15 +15,15 @@ mod parse;
 pub mod vcs;
 
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
-use crate::configuration::generated::push_to_analyzer_rules;
+pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
-use crate::settings::{LanguageListSettings, LinterSettings};
+use crate::settings::WorkspaceSettings;
 use crate::{DynRef, WorkspaceError, VERSION};
-use biome_analyze::{AnalyzerConfiguration, AnalyzerRules};
+use biome_analyze::AnalyzerRules;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, StringSet};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
@@ -578,63 +578,20 @@ pub fn create_config(
     Ok(())
 }
 
-/// Converts a [WorkspaceSettings] into a suited [configuration for the analyzer].
-///
-/// The function needs access to a filter, in order to have an easy access to the [metadata] of the
-/// rules.
-///
-/// The third argument is a closure that accepts a reference to `linter_settings`.
-///
-/// The closure is responsible to map the globals from the correct
-/// location of the settings.
-///
-/// ## Examples
-///
-/// ```rust
-/// use biome_service::configuration::to_analyzer_configuration;
-/// use biome_service::settings::{LanguageListSettings, WorkspaceSettings};
-/// let mut settings = WorkspaceSettings::default();
-/// settings.languages.javascript.globals = Some(["jQuery".to_string(), "React".to_string()].into());
-/// // map globals from JS language
-/// let analyzer_configuration =
-///     to_analyzer_configuration(&settings.linter, &settings.languages, |settings| {
-///         if let Some(globals) = settings.javascript.globals.as_ref() {
-///             globals
-///                 .iter()
-///                 .map(|global| global.to_string())
-///                 .collect::<Vec<_>>()
-///         } else {
-///             vec![]
-///         }
-///     });
-///
-///  assert_eq!(
-///     analyzer_configuration.globals,
-///     vec!["jQuery".to_string(), "React".to_string()]
-///  )
-/// ```
-///
-/// [WorkspaceSettings]: crate::settings::WorkspaceSettings
-/// [metadata]: biome_analyze::RegistryRuleMetadata
-/// [configuration for the analyzer]: AnalyzerConfiguration
-pub fn to_analyzer_configuration<ToGlobals>(
-    linter_settings: &LinterSettings,
-    language_settings: &LanguageListSettings,
-    to_globals: ToGlobals,
-) -> AnalyzerConfiguration
-where
-    ToGlobals: FnOnce(&LanguageListSettings) -> Vec<String>,
-{
-    let globals: Vec<String> = to_globals(language_settings);
+/// Returns the rules applied to a specific [Path], given the [WorkspaceSettings]
+pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerRules {
+    let linter_settings = &settings.linter;
+    let overrides = &settings.override_settings;
 
-    let mut analyzer_rules = AnalyzerRules::default();
+    overrides
+        .to_analyzer_rules_options(path)
+        .unwrap_or_else(|| {
+            let mut analyzer_rules = AnalyzerRules::default();
+            if let Some(rules) = linter_settings.rules.as_ref() {
+                push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+            }
 
-    if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
-    }
-
-    AnalyzerConfiguration {
-        globals,
-        rules: analyzer_rules,
-    }
+            dbg!("here", path.display());
+            analyzer_rules
+        })
 }

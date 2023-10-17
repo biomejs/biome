@@ -2,7 +2,7 @@ use super::{
     AnalyzerCapabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams,
     LintResults, Mime, ParserCapabilities,
 };
-use crate::configuration::to_analyzer_configuration;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::{is_diagnostic_error, Features, FixAllParams, Language as LanguageId};
 use crate::settings::OverrideSettings;
 use crate::workspace::OrganizeImportsResult;
@@ -15,8 +15,8 @@ use crate::{
     Rules, WorkspaceError,
 };
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
-    RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
+    QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
@@ -38,7 +38,6 @@ use biome_js_syntax::{
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
-use indexmap::IndexSet;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -466,6 +465,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         settings,
         should_format,
         rome_path,
+        mut filter,
     } = params;
 
     let file_source = parse
@@ -473,18 +473,6 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .map_err(|_| extension_error(params.rome_path))?;
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
-
-    let enabled_rules: Option<Vec<RuleFilter>> = if let Some(rules) = rules {
-        let enabled: IndexSet<RuleFilter> = rules.as_enabled_rules();
-        Some(enabled.into_iter().collect())
-    } else {
-        None
-    };
-
-    let mut filter = match &enabled_rules {
-        Some(rules) => AnalysisFilter::from_enabled_rules(Some(rules.as_slice())),
-        _ => AnalysisFilter::default(),
-    };
 
     filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
 
@@ -496,7 +484,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             let current_diagnostic = signal.diagnostic();
 
             if let Some(diagnostic) = current_diagnostic.as_ref() {
-                if is_diagnostic_error(diagnostic, params.rules) {
+                if is_diagnostic_error(diagnostic, rules) {
                     errors += 1;
                 }
             }
@@ -741,20 +729,18 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
-    let configuration = to_analyzer_configuration(
-        settings.as_ref().linter(),
-        &settings.as_ref().languages,
-        |settings| {
-            if let Some(globals) = settings.javascript.globals.as_ref() {
-                globals
-                    .iter()
-                    .map(|global| global.to_string())
-                    .collect::<Vec<_>>()
-            } else {
-                vec![]
-            }
+    let configuration = AnalyzerConfiguration {
+        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
+        globals: if let Some(globals) = &settings.as_ref().languages.javascript.globals.as_ref() {
+            globals
+                .iter()
+                .map(|global| global.to_string())
+                .collect::<Vec<_>>()
+        } else {
+            vec![]
         },
-    );
+    };
+
     AnalyzerOptions {
         configuration,
         file_path,
