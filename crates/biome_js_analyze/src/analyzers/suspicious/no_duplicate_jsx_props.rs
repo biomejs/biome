@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
 use biome_rowan::AstNode;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 declare_rule! {
     /// Prevents JSX properties to be assigned multiple times.
@@ -40,13 +40,13 @@ declare_rule! {
 impl Rule for NoDuplicateJsxProps {
     type Query = Ast<AnyJsxElement>;
     type State = (String, Vec<JsxAttribute>);
-    type Signals = HashMap<String, Vec<JsxAttribute>>;
+    type Signals = FxHashMap<String, Vec<JsxAttribute>>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_attributes: HashMap<String, Vec<JsxAttribute>> = HashMap::new();
+        let mut defined_attributes: FxHashMap<String, Vec<JsxAttribute>> = FxHashMap::default();
         for attribute in node.attributes() {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 if let Ok(name) = attr.name() {

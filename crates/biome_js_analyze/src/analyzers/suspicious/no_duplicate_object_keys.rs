@@ -9,8 +9,8 @@ use biome_js_syntax::{
     JsMethodObjectMember, JsPropertyObjectMember, JsShorthandPropertyObjectMember, TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use rustc_hash::FxHashMap;
 use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::fmt::Display;
 
 use crate::JsRuleAction;
@@ -217,7 +217,7 @@ impl Rule for NoDuplicateObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_properties: HashMap<TokenText, DefinedProperty> = HashMap::new();
+        let mut defined_properties = FxHashMap::default();
         let mut signals: Self::Signals = Vec::new();
 
         for member_definition in node

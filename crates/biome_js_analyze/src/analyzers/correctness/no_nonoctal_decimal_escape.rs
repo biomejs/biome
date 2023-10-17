@@ -7,7 +7,8 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
-use std::{collections::HashSet, ops::Range};
+use rustc_hash::FxHashSet;
+use std::ops::Range;
 
 declare_rule! {
     /// Disallow `\8` and `\9` escape sequences in string literals.
@@ -166,7 +167,7 @@ impl Rule for NoNonoctalDecimalEscape {
             }
         }
 
-        let mut seen = HashSet::new();
+        let mut seen = FxHashSet::default();
         signals.retain(|rule_state| seen.insert(rule_state.diagnostics_text_range));
         signals
     }

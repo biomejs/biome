@@ -1,5 +1,5 @@
-use std::collections::hash_map::Entry;
-use std::collections::{hash_map::IntoIter, HashMap};
+use rustc_hash::FxHashMap;
+use std::collections::hash_map::{Entry, IntoIter};
 use std::io;
 use std::panic::AssertUnwindSafe;
 use std::path::{Path, PathBuf};
@@ -16,8 +16,8 @@ use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
 
 /// Fully in-memory file system, stores the content of all known files in a hashmap
 pub struct MemoryFileSystem {
-    files: AssertUnwindSafe<RwLock<HashMap<PathBuf, FileEntry>>>,
-    errors: HashMap<PathBuf, ErrorEntry>,
+    files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
+    errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
 }
 

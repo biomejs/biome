@@ -1,23 +1,23 @@
 //! `LineIndex` maps flat `TextSize` offsets into `(Line, Column)`
 //! representation.
 
-use std::collections::HashMap;
 use std::mem;
 
 use crate::converters::{LineCol, WideChar, WideEncoding, WideLineCol};
 use biome_rowan::TextSize;
+use rustc_hash::FxHashMap;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct LineIndex {
     /// Offset the beginning of each line, zero-based.
     pub(crate) newlines: Vec<TextSize>,
     /// List of non-ASCII characters on each line.
-    pub(crate) line_wide_chars: HashMap<u32, Vec<WideChar>>,
+    pub(crate) line_wide_chars: FxHashMap<u32, Vec<WideChar>>,
 }
 
 impl LineIndex {
     pub fn new(text: &str) -> LineIndex {
-        let mut line_wide_chars = HashMap::default();
+        let mut line_wide_chars = FxHashMap::default();
         let mut wide_chars = Vec::new();
 
         let mut newlines = vec![TextSize::from(0)];

@@ -148,6 +148,7 @@ name = "biome_aria"
 version = "0.1.0"
 dependencies = [
  "biome_aria_metadata",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -190,6 +191,7 @@ dependencies = [
  "libc",
  "mimalloc",
  "rayon",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tikv-jemallocator",
@@ -218,6 +220,7 @@ name = "biome_control_flow"
 version = "0.1.0"
 dependencies = [
  "biome_rowan",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -363,6 +366,7 @@ dependencies = [
  "indexmap",
  "parking_lot",
  "rayon",
+ "rustc-hash",
  "schemars",
  "serde",
  "tracing",
@@ -459,6 +463,7 @@ dependencies = [
  "indexmap",
  "quickcheck",
  "quickcheck_macros",
+ "rustc-hash",
  "schemars",
  "serde",
  "serde_json",
@@ -530,6 +535,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
+ "rustc-hash",
  "tests_macros",
 ]
 
@@ -604,6 +610,7 @@ dependencies = [
  "futures",
  "indexmap",
  "proptest",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tokio",
@@ -697,6 +704,7 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
+ "rustc-hash",
  "schemars",
  "serde",
  "serde_json",

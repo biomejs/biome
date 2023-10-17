@@ -1,5 +1,4 @@
 use crate::react::{is_react_call_api, ReactLibrary};
-use std::collections::{HashMap, HashSet};
 
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::AstNode;
+use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
 /// Return result of [react_hook_with_dependency].
@@ -97,7 +97,7 @@ impl From<(usize, usize)> for ReactHookConfiguration {
 
 pub(crate) fn react_hook_configuration<'a>(
     call: &JsCallExpression,
-    hooks: &'a HashMap<String, ReactHookConfiguration>,
+    hooks: &'a FxHashMap<String, ReactHookConfiguration>,
 ) -> Option<&'a ReactHookConfiguration> {
     let name = call
         .callee()
@@ -137,7 +137,7 @@ const HOOKS_WITH_DEPS_API: [&str; 6] = [
 /// of all function that are considered hooks. See [ReactHookConfiguration].
 pub(crate) fn react_hook_with_dependency(
     call: &JsCallExpression,
-    hooks: &HashMap<String, ReactHookConfiguration>,
+    hooks: &FxHashMap<String, ReactHookConfiguration>,
     model: &SemanticModel,
 ) -> Option<ReactCallWithDependencyResult> {
     let expression = call.callee().ok()?;
@@ -209,7 +209,7 @@ impl StableReactHookConfiguration {
 /// ```
 pub fn is_binding_react_stable(
     binding: &AnyJsIdentifierBinding,
-    stable_config: &HashSet<StableReactHookConfiguration>,
+    stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
     fn array_binding_declarator_index(
         binding: &AnyJsIdentifierBinding,
@@ -277,7 +277,7 @@ mod test {
             .unwrap();
         let set_name = AnyJsIdentifierBinding::cast(node).unwrap();
 
-        let config = HashSet::from_iter([
+        let config = FxHashSet::from_iter([
             StableReactHookConfiguration::new("useRef", None),
             StableReactHookConfiguration::new("useState", Some(1)),
         ]);

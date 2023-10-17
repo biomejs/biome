@@ -37,6 +37,7 @@ biome_text_edit      = { workspace = true }
 bpaf                 = { workspace = true }
 dashmap              = { workspace = true }
 indexmap             = { workspace = true, features = ["serde"] }
+rustc-hash           = { workspace = true }
 schemars             = { workspace = true, features = ["indexmap1"], optional = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true, features = ["raw_value"] }

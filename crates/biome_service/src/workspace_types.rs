@@ -1,8 +1,9 @@
 //! Utility functions to help with generating bindings for the [Workspace] API
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
+use rustc_hash::FxHashSet;
 use schemars::{
     gen::{SchemaGenerator, SchemaSettings},
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
@@ -21,7 +22,7 @@ use biome_rowan::{AstSeparatedList, TriviaPieceKind};
 #[derive(Default)]
 pub struct ModuleQueue<'a> {
     /// Set of type names that have already been emitted
-    visited: HashSet<&'a str>,
+    visited: FxHashSet<&'a str>,
     /// Queue of type names and definitions that need to be generated
     queue: VecDeque<(&'a str, &'a SchemaObject)>,
 }
@@ -39,7 +40,7 @@ impl<'a> ModuleQueue<'a> {
         self.queue.pop_front()
     }
 
-    pub fn visited(&self) -> &HashSet<&'a str> {
+    pub fn visited(&self) -> &FxHashSet<&'a str> {
         &self.visited
     }
 }

@@ -1,6 +1,5 @@
 use std::{
     borrow::Cow,
-    collections::HashMap,
     hash::Hash,
     ops::Sub,
     ptr,
@@ -8,6 +7,7 @@ use std::{
 };
 
 use hdrhistogram::Histogram;
+use rustc_hash::FxHashMap;
 use std::sync::{Mutex, RwLock};
 use tracing::{span, subscriber::Interest, Level, Metadata, Subscriber};
 use tracing_subscriber::{
@@ -22,7 +22,7 @@ struct MetricsLayer;
 
 lazy_static::lazy_static! {
     /// Global storage for metrics data
-    static ref METRICS: RwLock<HashMap<CallsiteKey, Mutex<CallsiteEntry>>> = RwLock::default();
+    static ref METRICS: RwLock<FxHashMap<CallsiteKey, Mutex<CallsiteEntry>>> = RwLock::default();
 }
 
 /// Static pointer to the metadata of a callsite, used as a unique identifier
