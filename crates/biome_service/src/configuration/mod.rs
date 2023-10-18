@@ -591,7 +591,6 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
                 push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
             }
 
-            dbg!("here", path.display());
             analyzer_rules
         })
 }

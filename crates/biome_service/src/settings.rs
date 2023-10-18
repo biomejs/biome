@@ -126,9 +126,7 @@ impl WorkspaceSettings {
 
     pub fn as_rules(&self, path: &Path) -> Option<&Rules> {
         let overrides = &self.override_settings;
-        overrides
-            .as_rules(path)
-            .or_else(|| self.linter.rules.as_ref())
+        overrides.as_rules(path).or(self.linter.rules.as_ref())
     }
 }
 
