@@ -18,11 +18,11 @@ pub struct SemanticModelBuilder {
     scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<usize, usize>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, usize>,
     bindings: Vec<SemanticModelBindingData>,
-    /// maps a binding range to its index inside SemanticModelBuilder::bindings vec
-    bindings_by_range: FxHashMap<TextRange, usize>,
-    /// maps a reference range to its bindings. usize points to SemanticModelBuilder::bindings vec
-    declared_at_by_range: FxHashMap<TextRange, usize>,
-    exported: FxHashSet<TextRange>,
+    /// maps a binding range start to its index inside SemanticModelBuilder::bindings vec
+    bindings_by_start: FxHashMap<TextSize, usize>,
+    /// maps a reference range start to its bindings. usize points to SemanticModelBuilder::bindings vec
+    declared_at_by_start: FxHashMap<TextSize, usize>,
+    exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
 }
 
@@ -37,8 +37,8 @@ impl SemanticModelBuilder {
             scope_range_by_start: FxHashMap::default(),
             scope_hoisted_to_by_range: FxHashMap::default(),
             bindings: vec![],
-            bindings_by_range: FxHashMap::default(),
-            declared_at_by_range: FxHashMap::default(),
+            bindings_by_start: FxHashMap::default(),
+            declared_at_by_start: FxHashMap::default(),
             exported: FxHashSet::default(),
             unresolved_references: Vec::new(),
         }
@@ -48,7 +48,7 @@ impl SemanticModelBuilder {
     pub fn push_node(&mut self, node: &JsSyntaxNode) {
         use JsSyntaxKind::*;
         match node.kind() {
-            // Acessible from bindings and references
+            // Accessible from bindings and references
             JS_IDENTIFIER_BINDING
             | TS_IDENTIFIER_BINDING
             | JS_REFERENCE_IDENTIFIER
@@ -58,7 +58,7 @@ impl SemanticModelBuilder {
                 self.node_by_range.insert(node.text_range(), node.clone());
             }
 
-            // Acessible from scopes, closures
+            // Accessible from scopes, closures
             JS_MODULE
             | JS_SCRIPT
             | JS_FUNCTION_DECLARATION
@@ -155,7 +155,8 @@ impl SemanticModelBuilder {
                     range: name_range,
                     references: vec![],
                 });
-                self.bindings_by_range.insert(name_range, binding_id);
+                self.bindings_by_start
+                    .insert(name_range.start(), binding_id);
 
                 let scope = self.scopes.get_mut(binding_scope_id).unwrap();
 
@@ -172,7 +173,7 @@ impl SemanticModelBuilder {
                 declared_at: declaration_at, //TODO change to binding_id like we do with scope_id
                 scope_id,
             } => {
-                let binding_id = match self.bindings_by_range.entry(declaration_at) {
+                let binding_id = match self.bindings_by_start.entry(declaration_at.start()) {
                     Entry::Occupied(entry) => *entry.get(),
                     Entry::Vacant(entry) => {
                         let id = self.bindings.len();
@@ -199,14 +200,14 @@ impl SemanticModelBuilder {
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_range.insert(range, binding_id);
+                self.declared_at_by_start.insert(range.start(), binding_id);
             }
             HoistedRead {
                 range,
                 declared_at: declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_range[&declaration_at];
+                let binding_id = self.bindings_by_start[&declaration_at.start()];
                 let binding = &mut self.bindings[binding_id];
 
                 let reference_index = binding.references.len();
@@ -222,14 +223,14 @@ impl SemanticModelBuilder {
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_range.insert(range, binding_id);
+                self.declared_at_by_start.insert(range.start(), binding_id);
             }
             Write {
                 range,
                 declared_at: declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_range[&declaration_at];
+                let binding_id = self.bindings_by_start[&declaration_at.start()];
                 let binding = &mut self.bindings[binding_id];
 
                 let reference_index = binding.references.len();
@@ -245,14 +246,14 @@ impl SemanticModelBuilder {
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_range.insert(range, binding_id);
+                self.declared_at_by_start.insert(range.start(), binding_id);
             }
             HoistedWrite {
                 range,
                 declared_at: declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_range[&declaration_at];
+                let binding_id = self.bindings_by_start[&declaration_at.start()];
                 let binding = &mut self.bindings[binding_id];
 
                 let reference_index = binding.references.len();
@@ -268,7 +269,7 @@ impl SemanticModelBuilder {
                     reference_id: reference_index,
                 });
 
-                self.declared_at_by_range.insert(range, binding_id);
+                self.declared_at_by_start.insert(range.start(), binding_id);
             }
             UnresolvedReference { is_read, range } => {
                 let ty = if is_read {
@@ -307,7 +308,7 @@ impl SemanticModelBuilder {
                 }
             }
             Exported { range } => {
-                self.exported.insert(range);
+                self.exported.insert(range.start());
             }
         }
     }
@@ -327,8 +328,8 @@ impl SemanticModelBuilder {
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
             node_by_range: self.node_by_range,
             bindings: self.bindings,
-            bindings_by_range: self.bindings_by_range,
-            declared_at_by_range: self.declared_at_by_range,
+            bindings_by_start: self.bindings_by_start,
+            declared_at_by_start: self.declared_at_by_start,
             exported: self.exported,
             unresolved_references: self.unresolved_references,
             globals: self.globals,
