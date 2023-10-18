@@ -131,14 +131,12 @@ impl FileFeaturesResult {
         let formatter_disabled =
             if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
                 disabled
+            } else if language.is_javascript_like() {
+                !settings.formatter().enabled || settings.javascript_formatter_disabled()
+            } else if language.is_json_like() {
+                !settings.formatter().enabled || settings.json_formatter_disabled()
             } else {
-                if language.is_javascript_like() {
-                    !settings.formatter().enabled || settings.javascript_formatter_disabled()
-                } else if language.is_json_like() {
-                    !settings.formatter().enabled || settings.json_formatter_disabled()
-                } else {
-                    !settings.formatter().enabled
-                }
+                !settings.formatter().enabled
             };
         if formatter_disabled {
             self.features_supported
@@ -150,11 +148,9 @@ impl FileFeaturesResult {
                 self.features_supported
                     .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
             }
-        } else {
-            if !settings.linter().enabled {
-                self.features_supported
-                    .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
-            }
+        } else if !settings.linter().enabled {
+            self.features_supported
+                .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
         }
 
         // organize imports
@@ -163,11 +159,9 @@ impl FileFeaturesResult {
                 self.features_supported
                     .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
             }
-        } else {
-            if !settings.organize_imports().enabled {
-                self.features_supported
-                    .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
-            }
+        } else if !settings.organize_imports().enabled {
+            self.features_supported
+                .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
         }
 
         self

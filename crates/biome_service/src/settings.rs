@@ -584,7 +584,7 @@ impl OverrideSettings {
 
             if included == Some(true) || excluded == Some(false) {
                 if let Some(enabled) = pattern.formatter.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
             }
         }
@@ -599,7 +599,7 @@ impl OverrideSettings {
 
             if included == Some(true) || excluded == Some(false) {
                 if let Some(enabled) = pattern.linter.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
             }
         }
@@ -614,7 +614,7 @@ impl OverrideSettings {
 
             if included == Some(true) || excluded == Some(false) {
                 if let Some(enabled) = pattern.organize_imports.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
             }
         }
