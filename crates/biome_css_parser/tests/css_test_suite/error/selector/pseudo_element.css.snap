@@ -317,96 +317,96 @@ CssRoot {
 pseudo_element.css:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected an after, a backdrop, a before, a cue, a cue-region, a first-letter, a first-line, a file-selector-button, a grammar-error, a part, a placeholder, a selection, a slotted, a spelling-error, or a target-text but instead found '{'
-
+  
   > 1 │ :: {}
       │    ^
-    2 │
+    2 │ 
     3 │ ::mark( {}
-
+  
   i Expected an after, a backdrop, a before, a cue, a cue-region, a first-letter, a first-line, a file-selector-button, a grammar-error, a part, a placeholder, a selection, a slotted, a spelling-error, or a target-text here
-
+  
   > 1 │ :: {}
       │    ^
-    2 │
+    2 │ 
     3 │ ::mark( {}
-
+  
 pseudo_element.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a selector but instead found '{'
-
+  
     1 │ :: {}
-    2 │
+    2 │ 
   > 3 │ ::mark( {}
       │         ^
-    4 │
+    4 │ 
     5 │ ::mark( div {}
-
+  
   i Expected a selector here
-
+  
     1 │ :: {}
-    2 │
+    2 │ 
   > 3 │ ::mark( {}
       │         ^
-    4 │
+    4 │ 
     5 │ ::mark( div {}
-
+  
 pseudo_element.css:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     3 │ ::mark( {}
-    4 │
+    4 │ 
   > 5 │ ::mark( div {}
       │             ^
-    6 │
+    6 │ 
     7 │ ::mark( + div {}
-
+  
   i Remove {
-
+  
 pseudo_element.css:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected a selector but instead found '+'
-
+  
     5 │ ::mark( div {}
-    6 │
+    6 │ 
   > 7 │ ::mark( + div {}
       │         ^
-    8 │
+    8 │ 
     9 │ ::highlight(div + div) {}
-
+  
   i Expected a selector here
-
+  
     5 │ ::mark( div {}
-    6 │
+    6 │ 
   > 7 │ ::mark( + div {}
       │         ^
-    8 │
+    8 │ 
     9 │ ::highlight(div + div) {}
-
+  
 pseudo_element.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `+`
-
+  
      7 │ ::mark( + div {}
-     8 │
+     8 │ 
    > 9 │ ::highlight(div + div) {}
        │                 ^
-    10 │
-
+    10 │ 
+  
   i Remove +
-
+  
 pseudo_element.css:9:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
      7 │ ::mark( + div {}
-     8 │
+     8 │ 
    > 9 │ ::highlight(div + div) {}
        │                      ^
-    10 │
-
+    10 │ 
+  
   i Remove )
-
+  
 ```
 
 
