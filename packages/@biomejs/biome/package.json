@@ -31,5 +31,9 @@
     ],
     "engines": {
         "node": ">=14.*"
-    }
+    },
+		"funding": {
+			"type": "opencollective",
+			"url": "https://opencollective.com/biome"
+		}
 }
