@@ -132,7 +132,11 @@ pub(crate) fn run<'a>(
         }
 
         match new_content {
-            Cow::Borrowed(_) => {}
+            Cow::Borrowed(original_content) => {
+                console.append(markup! {
+                    {original_content}
+                });
+            }
             Cow::Owned(new_content) => {
                 console.append(markup! {
                     {new_content}
@@ -146,6 +150,8 @@ pub(crate) fn run<'a>(
                 })
             }
         }
+    } else {
+        console.append(markup! {{content}});
     }
     Ok(())
 }
