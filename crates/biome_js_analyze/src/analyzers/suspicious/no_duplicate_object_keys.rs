@@ -306,7 +306,7 @@ impl Rule for NoDuplicateObjectKeys {
         PropertyConflict(_, member_definition): &Self::State,
     ) -> Option<JsRuleAction> {
         let mut batch = ctx.root().begin();
-        batch.remove_js_object_member(&member_definition.node());
+        batch.remove_js_object_member(member_definition.node());
         Some(JsRuleAction {
             category: biome_analyze::ActionCategory::QuickFix,
             // The property initialization could contain side effects
