@@ -475,14 +475,6 @@ impl CssDimension {
         )
     }
 }
-impl CssHighlightElementName {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl CssIdSelector {
     pub fn with_hash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -648,10 +640,10 @@ impl CssPseudoElementFunction {
     }
 }
 impl CssPseudoElementHighlight {
-    pub fn with_name(self, element: CssHighlightElementName) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {

@@ -291,10 +291,13 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let pseudo_element_identifier =
-        parse_pseudo_element_identifier(p).or_add_diagnostic(p, expected_identifier);
-    let is_highlight =
-        pseudo_element_identifier.map_or(false, |m| m.kind(p) == CSS_HIGHLIGHT_ELEMENT_NAME);
+    let is_highlight = is_at_pseudo_highlight_element(p);
+
+    if is_highlight {
+        p.bump(HIGHLIGHT_KW);
+    } else {
+        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    }
 
     if p.eat(T!['(']) {
         let kind = if is_highlight {
@@ -315,18 +318,6 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(super) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
-        return Absent;
-    }
-
-    if p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['(']) {
-        let m = p.start();
-
-        p.expect(HIGHLIGHT_KW);
-
-        Present(m.complete(p, CSS_HIGHLIGHT_ELEMENT_NAME))
-    } else {
-        parse_selector_identifier(p)
-    }
+pub(crate) fn is_at_pseudo_highlight_element(p: &mut CssParser) -> bool {
+    p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['('])
 }

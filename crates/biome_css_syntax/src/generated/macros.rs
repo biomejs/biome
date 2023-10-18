@@ -113,10 +113,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDimension::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_HIGHLIGHT_ELEMENT_NAME => {
-                    let $pattern = unsafe { $crate::CssHighlightElementName::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body

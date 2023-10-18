@@ -1086,42 +1086,6 @@ pub struct CssDimensionFields {
     pub unit: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssHighlightElementName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssHighlightElementName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssHighlightElementNameFields {
-        CssHighlightElementNameFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssHighlightElementName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssHighlightElementNameFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1567,14 +1531,14 @@ impl CssPseudoElementHighlight {
     }
     pub fn as_fields(&self) -> CssPseudoElementHighlightFields {
         CssPseudoElementHighlightFields {
-            name: self.name(),
+            name_token: self.name_token(),
             l_paren_token: self.l_paren_token(),
             custom_highlight_name: self.custom_highlight_name(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssHighlightElementName> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1597,7 +1561,7 @@ impl Serialize for CssPseudoElementHighlight {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoElementHighlightFields {
-    pub name: SyntaxResult<CssHighlightElementName>,
+    pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub custom_highlight_name: SyntaxResult<CssIdentifier>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -2155,39 +2119,26 @@ impl AnyCssAttributeMatcherValue {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssPseudoElement {
-    AnyCssPseudoElementFunction(AnyCssPseudoElementFunction),
+    CssPseudoElementFunction(CssPseudoElementFunction),
+    CssPseudoElementHighlight(CssPseudoElementHighlight),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
 }
 impl AnyCssPseudoElement {
-    pub fn as_any_css_pseudo_element_function(&self) -> Option<&AnyCssPseudoElementFunction> {
+    pub fn as_css_pseudo_element_function(&self) -> Option<&CssPseudoElementFunction> {
         match &self {
-            AnyCssPseudoElement::AnyCssPseudoElementFunction(item) => Some(item),
+            AnyCssPseudoElement::CssPseudoElementFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_element_highlight(&self) -> Option<&CssPseudoElementHighlight> {
+        match &self {
+            AnyCssPseudoElement::CssPseudoElementHighlight(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_pseudo_element_identifier(&self) -> Option<&CssPseudoElementIdentifier> {
         match &self {
             AnyCssPseudoElement::CssPseudoElementIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssPseudoElementFunction {
-    CssPseudoElementFunction(CssPseudoElementFunction),
-    CssPseudoElementHighlight(CssPseudoElementHighlight),
-}
-impl AnyCssPseudoElementFunction {
-    pub fn as_css_pseudo_element_function(&self) -> Option<&CssPseudoElementFunction> {
-        match &self {
-            AnyCssPseudoElementFunction::CssPseudoElementFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_pseudo_element_highlight(&self) -> Option<&CssPseudoElementHighlight> {
-        match &self {
-            AnyCssPseudoElementFunction::CssPseudoElementHighlight(item) => Some(item),
             _ => None,
         }
     }
@@ -3393,47 +3344,6 @@ impl From<CssDimension> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssHighlightElementName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_HIGHLIGHT_ELEMENT_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_HIGHLIGHT_ELEMENT_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssHighlightElementName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssHighlightElementName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssHighlightElementName> for SyntaxNode {
-    fn from(n: CssHighlightElementName) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssHighlightElementName> for SyntaxElement {
-    fn from(n: CssHighlightElementName) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssIdSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3891,7 +3801,7 @@ impl AstNode for CssPseudoElementHighlight {
 impl std::fmt::Debug for CssPseudoElementHighlight {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPseudoElementHighlight")
-            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
             .field(
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
@@ -4663,6 +4573,16 @@ impl From<AnyCssAttributeMatcherValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssPseudoElementFunction> for AnyCssPseudoElement {
+    fn from(node: CssPseudoElementFunction) -> AnyCssPseudoElement {
+        AnyCssPseudoElement::CssPseudoElementFunction(node)
+    }
+}
+impl From<CssPseudoElementHighlight> for AnyCssPseudoElement {
+    fn from(node: CssPseudoElementHighlight) -> AnyCssPseudoElement {
+        AnyCssPseudoElement::CssPseudoElementHighlight(node)
+    }
+}
 impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
     fn from(node: CssPseudoElementIdentifier) -> AnyCssPseudoElement {
         AnyCssPseudoElement::CssPseudoElementIdentifier(node)
@@ -4670,99 +4590,27 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
 }
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssPseudoElementFunction::KIND_SET.union(CssPseudoElementIdentifier::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            CSS_PSEUDO_ELEMENT_IDENTIFIER => true,
-            k if AnyCssPseudoElementFunction::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_PSEUDO_ELEMENT_IDENTIFIER => {
-                AnyCssPseudoElement::CssPseudoElementIdentifier(CssPseudoElementIdentifier {
-                    syntax,
-                })
-            }
-            _ => {
-                if let Some(any_css_pseudo_element_function) =
-                    AnyCssPseudoElementFunction::cast(syntax)
-                {
-                    return Some(AnyCssPseudoElement::AnyCssPseudoElementFunction(
-                        any_css_pseudo_element_function,
-                    ));
-                }
-                return None;
-            }
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => &it.syntax,
-            AnyCssPseudoElement::AnyCssPseudoElementFunction(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.syntax,
-            AnyCssPseudoElement::AnyCssPseudoElementFunction(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssPseudoElement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyCssPseudoElement::AnyCssPseudoElementFunction(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssPseudoElement> for SyntaxNode {
-    fn from(n: AnyCssPseudoElement) -> SyntaxNode {
-        match n {
-            AnyCssPseudoElement::AnyCssPseudoElementFunction(it) => it.into(),
-            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssPseudoElement> for SyntaxElement {
-    fn from(n: AnyCssPseudoElement) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssPseudoElementFunction> for AnyCssPseudoElementFunction {
-    fn from(node: CssPseudoElementFunction) -> AnyCssPseudoElementFunction {
-        AnyCssPseudoElementFunction::CssPseudoElementFunction(node)
-    }
-}
-impl From<CssPseudoElementHighlight> for AnyCssPseudoElementFunction {
-    fn from(node: CssPseudoElementHighlight) -> AnyCssPseudoElementFunction {
-        AnyCssPseudoElementFunction::CssPseudoElementHighlight(node)
-    }
-}
-impl AstNode for AnyCssPseudoElementFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssPseudoElementFunction::KIND_SET.union(CssPseudoElementHighlight::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssPseudoElementFunction::KIND_SET
+        .union(CssPseudoElementHighlight::KIND_SET)
+        .union(CssPseudoElementIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_PSEUDO_ELEMENT_FUNCTION | CSS_PSEUDO_ELEMENT_HIGHLIGHT
+            CSS_PSEUDO_ELEMENT_FUNCTION
+                | CSS_PSEUDO_ELEMENT_HIGHLIGHT
+                | CSS_PSEUDO_ELEMENT_IDENTIFIER
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_PSEUDO_ELEMENT_FUNCTION => {
-                AnyCssPseudoElementFunction::CssPseudoElementFunction(CssPseudoElementFunction {
-                    syntax,
-                })
+                AnyCssPseudoElement::CssPseudoElementFunction(CssPseudoElementFunction { syntax })
             }
             CSS_PSEUDO_ELEMENT_HIGHLIGHT => {
-                AnyCssPseudoElementFunction::CssPseudoElementHighlight(CssPseudoElementHighlight {
+                AnyCssPseudoElement::CssPseudoElementHighlight(CssPseudoElementHighlight { syntax })
+            }
+            CSS_PSEUDO_ELEMENT_IDENTIFIER => {
+                AnyCssPseudoElement::CssPseudoElementIdentifier(CssPseudoElementIdentifier {
                     syntax,
                 })
             }
@@ -4772,39 +4620,39 @@ impl AstNode for AnyCssPseudoElementFunction {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssPseudoElementFunction::CssPseudoElementFunction(it) => &it.syntax,
-            AnyCssPseudoElementFunction::CssPseudoElementHighlight(it) => &it.syntax,
+            AnyCssPseudoElement::CssPseudoElementFunction(it) => &it.syntax,
+            AnyCssPseudoElement::CssPseudoElementHighlight(it) => &it.syntax,
+            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssPseudoElementFunction::CssPseudoElementFunction(it) => it.syntax,
-            AnyCssPseudoElementFunction::CssPseudoElementHighlight(it) => it.syntax,
+            AnyCssPseudoElement::CssPseudoElementFunction(it) => it.syntax,
+            AnyCssPseudoElement::CssPseudoElementHighlight(it) => it.syntax,
+            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.syntax,
         }
     }
 }
-impl std::fmt::Debug for AnyCssPseudoElementFunction {
+impl std::fmt::Debug for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssPseudoElementFunction::CssPseudoElementFunction(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyCssPseudoElementFunction::CssPseudoElementHighlight(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            AnyCssPseudoElement::CssPseudoElementFunction(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoElement::CssPseudoElementHighlight(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
-impl From<AnyCssPseudoElementFunction> for SyntaxNode {
-    fn from(n: AnyCssPseudoElementFunction) -> SyntaxNode {
+impl From<AnyCssPseudoElement> for SyntaxNode {
+    fn from(n: AnyCssPseudoElement) -> SyntaxNode {
         match n {
-            AnyCssPseudoElementFunction::CssPseudoElementFunction(it) => it.into(),
-            AnyCssPseudoElementFunction::CssPseudoElementHighlight(it) => it.into(),
+            AnyCssPseudoElement::CssPseudoElementFunction(it) => it.into(),
+            AnyCssPseudoElement::CssPseudoElementHighlight(it) => it.into(),
+            AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
         }
     }
 }
-impl From<AnyCssPseudoElementFunction> for SyntaxElement {
-    fn from(n: AnyCssPseudoElementFunction) -> SyntaxElement {
+impl From<AnyCssPseudoElement> for SyntaxElement {
+    fn from(n: AnyCssPseudoElement) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -5292,11 +5140,6 @@ impl std::fmt::Display for AnyCssPseudoElement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssPseudoElementFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyCssRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -5433,11 +5276,6 @@ impl std::fmt::Display for CssDeclarationImportant {
     }
 }
 impl std::fmt::Display for CssDimension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssHighlightElementName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -435,12 +435,6 @@ pub fn css_dimension(value: CssNumber, unit: CssIdentifier) -> CssDimension {
         ],
     ))
 }
-pub fn css_highlight_element_name(value_token: SyntaxToken) -> CssHighlightElementName {
-    CssHighlightElementName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_HIGHLIGHT_ELEMENT_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
@@ -570,7 +564,7 @@ pub fn css_pseudo_element_function(
     ))
 }
 pub fn css_pseudo_element_highlight(
-    name: CssHighlightElementName,
+    name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     custom_highlight_name: CssIdentifier,
     r_paren_token: SyntaxToken,
@@ -578,7 +572,7 @@ pub fn css_pseudo_element_highlight(
     CssPseudoElementHighlight::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_ELEMENT_HIGHLIGHT,
         [
-            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(name_token)),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(custom_highlight_name.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
