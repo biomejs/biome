@@ -292,6 +292,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noExcessiveCognitiveComplexity: {
+						description:
+							"Disallow functions that exceed a given Cognitive Complexity score.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noExtraBooleanCast: {
 						description: "Disallow unnecessary boolean casts",
 						anyOf: [
@@ -387,6 +395,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noVoid: {
+						description:
+							"Disallow the use of void operators, which is not a familiar operator.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noWith: {
 						description: "Disallow with statements in non-strict contexts.",
 						anyOf: [
@@ -440,7 +456,7 @@ export function GET() {
 				},
 			},
 			ComplexityOptions: {
-				description: "Options for the rule `noNestedModuleImports`.",
+				description: "Options for the rule `noExcessiveCognitiveComplexity`.",
 				type: "object",
 				required: ["maxAllowedComplexity"],
 				properties: {
@@ -660,6 +676,22 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useExhaustiveDependencies: {
+						description:
+							"Enforce all dependencies are correctly specified in a React hook.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useHookAtTopLevel: {
+						description:
+							"Enforce that all React hooks are being called from the Top Level component functions.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useIsNan: {
 						description: "Require calls to isNaN() when checking for NaN.",
@@ -1067,25 +1099,9 @@ export function GET() {
 						description: "It enables ALL rules for this group.",
 						type: ["boolean", "null"],
 					},
-					noAccumulatingSpread: {
-						description:
-							"Disallow the use of spread (...) syntax on accumulators.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noApproximativeNumericConstant: {
 						description:
 							"Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noConfusingVoidType: {
-						description:
-							"Disallow void type outside of generic or return types.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1099,6 +1115,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noEmptyBlockStatements: {
+						description: "Disallow empty block statements and static blocks.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noEmptyCharacterClassInRegex: {
 						description:
 							"Disallow empty character classes in regular expression literals.",
@@ -1107,30 +1130,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noExcessiveComplexity: {
+					noInteractiveElementToNoninteractiveRole: {
 						description:
-							"Disallow functions that exceed a given Cognitive Complexity score.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noFallthroughSwitchClause: {
-						description: "Disallow fallthrough of switch clauses.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noGlobalIsFinite: {
-						description: "Use Number.isFinite instead of global isFinite.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noGlobalIsNan: {
-						description: "Use Number.isNaN instead of global isNaN.",
+							"Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1173,9 +1175,8 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noVoid: {
-						description:
-							"Disallow the use of void operators, which is not a familiar operator.",
+					noUselessLoneBlockStatements: {
+						description: "Disallow unnecessary nested block statements.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1184,6 +1185,14 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useAriaActivedescendantWithTabindex: {
+						description:
+							"Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useArrowFunction: {
 						description: "Use arrow functions over function expressions.",
@@ -1200,21 +1209,6 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					useCollapsedElseIf: {
-						description:
-							"Enforce using else if instead of nested if in else clauses.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useExhaustiveDependencies: {
-						description: "Enforce all dependencies are correctly specified.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					useGroupedTypeImport: {
 						description:
 							"Enforce the use of import type when an import only has specifiers with type qualifier.",
@@ -1223,23 +1217,8 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					useHookAtTopLevel: {
-						description:
-							"Enforce that all React hooks are being called from the Top Level component functions.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					useImportRestrictions: {
 						description: "Disallows package private imports.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useIsArray: {
-						description: "Use Array.isArray() instead of instanceof Array.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1283,6 +1262,14 @@ export function GET() {
 					all: {
 						description: "It enables ALL rules for this group.",
 						type: ["boolean", "null"],
+					},
+					noAccumulatingSpread: {
+						description:
+							"Disallow the use of spread (...) syntax on accumulators.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					noDelete: {
 						description: "Disallow the use of the delete operator.",
@@ -1556,6 +1543,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					useCollapsedElseIf: {
+						description:
+							"Enforce using else if instead of nested if in else clauses.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					useConst: {
 						description:
 							"Require const declarations for variables that are never reassigned after declared.",
@@ -1733,6 +1728,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noConfusingVoidType: {
+						description:
+							"Disallow void type outside of generic or return types.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noConsoleLog: {
 						description: "Disallow the use of console.log",
 						anyOf: [
@@ -1828,8 +1831,29 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noFallthroughSwitchClause: {
+						description: "Disallow fallthrough of switch clauses.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noFunctionAssign: {
 						description: "Disallow reassigning function declarations.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noGlobalIsFinite: {
+						description: "Use Number.isFinite instead of global isFinite.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noGlobalIsNan: {
+						description: "Use Number.isNaN instead of global isNaN.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1923,6 +1947,13 @@ export function GET() {
 					},
 					useGetterReturn: {
 						description: "Enforce get methods to always return a value.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useIsArray: {
+						description: "Use Array.isArray() instead of instanceof Array.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },

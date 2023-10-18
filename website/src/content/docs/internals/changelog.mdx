@@ -18,6 +18,26 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+### VSCode
+
+## 1.3.0
+
+### Analyzer
+
 #### Enhancements
 
 - Import sorting is safe to apply now, and it will be applied when running `check --apply` instead of `check --apply-unsafe`.
@@ -68,8 +88,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Enhancements
 
-- Deprecated the environment variable `ROME_BINARY`. Contributed by @ematipico
+- Deprecated the environment variable `ROME_BINARY`. Use `BIOME_BINARY` instead. Contributed by @ematipico
 - Biome doesn't check anymore the presence of the `.git` folder when VCS support is enabled. Contributed by @ematipico
+- `biome rage` doesn't print the logs of the daemon, use `biome rage --daemon-logs` to print them. Contributed by @unvalley
 
 ### Configuration
 
@@ -103,7 +124,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Enhancements
 - Use `OnceCell` for the Memoized memory because that's what the `RefCell<Option>` implemented. Contributed by @denbezrukov
 
-### JavaScript APIs
 ### Linter
 
 #### Promoted rules
@@ -163,6 +183,7 @@ The following rules are now recommended:
 - Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
   The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
   Contributed by @victor-teles
+- Add [noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant/) rule. Contributed by @nikeee
 
 - Add [noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role) rule. The rule enforces the non-interactive ARIA roles are not assigned to interactive HTML elements. Contributed by @nissy-dev
 
