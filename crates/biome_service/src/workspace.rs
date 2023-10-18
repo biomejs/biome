@@ -129,8 +129,8 @@ impl FileFeaturesResult {
         path: &Path,
     ) -> Self {
         let formatter_disabled =
-            if let Some(result) = settings.override_settings.formatter_disabled(path) {
-                result
+            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
+                disabled
             } else {
                 if language.is_javascript_like() {
                     !settings.formatter().enabled || settings.javascript_formatter_disabled()
@@ -144,8 +144,9 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
         }
-        if let Some(result) = settings.override_settings.formatter_disabled(path) {
-            if result == true {
+        // linter
+        if let Some(disabled) = settings.override_settings.linter_disabled(path) {
+            if disabled {
                 self.features_supported
                     .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
             }
@@ -156,8 +157,9 @@ impl FileFeaturesResult {
             }
         }
 
-        if let Some(result) = settings.override_settings.formatter_disabled(path) {
-            if result == true {
+        // organize imports
+        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
+            if disabled {
                 self.features_supported
                     .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
             }

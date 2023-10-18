@@ -165,7 +165,7 @@ impl Default for FormatSettings {
 #[derive(Debug)]
 pub struct OverrideFormatSettings {
     /// Enabled by default
-    pub enabled: bool,
+    pub enabled: Option<bool>,
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
     pub format_with_errors: bool,
@@ -205,7 +205,7 @@ impl Default for LinterSettings {
 #[derive(Debug)]
 pub struct OverrideLinterSettings {
     /// Enabled by default
-    pub enabled: bool,
+    pub enabled: Option<bool>,
 
     /// List of rules
     pub rules: Option<Rules>,
@@ -238,7 +238,7 @@ impl Default for OrganizeImportsSettings {
 #[derive(Debug)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
-    pub enabled: bool,
+    pub enabled: Option<bool>,
 }
 
 /// Static map of language names to language-specific settings
@@ -583,7 +583,9 @@ impl OverrideSettings {
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                return Some(pattern.formatter.enabled == false);
+                if let Some(enabled) = pattern.formatter.enabled {
+                    return Some(enabled == false);
+                }
             }
         }
         None
@@ -596,7 +598,9 @@ impl OverrideSettings {
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                return Some(pattern.linter.enabled == false);
+                if let Some(enabled) = pattern.linter.enabled {
+                    return Some(enabled == false);
+                }
             }
         }
         None
@@ -609,7 +613,9 @@ impl OverrideSettings {
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                return Some(pattern.organize_imports.enabled == false);
+                if let Some(enabled) = pattern.organize_imports.enabled {
+                    return Some(enabled == false);
+                }
             }
         }
         None

@@ -745,7 +745,7 @@ How many characters can be written on a single line in JSON (and its super langu
 
 ## `overrides`
 
-A list of pattern .
+A list of patterns.
 
 Use this configuration to change the behaviour of the tools for certain files. The overrides are absolute, and they have precedence over the top-level configuration.
 
@@ -783,20 +783,20 @@ A list of Unix shell style patterns. Biome handles only the files and folders th
 
 ### `overrides.<ITEM>.formatter`
 
-It will include the options of [top level formatter](#formatter), minus `ignore` and `include`.
+It will include the options of [top level formatter](#formatter) configuration, minus `ignore` and `include`.
 
 ### `overrides.<ITEM>.linter`
 
-It will include the options of [top level formatter](#linter), minus `ignore` and `include`.
+It will include the options of [top level linter](#linter) configuration, minus `ignore` and `include`.
 
 ### `overrides.<ITEM>.organizeImports`
 
-It will include the options of [top level formatter](#organize_imports), minus `ignore` and `include`.
+It will include the options of [top level organize imports](#organize_imports), minus `ignore` and `include`.
 
 ### `overrides.<ITEM>.javascript`
 
-It will include the options of [top level formatter](#javascript).
+It will include the options of [top level javascript](#javascript) configuration.
 
 ### `overrides.<ITEM>.json`
 
-It will include the options of [top level formatter](#json).
+It will include the options of [top level formatter](#json) configuration.
