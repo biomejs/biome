@@ -22,14 +22,6 @@ const FORMATTED_LINE_WIDTH: &str = "const a = [\"loreum\", \"ipsum\"];\n";
 const FORMATTED_WITH_SINGLE_QUOTES: &str = "const a = ['loreum', 'ipsum'];\n";
 const FORMATTED_WITH_NO_SEMICOLONS: &str = "const a = [\"loreum\", \"ipsum\"]\n";
 
-const _FIX_BEFORE: &str = "(1 >= -0)";
-const _FIX_AFTER: &str = "(1 >= 0)";
-
-const _UNORGANIZED: &str = r#"import * as something from "../something";
-import { lorem, foom, bar } from "foo";"#;
-const _ORGANIZED: &str = r#"import { bar, foom, lorem } from "foo";
-import * as something from "../something";"#;
-
 #[test]
 fn does_not_handle_ignored_file() {
     let mut console = BufferConsole::default();

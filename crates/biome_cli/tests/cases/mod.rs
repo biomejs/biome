@@ -6,3 +6,4 @@ mod config_extends;
 mod included_files;
 mod overrides_formatter;
 mod overrides_linter;
+mod overrides_organize_imports;
