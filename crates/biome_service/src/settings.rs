@@ -575,6 +575,45 @@ impl OverrideSettings {
         }
         None
     }
+
+    /// Scans the overrides and checks if there's an override that disable the formatter for `path`
+    pub fn formatter_disabled(&self, path: &Path) -> Option<bool> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                return Some(pattern.formatter.enabled == false);
+            }
+        }
+        None
+    }
+
+    /// Scans the overrides and checks if there's an override that disable the linter for `path`
+    pub fn linter_disabled(&self, path: &Path) -> Option<bool> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                return Some(pattern.linter.enabled == false);
+            }
+        }
+        None
+    }
+
+    /// Scans the overrides and checks if there's an override that disable the organize imports for `path`
+    pub fn organize_imports_disabled(&self, path: &Path) -> Option<bool> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                return Some(pattern.organize_imports.enabled == false);
+            }
+        }
+        None
+    }
 }
 #[derive(Debug)]
 pub struct OverrideSettingPattern {

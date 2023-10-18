@@ -105,7 +105,61 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   - `linter.include`;
   - `organizeImports.include`;
   When `include` and `ignore` are both specified, `ignore` takes **precedence** over `include`
+- Add option `overrides`, where users can modify the behaviour of the tools for certain files or paths.
 
+  For example, it's possible to modify the formatter `lineWidth`, and even `quoteStyle` for certain files that are included in glob path `generated/**`:
+
+  ```json
+  {
+    "formatter": {
+      "lineWidth": 100
+    },
+    "overrides": [
+      {
+        "include": ["generated/**"],
+        "formatter": {
+          "lineWidth": 160
+        },
+        "javascript": {
+          "formatter": {
+            "quoteStyle": "single"
+          }
+        }
+      }
+    ]
+  }
+  ```
+
+  Or, you can disable certain rules for certain path, and disable the linter for other paths:
+
+  ```json
+  {
+    "linter": {
+      "enabled": true,
+      "rules": {
+        "recommended": true
+      }
+    },
+    "overrides": [
+      {
+        "include": ["lib/**"],
+        "linter": {
+          "rules": {
+            "suspicious": {
+              "noDebugger": "off"
+            }
+          }
+        }
+      },
+      {
+        "include": ["shims/**"],
+        "linter": {
+          "enabled": false
+        }
+      }
+    ]
+  }
+  ```
 
 ### Bug fixes
 

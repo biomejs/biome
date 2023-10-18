@@ -62,6 +62,7 @@ use biome_fs::RomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
+use std::path::Path;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
@@ -125,27 +126,46 @@ impl FileFeaturesResult {
         mut self,
         settings: &WorkspaceSettings,
         language: &Language,
+        path: &Path,
     ) -> Self {
-        let formatter_disabled = {
-            if language.is_javascript_like() {
-                !settings.formatter().enabled || settings.javascript_formatter_disabled()
-            } else if language.is_json_like() {
-                !settings.formatter().enabled || settings.json_formatter_disabled()
+        let formatter_disabled =
+            if let Some(result) = settings.override_settings.formatter_disabled(path) {
+                result
             } else {
-                !settings.formatter().enabled
-            }
-        };
+                if language.is_javascript_like() {
+                    !settings.formatter().enabled || settings.javascript_formatter_disabled()
+                } else if language.is_json_like() {
+                    !settings.formatter().enabled || settings.json_formatter_disabled()
+                } else {
+                    !settings.formatter().enabled
+                }
+            };
         if formatter_disabled {
             self.features_supported
                 .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
         }
-        if !settings.linter().enabled {
-            self.features_supported
-                .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+        if let Some(result) = settings.override_settings.formatter_disabled(path) {
+            if result == true {
+                self.features_supported
+                    .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+            }
+        } else {
+            if !settings.linter().enabled {
+                self.features_supported
+                    .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+            }
         }
-        if !settings.organize_imports().enabled {
-            self.features_supported
-                .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+
+        if let Some(result) = settings.override_settings.formatter_disabled(path) {
+            if result == true {
+                self.features_supported
+                    .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+            }
+        } else {
+            if !settings.organize_imports().enabled {
+                self.features_supported
+                    .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+            }
         }
 
         self
