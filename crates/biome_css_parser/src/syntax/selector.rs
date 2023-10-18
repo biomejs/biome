@@ -297,20 +297,16 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
         pseudo_element_identifier.map_or(false, |m| m.kind(p) == CSS_HIGHLIGHT_ELEMENT_NAME);
 
     if p.eat(T!['(']) {
-        if is_highlight {
+        let kind = if is_highlight {
             parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+            CSS_PSEUDO_ELEMENT_HIGHLIGHT
         } else {
             parse_selector(p).or_add_diagnostic(p, expect_any_selector);
-        }
+            CSS_PSEUDO_ELEMENT_FUNCTION
+        };
 
         let context = selector_lex_context(p);
         p.expect_with_context(T![')'], context);
-
-        let kind = if is_highlight {
-            CSS_PSEUDO_ELEMENT_HIGHLIGHT
-        } else {
-            CSS_PSEUDO_ELEMENT_FUNCTION
-        };
 
         Present(m.complete(p, kind))
     } else {
