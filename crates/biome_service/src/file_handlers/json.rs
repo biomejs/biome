@@ -1,5 +1,5 @@
 use super::{ExtensionHandler, Mime};
-use crate::configuration::to_analyzer_configuration;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::javascript::JsonParserSettings;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
@@ -7,13 +7,14 @@ use crate::file_handlers::{
 };
 use crate::file_handlers::{DebugCapabilities, Language as LanguageId};
 use crate::settings::{
-    FormatSettings, Language, LanguageSettings, LanguagesSettings, SettingsHandle,
+    FormatSettings, Language, LanguageListSettings, LanguageSettings, OverrideSettings,
+    SettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
 };
 use crate::{Configuration, Rules, WorkspaceError};
-use biome_analyze::{AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
@@ -43,34 +44,37 @@ impl Language for JsonLanguage {
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
-    fn lookup_settings(language: &LanguagesSettings) -> &LanguageSettings<Self> {
+    fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
     }
 
     fn resolve_format_options(
         global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        _path: &RomePath,
+        path: &RomePath,
     ) -> Self::FormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-        JsonFormatOptions::default()
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
+        overrides.json_format_options(path).unwrap_or_else(|| {
+            let indent_style = if let Some(indent_style) = language.indent_style {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            };
+            let line_width = if let Some(line_width) = language.line_width {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            };
+            let indent_width = if let Some(indent_width) = language.indent_width {
+                indent_width
+            } else {
+                global.indent_width.unwrap_or_default()
+            };
+            JsonFormatOptions::new(path.as_path().try_into().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+        })
     }
 }
 
@@ -364,11 +368,10 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
-    let configuration = to_analyzer_configuration(
-        settings.as_ref().linter(),
-        &settings.as_ref().languages,
-        |_| vec![],
-    );
+    let configuration = AnalyzerConfiguration {
+        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
+        globals: vec![],
+    };
     AnalyzerOptions {
         configuration,
         file_path,

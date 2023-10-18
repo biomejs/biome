@@ -1,6 +1,7 @@
 use crate::configuration::merge::MergeWith;
-use crate::settings::OrganizeImportsSettings;
-use crate::{ConfigurationDiagnostic, MatchOptions, Matcher, WorkspaceError};
+use crate::configuration::overrides::OverrideOrganizeImportsConfiguration;
+use crate::settings::{to_matcher, OrganizeImportsSettings};
+use crate::WorkspaceError;
 use biome_deserialize::StringSet;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -74,52 +75,24 @@ impl TryFrom<OrganizeImports> for OrganizeImportsSettings {
     type Error = WorkspaceError;
 
     fn try_from(organize_imports: OrganizeImports) -> Result<Self, Self::Error> {
-        let mut ignored_files = None;
-        let is_disabled = organize_imports.is_disabled();
-        if let Some(ignore) = organize_imports.ignore {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in ignore.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-
-            ignored_files = Some(matcher);
-        }
-
-        let mut included_files = None;
-        if let Some(include) = organize_imports.include {
-            let mut matcher = Matcher::new(MatchOptions {
-                case_sensitive: true,
-                require_literal_leading_dot: false,
-                require_literal_separator: false,
-            });
-            for pattern in include.index_set() {
-                matcher.add_pattern(pattern).map_err(|err| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            err.msg.to_string(),
-                        ),
-                    )
-                })?;
-            }
-
-            included_files = Some(matcher);
-        }
         Ok(Self {
-            enabled: !is_disabled,
-            ignored_files,
-            included_files,
+            enabled: organize_imports.enabled.unwrap_or_default(),
+            ignored_files: to_matcher(organize_imports.ignore.as_ref())?,
+            included_files: to_matcher(organize_imports.include.as_ref())?,
+        })
+    }
+}
+
+impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(
+        organize_imports: OverrideOrganizeImportsConfiguration,
+    ) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: organize_imports.enabled.unwrap_or_default(),
+            ignored_files: None,
+            included_files: None,
         })
     }
 }

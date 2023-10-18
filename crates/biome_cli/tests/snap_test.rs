@@ -12,7 +12,7 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::env::{current_exe, temp_dir};
 use std::fmt::Write as _;
-use std::path::{PathBuf, MAIN_SEPARATOR};
+use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 #[derive(Default)]
 struct InMessages {
@@ -351,4 +351,17 @@ pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
         insta::assert_snapshot!(test_name, content);
 
     });
+}
+
+/// It checks if the contents of a file matches the passed `expected_content`
+pub fn assert_file_contents(fs: &MemoryFileSystem, file: &Path, expected_content: &str) {
+    let mut file = fs.open(file).expect("file was removed");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, expected_content);
+
+    // drop(file);
 }

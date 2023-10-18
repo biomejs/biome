@@ -373,7 +373,7 @@ pub struct ComplexityScore {
 }
 
 /// Options for the rule `noExcessiveCognitiveComplexity`.
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ComplexityOptions {

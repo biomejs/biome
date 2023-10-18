@@ -5,7 +5,7 @@ use biome_formatter::{
 };
 
 use crate::comments::{FormatJsonLeadingComment, JsonComments};
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use std::fmt;
 use std::rc::Rc;
 
@@ -59,9 +59,19 @@ pub struct JsonFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_width: LineWidth,
+    _file_source: JsonFileSource,
 }
 
 impl JsonFormatOptions {
+    pub fn new(file_source: JsonFileSource) -> Self {
+        Self {
+            _file_source: file_source,
+            indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
+            line_width: LineWidth::default(),
+        }
+    }
+
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
         self.indent_style = indent_style;
         self

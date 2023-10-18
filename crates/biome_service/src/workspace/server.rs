@@ -6,6 +6,7 @@ use super::{
     UpdateSettingsParams,
 };
 use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
+use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
@@ -24,7 +25,6 @@ use biome_fs::RomePath;
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
-use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
@@ -119,10 +119,18 @@ impl WorkspaceServer {
         }
     }
 
-    fn build_rule_filter_list<'a>(&'a self, rules: Option<&'a Rules>) -> Vec<RuleFilter> {
-        if let Some(rules) = rules {
-            let enabled: IndexSet<RuleFilter> = rules.as_enabled_rules();
-            enabled.into_iter().collect::<Vec<RuleFilter>>()
+    fn build_rule_filter_list<'a>(
+        &'a self,
+        rules: Option<&'a Rules>,
+        overrides: &'a OverrideSettings,
+        path: &'a Path,
+    ) -> Vec<RuleFilter> {
+        let enabled_rules = overrides
+            .as_enabled_rules(path)
+            .or_else(|| rules.map(|rules| rules.as_enabled_rules()));
+
+        if let Some(enabled_rules) = enabled_rules {
+            enabled_rules.into_iter().collect::<Vec<RuleFilter>>()
         } else {
             vec![]
         }
@@ -200,7 +208,8 @@ impl WorkspaceServer {
         }
     }
 
-    fn is_ignored_by_main_config(&self, path: &Path) -> bool {
+    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
 
         let is_ignored_by_file_config = settings
@@ -270,6 +279,22 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings();
         let path = params.rome_path.as_path();
 
+        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
+        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
+
+        // Overrides have top priority
+        if let Some(excluded_by_override) = excluded_by_override {
+            if excluded_by_override {
+                return Ok(true);
+            }
+        }
+
+        if let Some(included_by_override) = included_by_override {
+            if included_by_override {
+                return Ok(!included_by_override);
+            }
+        }
+
         Ok(match params.feature {
             FeatureName::Format => {
                 if let Some(matcher) = settings.as_ref().formatter.ignored_files.as_ref() {
@@ -283,7 +308,7 @@ impl Workspace for WorkspaceServer {
                         return Ok(!included);
                     }
                 }
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
             FeatureName::Lint => {
                 if let Some(matcher) = settings.as_ref().linter.ignored_files.as_ref() {
@@ -298,7 +323,7 @@ impl Workspace for WorkspaceServer {
                     }
                 }
 
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
             FeatureName::OrganizeImports => {
                 if let Some(matcher) = settings.as_ref().organize_imports.ignored_files.as_ref() {
@@ -315,7 +340,7 @@ impl Workspace for WorkspaceServer {
                     }
                 }
 
-                self.is_ignored_by_main_config(path)
+                self.is_ignored_by_top_level_config(path)
             }
         })
     }
@@ -449,7 +474,9 @@ impl Workspace for WorkspaceServer {
             self.get_capabilities(&params.path).analyzer.lint
         {
             let rules = settings.linter().rules.as_ref();
-            let mut rule_filter_list = self.build_rule_filter_list(rules);
+            let overrides = &settings.override_settings;
+            let mut rule_filter_list =
+                self.build_rule_filter_list(rules, overrides, params.path.as_path());
             if settings.organize_imports.enabled && !params.categories.is_syntax() {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
@@ -577,11 +604,15 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.read().unwrap();
         let parse = self.get_parse(params.path.clone(), Some(FeatureName::Lint))?;
 
-        let rules = settings.linter().rules.as_ref();
+        let rules = settings.as_rules(params.path.as_path());
+        let overrides = &settings.override_settings;
+        let rule_filter_list = self.build_rule_filter_list(rules, overrides, params.path.as_path());
+        let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         fix_all(FixAllParams {
             parse,
             rules,
             fix_file_mode: params.fix_file_mode,
+            filter,
             settings: self.settings(),
             should_format: params.should_format,
             rome_path: &params.path,

@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    { "include": ["special/**"], "formatter": { "lineWidth": 20 } },
+    { "include": ["special/**"], "formatter": { "lineWidth": 130 } }
+  ]
+}
+```
+
+## `special/test2.js`
+
+```js
+const a = [
+	"loreum",
+	"ipsum",
+];
+
+```
+
+## `test.js`
+
+```js
+const a = ["loreum", "ipsum"];
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 file(s) in <TIME>
+```
+
+

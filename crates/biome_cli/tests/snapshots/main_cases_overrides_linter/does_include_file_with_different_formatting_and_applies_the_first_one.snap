@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "include": ["special/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["special/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "error"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+## `special/test2.js`
+
+```js
+debugger
+```
+
+## `test.js`
+
+```js
+
+```
+
+# Emitted Messages
+
+```block
+Fixed 2 file(s) in <TIME>
+```
+
+

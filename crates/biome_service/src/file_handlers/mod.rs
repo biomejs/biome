@@ -198,6 +198,7 @@ impl biome_console::fmt::Display for Mime {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) rules: Option<&'a Rules>,
+    pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) settings: SettingsHandle<'a>,
     /// Whether it should format the code action
