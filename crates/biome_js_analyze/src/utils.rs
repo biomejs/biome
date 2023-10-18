@@ -1,9 +1,5 @@
-use biome_js_factory::make;
-use biome_js_syntax::{
-    inner_string_text, AnyJsExpression, AnyJsStatement, JsBinaryExpression, JsLanguage,
-    JsModuleItemList, JsStatementList, JsSyntaxNode, T,
-};
-use biome_rowan::{AstNode, BatchMutation, Direction, WalkEvent};
+use biome_js_syntax::{inner_string_text, AnyJsExpression, JsBinaryExpression, JsSyntaxNode};
+use biome_rowan::{AstNode, Direction, WalkEvent};
 use std::iter;
 
 pub mod batch;
@@ -42,27 +38,6 @@ impl<'a> Iterator for InterpretEscapedString<'a> {
 ///
 pub(crate) fn escape_string(s: &str) -> Result<String, EscapeError> {
     (InterpretEscapedString { s: s.chars() }).collect()
-}
-
-/// Utility function to remove a statement node from a syntax tree, by either
-/// removing the node from its parent if said parent is a statement list or
-/// module item list, or by replacing the statement node with an empty statement
-pub(crate) fn remove_statement<N>(mutation: &mut BatchMutation<JsLanguage>, node: &N) -> Option<()>
-where
-    N: AstNode<Language = JsLanguage> + Into<AnyJsStatement>,
-{
-    let parent = node.syntax().parent()?;
-
-    if JsStatementList::can_cast(parent.kind()) || JsModuleItemList::can_cast(parent.kind()) {
-        mutation.remove_node(node.clone());
-    } else {
-        mutation.replace_node(
-            node.clone().into(),
-            AnyJsStatement::JsEmptyStatement(make::js_empty_statement(make::token(T![;]))),
-        );
-    }
-
-    Some(())
 }
 
 /// Verifies that both nodes are equal by checking their descendants (nodes included) kinds

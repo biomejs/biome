@@ -6,7 +6,7 @@ use biome_diagnostics::Applicability;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{utils, JsRuleAction};
+use crate::{utils::batch::JsBatchMutation, JsRuleAction};
 
 declare_rule! {
     /// Disallow the use of `debugger`
@@ -60,7 +60,7 @@ impl Rule for NoDebugger {
         let node = ctx.query();
 
         let mut mutation = ctx.root().begin();
-        utils::remove_statement(&mut mutation, node)?;
+        mutation.remove_statement(node.clone().into());
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
