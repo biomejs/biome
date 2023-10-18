@@ -4,7 +4,6 @@ use std::path::Path;
 
 #[derive(Debug, Default, Clone)]
 pub struct JsonFileSource {
-    #[allow(dead_code)]
     variant: JsonVariant,
 }
 
@@ -12,7 +11,6 @@ pub struct JsonFileSource {
 enum JsonVariant {
     #[default]
     Standard,
-    #[allow(dead_code)]
     Jsonc,
 }
 

@@ -534,6 +534,7 @@ impl OverrideSettings {
         None
     }
 
+    /// Retrieves the options of lint rules that have been overridden
     pub fn to_analyzer_rules_options(&self, path: &Path) -> Option<AnalyzerRules> {
         for pattern in &self.patterns {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
@@ -550,6 +551,7 @@ impl OverrideSettings {
         None
     }
 
+    /// Retrieves the enabled rules that match the given `path`
     pub fn as_enabled_rules(&self, path: &Path) -> Option<IndexSet<RuleFilter>> {
         for pattern in &self.patterns {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));

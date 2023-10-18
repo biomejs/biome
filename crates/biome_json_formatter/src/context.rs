@@ -59,14 +59,13 @@ pub struct JsonFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_width: LineWidth,
-    #[allow(dead_code)]
-    file_source: JsonFileSource,
+    _file_source: JsonFileSource,
 }
 
 impl JsonFormatOptions {
     pub fn new(file_source: JsonFileSource) -> Self {
         Self {
-            file_source,
+            _file_source: file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_width: LineWidth::default(),
