@@ -1,0 +1,215 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+video::cue-region {}
+video::cue-region(#scroll) {}
+video::cue-region(   #scroll   ) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..5 "video" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@5..7 "::" [] [],
+                            element: CssPseudoElementIdentifier {
+                                ident: CssIdentifier {
+                                    value_token: IDENT@7..18 "cue-region" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@18..19 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@19..20 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        ident: CssIdentifier {
+                            value_token: IDENT@20..26 "video" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@26..28 "::" [] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@28..38 "cue-region" [] [],
+                                },
+                                l_paren_token: L_PAREN@38..39 "(" [] [],
+                                parameter: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssIdSelector {
+                                            hash_token: HASH@39..40 "#" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@40..46 "scroll" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@46..48 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@48..49 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@49..50 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        ident: CssIdentifier {
+                            value_token: IDENT@50..56 "video" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@56..58 "::" [] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@58..68 "cue-region" [] [],
+                                },
+                                l_paren_token: L_PAREN@68..72 "(" [] [Whitespace("   ")],
+                                parameter: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssIdSelector {
+                                            hash_token: HASH@72..73 "#" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@73..82 "scroll" [] [Whitespace("   ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_paren_token: R_PAREN@82..84 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@84..85 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@85..86 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@86..87 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..87
+  0: CSS_RULE_LIST@0..86
+    0: CSS_RULE@0..20
+      0: CSS_SELECTOR_LIST@0..18
+        0: CSS_COMPOUND_SELECTOR@0..18
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@0..5
+            0: CSS_IDENTIFIER@0..5
+              0: IDENT@0..5 "video" [] []
+          2: CSS_SUB_SELECTOR_LIST@5..18
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@5..18
+              0: COLON2@5..7 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_IDENTIFIER@7..18
+                0: CSS_IDENTIFIER@7..18
+                  0: IDENT@7..18 "cue-region" [] [Whitespace(" ")]
+      1: CSS_BLOCK@18..20
+        0: L_CURLY@18..19 "{" [] []
+        1: CSS_DECLARATION_LIST@19..19
+        2: R_CURLY@19..20 "}" [] []
+    1: CSS_RULE@20..50
+      0: CSS_SELECTOR_LIST@20..48
+        0: CSS_COMPOUND_SELECTOR@20..48
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@20..26
+            0: CSS_IDENTIFIER@20..26
+              0: IDENT@20..26 "video" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@26..48
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@26..48
+              0: COLON2@26..28 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@28..48
+                0: CSS_IDENTIFIER@28..38
+                  0: IDENT@28..38 "cue-region" [] []
+                1: L_PAREN@38..39 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@39..46
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@39..46
+                    0: CSS_ID_SELECTOR@39..46
+                      0: HASH@39..40 "#" [] []
+                      1: CSS_IDENTIFIER@40..46
+                        0: IDENT@40..46 "scroll" [] []
+                3: R_PAREN@46..48 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@48..50
+        0: L_CURLY@48..49 "{" [] []
+        1: CSS_DECLARATION_LIST@49..49
+        2: R_CURLY@49..50 "}" [] []
+    2: CSS_RULE@50..86
+      0: CSS_SELECTOR_LIST@50..84
+        0: CSS_COMPOUND_SELECTOR@50..84
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@50..56
+            0: CSS_IDENTIFIER@50..56
+              0: IDENT@50..56 "video" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@56..84
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@56..84
+              0: COLON2@56..58 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@58..84
+                0: CSS_IDENTIFIER@58..68
+                  0: IDENT@58..68 "cue-region" [] []
+                1: L_PAREN@68..72 "(" [] [Whitespace("   ")]
+                2: CSS_COMPOUND_SELECTOR@72..82
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@72..82
+                    0: CSS_ID_SELECTOR@72..82
+                      0: HASH@72..73 "#" [] []
+                      1: CSS_IDENTIFIER@73..82
+                        0: IDENT@73..82 "scroll" [] [Whitespace("   ")]
+                3: R_PAREN@82..84 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@84..86
+        0: L_CURLY@84..85 "{" [] []
+        1: CSS_DECLARATION_LIST@85..85
+        2: R_CURLY@85..86 "}" [] []
+  1: EOF@86..87 "" [Newline("\n")] []
+
+```
+
+
