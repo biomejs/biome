@@ -227,6 +227,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) no longer reports function expressions that use `new.target`. Contributed by @Conaclos
 
+- [noForEach](https://biomejs.dev/linter/rules/no-for-each) now reports only calls that use a callback with `0` or `1` parameter. Address [#547](https://github.com/biomejs/biome/issues/547). Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
