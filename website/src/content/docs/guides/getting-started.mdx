@@ -68,15 +68,24 @@ Formatting is enabled because the configuration doesn't explicitly [disable](/re
 
 ## Usage
 
-You can lint any file or directory running:
+Biome CLI comes with many commands and options, so you can use only what you need.
 
-<PackageManagerBiomeCommand command="check <files>" />
-
-or format your files and directories with:
+You can format files and directories using the [`format`](/reference/cli#biome-format) command and the `--write` option:
 
 <PackageManagerBiomeCommand command="format <files> --write" />
 
-{/**Make sure to update the redirect in `static/_redirects` when changing the editors title -->**/}
+You can lint and apply [safe fixes](/linter#safe-fixes) to files and directories using the [`lint`](/reference/cli#biome-lint) command with the `--apply`:
+
+<PackageManagerBiomeCommand command="lint <files>" />
+
+You can apply **both** of them by leveraging the [`check`](/reference/cli#biome-check) command:
+
+<PackageManagerBiomeCommand command="check --apply <files>" />
+
+The command `check` is command meant to run multiple tools at once. Currently, it does:
+- format files
+- lint files
+- organize imports
 
 ## Editor Setup
 
