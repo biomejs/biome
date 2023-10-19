@@ -1,6 +1,7 @@
+use rustc_hash::FxHashMap;
+
 use crate::{Rule, RuleKey};
 use std::any::{Any, TypeId};
-use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
 
@@ -28,7 +29,7 @@ impl RuleOptions {
 
 /// A convenient new type data structure to insert and get rules
 #[derive(Debug, Default)]
-pub struct AnalyzerRules(HashMap<RuleKey, RuleOptions>);
+pub struct AnalyzerRules(FxHashMap<RuleKey, RuleOptions>);
 
 impl AnalyzerRules {
     /// It tracks the options of a specific rule

@@ -22,6 +22,7 @@ bitflags               = { workspace = true }
 cfg-if                 = "1.0.0"
 drop_bomb              = "0.1.5"
 indexmap               = { workspace = true }
+rustc-hash             = { workspace = true }
 schemars               = { workspace = true, optional = true }
 serde                  = { workspace = true, features = ["derive"] }
 serde_json             = { workspace = true }

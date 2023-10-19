@@ -1,9 +1,7 @@
 use crate::{RuleKey, TextRange};
 use biome_diagnostics::{Diagnostic, LineIndexBuf, Resource, Result, SourceCode};
-use std::{
-    any::{Any, TypeId},
-    collections::HashMap,
-};
+use rustc_hash::FxHashMap;
+use std::any::{Any, TypeId};
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "internalError/io", tags(INTERNAL))]
@@ -43,7 +41,7 @@ pub trait FromServices: Sized {
 
 #[derive(Debug, Default)]
 pub struct ServiceBag {
-    services: HashMap<TypeId, Box<dyn Any>>,
+    services: FxHashMap<TypeId, Box<dyn Any>>,
 }
 
 impl ServiceBag {

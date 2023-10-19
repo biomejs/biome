@@ -1,5 +1,5 @@
 ---
-title: noApproximativeNumericConstant (since vnext)
+title: noApproximativeNumericConstant (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noApproximativeNumericConstant`**

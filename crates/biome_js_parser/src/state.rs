@@ -3,7 +3,7 @@ use biome_js_syntax::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
 use bitflags::bitflags;
 use indexmap::IndexMap;
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 use std::ops::{Deref, DerefMut, Range};
 
 type LabelSet = IndexMap<String, LabelledItem>;
@@ -86,7 +86,7 @@ pub(crate) struct ParserState {
 
     /// Stores the token positions of all syntax that looks like an arrow expressions but aren't one.
     /// Optimization to reduce the back-tracking required when parsing parenthesized and arrow function expressions.
-    pub(crate) not_parenthesized_arrow: HashSet<TextSize>,
+    pub(crate) not_parenthesized_arrow: FxHashSet<TextSize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

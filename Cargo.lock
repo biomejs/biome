@@ -131,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "biome_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -145,9 +145,10 @@ dependencies = [
 
 [[package]]
 name = "biome_aria"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_aria_metadata",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -190,6 +191,7 @@ dependencies = [
  "libc",
  "mimalloc",
  "rayon",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tikv-jemallocator",
@@ -215,9 +217,10 @@ dependencies = [
 
 [[package]]
 name = "biome_control_flow"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_rowan",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -293,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_categories"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "quote",
  "schemars",
@@ -316,7 +319,7 @@ version = "0.0.0"
 
 [[package]]
 name = "biome_formatter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -363,6 +366,7 @@ dependencies = [
  "indexmap",
  "parking_lot",
  "rayon",
+ "rustc-hash",
  "schemars",
  "serde",
  "tracing",
@@ -370,7 +374,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_aria",
@@ -412,7 +416,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_formatter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
@@ -459,6 +463,7 @@ dependencies = [
  "indexmap",
  "quickcheck",
  "quickcheck_macros",
+ "rustc-hash",
  "schemars",
  "serde",
  "serde_json",
@@ -469,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_semantic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -483,7 +488,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_syntax"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -517,7 +522,7 @@ version = "0.1.0"
 
 [[package]]
 name = "biome_json_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -530,6 +535,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
+ "rustc-hash",
  "tests_macros",
 ]
 
@@ -604,6 +610,7 @@ dependencies = [
  "futures",
  "indexmap",
  "proptest",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tokio",
@@ -641,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "biome_parser"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -697,6 +704,8 @@ dependencies = [
  "dashmap",
  "indexmap",
  "insta",
+ "lazy_static",
+ "rustc-hash",
  "schemars",
  "serde",
  "serde_json",
@@ -818,7 +827,7 @@ checksum = "22cbaba260bbcbb69b0d54e9f0d83038a4568f3a5d1c95591fed5e8fee964539"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.32",
+ "syn 2.0.38",
 ]
 
 [[package]]
@@ -2134,9 +2143,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.63"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b368fba921b0dce7e60f5e04ec15e565b3303972b42bcfde1d0713b881959eb"
+checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
 dependencies = [
  "unicode-ident",
 ]
@@ -2581,7 +2590,7 @@ checksum = "4eca7ac642d82aa35b60049a6eccb4be6be75e599bd2e9adb5f875a737654af2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.32",
+ "syn 2.0.38",
 ]
 
 [[package]]
@@ -2736,9 +2745,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.32"
+version = "2.0.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "239814284fd6f1a4ffe4ca893952cdd93c224b6a1571c9a9eadd670295c0c9e2"
+checksum = "e96b79aaa137db8f61e26363a0c9b47d8b4ec75da28b7d1d614c2303e232408b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2786,7 +2795,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.38",
 ]
 
 [[package]]

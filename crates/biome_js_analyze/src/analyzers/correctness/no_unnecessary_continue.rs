@@ -6,7 +6,7 @@ use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{utils, JsRuleAction};
+use crate::{utils::batch::JsBatchMutation, JsRuleAction};
 
 declare_rule! {
     /// Avoid using unnecessary `continue`.
@@ -105,7 +105,7 @@ impl Rule for NoUnnecessaryContinue {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        utils::remove_statement(&mut mutation, node)?;
+        mutation.remove_statement(node.clone().into());
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,

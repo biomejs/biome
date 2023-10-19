@@ -1,5 +1,5 @@
 ---
-title: useAsConstAssertion (since vnext)
+title: useAsConstAssertion (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useAsConstAssertion`**

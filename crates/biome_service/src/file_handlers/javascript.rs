@@ -2,11 +2,12 @@ use super::{
     AnalyzerCapabilities, DebugCapabilities, ExtensionHandler, FormatterCapabilities, LintParams,
     LintResults, Mime, ParserCapabilities,
 };
-use crate::configuration::to_analyzer_configuration;
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::{is_diagnostic_error, Features, FixAllParams, Language as LanguageId};
+use crate::settings::OverrideSettings;
 use crate::workspace::OrganizeImportsResult;
 use crate::{
-    settings::{FormatSettings, Language, LanguageSettings, LanguagesSettings, SettingsHandle},
+    settings::{FormatSettings, Language, LanguageListSettings, LanguageSettings, SettingsHandle},
     workspace::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
@@ -14,8 +15,8 @@ use crate::{
     Rules, WorkspaceError,
 };
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Never, QueryMatch,
-    RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
+    QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
@@ -37,7 +38,6 @@ use biome_js_syntax::{
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
-use indexmap::IndexSet;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -89,40 +89,43 @@ impl Language for JsLanguage {
     type OrganizeImportsSettings = JsOrganizeImportsSettings;
     type ParserSettings = JsParserSettings;
 
-    fn lookup_settings(languages: &LanguagesSettings) -> &LanguageSettings<Self> {
+    fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
     }
 
     fn resolve_format_options(
         global: &FormatSettings,
+        overrides: &OverrideSettings,
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
-        JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_quote_style(language.quote_style.unwrap_or_default())
-            .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
-            .with_quote_properties(language.quote_properties.unwrap_or_default())
-            .with_trailing_comma(language.trailing_comma.unwrap_or_default())
-            .with_semicolons(language.semicolons.unwrap_or_default())
-            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+        overrides.as_js_format_options(path).unwrap_or_else(|| {
+            let indent_style = if let Some(indent_style) = language.indent_style {
+                indent_style
+            } else {
+                global.indent_style.unwrap_or_default()
+            };
+            let line_width = if let Some(line_width) = language.line_width {
+                line_width
+            } else {
+                global.line_width.unwrap_or_default()
+            };
+            let indent_width = if let Some(indent_width) = language.indent_width {
+                indent_width
+            } else {
+                global.indent_width.unwrap_or_default()
+            };
+            JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_quote_style(language.quote_style.unwrap_or_default())
+                .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
+                .with_quote_properties(language.quote_properties.unwrap_or_default())
+                .with_trailing_comma(language.trailing_comma.unwrap_or_default())
+                .with_semicolons(language.semicolons.unwrap_or_default())
+                .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+        })
     }
 }
 
@@ -192,10 +195,13 @@ fn parse(
             LanguageId::TypeScriptReact => JsFileSource::tsx(),
             _ => JsFileSource::js_module(),
         });
-    let settings = &settings.as_ref().languages.javascript.parser;
-    let options = JsParserOptions {
-        parse_class_parameter_decorators: settings.parse_class_parameter_decorators,
-    };
+    let parser_settings = &settings.as_ref().languages.javascript.parser;
+    let overrides = &settings.as_ref().override_settings;
+    let options = overrides
+        .as_js_parser_options(rome_path)
+        .unwrap_or(JsParserOptions {
+            parse_class_parameter_decorators: parser_settings.parse_class_parameter_decorators,
+        });
     let parse = biome_js_parser::parse_js_with_cache(text, source_type, options, cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
@@ -462,6 +468,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         settings,
         should_format,
         rome_path,
+        mut filter,
     } = params;
 
     let file_source = parse
@@ -469,18 +476,6 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .map_err(|_| extension_error(params.rome_path))?;
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
-
-    let enabled_rules: Option<Vec<RuleFilter>> = if let Some(rules) = rules {
-        let enabled: IndexSet<RuleFilter> = rules.as_enabled_rules();
-        Some(enabled.into_iter().collect())
-    } else {
-        None
-    };
-
-    let mut filter = match &enabled_rules {
-        Some(rules) => AnalysisFilter::from_enabled_rules(Some(rules.as_slice())),
-        _ => AnalysisFilter::default(),
-    };
 
     filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
 
@@ -492,7 +487,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             let current_diagnostic = signal.diagnostic();
 
             if let Some(diagnostic) = current_diagnostic.as_ref() {
-                if is_diagnostic_error(diagnostic, params.rules) {
+                if is_diagnostic_error(diagnostic, rules) {
                     errors += 1;
                 }
             }
@@ -737,20 +732,18 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 }
 
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
-    let configuration = to_analyzer_configuration(
-        settings.as_ref().linter(),
-        &settings.as_ref().languages,
-        |settings| {
-            if let Some(globals) = settings.javascript.globals.as_ref() {
-                globals
-                    .iter()
-                    .map(|global| global.to_string())
-                    .collect::<Vec<_>>()
-            } else {
-                vec![]
-            }
+    let configuration = AnalyzerConfiguration {
+        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
+        globals: if let Some(globals) = &settings.as_ref().languages.javascript.globals.as_ref() {
+            globals
+                .iter()
+                .map(|global| global.to_string())
+                .collect::<Vec<_>>()
+        } else {
+            vec![]
         },
-    );
+    };
+
     AnalyzerOptions {
         configuration,
         file_path,

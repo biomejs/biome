@@ -52,6 +52,6 @@ for crate in "${published_crates[@]}"; do
   if [ "$1" = "--execute" ]; then
     cargo publish -p $crate
   else
-    cargo publish --dry-run --no-verify -p $crate
+    cargo publish --dry-run --no-verify --allow-dirty -p $crate
   fi
 done

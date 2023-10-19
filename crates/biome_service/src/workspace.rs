@@ -62,6 +62,7 @@ use biome_fs::RomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
+use std::path::Path;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
@@ -125,25 +126,40 @@ impl FileFeaturesResult {
         mut self,
         settings: &WorkspaceSettings,
         language: &Language,
+        path: &Path,
     ) -> Self {
-        let formatter_disabled = {
-            if language.is_javascript_like() {
+        let formatter_disabled =
+            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
+                disabled
+            } else if language.is_javascript_like() {
                 !settings.formatter().enabled || settings.javascript_formatter_disabled()
             } else if language.is_json_like() {
                 !settings.formatter().enabled || settings.json_formatter_disabled()
             } else {
                 !settings.formatter().enabled
-            }
-        };
+            };
         if formatter_disabled {
             self.features_supported
                 .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
         }
-        if !settings.linter().enabled {
+        // linter
+        if let Some(disabled) = settings.override_settings.linter_disabled(path) {
+            if disabled {
+                self.features_supported
+                    .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+            }
+        } else if !settings.linter().enabled {
             self.features_supported
                 .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
         }
-        if !settings.organize_imports().enabled {
+
+        // organize imports
+        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
+            if disabled {
+                self.features_supported
+                    .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+            }
+        } else if !settings.organize_imports().enabled {
             self.features_supported
                 .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
         }

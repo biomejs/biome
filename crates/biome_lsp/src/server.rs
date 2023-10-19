@@ -13,8 +13,8 @@ use biome_service::workspace::{RageEntry, RageParams, RageResult};
 use biome_service::{workspace, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
+use rustc_hash::FxHashMap;
 use serde_json::json;
-use std::collections::HashMap;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -434,7 +434,7 @@ impl Drop for LSPServer {
 }
 
 /// Map of active sessions connected to a [ServerFactory].
-type Sessions = Arc<Mutex<HashMap<SessionKey, SessionHandle>>>;
+type Sessions = Arc<Mutex<FxHashMap<SessionKey, SessionHandle>>>;
 
 /// Helper method for wrapping a [Workspace] method in a `custom_method` for
 /// the [LSPServer]

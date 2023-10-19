@@ -31,7 +31,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoInteractiveElementToNoninteractiveRole {
-        version: "next",
+        version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
         recommended: false,
     }

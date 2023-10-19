@@ -5,7 +5,6 @@ description: How to use the Biome linter.
 
 import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
 import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
-import RecommendedRulesMd from "@src/components/generated/RecommendedRules.md";
 
 Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
 
@@ -36,8 +35,7 @@ Lint rules may provide automatic code fixes. Biome distinguishes between two typ
 
 ### Safe fixes
 
-Safe fixes are guaranteed to not change the semantic of your code.
-They can be applied without explicit review.
+Safe fixes are guaranteed to not change the semantic of your code. They can be applied without explicit review.
 
 To apply _safe fixes_, use `--apply`:
 
@@ -47,8 +45,7 @@ biome check --apply ./src
 
 ### Unsafe fixes
 
-Unsafe fixes may change the semantic of your program.
-Therefore, it's advised to manually review the changes.
+Unsafe fixes may change the semantic of your program. Therefore, it's advised to manually review the changes.
 
 To apply _unsafe fixes_, use `--apply-unsafe`:
 
@@ -60,7 +57,7 @@ biome check --apply-unsafe ./src
 ## Recommended rules
 
 When the linter is enabled, it recommends a number of rules. Recommended rules will emit error diagnostics. Below the list of recommended rules:
-<RecommendedRulesMd />
+
 <RecommendedRules />
 
 

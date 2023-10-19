@@ -1,5 +1,5 @@
+use rustc_hash::FxHashMap;
 use serde::Serialize;
-use std::collections::HashMap;
 
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -8,7 +8,7 @@ pub struct FormatterReport {
     summary: Option<FormatterReportSummary>,
 
     /// The key is the path of the file
-    files: HashMap<String, FormatterReportFileDetail>,
+    files: FxHashMap<String, FormatterReportFileDetail>,
 }
 
 impl FormatterReport {

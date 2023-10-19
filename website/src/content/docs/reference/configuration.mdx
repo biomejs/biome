@@ -168,8 +168,7 @@ match these patterns.
 
 ### `files.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that
-match these patterns.
+A list of Unix shell style patterns. Biome handles only the files and folders that match these patterns.
 
 <CodeBlockHeader filename="biome.json" />
 
@@ -515,8 +514,7 @@ Enables Biome's sort imports.
 ### `organizeImports.ignore`
 
 
-A list of Unix shell style patterns. Biome ignores files and folders that
-match these patterns.
+A list of Unix shell style patterns. Biome ignores files and folders that match these patterns.
 
 <CodeBlockHeader filename="biome.json" />
 
@@ -744,3 +742,179 @@ How big the indentation should be for JSON (and its super languages) files.
 How many characters can be written on a single line in JSON (and its super languages) files.
 
 > Default: `80`
+
+## `overrides`
+
+A list of patterns.
+
+Use this configuration to change the behaviour of the tools for certain files. The overrides are absolute, and they have precedence over the top-level configuration.
+
+When a file is matched against an override pattern, **only** the configuration specified in that pattern will be applied. If not configuration is set, Biome's defaults are applied.
+
+The order of the patterns matter. If a file *can* match three patterns, only the first one is used.
+
+### `overrides.<ITEM>.ignore`
+
+A list of Unix shell style patterns. Biome ignores files and folders that match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "overrides": [{
+    "ignore": ["scripts/*.js"]
+  }]
+}
+```
+
+### `overrides.<ITEM>.include`
+
+A list of Unix shell style patterns. Biome handles only the files and folders that match these patterns.
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "overrides": [{
+    "include": ["scripts/*.js"]
+  }]
+}
+```
+
+### `overrides.<ITEM>.formatter`
+
+It will include the options of [top level formatter](#formatter) configuration, minus `ignore` and `include`.
+
+#### Examples
+
+For example, it's possible to modify the formatter `lineWidth`, `indentStyle` for certain files that are included in the glob path `generated/**`:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "lineWidth": 100
+  },
+  "overrides": [
+    {
+      "include": ["generated/**"],
+      "formatter": {
+        "lineWidth": 160,
+        "indentStyle": "space"
+      }
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.linter`
+
+It will include the options of [top level linter](#linter) configuration, minus `ignore` and `include`.
+
+
+#### Examples
+
+You can disable certain rules for certain glob paths, and disable the linter for other glob paths:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["shims/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.organizeImports`
+
+It will include the options of [top level organize imports](#organize_imports), minus `ignore` and `include`.
+
+### `overrides.<ITEM>.javascript`
+
+It will include the options of [top level javascript](#javascript) configuration.
+
+#### Examples
+
+You can change the formatting behaviour of JavaScript files in certain folders:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "double"
+        }
+      }
+    }
+  ]
+}
+```
+
+
+### `overrides.<ITEM>.json`
+
+It will include the options of [top level json](#json) configuration.
+
+
+#### Examples
+
+You can enable parsing features for certain JSON files:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": [".vscode/**"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingComma": true
+        }
+      }
+    }
+  ]
+}
+```

@@ -8,7 +8,7 @@ use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxToken, TextRange, TextSize, WalkEvent};
 use biome_rowan::{AstNode, NodeOrToken};
 use rustc_hash::FxHashMap;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 /// This method helps testing scope resolution. It does this
 /// iterating [SemanticEventIterator] and storing where each scope start and end. Later it iterates
@@ -123,7 +123,7 @@ pub fn assert(code: &str, test_name: &str) {
 
     // Extract semantic events and index by range
 
-    let mut events_by_pos: HashMap<TextSize, Vec<SemanticEvent>> = HashMap::new();
+    let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
     let mut scope_start_by_id: FxHashMap<usize, TextSize> = FxHashMap::default();
     for event in semantic_events(r.syntax()) {
         let pos = if let SemanticEvent::ScopeEnded {
@@ -446,7 +446,7 @@ impl SemanticAssertions {
         &self,
         code: &str,
         test_name: &str,
-        events_by_pos: HashMap<TextSize, Vec<SemanticEvent>>,
+        events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
         scope_start: FxHashMap<usize, TextSize>,
     ) {
         // Check every declaration assertion is ok
@@ -824,7 +824,7 @@ fn show_unmatched_assertion(
 fn show_all_events<F>(
     test_name: &str,
     code: &str,
-    events_by_pos: HashMap<TextSize, Vec<SemanticEvent>>,
+    events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
     f: F,
 ) where
     F: Fn(&SemanticEvent) -> bool,

@@ -305,8 +305,8 @@ The first step is to setup a struct to represent the rule configuration.
 ```rust,ignore
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReactExtensiveDependenciesOptions {
-    hooks_config: HashMap<String, ReactHookConfiguration>,
-    stable_config: HashSet<StableReactHookConfiguration>,
+    hooks_config: FxHashMap<String, ReactHookConfiguration>,
+    stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
 impl Rule for UseExhaustiveDependencies {

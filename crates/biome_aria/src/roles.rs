@@ -1,6 +1,6 @@
 use crate::{define_role, is_aria_property_valid};
 use biome_aria_metadata::AriaPropertiesEnum;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::str::FromStr;
@@ -892,7 +892,7 @@ impl<'a> AriaRoles {
         &self,
         element: &str,
         // To generate `attributes`, you can use `biome_js_analyze::aria_services::AriaServices::extract_defined_attributes`
-        attributes: &HashMap<String, Vec<String>>,
+        attributes: &FxHashMap<String, Vec<String>>,
     ) -> Option<&'static dyn AriaRoleDefinition> {
         let result = match element {
             "article" => &ArticleRole as &dyn AriaRoleDefinition,
@@ -1023,7 +1023,7 @@ impl<'a> AriaRoles {
     pub fn is_not_interactive_element(
         &self,
         element_name: &str,
-        attributes: Option<HashMap<String, Vec<String>>>,
+        attributes: Option<FxHashMap<String, Vec<String>>>,
     ) -> bool {
         // <header> elements do not technically have semantics, unless the
         // element is a direct descendant of <body>, and this crate cannot
@@ -1125,7 +1125,7 @@ pub struct AriaRoles;
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
+    use rustc_hash::FxHashMap;
 
     use crate::AriaRoles;
 
@@ -1134,7 +1134,7 @@ mod test {
         let aria_roles = AriaRoles {};
         assert!(!aria_roles.is_not_interactive_element("header", None));
         assert!(!aria_roles.is_not_interactive_element("input", {
-            let mut attributes = HashMap::new();
+            let mut attributes = FxHashMap::default();
             attributes.insert("type".to_string(), vec!["search".to_string()]);
             Some(attributes)
         }));
@@ -1151,7 +1151,7 @@ mod test {
         assert!(aria_roles.is_not_interactive_element("h6", None));
         assert!(aria_roles.is_not_interactive_element("body", None));
         assert!(aria_roles.is_not_interactive_element("input", {
-            let mut attributes = HashMap::new();
+            let mut attributes = FxHashMap::default();
             attributes.insert("type".to_string(), vec!["hidden".to_string()]);
             Some(attributes)
         }));
@@ -1163,12 +1163,12 @@ mod test {
 
         // No attributes
         let implicit_role = aria_roles
-            .get_implicit_role("button", &HashMap::new())
+            .get_implicit_role("button", &FxHashMap::default())
             .unwrap();
         assert_eq!(implicit_role.type_name(), "biome_aria::roles::ButtonRole");
 
         // <input type="search">
-        let mut attributes = HashMap::new();
+        let mut attributes = FxHashMap::default();
         attributes.insert("type".to_string(), vec!["search".to_string()]);
         let implicit_role = aria_roles.get_implicit_role("input", &attributes).unwrap();
         assert_eq!(
@@ -1177,7 +1177,7 @@ mod test {
         );
 
         // <select name="animals" multiple size="4">
-        let mut attributes = HashMap::new();
+        let mut attributes = FxHashMap::default();
         attributes.insert("name".to_string(), vec!["animals".to_string()]);
         attributes.insert("multiple".to_string(), vec![String::new()]);
         attributes.insert("size".to_string(), vec!["4".to_string()]);

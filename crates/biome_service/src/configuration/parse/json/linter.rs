@@ -201,6 +201,7 @@ impl VisitNode<JsonLanguage> for RuleWithOptions {
     }
 }
 
+/// Custom validation. It checks that `recommended` and `all` are not present and both `true` in the same object
 pub(crate) fn are_recommended_and_all_correct(
     current_node: &AnyJsonValue,
     name: &str,

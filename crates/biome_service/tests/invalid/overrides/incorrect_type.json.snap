@@ -1,0 +1,16 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: incorrect_type.json
+---
+incorrect_type.json:2:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of key overrides is incorrect. Expected a array.
+  
+    1 │ {
+  > 2 │ 	"overrides": {}
+      │ 	             ^^
+    3 │ }
+    4 │ 
+  
+
+

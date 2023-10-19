@@ -31,7 +31,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoApproximativeNumericConstant {
-        version: "next",
+        version: "1.3.0",
         name: "noApproximativeNumericConstant",
         recommended: false,
     }

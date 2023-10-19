@@ -6,7 +6,7 @@ use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages}
 use biome_aria::{AriaProperties, AriaRoles};
 use biome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use biome_rowan::AstNode;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -41,14 +41,14 @@ impl AriaServices {
     }
 
     /// Parses a [JsxAttributeList] and extracts the names and values of each [JsxAttribute],
-    /// returning them as a [HashMap]. Attributes with no specified value are given a value of "true".
+    /// returning them as a [FxHashMap]. Attributes with no specified value are given a value of "true".
     /// If an attribute has multiple values, each value is stored as a separate item in the
-    /// [HashMap] under the same attribute name. Returns [None] if the parsing fails.
+    /// [FxHashMap] under the same attribute name. Returns [None] if the parsing fails.
     pub fn extract_attributes(
         &self,
         attribute_list: &JsxAttributeList,
-    ) -> Option<HashMap<String, Vec<String>>> {
-        let mut defined_attributes: HashMap<String, Vec<String>> = HashMap::new();
+    ) -> Option<FxHashMap<String, Vec<String>>> {
+        let mut defined_attributes: FxHashMap<String, Vec<String>> = FxHashMap::default();
         for attribute in attribute_list {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 let name = attr.name().ok()?.syntax().text_trimmed().to_string();

@@ -61,7 +61,7 @@ declare_rule! {
     /// }
     /// ```
     pub(crate) NoUselessElse {
-        version: "next",
+        version: "1.3.0",
         name: "noUselessElse",
         recommended: true,
         fix_kind: FixKind::Unsafe,

@@ -690,7 +690,7 @@ pub(crate) enum IdentifiersLike {
 }
 
 impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
-    type Error = SyntaxError;
+    type Error = ();
 
     fn try_from((left, right): (AnyNameLike, AnyNameLike)) -> Result<Self, Self::Error> {
         match (left, right) {
@@ -713,7 +713,7 @@ impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
                 AnyNameLike::AnyJsLiteralExpression(right),
             ) => Ok(Self::Literal(left, right)),
 
-            _ => unreachable!("you should map the correct references"),
+            _ => Err(()),
         }
     }
 }

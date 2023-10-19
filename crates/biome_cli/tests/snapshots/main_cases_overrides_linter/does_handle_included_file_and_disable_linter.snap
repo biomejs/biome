@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "include": ["test.js", "special/**"]
+  },
+  "overrides": [{ "include": ["special/**"], "linter": { "enabled": false } }]
+}
+```
+
+## `special/test2.js`
+
+```js
+(1 >= -0)
+```
+
+## `test.js`
+
+```js
+(1 >= 0)
+```
+
+# Emitted Messages
+
+```block
+Fixed 1 file(s) in <TIME>
+```
+
+

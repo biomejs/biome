@@ -22,7 +22,7 @@ pub use closure::*;
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
-    collections::{BTreeSet, HashSet, VecDeque},
+    collections::{BTreeSet, VecDeque},
     iter::FusedIterator,
     rc::Rc,
 };
@@ -41,7 +41,7 @@ pub use scope::*;
 #[derive(Default)]
 pub struct SemanticModelOptions {
     /// All the allowed globals names
-    pub globals: HashSet<String>,
+    pub globals: FxHashSet<String>,
 }
 
 /// Build the complete [SemanticModel] of a parsed file.

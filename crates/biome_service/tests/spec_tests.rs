@@ -6,8 +6,8 @@ use std::ffi::OsStr;
 use std::fs::read_to_string;
 use std::path::Path;
 
-tests_macros::gen_tests! {"tests/invalid/*.{json}", crate::run_invalid_configurations, "module"}
-tests_macros::gen_tests! {"tests/valid/*.{json}", crate::run_valid_configurations, "module"}
+tests_macros::gen_tests! {"tests/invalid/**/*.{json}", crate::run_invalid_configurations, "module"}
+tests_macros::gen_tests! {"tests/valid/**/*.{json}", crate::run_valid_configurations, "module"}
 
 fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);

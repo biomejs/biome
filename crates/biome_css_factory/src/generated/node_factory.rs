@@ -547,10 +547,54 @@ pub fn css_pseudo_class_selector_parameters(
         ],
     ))
 }
-pub fn css_pseudo_element_selector(name: CssIdentifier) -> CssPseudoElementSelector {
+pub fn css_pseudo_element_function(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    parameter: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoElementFunction {
+    CssPseudoElementFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(parameter.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_element_highlight(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    custom_highlight_name: CssIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoElementHighlight {
+    CssPseudoElementHighlight::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_HIGHLIGHT,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(custom_highlight_name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_element_identifier(ident: CssIdentifier) -> CssPseudoElementIdentifier {
+    CssPseudoElementIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_IDENTIFIER,
+        [Some(SyntaxElement::Node(ident.into_syntax()))],
+    ))
+}
+pub fn css_pseudo_element_selector(
+    double_colon_token: SyntaxToken,
+    element: AnyCssPseudoElement,
+) -> CssPseudoElementSelector {
     CssPseudoElementSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_ELEMENT_SELECTOR,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
+        [
+            Some(SyntaxElement::Token(double_colon_token)),
+            Some(SyntaxElement::Node(element.into_syntax())),
+        ],
     ))
 }
 pub fn css_ratio(numerator: CssNumber, denominator: CssNumber) -> CssRatio {

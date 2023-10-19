@@ -49,7 +49,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoMisleadingInstantiator {
-        version: "next",
+        version: "1.3.0",
         name: "noMisleadingInstantiator",
         recommended: true,
     }

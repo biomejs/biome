@@ -50,7 +50,7 @@ function PlaygroundLoader() {
 	const workerRef = useRef<Worker | null>(null);
 	const prettierWorkerRef = useRef<Worker | null>(null);
 
-	// biome-ignore lint/nursery/useExhaustiveDependencies: dependencies mismatch
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencies mismatch
 	useEffect(() => {
 		workerRef.current = new Worker(
 			new URL("./workers/biomeWorker", import.meta.url),
@@ -122,7 +122,7 @@ function PlaygroundLoader() {
 	}, []);
 
 	// Dispatch updated settings
-	// biome-ignore lint/nursery/useExhaustiveDependencies: dependencies mismatch
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencies mismatch
 	useEffect(() => {
 		if (loadingState !== LoadingState.Success) {
 			return;
@@ -155,7 +155,7 @@ function PlaygroundLoader() {
 	}, [loadingState, state.settings]);
 
 	// Dispatch updated code to Prettier
-	// biome-ignore lint/nursery/useExhaustiveDependencies: dependencies mismatch
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencies mismatch
 	useEffect(() => {
 		if (loadingState !== LoadingState.Success) {
 			return;

@@ -1,5 +1,5 @@
 ---
-title: noUnusedImports (since vnext)
+title: noUnusedImports (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noUnusedImports`**

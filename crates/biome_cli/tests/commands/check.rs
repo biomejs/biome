@@ -2335,6 +2335,50 @@ fn check_stdin_apply_unsafe_only_organize_imports() {
         result,
     ));
 }
+
+#[test]
+fn check_stdin_returns_text_if_content_is_not_changed() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console.in_buffer.push("console.log(\"\");\n".to_string());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--organize-imports-enabled=true",
+                "--apply-unsafe",
+                ("--stdin-file-path"),
+                ("mock.js"),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .get(0)
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, "console.log(\"\");\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_returns_text_if_content_is_not_changed",
+        fs,
+        console,
+        result,
+    ));
+}
 #[test]
 fn should_apply_correct_file_source() {
     let mut fs = MemoryFileSystem::default();
@@ -2485,49 +2529,6 @@ array.map((sentence) => sentence.split(" ")).flat();
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_disable_recommended_rules_for_a_group",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn should_not_enable_nursery_rules() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let configuration = r#"	{
-  "organizeImports": {
-    "enabled": false
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "nursery": {
-        "noAccumulatingSpread": "error"
-      }
-    }
-  }
-}"#;
-
-    let configuration_path = Path::new("biome.json");
-    fs.insert(configuration_path.into(), configuration.as_bytes());
-
-    let file_path = Path::new("fix.ts");
-    fs.insert(file_path.into(), r#"let confusingVoidType: void;"#);
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("check"), file_path.as_os_str().to_str().unwrap()].as_slice()),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_not_enable_nursery_rules",
         fs,
         console,
         result,

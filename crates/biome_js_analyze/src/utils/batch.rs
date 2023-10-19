@@ -1,9 +1,10 @@
-use biome_js_factory::make::jsx_child_list;
+use biome_js_factory::make::{self, jsx_child_list};
 use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsFormalParameter, AnyJsObjectMember, AnyJsParameter,
-    AnyJsxChild, JsConstructorParameterList, JsFormalParameter, JsLanguage, JsObjectMemberList,
-    JsParameterList, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator,
-    JsVariableDeclaratorList, JsVariableStatement, JsxChildList,
+    AnyJsStatement, AnyJsxChild, JsConstructorParameterList, JsFormalParameter, JsLanguage,
+    JsModuleItemList, JsObjectMemberList, JsParameterList, JsStatementList, JsSyntaxKind,
+    JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList,
+    JsVariableStatement, JsxChildList, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutation};
 
@@ -19,7 +20,13 @@ pub trait JsBatchMutation {
 
     /// Removes the object member, and:
     /// 1 - removes commas around the member to keep the list valid.
-    fn remove_js_object_member(&mut self, parameter: &AnyJsObjectMember) -> bool;
+    fn remove_js_object_member(&mut self, parameter: AnyJsObjectMember) -> bool;
+
+    /// Remove the statement, by either
+    /// - removing it from its parent if the parent is a [JsStatementList], or
+    /// - removing it from the module item list, or
+    /// - replacing it with an empty statement.
+    fn remove_statement(&mut self, statement: AnyJsStatement);
 
     /// Transfer leading trivia to the next sibling.
     /// If there is no next sibling, then transfer to the previous sibling.
@@ -200,24 +207,31 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
             .unwrap_or(false)
     }
 
-    fn remove_js_object_member(&mut self, member: &AnyJsObjectMember) -> bool {
-        member
-            .syntax()
-            .parent()
-            .and_then(|parent| {
-                let parent = JsObjectMemberList::cast(parent)?;
-                for element in parent.elements() {
-                    if element.node() == Ok(member) {
-                        self.remove_node(member.clone());
-                        if let Ok(Some(comma)) = element.trailing_separator() {
-                            self.remove_token(comma.clone());
-                        }
-                    }
+    fn remove_js_object_member(&mut self, member: AnyJsObjectMember) -> bool {
+        let Some(parent) = member.parent::<JsObjectMemberList>() else {
+            return false;
+        };
+        for element in parent.elements() {
+            if element.node() == Ok(&member) {
+                self.remove_node(member);
+                if let Ok(Some(comma)) = element.trailing_separator() {
+                    self.remove_token(comma.clone());
                 }
+                return true;
+            }
+        }
+        false
+    }
 
-                Some(true)
-            })
-            .unwrap_or(false)
+    fn remove_statement(&mut self, node: AnyJsStatement) {
+        let Some(parent) = node.syntax().parent() else {
+            return;
+        };
+        if JsStatementList::can_cast(parent.kind()) || JsModuleItemList::can_cast(parent.kind()) {
+            self.remove_node(node);
+        } else {
+            self.replace_node(node, make::js_empty_statement(make::token(T![;])).into());
+        }
     }
 
     fn add_jsx_elements_after_element<I>(

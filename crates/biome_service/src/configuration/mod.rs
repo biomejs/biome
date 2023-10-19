@@ -10,18 +10,20 @@ pub mod json;
 pub mod linter;
 mod merge;
 pub mod organize_imports;
+mod overrides;
 mod parse;
 pub mod vcs;
 
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
-use crate::configuration::generated::push_to_analyzer_rules;
+pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
+use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
-use crate::settings::{LanguagesSettings, LinterSettings};
+use crate::settings::WorkspaceSettings;
 use crate::{DynRef, WorkspaceError, VERSION};
-use biome_analyze::{AnalyzerConfiguration, AnalyzerRules};
+use biome_analyze::AnalyzerRules;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, StringSet};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
@@ -92,6 +94,11 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub extends: Option<StringSet>,
+
+    /// A list of granular patterns that should be applied only to a sub set of files
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub overrides: Option<Overrides>,
 }
 
 impl Default for Configuration {
@@ -109,6 +116,7 @@ impl Default for Configuration {
             vcs: None,
             extends: None,
             json: None,
+            overrides: None,
         }
     }
 }
@@ -124,6 +132,7 @@ impl Configuration {
         "$schema",
         "organizeImports",
         "extends",
+        "overrides",
     ];
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter
@@ -168,6 +177,8 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with(other_configuration.organize_imports);
         // VCS
         self.merge_with(other_configuration.vcs);
+        // overrides
+        self.merge_with(other_configuration.overrides);
     }
 
     fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
@@ -186,6 +197,8 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with_if_not_default(other_configuration.organize_imports);
         // VCS
         self.merge_with_if_not_default(other_configuration.vcs);
+        // overrides
+        self.merge_with_if_not_default(other_configuration.overrides);
     }
 }
 
@@ -335,6 +348,22 @@ impl MergeWith<Option<JsonFormatter>> for Configuration {
     {
         let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
         javascript_configuration.merge_with_if_not_default(other);
+    }
+}
+
+impl MergeWith<Option<Overrides>> for Configuration {
+    fn merge_with(&mut self, other: Option<Overrides>) {
+        if let Some(other) = other {
+            let overrides = self.overrides.get_or_insert_with(Overrides::default);
+            overrides.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<Overrides>)
+    where
+        Option<Overrides>: Default,
+    {
+        self.merge_with(other)
     }
 }
 
@@ -549,63 +578,19 @@ pub fn create_config(
     Ok(())
 }
 
-/// Converts a [WorkspaceSettings] into a suited [configuration for the analyzer].
-///
-/// The function needs access to a filter, in order to have an easy access to the [metadata] of the
-/// rules.
-///
-/// The third argument is a closure that accepts a reference to `linter_settings`.
-///
-/// The closure is responsible to map the globals from the correct
-/// location of the settings.
-///
-/// ## Examples
-///
-/// ```rust
-/// use biome_service::configuration::to_analyzer_configuration;
-/// use biome_service::settings::{LanguagesSettings, WorkspaceSettings};
-/// let mut settings = WorkspaceSettings::default();
-/// settings.languages.javascript.globals = Some(["jQuery".to_string(), "React".to_string()].into());
-/// // map globals from JS language
-/// let analyzer_configuration =
-///     to_analyzer_configuration(&settings.linter, &settings.languages, |settings| {
-///         if let Some(globals) = settings.javascript.globals.as_ref() {
-///             globals
-///                 .iter()
-///                 .map(|global| global.to_string())
-///                 .collect::<Vec<_>>()
-///         } else {
-///             vec![]
-///         }
-///     });
-///
-///  assert_eq!(
-///     analyzer_configuration.globals,
-///     vec!["jQuery".to_string(), "React".to_string()]
-///  )
-/// ```
-///
-/// [WorkspaceSettings]: crate::settings::WorkspaceSettings
-/// [metadata]: biome_analyze::RegistryRuleMetadata
-/// [configuration for the analyzer]: AnalyzerConfiguration
-pub fn to_analyzer_configuration<ToGlobals>(
-    linter_settings: &LinterSettings,
-    language_settings: &LanguagesSettings,
-    to_globals: ToGlobals,
-) -> AnalyzerConfiguration
-where
-    ToGlobals: FnOnce(&LanguagesSettings) -> Vec<String>,
-{
-    let globals: Vec<String> = to_globals(language_settings);
+/// Returns the rules applied to a specific [Path], given the [WorkspaceSettings]
+pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerRules {
+    let linter_settings = &settings.linter;
+    let overrides = &settings.override_settings;
 
-    let mut analyzer_rules = AnalyzerRules::default();
+    overrides
+        .as_analyzer_rules_options(path)
+        .unwrap_or_else(|| {
+            let mut analyzer_rules = AnalyzerRules::default();
+            if let Some(rules) = linter_settings.rules.as_ref() {
+                push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+            }
 
-    if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
-    }
-
-    AnalyzerConfiguration {
-        globals,
-        rules: analyzer_rules,
-    }
+            analyzer_rules
+        })
 }
