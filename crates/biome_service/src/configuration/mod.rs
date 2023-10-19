@@ -584,7 +584,7 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     let overrides = &settings.override_settings;
 
     overrides
-        .to_analyzer_rules_options(path)
+        .as_analyzer_rules_options(path)
         .unwrap_or_else(|| {
             let mut analyzer_rules = AnalyzerRules::default();
             if let Some(rules) = linter_settings.rules.as_ref() {

@@ -410,7 +410,7 @@ impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
             .unwrap_or_default();
 
         Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
+            enabled: conf.enabled,
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
             line_width: conf.line_width,
@@ -424,7 +424,7 @@ impl TryFrom<OverrideLinterConfiguration> for OverrideLinterSettings {
 
     fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
         Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
+            enabled: conf.enabled,
             rules: conf.rules,
         })
     }
@@ -435,7 +435,7 @@ impl TryFrom<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSe
 
     fn try_from(conf: OverrideOrganizeImportsConfiguration) -> Result<Self, Self::Error> {
         Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
+            enabled: conf.enabled,
         })
     }
 }

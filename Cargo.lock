@@ -131,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "biome_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -145,7 +145,7 @@ dependencies = [
 
 [[package]]
 name = "biome_aria"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_aria_metadata",
  "rustc-hash",
@@ -217,7 +217,7 @@ dependencies = [
 
 [[package]]
 name = "biome_control_flow"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_rowan",
  "rustc-hash",
@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "biome_diagnostics_categories"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "quote",
  "schemars",
@@ -319,7 +319,7 @@ version = "0.0.0"
 
 [[package]]
 name = "biome_formatter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -374,7 +374,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_aria",
@@ -416,7 +416,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_formatter"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
@@ -474,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_semantic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -488,7 +488,7 @@ dependencies = [
 
 [[package]]
 name = "biome_js_syntax"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
@@ -522,7 +522,7 @@ version = "0.1.0"
 
 [[package]]
 name = "biome_json_analyze"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
@@ -648,7 +648,7 @@ dependencies = [
 
 [[package]]
 name = "biome_parser"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",

@@ -119,6 +119,58 @@ fn does_handle_included_file() {
 }
 
 #[test]
+fn does_handle_included_file_and_disable_linter() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "include": ["test.js", "special/**"]
+  },
+  "overrides": [{ "include": ["special/**"], "linter": { "enabled": false } }]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), FIX_BEFORE.as_bytes());
+
+    let test2 = Path::new("special/test2.js");
+    fs.insert(test2.into(), FIX_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                ("--apply"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test2, FIX_BEFORE);
+    assert_file_contents(&fs, test, FIX_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_handle_included_file_and_disable_linter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_include_file_with_different_rules() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

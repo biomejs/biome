@@ -127,6 +127,58 @@ fn does_handle_included_file() {
 }
 
 #[test]
+fn does_handle_included_file_and_disable_formatter() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "include": ["test.js", "special/**"]
+  },
+  "overrides": [{ "include": ["special/**"], "formatter": { "enabled": false } }]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED.as_bytes());
+
+    let test2 = Path::new("special/test2.js");
+    fs.insert(test2.into(), UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test2, UNFORMATTED);
+    assert_file_contents(&fs, test, FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_handle_included_file_and_disable_formatter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_include_file_with_different_formatting() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

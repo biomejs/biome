@@ -251,7 +251,7 @@ impl Workspace for WorkspaceServer {
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new()
                     .with_capabilities(&capabilities)
-                    .with_settings_and_language(&settings, &language);
+                    .with_settings_and_language(&settings, &language, params.path.as_path());
 
                 if settings.files.ignore_unknown {
                     let language = self.get_language(&params.path);
