@@ -143,7 +143,7 @@ fn parse(
         });
     let options: JsonParserOptions =
         overrides
-            .as_json_parser_options(&rome_path)
+            .as_json_parser_options(rome_path)
             .unwrap_or(JsonParserOptions {
                 allow_comments: parser.allow_comments
                     || source_type.is_jsonc()

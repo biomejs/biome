@@ -198,7 +198,7 @@ fn parse(
     let parser_settings = &settings.as_ref().languages.javascript.parser;
     let overrides = &settings.as_ref().override_settings;
     let options = overrides
-        .as_js_parser_options(&rome_path)
+        .as_js_parser_options(rome_path)
         .unwrap_or(JsParserOptions {
             parse_class_parameter_decorators: parser_settings.parse_class_parameter_decorators,
         });
