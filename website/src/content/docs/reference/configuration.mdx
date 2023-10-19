@@ -785,9 +785,68 @@ A list of Unix shell style patterns. Biome handles only the files and folders th
 
 It will include the options of [top level formatter](#formatter) configuration, minus `ignore` and `include`.
 
+#### Examples
+
+For example, it's possible to modify the formatter `lineWidth`, `indentStyle` for certain files that are included in the glob path `generated/**`:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "lineWidth": 100
+  },
+  "overrides": [
+    {
+      "include": ["generated/**"],
+      "formatter": {
+        "lineWidth": 160,
+        "indentStyle": "space"
+      }
+    }
+  ]
+}
+```
+
 ### `overrides.<ITEM>.linter`
 
 It will include the options of [top level linter](#linter) configuration, minus `ignore` and `include`.
+
+
+#### Examples
+
+You can disable certain rules for certain glob paths, and disable the linter for other glob paths:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["shims/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
+}
+```
 
 ### `overrides.<ITEM>.organizeImports`
 
@@ -797,6 +856,65 @@ It will include the options of [top level organize imports](#organize_imports), 
 
 It will include the options of [top level javascript](#javascript) configuration.
 
+#### Examples
+
+You can change the formatting behaviour of JavaScript files in certain folders:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "formatter": {
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "double"
+        }
+      }
+    }
+  ]
+}
+```
+
+
 ### `overrides.<ITEM>.json`
 
-It will include the options of [top level formatter](#json) configuration.
+It will include the options of [top level json](#json) configuration.
+
+
+#### Examples
+
+You can enable parsing features for certain JSON files:
+
+<CodeBlockHeader filename="biome.json" />
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": [".vscode/**"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingComma": true
+        }
+      }
+    }
+  ]
+}
+```

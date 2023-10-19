@@ -11,8 +11,10 @@ use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
 use biome_fs::RomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
+use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
 use std::path::Path;
@@ -458,7 +460,7 @@ impl OverrideSettings {
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn js_format_options(&self, path: &Path) -> Option<JsFormatOptions> {
+    pub fn as_js_format_options(&self, path: &Path) -> Option<JsFormatOptions> {
         for pattern in &self.patterns {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
@@ -499,7 +501,7 @@ impl OverrideSettings {
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn json_format_options(&self, path: &Path) -> Option<JsonFormatOptions> {
+    pub fn as_json_format_options(&self, path: &Path) -> Option<JsonFormatOptions> {
         for pattern in &self.patterns {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
@@ -532,8 +534,43 @@ impl OverrideSettings {
         None
     }
 
+    pub fn as_js_parser_options(&self, path: &Path) -> Option<JsParserOptions> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                let js_parser = &pattern.languages.javascript.parser;
+
+                return Some(JsParserOptions {
+                    parse_class_parameter_decorators: js_parser.parse_class_parameter_decorators,
+                });
+            }
+        }
+
+        None
+    }
+
+    pub fn as_json_parser_options(&self, path: &Path) -> Option<JsonParserOptions> {
+        for pattern in &self.patterns {
+            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+
+            if included == Some(true) || excluded == Some(false) {
+                let json_parser = &pattern.languages.json.parser;
+
+                return Some(JsonParserOptions {
+                    allow_comments: json_parser.allow_comments,
+                    allow_trailing_commas: json_parser.allow_trailing_commas,
+                });
+            }
+        }
+
+        None
+    }
+
     /// Retrieves the options of lint rules that have been overridden
-    pub fn to_analyzer_rules_options(&self, path: &Path) -> Option<AnalyzerRules> {
+    pub fn as_analyzer_rules_options(&self, path: &Path) -> Option<AnalyzerRules> {
         for pattern in &self.patterns {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));

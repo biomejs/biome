@@ -99,7 +99,7 @@ impl Language for JsLanguage {
         language: &JsFormatterSettings,
         path: &RomePath,
     ) -> JsFormatOptions {
-        overrides.js_format_options(path).unwrap_or_else(|| {
+        overrides.as_js_format_options(path).unwrap_or_else(|| {
             let indent_style = if let Some(indent_style) = language.indent_style {
                 indent_style
             } else {
@@ -195,10 +195,13 @@ fn parse(
             LanguageId::TypeScriptReact => JsFileSource::tsx(),
             _ => JsFileSource::js_module(),
         });
-    let settings = &settings.as_ref().languages.javascript.parser;
-    let options = JsParserOptions {
-        parse_class_parameter_decorators: settings.parse_class_parameter_decorators,
-    };
+    let parser_settings = &settings.as_ref().languages.javascript.parser;
+    let overrides = &settings.as_ref().override_settings;
+    let options = overrides
+        .as_js_parser_options(&rome_path)
+        .unwrap_or(JsParserOptions {
+            parse_class_parameter_decorators: parser_settings.parse_class_parameter_decorators,
+        });
     let parse = biome_js_parser::parse_js_with_cache(text, source_type, options, cache);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();

@@ -54,7 +54,7 @@ impl Language for JsonLanguage {
         language: &Self::FormatterSettings,
         path: &RomePath,
     ) -> Self::FormatOptions {
-        overrides.json_format_options(path).unwrap_or_else(|| {
+        overrides.as_json_format_options(path).unwrap_or_else(|| {
             let indent_style = if let Some(indent_style) = language.indent_style {
                 indent_style
             } else {
@@ -134,18 +134,22 @@ fn parse(
     cache: &mut NodeCache,
 ) -> AnyParse {
     let parser = &settings.as_ref().languages.json.parser;
+    let overrides = &settings.as_ref().override_settings;
     let source_type =
         JsonFileSource::try_from(rome_path.as_path()).unwrap_or_else(|_| match language_hint {
             LanguageId::Json => JsonFileSource::json(),
             LanguageId::Jsonc => JsonFileSource::jsonc(),
             _ => JsonFileSource::json(),
         });
-    let options: JsonParserOptions = JsonParserOptions {
-        allow_comments: parser.allow_comments
-            || source_type.is_jsonc()
-            || is_file_allowed(rome_path),
-        allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(rome_path),
-    };
+    let options: JsonParserOptions =
+        overrides
+            .as_json_parser_options(&rome_path)
+            .unwrap_or(JsonParserOptions {
+                allow_comments: parser.allow_comments
+                    || source_type.is_jsonc()
+                    || is_file_allowed(rome_path),
+                allow_trailing_commas: parser.allow_trailing_commas || is_file_allowed(rome_path),
+            });
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
