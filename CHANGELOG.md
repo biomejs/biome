@@ -14,6 +14,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Fix `rage` command, now it doesn't print info about running servers. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
