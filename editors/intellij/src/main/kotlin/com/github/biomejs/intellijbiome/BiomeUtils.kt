@@ -44,7 +44,7 @@ object BiomeUtils {
         val executablePath = BiomeSettings.getInstance(project).executablePath
         val biomeBinFile = directoryManager.nodeModulesDirs
             .asSequence()
-            .mapNotNull { it.findFileByRelativePath(".bin/biome") }
+            .mapNotNull { it.findFileByRelativePath("@biomejs/biome/bin/biome") }
             .filter { it.isValid }
             .firstOrNull()
 
