@@ -210,6 +210,7 @@ jobs:
         if: needs.build.outputs.prerelease != 'true'
         uses: dawidd6/action-homebrew-bump-formula@v3
         with:
+          org: biomejs
           token: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
           formula: biome
 
