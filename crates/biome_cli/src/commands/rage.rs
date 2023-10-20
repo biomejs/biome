@@ -38,20 +38,21 @@ pub(crate) fn rage(session: CliSession, daemon_logs: bool) -> Result<(), CliDiag
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
-    match session.app.workspace.server_info() {
-        Some(_) if daemon_logs => {
-            session.app.console.log(markup!({
-                ConnectedClientServerLog(session.app.workspace.deref())
-            }));
+    if daemon_logs {
+        match session.app.workspace.server_info() {
+            Some(_) => {
+                session.app.console.log(markup!({
+                    ConnectedClientServerLog(session.app.workspace.deref())
+                }));
+            }
+            None => {
+                session
+                    .app
+                    .console
+                    .log(markup!("Discovering running Biome servers..."));
+                session.app.console.log(markup!({ RunningRomeServer }));
+            }
         }
-        None => {
-            session
-                .app
-                .console
-                .log(markup!("Discovering running Biome servers..."));
-            session.app.console.log(markup!({ RunningRomeServer }));
-        }
-        _ => {}
     }
     Ok(())
 }
