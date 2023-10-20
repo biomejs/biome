@@ -14,10 +14,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
-#### Bug fixes
-
-- Fix `rage` command, now it doesn't print info about running servers. Contributed by @ematipico
-
 ### Configuration
 
 ### Editors
@@ -28,14 +24,25 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+### Parser
+
+### VSCode
+
+## 1.3.1 (2022)
+
+### CLI
+
+#### Bug fixes
+
+- Fix `rage` command, now it doesn't print info about running servers. Contributed by @ematipico
+
+### Linter
+
 #### Bug fixes
 
 - Fix [#548](https://github.com/biomejs/biome/issues/548) which made [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign) panic.
 - Fix [#555](https://github.com/biomejs/biome/issues/555), by correctly map `globals` into the workspace.
 
-### Parser
-
-### VSCode
 
 ## 1.3.0 (2022-10-19)
 
