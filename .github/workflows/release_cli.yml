@@ -206,6 +206,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Bump Homebrew formula
+        if: needs.build.outputs.prerelease != 'true'
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
+          formula: biome
+
       - name: Extract changelog
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
