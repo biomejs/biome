@@ -279,6 +279,8 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         let organize_imports = javascript.organize_imports;
         if let Some(_organize_imports) = organize_imports {}
 
+        language_setting.globals = javascript.globals.map(|global| global.into_index_set());
+
         language_setting
     }
 }

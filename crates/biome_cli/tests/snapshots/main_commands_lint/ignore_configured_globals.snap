@@ -8,6 +8,13 @@ expression: content
 {
   "javascript": {
     "globals": ["foo", "bar"]
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error"
+      }
+    }
   }
 }
 ```

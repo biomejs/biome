@@ -1658,6 +1658,13 @@ fn ignore_configured_globals() {
     let rome_json = r#"{
         "javascript": {
             "globals": ["foo", "bar"]
+        },
+        "linter": {
+            "rules": {
+                "correctness": {
+                    "noUndeclaredVariables": "error"
+                }
+            }
         }
     }"#;
 
