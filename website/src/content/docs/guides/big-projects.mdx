@@ -79,7 +79,7 @@ Then, we tell Biome to inherit all the options from the main `app/biome.json` fi
 
 ```diff
 {
-+  "extends": ["../../app.json"],
++  "extends": ["../../biome.json"],
    "formatter": {
      "indentStyle": "space"
    }
@@ -92,7 +92,7 @@ Let's jump to `app/backend/biome.json`, where we need to enable the linting:
 
 ```json
 {
-  "extends": ["../app.json"],
+  "extends": ["../biome.json"],
     "linter": {
       "enabled": "true",
       "rules": {
