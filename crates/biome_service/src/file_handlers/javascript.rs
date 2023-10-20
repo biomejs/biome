@@ -734,7 +734,7 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
 fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
-        globals: if let Some(globals) = &settings.as_ref().languages.javascript.globals.as_ref() {
+        globals: if let Some(globals) = settings.as_ref().languages.javascript.globals.as_ref() {
             globals
                 .iter()
                 .map(|global| global.to_string())
