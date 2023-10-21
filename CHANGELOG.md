@@ -24,6 +24,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### Bug fixes
+
+- Fix [#557](https://github.com/biomejs/biome/issues/557) which made [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) report imported types used in `typeof` expression. Contributed by @Conaclos
+
 ### Parser
 
 ### VSCode
@@ -50,8 +54,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#548](https://github.com/biomejs/biome/issues/548) which made [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign) panic.
 
 - Fix [#555](https://github.com/biomejs/biome/issues/555), by correctly map `globals` into the workspace.
-
-- Fix [#557](https://github.com/biomejs/biome/issues/557) which made [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) report imported types used in `typeof` expression. Contributed by @Conaclos
 
 ## 1.3.0 (2023-10-19)
 
@@ -220,13 +222,6 @@ The following rules are now recommended:
 - [noFallthroughSwitchClause](https://biomejs.dev/linter/rules/no-fallthrough-switch-clause)
 - [noForEach](https://biomejs.dev/linter/rules/no-for-each)
 
-
-#### Bug fixes
-
-- Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
-- Fix [#322](ttps://github.com/biomejs/biome/issues/322), now [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) correctly handles literals inside call expressions.
-- Changed how [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) behaves. The rule is not triggered anymore on function calls. Contributed by @ematipico
-
 #### New features
 
 - Add [noEmptyCharacterClassInRegex](https://biomejs.dev/linter/rules/no-empty-character-class-in-regex) rule. The rule reports empty character classes and empty negated character classes in regular expression literals. Contributed by @Conaclos
@@ -312,6 +307,12 @@ The following rules are now recommended:
 - Fix [452](https://github.com/biomejs/biome/pull/452). The linter panicked when it met a malformed regex (a regex not ending with a slash).
 
 - Fix [#104](https://github.com/biomejs/biome/issues/104). We now correctly handle types and values with the same name.
+
+- Fix [#243](https://github.com/biomejs/biome/issues/243) a false positive case where the incorrect scope was defined for the `infer` type. in rule [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/). Contributed by @denbezrukov
+
+- Fix [#322](ttps://github.com/biomejs/biome/issues/322), now [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) correctly handles literals inside call expressions.
+
+- Changed how [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/) behaves. The rule is not triggered anymore on function calls. Contributed by @ematipico
 
 ### Parser
 
