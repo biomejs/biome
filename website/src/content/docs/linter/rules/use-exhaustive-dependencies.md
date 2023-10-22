@@ -51,8 +51,8 @@ function component() {
 
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook do not specify all of its dependencies.</span>
   
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook does not specify all of its dependencies.</span>
     <strong>3 │ </strong>function component() {
     <strong>4 │ </strong>    let a = 1;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    useEffect(() =&gt; {
@@ -151,8 +151,8 @@ function component() {
 
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:6:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook do not specify all of its dependencies.</span>
   
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook does not specify all of its dependencies.</span>
     <strong>4 │ </strong>    let a = 1;
     <strong>5 │ </strong>    const b = a + 1;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    useEffect(() =&gt; {
