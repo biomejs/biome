@@ -8,7 +8,7 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsStatement, JsBlockStatement, JsFileSource, JsLabeledStatement, JsStatementList,
-    JsVariableStatement,
+    JsVariableStatement, JsElseClause,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -145,6 +145,11 @@ fn statement_has_block_level_declaration(statement: &AnyJsStatement, is_module: 
 }
 
 fn in_control_structure(block: &JsBlockStatement) -> bool {
+    let syntax_kind = block.syntax().parent().unwrap().kind();
+    let is_else = JsElseClause::can_cast(syntax_kind);
+    if is_else {
+        return  true;
+    }
     matches!(
         block.parent(),
         Some(
