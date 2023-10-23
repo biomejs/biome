@@ -334,8 +334,6 @@ impl SameIdentifiers {
                             .ok()?;
                             return Some(AnyAssignmentLike::Identifiers(source_identifier));
                         }
-                    } else if identifier_like.is_literal() {
-                        return Some(AnyAssignmentLike::Identifiers(identifier_like));
                     } else {
                         return Self::next_static_expression(left, right);
                     }
@@ -747,10 +745,6 @@ impl IdentifiersLike {
             IdentifiersLike::References(_, right) => right.value_token().ok(),
             IdentifiersLike::Literal(_, right) => right.value_token().ok(),
         }
-    }
-
-    const fn is_literal(&self) -> bool {
-        matches!(self, IdentifiersLike::Literal(_, _))
     }
 }
 

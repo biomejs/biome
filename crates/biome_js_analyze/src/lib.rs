@@ -243,12 +243,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"document
-	.querySelector(`[data-field-id="customModel-container"]`)
-	.querySelector('input').value = document
-	.querySelector(`[data-field-id="${modelField.id}-field"]`)
-	.querySelector('input').value;
-
+        const SOURCE: &str = r#" this.arr[0] = p[0];
         "#;
         // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
         //
