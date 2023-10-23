@@ -145,10 +145,11 @@ fn statement_has_block_level_declaration(statement: &AnyJsStatement, is_module: 
 }
 
 fn in_control_structure(block: &JsBlockStatement) -> bool {
-    let syntax_kind = block.syntax().parent().unwrap().kind();
-    let is_else = JsElseClause::can_cast(syntax_kind);
-    if is_else {
-        return true;
+    if let Some(node) = block.syntax().parent() {
+        let syntax_kind = node.kind();
+        if JsElseClause::can_cast(syntax_kind) {
+            return true;
+        }
     }
     matches!(
         block.parent(),
