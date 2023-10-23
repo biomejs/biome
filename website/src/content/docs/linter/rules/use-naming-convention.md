@@ -120,10 +120,10 @@ enum Status {
 - A class name is in [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case).
 
 
-- A static property name and a static getter name are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case) or [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case).
+- Static property and static getter names are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case) or [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case).
 
 
-- A class property name and a class method name are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case).
+- Class property and method names are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case).
 
 
 
@@ -141,13 +141,13 @@ class Person {
 
 ### TypeScript `type` aliases and `interface`
 
-- A `type` alias and an interface name are in [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case).
+- A `type` alias or an interface name are in [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case).
 
 
-- A property name and a method name in a type or interface are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case) or [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case).
+- Property and method names in a type are in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case).
 
 
-- A `readonly` property name and a getter name can also be in [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case).
+- `readonly` property and getter names can also be in [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case).
 
 
 
@@ -324,7 +324,7 @@ Default: `true`
 ### enumMemberCase
 
 By default, the rule enforces the naming convention followed by the [TypeScript Compiler team](https://www.typescriptlang.org/docs/handbook/enums.html):
-an `enum` member has to be in [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case).
+an `enum` member is in [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case).
 
 You can enforce another convention by setting `enumMemberCase` option.
 The supported cases are: [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case), [`CONSTANT_CASE`](https://en.wikipedia.org/wiki/Snake_case), and [`camelCase`](https://en.wikipedia.org/wiki/Camel_case).
