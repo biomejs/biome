@@ -156,7 +156,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
 ```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook do not specify all of its dependencies.
+  ! This hook does not specify all of its dependencies.
   
     26 │ function MyComponent1() {
     27 │   let someObj = getObj();
