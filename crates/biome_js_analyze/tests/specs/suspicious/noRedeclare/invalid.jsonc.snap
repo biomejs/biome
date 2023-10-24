@@ -532,26 +532,4 @@ invalid.jsonc:1:18 lint/suspicious/noRedeclare ━━━━━━━━━━━
 function f(x) { var x = 5; }
 ```
 
-# Input
-```js
-interface A { [index: number]: string; [index: number]: string; }
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:41 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Shouldn't redeclare 'index'. Consider to delete it or rename it.
-  
-  > 1 │ interface A { [index: number]: string; [index: number]: string; }
-      │                                         ^^^^^
-  
-  i 'index' is defined here:
-  
-  > 1 │ interface A { [index: number]: string; [index: number]: string; }
-      │                ^^^^^
-  
-
-```
-
 
