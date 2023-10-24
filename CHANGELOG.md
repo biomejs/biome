@@ -26,6 +26,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+- Fix [#175](https://github.com/biomejs/biome/issues/175) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report index signatures using the name of a variable in the parent scope.
+
 - Fix [#557](https://github.com/biomejs/biome/issues/557) which made [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) report imported types used in `typeof` expression. Contributed by @Conaclos
 
 - Fix [#576](https://github.com/biomejs/biome/issues/576) by removing some erroneous logic in [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/). Contributed by @ematipico
