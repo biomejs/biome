@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_459.jsx
+---
+# Input
+```js
+{'' != null && <>stuff</>}
+
+```
+
+# Diagnostics
+```
+issue_459.jsx:1:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+  > 1 │ {'' != null && <>stuff</>}
+      │                ^^^^^^^^^^
+    2 │ 
+  
+  i Unsafe fix: Remove the Fragment
+  
+    1   │ - {''·!=·null·&&·<>stuff</>}
+      1 │ + {''·!=·null·&&·"stuff"}
+    2 2 │   
+  
+
+```
+
+
