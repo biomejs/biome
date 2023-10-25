@@ -25,6 +25,5 @@
 	"function f() { var a; if (test) { var a; } }",
 	"for (var a, a;;);",
 	"for (;;){ var a, a,;}",
-	"function f(x) { var x = 5; }",
-  "interface A { [index: number]: string; [index: number]: string; }"
+	"function f(x) { var x = 5; }"
 ]

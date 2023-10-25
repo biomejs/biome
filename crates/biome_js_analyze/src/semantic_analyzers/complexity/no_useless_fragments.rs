@@ -5,7 +5,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_factory::make::{ident, js_expression_statement, jsx_string, jsx_tag_expression};
+use biome_js_factory::make::{
+    ident, js_expression_statement, js_string_literal_expression, jsx_string, jsx_tag_expression,
+};
 use biome_js_syntax::{
     AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
     JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression,
@@ -241,7 +243,11 @@ impl Rule for NoUselessFragments {
                     ),
                     AnyJsxChild::JsxText(text) => {
                         let new_value = format!("\"{}\"", text.value_token().ok()?);
-                        Some(jsx_string(ident(&new_value)).into_syntax())
+                        if parent.kind() == JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE {
+                            Some(jsx_string(ident(&new_value)).into_syntax())
+                        } else {
+                            Some(js_string_literal_expression(ident(&new_value)).into_syntax())
+                        }
                     }
                     AnyJsxChild::JsxExpressionChild(child) => {
                         child.expression().map(|expression| {

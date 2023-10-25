@@ -324,7 +324,11 @@ impl SemanticEventExtractor {
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
             | TS_DECLARE_FUNCTION_DECLARATION
-            | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+            | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_METHOD_SIGNATURE_CLASS_MEMBER
+            | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_INDEX_SIGNATURE_CLASS_MEMBER
+            | TS_INDEX_SIGNATURE_TYPE_MEMBER => {
                 self.push_scope(
                     node.text_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
@@ -602,6 +606,10 @@ impl SemanticEventExtractor {
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_METHOD_SIGNATURE_CLASS_MEMBER
+            | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_INDEX_SIGNATURE_CLASS_MEMBER
+            | TS_INDEX_SIGNATURE_TYPE_MEMBER
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION

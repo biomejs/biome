@@ -12,7 +12,7 @@ declare_rule! {
     ///
     /// This rule generates warnings for generator functions that do not have the `yield` keyword.
     ///
-    /// Source: [require-await](https://eslint.org/docs/latest/rules/require-yield).
+    /// Source: [require-yield](https://eslint.org/docs/latest/rules/require-yield).
     ///
     /// ## Examples
     ///

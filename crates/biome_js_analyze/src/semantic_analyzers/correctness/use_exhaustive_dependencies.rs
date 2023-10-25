@@ -692,7 +692,7 @@ impl Rule for UseExhaustiveDependencies {
                     rule_category!(),
                     use_effect_range,
                     markup! {
-                        "This hook do not specify all of its dependencies."
+                        "This hook does not specify all of its dependencies."
                     },
                 );
 

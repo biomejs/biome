@@ -26,3 +26,5 @@ document
 	.querySelector(`[data-field-id="${modelField.id}-field"]`)
 	.querySelector('input').value;
 lorem.getConfig("foo", "bar").value = document.getConfig("foo", "bar").value
+
+this.arr[0] = p[0];

@@ -115,9 +115,9 @@ declare_rule! {
     ///
     /// - A class name is in [`PascalCase`].
     ///
-    /// - A static property name and a static getter name are in [`camelCase`] or [`CONSTANT_CASE`].
+    /// - Static property and static getter names are in [`camelCase`] or [`CONSTANT_CASE`].
     ///
-    /// - A class property name and a class method name are in [`camelCase`].
+    /// - Class property and method names are in [`camelCase`].
     ///
     /// ```js
     /// class Person {
@@ -133,11 +133,11 @@ declare_rule! {
     ///
     /// ### TypeScript `type` aliases and `interface`
     ///
-    /// - A `type` alias and an interface name are in [`PascalCase`].
+    /// - A `type` alias or an interface name are in [`PascalCase`].
     ///
-    /// - A property name and a method name in a type or interface are in [`camelCase`] or [`CONSTANT_CASE`].
+    /// - Property and method names in a type are in [`camelCase`].
     ///
-    /// - A `readonly` property name and a getter name can also be in [`CONSTANT_CASE`].
+    /// - `readonly` property and getter names can also be in [`CONSTANT_CASE`].
     ///
     /// ```ts
     /// type Named = {
@@ -262,7 +262,7 @@ declare_rule! {
     /// ### enumMemberCase
     ///
     /// By default, the rule enforces the naming convention followed by the [TypeScript Compiler team](https://www.typescriptlang.org/docs/handbook/enums.html):
-    /// an `enum` member has to be in [`PascalCase`].
+    /// an `enum` member is in [`PascalCase`].
     ///
     /// You can enforce another convention by setting `enumMemberCase` option.
     /// The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], and [`camelCase`].
