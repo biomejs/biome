@@ -34,14 +34,8 @@ CssRoot {
                                     value_token: IDENT@23..27 "part" [] [],
                                 },
                                 l_paren_token: L_PAREN@27..28 "(" [] [],
-                                parameter: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
-                                    simple_selector: CssTypeSelector {
-                                        ident: CssIdentifier {
-                                            value_token: IDENT@28..34 "active" [] [],
-                                        },
-                                    },
-                                    sub_selectors: CssSubSelectorList [],
+                                parameter: CssIdentifier {
+                                    value_token: IDENT@28..34 "active" [] [],
                                 },
                                 r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
                             },
@@ -72,14 +66,8 @@ CssRoot {
                                     value_token: IDENT@62..66 "part" [] [],
                                 },
                                 l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
-                                parameter: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
-                                    simple_selector: CssTypeSelector {
-                                        ident: CssIdentifier {
-                                            value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
-                                        },
-                                    },
-                                    sub_selectors: CssSubSelectorList [],
+                                parameter: CssIdentifier {
+                                    value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
                                 },
                                 r_paren_token: R_PAREN@79..81 ")" [] [Whitespace(" ")],
                             },
@@ -117,12 +105,8 @@ CssRoot {
                 0: CSS_IDENTIFIER@23..27
                   0: IDENT@23..27 "part" [] []
                 1: L_PAREN@27..28 "(" [] []
-                2: CSS_COMPOUND_SELECTOR@28..34
-                  0: (empty)
-                  1: CSS_TYPE_SELECTOR@28..34
-                    0: CSS_IDENTIFIER@28..34
-                      0: IDENT@28..34 "active" [] []
-                  2: CSS_SUB_SELECTOR_LIST@34..34
+                2: CSS_IDENTIFIER@28..34
+                  0: IDENT@28..34 "active" [] []
                 3: R_PAREN@34..36 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@36..38
         0: L_CURLY@36..37 "{" [] []
@@ -142,12 +126,8 @@ CssRoot {
                 0: CSS_IDENTIFIER@62..66
                   0: IDENT@62..66 "part" [] []
                 1: L_PAREN@66..70 "(" [] [Whitespace("   ")]
-                2: CSS_COMPOUND_SELECTOR@70..79
-                  0: (empty)
-                  1: CSS_TYPE_SELECTOR@70..79
-                    0: CSS_IDENTIFIER@70..79
-                      0: IDENT@70..79 "active" [] [Whitespace("   ")]
-                  2: CSS_SUB_SELECTOR_LIST@79..79
+                2: CSS_IDENTIFIER@70..79
+                  0: IDENT@70..79 "active" [] [Whitespace("   ")]
                 3: R_PAREN@79..81 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@81..83
         0: L_CURLY@81..82 "{" [] []

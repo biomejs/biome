@@ -173,7 +173,6 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunction
-  | CssPseudoElementHighlight
 
 // a::after {}
 //    ^^^^^
@@ -185,16 +184,16 @@ CssPseudoElementIdentifier =
 CssPseudoElementFunction =
 	name: CssIdentifier
 	'('
-	parameter: AnyCssSelector
+	parameter: AnyCssPseudoElementParameter
 	')'
 
 // ::highlight(sample) {}
-// ^^^^^^^^^^^^^^^^^^^
-CssPseudoElementHighlight =
-	name: 'highlight'
-	'('
-	custom_highlight_name: CssIdentifier
-	')'
+//             ^^^^^^
+// ::part(active) {}
+//        ^^^^^^
+AnyCssPseudoElementParameter =
+	AnyCssSelector
+	| CssIdentifier
 
 CssBlock =
 	'{'

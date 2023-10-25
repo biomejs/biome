@@ -291,33 +291,29 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let is_highlight = is_at_pseudo_highlight_element(p);
+    let is_identifier_parameter = is_at_pseudo_identifier_parameter(p);
 
-    if is_highlight {
-        p.bump(HIGHLIGHT_KW);
-    } else {
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    }
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     if p.eat(T!['(']) {
-        let kind = if is_highlight {
+        if is_identifier_parameter {
             parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-            CSS_PSEUDO_ELEMENT_HIGHLIGHT
         } else {
             parse_selector(p).or_add_diagnostic(p, expect_any_selector);
-            CSS_PSEUDO_ELEMENT_FUNCTION
         };
 
         let context = selector_lex_context(p);
         p.expect_with_context(T![')'], context);
 
-        Present(m.complete(p, kind))
+        Present(m.complete(p, CSS_PSEUDO_ELEMENT_FUNCTION))
     } else {
         Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
     }
 }
 
+const PSEUDO_IDENTIFIER_PARAMETER_SET: TokenSet<CssSyntaxKind> =
+    token_set![PART_KW, HIGHLIGHT_KW];
 #[inline]
-pub(crate) fn is_at_pseudo_highlight_element(p: &mut CssParser) -> bool {
-    p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['('])
+pub(crate) fn is_at_pseudo_identifier_parameter(p: &mut CssParser) -> bool {
+    p.at_ts(PSEUDO_IDENTIFIER_PARAMETER_SET) && p.nth_at(1, T!['('])
 }
