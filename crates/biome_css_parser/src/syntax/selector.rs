@@ -291,12 +291,12 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let is_identifier_parameter = is_at_pseudo_identifier_parameter(p);
+    let is_pseudo_identifier_parameter = is_at_pseudo_identifier_parameter(p);
 
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     if p.eat(T!['(']) {
-        if is_identifier_parameter {
+        if is_pseudo_identifier_parameter {
             parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
         } else {
             parse_selector(p).or_add_diagnostic(p, expect_any_selector);
