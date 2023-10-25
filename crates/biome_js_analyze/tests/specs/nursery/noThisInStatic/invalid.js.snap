@@ -45,6 +45,10 @@ invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━�
     8 │     }
     9 │ 
   
+  i Function this.foo() is static, so `this.` refers to the class (the constructor) instance.
+  
+  i Instead of this.foo() use A.foo().
+  
 
 ```
 
@@ -58,6 +62,10 @@ invalid.js:11:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━
        │         ^^^^
     12 │     }
     13 │     
+  
+  i Function this.faux() is static, so `this.` refers to the class (the constructor) instance.
+  
+  i Instead of this.faux() use A.faux().
   
 
 ```
@@ -73,6 +81,10 @@ invalid.js:21:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━
        │         ^^^^^
     22 │     }
     23 │ 
+  
+  i Function super.foo() is static, so `super.` refers to the class (the constructor) instance.
+  
+  i Instead of super.foo() use A.foo().
   
 
 ```
