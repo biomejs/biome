@@ -311,8 +311,7 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-const PSEUDO_IDENTIFIER_PARAMETER_SET: TokenSet<CssSyntaxKind> =
-    token_set![PART_KW, HIGHLIGHT_KW];
+const PSEUDO_IDENTIFIER_PARAMETER_SET: TokenSet<CssSyntaxKind> = token_set![PART_KW, HIGHLIGHT_KW];
 #[inline]
 pub(crate) fn is_at_pseudo_identifier_parameter(p: &mut CssParser) -> bool {
     p.at_ts(PSEUDO_IDENTIFIER_PARAMETER_SET) && p.nth_at(1, T!['('])
