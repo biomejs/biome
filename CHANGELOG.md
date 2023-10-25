@@ -37,6 +37,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### New features
+
+- Add [noDefaultExport](https://biomejs.dev/linter/rules/no-default-export) which disallows `export default`. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#639](https://github.com/biomejs/biome/issues/639) by ignoring unused TypeScript's mapped key. Contributed by @Conaclos

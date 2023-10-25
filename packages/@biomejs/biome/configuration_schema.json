@@ -1037,6 +1037,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDefaultExport": {
+					"description": "Disallow default exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [

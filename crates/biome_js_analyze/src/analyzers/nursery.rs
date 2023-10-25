@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub(crate) mod no_approximative_numeric_constant;
+pub(crate) mod no_default_export;
 pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_empty_character_class_in_regex;
 pub(crate) mod no_misleading_instantiator;
@@ -22,6 +23,7 @@ declare_group! {
         name : "nursery" ,
         rules : [
             self :: no_approximative_numeric_constant :: NoApproximativeNumericConstant ,
+            self :: no_default_export :: NoDefaultExport ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
