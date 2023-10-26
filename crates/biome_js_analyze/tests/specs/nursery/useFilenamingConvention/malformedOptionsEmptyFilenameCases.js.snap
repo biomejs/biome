@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: malformedOptionsEmptyFilenameCases.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+malformedOptionsEmptyFilenameCases.options:9:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × filenameCases cannot be an empty array.
+  
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"filenameCases": []
+       │ 						                 ^^
+    10 │ 					}
+    11 │ 				}
+  
+
+```
+
+
