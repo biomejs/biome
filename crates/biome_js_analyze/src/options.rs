@@ -15,8 +15,7 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
-use biome_rowan::AstNode;
+use biome_json_syntax::JsonLanguage;
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -49,15 +48,21 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
-    pub fn from_rule_name(rule_name: &str) -> Self {
+    pub fn try_from_rule_name(rule_name: &str) -> Option<Self> {
         match rule_name {
-            "noExcessiveCognitiveComplexity" => Self::Complexity(ComplexityOptions::default()),
-            "noRestrictedGlobals" => Self::RestrictedGlobals(RestrictedGlobalsOptions::default()),
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                Self::Hooks(HooksOptions::default())
+            "noExcessiveCognitiveComplexity" => {
+                Some(Self::Complexity(ComplexityOptions::default()))
             }
-            "useNamingConvention" => Self::NamingConvention(NamingConventionOptions::default()),
-            _ => Self::NoOptions,
+            "noRestrictedGlobals" => {
+                Some(Self::RestrictedGlobals(RestrictedGlobalsOptions::default()))
+            }
+            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+                Some(Self::Hooks(HooksOptions::default()))
+            }
+            "useNamingConvention" => {
+                Some(Self::NamingConvention(NamingConventionOptions::default()))
+            }
+            _ => None,
         }
     }
 
@@ -95,47 +100,30 @@ impl PossibleOptions {
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
     }
+}
 
-    pub fn map_to_rule_options(
+impl VisitNode<JsonLanguage> for PossibleOptions {
+    fn visit_map(
         &mut self,
-        value: &AnyJsonValue,
-        name: &str,
+        key: &biome_rowan::SyntaxNode<JsonLanguage>,
+        value: &biome_rowan::SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let value = JsonObjectValue::cast_ref(value.syntax()).or_else(|| {
-            diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
-                name,
-                "object",
-                value.range(),
-            ));
-            None
-        })?;
-        for element in value.json_member_list() {
-            let element = element.ok()?;
-            let key = element.name().ok()?;
-            let value = element.value().ok()?;
-            match self {
-                PossibleOptions::Complexity(options) => {
-                    options.visit_member_name(key.syntax(), diagnostics)?;
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                }
-                PossibleOptions::Hooks(options) => {
-                    options.visit_member_name(key.syntax(), diagnostics)?;
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                }
-                PossibleOptions::NamingConvention(options) => {
-                    options.visit_member_name(key.syntax(), diagnostics)?;
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                }
-                PossibleOptions::RestrictedGlobals(options) => {
-                    options.visit_member_name(key.syntax(), diagnostics)?;
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                }
-                PossibleOptions::NoOptions => {}
+        match self {
+            PossibleOptions::Complexity(options) => {
+                options.visit_map(key, value, diagnostics)?;
             }
+            PossibleOptions::Hooks(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::NamingConvention(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::RestrictedGlobals(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::NoOptions => {}
         }
         Some(())
     }
 }
-
-impl VisitNode<JsonLanguage> for PossibleOptions {}
