@@ -10,10 +10,10 @@ This rule is recommended by Biome. A diagnostic error will appear when linting y
 
 Disallow `void` type outside of generic or return types.
 
-`void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
+`void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. `void` can also be misleading for other developers even if used correctly.
 
 >The `void` type means cannot be mixed with any other types, other than `never`, which accepts all types.
-If you think you need this then you probably want the undefined type instead.
+If you think you need this then you probably want the `undefined` type instead.
 
 
 ## Examples
