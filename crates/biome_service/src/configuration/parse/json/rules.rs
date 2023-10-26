@@ -792,6 +792,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noInvalidNewBuiltin",
                 "noMisleadingInstantiator",
                 "noMisrefactoredShorthandAssign",
+                "noThisInStatic",
                 "noUnusedImports",
                 "noUselessElse",
                 "noUselessLoneBlockStatements",

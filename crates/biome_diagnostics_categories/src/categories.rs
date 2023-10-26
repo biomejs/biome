@@ -100,6 +100,7 @@ define_categories! {
     "lint/nursery/noInvalidNewBuiltin": "https://biomejs.dev/lint/rules/no-invalid-new-builtin",
     "lint/nursery/noMisleadingInstantiator": "https://biomejs.dev/linter/rules/no-misleading-instantiator",
     "lint/nursery/noMisrefactoredShorthandAssign": "https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign",
+    "lint/nursery/noThisInStatic": "https://biomejs.dev/lint/rules/no-this-in-static",
     "lint/nursery/noUnusedImports": "https://biomejs.dev/lint/rules/no-unused-imports",
     "lint/nursery/noUselessElse": "https://biomejs.dev/lint/rules/no-useless-else",
     "lint/nursery/noUselessLoneBlockStatements": "https://biomejs.dev/lint/rules/no-useless-lone-block-statements",

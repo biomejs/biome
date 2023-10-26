@@ -6,75 +6,79 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstNodeList};
 
 declare_rule! {
-///# Disallow `this`/`super` in static methods (no-this-in-static)
+///  Disallow `this`/`super` in static methods
 ///
-///`this` keyword on static methods refers the class (the constructor) instance.
-///However, probably it's confusing maintainers since this behavior is different to
-///most other languages.
+///  In JavaScript, the `this` keyword within static methods refers to the class (the constructor) instance, 
+///  not an instance of the class. This can be confusing for developers coming from other languages where 
+///  `this` typically refers to an instance of the class, not the class itself. 
 ///
-///This rule enforces a use of class itself to access static methods.
+///  Similarly, `super` in static methods also refers to the parent class, not an instance of the parent class. 
+///  This can lead to unexpected behavior if not properly understood.
 ///
-///## Rule Details
+///  This rule enforces the use of the class name itself to access static methods, 
+///  which can make the code clearer and less prone to errors. It helps to prevent 
+///  misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static methods.
+/// 
+///  Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
 ///
-///Examples of **incorrect** code for this rule:
+///  ## Example
 ///
-///```js
+///  ### Invalid
+/// 
+/// ```js,expect_diagnostic
 ///
-///class A {
-///    static foo() {
-///        doSomething()
-///    }
+///  class A {
+///     static foo() {
+///         doSomething()
+///     }
 ///
-///    static bar() {
-///        this.foo()   //ERROR: Instead of this.foo() use A.foo()
-///    }
-///}
+///     static bar() {
+///         this.foo()
+///     }
+///  }
 /// ```
 ///
-/// ```js
+/// ```js,expect_diagnostic
+///  class A {
+///     static foo() {
+///         doSomething()
+///     }
+///  }
 ///
-/// class A {
-///    static foo() {
-///        doSomething()
-///    }
-/// }
+///  class B extends A {
+///     static foo() {
+///         super.foo()
+///     }
+///  }
+/// ```
 ///
-/// class B extends A {
-///    static foo() {
-///        super.foo()  //ERROR: Instead of super.foo() use A.foo()
-///    }
-/// }
-///```
+///  ### Valid
 ///
-///Examples of **correct** code for this rule:
+///  ```js
+///  class A {
+///      static foo() {
+///          doSomething()
+///      }
+///  }
 ///
-///```js
+///  class B extends A {
+///      static foo() {
+///          A.foo()
+///      }
+///  }
+///  ```
 ///
-///class A {
-///    static foo() {
-///        doSomething()
-///    }
-///}
+///  ```js
+///  class A {
+///     static foo() {
+///         doSomething()
+///     }
 ///
-///class B extends A {
-///    static foo() {
-///        A.foo()
-///    }
-///}
-///```
-///
-/// ```js
-///
-///class A {
-///    static foo() {
-///        doSomething()
-///    }
-///
-///    bar() {
-///      A.foo()
-///    }
-///}
-///```
+///     bar() {
+///       A.foo()
+///     }
+///  }
+///  ```
 ///
     pub(crate) NoThisInStatic {
         version: "next",

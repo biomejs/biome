@@ -1086,6 +1086,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noThisInStatic": {
+					"description": "Disallow this/super in static methods",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
