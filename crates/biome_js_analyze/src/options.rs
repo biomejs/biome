@@ -14,9 +14,8 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
-use biome_deserialize::json::VisitJsonNode;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
@@ -50,6 +49,18 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
+    pub fn from_rule_name(rule_name: &str) -> Self {
+        match rule_name {
+            "noExcessiveCognitiveComplexity" => Self::Complexity(ComplexityOptions::default()),
+            "noRestrictedGlobals" => Self::RestrictedGlobals(RestrictedGlobalsOptions::default()),
+            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+                Self::Hooks(HooksOptions::default())
+            }
+            "useNamingConvention" => Self::NamingConvention(NamingConventionOptions::default()),
+            _ => Self::NoOptions,
+        }
+    }
+
     pub fn extract_option(&self, rule_key: &RuleKey) -> RuleOptions {
         match rule_key.rule_name() {
             "noExcessiveCognitiveComplexity" => {
@@ -84,14 +95,11 @@ impl PossibleOptions {
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
     }
-}
 
-impl PossibleOptions {
     pub fn map_to_rule_options(
         &mut self,
         value: &AnyJsonValue,
         name: &str,
-        rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         let value = JsonObjectValue::cast_ref(value.syntax()).or_else(|| {
@@ -106,91 +114,26 @@ impl PossibleOptions {
             let element = element.ok()?;
             let key = element.name().ok()?;
             let value = element.value().ok()?;
-            let name = key.inner_string_text().ok()?;
-            self.validate_key(&key, rule_name, diagnostics)?;
-            match name.text() {
-                "hooks" => {
-                    let mut options = HooksOptions::default();
-                    self.map_to_array(&value, &name, &mut options, diagnostics)?;
-                    *self = PossibleOptions::Hooks(options);
-                }
-                "maxAllowedComplexity" => {
-                    let mut options = ComplexityOptions::default();
+            match self {
+                PossibleOptions::Complexity(options) => {
+                    options.visit_member_name(key.syntax(), diagnostics)?;
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::Complexity(options);
                 }
-                "strictCase" | "enumMemberCase" => {
-                    let mut options = match self {
-                        PossibleOptions::NamingConvention(options) => options.clone(),
-                        _ => NamingConventionOptions::default(),
-                    };
+                PossibleOptions::Hooks(options) => {
+                    options.visit_member_name(key.syntax(), diagnostics)?;
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::NamingConvention(options);
                 }
-
-                "deniedGlobals" => {
-                    let mut options = match self {
-                        PossibleOptions::RestrictedGlobals(options) => options.clone(),
-                        _ => RestrictedGlobalsOptions::default(),
-                    };
+                PossibleOptions::NamingConvention(options) => {
+                    options.visit_member_name(key.syntax(), diagnostics)?;
                     options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::RestrictedGlobals(options);
                 }
-                _ => (),
+                PossibleOptions::RestrictedGlobals(options) => {
+                    options.visit_member_name(key.syntax(), diagnostics)?;
+                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
+                }
+                PossibleOptions::NoOptions => {}
             }
         }
-
-        Some(())
-    }
-
-    pub fn validate_key(
-        &mut self,
-        node: &JsonMemberName,
-        rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let key_name = node.inner_string_text().ok()?;
-        let key_name = key_name.text();
-        match rule_name {
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                if key_name != "hooks" {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["hooks"],
-                    ));
-                }
-            }
-            "useNamingConvention" => {
-                if !matches!(key_name, "strictCase" | "enumMemberCase") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["strictCase", "enumMemberCase"],
-                    ));
-                }
-            }
-            "noExcessiveComplexity" => {
-                if !matches!(key_name, "maxAllowedComplexity") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["maxAllowedComplexity"],
-                    ));
-                }
-            }
-            "noRestrictedGlobals" => {
-                if !matches!(key_name, "deniedGlobals") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["deniedGlobals"],
-                    ));
-                }
-            }
-            _ => {}
-        }
-
         Some(())
     }
 }

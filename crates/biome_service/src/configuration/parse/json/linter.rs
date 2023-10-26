@@ -92,9 +92,8 @@ impl RuleConfiguration {
                     }
                 }
                 "options" => {
-                    let mut possible_options = PossibleOptions::default();
-
-                    possible_options.map_to_rule_options(&value, name_text, rule_name, diagnostics);
+                    let mut possible_options = PossibleOptions::from_rule_name(rule_name);
+                    possible_options.map_to_rule_options(&value, name_text, diagnostics);
                     if let RuleConfiguration::WithOptions(options) = self {
                         options.options = Some(possible_options)
                     } else {
