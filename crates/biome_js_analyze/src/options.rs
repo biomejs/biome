@@ -22,7 +22,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PossibleOptions {
@@ -34,16 +34,14 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
-    /// No options available
-    #[default]
-    NoOptions,
 }
 
+// Required by [Bpaf].
 impl FromStr for PossibleOptions {
     type Err = ();
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::NoOptions)
+        Ok(Self::Complexity(ComplexityOptions::default()))
     }
 }
 
@@ -122,7 +120,6 @@ impl VisitNode<JsonLanguage> for PossibleOptions {
             PossibleOptions::RestrictedGlobals(options) => {
                 options.visit_map(key, value, diagnostics)?;
             }
-            PossibleOptions::NoOptions => {}
         }
         Some(())
     }

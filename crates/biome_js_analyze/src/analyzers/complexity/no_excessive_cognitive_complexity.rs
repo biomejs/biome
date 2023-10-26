@@ -389,6 +389,7 @@ impl Default for ComplexityOptions {
     }
 }
 
+// Required by [Bpaf].
 impl FromStr for ComplexityOptions {
     type Err = ();
 
