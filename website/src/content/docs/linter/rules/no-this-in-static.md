@@ -10,15 +10,15 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Disallow `this`/`super` in static methods
 
-In JavaScript, the `this` keyword within static methods refers to the class (the constructor) instance, 
-not an instance of the class. This can be confusing for developers coming from other languages where 
-`this` typically refers to an instance of the class, not the class itself. 
+In JavaScript, the `this` keyword within static methods refers to the class (the constructor) instance,
+not an instance of the class. This can be confusing for developers coming from other languages where
+`this` typically refers to an instance of the class, not the class itself.
 
-Similarly, `super` in static methods also refers to the parent class, not an instance of the parent class. 
+Similarly, `super` in static methods also refers to the parent class, not an instance of the parent class.
 This can lead to unexpected behavior if not properly understood.
 
-This rule enforces the use of the class name itself to access static methods, 
-which can make the code clearer and less prone to errors. It helps to prevent 
+This rule enforces the use of the class name itself to access static methods,
+which can make the code clearer and less prone to errors. It helps to prevent
 misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static methods.
 
 Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
