@@ -185,9 +185,7 @@ export interface OrganizeImports {
 	 */
 	include?: StringSet;
 }
-export interface Overrides {
-	list: OverridePattern[];
-}
+export type Overrides = OverridePattern[];
 /**
  * Set of properties to integrate Biome with a VCS software.
  */

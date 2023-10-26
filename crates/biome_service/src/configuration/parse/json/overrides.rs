@@ -20,8 +20,8 @@ impl VisitNode<JsonLanguage> for Overrides {
     ) -> Option<()> {
         let mut pattern = OverridePattern::default();
         let element = AnyJsonValue::cast_ref(element)?;
-        self.map_to_object(&element, "hooks", &mut pattern, diagnostics)?;
-        self.list.push(pattern);
+        self.map_to_object(&element, "overrides", &mut pattern, diagnostics)?;
+        self.0.push(pattern);
         Some(())
     }
 }
