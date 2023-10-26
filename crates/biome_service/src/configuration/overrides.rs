@@ -17,12 +17,8 @@ use std::str::FromStr;
 
 #[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct Overrides {
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[bpaf(hide)]
-    pub list: Vec<OverridePattern>,
-}
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Overrides(#[bpaf(hide)] pub Vec<OverridePattern>);
 
 impl FromStr for Overrides {
     type Err = String;
@@ -34,8 +30,8 @@ impl FromStr for Overrides {
 
 impl MergeWith<Overrides> for Overrides {
     fn merge_with(&mut self, other: Overrides) {
-        let mut self_iter = self.list.iter_mut();
-        let mut other_iter = other.list.into_iter();
+        let mut self_iter = self.0.iter_mut();
+        let mut other_iter = other.0.into_iter();
         while let (Some(self_item), Some(other_item)) = (self_iter.next(), other_iter.next()) {
             self_item.merge_with(other_item);
         }
@@ -45,8 +41,8 @@ impl MergeWith<Overrides> for Overrides {
     where
         Overrides: Default,
     {
-        let mut self_iter = self.list.iter_mut();
-        let mut other_iter = other.list.into_iter();
+        let mut self_iter = self.0.iter_mut();
+        let mut other_iter = other.0.into_iter();
         while let (Some(self_item), Some(other_item)) = (self_iter.next(), other_iter.next()) {
             self_item.merge_with_if_not_default(other_item);
         }
@@ -94,6 +90,7 @@ pub struct OverridePattern {
     #[bpaf(external(override_organize_imports_configuration), optional, hide)]
     pub organize_imports: Option<OverrideOrganizeImportsConfiguration>,
 }
+
 impl OverridePattern {
     pub const KNOWN_KEYS: &'static [&'static str] = &[
         "ignore",
@@ -359,7 +356,7 @@ impl TryFrom<Overrides> for OverrideSettings {
 
     fn try_from(overrides: Overrides) -> Result<Self, Self::Error> {
         let mut override_settings = OverrideSettings::default();
-        for mut pattern in overrides.list {
+        for mut pattern in overrides.0 {
             let formatter = pattern.formatter.take().unwrap_or_default();
             let formatter = OverrideFormatSettings::try_from(formatter)?;
 

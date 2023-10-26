@@ -1284,14 +1284,8 @@
 			"additionalProperties": false
 		},
 		"Overrides": {
-			"type": "object",
-			"properties": {
-				"list": {
-					"type": "array",
-					"items": { "$ref": "#/definitions/OverridePattern" }
-				}
-			},
-			"additionalProperties": false
+			"type": "array",
+			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
 		"Performance": {
 			"description": "A list of rules that belong to this group",
