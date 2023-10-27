@@ -4,40 +4,370 @@ expression: invalid.ts
 ---
 # Input
 ```js
-type PossibleValues = string | number | void;
-type MorePossibleValues = string | ((number & any) | (string | void));
-
-function logSomething(thing: void) {}
-function printArg<T = void>(arg: T) {}
-logAndReturn<void>(undefined);
-
-let voidPromise: Promise<void> = new Promise<void>(() => { });
-let voidMap: Map<string, void> = new Map<string, void>();
+// ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
+function takeVoid(thing: void) {}
+const arrowGeneric = <T extends void>(arg: T) => {};
+const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+function functionGeneric<T extends void>(arg: T) {}
+function functionGeneric2<T extends void = void>(arg: T) {}
+declare function functionDeclaration<T extends void>(arg: T): void;
+declare function functionDeclaration2<T extends void = void>(arg: T): void;
+functionGeneric<void>(undefined);
+declare function voidArray(args: void[]): void[];
+let value = undefined as void;
+let value = <void>undefined;
+function takesThings(...things: void[]): void {}
+type KeyofVoid = keyof void;
 
 interface Interface {
-	prop: void;
+  lambda: () => void;
+  voidProp: void;
 }
 
-class MyClass {
-	private readonly propName: void;
+class ClassName {
+  private readonly propName: void;
+}
+let letVoid: void;
+type VoidType = void;
+class OtherClassName {
+  private propName: VoidType;
 }
 
-let foo: void;
-let bar = 1 as unknown as void;
-let baz = 1 as unknown as void | string;
+type UnionType = string | number | void;
+type UnionType = string | ((number & any) | (string | void));
+declare function test(): number | void;
+declare function test<T extends number | void>(): T;
+type IntersectionType = string & number & void;
+
+type MappedType<T> = {
+  [K in keyof T]: void;
+};
+
+type ConditionalType<T> = {
+  [K in keyof T]: T[K] extends string ? void : string;
+};
+type ManyVoid = readonly void[];
+function foo(arr: readonly void[]) {}
+type invalidVoidUnion = void | Map<string, number>;
 
 ```
 
 # Diagnostics
 ```
-invalid.ts:1:41 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:26 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
+  > 2 │ function takeVoid(thing: void) {}
+      │                          ^^^^
+    3 │ const arrowGeneric = <T extends void>(arg: T) => {};
+    4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:3:33 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
+    2 │ function takeVoid(thing: void) {}
+  > 3 │ const arrowGeneric = <T extends void>(arg: T) => {};
+      │                                 ^^^^
+    4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+    5 │ function functionGeneric<T extends void>(arg: T) {}
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:4:34 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    2 │ function takeVoid(thing: void) {}
+    3 │ const arrowGeneric = <T extends void>(arg: T) => {};
+  > 4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+      │                                  ^^^^
+    5 │ function functionGeneric<T extends void>(arg: T) {}
+    6 │ function functionGeneric2<T extends void = void>(arg: T) {}
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:5:36 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    3 │ const arrowGeneric = <T extends void>(arg: T) => {};
+    4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+  > 5 │ function functionGeneric<T extends void>(arg: T) {}
+      │                                    ^^^^
+    6 │ function functionGeneric2<T extends void = void>(arg: T) {}
+    7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:6:37 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+    5 │ function functionGeneric<T extends void>(arg: T) {}
+  > 6 │ function functionGeneric2<T extends void = void>(arg: T) {}
+      │                                     ^^^^
+    7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+    8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:7:48 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    5 │ function functionGeneric<T extends void>(arg: T) {}
+    6 │ function functionGeneric2<T extends void = void>(arg: T) {}
+  > 7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+      │                                                ^^^^
+    8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+    9 │ functionGeneric<void>(undefined);
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:8:49 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+     6 │ function functionGeneric2<T extends void = void>(arg: T) {}
+     7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+   > 8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+       │                                                 ^^^^
+     9 │ functionGeneric<void>(undefined);
+    10 │ declare function voidArray(args: void[]): void[];
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:9:17 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+     7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+   > 9 │ functionGeneric<void>(undefined);
+       │                 ^^^^
+    10 │ declare function voidArray(args: void[]): void[];
+    11 │ let value = undefined as void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:10:34 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+     9 │ functionGeneric<void>(undefined);
+  > 10 │ declare function voidArray(args: void[]): void[];
+       │                                  ^^^^
+    11 │ let value = undefined as void;
+    12 │ let value = <void>undefined;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:10:43 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
+     9 │ functionGeneric<void>(undefined);
+  > 10 │ declare function voidArray(args: void[]): void[];
+       │                                           ^^^^
+    11 │ let value = undefined as void;
+    12 │ let value = <void>undefined;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:11:26 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+     9 │ functionGeneric<void>(undefined);
+    10 │ declare function voidArray(args: void[]): void[];
+  > 11 │ let value = undefined as void;
+       │                          ^^^^
+    12 │ let value = <void>undefined;
+    13 │ function takesThings(...things: void[]): void {}
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:12:14 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    10 │ declare function voidArray(args: void[]): void[];
+    11 │ let value = undefined as void;
+  > 12 │ let value = <void>undefined;
+       │              ^^^^
+    13 │ function takesThings(...things: void[]): void {}
+    14 │ type KeyofVoid = keyof void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:13:33 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    11 │ let value = undefined as void;
+    12 │ let value = <void>undefined;
+  > 13 │ function takesThings(...things: void[]): void {}
+       │                                 ^^^^
+    14 │ type KeyofVoid = keyof void;
+    15 │ 
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:14:24 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    12 │ let value = <void>undefined;
+    13 │ function takesThings(...things: void[]): void {}
+  > 14 │ type KeyofVoid = keyof void;
+       │                        ^^^^
+    15 │ 
+    16 │ interface Interface {
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:18:13 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    16 │ interface Interface {
+    17 │   lambda: () => void;
+  > 18 │   voidProp: void;
+       │             ^^^^
+    19 │ }
+    20 │ 
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:22:30 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    21 │ class ClassName {
+  > 22 │   private readonly propName: void;
+       │                              ^^^^
+    23 │ }
+    24 │ let letVoid: void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:24:14 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    22 │   private readonly propName: void;
+    23 │ }
+  > 24 │ let letVoid: void;
+       │              ^^^^
+    25 │ type VoidType = void;
+    26 │ class OtherClassName {
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:25:17 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    23 │ }
+    24 │ let letVoid: void;
+  > 25 │ type VoidType = void;
+       │                 ^^^^
+    26 │ class OtherClassName {
+    27 │   private propName: VoidType;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:30:36 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
-  > 1 │ type PossibleValues = string | number | void;
-      │                                         ^^^^
-    2 │ type MorePossibleValues = string | ((number & any) | (string | void));
-    3 │ 
+    28 │ }
+    29 │ 
+  > 30 │ type UnionType = string | number | void;
+       │                                    ^^^^
+    31 │ type UnionType = string | ((number & any) | (string | void));
+    32 │ declare function test(): number | void;
   
   i Remove void
   
@@ -45,15 +375,15 @@ invalid.ts:1:41 lint/suspicious/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:2:64 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:31:55 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
-    1 │ type PossibleValues = string | number | void;
-  > 2 │ type MorePossibleValues = string | ((number & any) | (string | void));
-      │                                                                ^^^^
-    3 │ 
-    4 │ function logSomething(thing: void) {}
+    30 │ type UnionType = string | number | void;
+  > 31 │ type UnionType = string | ((number & any) | (string | void));
+       │                                                       ^^^^
+    32 │ declare function test(): number | void;
+    33 │ declare function test<T extends number | void>(): T;
   
   i Remove void
   
@@ -61,97 +391,132 @@ invalid.ts:2:64 lint/suspicious/noConfusingVoidType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:4:30 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-    2 │ type MorePossibleValues = string | ((number & any) | (string | void));
-    3 │ 
-  > 4 │ function logSomething(thing: void) {}
-      │                              ^^^^
-    5 │ function printArg<T = void>(arg: T) {}
-    6 │ logAndReturn<void>(undefined);
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:12:8 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-    11 │ interface Interface {
-  > 12 │ 	prop: void;
-       │ 	      ^^^^
-    13 │ }
-    14 │ 
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:16:29 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-    15 │ class MyClass {
-  > 16 │ 	private readonly propName: void;
-       │ 	                           ^^^^
-    17 │ }
-    18 │ 
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:19:10 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-    17 │ }
-    18 │ 
-  > 19 │ let foo: void;
-       │          ^^^^
-    20 │ let bar = 1 as unknown as void;
-    21 │ let baz = 1 as unknown as void | string;
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:20:27 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-    19 │ let foo: void;
-  > 20 │ let bar = 1 as unknown as void;
-       │                           ^^^^
-    21 │ let baz = 1 as unknown as void | string;
-    22 │ 
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:21:27 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:32:35 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! void is not valid as a constituent in a union type
   
-    19 │ let foo: void;
-    20 │ let bar = 1 as unknown as void;
-  > 21 │ let baz = 1 as unknown as void | string;
-       │                           ^^^^
-    22 │ 
+    30 │ type UnionType = string | number | void;
+    31 │ type UnionType = string | ((number & any) | (string | void));
+  > 32 │ declare function test(): number | void;
+       │                                   ^^^^
+    33 │ declare function test<T extends number | void>(): T;
+    34 │ type IntersectionType = string & number & void;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:33:42 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is not valid as a constituent in a union type
+  
+    31 │ type UnionType = string | ((number & any) | (string | void));
+    32 │ declare function test(): number | void;
+  > 33 │ declare function test<T extends number | void>(): T;
+       │                                          ^^^^
+    34 │ type IntersectionType = string & number & void;
+    35 │ 
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:34:43 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    32 │ declare function test(): number | void;
+    33 │ declare function test<T extends number | void>(): T;
+  > 34 │ type IntersectionType = string & number & void;
+       │                                           ^^^^
+    35 │ 
+    36 │ type MappedType<T> = {
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:37:19 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    36 │ type MappedType<T> = {
+  > 37 │   [K in keyof T]: void;
+       │                   ^^^^
+    38 │ };
+    39 │ 
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:41:41 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    40 │ type ConditionalType<T> = {
+  > 41 │   [K in keyof T]: T[K] extends string ? void : string;
+       │                                         ^^^^
+    42 │ };
+    43 │ type ManyVoid = readonly void[];
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:43:26 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    41 │   [K in keyof T]: T[K] extends string ? void : string;
+    42 │ };
+  > 43 │ type ManyVoid = readonly void[];
+       │                          ^^^^
+    44 │ function foo(arr: readonly void[]) {}
+    45 │ type invalidVoidUnion = void | Map<string, number>;
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:44:28 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is only valid as a return type or a type argument in generic type
+  
+    42 │ };
+    43 │ type ManyVoid = readonly void[];
+  > 44 │ function foo(arr: readonly void[]) {}
+       │                            ^^^^
+    45 │ type invalidVoidUnion = void | Map<string, number>;
+    46 │ 
+  
+  i Remove void
+  
+
+```
+
+```
+invalid.ts:45:25 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is not valid as a constituent in a union type
+  
+    43 │ type ManyVoid = readonly void[];
+    44 │ function foo(arr: readonly void[]) {}
+  > 45 │ type invalidVoidUnion = void | Map<string, number>;
+       │                         ^^^^
+    46 │ 
   
   i Remove void
   
