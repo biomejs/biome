@@ -14,17 +14,15 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
-use biome_deserialize::json::VisitJsonNode;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMemberName, JsonObjectValue};
-use biome_rowan::AstNode;
+use biome_json_syntax::JsonLanguage;
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PossibleOptions {
@@ -36,20 +34,36 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
-    /// No options available
-    #[default]
-    NoOptions,
 }
 
+// Required by [Bpaf].
 impl FromStr for PossibleOptions {
     type Err = ();
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::NoOptions)
+        Ok(Self::Complexity(ComplexityOptions::default()))
     }
 }
 
 impl PossibleOptions {
+    pub fn new_from_rule_name(rule_name: &str) -> Option<Self> {
+        match rule_name {
+            "noExcessiveCognitiveComplexity" => {
+                Some(Self::Complexity(ComplexityOptions::default()))
+            }
+            "noRestrictedGlobals" => {
+                Some(Self::RestrictedGlobals(RestrictedGlobalsOptions::default()))
+            }
+            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+                Some(Self::Hooks(HooksOptions::default()))
+            }
+            "useNamingConvention" => {
+                Some(Self::NamingConvention(NamingConventionOptions::default()))
+            }
+            _ => None,
+        }
+    }
+
     pub fn extract_option(&self, rule_key: &RuleKey) -> RuleOptions {
         match rule_key.rule_name() {
             "noExcessiveCognitiveComplexity" => {
@@ -86,113 +100,27 @@ impl PossibleOptions {
     }
 }
 
-impl PossibleOptions {
-    pub fn map_to_rule_options(
+impl VisitNode<JsonLanguage> for PossibleOptions {
+    fn visit_map(
         &mut self,
-        value: &AnyJsonValue,
-        name: &str,
-        rule_name: &str,
+        key: &biome_rowan::SyntaxNode<JsonLanguage>,
+        value: &biome_rowan::SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let value = JsonObjectValue::cast_ref(value.syntax()).or_else(|| {
-            diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
-                name,
-                "object",
-                value.range(),
-            ));
-            None
-        })?;
-        for element in value.json_member_list() {
-            let element = element.ok()?;
-            let key = element.name().ok()?;
-            let value = element.value().ok()?;
-            let name = key.inner_string_text().ok()?;
-            self.validate_key(&key, rule_name, diagnostics)?;
-            match name.text() {
-                "hooks" => {
-                    let mut options = HooksOptions::default();
-                    self.map_to_array(&value, &name, &mut options, diagnostics)?;
-                    *self = PossibleOptions::Hooks(options);
-                }
-                "maxAllowedComplexity" => {
-                    let mut options = ComplexityOptions::default();
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::Complexity(options);
-                }
-                "strictCase" | "enumMemberCase" => {
-                    let mut options = match self {
-                        PossibleOptions::NamingConvention(options) => options.clone(),
-                        _ => NamingConventionOptions::default(),
-                    };
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::NamingConvention(options);
-                }
-
-                "deniedGlobals" => {
-                    let mut options = match self {
-                        PossibleOptions::RestrictedGlobals(options) => options.clone(),
-                        _ => RestrictedGlobalsOptions::default(),
-                    };
-                    options.visit_map(key.syntax(), value.syntax(), diagnostics)?;
-                    *self = PossibleOptions::RestrictedGlobals(options);
-                }
-                _ => (),
+        match self {
+            PossibleOptions::Complexity(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::Hooks(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::NamingConvention(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::RestrictedGlobals(options) => {
+                options.visit_map(key, value, diagnostics)?;
             }
         }
-
-        Some(())
-    }
-
-    pub fn validate_key(
-        &mut self,
-        node: &JsonMemberName,
-        rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let key_name = node.inner_string_text().ok()?;
-        let key_name = key_name.text();
-        match rule_name {
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                if key_name != "hooks" {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["hooks"],
-                    ));
-                }
-            }
-            "useNamingConvention" => {
-                if !matches!(key_name, "strictCase" | "enumMemberCase") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["strictCase", "enumMemberCase"],
-                    ));
-                }
-            }
-            "noExcessiveComplexity" => {
-                if !matches!(key_name, "maxAllowedComplexity") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["maxAllowedComplexity"],
-                    ));
-                }
-            }
-            "noRestrictedGlobals" => {
-                if !matches!(key_name, "deniedGlobals") {
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key_name,
-                        node.range(),
-                        &["deniedGlobals"],
-                    ));
-                }
-            }
-            _ => {}
-        }
-
         Some(())
     }
 }
-
-impl VisitNode<JsonLanguage> for PossibleOptions {}

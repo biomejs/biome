@@ -57,54 +57,29 @@ impl RuleConfiguration {
     pub(crate) fn map_rule_configuration(
         &mut self,
         value: &AnyJsonValue,
-        key_name: &str,
         rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let value = JsonObjectValue::cast_ref(value.syntax()).or_else(|| {
-            diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
-                key_name,
-                "object",
-                value.range(),
-            ));
-            None
-        })?;
-        for element in value.json_member_list() {
-            let element = element.ok()?;
-            let key = element.name().ok()?;
-            let value = element.value().ok()?;
-            let (name, value) =
-                self.get_key_and_value(key.syntax(), value.syntax(), diagnostics)?;
-            let name_text = name.text();
-            match name_text {
-                "level" => {
-                    if let RuleConfiguration::WithOptions(options) = self {
-                        let mut level = RulePlainConfiguration::default();
-                        level.visit_member_value(value.syntax(), diagnostics)?;
-                        options.level = level;
-                    } else {
-                        let mut level = RulePlainConfiguration::default();
-                        level.visit_member_value(value.syntax(), diagnostics)?;
-                        *self = RuleConfiguration::WithOptions(RuleWithOptions {
-                            level,
-                            ..RuleWithOptions::default()
-                        })
-                    }
-                }
-                "options" => {
-                    let mut possible_options = PossibleOptions::default();
-
-                    possible_options.map_to_rule_options(&value, name_text, rule_name, diagnostics);
-                    if let RuleConfiguration::WithOptions(options) = self {
-                        options.options = Some(possible_options)
-                    } else {
-                        *self = RuleConfiguration::WithOptions(RuleWithOptions {
-                            options: Some(possible_options),
-                            ..RuleWithOptions::default()
-                        })
-                    }
-                }
-                _ => {}
+        match value {
+            AnyJsonValue::JsonStringValue(_) => {
+                let mut configuration = RuleConfiguration::default();
+                self.map_to_known_string(value, rule_name, &mut configuration, diagnostics)?;
+                *self = configuration;
+            }
+            AnyJsonValue::JsonObjectValue(_) => {
+                let with_options = RuleWithOptions {
+                    level: RulePlainConfiguration::default(),
+                    options: PossibleOptions::new_from_rule_name(rule_name),
+                };
+                let mut configuration = RuleConfiguration::WithOptions(with_options);
+                self.map_to_object(value, rule_name, &mut configuration, diagnostics)?;
+                *self = configuration;
+            }
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
+                    "object or string",
+                    value.range(),
+                ));
             }
         }
         Some(())
@@ -125,18 +100,20 @@ impl VisitNode<JsonLanguage> for RuleConfiguration {
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, RulePlainConfiguration::KNOWN_KEYS, diagnostics)?;
-        match node.inner_string_text().ok()?.text() {
-            "error" => {
-                *self = RuleConfiguration::Plain(RulePlainConfiguration::Error);
-            }
-            "warn" => {
-                *self = RuleConfiguration::Plain(RulePlainConfiguration::Warn);
-            }
-            "off" => {
-                *self = RuleConfiguration::Plain(RulePlainConfiguration::Off);
-            }
-            _ => {}
+        if let Self::Plain(plain) = self {
+            plain.visit_member_value(node, diagnostics)?;
+        }
+        Some(())
+    }
+
+    fn visit_map(
+        &mut self,
+        key: &SyntaxNode<JsonLanguage>,
+        value: &SyntaxNode<JsonLanguage>,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<()> {
+        if let Self::WithOptions(with_options) = self {
+            with_options.visit_map(key, value, diagnostics)?;
         }
         Some(())
     }
@@ -186,12 +163,10 @@ impl VisitNode<JsonLanguage> for RuleWithOptions {
 
         match name_text {
             "level" => {
-                let mut rule_options = RulePlainConfiguration::default();
-                rule_options.visit_member_value(value.syntax(), diagnostics)?;
-                self.level = rule_options;
+                self.level.visit_member_value(value.syntax(), diagnostics)?;
             }
             "options" => {
-                let mut possible_options = PossibleOptions::default();
+                let mut possible_options = self.options.take()?;
                 self.map_to_object(&value, name_text, &mut possible_options, diagnostics);
                 self.options = Some(possible_options);
             }
