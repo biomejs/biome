@@ -687,7 +687,7 @@ impl AnyJsAssignmentLike {
             return Ok(AssignmentLikeLayout::BreakLeftHandSide);
         }
 
-        if self.should_break_after_operator(&right, f.context().comments())? {
+        if self.should_break_after_operator(&right, f)? {
             return Ok(AssignmentLikeLayout::BreakAfterOperator);
         }
 
@@ -885,15 +885,16 @@ impl AnyJsAssignmentLike {
     fn should_break_after_operator(
         &self,
         right: &RightAssignmentLike,
-        comments: &JsComments,
+        f: &Formatter<JsFormatContext>,
     ) -> SyntaxResult<bool> {
+        let comments = f.context().comments();
         let result = match right {
             RightAssignmentLike::AnyJsExpression(expression) => {
-                should_break_after_operator(expression, comments)?
+                should_break_after_operator(expression, comments, f)?
             }
             RightAssignmentLike::JsInitializerClause(initializer) => {
                 comments.has_leading_own_line_comment(initializer.syntax())
-                    || should_break_after_operator(&initializer.expression()?, comments)?
+                    || should_break_after_operator(&initializer.expression()?, comments, f)?
             }
             RightAssignmentLike::AnyTsType(AnyTsType::TsUnionType(ty)) => {
                 comments.has_leading_comments(ty.syntax())
@@ -909,6 +910,7 @@ impl AnyJsAssignmentLike {
 pub(crate) fn should_break_after_operator(
     right: &AnyJsExpression,
     comments: &JsComments,
+    f: &Formatter<JsFormatContext>,
 ) -> SyntaxResult<bool> {
     if comments.has_leading_own_line_comment(right.syntax())
         && !matches!(right, AnyJsExpression::JsxTagExpression(_))
@@ -941,7 +943,23 @@ pub(crate) fn should_break_after_operator(
 
         AnyJsExpression::JsClassExpression(class) => !class.decorators().is_empty(),
 
-        _ => false,
+        _ => {
+            let argument = match right {
+                AnyJsExpression::JsAwaitExpression(expression) => expression.argument().ok(),
+                AnyJsExpression::JsYieldExpression(expression) => {
+                    expression.argument().and_then(|arg| arg.expression().ok())
+                }
+                AnyJsExpression::JsUnaryExpression(expression) => expression.argument().ok(),
+                _ => None,
+            };
+
+            if let Some(argument) = argument {
+                matches!(argument, AnyJsExpression::AnyJsLiteralExpression(_))
+                    || is_poorly_breakable_member_or_call_chain(&argument, f)?
+            } else {
+                false
+            }
+        }
     };
 
     Ok(result)

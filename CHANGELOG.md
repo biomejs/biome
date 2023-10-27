@@ -20,6 +20,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Apply the correct layout when the right hand of an assignment expression is a await expression or a yield expression. Contributed by @ematipico
+
 ### JavaScript APIs
 
 ### Linter

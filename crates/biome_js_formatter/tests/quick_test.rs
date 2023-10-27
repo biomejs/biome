@@ -12,17 +12,8 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"
-        (action: h) => {}
-        (action?) => {}
-        (action
-        // yes
-        ) => {}
-        ({ action }) => {}
-        ([ action ]) => {}
-        (...action) => {}
-        (action = 1) => {}
-    "#;
+    let src =
+        r#"const { looooooooooooooooooooooooooooooooooooooooooooongValue } = await setup(2);"#;
     let syntax = JsFileSource::tsx();
     let tree = parse(
         src,
@@ -48,16 +39,8 @@ fn quick_test() {
     // I don't know why semicolons are added there, but it's not related to my code changes so ¯\_(ツ)_/¯
     assert_eq!(
         result.as_code(),
-        r#"(action: h) => {};
-(action?) => {};
-(
-	action,
-	// yes
-) => {};
-({ action }) => {};
-([action]) => {};
-(...action) => {};
-(action = 1) => {};
+        r#"const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+    await setup(2);
 "#
     );
 }
