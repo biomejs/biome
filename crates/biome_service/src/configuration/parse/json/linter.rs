@@ -69,7 +69,7 @@ impl RuleConfiguration {
             AnyJsonValue::JsonObjectValue(_) => {
                 let with_options = RuleWithOptions {
                     level: RulePlainConfiguration::default(),
-                    options: PossibleOptions::try_from_rule_name(rule_name),
+                    options: PossibleOptions::new_from_rule_name(rule_name),
                 };
                 let mut configuration = RuleConfiguration::WithOptions(with_options);
                 self.map_to_object(value, rule_name, &mut configuration, diagnostics)?;

@@ -46,7 +46,7 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
-    pub fn try_from_rule_name(rule_name: &str) -> Option<Self> {
+    pub fn new_from_rule_name(rule_name: &str) -> Option<Self> {
         match rule_name {
             "noExcessiveCognitiveComplexity" => {
                 Some(Self::Complexity(ComplexityOptions::default()))
