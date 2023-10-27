@@ -2,7 +2,7 @@ use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
@@ -229,6 +229,10 @@ pub struct HooksOptions {
     pub hooks: Vec<Hooks>,
 }
 
+impl HooksOptions {
+    const ALLOWED_KEYS: &'static [&'static str] = &["hooks"];
+}
+
 impl FromStr for HooksOptions {
     type Err = ();
 
@@ -255,26 +259,19 @@ pub struct Hooks {
 }
 
 impl Hooks {
-    const KNOWN_KEYS: &'static [&'static str] = &["name", "closureIndex", "dependenciesIndex"];
+    const ALLOWED_KEYS: &'static [&'static str] = &["name", "closureIndex", "dependenciesIndex"];
 }
 
 impl VisitNode<JsonLanguage> for Hooks {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, Hooks::KNOWN_KEYS, diagnostics)
-    }
-
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "name" => {
                 self.name = self.map_to_string(&value, name_text, diagnostics)?;
@@ -294,7 +291,9 @@ impl VisitNode<JsonLanguage> for Hooks {
                 self.dependencies_index =
                     self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())
@@ -310,22 +309,15 @@ impl FromStr for Hooks {
 }
 
 impl VisitNode<JsonLanguage> for HooksOptions {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, &["hooks"], diagnostics)
-    }
-
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         if name_text == "hooks" {
             let array = value.as_json_array_value()?;
             if array.elements().len() < 1 {
@@ -342,6 +334,8 @@ impl VisitNode<JsonLanguage> for HooksOptions {
                 hooks.map_to_object(&element, "hooks", diagnostics)?;
                 self.hooks.push(hooks);
             }
+        } else {
+            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
         Some(())
     }

@@ -62,16 +62,6 @@ impl FormatterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
     }
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
-        "enabled",
-        "formatWithErrors",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-        "ignore",
-        "include",
-    ];
 }
 
 impl Default for FormatterConfiguration {
@@ -227,10 +217,6 @@ pub enum PlainIndentStyle {
     Tab,
     /// Space
     Space,
-}
-
-impl PlainIndentStyle {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["tab", "space"];
 }
 
 impl FromStr for PlainIndentStyle {

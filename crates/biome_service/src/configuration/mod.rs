@@ -122,18 +122,6 @@ impl Default for Configuration {
 }
 
 impl Configuration {
-    const KNOWN_KEYS: &'static [&'static str] = &[
-        "vcs",
-        "files",
-        "linter",
-        "formatter",
-        "javascript",
-        "json",
-        "$schema",
-        "organizeImports",
-        "extends",
-        "overrides",
-    ];
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter
             .as_ref()
@@ -390,10 +378,6 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     pub ignore_unknown: Option<bool>,
-}
-
-impl FilesConfiguration {
-    const KNOWN_KEYS: &'static [&'static str] = &["maxSize", "ignore", "include", "ignoreUnknown"];
 }
 
 impl MergeWith<FilesConfiguration> for FilesConfiguration {

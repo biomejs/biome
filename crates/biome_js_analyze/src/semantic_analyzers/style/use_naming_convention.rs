@@ -12,7 +12,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
+    json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };
 use biome_diagnostics::Applicability;
@@ -24,7 +24,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
 use biome_js_unicode_table::is_js_ident;
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonLanguage, JsonStringValue};
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,
 };
@@ -455,6 +455,10 @@ pub struct NamingConventionOptions {
     pub enum_member_case: EnumMemberCase,
 }
 
+impl NamingConventionOptions {
+    const ALLOWED_KEYS: &'static [&'static str] = &["strictCase", "enumMemberCase"];
+}
+
 const fn default_strict_case() -> bool {
     true
 }
@@ -465,10 +469,6 @@ const fn is_default_strict_case(strict_case: &bool) -> bool {
 
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()
-}
-
-impl NamingConventionOptions {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["strictCase", "enumMemberCase"];
 }
 
 impl Default for NamingConventionOptions {
@@ -491,22 +491,15 @@ impl FromStr for NamingConventionOptions {
 }
 
 impl VisitNode<JsonLanguage> for NamingConventionOptions {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, Self::KNOWN_KEYS, diagnostics)
-    }
-
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "strictCase" => {
                 self.strict_case = self.map_to_boolean(&value, name_text, diagnostics)?
@@ -515,7 +508,9 @@ impl VisitNode<JsonLanguage> for NamingConventionOptions {
                 self.enum_member_case
                     .map_to_known_string(&value, name_text, diagnostics)?;
             }
-            _ => (),
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
         Some(())
     }
@@ -539,10 +534,6 @@ pub enum EnumMemberCase {
     Camel,
 }
 
-impl EnumMemberCase {
-    pub const KNOWN_VALUES: &'static [&'static str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
-}
-
 impl FromStr for EnumMemberCase {
     type Err = &'static str;
 
@@ -551,20 +542,26 @@ impl FromStr for EnumMemberCase {
             "PascalCase" => Ok(Self::Pascal),
             "CONSTANT_CASE" => Ok(Self::Constant),
             "camelCase" => Ok(Self::Camel),
-            _ => Err("value not supported for enum member case"),
+            _ => Err("Value not supported for enum member case"),
         }
     }
 }
 
+impl EnumMemberCase {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
+}
+
 impl VisitNode<JsonLanguage> for EnumMemberCase {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, Self::KNOWN_VALUES, diagnostics)?;
+        let node = JsonStringValue::cast_ref(node)?;
         if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
             *self = value;
+        } else {
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }

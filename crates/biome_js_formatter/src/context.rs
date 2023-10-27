@@ -1,6 +1,6 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
-use biome_deserialize::json::with_only_known_variants;
+use biome_deserialize::json::report_unknown_variant;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::token::string::Quote;
@@ -9,8 +9,8 @@ use biome_formatter::{
     LineWidth, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
+use biome_json_syntax::{JsonLanguage, JsonStringValue};
+use biome_rowan::{AstNode, SyntaxNode};
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -328,8 +328,6 @@ impl fmt::Display for QuoteStyle {
 }
 
 impl QuoteStyle {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["double", "single"];
-
     pub fn as_char(&self) -> char {
         match self {
             QuoteStyle::Double => '"',
@@ -376,23 +374,27 @@ impl QuoteStyle {
 impl From<QuoteStyle> for Quote {
     fn from(quote: QuoteStyle) -> Self {
         match quote {
-            QuoteStyle::Double => Quote::Double,
-            QuoteStyle::Single => Quote::Single,
+            QuoteStyle::Double => Self::Double,
+            QuoteStyle::Single => Self::Single,
         }
     }
 }
 
+impl QuoteStyle {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["double", "single"];
+}
+
 impl VisitNode<JsonLanguage> for QuoteStyle {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, QuoteStyle::KNOWN_VALUES, diagnostics)?;
-        if node.inner_string_text().ok()?.text() == "single" {
-            *self = QuoteStyle::Single;
+        let node = JsonStringValue::cast_ref(node)?;
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
         } else {
-            *self = QuoteStyle::Double;
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }
@@ -433,20 +435,20 @@ impl fmt::Display for QuoteProperties {
 }
 
 impl QuoteProperties {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["preserve", "asNeeded"];
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["preserve", "asNeeded"];
 }
 
 impl VisitNode<JsonLanguage> for QuoteProperties {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, QuoteProperties::KNOWN_VALUES, diagnostics)?;
-        if node.inner_string_text().ok()?.text() == "asNeeded" {
-            *self = QuoteProperties::AsNeeded;
-        } else {
-            *self = QuoteProperties::Preserve;
+        let node = JsonStringValue::cast_ref(node)?;
+        match node.inner_string_text().ok()?.text() {
+            "asNeeded" => *self = Self::AsNeeded,
+            "preserve" => *self = Self::Preserve,
+            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
         }
         Some(())
     }
@@ -465,8 +467,6 @@ pub enum Semicolons {
 }
 
 impl Semicolons {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["always", "asNeeded"];
-
     pub const fn is_as_needed(&self) -> bool {
         matches!(self, Self::AsNeeded)
     }
@@ -497,17 +497,21 @@ impl fmt::Display for Semicolons {
     }
 }
 
+impl Semicolons {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["always", "asNeeded"];
+}
+
 impl VisitNode<JsonLanguage> for Semicolons {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, Semicolons::KNOWN_VALUES, diagnostics)?;
-        if node.inner_string_text().ok()?.text() == "asNeeded" {
-            *self = Semicolons::AsNeeded;
-        } else {
-            *self = Semicolons::Always;
+        let node = JsonStringValue::cast_ref(node)?;
+        match node.inner_string_text().ok()?.text() {
+            "asNeeded" => *self = Self::AsNeeded,
+            "always" => *self = Self::Always,
+            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
         }
         Some(())
     }
@@ -526,8 +530,6 @@ pub enum ArrowParentheses {
 }
 
 impl ArrowParentheses {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["always", "asNeeded"];
-
     pub const fn is_as_needed(&self) -> bool {
         matches!(self, Self::AsNeeded)
     }
@@ -543,8 +545,8 @@ impl FromStr for ArrowParentheses {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed" => Ok(Self::AsNeeded),
-            "always" => Ok(Self::Always),
+            "as-needed" | "AsNeeded" => Ok(Self::AsNeeded),
+            "always" | "Always" => Ok(Self::Always),
             _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
         }
     }
@@ -559,17 +561,21 @@ impl fmt::Display for ArrowParentheses {
     }
 }
 
+impl ArrowParentheses {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["asNeeded", "always"];
+}
+
 impl VisitNode<JsonLanguage> for ArrowParentheses {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, ArrowParentheses::KNOWN_VALUES, diagnostics)?;
-        if node.inner_string_text().ok()?.text() == "asNeeded" {
-            *self = ArrowParentheses::AsNeeded;
-        } else {
-            *self = ArrowParentheses::Always;
+        let node = JsonStringValue::cast_ref(node)?;
+        match node.inner_string_text().ok()?.text() {
+            "asNeeded" => *self = Self::AsNeeded,
+            "always" => *self = Self::Always,
+            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
         }
         Some(())
     }

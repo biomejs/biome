@@ -3,41 +3,20 @@
 use crate::configuration::linter::*;
 use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 use crate::Rules;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
 impl VisitNode<JsonLanguage> for Rules {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "a11y",
-                "complexity",
-                "correctness",
-                "nursery",
-                "performance",
-                "security",
-                "style",
-                "suspicious",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -101,60 +80,38 @@ impl VisitNode<JsonLanguage> for Rules {
                     self.suspicious = Some(visitor);
                 }
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "a11y",
+                        "complexity",
+                        "correctness",
+                        "nursery",
+                        "performance",
+                        "security",
+                        "style",
+                        "suspicious",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for A11y {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noAccessKey",
-                "noAriaUnsupportedElements",
-                "noAutofocus",
-                "noBlankTarget",
-                "noDistractingElements",
-                "noHeaderScope",
-                "noNoninteractiveElementToInteractiveRole",
-                "noNoninteractiveTabindex",
-                "noPositiveTabindex",
-                "noRedundantAlt",
-                "noRedundantRoles",
-                "noSvgWithoutTitle",
-                "useAltText",
-                "useAnchorContent",
-                "useAriaPropsForRole",
-                "useButtonType",
-                "useHeadingContent",
-                "useHtmlLang",
-                "useIframeTitle",
-                "useKeyWithClickEvents",
-                "useKeyWithMouseEvents",
-                "useMediaCaption",
-                "useValidAnchor",
-                "useValidAriaProps",
-                "useValidAriaValues",
-                "useValidLang",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -316,56 +273,56 @@ impl VisitNode<JsonLanguage> for A11y {
                 configuration.map_rule_configuration(&value, "useValidLang", diagnostics)?;
                 self.use_valid_lang = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noAccessKey",
+                        "noAriaUnsupportedElements",
+                        "noAutofocus",
+                        "noBlankTarget",
+                        "noDistractingElements",
+                        "noHeaderScope",
+                        "noNoninteractiveElementToInteractiveRole",
+                        "noNoninteractiveTabindex",
+                        "noPositiveTabindex",
+                        "noRedundantAlt",
+                        "noRedundantRoles",
+                        "noSvgWithoutTitle",
+                        "useAltText",
+                        "useAnchorContent",
+                        "useAriaPropsForRole",
+                        "useButtonType",
+                        "useHeadingContent",
+                        "useHtmlLang",
+                        "useIframeTitle",
+                        "useKeyWithClickEvents",
+                        "useKeyWithMouseEvents",
+                        "useMediaCaption",
+                        "useValidAnchor",
+                        "useValidAriaProps",
+                        "useValidAriaValues",
+                        "useValidLang",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Complexity {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noBannedTypes",
-                "noExcessiveCognitiveComplexity",
-                "noExtraBooleanCast",
-                "noForEach",
-                "noMultipleSpacesInRegularExpressionLiterals",
-                "noStaticOnlyClass",
-                "noUselessCatch",
-                "noUselessConstructor",
-                "noUselessEmptyExport",
-                "noUselessFragments",
-                "noUselessLabel",
-                "noUselessRename",
-                "noUselessSwitchCase",
-                "noUselessThisAlias",
-                "noUselessTypeConstraint",
-                "noVoid",
-                "noWith",
-                "useFlatMap",
-                "useLiteralKeys",
-                "useOptionalChain",
-                "useSimpleNumberKeys",
-                "useSimplifiedLogicExpression",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -507,65 +464,52 @@ impl VisitNode<JsonLanguage> for Complexity {
                 )?;
                 self.use_simplified_logic_expression = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noBannedTypes",
+                        "noExcessiveCognitiveComplexity",
+                        "noExtraBooleanCast",
+                        "noForEach",
+                        "noMultipleSpacesInRegularExpressionLiterals",
+                        "noStaticOnlyClass",
+                        "noUselessCatch",
+                        "noUselessConstructor",
+                        "noUselessEmptyExport",
+                        "noUselessFragments",
+                        "noUselessLabel",
+                        "noUselessRename",
+                        "noUselessSwitchCase",
+                        "noUselessThisAlias",
+                        "noUselessTypeConstraint",
+                        "noVoid",
+                        "noWith",
+                        "useFlatMap",
+                        "useLiteralKeys",
+                        "useOptionalChain",
+                        "useSimpleNumberKeys",
+                        "useSimplifiedLogicExpression",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Correctness {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noChildrenProp",
-                "noConstAssign",
-                "noConstantCondition",
-                "noConstructorReturn",
-                "noEmptyPattern",
-                "noGlobalObjectCalls",
-                "noInnerDeclarations",
-                "noInvalidConstructorSuper",
-                "noNewSymbol",
-                "noNonoctalDecimalEscape",
-                "noPrecisionLoss",
-                "noRenderReturnValue",
-                "noSelfAssign",
-                "noSetterReturn",
-                "noStringCaseMismatch",
-                "noSwitchDeclarations",
-                "noUndeclaredVariables",
-                "noUnnecessaryContinue",
-                "noUnreachable",
-                "noUnreachableSuper",
-                "noUnsafeFinally",
-                "noUnsafeOptionalChaining",
-                "noUnusedLabels",
-                "noUnusedVariables",
-                "noVoidElementsWithChildren",
-                "noVoidTypeReturn",
-                "useExhaustiveDependencies",
-                "useHookAtTopLevel",
-                "useIsNan",
-                "useValidForDirection",
-                "useYield",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -768,52 +712,61 @@ impl VisitNode<JsonLanguage> for Correctness {
                 configuration.map_rule_configuration(&value, "useYield", diagnostics)?;
                 self.use_yield = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noChildrenProp",
+                        "noConstAssign",
+                        "noConstantCondition",
+                        "noConstructorReturn",
+                        "noEmptyPattern",
+                        "noGlobalObjectCalls",
+                        "noInnerDeclarations",
+                        "noInvalidConstructorSuper",
+                        "noNewSymbol",
+                        "noNonoctalDecimalEscape",
+                        "noPrecisionLoss",
+                        "noRenderReturnValue",
+                        "noSelfAssign",
+                        "noSetterReturn",
+                        "noStringCaseMismatch",
+                        "noSwitchDeclarations",
+                        "noUndeclaredVariables",
+                        "noUnnecessaryContinue",
+                        "noUnreachable",
+                        "noUnreachableSuper",
+                        "noUnsafeFinally",
+                        "noUnsafeOptionalChaining",
+                        "noUnusedLabels",
+                        "noUnusedVariables",
+                        "noVoidElementsWithChildren",
+                        "noVoidTypeReturn",
+                        "useExhaustiveDependencies",
+                        "useHookAtTopLevel",
+                        "useIsNan",
+                        "useValidForDirection",
+                        "useYield",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Nursery {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noApproximativeNumericConstant",
-                "noDuplicateJsonKeys",
-                "noEmptyBlockStatements",
-                "noEmptyCharacterClassInRegex",
-                "noInteractiveElementToNoninteractiveRole",
-                "noInvalidNewBuiltin",
-                "noMisleadingInstantiator",
-                "noMisrefactoredShorthandAssign",
-                "noThisInStatic",
-                "noUnusedImports",
-                "noUselessElse",
-                "noUselessLoneBlockStatements",
-                "useAriaActivedescendantWithTabindex",
-                "useArrowFunction",
-                "useAsConstAssertion",
-                "useGroupedTypeImport",
-                "useImportRestrictions",
-                "useShorthandAssign",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -951,31 +904,48 @@ impl VisitNode<JsonLanguage> for Nursery {
                 configuration.map_rule_configuration(&value, "useShorthandAssign", diagnostics)?;
                 self.use_shorthand_assign = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noApproximativeNumericConstant",
+                        "noDuplicateJsonKeys",
+                        "noEmptyBlockStatements",
+                        "noEmptyCharacterClassInRegex",
+                        "noInteractiveElementToNoninteractiveRole",
+                        "noInvalidNewBuiltin",
+                        "noMisleadingInstantiator",
+                        "noMisrefactoredShorthandAssign",
+                        "noThisInStatic",
+                        "noUnusedImports",
+                        "noUselessElse",
+                        "noUselessLoneBlockStatements",
+                        "useAriaActivedescendantWithTabindex",
+                        "useArrowFunction",
+                        "useAsConstAssertion",
+                        "useGroupedTypeImport",
+                        "useImportRestrictions",
+                        "useShorthandAssign",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Performance {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &["recommended", "all", "noAccumulatingSpread", "noDelete"],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -997,36 +967,27 @@ impl VisitNode<JsonLanguage> for Performance {
                 configuration.map_rule_configuration(&value, "noDelete", diagnostics)?;
                 self.no_delete = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &["recommended", "all", "noAccumulatingSpread", "noDelete"],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Security {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noDangerouslySetInnerHtml",
-                "noDangerouslySetInnerHtmlWithChildren",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -1052,63 +1013,32 @@ impl VisitNode<JsonLanguage> for Security {
                 )?;
                 self.no_dangerously_set_inner_html_with_children = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noDangerouslySetInnerHtml",
+                        "noDangerouslySetInnerHtmlWithChildren",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Style {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noArguments",
-                "noCommaOperator",
-                "noImplicitBoolean",
-                "noInferrableTypes",
-                "noNamespace",
-                "noNegationElse",
-                "noNonNullAssertion",
-                "noParameterAssign",
-                "noParameterProperties",
-                "noRestrictedGlobals",
-                "noShoutyConstants",
-                "noUnusedTemplateLiteral",
-                "noVar",
-                "useBlockStatements",
-                "useCollapsedElseIf",
-                "useConst",
-                "useDefaultParameterLast",
-                "useEnumInitializers",
-                "useExponentiationOperator",
-                "useFragmentSyntax",
-                "useLiteralEnumMembers",
-                "useNamingConvention",
-                "useNumericLiterals",
-                "useSelfClosingElements",
-                "useShorthandArrayType",
-                "useSingleCaseStatement",
-                "useSingleVarDeclarator",
-                "useTemplate",
-                "useWhile",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -1297,75 +1227,59 @@ impl VisitNode<JsonLanguage> for Style {
                 configuration.map_rule_configuration(&value, "useWhile", diagnostics)?;
                 self.use_while = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noArguments",
+                        "noCommaOperator",
+                        "noImplicitBoolean",
+                        "noInferrableTypes",
+                        "noNamespace",
+                        "noNegationElse",
+                        "noNonNullAssertion",
+                        "noParameterAssign",
+                        "noParameterProperties",
+                        "noRestrictedGlobals",
+                        "noShoutyConstants",
+                        "noUnusedTemplateLiteral",
+                        "noVar",
+                        "useBlockStatements",
+                        "useCollapsedElseIf",
+                        "useConst",
+                        "useDefaultParameterLast",
+                        "useEnumInitializers",
+                        "useExponentiationOperator",
+                        "useFragmentSyntax",
+                        "useLiteralEnumMembers",
+                        "useNamingConvention",
+                        "useNumericLiterals",
+                        "useSelfClosingElements",
+                        "useShorthandArrayType",
+                        "useSingleCaseStatement",
+                        "useSingleVarDeclarator",
+                        "useTemplate",
+                        "useWhile",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
 }
 impl VisitNode<JsonLanguage> for Suspicious {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            &[
-                "recommended",
-                "all",
-                "noArrayIndexKey",
-                "noAssignInExpressions",
-                "noAsyncPromiseExecutor",
-                "noCatchAssign",
-                "noClassAssign",
-                "noCommentText",
-                "noCompareNegZero",
-                "noConfusingLabels",
-                "noConfusingVoidType",
-                "noConsoleLog",
-                "noConstEnum",
-                "noControlCharactersInRegex",
-                "noDebugger",
-                "noDoubleEquals",
-                "noDuplicateCase",
-                "noDuplicateClassMembers",
-                "noDuplicateJsxProps",
-                "noDuplicateObjectKeys",
-                "noDuplicateParameters",
-                "noEmptyInterface",
-                "noExplicitAny",
-                "noExtraNonNullAssertion",
-                "noFallthroughSwitchClause",
-                "noFunctionAssign",
-                "noGlobalIsFinite",
-                "noGlobalIsNan",
-                "noImportAssign",
-                "noLabelVar",
-                "noPrototypeBuiltins",
-                "noRedeclare",
-                "noRedundantUseStrict",
-                "noSelfCompare",
-                "noShadowRestrictedNames",
-                "noSparseArray",
-                "noUnsafeDeclarationMerging",
-                "noUnsafeNegation",
-                "useDefaultSwitchClauseLast",
-                "useGetterReturn",
-                "useIsArray",
-                "useNamespaceKeyword",
-                "useValidTypeof",
-            ],
-            diagnostics,
-        )
-    }
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "recommended" => {
                 self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -1626,7 +1540,57 @@ impl VisitNode<JsonLanguage> for Suspicious {
                 configuration.map_rule_configuration(&value, "useValidTypeof", diagnostics)?;
                 self.use_valid_typeof = Some(configuration);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(
+                    &name,
+                    &[
+                        "recommended",
+                        "all",
+                        "noArrayIndexKey",
+                        "noAssignInExpressions",
+                        "noAsyncPromiseExecutor",
+                        "noCatchAssign",
+                        "noClassAssign",
+                        "noCommentText",
+                        "noCompareNegZero",
+                        "noConfusingLabels",
+                        "noConfusingVoidType",
+                        "noConsoleLog",
+                        "noConstEnum",
+                        "noControlCharactersInRegex",
+                        "noDebugger",
+                        "noDoubleEquals",
+                        "noDuplicateCase",
+                        "noDuplicateClassMembers",
+                        "noDuplicateJsxProps",
+                        "noDuplicateObjectKeys",
+                        "noDuplicateParameters",
+                        "noEmptyInterface",
+                        "noExplicitAny",
+                        "noExtraNonNullAssertion",
+                        "noFallthroughSwitchClause",
+                        "noFunctionAssign",
+                        "noGlobalIsFinite",
+                        "noGlobalIsNan",
+                        "noImportAssign",
+                        "noLabelVar",
+                        "noPrototypeBuiltins",
+                        "noRedeclare",
+                        "noRedundantUseStrict",
+                        "noSelfCompare",
+                        "noShadowRestrictedNames",
+                        "noSparseArray",
+                        "noUnsafeDeclarationMerging",
+                        "noUnsafeNegation",
+                        "useDefaultSwitchClauseLast",
+                        "useGetterReturn",
+                        "useIsArray",
+                        "useNamespaceKeyword",
+                        "useValidTypeof",
+                    ],
+                    diagnostics,
+                );
+            }
         }
         Some(())
     }
