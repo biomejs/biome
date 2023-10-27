@@ -1338,8 +1338,7 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
-				},
-				{ "description": "No options available", "type": "null" }
+				}
 			]
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },

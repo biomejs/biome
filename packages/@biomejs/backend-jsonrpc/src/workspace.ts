@@ -1202,8 +1202,7 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| HooksOptions
 	| NamingConventionOptions
-	| RestrictedGlobalsOptions
-	| null;
+	| RestrictedGlobalsOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
