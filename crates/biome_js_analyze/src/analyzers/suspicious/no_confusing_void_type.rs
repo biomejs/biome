@@ -45,7 +45,6 @@ declare_rule! {
     ///
     /// ```ts
     /// function printArg<T = void>(arg: T) {}
-    /// printArg<void>(undefined);
     /// ```
     pub(crate) NoConfusingVoidType {
         version: "1.2.0",

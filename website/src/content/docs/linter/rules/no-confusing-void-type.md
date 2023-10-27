@@ -100,7 +100,6 @@ function doSomething(this: void) {}
 
 ```ts
 function printArg<T = void>(arg: T) {}
-printArg<void>(undefined);
 ```
 
 ## Related links
