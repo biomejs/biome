@@ -94,10 +94,15 @@ fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeCon
     for parent in node.parent()?.ancestors() {
         match parent.kind() {
             JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
-                // checks if the union type contains generic type
-                for children in parent.descendants() {
-                    if children.kind() == JsSyntaxKind::TS_TYPE_ARGUMENT_LIST {
-                        return None;
+                // checks if the union type contains a generic type has a void type as argument
+                for child in parent.descendants() {
+                    if child.kind() == JsSyntaxKind::TS_TYPE_ARGUMENT_LIST {
+                        let found_void_type = child
+                            .descendants()
+                            .any(|descendant| descendant.kind() == JsSyntaxKind::TS_VOID_TYPE);
+                        if found_void_type {
+                            return None;
+                        }
                     }
                 }
             }
@@ -117,15 +122,26 @@ fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeCon
                 return Some(VoidTypeContext::Union);
             }
 
+            // Promise<void>
+            JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
+                // handle generic function that has a void type argument
+                // e.g. functionGeneric<void>(undefined);
+                let Some(grand_parent) = parent.grand_parent() else {
+                    continue;
+                };
+                if grand_parent.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
+                    return Some(VoidTypeContext::Unknown);
+                }
+                return None;
+            }
+
             // function fn(this: void) {}
             // fn(): void;
             // fn<T = void>() {}
-            // Promise<void>
             JsSyntaxKind::TS_THIS_PARAMETER
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
             | JsSyntaxKind::TS_TYPE_PARAMETER
-            | JsSyntaxKind::TS_FUNCTION_TYPE
-            | JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
+            | JsSyntaxKind::TS_FUNCTION_TYPE => {
                 return None;
             }
 
