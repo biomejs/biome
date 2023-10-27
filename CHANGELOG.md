@@ -12,6 +12,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Analyzer
 
+#### Bug fixes
+
+- Fix [#604](https://github.com/biomejs/biome/issues/604) which made [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) report false positives when the `void` type is used in a generic type parameter. Contributed by @unvalley
+
 ### CLI
 
 ### Configuration
