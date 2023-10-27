@@ -543,13 +543,16 @@ impl EnumMemberCase {
     pub const KNOWN_VALUES: &'static [&'static str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
 }
 
-/// Required by [Bpaf].
 impl FromStr for EnumMemberCase {
     type Err = &'static str;
 
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        // WARNING: should not be used.
-        Ok(EnumMemberCase::default())
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "PascalCase" => Ok(Self::Pascal),
+            "CONSTANT_CASE" => Ok(Self::Constant),
+            "camelCase" => Ok(Self::Camel),
+            _ => Err("value not supported for enum member case"),
+        }
     }
 }
 
@@ -560,11 +563,8 @@ impl VisitNode<JsonLanguage> for EnumMemberCase {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         let node = with_only_known_variants(node, Self::KNOWN_VALUES, diagnostics)?;
-        match node.inner_string_text().ok()?.text() {
-            "PascalCase" => *self = Self::Pascal,
-            "CONSTANT_CASE" => *self = Self::Constant,
-            "camelCase" => *self = Self::Camel,
-            _ => (),
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
         }
         Some(())
     }

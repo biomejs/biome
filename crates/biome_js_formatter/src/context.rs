@@ -537,13 +537,14 @@ impl ArrowParentheses {
     }
 }
 
+// Required by [Bpaf]
 impl FromStr for ArrowParentheses {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed" | "AsNeeded" => Ok(Self::AsNeeded),
-            "always" | "Always" => Ok(Self::Always),
+            "as-needed" => Ok(Self::AsNeeded),
+            "always" => Ok(Self::Always),
             _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
         }
     }

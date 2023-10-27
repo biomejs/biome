@@ -156,10 +156,7 @@ impl Configuration {
     }
 
     pub fn is_vcs_disabled(&self) -> bool {
-        self.vcs
-            .as_ref()
-            .map(|f| matches!(f.enabled, Some(false)))
-            .unwrap_or(true)
+        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
 }
 

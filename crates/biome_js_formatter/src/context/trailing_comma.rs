@@ -90,9 +90,9 @@ impl FromStr for TrailingComma {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "es5" | "ES5" => Ok(Self::Es5),
-            "all" | "All" => Ok(Self::All),
-            "none" | "None" => Ok(Self::None),
+            "es5" => Ok(Self::Es5),
+            "all" => Ok(Self::All),
+            "none" => Ok(Self::None),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for TrailingComma"),
         }
@@ -116,17 +116,8 @@ impl VisitNode<JsonLanguage> for TrailingComma {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         let node = with_only_known_variants(node, TrailingComma::KNOWN_VALUES, diagnostics)?;
-        match node.inner_string_text().ok()?.text() {
-            "all" => {
-                *self = TrailingComma::All;
-            }
-            "es5" => {
-                *self = TrailingComma::Es5;
-            }
-            "none" => {
-                *self = TrailingComma::None;
-            }
-            _ => {}
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
         }
         Some(())
     }

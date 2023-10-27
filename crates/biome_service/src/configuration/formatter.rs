@@ -89,8 +89,9 @@ impl Default for FormatterConfiguration {
     }
 }
 
+/// Required by [Bpaf].
 impl FromStr for FormatterConfiguration {
-    type Err = String;
+    type Err = &'static str;
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
@@ -233,13 +234,13 @@ impl PlainIndentStyle {
 }
 
 impl FromStr for PlainIndentStyle {
-    type Err = String;
+    type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "tab" => Ok(PlainIndentStyle::Tab),
             "space" => Ok(PlainIndentStyle::Space),
-            _ => Err("Unsupported value for this option".to_string()),
+            _ => Err("Unsupported value for this option"),
         }
     }
 }
