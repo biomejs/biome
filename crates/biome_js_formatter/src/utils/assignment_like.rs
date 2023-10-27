@@ -954,13 +954,8 @@ pub(crate) fn should_break_after_operator(
             };
 
             if let Some(argument) = argument {
-                if matches!(argument, AnyJsExpression::AnyJsLiteralExpression(_)) {
-                    true
-                } else if is_poorly_breakable_member_or_call_chain(&argument, f)? {
-                    true
-                } else {
-                    false
-                }
+                matches!(argument, AnyJsExpression::AnyJsLiteralExpression(_))
+                    || is_poorly_breakable_member_or_call_chain(&argument, f)?
             } else {
                 false
             }
