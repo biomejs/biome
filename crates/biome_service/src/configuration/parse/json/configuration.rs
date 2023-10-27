@@ -35,38 +35,38 @@ impl VisitNode<JsonLanguage> for Configuration {
             }
             "files" => {
                 let mut files = FilesConfiguration::default();
-                self.map_to_object(&value, name_text, &mut files, diagnostics)?;
+                files.map_to_object(&value, name_text, diagnostics)?;
                 self.files = Some(files);
             }
             "vcs" => {
                 let mut vcs = VcsConfiguration::default();
-                self.map_to_object(&value, name_text, &mut vcs, diagnostics)?;
+                vcs.map_to_object(&value, name_text, diagnostics)?;
                 validate_vcs_configuration(&value, &mut vcs, diagnostics);
                 self.vcs = Some(vcs);
             }
             "formatter" => {
                 let mut formatter = FormatterConfiguration::default();
-                self.map_to_object(&value, name_text, &mut formatter, diagnostics)?;
+                formatter.map_to_object(&value, name_text, diagnostics)?;
                 self.formatter = Some(formatter);
             }
             "linter" => {
                 let mut linter = LinterConfiguration::default();
-                self.map_to_object(&value, name_text, &mut linter, diagnostics)?;
+                linter.map_to_object(&value, name_text, diagnostics)?;
                 self.linter = Some(linter);
             }
             "javascript" => {
                 let mut javascript = JavascriptConfiguration::default();
-                self.map_to_object(&value, name_text, &mut javascript, diagnostics)?;
+                javascript.map_to_object(&value, name_text, diagnostics)?;
                 self.javascript = Some(javascript);
             }
             "json" => {
                 let mut json = JsonConfiguration::default();
-                self.map_to_object(&value, name_text, &mut json, diagnostics)?;
+                json.map_to_object(&value, name_text, diagnostics)?;
                 self.json = Some(json);
             }
             "organizeImports" => {
                 let mut organize_imports = OrganizeImports::default();
-                self.map_to_object(&value, name_text, &mut organize_imports, diagnostics)?;
+                organize_imports.map_to_object(&value, name_text, diagnostics)?;
                 self.organize_imports = Some(organize_imports);
             }
             "extends" => {
@@ -76,7 +76,7 @@ impl VisitNode<JsonLanguage> for Configuration {
             }
             "overrides" => {
                 let mut overrides = Overrides::default();
-                self.map_to_array(&value, name_text, &mut overrides, diagnostics)?;
+                overrides.map_to_array(&value, name_text, diagnostics)?;
                 self.overrides = Some(overrides);
             }
             _ => {}

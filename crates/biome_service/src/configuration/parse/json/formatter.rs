@@ -41,7 +41,7 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
 
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
-                self.map_to_known_string(&value, name_text, &mut indent_style, diagnostics)?;
+                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.indent_style = Some(indent_style);
             }
             "indentSize" => {

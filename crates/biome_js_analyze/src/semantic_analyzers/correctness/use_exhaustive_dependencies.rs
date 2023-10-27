@@ -339,7 +339,7 @@ impl VisitNode<JsonLanguage> for HooksOptions {
             for element in array.elements() {
                 let element = element.ok()?;
                 let mut hooks = Hooks::default();
-                self.map_to_object(&element, "hooks", &mut hooks, diagnostics)?;
+                hooks.map_to_object(&element, "hooks", diagnostics)?;
                 self.hooks.push(hooks);
             }
         }
