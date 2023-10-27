@@ -4,7 +4,7 @@ use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_formatter::LineWidth;
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_rowan::SyntaxNode;
 
 impl VisitNode<JsonLanguage> for JsonConfiguration {
     fn visit_member_name(
@@ -23,7 +23,6 @@ impl VisitNode<JsonLanguage> for JsonConfiguration {
     ) -> Option<()> {
         let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
         let name_text = name.text();
-
         match name_text {
             "parser" => {
                 let mut parser = JsonParser::default();
@@ -35,10 +34,8 @@ impl VisitNode<JsonLanguage> for JsonConfiguration {
                 formatter.map_to_object(&value, name_text, diagnostics)?;
                 self.formatter = Some(formatter);
             }
-
             _ => {}
         }
-
         Some(())
     }
 }
@@ -95,7 +92,6 @@ impl VisitNode<JsonLanguage> for JsonFormatter {
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
             }
-
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
                 indent_style.map_to_known_string(&value, name_text, diagnostics)?;
@@ -114,25 +110,10 @@ impl VisitNode<JsonLanguage> for JsonFormatter {
             }
             "lineWidth" => {
                 let line_width = self.map_to_u16(&value, name_text, LineWidth::MAX, diagnostics)?;
-
-                self.line_width = Some(match LineWidth::try_from(line_width) {
-                    Ok(result) => result,
-                    Err(err) => {
-                        diagnostics.push(
-                            biome_deserialize::DeserializationDiagnostic::new(err.to_string())
-                                .with_range(value.range())
-                                .with_note(
-                                    biome_console::markup! {"Maximum value accepted is "{{LineWidth::MAX}}},
-                                ),
-                        );
-                        LineWidth::default()
-                    }
-                });
+                self.line_width = LineWidth::try_from(line_width).ok();
             }
-
             _ => {}
         }
-
         Some(())
     }
 }

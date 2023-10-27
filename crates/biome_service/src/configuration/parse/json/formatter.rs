@@ -23,7 +23,6 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
     ) -> Option<()> {
         let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
         let name_text = name.text();
-
         match name_text {
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
@@ -38,7 +37,6 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }
-
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
                 indent_style.map_to_known_string(&value, name_text, diagnostics)?;
@@ -77,7 +75,6 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
             }
             _ => {}
         }
-
         Some(())
     }
 }
