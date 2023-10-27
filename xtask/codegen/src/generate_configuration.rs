@@ -142,7 +142,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     name_text,
                     diagnostics,
                 )? {
-                    self.map_to_object(&value, name_text, &mut visitor, diagnostics)?;
+                    visitor.map_to_object(&value, name_text, diagnostics)?;
                     self.#property_group_name = Some(visitor);
                 }
             }

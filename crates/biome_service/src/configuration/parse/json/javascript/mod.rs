@@ -28,13 +28,13 @@ impl VisitNode<JsonLanguage> for JavascriptConfiguration {
         match name_text {
             "formatter" => {
                 let mut javascript_formatter = JavascriptFormatter::default();
-                self.map_to_object(&value, name_text, &mut javascript_formatter, diagnostics)?;
+                javascript_formatter.map_to_object(&value, name_text, diagnostics)?;
                 self.formatter = Some(javascript_formatter);
             }
 
             "parser" => {
                 let mut parser = JavascriptParser::default();
-                self.map_to_object(&value, name_text, &mut parser, diagnostics)?;
+                parser.map_to_object(&value, name_text, diagnostics)?;
                 self.parser = Some(parser);
             }
 
@@ -45,12 +45,7 @@ impl VisitNode<JsonLanguage> for JavascriptConfiguration {
             }
             "organizeImports" => {
                 let mut javascript_organize_imports = JavascriptOrganizeImports::default();
-                self.map_to_object(
-                    &value,
-                    name_text,
-                    &mut javascript_organize_imports,
-                    diagnostics,
-                )?;
+                javascript_organize_imports.map_to_object(&value, name_text, diagnostics)?;
                 self.organize_imports = Some(javascript_organize_imports);
             }
             _ => {}

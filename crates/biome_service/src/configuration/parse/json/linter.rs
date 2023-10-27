@@ -40,15 +40,14 @@ impl VisitNode<JsonLanguage> for LinterConfiguration {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
             }
             "rules" => {
-                let mut rules = Rules::default();
                 if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    self.map_to_object(&value, name_text, &mut rules, diagnostics)?;
+                    let mut rules = Rules::default();
+                    rules.map_to_object(&value, name_text, diagnostics)?;
                     self.rules = Some(rules);
                 }
             }
             _ => {}
         }
-
         Some(())
     }
 }
@@ -62,9 +61,7 @@ impl RuleConfiguration {
     ) -> Option<()> {
         match value {
             AnyJsonValue::JsonStringValue(_) => {
-                let mut configuration = RuleConfiguration::default();
-                self.map_to_known_string(value, rule_name, &mut configuration, diagnostics)?;
-                *self = configuration;
+                self.map_to_known_string(value, rule_name, diagnostics)?;
             }
             AnyJsonValue::JsonObjectValue(_) => {
                 let with_options = RuleWithOptions {
@@ -72,7 +69,7 @@ impl RuleConfiguration {
                     options: PossibleOptions::new_from_rule_name(rule_name),
                 };
                 let mut configuration = RuleConfiguration::WithOptions(with_options);
-                self.map_to_object(value, rule_name, &mut configuration, diagnostics)?;
+                configuration.map_to_object(value, rule_name, diagnostics)?;
                 *self = configuration;
             }
             _ => {
@@ -126,17 +123,8 @@ impl VisitNode<JsonLanguage> for RulePlainConfiguration {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         let node = with_only_known_variants(node, RulePlainConfiguration::KNOWN_KEYS, diagnostics)?;
-        match node.inner_string_text().ok()?.text() {
-            "error" => {
-                *self = RulePlainConfiguration::Error;
-            }
-            "warn" => {
-                *self = RulePlainConfiguration::Warn;
-            }
-            "off" => {
-                *self = RulePlainConfiguration::Off;
-            }
-            _ => {}
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
         }
         Some(())
     }
@@ -167,7 +155,7 @@ impl VisitNode<JsonLanguage> for RuleWithOptions {
             }
             "options" => {
                 let mut possible_options = self.options.take()?;
-                self.map_to_object(&value, name_text, &mut possible_options, diagnostics);
+                possible_options.map_to_object(&value, name_text, diagnostics);
                 self.options = Some(possible_options);
             }
             _ => {}

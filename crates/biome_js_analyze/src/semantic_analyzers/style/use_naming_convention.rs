@@ -512,9 +512,8 @@ impl VisitNode<JsonLanguage> for NamingConventionOptions {
                 self.strict_case = self.map_to_boolean(&value, name_text, diagnostics)?
             }
             "enumMemberCase" => {
-                let mut enum_member_case = EnumMemberCase::default();
-                self.map_to_known_string(&value, name_text, &mut enum_member_case, diagnostics)?;
-                self.enum_member_case = enum_member_case;
+                self.enum_member_case
+                    .map_to_known_string(&value, name_text, diagnostics)?;
             }
             _ => (),
         }

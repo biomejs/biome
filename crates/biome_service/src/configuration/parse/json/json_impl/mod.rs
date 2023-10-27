@@ -27,12 +27,12 @@ impl VisitNode<JsonLanguage> for JsonConfiguration {
         match name_text {
             "parser" => {
                 let mut parser = JsonParser::default();
-                self.map_to_object(&value, name_text, &mut parser, diagnostics)?;
+                parser.map_to_object(&value, name_text, diagnostics)?;
                 self.parser = Some(parser);
             }
             "formatter" => {
                 let mut formatter = JsonFormatter::default();
-                self.map_to_object(&value, name_text, &mut formatter, diagnostics)?;
+                formatter.map_to_object(&value, name_text, diagnostics)?;
                 self.formatter = Some(formatter);
             }
 
@@ -98,7 +98,7 @@ impl VisitNode<JsonLanguage> for JsonFormatter {
 
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
-                self.map_to_known_string(&value, name_text, &mut indent_style, diagnostics)?;
+                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.indent_style = Some(indent_style);
             }
             "indentSize" => {
