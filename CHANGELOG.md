@@ -29,6 +29,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#301](https://github.com/biomejs/biome/issues/301), the formatter should not break before the `in` keyword. Contributed by @ematipico
+
 ### JavaScript APIs
 
 ### Linter

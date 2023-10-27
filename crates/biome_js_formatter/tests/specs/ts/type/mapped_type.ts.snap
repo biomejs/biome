@@ -7,6 +7,13 @@ info: ts/type/mapped_type.ts
 
 ```ts
 type LongNameHereToCauseLineBreak_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ={ [K in "foo"]: string };
+
+export type OmitIndexSignature<ObjectType> = {
+	[KeyType in keyof ObjectType as {} extends Record<KeyType, unknown>
+		? never
+		: KeyType]: ObjectType[KeyType];
+};
+
 ```
 
 
@@ -31,6 +38,12 @@ Arrow parentheses: Always
 ```ts
 type LongNameHereToCauseLineBreak_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
 	{ [K in "foo"]: string };
+
+export type OmitIndexSignature<ObjectType> = {
+	[KeyType in keyof ObjectType as {} extends Record<KeyType, unknown>
+		? never
+		: KeyType]: ObjectType[KeyType];
+};
 ```
 
 # Lines exceeding max width of 80 characters

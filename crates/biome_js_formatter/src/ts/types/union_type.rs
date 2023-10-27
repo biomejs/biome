@@ -53,7 +53,6 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
                                 | JsSyntaxKind::TS_TUPLE_TYPE_ELEMENT_LIST
                                 | JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT
                                 | JsSyntaxKind::TS_TYPE_ARGUMENT_LIST
-                                | JsSyntaxKind::TS_MAPPED_TYPE
                         )
                     )
                 }
