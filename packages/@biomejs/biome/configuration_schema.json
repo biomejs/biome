@@ -1100,6 +1100,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedPrivateClassMembers": {
+					"description": "Disallow unused private class members",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessElse": {
 					"description": "Disallow else block when the if block breaks early.",
 					"anyOf": [

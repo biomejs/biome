@@ -7,6 +7,7 @@ pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_empty_character_class_in_regex;
 pub(crate) mod no_misleading_instantiator;
 pub(crate) mod no_misrefactored_shorthand_assign;
+pub(crate) mod no_unused_private_class_members;
 pub(crate) mod no_useless_else;
 pub(crate) mod no_useless_lone_block_statements;
 pub(crate) mod use_arrow_function;
@@ -24,6 +25,7 @@ declare_group! {
             self :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
+            self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
             self :: no_useless_else :: NoUselessElse ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: use_arrow_function :: UseArrowFunction ,

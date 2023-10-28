@@ -773,6 +773,10 @@ export interface Nursery {
 	 */
 	noUnusedImports?: RuleConfiguration;
 	/**
+	 * Disallow unused private class members
+	 */
+	noUnusedPrivateClassMembers?: RuleConfiguration;
+	/**
 	 * Disallow else block when the if block breaks early.
 	 */
 	noUselessElse?: RuleConfiguration;
@@ -1442,6 +1446,7 @@ export type Category =
 	| "lint/nursery/noMisrefactoredShorthandAssign"
 	| "lint/nursery/noThisInStatic"
 	| "lint/nursery/noUnusedImports"
+	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/useAriaActivedescendantWithTabindex"
