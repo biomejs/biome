@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{marker::PhantomData, str::FromStr};
 
 use crate::{
     control_flow::AnyJsControlFlowRoot,
@@ -13,7 +13,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
-    DeserializationDiagnostic, VisitNode,
+    Acceptable, DeserializableLanguage, DeserializationDiagnostic, NodeVisitor, VisitNode,
 };
 use biome_diagnostics::Applicability;
 use biome_js_semantic::CanBeImportedExported;
@@ -518,6 +518,52 @@ impl VisitNode<JsonLanguage> for NamingConventionOptions {
             _ => (),
         }
         Some(())
+    }
+}
+
+impl<L: DeserializableLanguage> NodeVisitor<L> for NamingConventionOptions {
+    fn visit_map(
+        &mut self,
+        members: impl Iterator<Item = (SyntaxNode<L>, SyntaxNode<L>)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) {
+        for (key, value) in members {
+            let Some(key) = L::map_to_str(key) else {
+                return;
+            };
+            match key.text() {
+                "strictCase" => {
+                    L::deserialize(&mut self.strict_case, value, diagnostics);
+                }
+                "enumMemberCase" => {
+                    L::deserialize(&mut self.enum_member_case, value, diagnostics);
+                }
+                _ => (),
+            }
+        }
+    }
+}
+
+impl<L: DeserializableLanguage> NodeVisitor<L> for EnumMemberCase {
+    fn visit_str(
+        &mut self,
+        value: &str,
+        range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) {
+        match value {
+            "PascalCase" => *self = Self::Pascal,
+            "CONSTANT_CASE" => *self = Self::Constant,
+            "camelCase" => *self = Self::Camel,
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value,
+                    range,
+                    &["PascalCase", "CONSTANT_CASE", "camelCase"],
+                ));
+            }
+        }
     }
 }
 

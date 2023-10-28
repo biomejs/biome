@@ -8,7 +8,7 @@ use biome_diagnostics::{Error, Severity};
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic};
 use std::fmt::Debug;
 pub use string_set::{deserialize_string_set, serialize_string_set, StringSet};
-pub use visitor::VisitNode;
+pub use visitor::*;
 
 /// A small type to interrogate the result of a JSON deserialization
 #[derive(Debug, Default)]

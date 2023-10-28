@@ -1,12 +1,14 @@
-use crate::{DeserializationDiagnostic, Deserialized, VisitNode};
+use crate::{
+    DeserializableLanguage, DeserializationDiagnostic, Deserialized, NodeVisitor, VisitNode,
+};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
-    JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
+    JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, TextRange, TokenText};
 use indexmap::IndexSet;
 use std::num::ParseIntError;
 
@@ -622,5 +624,57 @@ where
     Deserialized {
         diagnostics: diagnostics.into_iter().map(Error::from).collect::<Vec<_>>(),
         deserialized: output,
+    }
+}
+
+impl DeserializableLanguage for JsonLanguage {
+    fn deserialize(
+        visitor: &mut impl NodeVisitor<JsonLanguage>,
+        value: SyntaxNode<JsonLanguage>,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) {
+        let range = value.text_trimmed_range();
+        let Some(value) = AnyJsonValue::cast(value) else {
+            return;
+        };
+        match value {
+            AnyJsonValue::JsonArrayValue(array) => {
+                let items = array
+                    .elements()
+                    .into_iter()
+                    .filter_map(|x| x.ok())
+                    .map(|x| x.into_syntax());
+                visitor.visit_array(items, range, diagnostics)
+            }
+            AnyJsonValue::JsonBogusValue(_) => visitor.fallback_on_error(range, diagnostics),
+            AnyJsonValue::JsonBooleanValue(value) => {
+                let Ok(value) = value.value_token() else {
+                    return;
+                };
+                visitor.visit_bool(value.kind() == T![true], range, diagnostics)
+            }
+            AnyJsonValue::JsonNullValue(_) => visitor.visit_unit(range, diagnostics),
+            AnyJsonValue::JsonNumberValue(_) => todo!(),
+            AnyJsonValue::JsonObjectValue(object) => {
+                let members = object
+                    .json_member_list()
+                    .into_iter()
+                    .filter_map(|x| x.ok())
+                    .filter_map(|x| {
+                        Some((x.name().ok()?.into_syntax(), x.value().ok()?.into_syntax()))
+                    });
+                visitor.visit_map(members, range, diagnostics)
+            }
+            AnyJsonValue::JsonStringValue(value) => {
+                let Ok(value) = value.inner_string_text() else {
+                    return;
+                };
+                visitor.visit_str(value.text(), range, diagnostics)
+            }
+        }
+    }
+
+    fn map_to_str(value: SyntaxNode<JsonLanguage>) -> Option<TokenText> {
+        JsonStringValue::cast(value).and_then(|value| value.inner_string_text().ok())
     }
 }
