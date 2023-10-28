@@ -23,14 +23,11 @@ The rule will inspect the following **known** hooks:
 - `useMemo`
 - `useImperativeHandle`
 - `useState`
-- `useContext`
 - `useReducer`
 - `useRef`
 - `useDebugValue`
 - `useDeferredValue`
 - `useTransition`
-- `useId`
-- `useSyncExternalStore`
 
 If you want to add more hooks to the rule, check the [#options](options).
 
@@ -52,23 +49,23 @@ function component() {
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook does not specify all of its dependencies.</span>
-  
+
     <strong>3 │ </strong>function component() {
     <strong>4 │ </strong>    let a = 1;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>6 │ </strong>        console.log(a);
     <strong>7 │ </strong>    });
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
-  
+
     <strong>4 │ </strong>    let a = 1;
     <strong>5 │ </strong>    useEffect(() =&gt; {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>        console.log(a);
    <strong>   │ </strong>                    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>    });
     <strong>8 │ </strong>}
-  
+
 </code></pre>
 
 ```jsx
@@ -84,23 +81,23 @@ function component() {
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook specifies more dependencies than necessary.</span>
-  
+
     <strong>3 │ </strong>function component() {
     <strong>4 │ </strong>    let b = 1;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>6 │ </strong>    }, [b]);
     <strong>7 │ </strong>}
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency can be removed from the list.</span>
-  
+
     <strong>4 │ </strong>    let b = 1;
     <strong>5 │ </strong>    useEffect(() =&gt; {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    }, [b]);
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 </code></pre>
 
 ```jsx
@@ -118,23 +115,23 @@ function component() {
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:5:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook specifies more dependencies than necessary.</span>
-  
+
     <strong>3 │ </strong>function component() {
     <strong>4 │ </strong>    const [name, setName] = useState();
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>6 │ </strong>        console.log(name);
     <strong>7 │ </strong>        setName(&quot;&quot;);
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency can be removed from the list.</span>
-  
+
      <strong>6 │ </strong>        console.log(name);
      <strong>7 │ </strong>        setName(&quot;&quot;);
    <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    }, [name, setName]);
     <strong>   │ </strong>              <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
      <strong>9 │ </strong>}
     <strong>10 │ </strong>
-  
+
 </code></pre>
 
 ```jsx
@@ -152,23 +149,23 @@ function component() {
 <pre class="language-text"><code class="language-text">correctness/useExhaustiveDependencies.js:6:5 <a href="https://biomejs.dev/linter/rules/use-exhaustive-dependencies">lint/correctness/useExhaustiveDependencies</a> ━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This hook does not specify all of its dependencies.</span>
-  
+
     <strong>4 │ </strong>    let a = 1;
     <strong>5 │ </strong>    const b = a + 1;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>        console.log(b);
     <strong>8 │ </strong>    });
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
-  
+
     <strong>5 │ </strong>    const b = a + 1;
     <strong>6 │ </strong>    useEffect(() =&gt; {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>        console.log(b);
    <strong>   │ </strong>                    <strong><span style="color: Tomato;">^</span></strong>
     <strong>8 │ </strong>    });
     <strong>9 │ </strong>}
-  
+
 </code></pre>
 
 ## Valid

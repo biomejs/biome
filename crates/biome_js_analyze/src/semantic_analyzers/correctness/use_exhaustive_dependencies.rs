@@ -207,9 +207,6 @@ impl Default for ReactExtensiveDependenciesOptions {
             StableReactHookConfiguration::new("useReducer", Some(1)),
             StableReactHookConfiguration::new("useTransition", Some(1)),
             StableReactHookConfiguration::new("useRef", None),
-            StableReactHookConfiguration::new("useContext", None),
-            StableReactHookConfiguration::new("useId", None),
-            StableReactHookConfiguration::new("useSyncExternalStore", None),
         ]);
 
         Self {
