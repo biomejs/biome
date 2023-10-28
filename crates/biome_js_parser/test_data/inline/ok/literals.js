@@ -9,3 +9,4 @@ null
 "test\
 new-line";
 /^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
+/[\p{Control}--[\t\n]]/v;

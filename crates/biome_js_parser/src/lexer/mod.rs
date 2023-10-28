@@ -1463,6 +1463,7 @@ impl<'src> JsLexer<'src> {
                 const U = 1 << 4;
                 const Y = 1 << 5;
                 const D = 1 << 6;
+                const V = 1 << 7;
             }
         }
         let current = unsafe { self.current_unchecked() };
@@ -1532,6 +1533,12 @@ impl<'src> JsLexer<'src> {
                                         self.diagnostics.push(self.flag_err('d'));
                                     }
                                     flag |= RegexFlag::D;
+                                }
+                                b'v' => {
+                                    if flag.contains(RegexFlag::V) {
+                                        self.diagnostics.push(self.flag_err('v'));
+                                    }
+                                    flag |= RegexFlag::V;
                                 }
                                 _ if self.cur_ident_part().is_some() => {
                                     self.diagnostics.push(

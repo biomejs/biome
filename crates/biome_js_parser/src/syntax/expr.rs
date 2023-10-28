@@ -155,6 +155,7 @@ pub(crate) fn parse_expression_or_recover_to_next_statement(
 // "test\
 // new-line";
 // /^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
+// /[\p{Control}--[\t\n]]/v;
 
 // test_err js literals
 // 00, 012, 08, 091, 0789 // parser errors
