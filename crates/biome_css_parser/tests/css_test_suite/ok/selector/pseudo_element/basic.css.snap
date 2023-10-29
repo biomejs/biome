@@ -334,18 +334,16 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON2@193..195 "::" [] [],
-                                CssPseudoElementPart {
-                                    name_token: PART_KW@195..199 "part" [] [],
-                                    l_paren_token: L_PAREN@199..200 "(" [] [],
-                                    ident: CssIdentifier {
-                                        value_token: IDENT@200..203 "tab" [] [],
-                                    },
-                                    r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@193..195 "::" [] [],
+                            element: CssPseudoElementPart {
+                                name_token: PART_KW@195..199 "part" [] [],
+                                l_paren_token: L_PAREN@199..200 "(" [] [],
+                                ident: CssIdentifier {
+                                    value_token: IDENT@200..203 "tab" [] [],
                                 },
-                            ],
+                                r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -816,7 +814,7 @@ CssRoot {
             0: CSS_IDENTIFIER@170..193
               0: IDENT@170..193 "tabbed-custom-element" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@193..205
-            0: CSS_BOGUS_SUB_SELECTOR@193..205
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@193..205
               0: COLON2@193..195 "::" [] []
               1: CSS_PSEUDO_ELEMENT_PART@195..205
                 0: PART_KW@195..199 "part" [] []

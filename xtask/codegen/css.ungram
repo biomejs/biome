@@ -172,7 +172,7 @@ CssPseudoElementSelector =
 
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
-	| CssPseudoElementSelector
+	| CssPseudoElementFunction
   | CssPseudoElementHighlight
   | CssPseudoElementPart
 
@@ -183,7 +183,7 @@ CssPseudoElementIdentifier =
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssPseudoElementSelector =
+CssPseudoElementFunction =
 	name: CssIdentifier
 	'('
 	selector: AnyCssSelector

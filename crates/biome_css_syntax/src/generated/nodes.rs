@@ -2173,6 +2173,7 @@ pub enum AnyCssPseudoElement {
     CssPseudoElementFunction(CssPseudoElementFunction),
     CssPseudoElementHighlight(CssPseudoElementHighlight),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
+    CssPseudoElementPart(CssPseudoElementPart),
 }
 impl AnyCssPseudoElement {
     pub fn as_css_pseudo_element_function(&self) -> Option<&CssPseudoElementFunction> {
@@ -2190,6 +2191,12 @@ impl AnyCssPseudoElement {
     pub fn as_css_pseudo_element_identifier(&self) -> Option<&CssPseudoElementIdentifier> {
         match &self {
             AnyCssPseudoElement::CssPseudoElementIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_element_part(&self) -> Option<&CssPseudoElementPart> {
+        match &self {
+            AnyCssPseudoElement::CssPseudoElementPart(item) => Some(item),
             _ => None,
         }
     }
@@ -4686,17 +4693,24 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
         AnyCssPseudoElement::CssPseudoElementIdentifier(node)
     }
 }
+impl From<CssPseudoElementPart> for AnyCssPseudoElement {
+    fn from(node: CssPseudoElementPart) -> AnyCssPseudoElement {
+        AnyCssPseudoElement::CssPseudoElementPart(node)
+    }
+}
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssPseudoElementFunction::KIND_SET
         .union(CssPseudoElementHighlight::KIND_SET)
-        .union(CssPseudoElementIdentifier::KIND_SET);
+        .union(CssPseudoElementIdentifier::KIND_SET)
+        .union(CssPseudoElementPart::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             CSS_PSEUDO_ELEMENT_FUNCTION
                 | CSS_PSEUDO_ELEMENT_HIGHLIGHT
                 | CSS_PSEUDO_ELEMENT_IDENTIFIER
+                | CSS_PSEUDO_ELEMENT_PART
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -4712,6 +4726,9 @@ impl AstNode for AnyCssPseudoElement {
                     syntax,
                 })
             }
+            CSS_PSEUDO_ELEMENT_PART => {
+                AnyCssPseudoElement::CssPseudoElementPart(CssPseudoElementPart { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -4721,6 +4738,7 @@ impl AstNode for AnyCssPseudoElement {
             AnyCssPseudoElement::CssPseudoElementFunction(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementHighlight(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => &it.syntax,
+            AnyCssPseudoElement::CssPseudoElementPart(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -4728,6 +4746,7 @@ impl AstNode for AnyCssPseudoElement {
             AnyCssPseudoElement::CssPseudoElementFunction(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementHighlight(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.syntax,
+            AnyCssPseudoElement::CssPseudoElementPart(it) => it.syntax,
         }
     }
 }
@@ -4737,6 +4756,7 @@ impl std::fmt::Debug for AnyCssPseudoElement {
             AnyCssPseudoElement::CssPseudoElementFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoElement::CssPseudoElementHighlight(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoElement::CssPseudoElementPart(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -4746,6 +4766,7 @@ impl From<AnyCssPseudoElement> for SyntaxNode {
             AnyCssPseudoElement::CssPseudoElementFunction(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementHighlight(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
+            AnyCssPseudoElement::CssPseudoElementPart(it) => it.into(),
         }
     }
 }
