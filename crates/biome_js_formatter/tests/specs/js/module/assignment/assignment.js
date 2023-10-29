@@ -152,3 +152,11 @@ a =
         a: { t: c = b       }, loreum, ipsurm
     } = {}
 
+
+const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+	await setup(2);
+
+function* f() {
+	const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+		yield setup(2);
+}

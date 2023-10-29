@@ -65,18 +65,14 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     /// ## Errors
     ///
     /// The function will emit a generic diagnostic if the `visitor` doesn't implement [visit_member_value]
-    fn map_to_known_string<T>(
-        &self,
+    fn map_to_known_string(
+        &mut self,
         value: &AnyJsonValue,
         name: &str,
-        visitor: &mut T,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()>
-    where
-        T: VisitNode<JsonLanguage>,
-    {
+    ) -> Option<()> {
         if JsonStringValue::can_cast(value.syntax().kind()) {
-            visitor.visit_member_value(value.syntax(), diagnostics)?;
+            self.visit_member_value(value.syntax(), diagnostics)?;
             return Some(());
         }
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
@@ -395,16 +391,12 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     /// ## Errors
     /// This function will emit diagnostics if:
     /// - the `value` can't be cast to [JsonObjectValue]
-    fn map_to_object<T>(
+    fn map_to_object(
         &mut self,
         value: &AnyJsonValue,
         name: &str,
-        visitor: &mut T,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()>
-    where
-        T: VisitNode<JsonLanguage>,
-    {
+    ) -> Option<()> {
         let value = JsonObjectValue::cast_ref(value.syntax()).or_else(|| {
             diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
                 name,
@@ -415,7 +407,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
         })?;
         for element in value.json_member_list() {
             let element = element.ok()?;
-            visitor.visit_map(
+            self.visit_map(
                 element.name().ok()?.syntax(),
                 element.value().ok()?.syntax(),
                 diagnostics,
@@ -424,16 +416,12 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
         Some(())
     }
 
-    fn map_to_array<V>(
-        &self,
+    fn map_to_array(
+        &mut self,
         value: &AnyJsonValue,
         name: &str,
-        visitor: &mut V,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()>
-    where
-        V: VisitNode<JsonLanguage>,
-    {
+    ) -> Option<()> {
         let array = JsonArrayValue::cast_ref(value.syntax()).or_else(|| {
             diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
                 name,
@@ -447,7 +435,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
         }
         for element in array.elements() {
             let element = element.ok()?;
-            visitor.visit_array_member(element.syntax(), diagnostics);
+            self.visit_array_member(element.syntax(), diagnostics);
         }
 
         Some(())

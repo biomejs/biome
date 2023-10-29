@@ -20,6 +20,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Apply the correct layout when the right hand of an assignment expression is a await expression or a yield expression. Contributed by @ematipico
+
 ### JavaScript APIs
 
 ### Linter
@@ -37,6 +41,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
 
 ### Parser
+
+- Support RegExp v flag. Contributed by @nissy-dev
 
 ### VSCode
 

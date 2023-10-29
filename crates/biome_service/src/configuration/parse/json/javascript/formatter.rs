@@ -33,32 +33,32 @@ impl VisitNode<JsonLanguage> for JavascriptFormatter {
         match name_text {
             "jsxQuoteStyle" => {
                 let mut jsx_quote_style = QuoteStyle::default();
-                self.map_to_known_string(&value, name_text, &mut jsx_quote_style, diagnostics)?;
+                jsx_quote_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.jsx_quote_style = Some(jsx_quote_style);
             }
             "quoteStyle" => {
                 let mut quote_style = QuoteStyle::default();
-                self.map_to_known_string(&value, name_text, &mut quote_style, diagnostics)?;
+                quote_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.quote_style = Some(quote_style);
             }
             "trailingComma" => {
                 let mut trailing_comma = TrailingComma::default();
-                self.map_to_known_string(&value, name_text, &mut trailing_comma, diagnostics)?;
+                trailing_comma.map_to_known_string(&value, name_text, diagnostics)?;
                 self.trailing_comma = Some(trailing_comma);
             }
             "quoteProperties" => {
                 let mut quote_properties = QuoteProperties::default();
-                self.map_to_known_string(&value, name_text, &mut quote_properties, diagnostics)?;
+                quote_properties.map_to_known_string(&value, name_text, diagnostics)?;
                 self.quote_properties = Some(quote_properties);
             }
             "semicolons" => {
                 let mut semicolons = Semicolons::default();
-                self.map_to_known_string(&value, name_text, &mut semicolons, diagnostics)?;
+                semicolons.map_to_known_string(&value, name_text, diagnostics)?;
                 self.semicolons = Some(semicolons);
             }
             "arrowParentheses" => {
                 let mut arrow_parentheses = ArrowParentheses::default();
-                self.map_to_known_string(&value, name_text, &mut arrow_parentheses, diagnostics)?;
+                arrow_parentheses.map_to_known_string(&value, name_text, diagnostics)?;
                 self.arrow_parentheses = Some(arrow_parentheses);
             }
 
@@ -68,7 +68,7 @@ impl VisitNode<JsonLanguage> for JavascriptFormatter {
 
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
-                self.map_to_known_string(&value, name_text, &mut indent_style, diagnostics)?;
+                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.indent_style = Some(indent_style);
             }
             "indentSize" => {

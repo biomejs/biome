@@ -25,7 +25,7 @@ impl VisitNode<JsonLanguage> for VcsConfiguration {
         match name_text {
             "clientKind" => {
                 let mut client_kind = VcsClientKind::default();
-                self.map_to_known_string(&value, name_text, &mut client_kind, diagnostics)?;
+                client_kind.map_to_known_string(&value, name_text, diagnostics)?;
                 self.client_kind = Some(client_kind);
             }
             "enabled" => {

@@ -42,17 +42,18 @@ object BiomeUtils {
     fun getBiomeExecutablePath(project: Project): String? {
         val directoryManager = NodeModulesDirectoryManager.getInstance(project)
         val executablePath = BiomeSettings.getInstance(project).executablePath
+
+        if (!executablePath.isEmpty()) {
+            return executablePath
+        }
+
         val biomeBinFile = directoryManager.nodeModulesDirs
             .asSequence()
             .mapNotNull { it.findFileByRelativePath("@biomejs/biome/bin/biome") }
             .filter { it.isValid }
             .firstOrNull()
 
-        if (executablePath.isEmpty()) {
-            return biomeBinFile?.path
-        }
-
-        return executablePath
+        return biomeBinFile?.path
     }
 
     fun createNodeCommandLine(project: Project, executable: String): GeneralCommandLine {

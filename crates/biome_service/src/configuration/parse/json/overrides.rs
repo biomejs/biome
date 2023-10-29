@@ -20,8 +20,8 @@ impl VisitNode<JsonLanguage> for Overrides {
     ) -> Option<()> {
         let mut pattern = OverridePattern::default();
         let element = AnyJsonValue::cast_ref(element)?;
-        self.map_to_object(&element, "hooks", &mut pattern, diagnostics)?;
-        self.list.push(pattern);
+        pattern.map_to_object(&element, "overrides", diagnostics)?;
+        self.0.push(pattern);
         Some(())
     }
 }
@@ -56,27 +56,27 @@ impl VisitNode<JsonLanguage> for OverridePattern {
             }
             "formatter" => {
                 let mut formatter = OverrideFormatterConfiguration::default();
-                self.map_to_object(&value, name_text, &mut formatter, diagnostics)?;
+                formatter.map_to_object(&value, name_text, diagnostics)?;
                 self.formatter = Some(formatter);
             }
             "linter" => {
                 let mut linter = OverrideLinterConfiguration::default();
-                self.map_to_object(&value, name_text, &mut linter, diagnostics)?;
+                linter.map_to_object(&value, name_text, diagnostics)?;
                 self.linter = Some(linter);
             }
             "organizeImports" => {
                 let mut organize_imports = OverrideOrganizeImportsConfiguration::default();
-                self.map_to_object(&value, name_text, &mut organize_imports, diagnostics)?;
+                organize_imports.map_to_object(&value, name_text, diagnostics)?;
                 self.organize_imports = Some(organize_imports);
             }
             "javascript" => {
                 let mut javascript = JavascriptConfiguration::default();
-                self.map_to_object(&value, name_text, &mut javascript, diagnostics)?;
+                javascript.map_to_object(&value, name_text, diagnostics)?;
                 self.javascript = Some(javascript);
             }
             "json" => {
                 let mut json = JsonConfiguration::default();
-                self.map_to_object(&value, name_text, &mut json, diagnostics)?;
+                json.map_to_object(&value, name_text, diagnostics)?;
                 self.json = Some(json);
             }
             _ => {}
@@ -114,7 +114,7 @@ impl VisitNode<JsonLanguage> for OverrideFormatterConfiguration {
 
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
-                self.map_to_known_string(&value, name_text, &mut indent_style, diagnostics)?;
+                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
                 self.indent_style = Some(indent_style);
             }
             "indentSize" => {
@@ -179,7 +179,7 @@ impl VisitNode<JsonLanguage> for OverrideLinterConfiguration {
             "rules" => {
                 let mut rules = Rules::default();
                 if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    self.map_to_object(&value, name_text, &mut rules, diagnostics)?;
+                    rules.map_to_object(&value, name_text, diagnostics)?;
                     self.rules = Some(rules);
                 }
             }

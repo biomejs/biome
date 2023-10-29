@@ -1284,14 +1284,8 @@
 			"additionalProperties": false
 		},
 		"Overrides": {
-			"type": "object",
-			"properties": {
-				"list": {
-					"type": "array",
-					"items": { "$ref": "#/definitions/OverridePattern" }
-				}
-			},
-			"additionalProperties": false
+			"type": "array",
+			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
 		"Performance": {
 			"description": "A list of rules that belong to this group",
@@ -1344,8 +1338,7 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
-				},
-				{ "description": "No options available", "type": "null" }
+				}
 			]
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },

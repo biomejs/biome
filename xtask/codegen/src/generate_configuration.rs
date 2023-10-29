@@ -142,7 +142,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     name_text,
                     diagnostics,
                 )? {
-                    self.map_to_object(&value, name_text, &mut visitor, diagnostics)?;
+                    visitor.map_to_object(&value, name_text, diagnostics)?;
                     self.#property_group_name = Some(visitor);
                 }
             }
@@ -267,8 +267,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use crate::Rules;
         use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
         use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-        use biome_json_syntax::{AnyJsonValue, JsonLanguage};
-        use biome_rowan::{AstNode, SyntaxNode};
+        use biome_json_syntax::JsonLanguage;
+        use biome_rowan::SyntaxNode;
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 
         impl VisitNode<JsonLanguage> for Rules {
@@ -601,23 +601,10 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
         let rule_identifier = Ident::new(&to_lower_snake_case(rule_name), Span::call_site());
         group_rules.push(Literal::string(rule_name));
         visitor_rule_line.push(quote! {
-            #rule_name => match value {
-                AnyJsonValue::JsonStringValue(_) => {
-                    let mut configuration = RuleConfiguration::default();
-                    self.map_to_known_string(&value, name_text, &mut configuration, diagnostics)?;
-                    self.#rule_identifier = Some(configuration);
-                }
-                AnyJsonValue::JsonObjectValue(_) => {
-                    let mut rule_configuration = RuleConfiguration::default();
-                    rule_configuration.map_rule_configuration(&value, name_text, #rule_name, diagnostics)?;
-                    self.#rule_identifier = Some(rule_configuration);
-                }
-                _ => {
-                    diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-                        "object or string",
-                        value.range(),
-                    ));
-                }
+            #rule_name => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(&value, #rule_name, diagnostics)?;
+                self.#rule_identifier = Some(configuration);
             }
         });
     }

@@ -9,8 +9,8 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast};
+use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast};
 use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -278,6 +278,14 @@ impl VisitNode<JsonLanguage> for Hooks {
         match name_text {
             "name" => {
                 self.name = self.map_to_string(&value, name_text, diagnostics)?;
+                if self.name.is_empty() {
+                    diagnostics.push(
+                        DeserializationDiagnostic::new(markup!(
+                            "The field "<Emphasis>"name"</Emphasis>" is mandatory"
+                        ))
+                        .with_range(value.range()),
+                    )
+                }
             }
             "closureIndex" => {
                 self.closure_index = self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
@@ -310,27 +318,6 @@ impl VisitNode<JsonLanguage> for HooksOptions {
         has_only_known_keys(node, &["hooks"], diagnostics)
     }
 
-    fn visit_array_member(
-        &mut self,
-        element: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let mut hook = Hooks::default();
-        let element = AnyJsonValue::cast_ref(element)?;
-        self.map_to_object(&element, "hooks", &mut hook, diagnostics)?;
-        if hook.name.is_empty() {
-            diagnostics.push(
-                DeserializationDiagnostic::new(markup!(
-                    "The field "<Emphasis>"name"</Emphasis>" is mandatory"
-                ))
-                .with_range(element.range()),
-            )
-        } else {
-            self.hooks.push(hook);
-        }
-        Some(())
-    }
-
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
@@ -341,58 +328,19 @@ impl VisitNode<JsonLanguage> for HooksOptions {
         let name_text = name.text();
         if name_text == "hooks" {
             let array = value.as_json_array_value()?;
+            if array.elements().len() < 1 {
+                diagnostics.push(
+                    DeserializationDiagnostic::new("At least one element is needed")
+                        .with_range(array.range()),
+                );
+                return Some(());
+            }
 
             for element in array.elements() {
                 let element = element.ok()?;
-                let hook_array = element.as_json_array_value()?;
-
-                let len = hook_array.elements().len();
-                if len < 1 {
-                    diagnostics.push(
-                        DeserializationDiagnostic::new("At least one element is needed")
-                            .with_range(hook_array.range()),
-                    );
-                    return Some(());
-                }
-                if len > 3 {
-                    diagnostics.push(
-                        DeserializationDiagnostic::new(
-                            "Too many elements, maximum three are expected",
-                        )
-                        .with_range(hook_array.range()),
-                    );
-                    return Some(());
-                }
-                let mut elements = hook_array.elements().iter();
-                let hook_name = elements.next()?.ok()?;
-                let hook_name = hook_name
-                    .as_json_string_value()
-                    .ok_or_else(|| {
-                        DeserializationDiagnostic::new_incorrect_type("string", hook_name.range())
-                    })
-                    .ok()?
-                    .inner_string_text()
-                    .ok()?
-                    .to_string();
-
-                let closure_index = if let Some(element) = elements.next() {
-                    let element = element.ok()?;
-                    Some(self.map_to_u8(&element, name_text, u8::MAX, diagnostics)? as usize)
-                } else {
-                    None
-                };
-                let dependencies_index = if let Some(element) = elements.next() {
-                    let element = element.ok()?;
-                    Some(self.map_to_u8(&element, name_text, u8::MAX, diagnostics)? as usize)
-                } else {
-                    None
-                };
-
-                self.hooks.push(Hooks {
-                    name: hook_name,
-                    closure_index,
-                    dependencies_index,
-                });
+                let mut hooks = Hooks::default();
+                hooks.map_to_object(&element, "hooks", diagnostics)?;
+                self.hooks.push(hooks);
             }
         }
         Some(())

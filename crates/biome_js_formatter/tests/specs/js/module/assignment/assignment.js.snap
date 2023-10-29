@@ -161,6 +161,14 @@ a =
     } = {}
 
 
+const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+	await setup(2);
+
+function* f() {
+	const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+		yield setup(2);
+}
+
 ```
 
 
@@ -407,6 +415,14 @@ a = {
 	loreum,
 	ipsurm,
 } = {};
+
+const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+	await setup(2);
+
+function* f() {
+	const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
+		yield setup(2);
+}
 ```
 
 # Lines exceeding max width of 80 characters
