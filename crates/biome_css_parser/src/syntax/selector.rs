@@ -297,6 +297,7 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
         parse_pseudo_element_function(p)
     } else {
         let m = p.start();
+        parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
         Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
     }
 }
