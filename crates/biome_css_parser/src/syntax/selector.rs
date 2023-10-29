@@ -296,9 +296,7 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
     } else if is_at_pseudo_element_function(p) {
         parse_pseudo_element_function(p)
     } else {
-        let m = p.start();
-        parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
-        Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
+        parse_pseudo_element_identifier(p)
     }
 }
 
@@ -369,4 +367,15 @@ pub(crate) fn parse_pseudo_element_function(p: &mut CssParser) -> ParsedSyntax {
     p.expect_with_context(T![')'], context);
 
     Present(m.complete(p, CSS_PSEUDO_ELEMENT_FUNCTION))
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
 }
