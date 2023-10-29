@@ -792,6 +792,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                 "noInvalidNewBuiltin",
                 "noMisleadingInstantiator",
                 "noMisrefactoredShorthandAssign",
+                "noThisInStatic",
                 "noUnusedImports",
                 "noUselessElse",
                 "noUselessLoneBlockStatements",
@@ -883,6 +884,11 @@ impl VisitNode<JsonLanguage> for Nursery {
                     diagnostics,
                 )?;
                 self.no_misrefactored_shorthand_assign = Some(configuration);
+            }
+            "noThisInStatic" => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(&value, "noThisInStatic", diagnostics)?;
+                self.no_this_in_static = Some(configuration);
             }
             "noUnusedImports" => {
                 let mut configuration = RuleConfiguration::default();

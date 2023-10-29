@@ -25,6 +25,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - noInvalidNewBuiltin
   - noMisleadingInstantiator
   - noMisrefactoredShorthandAssign
+  - noThisInStatic
   - noUnusedImports
   - noUselessElse
   - noUselessLoneBlockStatements

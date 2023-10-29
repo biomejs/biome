@@ -67,6 +67,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### New features
+
+- Add [noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static) rule. Contributed by @ditorodev and @Conaclos
+
 #### Bug fixes
 
 - Fix [#548](https://github.com/biomejs/biome/issues/548) which made [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign) panic.
