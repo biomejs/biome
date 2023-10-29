@@ -1,12 +1,12 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
-use biome_deserialize::json::with_only_known_variants;
+use biome_deserialize::json::report_unknown_variant;
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{if_group_breaks, text};
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonLanguage, JsonStringValue};
 use biome_rowan::SyntaxNode;
 use std::fmt;
 use std::str::FromStr;
@@ -72,8 +72,6 @@ pub enum TrailingComma {
 }
 
 impl TrailingComma {
-    pub(crate) const KNOWN_VALUES: &'static [&'static str] = &["all", "es5", "none"];
-
     pub const fn is_es5(&self) -> bool {
         matches!(self, TrailingComma::Es5)
     }
@@ -109,24 +107,21 @@ impl fmt::Display for TrailingComma {
     }
 }
 
+impl TrailingComma {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["all", "es5", "none"];
+}
+
 impl VisitNode<JsonLanguage> for TrailingComma {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, TrailingComma::KNOWN_VALUES, diagnostics)?;
-        match node.inner_string_text().ok()?.text() {
-            "all" => {
-                *self = TrailingComma::All;
-            }
-            "es5" => {
-                *self = TrailingComma::Es5;
-            }
-            "none" => {
-                *self = TrailingComma::None;
-            }
-            _ => {}
+        let node = JsonStringValue::cast_ref(node)?;
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
+        } else {
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }

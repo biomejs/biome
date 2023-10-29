@@ -2,7 +2,7 @@ use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
@@ -70,7 +70,7 @@ pub struct RestrictedGlobalsOptions {
 }
 
 impl RestrictedGlobalsOptions {
-    pub const KNOWN_KEYS: &'static [&'static str] = &["deniedGlobals"];
+    const ALLOWED_KEYS: &'static [&'static str] = &["deniedGlobals"];
 }
 
 // Required by [Bpaf].
@@ -84,24 +84,19 @@ impl FromStr for RestrictedGlobalsOptions {
 }
 
 impl VisitNode<JsonLanguage> for RestrictedGlobalsOptions {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, Self::KNOWN_KEYS, diagnostics)
-    }
-
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         if name_text == "deniedGlobals" {
             self.denied_globals = self.map_to_array_of_strings(&value, name_text, diagnostics);
+        } else {
+            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
 
         Some(())

@@ -1,29 +1,34 @@
 use crate::configuration::{FormatterConfiguration, PlainIndentStyle};
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_formatter::LineWidth;
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
+use biome_json_syntax::{JsonLanguage, JsonStringValue};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitNode<JsonLanguage> for FormatterConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, FormatterConfiguration::KNOWN_KEYS, diagnostics)
-    }
+impl FormatterConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] = &[
+        "enabled",
+        "formatWithErrors",
+        "indentStyle",
+        "indentSize",
+        "indentWidth",
+        "lineWidth",
+        "ignore",
+        "include",
+    ];
+}
 
+impl VisitNode<JsonLanguage> for FormatterConfiguration {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
-
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
@@ -38,7 +43,6 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
                     .map_to_index_set_string(&value, name_text, diagnostics)
                     .map(StringSet::new);
             }
-
             "indentStyle" => {
                 let mut indent_style = PlainIndentStyle::default();
                 indent_style.map_to_known_string(&value, name_text, diagnostics)?;
@@ -57,7 +61,6 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
             }
             "lineWidth" => {
                 let line_width = self.map_to_u16(&value, name_text, LineWidth::MAX, diagnostics)?;
-
                 self.line_width = Some(match LineWidth::try_from(line_width) {
                     Ok(result) => result,
                     Err(err) => {
@@ -75,24 +78,29 @@ impl VisitNode<JsonLanguage> for FormatterConfiguration {
             "formatWithErrors" => {
                 self.format_with_errors = self.map_to_boolean(&value, name_text, diagnostics);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
-
         Some(())
     }
 }
 
+impl PlainIndentStyle {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["tab", "space"];
+}
+
 impl VisitNode<JsonLanguage> for PlainIndentStyle {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, PlainIndentStyle::KNOWN_VALUES, diagnostics)?;
-        if node.inner_string_text().ok()? == "space" {
-            *self = PlainIndentStyle::Space;
+        let node = JsonStringValue::cast_ref(node)?;
+        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
+            *self = value;
         } else {
-            *self = PlainIndentStyle::Tab;
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }

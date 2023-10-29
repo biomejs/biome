@@ -91,18 +91,6 @@ pub struct OverridePattern {
     pub organize_imports: Option<OverrideOrganizeImportsConfiguration>,
 }
 
-impl OverridePattern {
-    pub const KNOWN_KEYS: &'static [&'static str] = &[
-        "ignore",
-        "include",
-        "formatter",
-        "linter",
-        "organizeImports",
-        "javascript",
-        "json",
-    ];
-}
-
 impl FromStr for OverridePattern {
     type Err = String;
 
@@ -236,17 +224,6 @@ pub struct OverrideFormatterConfiguration {
     pub line_width: Option<LineWidth>,
 }
 
-impl OverrideFormatterConfiguration {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
-        "enabled",
-        "formatWithErrors",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-    ];
-}
-
 impl MergeWith<OverrideFormatterConfiguration> for OverrideFormatterConfiguration {
     fn merge_with(&mut self, other: OverrideFormatterConfiguration) {
         if let Some(enabled) = other.enabled {
@@ -296,10 +273,6 @@ pub struct OverrideLinterConfiguration {
     pub rules: Option<Rules>,
 }
 
-impl OverrideLinterConfiguration {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["enabled", "rules"];
-}
-
 impl MergeWith<OverrideLinterConfiguration> for OverrideLinterConfiguration {
     fn merge_with(&mut self, other: OverrideLinterConfiguration) {
         if let Some(enabled) = other.enabled {
@@ -328,10 +301,6 @@ pub struct OverrideOrganizeImportsConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub enabled: Option<bool>,
-}
-
-impl OverrideOrganizeImportsConfiguration {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["enabled"];
 }
 
 impl MergeWith<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsConfiguration {

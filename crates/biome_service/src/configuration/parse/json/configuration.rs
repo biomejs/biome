@@ -7,28 +7,36 @@ use crate::configuration::{
     FilesConfiguration, FormatterConfiguration, JavascriptConfiguration, LinterConfiguration,
 };
 use crate::Configuration;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
 
-impl VisitNode<JsonLanguage> for Configuration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, Configuration::KNOWN_KEYS, diagnostics)
-    }
+impl Configuration {
+    const ALLOWED_KEYS: &'static [&'static str] = &[
+        "vcs",
+        "files",
+        "linter",
+        "formatter",
+        "javascript",
+        "json",
+        "$schema",
+        "organizeImports",
+        "extends",
+        "overrides",
+    ];
+}
 
+impl VisitNode<JsonLanguage> for Configuration {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "$schema" => {
                 self.schema = self.map_to_string(&value, name_text, diagnostics);
@@ -79,7 +87,9 @@ impl VisitNode<JsonLanguage> for Configuration {
                 overrides.map_to_array(&value, name_text, diagnostics)?;
                 self.overrides = Some(overrides);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())
