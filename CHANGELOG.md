@@ -39,6 +39,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#595](https://github.com/biomejs/biome/issues/595) by updating unsafe-apply logic to avoid unexpected errors in [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/). Contributed by @nissy-dev
 
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
+- Support more a11y roles and fix some methods for a11y lint rules Contributed @nissy-dev
 
 ### Parser
 
