@@ -54,27 +54,29 @@ impl Language for JsonLanguage {
         language: &Self::FormatterSettings,
         path: &RomePath,
     ) -> Self::FormatOptions {
-        overrides.as_json_format_options(path).unwrap_or_else(|| {
-            let indent_style = if let Some(indent_style) = language.indent_style {
-                indent_style
-            } else {
-                global.indent_style.unwrap_or_default()
-            };
-            let line_width = if let Some(line_width) = language.line_width {
-                line_width
-            } else {
-                global.line_width.unwrap_or_default()
-            };
-            let indent_width = if let Some(indent_width) = language.indent_width {
-                indent_width
-            } else {
-                global.indent_width.unwrap_or_default()
-            };
+        let indent_style = if let Some(indent_style) = language.indent_style {
+            indent_style
+        } else {
+            global.indent_style.unwrap_or_default()
+        };
+        let line_width = if let Some(line_width) = language.line_width {
+            line_width
+        } else {
+            global.line_width.unwrap_or_default()
+        };
+        let indent_width = if let Some(indent_width) = language.indent_width {
+            indent_width
+        } else {
+            global.indent_width.unwrap_or_default()
+        };
+
+        overrides.override_json_format_options(
+            path,
             JsonFormatOptions::new(path.as_path().try_into().unwrap_or_default())
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
-                .with_line_width(line_width)
-        })
+                .with_line_width(line_width),
+        )
     }
 }
 

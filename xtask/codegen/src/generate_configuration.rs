@@ -71,7 +71,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut struct_groups = Vec::new();
     let mut line_groups = Vec::new();
     let mut default_for_groups = Vec::new();
-    let mut group_rules_union = Vec::new();
+    let mut merge_width_groups = Vec::new();
+    let mut group_as_default_rules = Vec::new();
+    let mut group_as_disabled_rules = Vec::new();
     let mut group_match_code = Vec::new();
     let mut group_get_severity = Vec::new();
     let mut group_name_list = vec!["recommended", "all"];
@@ -96,13 +98,20 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             #property_group_name: None
         });
 
+        merge_width_groups.push(quote! {
+            if let Some(other) = other.#property_group_name {
+               let #property_group_name = self.#property_group_name.get_or_insert(#group_struct_name::default());
+                #property_group_name.merge_with(other);
+            }
+        });
+
         let global_recommended = if group == "nursery" {
             quote! { self.is_recommended() && biome_flags::is_unstable() }
         } else {
             quote! { self.is_recommended() }
         };
 
-        group_rules_union.push(quote! {
+        group_as_default_rules.push(quote! {
             if let Some(group) = self.#property_group_name.as_ref() {
                 group.collect_preset_rules(self.is_recommended(), &mut enabled_rules, &mut disabled_rules);
                 enabled_rules.extend(&group.get_enabled_rules());
@@ -113,6 +122,12 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 disabled_rules.extend(#group_struct_name::all_rules_as_filters());
             } else if #global_recommended {
                 enabled_rules.extend(#group_struct_name::recommended_rules_as_filters());
+            }
+        });
+
+        group_as_disabled_rules.push(quote! {
+            if let Some(group) = self.#property_group_name.as_ref() {
+                disabled_rules.extend(&group.get_disabled_rules());
             }
         });
 
@@ -153,7 +168,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
-        use crate::RuleConfiguration;
+        use crate::{MergeWith, RuleConfiguration};
         use biome_analyze::RuleFilter;
         use indexmap::IndexSet;
         use bpaf::Bpaf;
@@ -185,6 +200,32 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 }
             }
         }
+
+        impl MergeWith<Rules> for Rules {
+            fn merge_with(&mut self, other: Rules) {
+                if let Some(recommended) = other.recommended {
+                    self.recommended = Some(recommended);
+                }
+
+                if let Some(all) = other.all {
+                    self.all = Some(all);
+                }
+
+                #( #merge_width_groups )*
+            }
+
+            fn merge_with_if_not_default(&mut self, other: Rules)
+            where
+                Rules: Default,
+            {
+                if other != Rules::default() {
+                    self.merge_with(other)
+                }
+            }
+        }
+
+
+
         impl Rules {
 
             /// Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule.
@@ -244,19 +285,25 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 matches!(self.all, Some(false))
             }
 
-            /// It returns a tuple of filters. The first element of the tuple are the enabled rules,
-            /// while the second element are the disabled rules.
-            ///
-            /// Only one element of the tuple is [Some] at the time.
+            /// It returns the enabled rules by default.
             ///
             /// The enabled rules are calculated from the difference with the disabled rules.
             pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
                 let mut enabled_rules = IndexSet::new();
                 let mut disabled_rules = IndexSet::new();
-                #( #group_rules_union )*
+                #( #group_as_default_rules )*
 
                 enabled_rules.difference(&disabled_rules).copied().collect()
             }
+
+            /// It returns only the disabled rules
+            pub fn as_disabled_rules(&self) -> IndexSet<RuleFilter> {
+                let mut disabled_rules = IndexSet::new();
+                #( #group_as_disabled_rules )*
+
+                disabled_rules
+            }
+
         }
 
         #( #struct_groups )*
@@ -350,6 +397,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut declarations = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
+    let mut merge_with_lines_rules = Vec::new();
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
@@ -431,6 +479,12 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             pub #rule_identifier: Option<RuleConfiguration>
         });
 
+        merge_with_lines_rules.push(quote! {
+            if let Some(#rule_identifier) = other.#rule_identifier {
+                self.#rule_identifier = Some(#rule_identifier);
+            }
+        });
+
         rule_enabled_check_line.push(quote! {
             if let Some(rule) = self.#rule_identifier.as_ref() {
                 if rule.is_enabled() {
@@ -488,6 +542,18 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             pub all: Option<bool>,
 
             #( #schema_lines_rules ),*
+        }
+
+        impl MergeWith<#group_struct_name> for #group_struct_name {
+            fn merge_with(&mut self, other: #group_struct_name) {
+                #( #merge_with_lines_rules )*
+            }
+
+            fn merge_with_if_not_default(&mut self, other: #group_struct_name) where #group_struct_name: Default {
+                if other != #group_struct_name::default() {
+                    self.merge_with(other);
+                }
+            }
         }
 
         impl #group_struct_name {
