@@ -8,7 +8,7 @@ pub struct FormatClass<'a> {
 
 impl FormatClass<'_> {
     fn should_group(&self, comments: &JsComments) -> FormatResult<bool> {
-        if let Some(id) = self.class.id()? {
+        if let Some(id) = self.class.id() {
             if comments.has_trailing_comments(id.syntax()) {
                 return Ok(true);
             }
@@ -44,7 +44,7 @@ impl Format<JsFormatContext> for FormatClass<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         let decorators = self.class.decorators();
         let abstract_token = self.class.abstract_token();
-        let id = self.class.id()?;
+        let id = self.class.id();
         let extends = self.class.extends_clause();
         let implements_clause = self.class.implements_clause();
         let type_parameters = self.class.type_parameters();

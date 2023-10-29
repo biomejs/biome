@@ -1,94 +1,90 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-use biome_console::markup;
-use biome_js_syntax::{
-    JsCallExpression, JsClassDeclaration, JsMethodClassMember, JsSuperExpression, JsThisExpression,
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList};
+use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsClass, AnyJsClassMember, AnyJsExpression, JsArrowFunctionExpression, JsSuperExpression,
+    JsSyntaxToken, JsThisExpression,
+};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
+
+use crate::{control_flow::AnyJsControlFlowRoot, JsRuleAction};
 
 declare_rule! {
-///  Disallow `this`/`super` in static methods
-///
-///  In JavaScript, the `this` keyword within static methods refers to the class (the constructor) instance,
-///  not an instance of the class. This can be confusing for developers coming from other languages where
-///  `this` typically refers to an instance of the class, not the class itself.
-///
-///  Similarly, `super` in static methods also refers to the parent class, not an instance of the parent class.
-///  This can lead to unexpected behavior if not properly understood.
-///
-///  This rule enforces the use of the class name itself to access static methods,
-///  which can make the code clearer and less prone to errors. It helps to prevent
-///  misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static methods.
-///
-///  Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
-///
-///  ## Example
-///
-///  ### Invalid
-///
-/// ```js,expect_diagnostic
-///
-///  class A {
-///     static foo() {
-///         doSomething()
-///     }
-///
-///     static bar() {
-///         this.foo()
-///     }
-///  }
-/// ```
-///
-/// ```js,expect_diagnostic
-///  class A {
-///     static foo() {
-///         doSomething()
-///     }
-///  }
-///
-///  class B extends A {
-///     static foo() {
-///         super.foo()
-///     }
-///  }
-/// ```
-///
-///  ### Valid
-///
-///  ```js
-///  class A {
-///      static foo() {
-///          doSomething()
-///      }
-///  }
-///
-///  class B extends A {
-///      static foo() {
-///          A.foo()
-///      }
-///  }
-///  ```
-///
-///  ```js
-///  class A {
-///     static foo() {
-///         doSomething()
-///     }
-///
-///     bar() {
-///       A.foo()
-///     }
-///  }
-///  ```
-///
+    /// Disallow `this` and `super` in `static` contexts.
+    ///
+    /// In JavaScript, the `this` keyword in static contexts refers to the class (the constructor) instance,
+    /// not an instance of the class. This can be confusing for developers coming from other languages where
+    /// `this` typically refers to an instance of the class, not the class itself.
+    ///
+    /// Similarly, `super` in static contexts refers to the parent class, not an instance of the class.
+    /// This can lead to unexpected behavior if not properly understood.
+    ///
+    /// This rule enforces the use of the class name itself to access static methods,
+    /// which can make the code clearer and less prone to errors. It helps to prevent
+    /// misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static contexts.
+    ///
+    /// Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
+    ///
+    /// ## Example
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    ///  class A {
+    ///     static CONSTANT = 0;
+    ///
+    ///     static foo() {
+    ///         this.CONSTANT;
+    ///     }
+    ///  }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    ///  class B extends A {
+    ///     static bar() {
+    ///         super.CONSTANT;
+    ///     }
+    ///  }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// class B extends A {
+    ///     static ANOTHER_CONSTANT = A.CONSTANT + 1;
+    ///
+    ///     static foo() {
+    ///         A.CONSTANT;
+    ///         B.ANOTHER_CONSTANT;
+    ///     }
+    ///
+    ///     bar() {
+    ///         this.property;
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// class A {
+    ///    static foo() {
+    ///        doSomething()
+    ///    }
+    ///
+    ///    bar() {
+    ///      A.foo()
+    ///    }
+    /// }
+    /// ```
+    ///
     pub(crate) NoThisInStatic {
         version: "next",
         name: "noThisInStatic",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
-}
-
-declare_node_union! {
-    pub(crate) JsThisSuperExpression = JsSuperExpression | JsThisExpression
 }
 
 impl Rule for NoThisInStatic {
@@ -99,66 +95,99 @@ impl Rule for NoThisInStatic {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let this_super_expression = ctx.query();
-
         let static_method = this_super_expression
             .syntax()
             .ancestors()
-            .find_map(JsMethodClassMember::cast)
-            .filter(|member| {
-                member
+            .find(|x| {
+                AnyJsControlFlowRoot::can_cast(x.kind())
+                    && !JsArrowFunctionExpression::can_cast(x.kind())
+            })
+            .and_then(AnyJsClassMember::cast)
+            .filter(|member| match member {
+                AnyJsClassMember::JsGetterClassMember(member) => member
                     .modifiers()
                     .iter()
-                    .any(|modifier| modifier.as_js_static_modifier().is_some())
+                    .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                AnyJsClassMember::JsMethodClassMember(member) => member
+                    .modifiers()
+                    .iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                AnyJsClassMember::JsSetterClassMember(member) => member
+                    .modifiers()
+                    .iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                AnyJsClassMember::JsPropertyClassMember(member) => member
+                    .modifiers()
+                    .iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => true,
+                _ => false,
             });
-
-        if static_method.is_some() {
-            Some(())
-        } else {
-            None
-        }
+        static_method.is_some().then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let this_super_expression = ctx.query();
+        let this_super_token = this_super_expression.token().ok()?;
+        let text = this_super_token.text_trimmed();
+        let note = if let JsThisSuperExpression::JsSuperExpression(_) = this_super_expression {
+            markup! {
+                <Emphasis>"super"</Emphasis>" refers to a parent class."
+            }
+        } else {
+            markup! {
+                <Emphasis>"this"</Emphasis>" refers to the class."
+            }
+        };
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            this_super_expression.range(),
+            markup! {
+                "Using "<Emphasis>{text}</Emphasis>" in a "<Emphasis>"static"</Emphasis>" context can be confusing."
+            },
+        ).note(note))
+    }
 
-        let call_expression = this_super_expression
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let this_super_expression = ctx.query();
+        let class = this_super_expression
             .syntax()
             .ancestors()
-            .find_map(JsCallExpression::cast)?;
+            .find_map(AnyJsClass::cast)?;
+        let suggested_class_name = if let JsThisSuperExpression::JsSuperExpression(_) =
+            this_super_expression
+        {
+            let extends_clause = class.extends_clause()?;
+            let super_class_name = extends_clause.super_class().ok()?;
+            let AnyJsExpression::JsIdentifierExpression(super_class_name) = super_class_name else {
+                return None;
+            };
+            super_class_name
+        } else {
+            let class_name = class.id()?.as_js_identifier_binding()?.name_token().ok()?;
+            make::js_identifier_expression(make::js_reference_identifier(class_name))
+        };
+        let expr = AnyJsExpression::cast_ref(this_super_expression.syntax())?;
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(expr, suggested_class_name.into());
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Use the class name instead." }.to_owned(),
+            mutation,
+        })
+    }
+}
 
-        let class_declaration = this_super_expression
-            .syntax()
-            .ancestors()
-            .find_map(JsClassDeclaration::cast)?;
+declare_node_union! {
+    pub(crate) JsThisSuperExpression = JsSuperExpression | JsThisExpression
+}
 
-        let class_name_str = class_declaration.id().ok()?.text();
-        let call_expression_str = call_expression.text();
-
-        let extended_class_name = class_declaration
-            .extends_clause()
-            .and_then(|with_extends_clause| with_extends_clause.super_class().ok())
-            .map(|node| node.text());
-
-        let mut recommendation_str = call_expression_str.replace("this", &class_name_str);
-
-        if let Some(extended_class_name_str) = extended_class_name {
-            recommendation_str = recommendation_str.replace("super", &extended_class_name_str);
+impl JsThisSuperExpression {
+    fn token(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            JsThisSuperExpression::JsSuperExpression(expr) => expr.super_token(),
+            JsThisSuperExpression::JsThisExpression(expr) => expr.this_token(),
         }
-
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                this_super_expression.range(),
-                markup! {
-                    "Unexpected "<Emphasis>{this_super_expression.text()}</Emphasis>"."
-                },
-            )
-            .note(markup! {
-                            "Function "<Emphasis>{call_expression_str}</Emphasis>" is static, so `"<Emphasis>{this_super_expression.text()}"."</Emphasis>"` refers to the class (the constructor) instance."
-            })
-            .note(markup! {
-                            "Instead of "<Emphasis>{call_expression_str}</Emphasis>" use "<Emphasis>{recommendation_str}</Emphasis>"."
-                        }),
-        )
     }
 }

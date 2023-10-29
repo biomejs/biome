@@ -1087,7 +1087,7 @@
 					]
 				},
 				"noThisInStatic": {
-					"description": "Disallow this/super in static methods",
+					"description": "Disallow this and super in static contexts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

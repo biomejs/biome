@@ -765,7 +765,7 @@ export interface Nursery {
 	 */
 	noMisrefactoredShorthandAssign?: RuleConfiguration;
 	/**
-	 * Disallow this/super in static methods
+	 * Disallow this and super in static contexts.
 	 */
 	noThisInStatic?: RuleConfiguration;
 	/**

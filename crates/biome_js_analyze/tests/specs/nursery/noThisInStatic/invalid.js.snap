@@ -4,87 +4,374 @@ expression: invalid.js
 ---
 # Input
 ```js
-class A {
-    static foo() {
-        doSomething()
+export default class B extends A {
+    static { this.CONSTANT += super.foo(); }
+
+    static CONSTANT = this.OTHER_CONSTANT;
+    static OTHER_CONSTANT = super.ANOTHER_CONSTANT;
+
+    static get property() {
+        /*before*/this/*after*/;
+        return /*before*/super/*after*/.x;
     }
 
-    static bar() {
-        this.foo()
+    static set property(x) {
+        () => this;
+        () => super.x = x;
     }
 
-    static hello() {
-        this.faux()
-    }
-    
-    faux() { 
-        return
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }
 
-class B extends A {
-    static foo() {
-        super.foo()
-    }
-
-    faux() { 
-        return
+class C extends A {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }
+
+const D = class D extends f() {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
+    }
+}
+
+
+const E = class extends f() {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
+    }
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.js:7:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:14 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected this.
+  ! Using this in a static context can be confusing.
   
-    6 │     static bar() {
-  > 7 │         this.foo()
-      │         ^^^^
-    8 │     }
-    9 │ 
+    1 │ export default class B extends A {
+  > 2 │     static { this.CONSTANT += super.foo(); }
+      │              ^^^^
+    3 │ 
+    4 │     static CONSTANT = this.OTHER_CONSTANT;
   
-  i Function this.foo() is static, so `this.` refers to the class (the constructor) instance.
+  i this refers to the class.
   
-  i Instead of this.foo() use A.foo().
+  i Unsafe fix: Use the class name instead.
   
-
-```
-
-```
-invalid.js:11:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected this.
-  
-    10 │     static hello() {
-  > 11 │         this.faux()
-       │         ^^^^
-    12 │     }
-    13 │     
-  
-  i Function this.faux() is static, so `this.` refers to the class (the constructor) instance.
-  
-  i Instead of this.faux() use A.faux().
+     1  1 │   export default class B extends A {
+     2    │ - ····static·{·this.CONSTANT·+=·super.foo();·}
+        2 │ + ····static·{·B.CONSTANT·+=·super.foo();·}
+     3  3 │   
+     4  4 │       static CONSTANT = this.OTHER_CONSTANT;
   
 
 ```
 
 ```
-invalid.js:21:9 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:31 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected super.
+  ! Using super in a static context can be confusing.
   
-    19 │ class B extends A {
-    20 │     static foo() {
-  > 21 │         super.foo()
-       │         ^^^^^
-    22 │     }
-    23 │ 
+    1 │ export default class B extends A {
+  > 2 │     static { this.CONSTANT += super.foo(); }
+      │                               ^^^^^
+    3 │ 
+    4 │     static CONSTANT = this.OTHER_CONSTANT;
   
-  i Function super.foo() is static, so `super.` refers to the class (the constructor) instance.
+  i super refers to a parent class.
   
-  i Instead of super.foo() use A.foo().
+  i Unsafe fix: Use the class name instead.
+  
+     1  1 │   export default class B extends A {
+     2    │ - ····static·{·this.CONSTANT·+=·super.foo();·}
+        2 │ + ····static·{·this.CONSTANT·+=·A.foo();·}
+     3  3 │   
+     4  4 │       static CONSTANT = this.OTHER_CONSTANT;
+  
+
+```
+
+```
+invalid.js:8:19 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+     7 │     static get property() {
+   > 8 │         /*before*/this/*after*/;
+       │                   ^^^^
+     9 │         return /*before*/super/*after*/.x;
+    10 │     }
+  
+  i this refers to the class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+     6  6 │   
+     7  7 │       static get property() {
+     8    │ - ········/*before*/this/*after*/;
+        8 │ + ········/*before*/B/*after*/;
+     9  9 │           return /*before*/super/*after*/.x;
+    10 10 │       }
+  
+
+```
+
+```
+invalid.js:9:26 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+     7 │     static get property() {
+     8 │         /*before*/this/*after*/;
+   > 9 │         return /*before*/super/*after*/.x;
+       │                          ^^^^^
+    10 │     }
+    11 │ 
+  
+  i super refers to a parent class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+     7  7 │       static get property() {
+     8  8 │           /*before*/this/*after*/;
+     9    │ - ········return·/*before*/super/*after*/.x;
+        9 │ + ········return·/*before*/A/*after*/.x;
+    10 10 │       }
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:13:15 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    12 │     static set property(x) {
+  > 13 │         () => this;
+       │               ^^^^
+    14 │         () => super.x = x;
+    15 │     }
+  
+  i this refers to the class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    11 11 │   
+    12 12 │       static set property(x) {
+    13    │ - ········()·=>·this;
+       13 │ + ········()·=>·B;
+    14 14 │           () => super.x = x;
+    15 15 │       }
+  
+
+```
+
+```
+invalid.js:14:15 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+    12 │     static set property(x) {
+    13 │         () => this;
+  > 14 │         () => super.x = x;
+       │               ^^^^^
+    15 │     }
+    16 │ 
+  
+  i super refers to a parent class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    12 12 │       static set property(x) {
+    13 13 │           () => this;
+    14    │ - ········()·=>·super.x·=·x;
+       14 │ + ········()·=>·A.x·=·x;
+    15 15 │       }
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:18:16 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    17 │     static method() {
+  > 18 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                ^^^^
+    19 │     }
+    20 │ }
+  
+  i this refers to the class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    16 16 │   
+    17 17 │       static method() {
+    18    │ - ········return·this.CONSTANT·+·super.ANOTHER_CONSTANT;
+       18 │ + ········return·B.CONSTANT·+·super.ANOTHER_CONSTANT;
+    19 19 │       }
+    20 20 │   }
+  
+
+```
+
+```
+invalid.js:18:32 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+    17 │     static method() {
+  > 18 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                                ^^^^^
+    19 │     }
+    20 │ }
+  
+  i super refers to a parent class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    16 16 │   
+    17 17 │       static method() {
+    18    │ - ········return·this.CONSTANT·+·super.ANOTHER_CONSTANT;
+       18 │ + ········return·this.CONSTANT·+·A.ANOTHER_CONSTANT;
+    19 19 │       }
+    20 20 │   }
+  
+
+```
+
+```
+invalid.js:24:16 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    22 │ class C extends A {
+    23 │     static method() {
+  > 24 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                ^^^^
+    25 │     }
+    26 │ }
+  
+  i this refers to the class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    22 22 │   class C extends A {
+    23 23 │       static method() {
+    24    │ - ········return·this.CONSTANT·+·super.ANOTHER_CONSTANT;
+       24 │ + ········return·C.CONSTANT·+·super.ANOTHER_CONSTANT;
+    25 25 │       }
+    26 26 │   }
+  
+
+```
+
+```
+invalid.js:24:32 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+    22 │ class C extends A {
+    23 │     static method() {
+  > 24 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                                ^^^^^
+    25 │     }
+    26 │ }
+  
+  i super refers to a parent class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    22 22 │   class C extends A {
+    23 23 │       static method() {
+    24    │ - ········return·this.CONSTANT·+·super.ANOTHER_CONSTANT;
+       24 │ + ········return·this.CONSTANT·+·A.ANOTHER_CONSTANT;
+    25 25 │       }
+    26 26 │   }
+  
+
+```
+
+```
+invalid.js:30:16 lint/nursery/noThisInStatic  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    28 │ const D = class D extends f() {
+    29 │     static method() {
+  > 30 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                ^^^^
+    31 │     }
+    32 │ }
+  
+  i this refers to the class.
+  
+  i Unsafe fix: Use the class name instead.
+  
+    28 28 │   const D = class D extends f() {
+    29 29 │       static method() {
+    30    │ - ········return·this.CONSTANT·+·super.ANOTHER_CONSTANT;
+       30 │ + ········return·D.CONSTANT·+·super.ANOTHER_CONSTANT;
+    31 31 │       }
+    32 32 │   }
+  
+
+```
+
+```
+invalid.js:30:32 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+    28 │ const D = class D extends f() {
+    29 │     static method() {
+  > 30 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                                ^^^^^
+    31 │     }
+    32 │ }
+  
+  i super refers to a parent class.
+  
+
+```
+
+```
+invalid.js:37:16 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using this in a static context can be confusing.
+  
+    35 │ const E = class extends f() {
+    36 │     static method() {
+  > 37 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                ^^^^
+    38 │     }
+    39 │ }
+  
+  i this refers to the class.
+  
+
+```
+
+```
+invalid.js:37:32 lint/nursery/noThisInStatic ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using super in a static context can be confusing.
+  
+    35 │ const E = class extends f() {
+    36 │     static method() {
+  > 37 │         return this.CONSTANT + super.ANOTHER_CONSTANT;
+       │                                ^^^^^
+    38 │     }
+    39 │ }
+  
+  i super refers to a parent class.
   
 
 ```

@@ -1,23 +1,5 @@
-class A {
-    static foo() {
-        doSomething()
-    }
-
-    static bar() {
-        A.foo()
-    }
-
-    fax() {
-        return 'asd';
-    }
-}
-
-class B extends A {
-    static foo() {
-        A.foo()
-    }
-
-    fax() { 
-        return 'asd';
-    }
-}
+function foo() { this }
+() => { this }
+class A { constructor() { this } }
+class A { foo() { this } }
+class A { static foo() { function foo() { this } } }

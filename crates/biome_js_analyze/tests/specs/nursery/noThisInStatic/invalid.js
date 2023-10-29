@@ -1,27 +1,39 @@
-class A {
-    static foo() {
-        doSomething()
+export default class B extends A {
+    static { this.CONSTANT += super.foo(); }
+
+    static CONSTANT = this.OTHER_CONSTANT;
+    static OTHER_CONSTANT = super.ANOTHER_CONSTANT;
+
+    static get property() {
+        /*before*/this/*after*/;
+        return /*before*/super/*after*/.x;
     }
 
-    static bar() {
-        this.foo()
+    static set property(x) {
+        () => this;
+        () => super.x = x;
     }
 
-    static hello() {
-        this.faux()
-    }
-    
-    faux() { 
-        return
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }
 
-class B extends A {
-    static foo() {
-        super.foo()
+class C extends A {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
+}
 
-    faux() { 
-        return
+const D = class D extends f() {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
+    }
+}
+
+
+const E = class extends f() {
+    static method() {
+        return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }

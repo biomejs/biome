@@ -2302,7 +2302,7 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misrefactored_shorthand_assign: Option<RuleConfiguration>,
-    #[doc = "Disallow this/super in static methods"]
+    #[doc = "Disallow this and super in static contexts."]
     #[bpaf(long("no-this-in-static"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_this_in_static: Option<RuleConfiguration>,
@@ -2532,7 +2532,7 @@ impl Nursery {
         }
         if let Some(rule) = self.use_shorthand_assign.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
@@ -2626,7 +2626,7 @@ impl Nursery {
         }
         if let Some(rule) = self.use_shorthand_assign.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
