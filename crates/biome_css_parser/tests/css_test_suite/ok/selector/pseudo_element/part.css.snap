@@ -27,18 +27,18 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@21..23 "::" [] [],
-                            element: CssPseudoElementFunction {
-                                name: CssIdentifier {
-                                    value_token: IDENT@23..27 "part" [] [],
+                        CssBogusSubSelector {
+                            items: [
+                                COLON2@21..23 "::" [] [],
+                                CssPseudoElementPart {
+                                    name_token: PART_KW@23..27 "part" [] [],
+                                    l_paren_token: L_PAREN@27..28 "(" [] [],
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@28..34 "active" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
                                 },
-                                l_paren_token: L_PAREN@27..28 "(" [] [],
-                                parameter: CssIdentifier {
-                                    value_token: IDENT@28..34 "active" [] [],
-                                },
-                                r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
-                            },
+                            ],
                         },
                     ],
                 },
@@ -59,18 +59,18 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@60..62 "::" [] [],
-                            element: CssPseudoElementFunction {
-                                name: CssIdentifier {
-                                    value_token: IDENT@62..66 "part" [] [],
+                        CssBogusSubSelector {
+                            items: [
+                                COLON2@60..62 "::" [] [],
+                                CssPseudoElementPart {
+                                    name_token: PART_KW@62..66 "part" [] [],
+                                    l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@79..81 ")" [] [Whitespace(" ")],
                                 },
-                                l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
-                                parameter: CssIdentifier {
-                                    value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@79..81 ")" [] [Whitespace(" ")],
-                            },
+                            ],
                         },
                     ],
                 },
@@ -99,11 +99,10 @@ CssRoot {
             0: CSS_IDENTIFIER@0..21
               0: IDENT@0..21 "tabbed-custom-element" [] []
           2: CSS_SUB_SELECTOR_LIST@21..36
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@21..36
+            0: CSS_BOGUS_SUB_SELECTOR@21..36
               0: COLON2@21..23 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@23..36
-                0: CSS_IDENTIFIER@23..27
-                  0: IDENT@23..27 "part" [] []
+              1: CSS_PSEUDO_ELEMENT_PART@23..36
+                0: PART_KW@23..27 "part" [] []
                 1: L_PAREN@27..28 "(" [] []
                 2: CSS_IDENTIFIER@28..34
                   0: IDENT@28..34 "active" [] []
@@ -120,11 +119,10 @@ CssRoot {
             0: CSS_IDENTIFIER@38..60
               0: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@60..81
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@60..81
+            0: CSS_BOGUS_SUB_SELECTOR@60..81
               0: COLON2@60..62 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@62..81
-                0: CSS_IDENTIFIER@62..66
-                  0: IDENT@62..66 "part" [] []
+              1: CSS_PSEUDO_ELEMENT_PART@62..81
+                0: PART_KW@62..66 "part" [] []
                 1: L_PAREN@66..70 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@70..79
                   0: IDENT@70..79 "active" [] [Whitespace("   ")]

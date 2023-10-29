@@ -56,7 +56,7 @@ CssRoot {
                                     value_token: IDENT@9..13 "mark" [] [],
                                 },
                                 l_paren_token: L_PAREN@13..15 "(" [] [Whitespace(" ")],
-                                parameter: missing (required),
+                                selector: missing (required),
                                 r_paren_token: missing (required),
                             },
                         },
@@ -82,7 +82,7 @@ CssRoot {
                                     value_token: IDENT@21..25 "mark" [] [],
                                 },
                                 l_paren_token: L_PAREN@25..27 "(" [] [Whitespace(" ")],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -117,7 +117,7 @@ CssRoot {
                                         value_token: IDENT@37..41 "mark" [] [],
                                     },
                                     l_paren_token: L_PAREN@41..43 "(" [] [Whitespace(" ")],
-                                    parameter: missing (required),
+                                    selector: missing (required),
                                     r_paren_token: missing (required),
                                 },
                             },
@@ -150,12 +150,10 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] [],
-                                element: CssPseudoElementFunction {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@55..64 "highlight" [] [],
-                                    },
+                                element: CssPseudoElementHighlight {
+                                    name_token: HIGHLIGHT_KW@55..64 "highlight" [] [],
                                     l_paren_token: L_PAREN@64..65 "(" [] [],
-                                    parameter: CssIdentifier {
+                                    custom_highlight_name: CssIdentifier {
                                         value_token: IDENT@65..69 "div" [] [Whitespace(" ")],
                                     },
                                     r_paren_token: missing (required),
@@ -286,9 +284,8 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@51..69
               0: CSS_PSEUDO_ELEMENT_SELECTOR@51..69
                 0: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] []
-                1: CSS_PSEUDO_ELEMENT_FUNCTION@55..69
-                  0: CSS_IDENTIFIER@55..64
-                    0: IDENT@55..64 "highlight" [] []
+                1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@55..69
+                  0: HIGHLIGHT_KW@55..64 "highlight" [] []
                   1: L_PAREN@64..65 "(" [] []
                   2: CSS_IDENTIFIER@65..69
                     0: IDENT@65..69 "div" [] [Whitespace(" ")]
