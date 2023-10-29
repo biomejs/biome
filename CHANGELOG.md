@@ -27,6 +27,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Apply the correct layout when the right hand of an assignment expression is a await expression or a yield expression. Contributed by @ematipico
+- Fix [#303](https://github.com/biomejs/biome/issues/303), where nested arrow functions didn't break. Contributed by @victor-teles
+
 
 ### JavaScript APIs
 
