@@ -1,5 +1,6 @@
 use biome_console::markup;
 use biome_diagnostics::console::fmt::Display;
+use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Diagnostic, DiagnosticTags, MessageAndDescription};
 use biome_text_size::TextRange;
 use serde::{Deserialize, Serialize};
@@ -53,4 +54,36 @@ impl ProjectDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "project")]
-pub struct ProjectAnalyzeDiagnostic {}
+pub struct ProjectAnalyzeDiagnostic {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
+    #[location(span)]
+    range: Option<TextRange>,
+}
+
+impl ProjectAnalyzeDiagnostic {
+    fn new(message: impl Display) -> Self {
+        Self {
+            message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+            range: None,
+        }
+    }
+
+    pub fn new_invalid_license(licence: impl Display) -> Self {
+        Self::new(markup! {
+            "The license "<Emphasis>{licence}</Emphasis>" is invalid"
+        })
+    }
+
+    pub fn new_deprecated_license(licence: impl Display) -> Self {
+        Self::new(markup! {
+            "The license "<Emphasis>{licence}</Emphasis>" is deprecated"
+        })
+    }
+    pub fn with_range(mut self, range: impl AsSpan) -> Self {
+        self.range = range.as_span();
+        self
+    }
+}

@@ -4,7 +4,7 @@ use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
-    JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
+    JsonObjectValue, JsonStringValue, JsonSyntaxNode,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use indexmap::IndexSet;
@@ -15,7 +15,7 @@ pub trait JsonDeserialize: Sized {
     /// It accepts a JSON AST and a visitor. The visitor is the [default](Default) implementation of the data
     /// type that implements this trait.
     fn deserialize_from_ast(
-        root: &JsonRoot,
+        root: &AnyJsonValue,
         visitor: &mut impl VisitJsonNode,
         deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()>;
@@ -23,7 +23,7 @@ pub trait JsonDeserialize: Sized {
 
 impl JsonDeserialize for () {
     fn deserialize_from_ast(
-        _root: &JsonRoot,
+        _root: &AnyJsonValue,
         _visitor: &mut impl VisitJsonNode,
         _deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
@@ -566,7 +566,19 @@ where
     let mut output = Output::default();
     let mut diagnostics = vec![];
     let parse = parse_json(source, options);
-    Output::deserialize_from_ast(&parse.tree(), &mut output, &mut diagnostics);
+
+    let Ok(root) = &parse.tree().value() else {
+        let errors = parse
+            .into_diagnostics()
+            .into_iter()
+            .map(Error::from)
+            .collect::<Vec<_>>();
+        return Deserialized {
+            diagnostics: errors,
+            deserialized: output,
+        };
+    };
+    Output::deserialize_from_ast(root, &mut output, &mut diagnostics);
     let mut errors = parse
         .into_diagnostics()
         .into_iter()
@@ -585,7 +597,7 @@ where
 }
 
 /// Attempts to deserialize a JSON AST, given the `Output`.
-pub fn deserialize_from_json_ast<Output>(parse: &JsonRoot) -> Deserialized<Output>
+pub fn deserialize_from_json_ast<Output>(parse: &AnyJsonValue) -> Deserialized<Output>
 where
     Output: Default + VisitJsonNode + JsonDeserialize,
 {

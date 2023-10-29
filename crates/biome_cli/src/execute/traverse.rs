@@ -733,13 +733,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 /// in a [catch_unwind] block and emit diagnostics in case of error (either the
 /// traversal function returns Err or panics)
 fn handle_file(ctx: &TraversalOptions, path: &Path) {
-    match catch_unwind(move || {
-        if Manifests::is_manifest(path) {
-            process_manifest(ctx, path)
-        } else {
-            process_file(ctx, path)
-        }
-    }) {
+    match catch_unwind(move || process_file(ctx, path)) {
         Ok(Ok(FileStatus::Success)) => {}
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.push_message(msg);

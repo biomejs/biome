@@ -259,7 +259,7 @@ fn lint(params: LintParams) -> LintResults {
         // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
         // malformed configuration
         if params.path.ends_with(ROME_JSON) || params.path.ends_with(BIOME_JSON) {
-            let deserialized = deserialize_from_json_ast::<Configuration>(&root);
+            let deserialized = deserialize_from_json_ast::<Configuration>(&root.value().unwrap());
             diagnostics.extend(
                 deserialized
                     .into_diagnostics()

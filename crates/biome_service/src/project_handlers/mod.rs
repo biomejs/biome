@@ -48,14 +48,14 @@ pub(crate) struct ProjectCapabilities {
 
 #[derive(Default)]
 pub(crate) struct ProjectAnalyzerCapabilities {
-    pub(crate) licenses: Option<Licenses>,
-    pub(crate) deserialize: Option<Deserialize>,
+    pub(crate) lint: Option<lint>,
+    pub(crate) parse: Option<Parse>,
 }
 
-type Licenses = fn(&RomePath, AnyParse) -> Result<(), WorkspaceError>;
-type Deserialize = fn(&RomePath, AnyParse) -> Result<DeserializeResults, WorkspaceError>;
+type lint = fn(&RomePath, AnyParse) -> Result<ProjectLintResult, WorkspaceError>;
+type Parse = fn(&RomePath, AnyParse) -> Result<DeserializeResults, WorkspaceError>;
 
-pub(crate) struct KnownProjectHandlers {
+pub(crate) struct ProjectHandlers {
     node: NodeProjectHandler,
     unknown: UnknownProjectHandler,
 }
@@ -65,9 +65,16 @@ pub(crate) struct DeserializeResults {
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u64,
 }
-impl KnownProjectHandlers {
+
+pub(crate) struct ProjectLintResult {
+    pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    pub(crate) errors: usize,
+    pub(crate) skipped_diagnostics: u64,
+}
+
+impl ProjectHandlers {
     pub(crate) fn new() -> Self {
-        KnownProjectHandlers {
+        ProjectHandlers {
             node: NodeProjectHandler::default(),
             unknown: UnknownProjectHandler::default(),
         }

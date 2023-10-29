@@ -2,10 +2,10 @@ mod package_json;
 
 use crate::diagnostics::ProjectDiagnostic;
 pub use crate::node_js_project::package_json::PackageJson;
-use crate::{Manifest, Project, ProjectAnalyzeResult};
+use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
 use biome_diagnostics::Error;
-use biome_json_syntax::{AnyJsonValue, JsonRoot};
-use biome_rowan::{AstNode, Language};
+use biome_json_syntax::AnyJsonValue;
+use biome_rowan::Language;
 use std::path::{Path, PathBuf};
 
 #[derive(Default, Debug)]
@@ -45,9 +45,23 @@ impl Project for NodeJsProject {
         Some(&self.manifest)
     }
 
-    fn analyze(&self) -> Result<ProjectAnalyzeResult, ProjectDiagnostic> {
-        Ok(ProjectAnalyzeResult {
-            _diagnostics: vec![],
-        })
+    fn analyze(&self) -> ProjectAnalyzeResult {
+        let mut diagnostics = vec![];
+        if let Some((license, range)) = &self.manifest.license {
+            if !LICENSE_LIST.is_valid(license) {
+                diagnostics
+                    .push(ProjectAnalyzeDiagnostic::new_invalid_license(license).with_range(range))
+            } else if !LICENSE_LIST.is_deprecated(license) {
+                diagnostics.push(
+                    ProjectAnalyzeDiagnostic::new_deprecated_license(license).with_range(range),
+                )
+            }
+        }
+
+        ProjectAnalyzeResult { diagnostics }
+    }
+
+    fn has_errors(&self) -> bool {
+        !self.diagnostics.is_empty()
     }
 }

@@ -29,3 +29,4 @@ serde             = { workspace = true }
 [dev-dependencies]
 insta        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
+biome_json_parser = { path = "../biome_json_parser" }

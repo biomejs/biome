@@ -6,6 +6,7 @@ use super::{
     UpdateSettingsParams,
 };
 use crate::file_handlers::{Capabilities, FixAllParams, Language, LintParams};
+use crate::project_handlers::{ProjectCapabilities, ProjectHandlers};
 use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
@@ -15,7 +16,7 @@ use crate::workspace::{
 use crate::{
     file_handlers::Features,
     settings::{SettingsHandle, WorkspaceSettings},
-    Rules, Workspace, WorkspaceError,
+    Manifests, Rules, Workspace, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, RuleFilter};
 use biome_diagnostics::{
@@ -42,6 +43,8 @@ pub(super) struct WorkspaceServer {
     syntax: DashMap<RomePath, AnyParse>,
     /// Stores the features supported for each file
     file_features: DashMap<RomePath, FileFeaturesResult>,
+    /// Handlers that know how to handle a specific project
+    project_handlers: ProjectHandlers,
 }
 
 /// The `Workspace` object is long lived, so we want it to be able to cross
@@ -73,6 +76,7 @@ impl WorkspaceServer {
             documents: DashMap::default(),
             syntax: DashMap::default(),
             file_features: DashMap::default(),
+            project_handlers: ProjectHandlers::new(),
         }
     }
 
@@ -81,10 +85,16 @@ impl WorkspaceServer {
     }
 
     /// Get the supported capabilities for a given file path
-    fn get_capabilities(&self, path: &RomePath) -> Capabilities {
+    fn get_file_capabilities(&self, path: &RomePath) -> Capabilities {
         let language = self.get_language(path);
 
         self.features.get_capabilities(path, language)
+    }
+
+    /// Get the supported manifest capabilities for a given file path
+    fn get_project_capabilities(&self, path: &RomePath) -> ProjectCapabilities {
+        self.project_handlers
+            .get_capabilities(path, ProjectHandlers::get_manifest(path))
     }
 
     /// Retrieves the supported language of a file
@@ -166,7 +176,7 @@ impl WorkspaceServer {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
                 let rome_path = entry.key();
-                let capabilities = self.get_capabilities(rome_path);
+                let capabilities = self.get_file_capabilities(rome_path);
 
                 let mut document = self
                     .documents
@@ -247,7 +257,7 @@ impl Workspace for WorkspaceServer {
                 Ok(result.clone())
             }
             Entry::Vacant(entry) => {
-                let capabilities = self.get_capabilities(&params.path);
+                let capabilities = self.get_file_capabilities(&params.path);
                 let language = Language::from_path(&params.path);
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new()
@@ -396,7 +406,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: GetSyntaxTreeParams,
     ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let debug_syntax_tree = capabilities
             .debug
             .debug_syntax_tree
@@ -413,7 +423,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: GetControlFlowGraphParams,
     ) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let debug_control_flow = capabilities
             .debug
             .debug_control_flow
@@ -426,7 +436,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let debug_formatter_ir = capabilities
             .debug
             .debug_formatter_ir
@@ -489,7 +499,7 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.read().unwrap();
 
         let (diagnostics, errors, skipped_diagnostics) = if let Some(lint) =
-            self.get_capabilities(&params.path).analyzer.lint
+            self.get_file_capabilities(&params.path).analyzer.lint
         {
             let rules = settings.linter().rules.as_ref();
             let overrides = &settings.override_settings;
@@ -545,7 +555,7 @@ impl Workspace for WorkspaceServer {
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let code_actions = capabilities
             .analyzer
             .code_actions
@@ -566,7 +576,7 @@ impl Workspace for WorkspaceServer {
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let format = capabilities
             .formatter
             .format
@@ -582,7 +592,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let format_range = capabilities
             .formatter
             .format_range
@@ -598,7 +608,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let format_on_type = capabilities
             .formatter
             .format_on_type
@@ -614,7 +624,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn fix_file(&self, params: super::FixFileParams) -> Result<FixFileResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let fix_all = capabilities
             .analyzer
             .fix_all
@@ -638,7 +648,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let rename = capabilities
             .analyzer
             .rename
@@ -667,7 +677,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: OrganizeImportsParams,
     ) -> Result<OrganizeImportsResult, WorkspaceError> {
-        let capabilities = self.get_capabilities(&params.path);
+        let capabilities = self.get_file_capabilities(&params.path);
         let organize_imports = capabilities
             .analyzer
             .organize_imports

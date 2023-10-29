@@ -1,7 +1,7 @@
 use crate::Manifest;
 use biome_deserialize::json::{deserialize_from_json_ast, JsonDeserialize, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, Deserialized, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, JsonStringValue, JsonSyntaxNode};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonStringValue, JsonSyntaxNode};
 use biome_rowan::{AstNode, Language, SyntaxNode};
 use biome_text_size::{TextRange, TextSize};
 use node_semver::{SemverError, Version};
@@ -16,14 +16,13 @@ pub struct PackageJson {
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    pub license: Option<String>,
+    pub license: Option<(String, TextRange)>,
 }
 
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &<Self::Language as Language>::Root) -> Deserialized<Self> {
-        let root: JsonRoot = root;
         let deserialized = deserialize_from_json_ast::<PackageJson>(root);
 
         deserialized
@@ -35,12 +34,11 @@ pub struct Dependencies(FxHashMap<String, Version>);
 
 impl JsonDeserialize for PackageJson {
     fn deserialize_from_ast(
-        root: &JsonRoot,
+        root: &AnyJsonValue,
         visitor: &mut impl VisitJsonNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let value = root.value().ok()?;
-        match value {
+        match root {
             AnyJsonValue::JsonObjectValue(node) => {
                 for element in node.json_member_list() {
                     let element = element.ok()?;
@@ -89,24 +87,27 @@ impl VisitNode<JsonLanguage> for PackageJson {
                 self.name = self.map_to_string(&value, name_text, diagnostics);
             }
             "license" => {
-                self.license = self.map_to_string(&value, name_text, diagnostics);
+                // TODO: add proper parsing of license, e.g. support for AND keywords
+                self.license = self
+                    .map_to_string(&value, name_text, diagnostics)
+                    .map(|license| (license, value.range()));
             }
             "description" => {
                 self.description = self.map_to_string(&value, name_text, diagnostics);
             }
             "dependencies" => {
                 let mut dependencies = Dependencies::default();
-                self.map_to_object(&value, name_text, &mut dependencies, diagnostics)?;
+                dependencies.map_to_object(&value, name_text, diagnostics)?;
                 self.dependencies = dependencies;
             }
             "devDependencies" => {
                 let mut dev_dependencies = Dependencies::default();
-                self.map_to_object(&value, name_text, &mut dev_dependencies, diagnostics)?;
+                dev_dependencies.map_to_object(&value, name_text, diagnostics)?;
                 self.dev_dependencies = dev_dependencies;
             }
             "optionalDependencies" => {
                 let mut optional_dependencies = Dependencies::default();
-                self.map_to_object(&value, name_text, &mut optional_dependencies, diagnostics)?;
+                optional_dependencies.map_to_object(&value, name_text, diagnostics)?;
                 self.optional_dependencies = optional_dependencies;
             }
             _ => {}
