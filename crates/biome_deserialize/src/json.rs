@@ -4,18 +4,19 @@ use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
-    JsonObjectValue, JsonStringValue, JsonSyntaxNode,
+    JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use indexmap::IndexSet;
 use std::num::ParseIntError;
 
 /// Main trait to
+///
 pub trait JsonDeserialize: Sized {
     /// It accepts a JSON AST and a visitor. The visitor is the [default](Default) implementation of the data
     /// type that implements this trait.
     fn deserialize_from_ast(
-        root: &AnyJsonValue,
+        root: &JsonRoot,
         visitor: &mut impl VisitJsonNode,
         deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()>;
@@ -23,7 +24,7 @@ pub trait JsonDeserialize: Sized {
 
 impl JsonDeserialize for () {
     fn deserialize_from_ast(
-        _root: &AnyJsonValue,
+        _root: &JsonRoot,
         _visitor: &mut impl VisitJsonNode,
         _deserialize_diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
@@ -567,18 +568,7 @@ where
     let mut diagnostics = vec![];
     let parse = parse_json(source, options);
 
-    let Ok(root) = &parse.tree().value() else {
-        let errors = parse
-            .into_diagnostics()
-            .into_iter()
-            .map(Error::from)
-            .collect::<Vec<_>>();
-        return Deserialized {
-            diagnostics: errors,
-            deserialized: output,
-        };
-    };
-    Output::deserialize_from_ast(root, &mut output, &mut diagnostics);
+    Output::deserialize_from_ast(&parse.tree(), &mut output, &mut diagnostics);
     let mut errors = parse
         .into_diagnostics()
         .into_iter()
@@ -597,7 +587,21 @@ where
 }
 
 /// Attempts to deserialize a JSON AST, given the `Output`.
-pub fn deserialize_from_json_ast<Output>(parse: &AnyJsonValue) -> Deserialized<Output>
+pub fn deserialize_from_json_ast<Output>(parse: &JsonRoot) -> Deserialized<Output>
+where
+    Output: Default + VisitJsonNode + JsonDeserialize,
+{
+    let mut output = Output::default();
+    let mut diagnostics = vec![];
+    Output::deserialize_from_ast(parse, &mut output, &mut diagnostics);
+    Deserialized {
+        diagnostics: diagnostics.into_iter().map(Error::from).collect::<Vec<_>>(),
+        deserialized: output,
+    }
+}
+
+/// Attempts to deserialize a JSON AST, given the `Output`.
+pub fn deserialize_from_json_root<Output>(parse: &JsonRoot) -> Deserialized<Output>
 where
     Output: Default + VisitJsonNode + JsonDeserialize,
 {

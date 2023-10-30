@@ -1,4 +1,4 @@
-use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_project::{NodeJsProject, Project};
 use std::ffi::OsStr;
@@ -18,9 +18,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     match extension {
         "json" => {
             let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
-            if let Ok(root) = parsed.tree().value() {
-                project.deserialize(&root);
-            }
+            project.from_root(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");

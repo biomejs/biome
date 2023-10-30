@@ -538,8 +538,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Given a file, the workspace tries to understand if this file is a "manifest" of a project.
     fn project_features(
         &self,
-        params: ProjectFeaturesParams,
-    ) -> Result<ProjectFeaturesResult, WorkspaceError>;
+        _params: ProjectFeaturesParams,
+    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
+        todo!()
+    }
 
     /// Checks if the current path is ignored by the workspace, against a particular feature.
     ///

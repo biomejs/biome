@@ -109,7 +109,7 @@ mod test {
 
         let parsed = parse_json(source, JsonParserOptions::default());
 
-        migrate_configuration(&parsed.tree().value().unwrap(), Path::new(""), |signal| {
+        migrate_configuration(&parsed.tree(), Path::new(""), |signal| {
             for action in signal.actions() {
                 let new_code = action.mutation.commit();
                 eprintln!("{new_code}");

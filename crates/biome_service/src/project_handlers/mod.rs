@@ -43,29 +43,31 @@ pub(crate) trait ProjectHandler {
 
 #[derive(Default)]
 pub(crate) struct ProjectCapabilities {
+    #[allow(dead_code)]
     pub(crate) analyzer: ProjectAnalyzerCapabilities,
 }
 
 #[derive(Default)]
 pub(crate) struct ProjectAnalyzerCapabilities {
-    pub(crate) lint: Option<lint>,
-    pub(crate) parse: Option<Parse>,
+    #[allow(dead_code)]
+    pub(crate) lint: Option<Lint>,
 }
 
-type lint = fn(&RomePath, AnyParse) -> Result<ProjectLintResult, WorkspaceError>;
-type Parse = fn(&RomePath, AnyParse) -> Result<DeserializeResults, WorkspaceError>;
+type Lint = fn(&RomePath, AnyParse) -> Result<ProjectLintResult, WorkspaceError>;
 
 pub(crate) struct ProjectHandlers {
     node: NodeProjectHandler,
     unknown: UnknownProjectHandler,
 }
 
+#[allow(unused)]
 pub(crate) struct DeserializeResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u64,
 }
 
+#[allow(unused)]
 pub(crate) struct ProjectLintResult {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,

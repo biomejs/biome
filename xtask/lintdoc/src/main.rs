@@ -758,7 +758,7 @@ fn assert_lint(
 
                 let options = AnalyzerOptions::default();
                 let (_, diagnostics) = biome_json_analyze::analyze(
-                    &root.value().unwrap(),
+                    &root,
                     filter,
                     &options,
                     |signal| {

@@ -4,7 +4,6 @@ use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
     FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
-use crate::execute::process_manifest::process_manifest;
 use crate::{
     CliDiagnostic, CliSession, Execution, FormatterReportFileDetail, FormatterReportSummary,
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
@@ -106,7 +105,7 @@ pub(crate) fn traverse(
     let duration = thread::scope(|s| {
         thread::Builder::new()
             .name(String::from("biome::console"))
-            .spawn_scoped(s.clone(), || {
+            .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
                     execution: &execution,
                     console,

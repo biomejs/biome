@@ -10,13 +10,12 @@ use crate::project_handlers::{ProjectCapabilities, ProjectHandlers};
 use crate::settings::OverrideSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectFeaturesParams, ProjectFeaturesResult, RageEntry, RageParams,
-    RageResult, ServerInfo,
+    OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::{
     file_handlers::Features,
     settings::{SettingsHandle, WorkspaceSettings},
-    Manifests, Rules, Workspace, WorkspaceError,
+    Rules, Workspace, WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, RuleFilter};
 use biome_diagnostics::{
@@ -92,6 +91,7 @@ impl WorkspaceServer {
     }
 
     /// Get the supported manifest capabilities for a given file path
+    #[allow(unused)]
     fn get_project_capabilities(&self, path: &RomePath) -> ProjectCapabilities {
         self.project_handlers
             .get_capabilities(path, ProjectHandlers::get_manifest(path))
@@ -284,23 +284,6 @@ impl Workspace for WorkspaceServer {
                 Ok(entry.insert(file_features).clone())
             }
         }
-    }
-
-    #[tracing::instrument(level = "debug", skip(self))]
-    fn project_features(
-        &self,
-        params: ProjectFeaturesParams,
-    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
-        // let capabilities = self.get_project_capabilities(&params.manifest_path);
-        // let capabilities = self.get_parse(&params.manifest_path);
-        // let load = capabilities
-        //     .syntax
-        //     .parse
-        //     .ok_or_else(self.build_capability_error(&params.manifest_path))?;
-
-        // let result = load(&params.manifest_path)?;
-
-        Ok(ProjectFeaturesResult {})
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {

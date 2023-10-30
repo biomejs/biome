@@ -12,11 +12,6 @@ use std::sync::atomic::Ordering;
 use tracing::debug;
 
 pub(crate) fn format<'ctx>(ctx: &'ctx SharedTraversalOptions<'ctx, '_>, path: &Path) -> FileResult {
-    // We don't want to format the package.json file.
-    // This is intended.
-    if path.file_name().and_then(|s| s.to_str()) == Some("package.json") {
-        return Ok(FileStatus::Ignored);
-    }
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     format_with_guard(ctx, &mut workspace_file)
 }

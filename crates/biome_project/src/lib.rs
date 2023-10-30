@@ -13,11 +13,13 @@ use std::any::TypeId;
 use std::fmt::Debug;
 use std::path::Path;
 
+pub(crate) type LanguageRoot<L> = <L as Language>::Root;
+
 pub trait Manifest: Default + Debug {
     type Language: Language;
 
     /// It loads the manifest of the project. It accepts the path where the manifest should be
-    fn deserialize_manifest(root: &<Self::Language as Language>::Root) -> Deserialized<Self>;
+    fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self>;
 }
 
 /// An internal representation of a project.

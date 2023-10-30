@@ -1,8 +1,8 @@
-use crate::Manifest;
+use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::{deserialize_from_json_ast, JsonDeserialize, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, Deserialized, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonStringValue, JsonSyntaxNode};
-use biome_rowan::{AstNode, Language, SyntaxNode};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonRoot, JsonStringValue, JsonSyntaxNode};
+use biome_rowan::{AstNode, SyntaxNode};
 use biome_text_size::{TextRange, TextSize};
 use node_semver::{SemverError, Version};
 use rustc_hash::FxHashMap;
@@ -22,7 +22,7 @@ pub struct PackageJson {
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
-    fn deserialize_manifest(root: &<Self::Language as Language>::Root) -> Deserialized<Self> {
+    fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
         let deserialized = deserialize_from_json_ast::<PackageJson>(root);
 
         deserialized
@@ -34,11 +34,12 @@ pub struct Dependencies(FxHashMap<String, Version>);
 
 impl JsonDeserialize for PackageJson {
     fn deserialize_from_ast(
-        root: &AnyJsonValue,
+        root: &JsonRoot,
         visitor: &mut impl VisitJsonNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        match root {
+        let value = root.value().ok()?;
+        match value {
             AnyJsonValue::JsonObjectValue(node) => {
                 for element in node.json_member_list() {
                     let element = element.ok()?;

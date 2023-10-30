@@ -1,10 +1,9 @@
 mod package_json;
 
-use crate::diagnostics::ProjectDiagnostic;
 pub use crate::node_js_project::package_json::PackageJson;
 use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
 use biome_diagnostics::Error;
-use biome_json_syntax::AnyJsonValue;
+use biome_json_syntax::JsonRoot;
 use biome_rowan::Language;
 use std::path::{Path, PathBuf};
 
@@ -20,7 +19,7 @@ pub struct NodeJsProject {
 }
 
 impl NodeJsProject {
-    pub fn deserialize(&mut self, root: &AnyJsonValue) {
+    pub fn from_root(&mut self, root: &JsonRoot) {
         self.deserialize_manifest(root);
     }
 }
