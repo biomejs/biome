@@ -99,9 +99,9 @@ function printFunc(f) {
 ```
 intrinsic_call.js:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '%DebugPrint
+  × Expected a statement but instead found '%DebugPrint
             (
-                    foo )'
+                    foo )'.
   
     1 │ function doSmth()     {
   > 2 │             %DebugPrint
@@ -112,7 +112,7 @@ intrinsic_call.js:2:13 parse ━━━━━━━━━━━━━━━━━
     5 │   }
     6 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ function doSmth()     {
   > 2 │             %DebugPrint

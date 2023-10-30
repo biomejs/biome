@@ -298,7 +298,7 @@ invalid_assignment_target.js:5:1 parse ━━━━━━━━━━━━━�
 --
 invalid_assignment_target.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     4 │ a?.b = b;
     5 │ a?.["b"] = b;
@@ -306,7 +306,7 @@ invalid_assignment_target.js:6:5 parse ━━━━━━━━━━━━━�
       │     ^
     7 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ a?.b = b;
     5 │ a?.["b"] = b;

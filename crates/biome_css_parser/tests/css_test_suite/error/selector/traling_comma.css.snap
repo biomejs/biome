@@ -76,14 +76,14 @@ CssRoot {
 ```
 traling_comma.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a selector but instead found '{'
+  × Expected a selector but instead found '{'.
   
   > 1 │ .selector, {
       │            ^
     2 │ 
     3 │ }
   
-  i Expected a selector here
+  i Expected a selector here.
   
   > 1 │ .selector, {
       │            ^

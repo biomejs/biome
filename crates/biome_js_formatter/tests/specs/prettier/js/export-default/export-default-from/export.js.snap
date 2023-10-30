@@ -150,7 +150,7 @@ export.js:2:15 parse ━━━━━━━━━━━━━━━━━━━�
   
 export.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class, a function, or a variable declaration but instead found 'a'
+  × Expected a class, a function, or a variable declaration but instead found 'a'.
   
     1 │ export * as ns from 'mod';
     2 │ export v from 'mod';
@@ -159,7 +159,7 @@ export.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━
     4 │ export c, { foo } from 'mod';
     5 │ export * as d from 'mod';
   
-  i Expected a class, a function, or a variable declaration here
+  i Expected a class, a function, or a variable declaration here.
   
     1 │ export * as ns from 'mod';
     2 │ export v from 'mod';
@@ -270,7 +270,7 @@ export.js:3:23 parse ━━━━━━━━━━━━━━━━━━━�
   
 export.js:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class, a function, or a variable declaration but instead found 'c'
+  × Expected a class, a function, or a variable declaration but instead found 'c'.
   
     2 │ export v from 'mod';
     3 │ export a, * as b from 'mod';
@@ -279,7 +279,7 @@ export.js:4:8 parse ━━━━━━━━━━━━━━━━━━━━
     5 │ export * as d from 'mod';
     6 │ export { fooooooooooooooooooooooooooooooooooooooooooooooooo } from "fooooooooooooooooooooooooooooo";
   
-  i Expected a class, a function, or a variable declaration here
+  i Expected a class, a function, or a variable declaration here.
   
     2 │ export v from 'mod';
     3 │ export a, * as b from 'mod';

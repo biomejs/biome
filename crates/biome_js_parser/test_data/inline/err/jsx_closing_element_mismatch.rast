@@ -365,7 +365,7 @@ jsx_closing_element_mismatch.jsx:3:1 parse ━━━━━━━━━━━━�
 --
 jsx_closing_element_mismatch.jsx:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '5'
+  × Expected an identifier but instead found '5'.
   
     2 │ <test></text>;
     3 │ <some><nested></some></nested>;
@@ -373,7 +373,7 @@ jsx_closing_element_mismatch.jsx:4:4 parse ━━━━━━━━━━━━�
       │    ^
     5 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     2 │ <test></text>;
     3 │ <some><nested></some></nested>;

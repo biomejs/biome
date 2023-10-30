@@ -87,7 +87,7 @@ foo = foo || #;
 ```
 tuple-and-record.js:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     4 │ ]
     5 │ 
@@ -96,7 +96,7 @@ tuple-and-record.js:6:15 parse ━━━━━━━━━━━━━━━━�
     7 │   // comment
     8 │   a,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ ]
     5 │ 
@@ -147,7 +147,7 @@ tuple-and-record.js:6:15 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:16:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     14 │ }
     15 │ 
@@ -156,7 +156,7 @@ tuple-and-record.js:16:15 parse ━━━━━━━━━━━━━━━━
     17 │   // comment
     18 │   a,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     14 │ }
     15 │ 
@@ -207,7 +207,7 @@ tuple-and-record.js:16:15 parse ━━━━━━━━━━━━━━━━
   
 tuple-and-record.js:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '}'
+  × Expected an expression but instead found '}'.
   
     17 │   // comment
     18 │   a,
@@ -215,7 +215,7 @@ tuple-and-record.js:19:1 parse ━━━━━━━━━━━━━━━━�
        │ ^
     20 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     17 │   // comment
     18 │   a,

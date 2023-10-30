@@ -55,13 +55,13 @@ JsModule {
 --
 block_stmt_in_class.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'.
   
   > 1 │ class S{{}}
       │         ^
     2 │ 
   
-  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
   
   > 1 │ class S{{}}
       │         ^
@@ -70,13 +70,13 @@ block_stmt_in_class.js:1:9 parse ━━━━━━━━━━━━━━━�
 --
 block_stmt_in_class.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
   > 1 │ class S{{}}
       │           ^
     2 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
   > 1 │ class S{{}}
       │           ^

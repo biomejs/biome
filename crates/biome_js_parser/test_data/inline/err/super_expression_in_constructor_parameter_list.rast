@@ -101,13 +101,13 @@ JsModule {
 --
 super_expression_in_constructor_parameter_list.js:1:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parameter but instead found 'super('
+  × Expected a parameter but instead found 'super('.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                 ^^^^^^
     2 │ 
   
-  i Expected a parameter here
+  i Expected a parameter here.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                 ^^^^^^
@@ -116,13 +116,13 @@ super_expression_in_constructor_parameter_list.js:1:33 parse ━━━━━━�
 --
 super_expression_in_constructor_parameter_list.js:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found ')'
+  × Expected a class method body but instead found ')'.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                        ^
     2 │ 
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                        ^
@@ -131,13 +131,13 @@ super_expression_in_constructor_parameter_list.js:1:40 parse ━━━━━━�
 --
 super_expression_in_constructor_parameter_list.js:1:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                             ^
     2 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
   > 1 │ class A extends B { constructor(super()) {} }
       │                                             ^

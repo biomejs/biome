@@ -76,7 +76,7 @@ syntax.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━
   
 syntax.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ #{}
   > 2 │ #{ a: 1, b: 2 }
@@ -84,7 +84,7 @@ syntax.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━
     3 │ #{ a: 1, b: #[2, 3, #{ c: 4 }] }
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ #{}
   > 2 │ #{ a: 1, b: 2 }
@@ -156,7 +156,7 @@ syntax.js:2:11 parse ━━━━━━━━━━━━━━━━━━━�
   
 syntax.js:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ #{}
     2 │ #{ a: 1, b: 2 }
@@ -164,7 +164,7 @@ syntax.js:3:2 parse ━━━━━━━━━━━━━━━━━━━━
       │  ^
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ #{}
     2 │ #{ a: 1, b: 2 }
@@ -236,7 +236,7 @@ syntax.js:3:11 parse ━━━━━━━━━━━━━━━━━━━�
   
 syntax.js:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ']'
+  × Expected a statement but instead found ']'.
   
     1 │ #{}
     2 │ #{ a: 1, b: 2 }
@@ -244,7 +244,7 @@ syntax.js:3:30 parse ━━━━━━━━━━━━━━━━━━━�
       │                              ^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ #{}
     2 │ #{ a: 1, b: 2 }

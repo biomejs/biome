@@ -1305,8 +1305,8 @@ fn parse_export_default_clause(p: &mut JsParser) -> ParsedSyntax {
                         "Illegal duplicate default export declarations",
                         clause.range(p),
                     )
-                    .detail(clause.range(p), "multiple default exports are erroneous")
-                    .detail(
+                    .with_detail(clause.range(p), "multiple default exports are erroneous")
+                    .with_detail(
                         existing_default_item.range.clone(),
                         "the module's default export is first defined here",
                     );

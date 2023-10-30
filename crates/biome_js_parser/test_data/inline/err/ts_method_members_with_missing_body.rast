@@ -147,7 +147,7 @@ JsModule {
 --
 ts_method_members_with_missing_body.ts:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found 'method'
+  × Expected a class method body but instead found 'method'.
   
     1 │ class Test {
   > 2 │      constructor() method() get test()
@@ -155,7 +155,7 @@ ts_method_members_with_missing_body.ts:2:20 parse ━━━━━━━━━━
     3 │      set test(value)
     4 │ }
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
     1 │ class Test {
   > 2 │      constructor() method() get test()
@@ -166,7 +166,7 @@ ts_method_members_with_missing_body.ts:2:20 parse ━━━━━━━━━━
 --
 ts_method_members_with_missing_body.ts:2:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found 'get'
+  × Expected a class method body but instead found 'get'.
   
     1 │ class Test {
   > 2 │      constructor() method() get test()
@@ -174,7 +174,7 @@ ts_method_members_with_missing_body.ts:2:29 parse ━━━━━━━━━━
     3 │      set test(value)
     4 │ }
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
     1 │ class Test {
   > 2 │      constructor() method() get test()
@@ -185,7 +185,7 @@ ts_method_members_with_missing_body.ts:2:29 parse ━━━━━━━━━━
 --
 ts_method_members_with_missing_body.ts:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found 'set'
+  × Expected a class method body but instead found 'set'.
   
     1 │ class Test {
     2 │      constructor() method() get test()
@@ -194,7 +194,7 @@ ts_method_members_with_missing_body.ts:3:6 parse ━━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
     1 │ class Test {
     2 │      constructor() method() get test()
@@ -206,7 +206,7 @@ ts_method_members_with_missing_body.ts:3:6 parse ━━━━━━━━━━�
 --
 ts_method_members_with_missing_body.ts:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found '}'
+  × Expected a class method body but instead found '}'.
   
     2 │      constructor() method() get test()
     3 │      set test(value)
@@ -214,7 +214,7 @@ ts_method_members_with_missing_body.ts:4:1 parse ━━━━━━━━━━�
       │ ^
     5 │ 
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
     2 │      constructor() method() get test()
     3 │      set test(value)

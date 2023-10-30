@@ -147,7 +147,7 @@ impl<'src> Lexer<'src> {
                                 "The JSON standard only allows tabs, whitespace, carriage return and line feed whitespace.",
                                 start..self.text_position(),
                             )
-                            .hint("Use a regular whitespace character instead."),
+                            .with_hint("Use a regular whitespace character instead."),
                         )
                     }
                 },
@@ -443,11 +443,11 @@ impl<'src> Lexer<'src> {
                     ),
                     InvalidNumberReason::MissingExponent => {
                         ParseDiagnostic::new( "Missing exponent", start..position)
-                            .detail(position..position + TextSize::from(1), "Expected a digit as the exponent")
+                            .with_detail(position..position + TextSize::from(1), "Expected a digit as the exponent")
                     }
                     InvalidNumberReason::MissingFraction => {
                         ParseDiagnostic::new( "Missing fraction", position..position + TextSize::from(1))
-                            .hint("Remove the `.`")
+                            .with_hint("Remove the `.`")
                     }
                 };
 
@@ -514,7 +514,7 @@ impl<'src> Lexer<'src> {
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
+                                        .with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }
@@ -527,7 +527,7 @@ impl<'src> Lexer<'src> {
                                     "Expected an escape sequence following a backslash, but found none",
                                     escape_start..self.text_position(),
                                 )
-                                    .detail(self.text_position()..self.text_position(), "File ends here")
+                                    .with_detail(self.text_position()..self.text_position(), "File ends here")
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }
@@ -537,7 +537,7 @@ impl<'src> Lexer<'src> {
                 WHS if matches!(chr, b'\n' | b'\r') => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .detail(self.position..self.position + 1, "line breaks here");
+                            .with_detail(self.position..self.position + 1, "line breaks here");
 
                     self.diagnostics.push(unterminated);
 
@@ -560,7 +560,7 @@ impl<'src> Lexer<'src> {
                             ),
                             self.text_position()..self.text_position() + TextSize::from(1),
                         )
-                        .hint(format!("Use the escape sequence '\\u{chr:04x}' instead.")),
+                        .with_hint(format!("Use the escape sequence '\\u{chr:04x}' instead.")),
                     );
                     state = LexStringState::InvalidEscapeSequence;
                 }
@@ -577,14 +577,14 @@ impl<'src> Lexer<'src> {
                         "JSON standard does not allow single quoted strings",
                         literal_range,
                     )
-                    .hint("Use double quotes to escape the string."),
+                    .with_hint("Use double quotes to escape the string."),
                 );
                 ERROR_TOKEN
             }
             LexStringState::InString => {
                 let unterminated =
                     ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                        .detail(
+                        .with_detail(
                             self.source.text_len()..self.source.text_len(),
                             "file ends here",
                         );
@@ -623,8 +623,8 @@ impl<'src> Lexer<'src> {
                         "Invalid unicode sequence",
                         start..self.text_position(),
                     )
-                    .detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
-                    .hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
+                    .with_detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
+                    .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
                 }
                 None => {
                     // Reached the end of the file before processing 4 hex digits
@@ -633,11 +633,11 @@ impl<'src> Lexer<'src> {
                         "Unicode escape sequence with two few hexadecimal numbers.",
                         start..self.text_position(),
                     )
-                    .detail(
+                    .with_detail(
                         self.text_position()..self.text_position(),
                         "reached the end of the file",
                     )
-                    .hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
+                    .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
                 }
             }
         }
@@ -722,7 +722,7 @@ impl<'src> Lexer<'src> {
 
                 let err =
                     ParseDiagnostic::new("Unterminated block comment", start..self.text_position())
-                        .detail(
+                        .with_detail(
                             self.position..self.position + 1,
                             "... but the file ends here",
                         );

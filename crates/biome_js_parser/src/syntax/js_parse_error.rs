@@ -150,8 +150,8 @@ pub(crate) fn duplicate_assertion_keys_error(
     duplicate_range: TextRange,
 ) -> ParseDiagnostic {
     p.err_builder("Duplicate assertion keys are not allowed", first_use)
-        .detail(first_use, format!("First use of the key `{}`", key))
-        .detail(duplicate_range, "second use here")
+        .with_detail(first_use, format!("First use of the key `{}`", key))
+        .with_detail(duplicate_range, "second use here")
 }
 
 pub(crate) fn expected_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -230,7 +230,7 @@ pub(crate) fn invalid_assignment_error(p: &JsParser, range: TextRange) -> ParseD
         format!("Invalid assignment to `{}`", p.text(range.as_range()),),
         range,
     )
-    .hint("This expression cannot be assigned to")
+    .with_hint("This expression cannot be assigned to")
 }
 
 pub(crate) fn modifier_already_seen(
@@ -240,8 +240,8 @@ pub(crate) fn modifier_already_seen(
 ) -> ParseDiagnostic {
     let modifier = p.text(second_range);
     p.err_builder(format!("'{modifier}' already seen"), second_range)
-        .detail(second_range, "duplicate modifier")
-        .detail(first_range, "first seen here")
+        .with_detail(second_range, "duplicate modifier")
+        .with_detail(first_range, "first seen here")
 }
 
 pub(crate) fn modifier_cannot_be_used_with_modifier(
@@ -256,8 +256,8 @@ pub(crate) fn modifier_cannot_be_used_with_modifier(
         format!("'{modifier}' cannot be used with '{other_modifier}' modifier."),
         range,
     )
-    .detail(range, format!("'{modifier}' modifier"))
-    .detail(other_modifier_range, format!("'{other_modifier}' modifier"))
+    .with_detail(range, format!("'{modifier}' modifier"))
+    .with_detail(other_modifier_range, format!("'{other_modifier}' modifier"))
 }
 
 pub(crate) fn modifier_must_precede_modifier(
@@ -272,8 +272,8 @@ pub(crate) fn modifier_must_precede_modifier(
         format!("'{modifier_name}' must precede '{to_precede_name}'",),
         range,
     )
-    .detail(range, "move this modifier")
-    .detail(to_precede_modifier_range, "before this modifier")
+    .with_detail(range, "move this modifier")
+    .with_detail(to_precede_modifier_range, "before this modifier")
 }
 
 pub(crate) fn invalid_decorator_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -284,11 +284,12 @@ pub(crate) fn invalid_decorator_error(p: &JsParser, range: TextRange) -> ParseDi
 }
 
 pub(crate) fn parameter_decorators_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    decorators_not_allowed(p, range).hint("You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.")
+    decorators_not_allowed(p, range).with_hint("You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.")
 }
 
 pub(crate) fn decorators_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Decorators are not valid here.", range).hint(
+    p.err_builder("Decorators are not valid here.", range)
+        .with_hint(
         "Decorators are only valid on class declarations, class expressions, and class methods.",
     )
 }

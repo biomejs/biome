@@ -232,14 +232,14 @@ hack_pipeline_operator.js:1:4 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found '%'
+  × Expected an unary expression but instead found '%'.
   
   > 1 │ a |> await % |> % * 3;
       │            ^
     2 │ 
     3 │ foo
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
   > 1 │ a |> await % |> % * 3;
       │            ^
@@ -248,14 +248,14 @@ hack_pipeline_operator.js:1:12 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '|'
+  × Expected an expression but instead found '|'.
   
   > 1 │ a |> await % |> % * 3;
       │              ^
     2 │ 
     3 │ foo
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ a |> await % |> % * 3;
       │              ^
@@ -286,14 +286,14 @@ hack_pipeline_operator.js:1:17 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '*'
+  × Expected an expression but instead found '*'.
   
   > 1 │ a |> await % |> % * 3;
       │                   ^
     2 │ 
     3 │ foo
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ a |> await % |> % * 3;
       │                   ^
@@ -314,7 +314,7 @@ hack_pipeline_operator.js:4:4 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found '%'
+  × Expected an unary expression but instead found '%'.
   
     3 │ foo
   > 4 │   |> await %
@@ -322,7 +322,7 @@ hack_pipeline_operator.js:4:12 parse ━━━━━━━━━━━━━━�
     5 │   |> % || throw new Error(`foo ${bar1}`)
     6 │   |> bar2(%, ", ")
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     3 │ foo
   > 4 │   |> await %
@@ -332,7 +332,7 @@ hack_pipeline_operator.js:4:12 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '|'
+  × Expected an expression but instead found '|'.
   
     3 │ foo
     4 │   |> await %
@@ -341,7 +341,7 @@ hack_pipeline_operator.js:5:3 parse ━━━━━━━━━━━━━━�
     6 │   |> bar2(%, ", ")
     7 │   |> bar3(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     3 │ foo
     4 │   |> await %
@@ -378,7 +378,7 @@ hack_pipeline_operator.js:5:6 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '||'
+  × Expected an expression but instead found '||'.
   
     3 │ foo
     4 │   |> await %
@@ -387,7 +387,7 @@ hack_pipeline_operator.js:5:8 parse ━━━━━━━━━━━━━━�
     6 │   |> bar2(%, ", ")
     7 │   |> bar3(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     3 │ foo
     4 │   |> await %
@@ -398,7 +398,7 @@ hack_pipeline_operator.js:5:8 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found 'throw'
+  × Expected an expression but instead found 'throw'.
   
     3 │ foo
     4 │   |> await %
@@ -407,7 +407,7 @@ hack_pipeline_operator.js:5:11 parse ━━━━━━━━━━━━━━�
     6 │   |> bar2(%, ", ")
     7 │   |> bar3(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     3 │ foo
     4 │   |> await %
@@ -444,7 +444,7 @@ hack_pipeline_operator.js:6:11 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     4 │   |> await %
     5 │   |> % || throw new Error(`foo ${bar1}`)
@@ -453,7 +453,7 @@ hack_pipeline_operator.js:6:12 parse ━━━━━━━━━━━━━━�
     7 │   |> bar3(%)
     8 │   |> % + "!"
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │   |> await %
     5 │   |> % || throw new Error(`foo ${bar1}`)
@@ -490,7 +490,7 @@ hack_pipeline_operator.js:7:11 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     5 │   |> % || throw new Error(`foo ${bar1}`)
     6 │   |> bar2(%, ", ")
@@ -499,7 +499,7 @@ hack_pipeline_operator.js:7:12 parse ━━━━━━━━━━━━━━�
     8 │   |> % + "!"
     9 │   |> new Bar.Foo(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     5 │   |> % || throw new Error(`foo ${bar1}`)
     6 │   |> bar2(%, ", ")
@@ -562,7 +562,7 @@ hack_pipeline_operator.js:9:18 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:9:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
      7 │   |> bar3(%)
      8 │   |> % + "!"
@@ -571,7 +571,7 @@ hack_pipeline_operator.js:9:19 parse ━━━━━━━━━━━━━━�
     10 │   |> await bar.bar(%)
     11 │   |> console.log(%);
   
-  i Expected an expression here
+  i Expected an expression here.
   
      7 │   |> bar3(%)
      8 │   |> % + "!"
@@ -608,7 +608,7 @@ hack_pipeline_operator.js:10:20 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
      8 │   |> % + "!"
      9 │   |> new Bar.Foo(%)
@@ -617,7 +617,7 @@ hack_pipeline_operator.js:10:21 parse ━━━━━━━━━━━━━━
     11 │   |> console.log(%);
     12 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
      8 │   |> % + "!"
      9 │   |> new Bar.Foo(%)
@@ -654,7 +654,7 @@ hack_pipeline_operator.js:11:18 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:11:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
      9 │   |> new Bar.Foo(%)
     10 │   |> await bar.bar(%)
@@ -663,7 +663,7 @@ hack_pipeline_operator.js:11:19 parse ━━━━━━━━━━━━━━
     12 │ 
     13 │ const result = "hello"
   
-  i Expected an expression here
+  i Expected an expression here.
   
      9 │   |> new Bar.Foo(%)
     10 │   |> await bar.bar(%)
@@ -698,7 +698,7 @@ hack_pipeline_operator.js:14:16 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:14:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     13 │ const result = "hello"
   > 14 │   |> doubleSay(%)
@@ -706,7 +706,7 @@ hack_pipeline_operator.js:14:17 parse ━━━━━━━━━━━━━━
     15 │   |> capitalize(%, "foo")
     16 │   |> exclaim(%);
   
-  i Expected an expression here
+  i Expected an expression here.
   
     13 │ const result = "hello"
   > 14 │   |> doubleSay(%)
@@ -742,7 +742,7 @@ hack_pipeline_operator.js:15:17 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:15:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     13 │ const result = "hello"
     14 │   |> doubleSay(%)
@@ -751,7 +751,7 @@ hack_pipeline_operator.js:15:18 parse ━━━━━━━━━━━━━━
     16 │   |> exclaim(%);
     17 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     13 │ const result = "hello"
     14 │   |> doubleSay(%)
@@ -788,7 +788,7 @@ hack_pipeline_operator.js:16:14 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:16:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     14 │   |> doubleSay(%)
     15 │   |> capitalize(%, "foo")
@@ -797,7 +797,7 @@ hack_pipeline_operator.js:16:15 parse ━━━━━━━━━━━━━━
     17 │ 
     18 │ function createPerson (attrs) {
   
-  i Expected an expression here
+  i Expected an expression here.
   
     14 │   |> doubleSay(%)
     15 │   |> capitalize(%, "foo")
@@ -834,7 +834,7 @@ hack_pipeline_operator.js:20:12 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:20:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     18 │ function createPerson (attrs) {
     19 │   attrs
@@ -843,7 +843,7 @@ hack_pipeline_operator.js:20:13 parse ━━━━━━━━━━━━━━
     21 │     |> foo(%)
     22 │     |> Person.insertIntoDatabase(%);
   
-  i Expected an expression here
+  i Expected an expression here.
   
     18 │ function createPerson (attrs) {
     19 │   attrs
@@ -880,7 +880,7 @@ hack_pipeline_operator.js:21:12 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:21:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     19 │   attrs
     20 │     |> foo(%)
@@ -889,7 +889,7 @@ hack_pipeline_operator.js:21:13 parse ━━━━━━━━━━━━━━
     22 │     |> Person.insertIntoDatabase(%);
     23 │ }
   
-  i Expected an expression here
+  i Expected an expression here.
   
     19 │   attrs
     20 │     |> foo(%)
@@ -926,7 +926,7 @@ hack_pipeline_operator.js:22:34 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:22:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     20 │     |> foo(%)
     21 │     |> foo(%)
@@ -935,7 +935,7 @@ hack_pipeline_operator.js:22:35 parse ━━━━━━━━━━━━━━
     23 │ }
     24 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     20 │     |> foo(%)
     21 │     |> foo(%)
@@ -970,7 +970,7 @@ hack_pipeline_operator.js:26:5 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:26:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '.'
+  × Expected an expression but instead found '.'.
   
     25 │ const result = [1,2,3]
   > 26 │  |> %.map(a => a * 2 )
@@ -978,7 +978,7 @@ hack_pipeline_operator.js:26:6 parse ━━━━━━━━━━━━━━�
     27 │  |> %.filter(a => a > 5)
     28 │  |> %.reduce((sum, a) => a+sum, 0)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     25 │ const result = [1,2,3]
   > 26 │  |> %.map(a => a * 2 )
@@ -1012,7 +1012,7 @@ hack_pipeline_operator.js:33:10 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:33:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     32 │ const searchResults$ = fromEvent(document.querySelector('input'), 'input')
   > 33 │   |> map(%, event => event.target.value)
@@ -1020,7 +1020,7 @@ hack_pipeline_operator.js:33:11 parse ━━━━━━━━━━━━━━
     34 │   |> filter(%, searchText => searchText.length > 2)
     35 │   |> debounce(%, 300)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     32 │ const searchResults$ = fromEvent(document.querySelector('input'), 'input')
   > 33 │   |> map(%, event => event.target.value)
@@ -1056,7 +1056,7 @@ hack_pipeline_operator.js:34:13 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:34:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     32 │ const searchResults$ = fromEvent(document.querySelector('input'), 'input')
     33 │   |> map(%, event => event.target.value)
@@ -1065,7 +1065,7 @@ hack_pipeline_operator.js:34:14 parse ━━━━━━━━━━━━━━
     35 │   |> debounce(%, 300)
     36 │   |> distinctUntilChanged(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     32 │ const searchResults$ = fromEvent(document.querySelector('input'), 'input')
     33 │   |> map(%, event => event.target.value)
@@ -1102,7 +1102,7 @@ hack_pipeline_operator.js:35:15 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:35:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     33 │   |> map(%, event => event.target.value)
     34 │   |> filter(%, searchText => searchText.length > 2)
@@ -1111,7 +1111,7 @@ hack_pipeline_operator.js:35:16 parse ━━━━━━━━━━━━━━
     36 │   |> distinctUntilChanged(%)
     37 │   |> switchMap(%, searchText => queryApi(searchText) |> retry(%, 3))
   
-  i Expected an expression here
+  i Expected an expression here.
   
     33 │   |> map(%, event => event.target.value)
     34 │   |> filter(%, searchText => searchText.length > 2)
@@ -1148,7 +1148,7 @@ hack_pipeline_operator.js:36:27 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:36:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     34 │   |> filter(%, searchText => searchText.length > 2)
     35 │   |> debounce(%, 300)
@@ -1157,7 +1157,7 @@ hack_pipeline_operator.js:36:28 parse ━━━━━━━━━━━━━━
     37 │   |> switchMap(%, searchText => queryApi(searchText) |> retry(%, 3))
     38 │   |> share(%);
   
-  i Expected an expression here
+  i Expected an expression here.
   
     34 │   |> filter(%, searchText => searchText.length > 2)
     35 │   |> debounce(%, 300)
@@ -1194,7 +1194,7 @@ hack_pipeline_operator.js:37:16 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:37:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     35 │   |> debounce(%, 300)
     36 │   |> distinctUntilChanged(%)
@@ -1203,7 +1203,7 @@ hack_pipeline_operator.js:37:17 parse ━━━━━━━━━━━━━━
     38 │   |> share(%);
     39 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     35 │   |> debounce(%, 300)
     36 │   |> distinctUntilChanged(%)
@@ -1240,7 +1240,7 @@ hack_pipeline_operator.js:37:63 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:37:64 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     35 │   |> debounce(%, 300)
     36 │   |> distinctUntilChanged(%)
@@ -1249,7 +1249,7 @@ hack_pipeline_operator.js:37:64 parse ━━━━━━━━━━━━━━
     38 │   |> share(%);
     39 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     35 │   |> debounce(%, 300)
     36 │   |> distinctUntilChanged(%)
@@ -1286,7 +1286,7 @@ hack_pipeline_operator.js:38:12 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:38:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     36 │   |> distinctUntilChanged(%)
     37 │   |> switchMap(%, searchText => queryApi(searchText) |> retry(%, 3))
@@ -1295,7 +1295,7 @@ hack_pipeline_operator.js:38:13 parse ━━━━━━━━━━━━━━
     39 │ 
     40 │ v |> %.method() |> f(%);
   
-  i Expected an expression here
+  i Expected an expression here.
   
     36 │   |> distinctUntilChanged(%)
     37 │   |> switchMap(%, searchText => queryApi(searchText) |> retry(%, 3))
@@ -1332,7 +1332,7 @@ hack_pipeline_operator.js:40:6 parse ━━━━━━━━━━━━━━�
   
 hack_pipeline_operator.js:40:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '.'
+  × Expected an expression but instead found '.'.
   
     38 │   |> share(%);
     39 │ 
@@ -1341,7 +1341,7 @@ hack_pipeline_operator.js:40:7 parse ━━━━━━━━━━━━━━�
     41 │ 
     42 │ async function * f () {
   
-  i Expected an expression here
+  i Expected an expression here.
   
     38 │   |> share(%);
     39 │ 
@@ -1378,7 +1378,7 @@ hack_pipeline_operator.js:44:15 parse ━━━━━━━━━━━━━━
   
 hack_pipeline_operator.js:44:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     42 │ async function * f () {
     43 │   return x
@@ -1387,7 +1387,7 @@ hack_pipeline_operator.js:44:16 parse ━━━━━━━━━━━━━━
     45 │     |> (await %)
     46 │     |> y(%)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     42 │ async function * f () {
     43 │   return x

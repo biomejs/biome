@@ -435,14 +435,14 @@ JsModule {
 --
 rest_property_binding_err.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '}'
+  × Expected an identifier but instead found '}'.
   
   > 1 │ let { ... } = a;
       │           ^
     2 │ let { ...c = "default" } = a;
     3 │ let { ...{a} } = b;
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
   > 1 │ let { ... } = a;
       │           ^

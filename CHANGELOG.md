@@ -53,7 +53,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Parser
 
+#### Enhancements
+
 - Support RegExp v flag. Contributed by @nissy-dev
+- Improve error messages. Contributed by @ematipico
 
 ### VSCode
 

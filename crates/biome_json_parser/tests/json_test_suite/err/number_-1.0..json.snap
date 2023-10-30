@@ -48,12 +48,12 @@ JsonRoot {
 ```
 number_-1.0..json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '-1.0.'
+  × Expected an array, an object, or a literal but instead found '-1.0.'.
   
   > 1 │ [-1.0.]
       │  ^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ [-1.0.]
       │  ^^^^^

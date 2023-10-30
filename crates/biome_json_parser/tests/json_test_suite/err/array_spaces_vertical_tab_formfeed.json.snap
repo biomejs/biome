@@ -52,12 +52,12 @@ JsonRoot {
 ```
 array_spaces_vertical_tab_formfeed.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '"a"\f'
+  × Expected an array, an object, or a literal but instead found '"a"\f'.
   
   > 1 │ ["␋a"\f]
       │  ^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ["␋a"\f]
       │  ^^^^^

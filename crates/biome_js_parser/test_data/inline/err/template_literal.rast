@@ -140,14 +140,14 @@ JsModule {
 --
 template_literal.js:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '}'
+  × Expected an expression but instead found '}'.
   
   > 1 │ let a = `foo ${}`
       │                ^
     2 │ let b = `${a a}`
     3 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ let a = `foo ${}`
       │                ^

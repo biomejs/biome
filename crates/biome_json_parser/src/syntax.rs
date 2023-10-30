@@ -324,7 +324,7 @@ fn parse_rest(p: &mut JsonParser, value: ParsedSyntax) {
 
         p.error(
             p.err_builder("End of file expected", range)
-                .hint("Use an array for a sequence of values: `[1, 2]`"),
+                .with_hint("Use an array for a sequence of values: `[1, 2]`"),
         );
     }
 

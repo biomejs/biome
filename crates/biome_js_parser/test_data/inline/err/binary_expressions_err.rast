@@ -120,14 +120,14 @@ JsModule {
 --
 binary_expressions_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
   > 1 │ foo(foo +);
       │          ^
     2 │ foo + * 2;
     3 │ !foo * bar;
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ foo(foo +);
       │          ^

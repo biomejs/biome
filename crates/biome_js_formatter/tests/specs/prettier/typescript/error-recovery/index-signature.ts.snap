@@ -143,7 +143,7 @@ index-signature.ts:4:24 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:4:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     3 │ type TwoParams = {
   > 4 │   [a: string, b: string]: string;
@@ -151,7 +151,7 @@ index-signature.ts:4:33 parse ━━━━━━━━━━━━━━━━�
     5 │ };
     6 │ type ThreeParams = {
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     3 │ type TwoParams = {
   > 4 │   [a: string, b: string]: string;
@@ -161,7 +161,7 @@ index-signature.ts:4:33 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     3 │ type TwoParams = {
     4 │   [a: string, b: string]: string;
@@ -170,7 +170,7 @@ index-signature.ts:5:1 parse ━━━━━━━━━━━━━━━━━
     6 │ type ThreeParams = {
     7 │   [a: string, b: string, c: string]: string;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     3 │ type TwoParams = {
     4 │   [a: string, b: string]: string;
@@ -207,7 +207,7 @@ index-signature.ts:7:35 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:7:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     5 │ };
     6 │ type ThreeParams = {
@@ -216,7 +216,7 @@ index-signature.ts:7:44 parse ━━━━━━━━━━━━━━━━�
     8 │ };
     9 │ 
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     5 │ };
     6 │ type ThreeParams = {
@@ -227,7 +227,7 @@ index-signature.ts:7:44 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
      6 │ type ThreeParams = {
      7 │   [a: string, b: string, c: string]: string;
@@ -236,7 +236,7 @@ index-signature.ts:8:1 parse ━━━━━━━━━━━━━━━━━
      9 │ 
     10 │ type TooLong = {
   
-  i Expected a statement here
+  i Expected a statement here.
   
      6 │ type ThreeParams = {
      7 │   [a: string, b: string, c: string]: string;
@@ -271,7 +271,7 @@ index-signature.ts:11:93 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:11:102 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     10 │ type TooLong = {
   > 11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
@@ -279,7 +279,7 @@ index-signature.ts:11:102 parse ━━━━━━━━━━━━━━━━
     12 │ }
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     10 │ type TooLong = {
   > 11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
@@ -289,7 +289,7 @@ index-signature.ts:11:102 parse ━━━━━━━━━━━━━━━━
   
 index-signature.ts:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     10 │ type TooLong = {
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
@@ -298,7 +298,7 @@ index-signature.ts:12:1 parse ━━━━━━━━━━━━━━━━�
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }
     14 │ type TooLong80 = { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string; }
   
-  i Expected a statement here
+  i Expected a statement here.
   
     10 │ type TooLong = {
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
@@ -335,7 +335,7 @@ index-signature.ts:13:89 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:13:98 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
     12 │ }
@@ -344,7 +344,7 @@ index-signature.ts:13:98 parse ━━━━━━━━━━━━━━━━�
     14 │ type TooLong80 = { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string; }
     15 │ 
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
     12 │ }
@@ -355,7 +355,7 @@ index-signature.ts:13:98 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:13:100 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
     12 │ }
@@ -364,7 +364,7 @@ index-signature.ts:13:100 parse ━━━━━━━━━━━━━━━━
     14 │ type TooLong80 = { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string; }
     15 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     11 │   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
     12 │ }
@@ -401,7 +401,7 @@ index-signature.ts:14:88 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:14:97 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     12 │ }
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }
@@ -410,7 +410,7 @@ index-signature.ts:14:97 parse ━━━━━━━━━━━━━━━━�
     15 │ 
     16 │ // note lack of trailing comma in the index signature
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     12 │ }
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }
@@ -421,7 +421,7 @@ index-signature.ts:14:97 parse ━━━━━━━━━━━━━━━━�
   
 index-signature.ts:14:99 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     12 │ }
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }
@@ -430,7 +430,7 @@ index-signature.ts:14:99 parse ━━━━━━━━━━━━━━━━�
     15 │ 
     16 │ // note lack of trailing comma in the index signature
   
-  i Expected a statement here
+  i Expected a statement here.
   
     12 │ }
     13 │ type TooLong81 = { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string; }

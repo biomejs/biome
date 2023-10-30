@@ -130,7 +130,7 @@ map(() => (#{
 ```
 tuple-and-record.js:5:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     4 │ const fn12 = (a) => (b) => (c) => (d) => (e) =>
   > 5 │   (#{ foo: bar, bar: baz, baz: foo });
@@ -138,7 +138,7 @@ tuple-and-record.js:5:5 parse ━━━━━━━━━━━━━━━━�
     6 │ 
     7 │ map(() => ([
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ const fn12 = (a) => (b) => (c) => (d) => (e) =>
   > 5 │   (#{ foo: bar, bar: baz, baz: foo });
@@ -196,7 +196,7 @@ tuple-and-record.js:5:20 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:5:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ')'
+  × Expected a statement but instead found ')'.
   
     4 │ const fn12 = (a) => (b) => (c) => (d) => (e) =>
   > 5 │   (#{ foo: bar, bar: baz, baz: foo });
@@ -204,7 +204,7 @@ tuple-and-record.js:5:37 parse ━━━━━━━━━━━━━━━━�
     6 │ 
     7 │ map(() => ([
   
-  i Expected a statement here
+  i Expected a statement here.
   
     4 │ const fn12 = (a) => (b) => (c) => (d) => (e) =>
   > 5 │   (#{ foo: bar, bar: baz, baz: foo });
@@ -214,7 +214,7 @@ tuple-and-record.js:5:37 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:12:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     10 │ ]));
     11 │ 
@@ -223,7 +223,7 @@ tuple-and-record.js:12:13 parse ━━━━━━━━━━━━━━━━
     13 │   // comment
     14 │   foo
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     10 │ ]));
     11 │ 
@@ -291,7 +291,7 @@ tuple-and-record.js:15:3 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:22:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     20 │ }));
     21 │ 
@@ -300,7 +300,7 @@ tuple-and-record.js:22:13 parse ━━━━━━━━━━━━━━━━
     23 │   // comment
     24 │   foo
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     20 │ }));
     21 │ 

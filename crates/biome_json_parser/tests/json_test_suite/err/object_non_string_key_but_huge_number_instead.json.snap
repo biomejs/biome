@@ -67,12 +67,12 @@ JsonRoot {
 ```
 object_non_string_key_but_huge_number_instead.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property but instead found '9999E9999'
+  × Expected a property but instead found '9999E9999'.
   
   > 1 │ {9999E9999:1}
       │  ^^^^^^^^^
   
-  i Expected a property here
+  i Expected a property here.
   
   > 1 │ {9999E9999:1}
       │  ^^^^^^^^^

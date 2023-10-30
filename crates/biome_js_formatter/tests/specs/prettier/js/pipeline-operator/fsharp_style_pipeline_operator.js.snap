@@ -223,7 +223,7 @@ fsharp_style_pipeline_operator.js:2:4 parse ━━━━━━━━━━━━
   
 fsharp_style_pipeline_operator.js:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found '|'
+  × Expected an unary expression but instead found '|'.
   
     1 │ promise
     2 │   |> await
@@ -232,7 +232,7 @@ fsharp_style_pipeline_operator.js:3:3 parse ━━━━━━━━━━━━
     4 │   |> capitalize
     5 │   |> x => x + '!'
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     1 │ promise
     2 │   |> await
@@ -406,7 +406,7 @@ fsharp_style_pipeline_operator.js:23:4 parse ━━━━━━━━━━━�
   
 fsharp_style_pipeline_operator.js:24:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found '|'
+  × Expected an unary expression but instead found '|'.
   
     22 │   |> api.get
     23 │   |> await
@@ -415,7 +415,7 @@ fsharp_style_pipeline_operator.js:24:3 parse ━━━━━━━━━━━�
     25 │   |> await
     26 │   |> j => j.data.user;
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     22 │   |> api.get
     23 │   |> await
