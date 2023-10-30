@@ -207,6 +207,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Bump Homebrew formula
+        continue-on-error: true
         if: needs.build.outputs.prerelease != 'true'
         uses: dawidd6/action-homebrew-bump-formula@v3
         with:
