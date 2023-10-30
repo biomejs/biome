@@ -1,7 +1,7 @@
 use std::cell::Ref;
 
-use rome_js_syntax::{JsLanguage, JsSyntaxNode, WalkEvent};
-use rome_rowan::{
+use biome_js_syntax::{JsLanguage, JsSyntaxNode, WalkEvent};
+use biome_rowan::{
     syntax::{Descendants, DescendantsTokens, DescendantsWithTokens, Preorder},
     BatchMutation, SyntaxTriviaPiece,
 };
@@ -23,7 +23,7 @@ fn JsSyntaxNode_splice_slots<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = Ref::<rome_js_syntax::JsSyntaxNode>::from_v8(scope, this).unwrap();
+    let this = Ref::<biome_js_syntax::JsSyntaxNode>::from_v8(scope, this).unwrap();
     let this = this.clone();
 
     let range = args.get(0i32);
@@ -36,7 +36,7 @@ fn JsSyntaxNode_splice_slots<'s>(
     let length = replace_with.length();
     let replace_with = (0..length).map(|index| {
         let item = replace_with.get_index(scope, index)?;
-        let item = rome_js_syntax::JsSyntaxElement::from_v8(scope, item).ok()?;
+        let item = biome_js_syntax::JsSyntaxElement::from_v8(scope, item).ok()?;
         Some(item)
     });
 

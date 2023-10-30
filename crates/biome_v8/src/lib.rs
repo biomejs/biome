@@ -1,8 +1,8 @@
 use std::{cell::Ref, sync::Once};
 
 use anyhow::{bail, ensure, Context, Result};
-use rome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
-use rome_rowan::BatchMutation;
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
+use biome_rowan::BatchMutation;
 use v8::inspector::{StringView, V8Inspector};
 
 mod bindings;
@@ -76,7 +76,8 @@ impl Instance {
         EnumRegistry::install(scope)?;
 
         let name = StringView::from(b"context".as_slice());
-        self.inspector.context_created(context, 1, name);
+        let aux_data = StringView::from(b"aux_data".as_slice());
+        self.inspector.context_created(context, 1, name, aux_data);
 
         // Create a new `TryCatch` scope to catch JS exceptions in the following code
         let scope = &mut v8::TryCatch::new(scope);
@@ -188,8 +189,8 @@ impl Instance {
 
 #[cfg(test)]
 mod tests {
-    use rome_js_parser::{parse, JsParserOptions};
-    use rome_js_syntax::JsFileSource;
+    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_syntax::JsFileSource;
 
     use super::Instance;
 

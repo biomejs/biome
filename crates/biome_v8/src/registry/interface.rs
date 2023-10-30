@@ -26,7 +26,11 @@ impl<T> InterfaceBuilder<'_, '_, T> {
         self
     }
 
-    pub(crate) fn iterable<'s, F>(self, scope: &mut v8::HandleScope<'_, ()>, callback: F) -> Self
+    pub(crate) fn iterable<'s: 'static, F>(
+        self,
+        scope: &mut v8::HandleScope<'_, ()>,
+        callback: F,
+    ) -> Self
     where
         T: Iterator + 'static,
         F: UnitType + Fn(T::Item, &mut v8::HandleScope<'s>) -> Result<v8::Local<'s, v8::Value>>,

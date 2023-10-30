@@ -1,11 +1,11 @@
 use std::cell::Ref;
 
 use anyhow::{bail, Context, Result};
-use rome_js_syntax::{
+use biome_js_syntax::{
     JsLanguage, JsSyntaxElement, JsSyntaxKind, JsSyntaxList, JsSyntaxNode, JsSyntaxToken,
     JsSyntaxTrivia, SyntaxNodeText, TextRange, TextSize, WalkEvent,
 };
-use rome_rowan::{
+use biome_rowan::{
     syntax::{Descendants, DescendantsTokens, DescendantsWithTokens, Preorder},
     BatchMutation, Direction, RawSyntaxKind, SyntaxSlot, SyntaxTriviaPiece,
 };

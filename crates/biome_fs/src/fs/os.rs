@@ -8,6 +8,7 @@ use crate::{
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use rayon::{scope, Scope};
 use std::fs::{DirEntry, FileType};
+use std::io::SeekFrom;
 use std::{
     env,
     ffi::OsStr,
@@ -58,7 +59,7 @@ impl File for OsFile {
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
         tracing::debug_span!("OsFile::read_to_string").in_scope(move || {
             // Reset the cursor to the starting position
-            self.inner.rewind()?;
+            self.inner.seek(SeekFrom::Start(0))?;
             // Read the file content
             self.inner.read_to_string(buffer)?;
             Ok(())
@@ -70,7 +71,7 @@ impl File for OsFile {
             // Truncate the file
             self.inner.set_len(0)?;
             // Reset the cursor to the starting position
-            self.inner.rewind()?;
+            self.inner.seek(SeekFrom::Start(0))?;
             // Write the byte slice
             self.inner.write_all(content)?;
             // new version stored

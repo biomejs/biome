@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name    = "rome_v8"
+name    = "biome_v8"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,18 +11,18 @@ serde    = { workspace = true }
 serde_v8 = { version = "0.108.0" }
 v8       = { version = "0.74.3", default-features = false }
 
-rome_js_factory = { workspace = true }
-rome_js_syntax  = { workspace = true }
-rome_rowan      = { workspace = true, features = ["serde"] }
+biome_js_factory = { workspace = true }
+biome_js_syntax  = { workspace = true }
+biome_rowan      = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 bpaf             = { workspace = true }
 crossbeam        = { workspace = true }
-rome_console     = { workspace = true }
-rome_diagnostics = { workspace = true }
-rome_fs          = { workspace = true }
-rome_js_parser   = { workspace = true }
-rome_service     = { workspace = true }
+biome_console     = { workspace = true }
+biome_diagnostics = { workspace = true }
+biome_fs          = { workspace = true }
+biome_js_parser   = { workspace = true }
+biome_service     = { workspace = true }
 
 [build-dependencies]
-rome_idl = { path = "../rome_idl" }
+biome_idl = { path = "../biome_idl" }

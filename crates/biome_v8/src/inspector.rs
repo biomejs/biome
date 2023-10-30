@@ -1,4 +1,7 @@
-use v8::inspector::{StringView, V8InspectorClientBase, V8InspectorClientImpl, V8StackTrace};
+use v8::inspector::{
+    AsV8InspectorClient, StringView, V8InspectorClient, V8InspectorClientBase,
+    V8InspectorClientImpl, V8StackTrace,
+};
 
 pub(crate) struct DebugClient {
     base: V8InspectorClientBase,
@@ -19,6 +22,13 @@ impl V8InspectorClientImpl for DebugClient {
 
     fn base_mut(&mut self) -> &mut V8InspectorClientBase {
         &mut self.base
+    }
+
+    unsafe fn base_ptr(this: *const Self) -> *const V8InspectorClientBase
+    where
+        Self: Sized,
+    {
+        todo!()
     }
 
     fn console_api_message(

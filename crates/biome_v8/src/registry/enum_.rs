@@ -7,7 +7,7 @@ use std::{
 };
 
 use anyhow::{Context, Result};
-use rome_rowan::{RawSyntaxKind, SyntaxKind};
+use biome_rowan::{RawSyntaxKind, SyntaxKind};
 use v8::{FunctionCallback, MapFnTo};
 
 use super::{Template, TemplateRegistry};

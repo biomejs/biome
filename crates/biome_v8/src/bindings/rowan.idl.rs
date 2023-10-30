@@ -1,14 +1,17 @@
-use crate::convert::{FromV8, ToV8};
 use super::TemplateRegistry;
+use crate::convert::{FromV8, ToV8};
 pub(super) fn register_interfaces(
     scope: &mut v8::HandleScope<'_, ()>,
     global: v8::Local<'_, v8::ObjectTemplate>,
     registry: &mut TemplateRegistry,
 ) {
     registry
-        .build_class_with_constructor::<
-            JsBatchMutation,
-        >(scope, global, "JsBatchMutation", JsBatchMutation_constructor)
+        .build_class_with_constructor::<JsBatchMutation>(
+            scope,
+            global,
+            "JsBatchMutation",
+            JsBatchMutation_constructor,
+        )
         .method(scope, "replace_element", JsBatchMutation_replace_element)
         .method(
             scope,
@@ -34,7 +37,7 @@ pub(super) fn register_interfaces(
         .iterable(scope, ToV8::to_v8)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsSyntaxList>(scope, global, "JsSyntaxList")
+        .build_class::<biome_js_syntax::JsSyntaxList>(scope, global, "JsSyntaxList")
         .method(scope, "len", JsSyntaxList_len)
         .method(scope, "is_empty", JsSyntaxList_is_empty)
         .method(scope, "first", JsSyntaxList_first)
@@ -42,67 +45,143 @@ pub(super) fn register_interfaces(
         .method(scope, "node", JsSyntaxList_node)
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsSyntaxNode>(scope, global, "JsSyntaxNode")
+        .build_class::<biome_js_syntax::JsSyntaxNode>(scope, global, "JsSyntaxNode")
         .method(scope, "kind", JsSyntaxNode_kind)
         .method(scope, "text", JsSyntaxNode_text)
         .method(scope, "text_trimmed", JsSyntaxNode_text_trimmed)
         .method(scope, "text_range", JsSyntaxNode_text_range)
         .method(scope, "text_trimmed_range", JsSyntaxNode_text_trimmed_range)
-        .method(scope, "first_leading_trivia", JsSyntaxNode_first_leading_trivia)
-        .method(scope, "last_trailing_trivia", JsSyntaxNode_last_trailing_trivia)
+        .method(
+            scope,
+            "first_leading_trivia",
+            JsSyntaxNode_first_leading_trivia,
+        )
+        .method(
+            scope,
+            "last_trailing_trivia",
+            JsSyntaxNode_last_trailing_trivia,
+        )
         .method(scope, "parent", JsSyntaxNode_parent)
         .method(scope, "grand_parent", JsSyntaxNode_grand_parent)
         .method(scope, "index", JsSyntaxNode_index)
         .method(scope, "first_child", JsSyntaxNode_first_child)
         .method(scope, "last_child", JsSyntaxNode_last_child)
-        .method(scope, "first_child_or_token", JsSyntaxNode_first_child_or_token)
-        .method(scope, "last_child_or_token", JsSyntaxNode_last_child_or_token)
+        .method(
+            scope,
+            "first_child_or_token",
+            JsSyntaxNode_first_child_or_token,
+        )
+        .method(
+            scope,
+            "last_child_or_token",
+            JsSyntaxNode_last_child_or_token,
+        )
         .method(scope, "next_sibling", JsSyntaxNode_next_sibling)
         .method(scope, "prev_sibling", JsSyntaxNode_prev_sibling)
-        .method(scope, "next_sibling_or_token", JsSyntaxNode_next_sibling_or_token)
-        .method(scope, "prev_sibling_or_token", JsSyntaxNode_prev_sibling_or_token)
+        .method(
+            scope,
+            "next_sibling_or_token",
+            JsSyntaxNode_next_sibling_or_token,
+        )
+        .method(
+            scope,
+            "prev_sibling_or_token",
+            JsSyntaxNode_prev_sibling_or_token,
+        )
         .method(scope, "first_token", JsSyntaxNode_first_token)
         .method(scope, "last_token", JsSyntaxNode_last_token)
         .method(scope, "descendants", JsSyntaxNode_descendants)
         .method(scope, "descendants_tokens", JsSyntaxNode_descendants_tokens)
-        .method(scope, "descendants_with_tokens", JsSyntaxNode_descendants_with_tokens)
+        .method(
+            scope,
+            "descendants_with_tokens",
+            JsSyntaxNode_descendants_with_tokens,
+        )
         .method(scope, "preorder", JsSyntaxNode_preorder)
         .method(scope, "covering_element", JsSyntaxNode_covering_element)
-        .method(scope, "child_or_token_at_range", JsSyntaxNode_child_or_token_at_range)
+        .method(
+            scope,
+            "child_or_token_at_range",
+            JsSyntaxNode_child_or_token_at_range,
+        )
         .method(scope, "clone_subtree", JsSyntaxNode_clone_subtree)
         .method(scope, "detach", JsSyntaxNode_detach)
         .method(scope, "splice_slots", JsSyntaxNode_splice_slots)
         .method(scope, "replace_child", JsSyntaxNode_replace_child)
         .method(scope, "into_list", JsSyntaxNode_into_list)
-        .method(scope, "has_comments_descendants", JsSyntaxNode_has_comments_descendants)
-        .method(scope, "has_comments_direct", JsSyntaxNode_has_comments_direct)
+        .method(
+            scope,
+            "has_comments_descendants",
+            JsSyntaxNode_has_comments_descendants,
+        )
+        .method(
+            scope,
+            "has_comments_direct",
+            JsSyntaxNode_has_comments_direct,
+        )
         .method(
             scope,
             "first_or_last_token_have_comments",
             JsSyntaxNode_first_or_last_token_have_comments,
         )
-        .method(scope, "has_trailing_comments", JsSyntaxNode_has_trailing_comments)
-        .method(scope, "last_token_has_comments", JsSyntaxNode_last_token_has_comments)
-        .method(scope, "first_token_has_comments", JsSyntaxNode_first_token_has_comments)
-        .method(scope, "has_leading_comments", JsSyntaxNode_has_leading_comments)
+        .method(
+            scope,
+            "has_trailing_comments",
+            JsSyntaxNode_has_trailing_comments,
+        )
+        .method(
+            scope,
+            "last_token_has_comments",
+            JsSyntaxNode_last_token_has_comments,
+        )
+        .method(
+            scope,
+            "first_token_has_comments",
+            JsSyntaxNode_first_token_has_comments,
+        )
+        .method(
+            scope,
+            "has_leading_comments",
+            JsSyntaxNode_has_leading_comments,
+        )
         .finish(scope);
     registry
-        .build_class::<rome_js_syntax::JsSyntaxToken>(scope, global, "JsSyntaxToken")
+        .build_class::<biome_js_syntax::JsSyntaxToken>(scope, global, "JsSyntaxToken")
         .method(scope, "kind", JsSyntaxToken_kind)
         .method(scope, "text_range", JsSyntaxToken_text_range)
-        .method(scope, "text_trimmed_range", JsSyntaxToken_text_trimmed_range)
+        .method(
+            scope,
+            "text_trimmed_range",
+            JsSyntaxToken_text_trimmed_range,
+        )
         .method(scope, "text", JsSyntaxToken_text)
         .method(scope, "text_trimmed", JsSyntaxToken_text_trimmed)
         .method(scope, "parent", JsSyntaxToken_parent)
-        .method(scope, "next_sibling_or_token", JsSyntaxToken_next_sibling_or_token)
-        .method(scope, "prev_sibling_or_token", JsSyntaxToken_prev_sibling_or_token)
+        .method(
+            scope,
+            "next_sibling_or_token",
+            JsSyntaxToken_next_sibling_or_token,
+        )
+        .method(
+            scope,
+            "prev_sibling_or_token",
+            JsSyntaxToken_prev_sibling_or_token,
+        )
         .method(scope, "next_token", JsSyntaxToken_next_token)
         .method(scope, "prev_token", JsSyntaxToken_prev_token)
         .method(scope, "detach", JsSyntaxToken_detach)
         .method(scope, "leading_trivia", JsSyntaxToken_leading_trivia)
         .method(scope, "trailing_trivia", JsSyntaxToken_trailing_trivia)
-        .method(scope, "has_trailing_comments", JsSyntaxToken_has_trailing_comments)
-        .method(scope, "has_leading_comments", JsSyntaxToken_has_leading_comments)
+        .method(
+            scope,
+            "has_trailing_comments",
+            JsSyntaxToken_has_trailing_comments,
+        )
+        .method(
+            scope,
+            "has_leading_comments",
+            JsSyntaxToken_has_leading_comments,
+        )
         .method(
             scope,
             "has_leading_non_whitespace_trivia",
@@ -110,7 +189,7 @@ pub(super) fn register_interfaces(
         )
         .finish(scope);
     registry
-        .build_interface::<rome_js_syntax::JsSyntaxTrivia>(scope)
+        .build_interface::<biome_js_syntax::JsSyntaxTrivia>(scope)
         .method(scope, "last", JsSyntaxTrivia_last)
         .method(scope, "first", JsSyntaxTrivia_first)
         .method(scope, "text", JsSyntaxTrivia_text)
@@ -131,12 +210,14 @@ pub(super) fn register_interfaces(
         .finish(scope);
     registry.build_interface::<JsWalkEvent>(scope).finish(scope);
     registry
-        .build_interface::<rome_rowan::SyntaxNodeText>(scope)
+        .build_interface::<biome_rowan::SyntaxNodeText>(scope)
         .method(scope, "len", SyntaxNodeText_len)
         .method(scope, "is_empty", SyntaxNodeText_is_empty)
         .method(scope, "to_string", SyntaxNodeText_to_string)
         .finish(scope);
-    registry.build_namespace(scope, global, "make").method(scope, "ident", make_ident);
+    registry
+        .build_namespace(scope, global, "make")
+        .method(scope, "ident", make_ident);
 }
 #[allow(non_snake_case)]
 fn JsBatchMutation_constructor<'s>(
@@ -144,11 +225,10 @@ fn JsBatchMutation_constructor<'s>(
     args: v8::FunctionCallbackArguments<'s>,
     _res: v8::ReturnValue,
 ) {
-    let root = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, args.get(0i32))
-        .expect("could not load native object from JS value")
-        .clone();
+    let root =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, args.get(0i32))
+            .expect("could not load native object from JS value")
+            .clone();
     let res = JsBatchMutation::new(root);
     crate::registry::store_native(scope, args.this(), res);
 }
@@ -159,17 +239,10 @@ fn JsBatchMutation_replace_element<'s>(
     _result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let prev_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(0i32),
-        )
+    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this).unwrap();
+    let prev_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
-    let next_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(1i32),
-        )
+    let next_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(1i32))
         .expect("failed to deserialize argument from V8 value");
     this.replace_element(prev_element, next_element);
 }
@@ -180,17 +253,10 @@ fn JsBatchMutation_replace_element_discard_trivia<'s>(
     _result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let prev_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(0i32),
-        )
+    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this).unwrap();
+    let prev_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
-    let next_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(1i32),
-        )
+    let next_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(1i32))
         .expect("failed to deserialize argument from V8 value");
     this.replace_element_discard_trivia(prev_element, next_element);
 }
@@ -201,12 +267,8 @@ fn JsBatchMutation_remove_element<'s>(
     _result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let prev_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(0i32),
-        )
+    let mut this = <std::cell::RefMut<JsBatchMutation> as FromV8>::from_v8(scope, this).unwrap();
+    let prev_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
     this.remove_element(prev_element);
 }
@@ -217,10 +279,8 @@ fn JsSyntaxList_len<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxList,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxList> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.len();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -232,10 +292,8 @@ fn JsSyntaxList_is_empty<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxList,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxList> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_empty();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -247,13 +305,10 @@ fn JsSyntaxList_first<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxList,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxList> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.first() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -264,13 +319,10 @@ fn JsSyntaxList_last<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxList,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxList> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.last() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -281,10 +333,8 @@ fn JsSyntaxList_node<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxList,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxList> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.node();
     let res = res.clone();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -297,10 +347,8 @@ fn JsSyntaxNode_kind<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.kind();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -312,10 +360,8 @@ fn JsSyntaxNode_text<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -327,10 +373,8 @@ fn JsSyntaxNode_text_trimmed<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_trimmed();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -342,10 +386,8 @@ fn JsSyntaxNode_text_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -357,10 +399,8 @@ fn JsSyntaxNode_text_trimmed_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_trimmed_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -372,13 +412,10 @@ fn JsSyntaxNode_first_leading_trivia<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.first_leading_trivia() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -389,13 +426,10 @@ fn JsSyntaxNode_last_trailing_trivia<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.last_trailing_trivia() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -406,13 +440,10 @@ fn JsSyntaxNode_parent<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.parent() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -423,13 +454,10 @@ fn JsSyntaxNode_grand_parent<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.grand_parent() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -440,10 +468,8 @@ fn JsSyntaxNode_index<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.index();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -455,13 +481,10 @@ fn JsSyntaxNode_first_child<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.first_child() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -472,13 +495,10 @@ fn JsSyntaxNode_last_child<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.last_child() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -489,10 +509,8 @@ fn JsSyntaxNode_first_child_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.first_child_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -504,10 +522,8 @@ fn JsSyntaxNode_last_child_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.last_child_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -519,13 +535,10 @@ fn JsSyntaxNode_next_sibling<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.next_sibling() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -536,13 +549,10 @@ fn JsSyntaxNode_prev_sibling<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.prev_sibling() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -553,10 +563,8 @@ fn JsSyntaxNode_next_sibling_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.next_sibling_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -568,10 +576,8 @@ fn JsSyntaxNode_prev_sibling_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.prev_sibling_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -583,13 +589,10 @@ fn JsSyntaxNode_first_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.first_token() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -600,13 +603,10 @@ fn JsSyntaxNode_last_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.last_token() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -617,10 +617,8 @@ fn JsSyntaxNode_descendants<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.descendants();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -632,17 +630,15 @@ fn JsSyntaxNode_descendants_tokens<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let direction = if let Some(direction)
-        = <Option<rome_rowan::Direction> as FromV8>::from_v8(scope, args.get(0i32))
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
+    let direction = if let Some(direction) =
+        <Option<biome_rowan::Direction> as FromV8>::from_v8(scope, args.get(0i32))
             .expect("failed to deserialize argument from V8 value")
     {
         direction
     } else {
-        rome_rowan::Direction::Next
+        biome_rowan::Direction::Next
     };
     let res = this.descendants_tokens(direction);
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -655,17 +651,15 @@ fn JsSyntaxNode_descendants_with_tokens<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let direction = if let Some(direction)
-        = <Option<rome_rowan::Direction> as FromV8>::from_v8(scope, args.get(0i32))
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
+    let direction = if let Some(direction) =
+        <Option<biome_rowan::Direction> as FromV8>::from_v8(scope, args.get(0i32))
             .expect("failed to deserialize argument from V8 value")
     {
         direction
     } else {
-        rome_rowan::Direction::Next
+        biome_rowan::Direction::Next
     };
     let res = this.descendants_with_tokens(direction);
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -678,10 +672,8 @@ fn JsSyntaxNode_preorder<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.preorder();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -693,11 +685,9 @@ fn JsSyntaxNode_covering_element<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let range = <rome_rowan::TextRange as FromV8>::from_v8(scope, args.get(0i32))
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
+    let range = <biome_rowan::TextRange as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
     let res = this.covering_element(range);
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -710,11 +700,9 @@ fn JsSyntaxNode_child_or_token_at_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
-    let range = <rome_rowan::TextRange as FromV8>::from_v8(scope, args.get(0i32))
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
+    let range = <biome_rowan::TextRange as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
     let res = this.child_or_token_at_range(range);
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -727,10 +715,8 @@ fn JsSyntaxNode_clone_subtree<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.clone_subtree();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -742,10 +728,8 @@ fn JsSyntaxNode_detach<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let this = this.clone();
     let res = this.detach();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -758,24 +742,15 @@ fn JsSyntaxNode_replace_child<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let this = this.clone();
-    let prev_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(0i32),
-        )
+    let prev_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
-    let next_element = <rome_js_syntax::JsSyntaxElement as FromV8>::from_v8(
-            scope,
-            args.get(1i32),
-        )
+    let next_element = <biome_js_syntax::JsSyntaxElement as FromV8>::from_v8(scope, args.get(1i32))
         .expect("failed to deserialize argument from V8 value");
     if let Some(res) = this.replace_child(prev_element, next_element) {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -786,10 +761,8 @@ fn JsSyntaxNode_into_list<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let this = this.clone();
     let res = this.into_list();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -802,10 +775,8 @@ fn JsSyntaxNode_has_comments_descendants<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_comments_descendants();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -817,10 +788,8 @@ fn JsSyntaxNode_has_comments_direct<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_comments_direct();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -832,10 +801,8 @@ fn JsSyntaxNode_first_or_last_token_have_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.first_or_last_token_have_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -847,10 +814,8 @@ fn JsSyntaxNode_has_trailing_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_trailing_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -862,10 +827,8 @@ fn JsSyntaxNode_last_token_has_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.last_token_has_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -877,10 +840,8 @@ fn JsSyntaxNode_first_token_has_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.first_token_has_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -892,10 +853,8 @@ fn JsSyntaxNode_has_leading_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxNode,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxNode> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_leading_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -907,10 +866,8 @@ fn JsSyntaxToken_kind<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.kind();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -922,10 +879,8 @@ fn JsSyntaxToken_text_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -937,10 +892,8 @@ fn JsSyntaxToken_text_trimmed_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_trimmed_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -952,10 +905,8 @@ fn JsSyntaxToken_text<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -967,10 +918,8 @@ fn JsSyntaxToken_text_trimmed<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_trimmed();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -982,13 +931,10 @@ fn JsSyntaxToken_parent<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.parent() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -999,10 +945,8 @@ fn JsSyntaxToken_next_sibling_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.next_sibling_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1014,10 +958,8 @@ fn JsSyntaxToken_prev_sibling_or_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.prev_sibling_or_token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1029,13 +971,10 @@ fn JsSyntaxToken_next_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.next_token() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -1046,13 +985,10 @@ fn JsSyntaxToken_prev_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.prev_token() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -1063,10 +999,8 @@ fn JsSyntaxToken_detach<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let this = this.clone();
     let res = this.detach();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
@@ -1079,10 +1013,8 @@ fn JsSyntaxToken_leading_trivia<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.leading_trivia();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1094,10 +1026,8 @@ fn JsSyntaxToken_trailing_trivia<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.trailing_trivia();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1109,10 +1039,8 @@ fn JsSyntaxToken_has_trailing_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_trailing_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1124,10 +1052,8 @@ fn JsSyntaxToken_has_leading_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_leading_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1139,10 +1065,8 @@ fn JsSyntaxToken_has_leading_non_whitespace_trivia<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxToken,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxToken> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_leading_non_whitespace_trivia();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1154,13 +1078,10 @@ fn JsSyntaxTrivia_last<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.last() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -1171,13 +1092,10 @@ fn JsSyntaxTrivia_first<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     if let Some(res) = this.first() {
-        let res = ToV8::to_v8(res, scope)
-            .expect("failed to serialize result to JS value");
+        let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
         result.set(res);
     }
 }
@@ -1188,10 +1106,8 @@ fn JsSyntaxTrivia_text<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1203,10 +1119,8 @@ fn JsSyntaxTrivia_text_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1218,10 +1132,8 @@ fn JsSyntaxTrivia_is_empty<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_empty();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1233,10 +1145,8 @@ fn JsSyntaxTrivia_has_skipped<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_js_syntax::JsSyntaxTrivia,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_js_syntax::JsSyntaxTrivia> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.has_skipped();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1248,8 +1158,7 @@ fn JsSyntaxTriviaPiece_text<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1261,8 +1170,7 @@ fn JsSyntaxTriviaPiece_text_len<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_len();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1274,8 +1182,7 @@ fn JsSyntaxTriviaPiece_text_range<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.text_range();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1287,8 +1194,7 @@ fn JsSyntaxTriviaPiece_is_newline<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_newline();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1300,8 +1206,7 @@ fn JsSyntaxTriviaPiece_is_whitespace<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_whitespace();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1313,8 +1218,7 @@ fn JsSyntaxTriviaPiece_is_comments<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_comments();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1326,8 +1230,7 @@ fn JsSyntaxTriviaPiece_is_skipped<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_skipped();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1339,8 +1242,7 @@ fn JsSyntaxTriviaPiece_token<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this = <std::cell::Ref<JsSyntaxTriviaPiece> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.token();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1352,10 +1254,8 @@ fn SyntaxNodeText_len<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_rowan::SyntaxNodeText,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_rowan::SyntaxNodeText> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.len();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1367,10 +1267,8 @@ fn SyntaxNodeText_is_empty<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_rowan::SyntaxNodeText,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_rowan::SyntaxNodeText> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.is_empty();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1382,10 +1280,8 @@ fn SyntaxNodeText_to_string<'s>(
     mut result: v8::ReturnValue,
 ) {
     let this = args.this().into();
-    let this = <std::cell::Ref<
-        rome_rowan::SyntaxNodeText,
-    > as FromV8>::from_v8(scope, this)
-        .unwrap();
+    let this =
+        <std::cell::Ref<biome_rowan::SyntaxNodeText> as FromV8>::from_v8(scope, this).unwrap();
     let res = this.to_string();
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
@@ -1398,7 +1294,7 @@ fn make_ident<'s>(
 ) {
     let text = <String as FromV8>::from_v8(scope, args.get(0i32))
         .expect("failed to deserialize argument from V8 value");
-    let res = rome_js_factory::make::ident(&text);
+    let res = biome_js_factory::make::ident(&text);
     let res = ToV8::to_v8(res, scope).expect("failed to serialize result to JS value");
     result.set(res);
 }

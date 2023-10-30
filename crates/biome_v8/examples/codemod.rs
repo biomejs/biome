@@ -9,15 +9,15 @@ use std::{
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
 
-use rome_console::{markup, ColorMode, Console, ConsoleExt, EnvConsole};
-use rome_diagnostics::{Error, PrintDiagnostic};
-use rome_fs::{
+use biome_console::{markup, ColorMode, Console, ConsoleExt, EnvConsole};
+use biome_diagnostics::{Error, PrintDiagnostic};
+use biome_fs::{
     self, FileSystem, FileSystemExt, OsFileSystem, PathInterner, RomePath, TraversalContext,
 };
-use rome_js_parser::{parse, JsParserOptions};
-use rome_js_syntax::JsFileSource;
-use rome_service::{workspace, App, DynRef, WorkspaceRef};
-use rome_v8::{Instance, Script};
+use biome_js_parser::{parse, JsParserOptions};
+use biome_js_syntax::JsFileSource;
+use biome_service::{workspace, App, DynRef, WorkspaceRef};
+use biome_v8::{Instance, Script};
 
 pub fn main() {
     let mut console = EnvConsole::default();
@@ -159,7 +159,7 @@ impl TraversalContext for CodemodContext<'_> {
             })
         });
 
-        let output = result.to_string();
+        let output = String::from_utf8_lossy(result.to_string());
         file.set_content(output.as_bytes()).unwrap();
     }
 }
