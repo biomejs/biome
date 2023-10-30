@@ -34,19 +34,19 @@ JsModule {
 --
 regex.js:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × duplicate flag `v`
+  × Duplicate flag `v`.
   
   > 1 │ /[\p{Control}--[\t\n]]/vv;
       │                         ^
     2 │ /[\p{Control}--[\t\n]]/uv;
     3 │ 
   
-  i this flag was already used
+  i This flag was already used.
   
 --
 regex.js:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid regex flag
+  × Invalid regex flag.
   
     1 │ /[\p{Control}--[\t\n]]/vv;
   > 2 │ /[\p{Control}--[\t\n]]/uv;
