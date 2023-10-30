@@ -174,7 +174,7 @@ CssRoot {
                                     value_token: IDENT@69..72 "cue" [] [],
                                 },
                                 l_paren_token: L_PAREN@72..73 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -239,7 +239,7 @@ CssRoot {
                                     value_token: IDENT@108..118 "cue-region" [] [],
                                 },
                                 l_paren_token: L_PAREN@118..119 "(" [] [],
-                                parameter: CssComplexSelector {
+                                selector: CssComplexSelector {
                                     left: CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: missing (optional),
@@ -336,19 +336,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@193..195 "::" [] [],
-                            element: CssPseudoElementFunction {
-                                name: CssIdentifier {
-                                    value_token: IDENT@195..199 "part" [] [],
-                                },
+                            element: CssPseudoElementPart {
+                                name_token: PART_KW@195..199 "part" [] [],
                                 l_paren_token: L_PAREN@199..200 "(" [] [],
-                                parameter: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
-                                    simple_selector: CssTypeSelector {
-                                        ident: CssIdentifier {
-                                            value_token: IDENT@200..203 "tab" [] [],
-                                        },
-                                    },
-                                    sub_selectors: CssSubSelectorList [],
+                                ident: CssIdentifier {
+                                    value_token: IDENT@200..203 "tab" [] [],
                                 },
                                 r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
                             },
@@ -421,7 +413,7 @@ CssRoot {
                                     value_token: IDENT@245..252 "slotted" [] [],
                                 },
                                 l_paren_token: L_PAREN@252..253 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssUniversalSelector {
                                         star_token: STAR@253..254 "*" [] [],
@@ -453,7 +445,7 @@ CssRoot {
                                     value_token: IDENT@261..268 "slotted" [] [],
                                 },
                                 l_paren_token: L_PAREN@268..269 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -824,16 +816,11 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@193..205
             0: CSS_PSEUDO_ELEMENT_SELECTOR@193..205
               0: COLON2@193..195 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@195..205
-                0: CSS_IDENTIFIER@195..199
-                  0: IDENT@195..199 "part" [] []
+              1: CSS_PSEUDO_ELEMENT_PART@195..205
+                0: PART_KW@195..199 "part" [] []
                 1: L_PAREN@199..200 "(" [] []
-                2: CSS_COMPOUND_SELECTOR@200..203
-                  0: (empty)
-                  1: CSS_TYPE_SELECTOR@200..203
-                    0: CSS_IDENTIFIER@200..203
-                      0: IDENT@200..203 "tab" [] []
-                  2: CSS_SUB_SELECTOR_LIST@203..203
+                2: CSS_IDENTIFIER@200..203
+                  0: IDENT@200..203 "tab" [] []
                 3: R_PAREN@203..205 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@205..207
         0: L_CURLY@205..206 "{" [] []

@@ -33,7 +33,7 @@ CssRoot {
                                     value_token: IDENT@2..9 "slotted" [] [],
                                 },
                                 l_paren_token: L_PAREN@9..10 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssUniversalSelector {
                                         star_token: STAR@10..11 "*" [] [],
@@ -65,7 +65,7 @@ CssRoot {
                                     value_token: IDENT@18..25 "slotted" [] [],
                                 },
                                 l_paren_token: L_PAREN@25..26 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -99,7 +99,7 @@ CssRoot {
                                     value_token: IDENT@37..44 "slotted" [] [],
                                 },
                                 l_paren_token: L_PAREN@44..48 "(" [] [Whitespace("   ")],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -133,7 +133,7 @@ CssRoot {
                                     value_token: IDENT@62..69 "SLOTTED" [] [],
                                 },
                                 l_paren_token: L_PAREN@69..70 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
