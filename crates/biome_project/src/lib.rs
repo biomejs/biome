@@ -15,6 +15,9 @@ use std::path::Path;
 
 pub(crate) type LanguageRoot<L> = <L as Language>::Root;
 
+pub(crate) type ProjectRoot<P> =
+    <<<P as Project>::Manifest as Manifest>::Language as Language>::Root;
+
 pub trait Manifest: Default + Debug {
     type Language: Language;
 
@@ -27,10 +30,7 @@ pub trait Project {
     type Manifest: Manifest;
 
     /// Use this function to prepare the project, like loading the manifest.
-    fn deserialize_manifest(
-        &mut self,
-        root: &<<<Self as Project>::Manifest as Manifest>::Language as Language>::Root,
-    );
+    fn deserialize_manifest(&mut self, root: &ProjectRoot<Self>);
 
     /// The home directory of the project
     fn project_path(&self) -> &Path;
@@ -80,16 +80,3 @@ impl AnyProject {
             .collect()
     }
 }
-
-//
-// impl AnyProject {
-// 	pub fn try_from<T>(&self, manifest_name: &str) -> Result<T, ProjectDiagnostic> {
-// 		let project_type = self.type_id();
-// 		if project_type == self.project_type {
-// 			match manifest_name { }
-// 		} else {
-// 			Err(ProjectDiagnostic::new_internal())
-// 		}
-// 	}
-//
-// }

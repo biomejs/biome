@@ -664,7 +664,6 @@ dependencies = [
  "biome_console",
  "biome_deserialize",
  "biome_diagnostics",
- "biome_fs",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_parser",

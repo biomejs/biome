@@ -15,11 +15,11 @@ pico-args      = { version = "0.5.0", features = ["eq-separator"] }
 proc-macro2    = { version = "1.0.63", features = ["span-locations"] }
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
 quote          = "1.0.14"
+serde          = { workspace = true, optional = true }
 ungrammar      = "1.14.9"
 ureq           = "2.4.0"
 walkdir        = "2.3.2"
 xtask          = { path = '../', version = "0.0" }
-serde = { workspace = true, optional = true }
 
 biome_analyze        = { workspace = true, optional = true }
 biome_aria           = { workspace = true, optional = true }
@@ -48,6 +48,7 @@ configuration = [
   "biome_json_syntax",
   "pulldown-cmark",
 ]
+license = ["ureq/default", "ureq/json", "ureq/serde_json", "serde", "serde_json"]
 schema = [
   "schemars",
   "serde_json",
@@ -61,4 +62,3 @@ schema = [
   "biome_diagnostics",
 ]
 website = ["schema", "biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]
-license = ["ureq/default", "ureq/json", "ureq/serde_json", "serde", "serde_json"]

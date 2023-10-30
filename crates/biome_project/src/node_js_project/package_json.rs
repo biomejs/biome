@@ -23,9 +23,7 @@ impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
-        let deserialized = deserialize_from_json_ast::<PackageJson>(root);
-
-        deserialized
+        deserialize_from_json_ast::<PackageJson>(root)
     }
 }
 
@@ -61,7 +59,7 @@ impl JsonDeserialize for PackageJson {
 }
 
 impl VisitNode<JsonLanguage> for PackageJson {
-    fn visit_member_name(
+    fn visit_value(
         &mut self,
         _node: &JsonSyntaxNode,
         _diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -77,8 +75,9 @@ impl VisitNode<JsonLanguage> for PackageJson {
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "version" => {
                 let version = self.map_to_string(&value, name_text, diagnostics)?;
@@ -118,7 +117,7 @@ impl VisitNode<JsonLanguage> for PackageJson {
 }
 
 impl VisitNode<JsonLanguage> for Dependencies {
-    fn visit_member_name(
+    fn visit_value(
         &mut self,
         _node: &SyntaxNode<JsonLanguage>,
         _diagnostics: &mut Vec<DeserializationDiagnostic>,
@@ -131,8 +130,9 @@ impl VisitNode<JsonLanguage> for Dependencies {
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
 
         let value = JsonStringValue::cast_ref(value.syntax()).or_else(|| {
             diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(

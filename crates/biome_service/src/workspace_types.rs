@@ -381,9 +381,8 @@ pub fn generate_type<'a>(
             module.push((current_module, description));
         } else {
             // If the schema for this type is not an object, emit it as a type alias
-            dbg!(&schema);
             let (ts_type, optional, description) = schema_object_type(queue, root_schema, schema);
-            eprintln!("{:?}", description);
+
             assert!(!optional, "optional nested types are not supported");
 
             let current_module = AnyJsDeclaration::from(

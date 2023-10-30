@@ -126,7 +126,7 @@ fn create_data(license_list: LicenseList) -> io::Result<TokenStream> {
             release_date: #release_date,
         };
 
-        pub const LICENSES: &'static [&'static Licence] = &[
+        pub const LICENSES: &[&Licence] = &[
             #( #list ),*
         ];
 
