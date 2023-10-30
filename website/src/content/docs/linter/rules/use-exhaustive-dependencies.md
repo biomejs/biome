@@ -23,14 +23,11 @@ The rule will inspect the following **known** hooks:
 - `useMemo`
 - `useImperativeHandle`
 - `useState`
-- `useContext`
 - `useReducer`
 - `useRef`
 - `useDebugValue`
 - `useDeferredValue`
 - `useTransition`
-- `useId`
-- `useSyncExternalStore`
 
 If you want to add more hooks to the rule, check the [#options](options).
 

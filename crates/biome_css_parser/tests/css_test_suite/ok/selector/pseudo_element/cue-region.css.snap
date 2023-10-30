@@ -62,7 +62,7 @@ CssRoot {
                                     value_token: IDENT@28..38 "cue-region" [] [],
                                 },
                                 l_paren_token: L_PAREN@38..39 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
@@ -103,7 +103,7 @@ CssRoot {
                                     value_token: IDENT@58..68 "cue-region" [] [],
                                 },
                                 l_paren_token: L_PAREN@68..72 "(" [] [Whitespace("   ")],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [

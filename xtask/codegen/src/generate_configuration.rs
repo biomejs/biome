@@ -265,30 +265,22 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let visitors = quote! {
         use crate::configuration::linter::*;
         use crate::Rules;
-        use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+        use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
         use biome_deserialize::{DeserializationDiagnostic, VisitNode};
         use biome_json_syntax::JsonLanguage;
         use biome_rowan::SyntaxNode;
         use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 
         impl VisitNode<JsonLanguage> for Rules {
-            fn visit_member_name(
-                &mut self,
-                node: &SyntaxNode<JsonLanguage>,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<()> {
-                has_only_known_keys(node, &[#( #group_name_list ),*], diagnostics)
-            }
-
             fn visit_map(
                 &mut self,
                 key: &SyntaxNode<JsonLanguage>,
                 value: &SyntaxNode<JsonLanguage>,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<()> {
-                let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-
-                let name_text = name.text();
+                let (name, value) = self.get_key_and_value(key, value)?;
+                let name_text = name.inner_string_text().ok()?;
+                let name_text = name_text.text();
                 match name_text {
                     "recommended" => {
                         self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -300,7 +292,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
                     #( #rule_visitor_call )*
 
-                    _ => {}
+                    _ => {
+                        report_unknown_map_key(&name, &[#( #group_name_list ),*], diagnostics);
+                    }
                 }
 
                 Some(())
@@ -611,23 +605,15 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
 
     quote! {
         impl VisitNode<JsonLanguage> for #group_struct_name {
-            fn visit_member_name(
-                &mut self,
-                node: &SyntaxNode<JsonLanguage>,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<()> {
-                has_only_known_keys(node, &[#( #group_rules ),*], diagnostics)
-            }
-
             fn visit_map(
                 &mut self,
                 key: &SyntaxNode<JsonLanguage>,
                 value: &SyntaxNode<JsonLanguage>,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<()> {
-                let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-
-                let name_text = name.text();
+                let (name, value) = self.get_key_and_value(key, value)?;
+                let name_text = name.inner_string_text().ok()?;
+                let name_text = name_text.text();
                 match name_text {
                     "recommended" => {
                         self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
@@ -638,7 +624,9 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
                     }
 
                     #( #visitor_rule_line ),*,
-                    _ => {}
+                    _ => {
+                        report_unknown_map_key(&name, &[#( #group_rules ),*], diagnostics);
+                    }
                 }
 
                 Some(())

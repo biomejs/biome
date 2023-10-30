@@ -2,29 +2,26 @@ use crate::configuration::linter::{RulePlainConfiguration, RuleWithOptions};
 use crate::configuration::LinterConfiguration;
 use crate::{RuleConfiguration, Rules};
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_js_analyze::options::PossibleOptions;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue, JsonSyntaxNode};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue, JsonStringValue};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode};
 
-impl VisitNode<JsonLanguage> for LinterConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, LinterConfiguration::KNOWN_KEYS, diagnostics)
-    }
+impl LinterConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] = &["enabled", "rules", "include", "ignore"];
+}
 
+impl VisitNode<JsonLanguage> for LinterConfiguration {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "ignore" => {
                 self.ignore = self
@@ -46,7 +43,9 @@ impl VisitNode<JsonLanguage> for LinterConfiguration {
                     self.rules = Some(rules);
                 }
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
         Some(())
     }
@@ -84,21 +83,13 @@ impl RuleConfiguration {
 }
 
 impl VisitNode<JsonLanguage> for RuleConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, &["level", "options"], diagnostics)
-    }
-
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         if let Self::Plain(plain) = self {
-            plain.visit_member_value(node, diagnostics)?;
+            plain.visit_value(node, diagnostics)?;
         }
         Some(())
     }
@@ -116,49 +107,52 @@ impl VisitNode<JsonLanguage> for RuleConfiguration {
     }
 }
 
+impl RulePlainConfiguration {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["error", "warn", "off"];
+}
+
 impl VisitNode<JsonLanguage> for RulePlainConfiguration {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, RulePlainConfiguration::KNOWN_KEYS, diagnostics)?;
+        let node = JsonStringValue::cast_ref(node)?;
         if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
             *self = value;
+        } else {
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }
 }
 
-impl VisitNode<JsonLanguage> for RuleWithOptions {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, &["level", "options"], diagnostics)
-    }
+impl RuleWithOptions {
+    const ALLOWED_KEYS: &'static [&'static str] = &["level", "options"];
+}
 
+impl VisitNode<JsonLanguage> for RuleWithOptions {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-
-        let name_text = name.text();
-
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "level" => {
-                self.level.visit_member_value(value.syntax(), diagnostics)?;
+                self.level.visit_value(value.syntax(), diagnostics)?;
             }
             "options" => {
                 let mut possible_options = self.options.take()?;
                 possible_options.map_to_object(&value, name_text, diagnostics);
                 self.options = Some(possible_options);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
         Some(())
     }

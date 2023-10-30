@@ -20,10 +20,6 @@ pub struct JsonConfiguration {
     pub formatter: Option<JsonFormatter>,
 }
 
-impl JsonConfiguration {
-    pub const KNOWN_KEYS: &'static [&'static str] = &["parser", "formatter"];
-}
-
 impl MergeWith<JsonConfiguration> for JsonConfiguration {
     fn merge_with(&mut self, other: JsonConfiguration) {
         if let Some(other_parser) = other.parser {
@@ -59,11 +55,6 @@ pub struct JsonParser {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing trailing commas in `.json` files
     pub allow_trailing_commas: Option<bool>,
-}
-
-impl JsonParser {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
-        &["allowComments", "allowTrailingCommas"];
 }
 
 impl MergeWith<JsonParser> for JsonParser {
@@ -118,16 +109,6 @@ pub struct JsonFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
-}
-
-impl JsonFormatter {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
-        "enabled",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-    ];
 }
 
 impl MergeWith<JsonFormatter> for JsonFormatter {

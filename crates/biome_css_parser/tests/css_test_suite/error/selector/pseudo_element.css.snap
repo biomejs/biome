@@ -56,7 +56,7 @@ CssRoot {
                                     value_token: IDENT@9..13 "mark" [] [],
                                 },
                                 l_paren_token: L_PAREN@13..15 "(" [] [Whitespace(" ")],
-                                parameter: missing (required),
+                                selector: missing (required),
                                 r_paren_token: missing (required),
                             },
                         },
@@ -82,7 +82,7 @@ CssRoot {
                                     value_token: IDENT@21..25 "mark" [] [],
                                 },
                                 l_paren_token: L_PAREN@25..27 "(" [] [Whitespace(" ")],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -117,7 +117,7 @@ CssRoot {
                                         value_token: IDENT@37..41 "mark" [] [],
                                     },
                                     l_paren_token: L_PAREN@41..43 "(" [] [Whitespace(" ")],
-                                    parameter: missing (required),
+                                    selector: missing (required),
                                     r_paren_token: missing (required),
                                 },
                             },

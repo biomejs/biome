@@ -1446,10 +1446,15 @@ impl<'src> JsLexer<'src> {
     #[inline]
     fn flag_err(&self, flag: char) -> ParseDiagnostic {
         ParseDiagnostic::new(
-            format!("duplicate flag `{}`", flag),
+            format!("Duplicate flag `{}`.", flag),
             self.position..self.position + 1,
         )
-        .hint("this flag was already used")
+        .hint("This flag was already used.")
+    }
+    #[inline]
+    fn flag_uv_err(&self) -> ParseDiagnostic {
+        ParseDiagnostic::new("Invalid regex flag.", self.position..self.position + 1)
+            .hint("The 'u' and 'v' regular expression flags cannot be enabled at the same time.")
     }
     #[inline]
     #[allow(clippy::many_single_char_names)]
@@ -1517,6 +1522,9 @@ impl<'src> JsLexer<'src> {
                                     flag |= RegexFlag::S;
                                 }
                                 b'u' => {
+                                    if flag.contains(RegexFlag::V) {
+                                        self.diagnostics.push(self.flag_uv_err());
+                                    }
                                     if flag.contains(RegexFlag::U) {
                                         self.diagnostics.push(self.flag_err('u'));
                                     }
@@ -1535,6 +1543,9 @@ impl<'src> JsLexer<'src> {
                                     flag |= RegexFlag::D;
                                 }
                                 b'v' => {
+                                    if flag.contains(RegexFlag::U) {
+                                        self.diagnostics.push(self.flag_uv_err());
+                                    }
                                     if flag.contains(RegexFlag::V) {
                                         self.diagnostics.push(self.flag_err('v'));
                                     }
@@ -1543,10 +1554,10 @@ impl<'src> JsLexer<'src> {
                                 _ if self.cur_ident_part().is_some() => {
                                     self.diagnostics.push(
                                         ParseDiagnostic::new(
-                                            "invalid regex flag",
+                                            "Invalid regex flag",
                                             chr_start..self.position + 1,
                                         )
-                                        .hint("this is not a valid regex flag"),
+                                        .hint("This is not a valid regex flag."),
                                     );
                                 }
                                 _ => break,

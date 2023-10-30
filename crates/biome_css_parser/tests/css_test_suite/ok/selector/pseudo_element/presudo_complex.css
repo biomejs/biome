@@ -1,0 +1,6 @@
+a::after div {}
+video::cue div {}
+video::cue(b) div {}
+::highlight(sample) div {}
+::part(active) div {}
+::cue(b ::part(active)) {}
