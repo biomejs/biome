@@ -229,7 +229,7 @@ fn eat_members_separator(p: &mut JsParser, parent: MemberParent) {
         if semi_colon {
             let err = p
                 .err_builder("';' expected'", p.cur_range())
-                .hint("An explicit or implicit semicolon is expected here...");
+                .with_hint("An explicit or implicit semicolon is expected here...");
             p.error(err);
         } else {
             let mut tokens = vec![];

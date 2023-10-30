@@ -230,7 +230,7 @@ pub(crate) fn invalid_assignment_error(p: &JsParser, range: TextRange) -> ParseD
         format!("Invalid assignment to `{}`", p.text(range.as_range()),),
         range,
     )
-    .hint("This expression cannot be assigned to")
+    .with_hint("This expression cannot be assigned to")
 }
 
 pub(crate) fn modifier_already_seen(
@@ -284,11 +284,12 @@ pub(crate) fn invalid_decorator_error(p: &JsParser, range: TextRange) -> ParseDi
 }
 
 pub(crate) fn parameter_decorators_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    decorators_not_allowed(p, range).hint("You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.")
+    decorators_not_allowed(p, range).with_hint("You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.")
 }
 
 pub(crate) fn decorators_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Decorators are not valid here.", range).hint(
+    p.err_builder("Decorators are not valid here.", range)
+        .with_hint(
         "Decorators are only valid on class declarations, class expressions, and class methods.",
     )
 }

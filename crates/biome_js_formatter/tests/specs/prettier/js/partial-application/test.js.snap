@@ -54,14 +54,14 @@ let newScore = player.score
 ```
 test.js:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
   > 1 │ const addOne = add(1, ?); // apply from the left
       │                       ^
     2 │ addOne(2); // 3
     3 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ const addOne = add(1, ?); // apply from the left
       │                       ^
@@ -70,7 +70,7 @@ test.js:1:23 parse ━━━━━━━━━━━━━━━━━━━━�
   
 test.js:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, 10'
+  × Expected an expression but instead found '?, 10'.
   
     2 │ addOne(2); // 3
     3 │ 
@@ -79,7 +79,7 @@ test.js:4:20 parse ━━━━━━━━━━━━━━━━━━━━�
     5 │ addTen(2); // 12
     6 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     2 │ addOne(2); // 3
     3 │ 
@@ -103,7 +103,7 @@ test.js:9:4 parse ━━━━━━━━━━━━━━━━━━━━�
   
 test.js:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
      7 │ // with pipeline
      8 │ let newScore = player.score
@@ -112,7 +112,7 @@ test.js:9:13 parse ━━━━━━━━━━━━━━━━━━━━�
     10 │   |> clamp(0, 100, ?); // shallow stack, the pipe to `clamp` is the same frame as the pipe to `add`.
     11 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
      7 │ // with pipeline
      8 │ let newScore = player.score
@@ -135,7 +135,7 @@ test.js:10:4 parse ━━━━━━━━━━━━━━━━━━━━�
   
 test.js:10:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
      8 │ let newScore = player.score
      9 │   |> add(7, ?)
@@ -143,7 +143,7 @@ test.js:10:20 parse ━━━━━━━━━━━━━━━━━━━━
        │                    ^
     11 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
      8 │ let newScore = player.score
      9 │   |> add(7, ?)

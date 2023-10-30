@@ -647,7 +647,7 @@ impl<'src> JsLexer<'src> {
                     "out of bounds codepoint for unicode codepoint escape sequence",
                     start..self.position,
                 )
-                .hint("Codepoints range from 0 to 0x10FFFF (1114111)");
+                .with_hint("Codepoints range from 0 to 0x10FFFF (1114111)");
                 self.diagnostics.push(err);
                 Err(())
             }
@@ -716,7 +716,7 @@ impl<'src> JsLexer<'src> {
             "invalid digits after hex escape sequence",
             (self.position - 1)..(self.position + 1),
         )
-        .hint("Expected 2 hex digits following this");
+        .with_hint("Expected 2 hex digits following this");
 
         for _ in 0..2 {
             match self.next_byte_bounded() {
@@ -769,10 +769,10 @@ impl<'src> JsLexer<'src> {
                 }
             }
         } else {
-            self.diagnostics.push(
-                ParseDiagnostic::new("", cur..cur + 1)
-                    .hint("expected an escape sequence following a backslash, but found none"),
-            );
+            self.diagnostics
+                .push(ParseDiagnostic::new("", cur..cur + 1).with_hint(
+                    "expected an escape sequence following a backslash, but found none",
+                ));
             false
         }
     }
@@ -1334,7 +1334,7 @@ impl<'src> JsLexer<'src> {
                 "numbers cannot be followed by identifiers directly after",
                 err_start..self.position,
             )
-            .hint("an identifier cannot appear here");
+            .with_hint("an identifier cannot appear here");
 
             self.diagnostics.push(err);
             JsSyntaxKind::ERROR_TOKEN
@@ -1449,7 +1449,7 @@ impl<'src> JsLexer<'src> {
             format!("Duplicate flag `{}`.", flag),
             self.position..self.position + 1,
         )
-        .hint("This flag was already used.")
+        .with_hint("This flag was already used.")
     }
     #[inline]
     fn flag_uv_err(&self) -> ParseDiagnostic {
@@ -1557,7 +1557,7 @@ impl<'src> JsLexer<'src> {
                                             "Invalid regex flag",
                                             chr_start..self.position + 1,
                                         )
-                                        .hint("This is not a valid regex flag."),
+                                        .with_hint("This is not a valid regex flag."),
                                     );
                                 }
                                 _ => break,
@@ -1578,7 +1578,7 @@ impl<'src> JsLexer<'src> {
                                 "expected a character after a regex escape, but found none",
                                 self.position..self.position + 1,
                             )
-                            .hint("expected a character following this"),
+                            .with_hint("expected a character following this"),
                         );
 
                         return JsSyntaxKind::JS_REGEX_LITERAL;
@@ -1863,7 +1863,7 @@ impl<'src> JsLexer<'src> {
                                 self.resolve_identifier(chr)
                             } else {
                                 let err = ParseDiagnostic::new(  "unexpected unicode escape",
-                                    start..self.position).hint("this escape is unexpected, as it does not designate the start of an identifier");
+                                    start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
                                 self.diagnostics.push(err);
                                 self.next_byte();
                                 JsSyntaxKind::ERROR_TOKEN

@@ -270,7 +270,7 @@ fn validate_rest_pattern(
     } else {
         p.error(
             p.err_builder("rest element must be the last element", rest.range(p),)
-                .hint(
+                .with_hint(
                     format!(
                     "Move the rest element to the end of the pattern, right before the closing '{}'",
                     end_token.to_string().unwrap(),

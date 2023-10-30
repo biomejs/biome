@@ -76,7 +76,7 @@ pipeline-operator-hack.js:5:25 parse ━━━━━━━━━━━━━━�
   
 pipeline-operator-hack.js:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     4 │ return list
   > 5 │  |> take(prefix.length, %)
@@ -84,7 +84,7 @@ pipeline-operator-hack.js:5:26 parse ━━━━━━━━━━━━━━�
     6 │  |> equals(%, prefix);
     7 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ return list
   > 5 │  |> take(prefix.length, %)
@@ -120,7 +120,7 @@ pipeline-operator-hack.js:6:12 parse ━━━━━━━━━━━━━━�
   
 pipeline-operator-hack.js:6:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ','
+  × Expected an expression but instead found ','.
   
     4 │ return list
     5 │  |> take(prefix.length, %)
@@ -129,7 +129,7 @@ pipeline-operator-hack.js:6:13 parse ━━━━━━━━━━━━━━�
     7 │ 
     8 │ // (The % token isn't final; it might instead be @ or ? or #.)
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ return list
     5 │  |> take(prefix.length, %)

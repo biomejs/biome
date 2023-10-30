@@ -81,7 +81,7 @@ export { undefinedExport };
 ```
 test.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class, a function, or a variable declaration but instead found 'a'
+  × Expected a class, a function, or a variable declaration but instead found 'a'.
   
     1 │ export { value1, value2 as value2_renamed, value3, value4 as value4_renamed, value5 } from "exports";
     2 │ 
@@ -90,7 +90,7 @@ test.js:3:8 parse ━━━━━━━━━━━━━━━━━━━━�
     4 │ 
     5 │ export * as ns from "mod";
   
-  i Expected a class, a function, or a variable declaration here
+  i Expected a class, a function, or a variable declaration here.
   
     1 │ export { value1, value2 as value2_renamed, value3, value4 as value4_renamed, value5 } from "exports";
     2 │ 

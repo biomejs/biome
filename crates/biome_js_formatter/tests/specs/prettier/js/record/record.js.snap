@@ -83,14 +83,14 @@ assert(record1.d?.a === undefined);
 ```
 record.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
   > 1 │ const record1 = #{
       │                  ^
     2 │     a: 1,
     3 │     b: 2,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
   > 1 │ const record1 = #{
       │                  ^
@@ -161,7 +161,7 @@ record.js:3:6 parse ━━━━━━━━━━━━━━━━━━━━
   
 record.js:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     5 │ };
     6 │ 
@@ -170,7 +170,7 @@ record.js:7:18 parse ━━━━━━━━━━━━━━━━━━━�
     8 │ 
     9 │ assert(record1.a === 1);
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     5 │ };
     6 │ 
@@ -221,7 +221,7 @@ record.js:7:18 parse ━━━━━━━━━━━━━━━━━━━�
   
 record.js:7:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '...record1, b: 5'
+  × Expected an expression but instead found '...record1, b: 5'.
   
     5 │ };
     6 │ 
@@ -230,7 +230,7 @@ record.js:7:19 parse ━━━━━━━━━━━━━━━━━━━�
     8 │ 
     9 │ assert(record1.a === 1);
   
-  i Expected an expression here
+  i Expected an expression here.
   
     5 │ };
     6 │ 
@@ -241,7 +241,7 @@ record.js:7:19 parse ━━━━━━━━━━━━━━━━━━━�
   
 record.js:12:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     10 │ assert(record1["a"] === 1);
     11 │ assert(record1 !== record2);
@@ -250,7 +250,7 @@ record.js:12:21 parse ━━━━━━━━━━━━━━━━━━━�
     13 │ assert(record1?.a === 1);
     14 │ assert(record1?.d === undefined);
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     10 │ assert(record1["a"] === 1);
     11 │ assert(record1 !== record2);

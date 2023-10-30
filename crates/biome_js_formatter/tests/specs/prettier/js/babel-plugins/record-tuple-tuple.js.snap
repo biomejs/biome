@@ -33,13 +33,13 @@ const tuple1 = #;
 ```
 record-tuple-tuple.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
   > 1 │ const tuple1 = #[1, 2, 3];
       │                 ^
     2 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
   > 1 │ const tuple1 = #[1, 2, 3];
       │                 ^

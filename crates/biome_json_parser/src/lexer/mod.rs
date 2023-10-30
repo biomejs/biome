@@ -147,7 +147,7 @@ impl<'src> Lexer<'src> {
                                 "The JSON standard only allows tabs, whitespace, carriage return and line feed whitespace.",
                                 start..self.text_position(),
                             )
-                            .hint("Use a regular whitespace character instead."),
+                            .with_hint("Use a regular whitespace character instead."),
                         )
                     }
                 },
@@ -447,7 +447,7 @@ impl<'src> Lexer<'src> {
                     }
                     InvalidNumberReason::MissingFraction => {
                         ParseDiagnostic::new( "Missing fraction", position..position + TextSize::from(1))
-                            .hint("Remove the `.`")
+                            .with_hint("Remove the `.`")
                     }
                 };
 
@@ -514,7 +514,7 @@ impl<'src> Lexer<'src> {
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
+                                        .with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }
@@ -560,7 +560,7 @@ impl<'src> Lexer<'src> {
                             ),
                             self.text_position()..self.text_position() + TextSize::from(1),
                         )
-                        .hint(format!("Use the escape sequence '\\u{chr:04x}' instead.")),
+                        .with_hint(format!("Use the escape sequence '\\u{chr:04x}' instead.")),
                     );
                     state = LexStringState::InvalidEscapeSequence;
                 }
@@ -577,7 +577,7 @@ impl<'src> Lexer<'src> {
                         "JSON standard does not allow single quoted strings",
                         literal_range,
                     )
-                    .hint("Use double quotes to escape the string."),
+                    .with_hint("Use double quotes to escape the string."),
                 );
                 ERROR_TOKEN
             }
@@ -624,7 +624,7 @@ impl<'src> Lexer<'src> {
                         start..self.text_position(),
                     )
                     .detail(self.text_position()..self.text_position().add(char.text_len()), "Non hexadecimal number")
-                    .hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
+                    .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
                 }
                 None => {
                     // Reached the end of the file before processing 4 hex digits
@@ -637,7 +637,7 @@ impl<'src> Lexer<'src> {
                         self.text_position()..self.text_position(),
                         "reached the end of the file",
                     )
-                    .hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
+                    .with_hint("A unicode escape sequence must consist of 4 hexadecimal numbers: `\\uXXXX`, e.g. `\\u002F' for '/'."));
                 }
             }
         }

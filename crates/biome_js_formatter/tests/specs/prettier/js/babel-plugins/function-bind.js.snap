@@ -88,7 +88,7 @@ obj.func.call(obj, val)
 ```
 function-bind.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ':'
+  × Expected a statement but instead found ':'.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-function-bind
     2 │ 
@@ -97,7 +97,7 @@ function-bind.js:3:5 parse ━━━━━━━━━━━━━━━━━�
     4 │ // is equivalent to:
     5 │ func.bind(obj)
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-function-bind
     2 │ 

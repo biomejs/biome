@@ -583,7 +583,7 @@ fn parse_binary_or_logical_expression_recursive(
                     ),
                     op_range,
                 )
-                .hint("This operator requires a left hand side value");
+                .with_hint("This operator requires a left hand side value");
             p.error(err);
         }
 
@@ -827,7 +827,7 @@ fn parse_new_expr(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax 
                     format!("'{name}' is not a valid meta-property for keyword 'new'."),
                     identifier_range,
                 )
-                .hint("Did you mean 'target'?");
+                .with_hint("Did you mean 'target'?");
 
             p.error(error);
             p.bump_remap(T![ident]);
@@ -852,7 +852,7 @@ fn parse_new_expr(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax 
         if p.at(T![?.]) {
             let error = p
                 .err_builder("Invalid optional chain from new expression.", p.cur_range())
-                .hint(format!("Did you mean to call '{}()'?", lhs.text(p)));
+                .with_hint(format!("Did you mean to call '{}()'?", lhs.text(p)));
 
             p.error(error);
         }
@@ -960,7 +960,7 @@ fn parse_static_member_expression(
         p.error(p.err_builder(
             "An instantiation expression cannot be followed by a property access.",
             lhs.range(p),
-        ).hint("You can either wrap the instantiation expression in parentheses, or delete the type arguments."));
+        ).with_hint("You can either wrap the instantiation expression in parentheses, or delete the type arguments."));
     }
 
     let m = lhs.precede(p);
@@ -990,7 +990,7 @@ pub(super) fn parse_private_name(p: &mut JsParser) -> ParsedSyntax {
                 "Unexpected space or comment between `#` and identifier",
                 hash_end..p.cur_range().start(),
             )
-            .hint("remove the space here"),
+            .with_hint("remove the space here"),
         );
         Present(m.complete(p, JS_BOGUS))
     } else {
@@ -1168,7 +1168,7 @@ fn parse_parenthesized_expression(p: &mut JsParser) -> ParsedSyntax {
                 "Parenthesized expression didnt contain anything",
                 p.cur_range(),
             )
-            .hint("Expected an expression here"),
+            .with_hint("Expected an expression here"),
         );
     } else {
         let first = parse_assignment_expression_or_higher(p, ExpressionContext::default());

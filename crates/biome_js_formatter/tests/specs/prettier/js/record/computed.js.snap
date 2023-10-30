@@ -60,7 +60,7 @@ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
 ```
 computed.js:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ const key = "a";
   > 2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -68,7 +68,7 @@ computed.js:2:9 parse ━━━━━━━━━━━━━━━━━━━�
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ const key = "a";
   > 2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -100,7 +100,7 @@ computed.js:2:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ const key = "a";
   > 2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -108,7 +108,7 @@ computed.js:2:27 parse ━━━━━━━━━━━━━━━━━━━
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ const key = "a";
   > 2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -140,7 +140,7 @@ computed.js:2:27 parse ━━━━━━━━━━━━━━━━━━━
   
 computed.js:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ const key = "a";
     2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -149,7 +149,7 @@ computed.js:3:9 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ 
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ const key = "a";
     2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -184,7 +184,7 @@ computed.js:3:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:3:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ const key = "a";
     2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -193,7 +193,7 @@ computed.js:3:41 parse ━━━━━━━━━━━━━━━━━━━
     4 │ 
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ const key = "a";
     2 │ assert(#{ [key]: 1 } === #{ a: 1 })
@@ -228,7 +228,7 @@ computed.js:3:41 parse ━━━━━━━━━━━━━━━━━━━
   
 computed.js:5:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
@@ -237,7 +237,7 @@ computed.js:5:9 parse ━━━━━━━━━━━━━━━━━━━�
     6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
     7 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
@@ -272,7 +272,7 @@ computed.js:5:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:5:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
@@ -281,7 +281,7 @@ computed.js:5:28 parse ━━━━━━━━━━━━━━━━━━━
     6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
     7 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     3 │ assert(#{ [key.toUpperCase()]: 1 } === #{ A: 1 })
     4 │ 
@@ -316,7 +316,7 @@ computed.js:5:28 parse ━━━━━━━━━━━━━━━━━━━
   
 computed.js:6:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   > 6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
@@ -324,7 +324,7 @@ computed.js:6:9 parse ━━━━━━━━━━━━━━━━━━━�
     7 │ 
     8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   > 6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
@@ -356,7 +356,7 @@ computed.js:6:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:6:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   > 6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
@@ -364,7 +364,7 @@ computed.js:6:28 parse ━━━━━━━━━━━━━━━━━━━
     7 │ 
     8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     5 │ assert(#{ [true]: 1 } === #{ true: 1 })
   > 6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
@@ -396,7 +396,7 @@ computed.js:6:28 parse ━━━━━━━━━━━━━━━━━━━
   
 computed.js:8:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
      6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
      7 │ 
@@ -405,7 +405,7 @@ computed.js:8:9 parse ━━━━━━━━━━━━━━━━━━━�
      9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
     10 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
      7 │ 
@@ -440,7 +440,7 @@ computed.js:8:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:8:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
      6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
      7 │ 
@@ -449,7 +449,7 @@ computed.js:8:33 parse ━━━━━━━━━━━━━━━━━━━
      9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
     10 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      6 │ assert(#{ [true]: 1 } === #{ ["true"]: 1 })
      7 │ 
@@ -484,14 +484,14 @@ computed.js:8:33 parse ━━━━━━━━━━━━━━━━━━━
   
 computed.js:9:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
      8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
    > 9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
        │         ^
     10 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
    > 9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
@@ -520,14 +520,14 @@ computed.js:9:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 computed.js:9:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
      8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
    > 9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })
        │                                 ^
     10 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      8 │ assert(#{ [1 + 1]: "two" } === #{ 2: "two" })
    > 9 │ assert(#{ [9 + 1]: "ten" } === #{ ["10"]: "ten" })

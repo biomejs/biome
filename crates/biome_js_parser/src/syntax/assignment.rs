@@ -487,7 +487,7 @@ impl RewriteParseEvents for ReparseAssignment {
                             format!("Invalid assignment to `{}`", completed.text(p)),
                             range,
                         )
-                        .hint("This expression cannot be assigned to"),
+                        .with_hint("This expression cannot be assigned to"),
                     );
                 }
                 _ => {}

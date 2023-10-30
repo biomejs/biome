@@ -38,7 +38,7 @@ const durabilityMetricsSelectable: Immutable.OrderedSet<
 ```
 issue-5370.ts:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     1 │ const durabilityMetricsSelectable: Immutable.OrderedSet<
     2 │   SomeReportingMetric,
@@ -46,7 +46,7 @@ issue-5370.ts:3:1 parse ━━━━━━━━━━━━━━━━━━�
       │ ^
     4 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     1 │ const durabilityMetricsSelectable: Immutable.OrderedSet<
     2 │   SomeReportingMetric,

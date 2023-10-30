@@ -235,7 +235,7 @@ impl<'src> CssLexer<'src> {
                                 "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
                                 start..self.text_position(),
                             )
-                            .hint("Use a regular whitespace character instead."),
+                            .with_hint("Use a regular whitespace character instead."),
                         )
                     }
                 },

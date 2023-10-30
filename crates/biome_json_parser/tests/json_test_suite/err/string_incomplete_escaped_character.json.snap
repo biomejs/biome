@@ -48,12 +48,12 @@ JsonRoot {
 ```
 string_incomplete_escaped_character.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '"\u00A"'
+  × Expected an array, an object, or a literal but instead found '"\u00A"'.
   
   > 1 │ ["\u00A"]
       │  ^^^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ["\u00A"]
       │  ^^^^^^^

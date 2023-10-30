@@ -173,7 +173,7 @@ pub(super) fn parse_class_declaration(
                 "Classes can only be declared at top level or inside a block",
                 class.range(p),
             )
-            .hint("wrap the class in a block statement"),
+            .with_hint("wrap the class in a block statement"),
         );
         class.change_to_bogus(p)
     }

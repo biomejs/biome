@@ -58,7 +58,7 @@ testObjLiteral =  <PermissionsChecker<any> | undefined>
 ```
 tuple-and-record.ts:2:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     1 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)[receiverType];
   > 2 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
@@ -66,7 +66,7 @@ tuple-and-record.ts:2:75 parse ━━━━━━━━━━━━━━━━�
     3 │ 
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)[receiverType];
   > 2 │ breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
@@ -98,14 +98,14 @@ tuple-and-record.ts:2:75 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.ts:5:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '#'
+  × Expected an expression but instead found '#'.
   
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
       │                                                        ^
     6 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
@@ -114,14 +114,14 @@ tuple-and-record.ts:5:56 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.ts:5:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
       │                                                         ^
     6 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ testObjLiteral =  <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
   > 5 │ testObjLiteral =  <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };

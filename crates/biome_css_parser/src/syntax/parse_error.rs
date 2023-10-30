@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use biome_parser::diagnostic::{expected_any, expected_node};
+use biome_parser::diagnostic::{expect_one_of, expected_any, expected_node};
 use biome_parser::prelude::{ParseDiagnostic, ToDiagnostic};
 use biome_rowan::TextRange;
 
@@ -37,7 +37,7 @@ pub(crate) fn expect_any_attribute_modifier(p: &CssParser, range: TextRange) -> 
 }
 
 pub(crate) fn expect_any_pseudo_element(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(
+    expect_one_of(
         &[
             "after",
             "backdrop",

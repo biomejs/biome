@@ -63,14 +63,14 @@ const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<
 ```
 issue-13817.ts:1:74 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
   > 1 │ const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> =
       │                                                                          ^
     2 │   arg => null;
     3 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
   > 1 │ const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> =
       │                                                                          ^
@@ -79,7 +79,7 @@ issue-13817.ts:1:74 parse ━━━━━━━━━━━━━━━━━━
   
 issue-13817.ts:4:87 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     2 │   arg => null;
     3 │ 
@@ -88,7 +88,7 @@ issue-13817.ts:4:87 parse ━━━━━━━━━━━━━━━━━━
     5 │   arg => null;
     6 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     2 │   arg => null;
     3 │ 
@@ -99,7 +99,7 @@ issue-13817.ts:4:87 parse ━━━━━━━━━━━━━━━━━━
   
 issue-13817.ts:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
      8 │ const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<
      9 │   // comment
@@ -108,7 +108,7 @@ issue-13817.ts:10:1 parse ━━━━━━━━━━━━━━━━━━
     11 │   arg => null;
     12 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
      8 │ const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<
      9 │   // comment

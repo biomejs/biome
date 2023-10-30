@@ -95,7 +95,7 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                     ),
                         identifier.range(p),
                     )
-                    .hint("Rename the let identifier here");
+                    .with_hint("Rename the let identifier here");
 
                 p.error(err);
                 identifier.change_to_bogus(p);
@@ -320,7 +320,7 @@ impl ParseObjectPattern for ObjectBindingPattern {
                     let inner_range = inner.range(p);
                     // Don't add multiple errors
                     if inner.kind(p) != JS_BOGUS_BINDING {
-                        p.error(p.err_builder("Expected identifier binding", inner_range,).hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
+                        p.error(p.err_builder("Expected identifier binding", inner_range,).with_hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
                     }
 
                     inner.change_kind(p, JS_BOGUS_BINDING);
