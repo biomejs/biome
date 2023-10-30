@@ -17,10 +17,6 @@ pub const ROME_JSON: &str = "rome.json";
 pub const BIOME_JSON: &str = "biome.json";
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
-    fn get_configuration_base_path(&self) -> Option<PathBuf> {
-        None
-    }
-
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>>;
 

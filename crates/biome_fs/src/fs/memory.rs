@@ -19,7 +19,6 @@ pub struct MemoryFileSystem {
     files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
-    configuration_base_path: AssertUnwindSafe<RwLock<Option<PathBuf>>>,
 }
 
 impl Default for MemoryFileSystem {
@@ -28,7 +27,6 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
-            configuration_base_path: AssertUnwindSafe::default(),
         }
     }
 }
@@ -95,12 +93,6 @@ impl MemoryFileSystem {
 }
 
 impl FileSystem for MemoryFileSystem {
-    fn get_configuration_base_path(&self) -> Option<PathBuf> {
-        let configuration = self.configuration_base_path.read();
-        let configuration = configuration.as_ref();
-        configuration.cloned()
-    }
-
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         if !self.allow_write
             && (options.create || options.create_new || options.truncate || options.write)
