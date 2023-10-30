@@ -8,6 +8,9 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{registry, Layer};
 
 pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
+    if level == LoggingLevel::None {
+        return;
+    }
     let format = tracing_subscriber::fmt::layer()
         .with_level(true)
         .with_target(false)
@@ -37,7 +40,7 @@ pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
     };
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum LoggingLevel {
     /// No logs should be shown
     #[default]

@@ -18,6 +18,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### Bug fixes
+
+- Bootstrap the logger only when needed. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
