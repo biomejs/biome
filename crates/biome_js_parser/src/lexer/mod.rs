@@ -1453,11 +1453,8 @@ impl<'src> JsLexer<'src> {
     }
     #[inline]
     fn flag_uv_err(&self) -> ParseDiagnostic {
-        ParseDiagnostic::new(
-            "Invalid regex flag.",
-            self.position..self.position + 1,
-        )
-        .hint("The 'u' and 'v' regular expression flags cannot be enabled at the same time.")
+        ParseDiagnostic::new("Invalid regex flag.", self.position..self.position + 1)
+            .hint("The 'u' and 'v' regular expression flags cannot be enabled at the same time.")
     }
     #[inline]
     #[allow(clippy::many_single_char_names)]
