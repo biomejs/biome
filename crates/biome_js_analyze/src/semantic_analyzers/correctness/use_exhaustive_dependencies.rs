@@ -36,14 +36,11 @@ declare_rule! {
     /// - `useMemo`
     /// - `useImperativeHandle`
     /// - `useState`
-    /// - `useContext`
     /// - `useReducer`
     /// - `useRef`
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
-    /// - `useId`
-    /// - `useSyncExternalStore`
     ///
     /// If you want to add more hooks to the rule, check the [#options](options).
     ///
@@ -180,7 +177,6 @@ impl Default for ReactExtensiveDependenciesOptions {
             ("useMemo".to_string(), (0, 1).into()),
             ("useImperativeHandle".to_string(), (1, 2).into()),
             ("useState".to_string(), ReactHookConfiguration::default()),
-            ("useContext".to_string(), ReactHookConfiguration::default()),
             ("useReducer".to_string(), ReactHookConfiguration::default()),
             ("useRef".to_string(), ReactHookConfiguration::default()),
             (
@@ -195,11 +191,6 @@ impl Default for ReactExtensiveDependenciesOptions {
                 "useTransition".to_string(),
                 ReactHookConfiguration::default(),
             ),
-            ("useId".to_string(), ReactHookConfiguration::default()),
-            (
-                "useSyncExternalStore".to_string(),
-                ReactHookConfiguration::default(),
-            ),
         ]);
 
         let stable_config = FxHashSet::from_iter([
@@ -207,9 +198,6 @@ impl Default for ReactExtensiveDependenciesOptions {
             StableReactHookConfiguration::new("useReducer", Some(1)),
             StableReactHookConfiguration::new("useTransition", Some(1)),
             StableReactHookConfiguration::new("useRef", None),
-            StableReactHookConfiguration::new("useContext", None),
-            StableReactHookConfiguration::new("useId", None),
-            StableReactHookConfiguration::new("useSyncExternalStore", None),
         ]);
 
         Self {
