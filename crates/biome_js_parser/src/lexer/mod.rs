@@ -832,8 +832,8 @@ impl<'src> JsLexer<'src> {
                 b'\r' | b'\n' if !jsx_attribute => {
                     let unterminated =
                         ParseDiagnostic::new("unterminated string literal", start..self.position)
-                            .detail(start..self.position, "")
-                            .detail(self.position..self.position + 2, "line breaks here");
+                            .with_detail(start..self.position, "")
+                            .with_detail(self.position..self.position + 2, "line breaks here");
                     self.diagnostics.push(unterminated);
                     return false;
                 }
@@ -853,8 +853,8 @@ impl<'src> JsLexer<'src> {
 
         let unterminated =
             ParseDiagnostic::new("unterminated string literal", self.position..self.position)
-                .detail(self.position..self.position, "input ends here")
-                .detail(start..start + 1, "string literal starts here");
+                .with_detail(self.position..self.position, "input ends here")
+                .with_detail(start..start + 1, "string literal starts here");
         self.diagnostics.push(unterminated);
 
         false
@@ -1408,11 +1408,11 @@ impl<'src> JsLexer<'src> {
                     "unterminated block comment",
                     self.position..self.position + 1,
                 )
-                .detail(
+                .with_detail(
                     self.position..self.position + 1,
                     "... but the file ends here",
                 )
-                .detail(start..start + 2, "A block comment starts here");
+                .with_detail(start..start + 2, "A block comment starts here");
                 self.diagnostics.push(err);
 
                 JsSyntaxKind::COMMENT
@@ -1590,8 +1590,8 @@ impl<'src> JsLexer<'src> {
                             "unterminated regex literal",
                             self.position..self.position,
                         )
-                        .detail(self.position..self.position, "...but the line ends here")
-                        .detail(start..start + 1, "a regex literal starts there..."),
+                        .with_detail(self.position..self.position, "...but the line ends here")
+                        .with_detail(start..start + 1, "a regex literal starts there..."),
                     );
 
                     return JsSyntaxKind::JS_REGEX_LITERAL;
@@ -1607,8 +1607,11 @@ impl<'src> JsLexer<'src> {
                                     "unterminated regex literal",
                                     self.position..self.position,
                                 )
-                                .detail(self.position..self.position, "...but the line ends here")
-                                .detail(start..start + 1, "a regex literal starts there..."),
+                                .with_detail(
+                                    self.position..self.position,
+                                    "...but the line ends here",
+                                )
+                                .with_detail(start..start + 1, "a regex literal starts there..."),
                             );
                             return JsSyntaxKind::JS_REGEX_LITERAL;
                         } else {
@@ -1621,8 +1624,8 @@ impl<'src> JsLexer<'src> {
 
         self.diagnostics.push(
             ParseDiagnostic::new("unterminated regex literal", self.position..self.position)
-                .detail(self.position..self.position, "...but the file ends here")
-                .detail(start..start + 1, "a regex literal starts there..."),
+                .with_detail(self.position..self.position, "...but the file ends here")
+                .with_detail(start..start + 1, "a regex literal starts there..."),
         );
 
         JsSyntaxKind::JS_REGEX_LITERAL

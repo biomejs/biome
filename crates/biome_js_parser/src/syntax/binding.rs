@@ -111,14 +111,14 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                         ),
                         identifier.range(p),
                     )
-                    .detail(
+                    .with_detail(
                         identifier.range(p),
                         format!(
                             "a second declaration of `{}` is not allowed",
                             identifier_name
                         ),
                     )
-                    .detail(
+                    .with_detail(
                         *existing,
                         format!("`{}` is first declared here", identifier_name),
                     );

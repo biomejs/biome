@@ -523,7 +523,7 @@ impl<'src> CssLexer<'src> {
                 WHS if matches!(chr, b'\n' | b'\r') => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .detail(self.position..self.position + 1, "line breaks here");
+                            .with_detail(self.position..self.position + 1, "line breaks here");
 
                     self.diagnostics.push(unterminated);
 
@@ -541,7 +541,7 @@ impl<'src> CssLexer<'src> {
             LexStringState::InString => {
                 let unterminated =
                     ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                        .detail(
+                        .with_detail(
                             self.source.text_len()..self.source.text_len(),
                             "file ends here",
                         );
@@ -823,7 +823,7 @@ impl<'src> CssLexer<'src> {
 
                 let err =
                     ParseDiagnostic::new("Unterminated block comment", start..self.text_position())
-                        .detail(
+                        .with_detail(
                             self.position..self.position + 1,
                             "... but the file ends here",
                         );

@@ -78,8 +78,8 @@ pub(crate) fn ts_accessibility_modifier_already_seen(
     first_range: TextRange,
 ) -> ParseDiagnostic {
     p.err_builder("Accessibility modifier already seen.", second_range)
-        .detail(second_range, "duplicate modifier")
-        .detail(first_range, "first modifier")
+        .with_detail(second_range, "duplicate modifier")
+        .with_detail(first_range, "first modifier")
 }
 
 pub(crate) fn ts_only_syntax_error(

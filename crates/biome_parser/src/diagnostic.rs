@@ -160,8 +160,8 @@ impl ParseDiagnostic {
     ///     result,
     ///     "{}",
     ///     std::str::from_utf8(write.as_slice()).expect("non utf8 in error buffer")
-    /// ).expect("");    ///
-    pub fn detail(mut self, range: impl AsSpan, message: impl Display) -> Self {
+    /// ).expect("");
+    pub fn with_detail(mut self, range: impl AsSpan, message: impl Display) -> Self {
         self.advice.add_detail(message, range.as_span());
         self
     }
@@ -333,7 +333,7 @@ where
                 format!("expected `{}` but instead the file ends", self.0),
                 p.cur_range(),
             )
-            .detail(p.cur_range(), "the file ends here")
+            .with_detail(p.cur_range(), "the file ends here")
         } else {
             p.err_builder(
                 format!("expected `{}` but instead found `{}`", self.0, p.cur_text()),
@@ -356,7 +356,7 @@ where
                 format!("expected {} but instead the file ends", self.0),
                 p.cur_range(),
             )
-            .detail(p.cur_range(), "the file ends here")
+            .with_detail(p.cur_range(), "the file ends here")
         } else {
             p.err_builder(
                 format!("expected {} but instead found `{}`", self.0, p.cur_text()),
@@ -444,7 +444,7 @@ impl<P: Parser> ToDiagnostic<P> for ExpectedNodeDiagnosticBuilder {
         };
 
         let diag = p.err_builder(msg, self.range);
-        diag.detail(self.range, format!("Expected {} here.", self.names))
+        diag.with_detail(self.range, format!("Expected {} here.", self.names))
     }
 }
 

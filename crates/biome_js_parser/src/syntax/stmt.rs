@@ -92,11 +92,11 @@ pub(crate) fn semi(p: &mut JsParser, err_range: TextRange) -> bool {
                 "Expected a semicolon or an implicit semicolon after a statement, but found none",
                 p.cur_range(),
             )
-            .detail(
+            .with_detail(
                 p.cur_range(),
                 "An explicit or implicit semicolon is expected here...",
             )
-            .detail(err_range, "...Which is required to end this statement");
+            .with_detail(err_range, "...Which is required to end this statement");
 
         p.error(err);
         false
@@ -448,11 +448,11 @@ fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> Parse
 			Some(label_item) if is_valid_identifier => {
 				let err = p
 					.err_builder("Duplicate statement labels are not allowed", identifier_range)
-					.detail(
+					.with_detail(
 						identifier_range,
 						format!("a second use of `{}` here is not allowed", label),
 					)
-					.detail(
+					.with_detail(
 						*label_item.range(),
 						format!("`{}` is first used as a label here", label),
 					);
@@ -558,7 +558,7 @@ fn parse_throw_statement(p: &mut JsParser) -> ParsedSyntax {
             .with_hint("A linebreak is not allowed here");
 
         if is_at_expression(p) {
-            err = err.detail(p.cur_range(), "Help: did you mean to throw this?");
+            err = err.with_detail(p.cur_range(), "Help: did you mean to throw this?");
         }
 
         p.error(err);
@@ -660,8 +660,8 @@ fn parse_continue_statement(p: &mut JsParser) -> ParsedSyntax {
 			Some(LabelledItem::Iteration(_)) => None,
 			Some(LabelledItem::Other(range)) => {
 				Some(p.err_builder("A `continue` statement can only jump to a label of an enclosing `for`, `while` or `do while` statement.", p.cur_range())
-					.detail(p.cur_range(), "This label")
-					.detail(*range, "points to non-iteration statement"))
+					.with_detail(p.cur_range(), "This label")
+					.with_detail(*range, "points to non-iteration statement"))
 			}
 			None => {
 				Some(p
@@ -1385,7 +1385,7 @@ fn parse_variable_declarator(
                     p
                         .err_builder("Declarations with initializers cannot also have definite assignment assertions.", initializer.range(p))
 
-                        .detail(ts_annotation.range(p), "Annotation")
+                        .with_detail(ts_annotation.range(p), "Annotation")
                 );
                 initializer.change_to_bogus(p);
             }
@@ -1768,8 +1768,8 @@ fn parse_for_statement(p: &mut JsParser) -> ParsedSyntax {
                     "await can only be used in conjunction with `for...of` statements",
                     await_range,
                 )
-                .detail(await_range, "Remove the await here")
-                .detail(
+                .with_detail(await_range, "Remove the await here")
+                .with_detail(
                     completed.range(p),
                     "or convert this to a `for...of` statement",
                 ),
@@ -1836,8 +1836,8 @@ fn parse_switch_clause(p: &mut JsParser, first_default: &mut Option<TextRange>) 
                         "Multiple default clauses inside of a switch statement are not allowed",
                         default.range(p),
                     )
-                    .detail(default.range(p), "a second clause here is not allowed")
-                    .detail(
+                    .with_detail(default.range(p), "a second clause here is not allowed")
+                    .with_detail(
                         *first_default_range,
                         "the first default clause is defined here",
                     );
