@@ -162,6 +162,10 @@ pub(crate) fn parse_expression_or_recover_to_next_statement(
 // 01n, 0_0, 01.2 // lexer errors
 // "test
 // continues" // unterminated string literal
+
+// test_err js regex
+// /[\p{Control}--[\t\n]]/vv;
+// /[\p{Control}--[\t\n]]/uv;
 pub(super) fn parse_literal_expression(p: &mut JsParser) -> ParsedSyntax {
     let literal_kind = match p.cur() {
         JsSyntaxKind::JS_NUMBER_LITERAL => {

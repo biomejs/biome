@@ -1517,6 +1517,15 @@ impl<'src> JsLexer<'src> {
                                     flag |= RegexFlag::S;
                                 }
                                 b'u' => {
+                                    if flag.contains(RegexFlag::V) {
+                                        self.diagnostics.push(
+                                            ParseDiagnostic::new(
+                                                "invalid regex flag",
+                                                chr_start..self.position + 1,
+                                            )
+                                            .hint("The 'u' and 'v' regular expression flags cannot be enabled at the same time."),
+                                        );
+                                    }
                                     if flag.contains(RegexFlag::U) {
                                         self.diagnostics.push(self.flag_err('u'));
                                     }
@@ -1535,6 +1544,15 @@ impl<'src> JsLexer<'src> {
                                     flag |= RegexFlag::D;
                                 }
                                 b'v' => {
+                                    if flag.contains(RegexFlag::U) {
+                                        self.diagnostics.push(
+                                            ParseDiagnostic::new(
+                                                "invalid regex flag",
+                                                chr_start..self.position + 1,
+                                            )
+                                            .hint("The 'u' and 'v' regular expression flags cannot be enabled at the same time."),
+                                        );
+                                    }
                                     if flag.contains(RegexFlag::V) {
                                         self.diagnostics.push(self.flag_err('v'));
                                     }
