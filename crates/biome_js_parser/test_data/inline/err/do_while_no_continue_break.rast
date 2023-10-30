@@ -224,14 +224,14 @@ do_while_no_continue_break.js:1:15 parse ━━━━━━━━━━━━━
 --
 do_while_no_continue_break.js:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ')'
+  × Expected a statement but instead found ')'.
   
   > 1 │ do { } break (continue)
       │                       ^
     2 │ do { } continue (break)
     3 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
   > 1 │ do { } break (continue)
       │                       ^
@@ -333,14 +333,14 @@ do_while_no_continue_break.js:2:18 parse ━━━━━━━━━━━━━
 --
 do_while_no_continue_break.js:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ')'
+  × Expected a statement but instead found ')'.
   
     1 │ do { } break (continue)
   > 2 │ do { } continue (break)
       │                       ^
     3 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ do { } break (continue)
   > 2 │ do { } continue (break)

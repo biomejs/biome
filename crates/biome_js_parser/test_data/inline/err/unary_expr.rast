@@ -50,14 +50,14 @@ JsModule {
 --
 unary_expr.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or a member expression but instead found ';'
+  × Expected an identifier, or a member expression but instead found ';'.
   
   > 1 │ ++ ;
       │    ^
     2 │ -- ;
     3 │ -;
   
-  i Expected an identifier, or a member expression here
+  i Expected an identifier, or a member expression here.
   
   > 1 │ ++ ;
       │    ^
@@ -67,7 +67,7 @@ unary_expr.js:1:4 parse ━━━━━━━━━━━━━━━━━━�
 --
 unary_expr.js:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or a member expression but instead found ';'
+  × Expected an identifier, or a member expression but instead found ';'.
   
     1 │ ++ ;
   > 2 │ -- ;
@@ -75,7 +75,7 @@ unary_expr.js:2:4 parse ━━━━━━━━━━━━━━━━━━�
     3 │ -;
     4 │ 
   
-  i Expected an identifier, or a member expression here
+  i Expected an identifier, or a member expression here.
   
     1 │ ++ ;
   > 2 │ -- ;

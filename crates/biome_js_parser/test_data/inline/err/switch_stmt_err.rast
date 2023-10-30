@@ -321,7 +321,7 @@ switch_stmt_err.js:3:8 parse ━━━━━━━━━━━━━━━━━
 --
 switch_stmt_err.js:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a default, or a case but instead found 'var i = 0'
+  × Expected a default, or a case but instead found 'var i = 0'.
   
     1 │ switch foo {}
     2 │ switch {}
@@ -330,7 +330,7 @@ switch_stmt_err.js:3:10 parse ━━━━━━━━━━━━━━━━�
     4 │ switch { var i = 0; case "bar": {} }
     5 │ switch (foo) {
   
-  i Expected a default, or a case here
+  i Expected a default, or a case here.
   
     1 │ switch foo {}
     2 │ switch {}
@@ -356,7 +356,7 @@ switch_stmt_err.js:4:8 parse ━━━━━━━━━━━━━━━━━
 --
 switch_stmt_err.js:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a default, or a case but instead found 'var i = 0;'
+  × Expected a default, or a case but instead found 'var i = 0;'.
   
     2 │ switch {}
     3 │ switch { var i = 0 }
@@ -365,7 +365,7 @@ switch_stmt_err.js:4:10 parse ━━━━━━━━━━━━━━━━�
     5 │ switch (foo) {
     6 │   default: {}
   
-  i Expected a default, or a case here
+  i Expected a default, or a case here.
   
     2 │ switch {}
     3 │ switch { var i = 0 }
@@ -407,7 +407,7 @@ switch_stmt_err.js:7:3 parse ━━━━━━━━━━━━━━━━━
 --
 switch_stmt_err.js:9:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ':'
+  × Expected an expression but instead found ':'.
   
      7 │   default: {}
      8 │ }
@@ -415,7 +415,7 @@ switch_stmt_err.js:9:21 parse ━━━━━━━━━━━━━━━━�
        │                     ^
     10 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
      7 │   default: {}
      8 │ }

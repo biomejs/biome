@@ -258,7 +258,7 @@ export_from_clause_err.js:1:9 parse ━━━━━━━━━━━━━━�
 --
 export_from_clause_err.js:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal but instead found '5'
+  × Expected a string literal but instead found '5'.
   
     1 │ export *;
   > 2 │ export * from 5;
@@ -266,7 +266,7 @@ export_from_clause_err.js:2:15 parse ━━━━━━━━━━━━━━�
     3 │ export as from "test";
     4 │ export from "test";
   
-  i Expected a string literal here
+  i Expected a string literal here.
   
     1 │ export *;
   > 2 │ export * from 5;
@@ -333,7 +333,7 @@ export_from_clause_err.js:5:14 parse ━━━━━━━━━━━━━━�
 --
 export_from_clause_err.js:6:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal but instead found ';'
+  × Expected a string literal but instead found ';'.
   
     4 │ export from "test";
     5 │ export type *;
@@ -342,7 +342,7 @@ export_from_clause_err.js:6:19 parse ━━━━━━━━━━━━━━�
     7 │ export type * as from;
     8 │ export type * as ns from;
   
-  i Expected a string literal here
+  i Expected a string literal here.
   
     4 │ export from "test";
     5 │ export type *;
@@ -368,7 +368,7 @@ export_from_clause_err.js:7:22 parse ━━━━━━━━━━━━━━�
 --
 export_from_clause_err.js:8:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal but instead found ';'
+  × Expected a string literal but instead found ';'.
   
     6 │ export type * from;
     7 │ export type * as from;
@@ -376,7 +376,7 @@ export_from_clause_err.js:8:25 parse ━━━━━━━━━━━━━━�
       │                         ^
     9 │ 
   
-  i Expected a string literal here
+  i Expected a string literal here.
   
     6 │ export type * from;
     7 │ export type * as from;

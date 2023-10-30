@@ -230,14 +230,14 @@ JsModule {
 --
 export_named_from_clause_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found ''
+  × Expected a string literal, or an identifier but instead found ''.
   
   > 1 │ export { as b } from "mod";
       │          
     2 │ export { a as 5 } from "mod";
     3 │ export { a b c } from "mod";
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
   > 1 │ export { as b } from "mod";
       │          
@@ -247,7 +247,7 @@ export_named_from_clause_err.js:1:10 parse ━━━━━━━━━━━━�
 --
 export_named_from_clause_err.js:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found '5'
+  × Expected a string literal, or an identifier but instead found '5'.
   
     1 │ export { as b } from "mod";
   > 2 │ export { a as 5 } from "mod";
@@ -255,7 +255,7 @@ export_named_from_clause_err.js:2:15 parse ━━━━━━━━━━━━�
     3 │ export { a b c } from "mod";
     4 │ export { 5 as b } from "mod";
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
     1 │ export { as b } from "mod";
   > 2 │ export { a as 5 } from "mod";
@@ -294,7 +294,7 @@ export_named_from_clause_err.js:3:14 parse ━━━━━━━━━━━━�
 --
 export_named_from_clause_err.js:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found '5 as b'
+  × Expected a string literal, or an identifier but instead found '5 as b'.
   
     2 │ export { a as 5 } from "mod";
     3 │ export { a b c } from "mod";
@@ -302,7 +302,7 @@ export_named_from_clause_err.js:4:10 parse ━━━━━━━━━━━━�
       │          ^^^^^^
     5 │ 
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
     2 │ export { a as 5 } from "mod";
     3 │ export { a b c } from "mod";

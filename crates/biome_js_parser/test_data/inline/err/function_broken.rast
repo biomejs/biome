@@ -95,13 +95,13 @@ JsModule {
 --
 function_broken.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body but instead found ')'
+  × Expected a function body but instead found ')'.
   
   > 1 │ function foo())})}{{{  {}
       │               ^
     2 │ 
   
-  i Expected a function body here
+  i Expected a function body here.
   
   > 1 │ function foo())})}{{{  {}
       │               ^

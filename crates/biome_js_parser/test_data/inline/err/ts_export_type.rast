@@ -36,13 +36,13 @@ JsModule {
 --
 ts_export_type.ts:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class, a function, or a variable declaration but instead found 'type'
+  × Expected a class, a function, or a variable declaration but instead found 'type'.
   
   > 1 │ export type
       │        ^^^^
     2 │ 
   
-  i Expected a class, a function, or a variable declaration here
+  i Expected a class, a function, or a variable declaration here.
   
   > 1 │ export type
       │        ^^^^

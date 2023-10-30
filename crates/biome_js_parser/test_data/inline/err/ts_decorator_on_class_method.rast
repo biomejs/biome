@@ -997,6 +997,8 @@ ts_decorator_on_class_method.ts:2:12 parse ━━━━━━━━━━━━�
     3 │     method(@dec.fn() x, second, @dec.fn() third = 'default') {}
     4 │     method(@dec() x, second, @dec() third = 'default') {}
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1009,6 +1011,8 @@ ts_decorator_on_class_method.ts:2:28 parse ━━━━━━━━━━━━�
       │                            ^^^^
     3 │     method(@dec.fn() x, second, @dec.fn() third = 'default') {}
     4 │     method(@dec() x, second, @dec() third = 'default') {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -1024,6 +1028,8 @@ ts_decorator_on_class_method.ts:3:12 parse ━━━━━━━━━━━━�
     4 │     method(@dec() x, second, @dec() third = 'default') {}
     5 │     static method(@dec x, second, @dec third = 'default') {}
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1037,6 +1043,8 @@ ts_decorator_on_class_method.ts:3:33 parse ━━━━━━━━━━━━�
       │                                 ^^^^^^^^^
     4 │     method(@dec() x, second, @dec() third = 'default') {}
     5 │     static method(@dec x, second, @dec third = 'default') {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -1052,6 +1060,8 @@ ts_decorator_on_class_method.ts:4:12 parse ━━━━━━━━━━━━�
     5 │     static method(@dec x, second, @dec third = 'default') {}
     6 │     static method(@dec.fn() x, second, @dec.fn() third = 'default') {}
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1065,6 +1075,8 @@ ts_decorator_on_class_method.ts:4:30 parse ━━━━━━━━━━━━�
       │                              ^^^^^^
     5 │     static method(@dec x, second, @dec third = 'default') {}
     6 │     static method(@dec.fn() x, second, @dec.fn() third = 'default') {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -1080,6 +1092,8 @@ ts_decorator_on_class_method.ts:5:19 parse ━━━━━━━━━━━━�
     6 │     static method(@dec.fn() x, second, @dec.fn() third = 'default') {}
     7 │     static method(@dec() x, second, @dec() third = 'default') {}
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1093,6 +1107,8 @@ ts_decorator_on_class_method.ts:5:35 parse ━━━━━━━━━━━━�
       │                                   ^^^^
     6 │     static method(@dec.fn() x, second, @dec.fn() third = 'default') {}
     7 │     static method(@dec() x, second, @dec() third = 'default') {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -1108,6 +1124,8 @@ ts_decorator_on_class_method.ts:6:19 parse ━━━━━━━━━━━━�
     7 │     static method(@dec() x, second, @dec() third = 'default') {}
     8 │ }
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1121,6 +1139,8 @@ ts_decorator_on_class_method.ts:6:40 parse ━━━━━━━━━━━━�
       │                                        ^^^^^^^^^
     7 │     static method(@dec() x, second, @dec() third = 'default') {}
     8 │ }
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -1136,6 +1156,8 @@ ts_decorator_on_class_method.ts:7:19 parse ━━━━━━━━━━━━�
     8 │ }
     9 │ 
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -1149,6 +1171,8 @@ ts_decorator_on_class_method.ts:7:37 parse ━━━━━━━━━━━━�
       │                                     ^^^^^^
     8 │ }
     9 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   

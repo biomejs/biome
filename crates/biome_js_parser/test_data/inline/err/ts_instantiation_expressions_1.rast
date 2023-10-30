@@ -1257,14 +1257,14 @@ JsModule {
 --
 ts_instantiation_expressions_1.ts:1:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ';'
+  × Expected an expression but instead found ';'.
   
   > 1 │ const a8 = f<number><number>;  // Relational operator error
       │                             ^
     2 │ const b1 = f?.<number>;  // Error, `(` expected
     3 │ f<T> << f<T>;
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ const a8 = f<number><number>;  // Relational operator error
       │                             ^
@@ -1301,7 +1301,7 @@ ts_instantiation_expressions_1.ts:3:10 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parenthesis '(' but instead found ';'
+  × Expected a parenthesis '(' but instead found ';'.
   
     1 │ const a8 = f<number><number>;  // Relational operator error
     2 │ const b1 = f?.<number>;  // Error, `(` expected
@@ -1310,7 +1310,7 @@ ts_instantiation_expressions_1.ts:3:13 parse ━━━━━━━━━━━�
     4 │ f<T> = g<K>;
     5 │ f<T> >> f<T>;
   
-  i Expected a parenthesis '(' here
+  i Expected a parenthesis '(' here.
   
     1 │ const a8 = f<number><number>;  // Relational operator error
     2 │ const b1 = f?.<number>;  // Error, `(` expected
@@ -1350,7 +1350,7 @@ ts_instantiation_expressions_1.ts:5:6 parse ━━━━━━━━━━━━
 --
 ts_instantiation_expressions_1.ts:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '>='
+  × Expected an expression but instead found '>='.
   
     4 │ f<T> = g<K>;
     5 │ f<T> >> f<T>;
@@ -1359,7 +1359,7 @@ ts_instantiation_expressions_1.ts:6:6 parse ━━━━━━━━━━━━
     7 │ f<T> < f<T>;
     8 │ f<T> > f<T>;
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ f<T> = g<K>;
     5 │ f<T> >> f<T>;
@@ -1385,7 +1385,7 @@ ts_instantiation_expressions_1.ts:7:12 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '>'
+  × Expected an expression but instead found '>'.
   
      6 │ f<T> >= f<T>;
      7 │ f<T> < f<T>;
@@ -1394,7 +1394,7 @@ ts_instantiation_expressions_1.ts:8:6 parse ━━━━━━━━━━━━
      9 │ f<T> import<1>;
     10 │ f<T> yield;
   
-  i Expected an expression here
+  i Expected an expression here.
   
      6 │ f<T> >= f<T>;
      7 │ f<T> < f<T>;
@@ -1406,7 +1406,7 @@ ts_instantiation_expressions_1.ts:8:6 parse ━━━━━━━━━━━━
 --
 ts_instantiation_expressions_1.ts:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found 'import'
+  × Expected an expression but instead found 'import'.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1415,7 +1415,7 @@ ts_instantiation_expressions_1.ts:9:6 parse ━━━━━━━━━━━━
     10 │ f<T> yield;
     11 │ f<T> ++;
   
-  i Expected an expression here
+  i Expected an expression here.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1427,7 +1427,7 @@ ts_instantiation_expressions_1.ts:9:6 parse ━━━━━━━━━━━━
 --
 ts_instantiation_expressions_1.ts:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a default import, a namespace import, or a named import but instead found '<'
+  × Expected a default import, a namespace import, or a named import but instead found '<'.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1436,7 +1436,7 @@ ts_instantiation_expressions_1.ts:9:12 parse ━━━━━━━━━━━�
     10 │ f<T> yield;
     11 │ f<T> ++;
   
-  i Expected a default import, a namespace import, or a named import here
+  i Expected a default import, a namespace import, or a named import here.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1448,7 +1448,7 @@ ts_instantiation_expressions_1.ts:9:12 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ';'
+  × Expected an expression but instead found ';'.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1457,7 +1457,7 @@ ts_instantiation_expressions_1.ts:9:15 parse ━━━━━━━━━━━�
     10 │ f<T> yield;
     11 │ f<T> ++;
   
-  i Expected an expression here
+  i Expected an expression here.
   
      7 │ f<T> < f<T>;
      8 │ f<T> > f<T>;
@@ -1481,7 +1481,7 @@ ts_instantiation_expressions_1.ts:10:6 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:11:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or a member expression but instead found ';'
+  × Expected an identifier, or a member expression but instead found ';'.
   
      9 │ f<T> import<1>;
     10 │ f<T> yield;
@@ -1490,7 +1490,7 @@ ts_instantiation_expressions_1.ts:11:8 parse ━━━━━━━━━━━�
     12 │ f<T> --;
     13 │ f<T> /= 1;
   
-  i Expected an identifier, or a member expression here
+  i Expected an identifier, or a member expression here.
   
      9 │ f<T> import<1>;
     10 │ f<T> yield;
@@ -1502,7 +1502,7 @@ ts_instantiation_expressions_1.ts:11:8 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:12:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or a member expression but instead found ';'
+  × Expected an identifier, or a member expression but instead found ';'.
   
     10 │ f<T> yield;
     11 │ f<T> ++;
@@ -1511,7 +1511,7 @@ ts_instantiation_expressions_1.ts:12:8 parse ━━━━━━━━━━━�
     13 │ f<T> /= 1;
     14 │ f<T> <= f<T>;
   
-  i Expected an identifier, or a member expression here
+  i Expected an identifier, or a member expression here.
   
     10 │ f<T> yield;
     11 │ f<T> ++;
@@ -1553,7 +1553,7 @@ ts_instantiation_expressions_1.ts:13:11 parse ━━━━━━━━━━━�
 --
 ts_instantiation_expressions_1.ts:16:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ']'
+  × Expected an expression but instead found ']'.
   
     14 │ f<T> <= f<T>;
     15 │ f <T>
@@ -1562,7 +1562,7 @@ ts_instantiation_expressions_1.ts:16:2 parse ━━━━━━━━━━━�
     17 │ f<T>
     18 │ as {};
   
-  i Expected an expression here
+  i Expected an expression here.
   
     14 │ f<T> <= f<T>;
     15 │ f <T>

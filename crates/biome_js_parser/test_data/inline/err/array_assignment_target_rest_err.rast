@@ -173,14 +173,14 @@ JsModule {
 --
 array_assignment_target_rest_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or an assignment target but instead found ''
+  × Expected an identifier, or an assignment target but instead found ''.
   
   > 1 │ ([ ... ] = a);
       │       
     2 │ ([ ...c = "default" ] = a);
     3 │ ([ ...rest, other_assignment ] = a);
   
-  i Expected an identifier, or an assignment target here
+  i Expected an identifier, or an assignment target here.
   
   > 1 │ ([ ... ] = a);
       │       

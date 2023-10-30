@@ -103,7 +103,7 @@ JsModule {
 --
 ts_declare_function_export_declaration_missing_id.ts:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found '('
+  × Expected an identifier, an array pattern, or an object pattern but instead found '('.
   
     1 │ declare module 'x' {
   > 2 │   export function(option: any): void
@@ -111,7 +111,7 @@ ts_declare_function_export_declaration_missing_id.ts:2:18 parse ━━━━━�
     3 │ }
     4 │ 
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
     1 │ declare module 'x' {
   > 2 │   export function(option: any): void

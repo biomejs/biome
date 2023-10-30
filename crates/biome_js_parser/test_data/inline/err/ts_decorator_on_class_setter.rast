@@ -256,6 +256,8 @@ ts_decorator_on_class_setter.ts:2:13 parse ━━━━━━━━━━━━�
     3 │     set val(@dec.fn() x) {}
     4 │     set val(@dec() x) {}
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -270,6 +272,8 @@ ts_decorator_on_class_setter.ts:3:13 parse ━━━━━━━━━━━━�
     4 │     set val(@dec() x) {}
     5 │ }
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -283,6 +287,8 @@ ts_decorator_on_class_setter.ts:4:13 parse ━━━━━━━━━━━━�
       │             ^^^^^^
     5 │ }
     6 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   

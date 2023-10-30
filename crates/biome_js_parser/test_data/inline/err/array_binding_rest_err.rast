@@ -201,14 +201,14 @@ JsModule {
 --
 array_binding_rest_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found ''
+  × Expected an identifier, an array pattern, or an object pattern but instead found ''.
   
   > 1 │ let [ ... ] = a;
       │          
     2 │ let [ ...c = "default" ] = a;
     3 │ let [ ...rest, other_assignment ] = a;
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
   > 1 │ let [ ... ] = a;
       │          

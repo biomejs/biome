@@ -94,7 +94,7 @@ JsModule {
 --
 object_expr_setter.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parameter but instead found ')'
+  × Expected a parameter but instead found ')'.
   
     1 │ let b = {
   > 2 │  set foo() {
@@ -102,7 +102,7 @@ object_expr_setter.js:2:10 parse ━━━━━━━━━━━━━━━�
     3 │     return 5;
     4 │  }
   
-  i Expected a parameter here
+  i Expected a parameter here.
   
     1 │ let b = {
   > 2 │  set foo() {

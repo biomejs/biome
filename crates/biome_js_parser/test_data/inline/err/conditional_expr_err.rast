@@ -164,14 +164,14 @@ conditional_expr_err.js:2:11 parse ━━━━━━━━━━━━━━━
 --
 conditional_expr_err.js:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found the end of the file
+  × Expected an expression, or an assignment but instead found the end of the file.
   
     2 │ foo ? bar baz ? foo : bar
     3 │ foo ? bar :
   > 4 │ 
       │ 
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     2 │ foo ? bar baz ? foo : bar
     3 │ foo ? bar :

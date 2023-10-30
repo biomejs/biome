@@ -48,14 +48,14 @@ JsModule {
 --
 variable_declarator_list_empty.js:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found ';'
+  × Expected an identifier, an array pattern, or an object pattern but instead found ';'.
   
   > 1 │ const;
       │      ^
     2 │ const
     3 │ 
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
   > 1 │ const;
       │      ^
@@ -65,14 +65,14 @@ variable_declarator_list_empty.js:1:6 parse ━━━━━━━━━━━━
 --
 variable_declarator_list_empty.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found the end of the file
+  × Expected an identifier, an array pattern, or an object pattern but instead found the end of the file.
   
     1 │ const;
     2 │ const
   > 3 │ 
       │ 
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
     1 │ const;
     2 │ const
