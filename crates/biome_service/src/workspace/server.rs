@@ -125,9 +125,8 @@ impl WorkspaceServer {
         overrides: &'a OverrideSettings,
         path: &'a Path,
     ) -> Vec<RuleFilter> {
-        let enabled_rules = overrides
-            .as_enabled_rules(path)
-            .or_else(|| rules.map(|rules| rules.as_enabled_rules()));
+        let enabled_rules =
+            rules.map(|rules| overrides.overrides_enabled_rules(path, rules.as_enabled_rules()));
 
         if let Some(enabled_rules) = enabled_rules {
             enabled_rules.into_iter().collect::<Vec<RuleFilter>>()
@@ -606,11 +605,12 @@ impl Workspace for WorkspaceServer {
 
         let rules = settings.as_rules(params.path.as_path());
         let overrides = &settings.override_settings;
-        let rule_filter_list = self.build_rule_filter_list(rules, overrides, params.path.as_path());
+        let rule_filter_list =
+            self.build_rule_filter_list(rules.as_ref(), overrides, params.path.as_path());
         let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
         fix_all(FixAllParams {
             parse,
-            rules,
+            rules: rules.as_ref(),
             fix_file_mode: params.fix_file_mode,
             filter,
             settings: self.settings(),

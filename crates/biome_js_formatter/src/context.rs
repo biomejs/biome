@@ -227,6 +227,42 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
+        self.arrow_parentheses = arrow_parentheses;
+    }
+
+    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
+        self.indent_style = indent_style;
+    }
+
+    pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
+        self.indent_width = indent_width;
+    }
+
+    pub fn set_line_width(&mut self, line_width: LineWidth) {
+        self.line_width = line_width;
+    }
+
+    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
+        self.quote_style = quote_style;
+    }
+
+    pub fn set_jsx_quote_style(&mut self, jsx_quote_style: QuoteStyle) {
+        self.jsx_quote_style = jsx_quote_style;
+    }
+
+    pub fn set_quote_properties(&mut self, quote_properties: QuoteProperties) {
+        self.quote_properties = quote_properties;
+    }
+
+    pub fn set_trailing_comma(&mut self, trailing_comma: TrailingComma) {
+        self.trailing_comma = trailing_comma;
+    }
+
+    pub fn set_semicolons(&mut self, semicolons: Semicolons) {
+        self.semicolons = semicolons;
+    }
+
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
     }

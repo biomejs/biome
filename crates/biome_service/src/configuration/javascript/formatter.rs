@@ -114,7 +114,7 @@ impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
         JavascriptFormatter: Default,
     {
         if other != JavascriptFormatter::default() {
-            self.merge_with(other)
+            self.merge_with_if_not_default(other)
         }
     }
 }

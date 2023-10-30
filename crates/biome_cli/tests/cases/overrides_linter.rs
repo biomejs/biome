@@ -222,7 +222,7 @@ fn does_include_file_with_different_rules() {
 }
 
 #[test]
-fn does_include_file_with_different_linting_and_applies_the_first_one() {
+fn does_include_file_with_different_linting_and_applies_all_of_them() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
     let file_path = Path::new("biome.json");
@@ -283,12 +283,12 @@ fn does_include_file_with_different_linting_and_applies_the_first_one() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test2, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_AFTER);
     assert_file_contents(&fs, test, DEBUGGER_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "does_include_file_with_different_formatting_and_applies_the_first_one",
+        "does_include_file_with_different_linting_and_applies_all_of_them",
         fs,
         console,
         result,

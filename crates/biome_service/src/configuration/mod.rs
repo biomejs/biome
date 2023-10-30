@@ -563,15 +563,10 @@ pub fn create_config(
 pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerRules {
     let linter_settings = &settings.linter;
     let overrides = &settings.override_settings;
+    let mut analyzer_rules = AnalyzerRules::default();
+    if let Some(rules) = linter_settings.rules.as_ref() {
+        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+    }
 
-    overrides
-        .as_analyzer_rules_options(path)
-        .unwrap_or_else(|| {
-            let mut analyzer_rules = AnalyzerRules::default();
-            if let Some(rules) = linter_settings.rules.as_ref() {
-                push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
-            }
-
-            analyzer_rules
-        })
+    overrides.override_analyzer_rules(path, analyzer_rules)
 }
