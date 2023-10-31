@@ -1,7 +1,7 @@
 /* should not generate diagnostics */
 
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import doSomething from 'a';
 
 // No captures
@@ -62,7 +62,7 @@ function MyComponent4() {
         console.log(id);
 
         console.log(externalStore);
-    }, [name, state, memoizedCallback, memoizedValue, isPending]);
+    }, [name, state, memoizedCallback, memoizedValue, isPending, externalStore, id, theme]);
 }
 
 // all hooks with dependencies
@@ -166,4 +166,13 @@ function MyComponent16() {
     React.useEffect(() => {
         console.log(a);
     }, [a]);
+}
+
+// https://github.com/biomejs/biome/issues/609
+function MyComponent17() {
+  const data = useSyncExternalStore(subscribe, getSnapshot);
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 }

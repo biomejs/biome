@@ -84,9 +84,6 @@ impl MergeWith<Option<JavascriptFormatter>> for JavascriptConfiguration {
 }
 
 impl JavascriptConfiguration {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
-        &["formatter", "globals", "organizeImports", "parser"];
-
     pub fn with_formatter() -> Self {
         Self {
             formatter: Some(JavascriptFormatter::default()),
@@ -111,10 +108,6 @@ pub struct JavascriptParser {
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
     pub unsafe_parameter_decorators_enabled: Option<bool>,
-}
-
-impl JavascriptParser {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["unsafeParameterDecoratorsEnabled"];
 }
 
 impl MergeWith<JavascriptParser> for JavascriptParser {

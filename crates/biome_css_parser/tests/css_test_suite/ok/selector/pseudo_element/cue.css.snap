@@ -57,7 +57,7 @@ CssRoot {
                                     value_token: IDENT@11..14 "cue" [] [],
                                 },
                                 l_paren_token: L_PAREN@14..15 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -108,7 +108,7 @@ CssRoot {
                                     value_token: IDENT@37..40 "cue" [] [],
                                 },
                                 l_paren_token: L_PAREN@40..44 "(" [] [Whitespace("   ")],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -190,7 +190,7 @@ CssRoot {
                                     value_token: IDENT@88..91 "cue" [] [],
                                 },
                                 l_paren_token: L_PAREN@91..92 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
                                         ident: CssIdentifier {
@@ -228,7 +228,7 @@ CssRoot {
                                     value_token: IDENT@105..108 "cue" [] [],
                                 },
                                 l_paren_token: L_PAREN@108..109 "(" [] [],
-                                parameter: CssCompoundSelector {
+                                selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [

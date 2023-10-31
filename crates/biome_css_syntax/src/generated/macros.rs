@@ -164,6 +164,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssPseudoElementIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_PART => {
+                    let $pattern = unsafe { $crate::CssPseudoElementPart::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_SELECTOR => {
                     let $pattern = unsafe { $crate::CssPseudoElementSelector::new_unchecked(node) };
                     $body

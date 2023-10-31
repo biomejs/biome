@@ -84,4 +84,53 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
 
 ```
 
+```block
+biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `what_the_hell`.
+  
+     7 │         },
+     8 │         "style": {
+   > 9 │             "what_the_hell": "off"
+       │             ^^^^^^^^^^^^^^^
+    10 │         }
+    11 │     }
+  
+  i Accepted keys
+  
+  - recommended
+  - all
+  - noArguments
+  - noCommaOperator
+  - noImplicitBoolean
+  - noInferrableTypes
+  - noNamespace
+  - noNegationElse
+  - noNonNullAssertion
+  - noParameterAssign
+  - noParameterProperties
+  - noRestrictedGlobals
+  - noShoutyConstants
+  - noUnusedTemplateLiteral
+  - noVar
+  - useBlockStatements
+  - useCollapsedElseIf
+  - useConst
+  - useDefaultParameterLast
+  - useEnumInitializers
+  - useExponentiationOperator
+  - useFragmentSyntax
+  - useLiteralEnumMembers
+  - useNamingConvention
+  - useNumericLiterals
+  - useSelfClosingElements
+  - useShorthandArrayType
+  - useSingleCaseStatement
+  - useSingleVarDeclarator
+  - useTemplate
+  - useWhile
+  
+
+```
+
 

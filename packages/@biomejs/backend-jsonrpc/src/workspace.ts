@@ -765,6 +765,10 @@ export interface Nursery {
 	 */
 	noMisrefactoredShorthandAssign?: RuleConfiguration;
 	/**
+	 * Disallow this and super in static contexts.
+	 */
+	noThisInStatic?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1432,6 +1436,7 @@ export type Category =
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"
+	| "lint/nursery/noThisInStatic"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"

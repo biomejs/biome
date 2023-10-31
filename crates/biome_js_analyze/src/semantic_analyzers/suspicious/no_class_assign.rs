@@ -82,7 +82,7 @@ impl Rule for NoClassAssign {
         let node = ctx.query();
         let model = ctx.model();
 
-        if let Ok(Some(id)) = node.id() {
+        if let Some(id) = node.id() {
             if let Some(id_binding) = id.as_js_identifier_binding() {
                 return id_binding.all_writes(model).collect();
             }
@@ -94,8 +94,7 @@ impl Rule for NoClassAssign {
     fn diagnostic(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
         let binding = ctx
             .query()
-            .id()
-            .ok()??
+            .id()?
             .as_js_identifier_binding()?
             .name_token()
             .ok()?;

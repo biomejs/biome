@@ -1,35 +1,39 @@
 use crate::configuration::javascript::JavascriptFormatter;
 use crate::configuration::PlainIndentStyle;
-use biome_deserialize::json::VisitJsonNode;
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
 use biome_formatter::LineWidth;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
+use biome_json_syntax::JsonLanguage;
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitNode<JsonLanguage> for JavascriptFormatter {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        biome_deserialize::json::has_only_known_keys(
-            node,
-            JavascriptFormatter::KNOWN_KEYS,
-            diagnostics,
-        )
-    }
+impl JavascriptFormatter {
+    const ALLOWED_KEYS: &'static [&'static str] = &[
+        "quoteStyle",
+        "jsxQuoteStyle",
+        "quoteProperties",
+        "trailingComma",
+        "semicolons",
+        "arrowParentheses",
+        "enabled",
+        "indentStyle",
+        "indentSize",
+        "indentWidth",
+        "lineWidth",
+    ];
+}
 
+impl VisitNode<JsonLanguage> for JavascriptFormatter {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
-
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "jsxQuoteStyle" => {
                 let mut jsx_quote_style = QuoteStyle::default();
@@ -100,8 +104,9 @@ impl VisitNode<JsonLanguage> for JavascriptFormatter {
                     }
                 });
             }
-
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())

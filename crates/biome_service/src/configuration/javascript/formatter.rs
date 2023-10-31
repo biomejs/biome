@@ -75,22 +75,6 @@ pub struct JavascriptFormatter {
     pub line_width: Option<LineWidth>,
 }
 
-impl JavascriptFormatter {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &[
-        "quoteStyle",
-        "jsxQuoteStyle",
-        "quoteProperties",
-        "trailingComma",
-        "semicolons",
-        "arrowParentheses",
-        "enabled",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-    ];
-}
-
 impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
     fn merge_with(&mut self, other: JavascriptFormatter) {
         if let Some(arrow_parentheses) = other.arrow_parentheses {

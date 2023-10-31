@@ -31,11 +31,11 @@ impl AnyJsClass {
         }
     }
 
-    pub fn id(&self) -> SyntaxResult<Option<AnyJsBinding>> {
+    pub fn id(&self) -> Option<AnyJsBinding> {
         match self {
-            AnyJsClass::JsClassDeclaration(declaration) => declaration.id().map(Some),
-            AnyJsClass::JsClassExpression(expression) => Ok(expression.id()),
-            AnyJsClass::JsClassExportDefaultDeclaration(declaration) => Ok(declaration.id()),
+            AnyJsClass::JsClassDeclaration(declaration) => declaration.id().ok(),
+            AnyJsClass::JsClassExpression(expression) => expression.id(),
+            AnyJsClass::JsClassExportDefaultDeclaration(declaration) => declaration.id(),
         }
     }
 
