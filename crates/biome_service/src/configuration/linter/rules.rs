@@ -2735,6 +2735,10 @@ pub struct Nursery {
     #[bpaf(long("use-shorthand-assign"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_assign: Option<RuleConfiguration>,
+    #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
+    #[bpaf(long("use-valid-aria-role"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_valid_aria_role: Option<RuleConfiguration>,
 }
 impl MergeWith<Nursery> for Nursery {
     fn merge_with(&mut self, other: Nursery) {
@@ -2804,6 +2808,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_shorthand_assign) = other.use_shorthand_assign {
             self.use_shorthand_assign = Some(use_shorthand_assign);
         }
+        if let Some(use_valid_aria_role) = other.use_valid_aria_role {
+            self.use_valid_aria_role = Some(use_valid_aria_role);
+        }
     }
     fn merge_with_if_not_default(&mut self, other: Nursery)
     where
@@ -2837,6 +2844,7 @@ impl Nursery {
         "useGroupedTypeImport",
         "useImportRestrictions",
         "useShorthandAssign",
+        "useValidAriaRole",
     ];
     const RECOMMENDED_RULES: [&'static str; 9] = [
         "noDuplicateJsonKeys",
@@ -2848,6 +2856,7 @@ impl Nursery {
         "useAsConstAssertion",
         "useAwait",
         "useGroupedTypeImport",
+        "useValidAriaRole",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 9] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -3161,6 +3170,7 @@ impl Nursery {
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
             "useShorthandAssign" => self.use_shorthand_assign.as_ref(),
+            "useValidAriaRole" => self.use_valid_aria_role.as_ref(),
             _ => None,
         }
     }

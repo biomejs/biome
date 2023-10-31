@@ -918,6 +918,11 @@ impl VisitNode<JsonLanguage> for Nursery {
                 configuration.map_rule_configuration(&value, "useShorthandAssign", diagnostics)?;
                 self.use_shorthand_assign = Some(configuration);
             }
+            "useValidAriaRole" => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(&value, "useValidAriaRole", diagnostics)?;
+                self.use_valid_aria_role = Some(configuration);
+            }
             _ => {
                 report_unknown_map_key(
                     &name,
@@ -944,6 +949,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                         "useGroupedTypeImport",
                         "useImportRestrictions",
                         "useShorthandAssign",
+                        "useValidAriaRole",
                     ],
                     diagnostics,
                 );

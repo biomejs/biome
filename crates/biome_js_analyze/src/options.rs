@@ -3,6 +3,9 @@
 use crate::analyzers::complexity::no_excessive_cognitive_complexity::{
     complexity_options, ComplexityOptions,
 };
+use crate::aria_analyzers::nursery::use_valid_aria_role::{
+    valid_aria_role_options, ValidAriaRoleOptions,
+};
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
 };
@@ -34,6 +37,8 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
+    /// Options for `useValidAriaRole` rule
+    ValidAriaRole(#[bpaf(external(valid_aria_role_options), hide)] ValidAriaRoleOptions),
 }
 
 // Required by [Bpaf].
@@ -60,6 +65,7 @@ impl PossibleOptions {
             "useNamingConvention" => {
                 Some(Self::NamingConvention(NamingConventionOptions::default()))
             }
+            "useValidAriaRole" => Some(Self::ValidAriaRole(ValidAriaRoleOptions::default())),
             _ => None,
         }
     }
@@ -94,6 +100,13 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
+            "useValidAriaRole" => {
+                let options = match self {
+                    PossibleOptions::ValidAriaRole(options) => options.clone(),
+                    _ => ValidAriaRoleOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
             // TODO: review error
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
@@ -118,6 +131,9 @@ impl VisitNode<JsonLanguage> for PossibleOptions {
                 options.visit_map(key, value, diagnostics)?;
             }
             PossibleOptions::RestrictedGlobals(options) => {
+                options.visit_map(key, value, diagnostics)?;
+            }
+            PossibleOptions::ValidAriaRole(options) => {
                 options.visit_map(key, value, diagnostics)?;
             }
         }
