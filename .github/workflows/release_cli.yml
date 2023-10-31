@@ -206,15 +206,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Bump Homebrew formula
-        continue-on-error: true
-        if: needs.build.outputs.prerelease != 'true'
-        uses: dawidd6/action-homebrew-bump-formula@v3
-        with:
-          org: biomejs
-          token: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
-          formula: biome
-
       - name: Extract changelog
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
@@ -232,3 +223,18 @@ jobs:
             biome-*
           fail_on_unmatched_files: true
           generate_release_notes: true
+
+  homebrew:
+    name: Bump Homebrew formula
+    if: needs.build.outputs.prerelease != 'true'
+    runs-on: ubuntu-latest
+    needs: build
+    environment: package_manager
+    continue-on-error: true
+    steps: 
+      - name: Bump Homebrew formula
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          org: biomejs
+          token: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
+          formula: biome
