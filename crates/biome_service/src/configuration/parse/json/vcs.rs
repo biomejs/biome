@@ -1,27 +1,25 @@
 use crate::configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, with_only_known_variants, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage};
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonStringValue};
 use biome_rowan::{AstNode, SyntaxNode};
 
-impl VisitNode<JsonLanguage> for VcsConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, VcsConfiguration::KNOWN_KEYS, diagnostics)
-    }
+impl VcsConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] =
+        &["clientKind", "enabled", "useIgnoreFile", "root"];
+}
 
+impl VisitNode<JsonLanguage> for VcsConfiguration {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "clientKind" => {
                 let mut client_kind = VcsClientKind::default();
@@ -34,25 +32,32 @@ impl VisitNode<JsonLanguage> for VcsConfiguration {
             "useIgnoreFile" => {
                 self.use_ignore_file = self.map_to_boolean(&value, name_text, diagnostics);
             }
-
             "root" => {
                 self.root = self.map_to_string(&value, name_text, diagnostics);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
         Some(())
     }
 }
 
+impl VcsClientKind {
+    const ALLOWED_VARIANTS: &'static [&'static str] = &["git"];
+}
+
 impl VisitNode<JsonLanguage> for VcsClientKind {
-    fn visit_member_value(
+    fn visit_value(
         &mut self,
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let node = with_only_known_variants(node, VcsClientKind::KNOWN_VALUES, diagnostics)?;
+        let node = JsonStringValue::cast_ref(node)?;
         if node.inner_string_text().ok()?.text() == "git" {
             *self = VcsClientKind::Git;
+        } else {
+            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
         }
         Some(())
     }

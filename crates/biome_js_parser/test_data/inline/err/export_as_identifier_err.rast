@@ -49,13 +49,13 @@ JsModule {
 --
 export_as_identifier_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found ''
+  × Expected an identifier but instead found ''.
   
   > 1 │ export { as c }
       │          
     2 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
   > 1 │ export { as c }
       │          

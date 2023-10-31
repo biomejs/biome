@@ -75,7 +75,7 @@ JsModule {
 --
 setter_class_no_body.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class method body but instead found '}'
+  × Expected a class method body but instead found '}'.
   
     1 │ class Setters {
     2 │   set foo(a)
@@ -83,7 +83,7 @@ setter_class_no_body.js:3:1 parse ━━━━━━━━━━━━━━━�
       │ ^
     4 │ 
   
-  i Expected a class method body here
+  i Expected a class method body here.
   
     1 │ class Setters {
     2 │   set foo(a)

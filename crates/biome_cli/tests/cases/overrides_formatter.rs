@@ -228,7 +228,7 @@ fn does_include_file_with_different_formatting() {
 }
 
 #[test]
-fn does_include_file_with_different_formatting_and_applies_the_first_one() {
+fn does_include_file_with_different_formatting_and_all_of_them() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
     let file_path = Path::new("biome.json");
@@ -236,8 +236,8 @@ fn does_include_file_with_different_formatting_and_applies_the_first_one() {
         file_path.into(),
         r#"{
   "overrides": [
-    { "include": ["special/**"], "formatter": { "lineWidth": 20 } },
-    { "include": ["special/**"], "formatter": { "lineWidth": 130 } }
+    { "include": ["special/**"], "formatter": { "lineWidth": 130 } },
+    { "include": ["special/**"], "formatter": { "lineWidth": 20 } }
    ]
 }
 
@@ -272,7 +272,7 @@ fn does_include_file_with_different_formatting_and_applies_the_first_one() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "does_include_file_with_different_formatting_and_applies_the_first_one",
+        "does_include_file_with_different_formatting_and_all_of_them",
         fs,
         console,
         result,

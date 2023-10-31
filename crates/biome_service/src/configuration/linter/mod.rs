@@ -64,8 +64,6 @@ impl LinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
     }
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] =
-        &["enabled", "rules", "include", "ignore"];
 }
 
 impl Default for LinterConfiguration {
@@ -179,10 +177,6 @@ pub enum RulePlainConfiguration {
     Warn,
     Error,
     Off,
-}
-
-impl RulePlainConfiguration {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["warn", "error", "off"];
 }
 
 impl FromStr for RulePlainConfiguration {

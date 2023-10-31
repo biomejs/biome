@@ -56,7 +56,7 @@ syntax.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━
   
 syntax.js:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ']'
+  × Expected a statement but instead found ']'.
   
     1 │ #[]
     2 │ #[1, 2]
@@ -64,7 +64,7 @@ syntax.js:3:18 parse ━━━━━━━━━━━━━━━━━━━�
       │                  ^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ #[]
     2 │ #[1, 2]

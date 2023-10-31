@@ -48,12 +48,12 @@ JsonRoot {
 ```
 string_invalid_unicode_escape.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '"\uqqqq"'
+  × Expected an array, an object, or a literal but instead found '"\uqqqq"'.
   
   > 1 │ ["\uqqqq"]
       │  ^^^^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ["\uqqqq"]
       │  ^^^^^^^^

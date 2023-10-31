@@ -14,7 +14,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.3.3 (2023-10-31)
 
 ### Analyzer
 
@@ -24,17 +24,24 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
-### Configuration
+#### Bug fixes
+
+- Fix how `overrides` behave. Now `ignore` and `include` apply or not the override pattern, so they override each other.
+  Now the options inside `overrides` override the top-level options.
+- Bootstrap the logger only when needed. Contributed by @ematipico
 
 ### Editors
+
+#### Bug fixes
+
+- Fix [#592](https://github.com/biomejs/biome/issues/592), by changing binary resolution in the IntelliJ plugin. Contributed by @Joshuabaker2
 
 ### Formatter
 
 #### Bug fixes
 
 - Apply the correct layout when the right hand of an assignment expression is a await expression or a yield expression. Contributed by @ematipico
-
-### JavaScript APIs
+- Fix [#303](https://github.com/biomejs/biome/issues/303), where nested arrow functions didn't break. Contributed by @victor-teles
 
 ### Linter
 
@@ -49,12 +56,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#595](https://github.com/biomejs/biome/issues/595) by updating unsafe-apply logic to avoid unexpected errors in [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/). Contributed by @nissy-dev
 
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
-
+- Support more a11y roles and fix some methods for a11y lint rules Contributed @nissy-dev
+- Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+-
 ### Parser
 
-- Support RegExp v flag. Contributed by @nissy-dev
+#### Enhancements
 
-### VSCode
+- Support RegExp v flag. Contributed by @nissy-dev
+- Improve error messages. Contributed by @ematipico
 
 ## 1.3.1 (2023-10-20)
 
@@ -72,6 +82,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#552](https://github.com/biomejs/biome/issues/552), where the formatter isn't correctly triggered in Windows systems. Contributed by @victor-teles
 
 ### Linter
+
+#### New features
+
+- Add [noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static) rule. Contributed by @ditorodev and @Conaclos
 
 #### Bug fixes
 

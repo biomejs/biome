@@ -58,14 +58,14 @@ comment.js:2:1 parse ━━━━━━━━━━━━━━━━━━━�
   
 comment.js:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or a member expression but instead found '>'
+  × Expected an identifier, or a member expression but instead found '>'.
   
     1 │ <!--
     2 │ alert(1)
   > 3 │ -->
       │   ^
   
-  i Expected an identifier, or a member expression here
+  i Expected an identifier, or a member expression here.
   
     1 │ <!--
     2 │ alert(1)
@@ -74,14 +74,14 @@ comment.js:3:3 parse ━━━━━━━━━━━━━━━━━━━�
   
 comment.js:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found the end of the file
+  × Expected an expression but instead found the end of the file.
   
     1 │ <!--
     2 │ alert(1)
   > 3 │ -->
       │    
   
-  i Expected an expression here
+  i Expected an expression here.
   
     1 │ <!--
     2 │ alert(1)

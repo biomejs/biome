@@ -107,7 +107,7 @@ foo = /** @type A */ (#[
 ```
 tuple-and-record.js:8:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
      6 │ });
      7 │ 
@@ -116,7 +116,7 @@ tuple-and-record.js:8:24 parse ━━━━━━━━━━━━━━━━�
      9 │   // comment
     10 │   width,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      6 │ });
      7 │ 
@@ -151,7 +151,7 @@ tuple-and-record.js:8:24 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '...'
+  × Expected an expression but instead found '...'.
   
     10 │   width,
     11 │   height,
@@ -160,7 +160,7 @@ tuple-and-record.js:12:3 parse ━━━━━━━━━━━━━━━━�
     13 │ });
     14 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     10 │   width,
     11 │   height,
@@ -171,7 +171,7 @@ tuple-and-record.js:12:3 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:13:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ')'
+  × Expected a statement but instead found ')'.
   
     11 │   height,
     12 │   ...margins,
@@ -180,7 +180,7 @@ tuple-and-record.js:13:2 parse ━━━━━━━━━━━━━━━━�
     14 │ 
     15 │ foo = /** @type A */ ([
   
-  i Expected a statement here
+  i Expected a statement here.
   
     11 │   height,
     12 │   ...margins,
@@ -191,7 +191,7 @@ tuple-and-record.js:13:2 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:22:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     20 │ ]);
     21 │ 
@@ -200,7 +200,7 @@ tuple-and-record.js:22:24 parse ━━━━━━━━━━━━━━━━
     23 │   // comment
     24 │   width,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     20 │ ]);
     21 │ 
@@ -235,7 +235,7 @@ tuple-and-record.js:22:24 parse ━━━━━━━━━━━━━━━━
   
 tuple-and-record.js:26:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '...'
+  × Expected an expression but instead found '...'.
   
     24 │   width,
     25 │   height,
@@ -244,7 +244,7 @@ tuple-and-record.js:26:3 parse ━━━━━━━━━━━━━━━━�
     27 │ ]);
     28 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     24 │   width,
     25 │   height,

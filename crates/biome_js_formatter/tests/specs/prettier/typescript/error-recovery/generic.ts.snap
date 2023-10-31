@@ -80,14 +80,14 @@ class f7<> {
 ```
 generic.ts:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
   > 1 │ f1<>();
       │    ^
     2 │ 
     3 │ new f2<>();
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
   > 1 │ f1<>();
       │    ^
@@ -96,7 +96,7 @@ generic.ts:1:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 generic.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     1 │ f1<>();
     2 │ 
@@ -105,7 +105,7 @@ generic.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ 
     5 │ function f3<>() {}
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     1 │ f1<>();
     2 │ 
@@ -116,7 +116,7 @@ generic.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━�
   
 generic.ts:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     3 │ new f2<>();
     4 │ 
@@ -125,7 +125,7 @@ generic.ts:5:13 parse ━━━━━━━━━━━━━━━━━━━�
     6 │ 
     7 │ class f4 {
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     3 │ new f2<>();
     4 │ 
@@ -136,7 +136,7 @@ generic.ts:5:13 parse ━━━━━━━━━━━━━━━━━━━�
   
 generic.ts:8:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
      7 │ class f4 {
    > 8 │     constructor<>() {}
@@ -144,7 +144,7 @@ generic.ts:8:17 parse ━━━━━━━━━━━━━━━━━━━�
      9 │ }
     10 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
      7 │ class f4 {
    > 8 │     constructor<>() {}
@@ -164,7 +164,7 @@ generic.ts:8:16 parse ━━━━━━━━━━━━━━━━━━━�
   
 generic.ts:11:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
      9 │ }
     10 │ 
@@ -173,7 +173,7 @@ generic.ts:11:21 parse ━━━━━━━━━━━━━━━━━━━
     12 │ 
     13 │ interface f6<> {
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
      9 │ }
     10 │ 
@@ -184,7 +184,7 @@ generic.ts:11:21 parse ━━━━━━━━━━━━━━━━━━━
   
 generic.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     11 │ const f5 = function<>() {}
     12 │ 
@@ -193,7 +193,7 @@ generic.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━
     14 │     test<>();
     15 │ }
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     11 │ const f5 = function<>() {}
     12 │ 
@@ -204,7 +204,7 @@ generic.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━
   
 generic.ts:14:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     13 │ interface f6<> {
   > 14 │     test<>();
@@ -212,7 +212,7 @@ generic.ts:14:10 parse ━━━━━━━━━━━━━━━━━━━
     15 │ }
     16 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     13 │ interface f6<> {
   > 14 │     test<>();
@@ -222,7 +222,7 @@ generic.ts:14:10 parse ━━━━━━━━━━━━━━━━━━━
   
 generic.ts:17:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     15 │ }
     16 │ 
@@ -231,7 +231,7 @@ generic.ts:17:10 parse ━━━━━━━━━━━━━━━━━━━
     18 │     test<>() {}
     19 │ }
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     15 │ }
     16 │ 
@@ -242,7 +242,7 @@ generic.ts:17:10 parse ━━━━━━━━━━━━━━━━━━━
   
 generic.ts:18:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     17 │ class f7<> {
   > 18 │     test<>() {}
@@ -250,7 +250,7 @@ generic.ts:18:10 parse ━━━━━━━━━━━━━━━━━━━
     19 │ }
     20 │ 
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     17 │ class f7<> {
   > 18 │     test<>() {}

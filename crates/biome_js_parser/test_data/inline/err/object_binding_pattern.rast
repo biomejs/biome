@@ -361,14 +361,14 @@ object_binding_pattern.js:1:5 parse ━━━━━━━━━━━━━━�
 --
 object_binding_pattern.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '} ='
+  × Expected a statement but instead found '} ='.
   
   > 1 │ let { 5 } } = { eval: "foo" };
       │           ^^^
     2 │ let { eval } = { eval: "foo" };
     3 │ let { 5, 6 } = { eval: "foo" };
   
-  i Expected a statement here
+  i Expected a statement here.
   
   > 1 │ let { 5 } } = { eval: "foo" };
       │           ^^^
@@ -430,7 +430,7 @@ object_binding_pattern.js:4:15 parse ━━━━━━━━━━━━━━�
 --
 object_binding_pattern.js:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found '}'
+  × Expected an identifier, an array pattern, or an object pattern but instead found '}'.
   
     2 │ let { eval } = { eval: "foo" };
     3 │ let { 5, 6 } = { eval: "foo" };
@@ -438,7 +438,7 @@ object_binding_pattern.js:4:23 parse ━━━━━━━━━━━━━━�
       │                       ^
     5 │ 
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
     2 │ let { eval } = { eval: "foo" };
     3 │ let { 5, 6 } = { eval: "foo" };

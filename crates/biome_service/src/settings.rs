@@ -1,8 +1,7 @@
-// use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::{push_to_analyzer_rules, JavascriptConfiguration, JsonConfiguration};
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
-    Matcher, Rules, WorkspaceError,
+    Matcher, MergeWith, Rules, WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_deserialize::StringSet;
@@ -17,6 +16,7 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use indexmap::IndexSet;
+use std::ops::{BitOr, Sub};
 use std::path::Path;
 use std::{
     num::NonZeroU64,
@@ -126,9 +126,13 @@ impl WorkspaceSettings {
         }
     }
 
-    pub fn as_rules(&self, path: &Path) -> Option<&Rules> {
+    /// Returns rules
+    pub fn as_rules(&self, path: &Path) -> Option<Rules> {
         let overrides = &self.override_settings;
-        overrides.as_rules(path).or(self.linter.rules.as_ref())
+        self.linter
+            .rules
+            .as_ref()
+            .map(|rules| overrides.override_as_rules(path, rules.clone()))
     }
 }
 
@@ -462,95 +466,106 @@ impl OverrideSettings {
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn as_js_format_options(&self, path: &Path) -> Option<JsFormatOptions> {
-        for pattern in &self.patterns {
+    pub fn override_js_format_options(
+        &self,
+        path: &Path,
+        options: JsFormatOptions,
+    ) -> JsFormatOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
                 let js_formatter = &pattern.languages.javascript.formatter;
-                return Some(
-                    JsFormatOptions::new(path.try_into().unwrap_or_default())
-                        .with_indent_style(
-                            pattern
-                                .formatter
-                                .indent_style
-                                .unwrap_or(js_formatter.indent_style.unwrap_or_default()),
-                        )
-                        .with_indent_width(
-                            pattern
-                                .formatter
-                                .indent_width
-                                .unwrap_or(js_formatter.indent_width.unwrap_or_default()),
-                        )
-                        .with_line_width(
-                            pattern
-                                .formatter
-                                .line_width
-                                .unwrap_or(js_formatter.line_width.unwrap_or_default()),
-                        )
-                        .with_quote_style(js_formatter.quote_style.unwrap_or_default())
-                        .with_jsx_quote_style(js_formatter.jsx_quote_style.unwrap_or_default())
-                        .with_quote_properties(js_formatter.quote_properties.unwrap_or_default())
-                        .with_trailing_comma(js_formatter.trailing_comma.unwrap_or_default())
-                        .with_semicolons(js_formatter.semicolons.unwrap_or_default())
-                        .with_arrow_parentheses(js_formatter.arrow_parentheses.unwrap_or_default()),
-                );
-            }
-        }
+                let formatter = &pattern.formatter;
 
-        None
+                if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
+                    options.set_indent_style(indent_style);
+                }
+
+                if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
+                    options.set_indent_width(indent_width)
+                }
+                if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
+                    options.set_line_width(line_width);
+                }
+                if let Some(quote_style) = js_formatter.quote_style {
+                    options.set_quote_style(quote_style);
+                }
+                if let Some(trailing_comma) = js_formatter.trailing_comma {
+                    options.set_trailing_comma(trailing_comma);
+                }
+                if let Some(quote_properties) = js_formatter.quote_properties {
+                    options.set_quote_properties(quote_properties);
+                }
+                if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
+                    options.set_jsx_quote_style(jsx_quote_style);
+                }
+                if let Some(semicolons) = js_formatter.semicolons {
+                    options.set_semicolons(semicolons);
+                }
+                if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
+                    options.set_arrow_parentheses(arrow_parentheses);
+                }
+            }
+
+            options
+        })
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn as_json_format_options(&self, path: &Path) -> Option<JsonFormatOptions> {
-        for pattern in &self.patterns {
+    pub fn override_json_format_options(
+        &self,
+        path: &Path,
+        options: JsonFormatOptions,
+    ) -> JsonFormatOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                let pattern_formatter = &pattern.formatter;
                 let json_formatter = &pattern.languages.json.formatter;
 
-                return Some(
-                    JsonFormatOptions::new(path.try_into().unwrap_or_default())
-                        .with_indent_style(
-                            json_formatter
-                                .indent_style
-                                .unwrap_or(pattern_formatter.indent_style.unwrap_or_default()),
-                        )
-                        .with_indent_width(
-                            json_formatter
-                                .indent_width
-                                .unwrap_or(pattern_formatter.indent_width.unwrap_or_default()),
-                        )
-                        .with_line_width(
-                            json_formatter
-                                .line_width
-                                .unwrap_or(pattern_formatter.line_width.unwrap_or_default()),
-                        ),
-                );
-            }
-        }
+                if let Some(indent_style) = json_formatter
+                    .indent_style
+                    .or(pattern.formatter.indent_style)
+                {
+                    options.set_indent_style(indent_style);
+                }
 
-        None
+                if let Some(indent_width) = json_formatter
+                    .indent_width
+                    .or(pattern.formatter.indent_width)
+                {
+                    options.set_indent_width(indent_width)
+                }
+                if let Some(line_width) = json_formatter.line_width.or(pattern.formatter.line_width)
+                {
+                    options.set_line_width(line_width);
+                }
+            }
+
+            options
+        })
     }
 
-    pub fn as_js_parser_options(&self, path: &Path) -> Option<JsParserOptions> {
-        for pattern in &self.patterns {
+    pub fn override_js_parser_options(
+        &self,
+        path: &Path,
+        options: JsParserOptions,
+    ) -> JsParserOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
                 let js_parser = &pattern.languages.javascript.parser;
 
-                return Some(JsParserOptions {
-                    parse_class_parameter_decorators: js_parser.parse_class_parameter_decorators,
-                });
+                options.parse_class_parameter_decorators =
+                    js_parser.parse_class_parameter_decorators;
             }
-        }
-
-        None
+            options
+        })
     }
 
     pub fn as_json_parser_options(&self, path: &Path) -> Option<JsonParserOptions> {
@@ -572,47 +587,63 @@ impl OverrideSettings {
     }
 
     /// Retrieves the options of lint rules that have been overridden
-    pub fn as_analyzer_rules_options(&self, path: &Path) -> Option<AnalyzerRules> {
-        for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+    pub fn override_analyzer_rules(
+        &self,
+        path: &Path,
+        analyzer_rules: AnalyzerRules,
+    ) -> AnalyzerRules {
+        self.patterns
+            .iter()
+            .fold(analyzer_rules, |mut analyzer_rules, pattern| {
+                let included = pattern.include.as_ref().map(|p| p.matches_path(path));
+                let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
-            if included == Some(true) || excluded == Some(false) {
-                if let Some(rules) = pattern.linter.rules.as_ref() {
-                    let mut analyzer_rules = AnalyzerRules::default();
-                    push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
-                    return Some(analyzer_rules);
+                if included == Some(true) || excluded == Some(false) {
+                    if let Some(rules) = pattern.linter.rules.as_ref() {
+                        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+                    }
                 }
-            }
-        }
-        None
+                analyzer_rules
+            })
     }
 
     /// Retrieves the enabled rules that match the given `path`
-    pub fn as_enabled_rules(&self, path: &Path) -> Option<IndexSet<RuleFilter>> {
-        for pattern in &self.patterns {
+    pub fn overrides_enabled_rules<'a>(
+        &'a self,
+        path: &Path,
+        rules: IndexSet<RuleFilter<'a>>,
+    ) -> IndexSet<RuleFilter> {
+        self.patterns.iter().fold(rules, move |mut rules, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                if let Some(rules) = pattern.linter.rules.as_ref() {
-                    return Some(rules.as_enabled_rules());
+                if let Some(pattern_rules) = pattern.linter.rules.as_ref() {
+                    let disabled_rules = pattern_rules.as_disabled_rules();
+                    let enabled_rules = pattern_rules.as_enabled_rules();
+
+                    rules = rules.bitor(&enabled_rules).sub(&disabled_rules);
                 }
             }
-        }
-        None
+
+            rules
+        })
     }
 
-    pub fn as_rules(&self, path: &Path) -> Option<&Rules> {
-        for pattern in &self.patterns {
+    pub fn override_as_rules(&self, path: &Path, rules: Rules) -> Rules {
+        self.patterns.iter().fold(rules, |mut rules, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
             if included == Some(true) || excluded == Some(false) {
-                return pattern.linter.rules.as_ref();
+                let pattern_rules = pattern.linter.rules.as_ref();
+                if let Some(patter_rules) = pattern_rules {
+                    rules.merge_with(patter_rules.clone())
+                }
             }
-        }
-        None
+
+            rules
+        })
     }
 
     /// Scans the overrides and checks if there's an override that disable the formatter for `path`

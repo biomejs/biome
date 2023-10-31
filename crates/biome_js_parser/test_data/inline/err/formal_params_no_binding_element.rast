@@ -60,13 +60,13 @@ JsModule {
 --
 formal_params_no_binding_element.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parameter but instead found 'true'
+  × Expected a parameter but instead found 'true'.
   
   > 1 │ function foo(true) {}
       │              ^^^^
     2 │ 
   
-  i Expected a parameter here
+  i Expected a parameter here.
   
   > 1 │ function foo(true) {}
       │              ^^^^

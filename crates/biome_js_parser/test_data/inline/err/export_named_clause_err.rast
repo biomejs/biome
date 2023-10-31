@@ -255,7 +255,7 @@ export_named_clause_err.js:2:10 parse ━━━━━━━━━━━━━━
 --
 export_named_clause_err.js:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found ''
+  × Expected an identifier but instead found ''.
   
     1 │ export { default as "b" };
     2 │ export { "a" as b };
@@ -264,7 +264,7 @@ export_named_clause_err.js:3:10 parse ━━━━━━━━━━━━━━
     4 │ export { a as 5 };
     5 │ export { a b c };
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ export { default as "b" };
     2 │ export { "a" as b };
@@ -276,7 +276,7 @@ export_named_clause_err.js:3:10 parse ━━━━━━━━━━━━━━
 --
 export_named_clause_err.js:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found '5'
+  × Expected a string literal, or an identifier but instead found '5'.
   
     2 │ export { "a" as b };
     3 │ export { as b };
@@ -285,7 +285,7 @@ export_named_clause_err.js:4:15 parse ━━━━━━━━━━━━━━
     5 │ export { a b c };
     6 │ 
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
     2 │ export { "a" as b };
     3 │ export { as b };

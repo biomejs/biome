@@ -6,7 +6,7 @@ use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 use crate::configuration::{JavascriptConfiguration, JsonConfiguration, PlainIndentStyle};
 use crate::Rules;
 use biome_console::markup;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_formatter::LineWidth;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
@@ -26,23 +26,28 @@ impl VisitNode<JsonLanguage> for Overrides {
     }
 }
 
-impl VisitNode<JsonLanguage> for OverridePattern {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, OverridePattern::KNOWN_KEYS, diagnostics)
-    }
+impl OverridePattern {
+    const ALLOWED_KEYS: &'static [&'static str] = &[
+        "ignore",
+        "include",
+        "formatter",
+        "linter",
+        "organizeImports",
+        "javascript",
+        "json",
+    ];
+}
 
+impl VisitNode<JsonLanguage> for OverridePattern {
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "ignore" => {
                 self.ignore = self
@@ -79,34 +84,36 @@ impl VisitNode<JsonLanguage> for OverridePattern {
                 json.map_to_object(&value, name_text, diagnostics)?;
                 self.json = Some(json);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())
     }
 }
 
-impl VisitNode<JsonLanguage> for OverrideFormatterConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            OverrideFormatterConfiguration::KNOWN_KEYS,
-            diagnostics,
-        )
-    }
+impl OverrideFormatterConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] = &[
+        "enabled",
+        "formatWithErrors",
+        "indentStyle",
+        "indentSize",
+        "indentWidth",
+        "lineWidth",
+    ];
+}
 
+impl VisitNode<JsonLanguage> for OverrideFormatterConfiguration {
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
@@ -148,30 +155,29 @@ impl VisitNode<JsonLanguage> for OverrideFormatterConfiguration {
             "formatWithErrors" => {
                 self.format_with_errors = self.map_to_boolean(&value, name_text, diagnostics);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())
     }
 }
 
-impl VisitNode<JsonLanguage> for OverrideLinterConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, OverrideLinterConfiguration::KNOWN_KEYS, diagnostics)
-    }
+impl OverrideLinterConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] = &["enabled", "rules"];
+}
 
+impl VisitNode<JsonLanguage> for OverrideLinterConfiguration {
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "enabled" => {
                 self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
@@ -183,37 +189,33 @@ impl VisitNode<JsonLanguage> for OverrideLinterConfiguration {
                     self.rules = Some(rules);
                 }
             }
-
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
 
         Some(())
     }
 }
 
-impl VisitNode<JsonLanguage> for OverrideOrganizeImportsConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(
-            node,
-            OverrideOrganizeImportsConfiguration::KNOWN_KEYS,
-            diagnostics,
-        )
-    }
+impl OverrideOrganizeImportsConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] = &["enabled"];
+}
 
+impl VisitNode<JsonLanguage> for OverrideOrganizeImportsConfiguration {
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         if name_text == "enabled" {
             self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
+        } else {
+            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
 
         Some(())

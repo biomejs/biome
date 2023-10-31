@@ -132,7 +132,7 @@ logical_expressions_err.js:1:8 parse ━━━━━━━━━━━━━━�
 --
 logical_expressions_err.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     1 │ foo ?? * 2;
     2 │ !foo && bar;
@@ -140,7 +140,7 @@ logical_expressions_err.js:3:11 parse ━━━━━━━━━━━━━━
       │           ^
     4 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     1 │ foo ?? * 2;
     2 │ !foo && bar;

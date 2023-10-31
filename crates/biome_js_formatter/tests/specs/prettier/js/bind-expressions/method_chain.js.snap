@@ -81,13 +81,13 @@ function test(observable) {
 ```
 method_chain.js:10:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '::filter(data => data.someTest)
+  × Expected a statement but instead found '::filter(data => data.someTest)
             ::throttle(() =>
                 interval(10)
                     ::take(1)
                     ::takeUntil(observable::filter(data => someOtherTest))
             )
-            ::map(someFunction)'
+            ::map(someFunction)'.
   
      8 │ function test(observable) {
      9 │     return observable
@@ -101,7 +101,7 @@ method_chain.js:10:9 parse ━━━━━━━━━━━━━━━━━�
     17 │ }
     18 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
      8 │ function test(observable) {
      9 │     return observable

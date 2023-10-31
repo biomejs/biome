@@ -181,7 +181,7 @@ nested-quotes.json:7:17 parse ━━━━━━━━━━━━━━━━�
   
 nested-quotes.json:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
     10 │     {"type": "office",
     11 │       "trailing": "commas by accident"},
@@ -190,7 +190,7 @@ nested-quotes.json:12:3 parse ━━━━━━━━━━━━━━━━�
     13 │ }
     14 │ 
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
     10 │     {"type": "office",
     11 │       "trailing": "commas by accident"},

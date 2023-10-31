@@ -50,7 +50,7 @@ function test(param = throw new Error('required!')
 ```
 throw-expressions.js:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found 'throw'
+  × Expected an expression, or an assignment but instead found 'throw'.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-throw-expressions
     2 │ 
@@ -59,7 +59,7 @@ throw-expressions.js:3:23 parse ━━━━━━━━━━━━━━━━
     4 │   const test = param === true || throw new Error('Falsy!');
     5 │ }
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-throw-expressions
     2 │ 
@@ -96,7 +96,7 @@ throw-expressions.js:3:38 parse ━━━━━━━━━━━━━━━━
   
 throw-expressions.js:3:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body but instead found ')'
+  × Expected a function body but instead found ')'.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-throw-expressions
     2 │ 
@@ -105,7 +105,7 @@ throw-expressions.js:3:51 parse ━━━━━━━━━━━━━━━━
     4 │   const test = param === true || throw new Error('Falsy!');
     5 │ }
   
-  i Expected a function body here
+  i Expected a function body here.
   
     1 │ // https://babeljs.io/docs/en/babel-plugin-proposal-throw-expressions
     2 │ 
@@ -116,7 +116,7 @@ throw-expressions.js:3:51 parse ━━━━━━━━━━━━━━━━
   
 throw-expressions.js:4:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found 'throw'
+  × Expected an expression but instead found 'throw'.
   
     3 │ function test(param = throw new Error('required!')) {
   > 4 │   const test = param === true || throw new Error('Falsy!');
@@ -124,7 +124,7 @@ throw-expressions.js:4:34 parse ━━━━━━━━━━━━━━━━
     5 │ }
     6 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     3 │ function test(param = throw new Error('required!')) {
   > 4 │   const test = param === true || throw new Error('Falsy!');

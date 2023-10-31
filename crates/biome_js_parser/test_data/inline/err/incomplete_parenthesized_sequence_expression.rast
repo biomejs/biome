@@ -87,14 +87,14 @@ JsModule {
 --
 incomplete_parenthesized_sequence_expression.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ';'
+  × Expected an expression but instead found ';'.
   
   > 1 │ (a,;
       │    ^
     2 │ (a, b, c;
     3 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
   > 1 │ (a,;
       │    ^

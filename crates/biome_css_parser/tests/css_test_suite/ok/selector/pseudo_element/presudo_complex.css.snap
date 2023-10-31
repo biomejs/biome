@@ -1,0 +1,468 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+a::after div {}
+video::cue div {}
+video::cue(b) div {}
+::highlight(sample) div {}
+::part(active) div {}
+::cue(b ::part(active)) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@0..1 "a" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@1..3 "::" [] [],
+                                element: CssPseudoElementIdentifier {
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@3..8 "after" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@8..9 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@9..13 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@14..15 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@15..21 "video" [Newline("\n")] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@21..23 "::" [] [],
+                                element: CssPseudoElementIdentifier {
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@23..26 "cue" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@26..27 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@27..31 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@31..32 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@32..33 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@33..39 "video" [Newline("\n")] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@39..41 "::" [] [],
+                                element: CssPseudoElementFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@41..44 "cue" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@44..45 "(" [] [],
+                                    selector: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@45..46 "b" [] [],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    r_paren_token: R_PAREN@46..47 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@47..48 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@48..52 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@52..53 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@53..54 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@54..57 "::" [Newline("\n")] [],
+                                element: CssPseudoElementHighlight {
+                                    name_token: HIGHLIGHT_KW@57..66 "highlight" [] [],
+                                    l_paren_token: L_PAREN@66..67 "(" [] [],
+                                    custom_highlight_name: CssIdentifier {
+                                        value_token: IDENT@67..73 "sample" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@73..74 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@74..75 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@75..79 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@79..80 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@80..81 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@81..84 "::" [Newline("\n")] [],
+                                element: CssPseudoElementPart {
+                                    name_token: PART_KW@84..88 "part" [] [],
+                                    l_paren_token: L_PAREN@88..89 "(" [] [],
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@89..95 "active" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@95..96 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@96..97 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@97..101 "div" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@101..102 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@102..103 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@103..106 "::" [Newline("\n")] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@106..109 "cue" [] [],
+                                },
+                                l_paren_token: L_PAREN@109..110 "(" [] [],
+                                selector: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@110..111 "b" [] [],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    combinator: CSS_SPACE_LITERAL@111..112 " " [] [],
+                                    right: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssPseudoElementSelector {
+                                                double_colon_token: COLON2@112..114 "::" [] [],
+                                                element: CssPseudoElementPart {
+                                                    name_token: PART_KW@114..118 "part" [] [],
+                                                    l_paren_token: L_PAREN@118..119 "(" [] [],
+                                                    ident: CssIdentifier {
+                                                        value_token: IDENT@119..125 "active" [] [],
+                                                    },
+                                                    r_paren_token: R_PAREN@125..126 ")" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@126..128 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@128..129 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@129..130 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@130..131 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..131
+  0: CSS_RULE_LIST@0..130
+    0: CSS_RULE@0..15
+      0: CSS_SELECTOR_LIST@0..13
+        0: CSS_COMPLEX_SELECTOR@0..13
+          0: CSS_COMPOUND_SELECTOR@0..8
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@0..1
+              0: CSS_IDENTIFIER@0..1
+                0: IDENT@0..1 "a" [] []
+            2: CSS_SUB_SELECTOR_LIST@1..8
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@1..8
+                0: COLON2@1..3 "::" [] []
+                1: CSS_PSEUDO_ELEMENT_IDENTIFIER@3..8
+                  0: CSS_IDENTIFIER@3..8
+                    0: IDENT@3..8 "after" [] []
+          1: CSS_SPACE_LITERAL@8..9 " " [] []
+          2: CSS_COMPOUND_SELECTOR@9..13
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@9..13
+              0: CSS_IDENTIFIER@9..13
+                0: IDENT@9..13 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@13..13
+      1: CSS_BLOCK@13..15
+        0: L_CURLY@13..14 "{" [] []
+        1: CSS_DECLARATION_LIST@14..14
+        2: R_CURLY@14..15 "}" [] []
+    1: CSS_RULE@15..33
+      0: CSS_SELECTOR_LIST@15..31
+        0: CSS_COMPLEX_SELECTOR@15..31
+          0: CSS_COMPOUND_SELECTOR@15..26
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@15..21
+              0: CSS_IDENTIFIER@15..21
+                0: IDENT@15..21 "video" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@21..26
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@21..26
+                0: COLON2@21..23 "::" [] []
+                1: CSS_PSEUDO_ELEMENT_IDENTIFIER@23..26
+                  0: CSS_IDENTIFIER@23..26
+                    0: IDENT@23..26 "cue" [] []
+          1: CSS_SPACE_LITERAL@26..27 " " [] []
+          2: CSS_COMPOUND_SELECTOR@27..31
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@27..31
+              0: CSS_IDENTIFIER@27..31
+                0: IDENT@27..31 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@31..31
+      1: CSS_BLOCK@31..33
+        0: L_CURLY@31..32 "{" [] []
+        1: CSS_DECLARATION_LIST@32..32
+        2: R_CURLY@32..33 "}" [] []
+    2: CSS_RULE@33..54
+      0: CSS_SELECTOR_LIST@33..52
+        0: CSS_COMPLEX_SELECTOR@33..52
+          0: CSS_COMPOUND_SELECTOR@33..47
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@33..39
+              0: CSS_IDENTIFIER@33..39
+                0: IDENT@33..39 "video" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@39..47
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@39..47
+                0: COLON2@39..41 "::" [] []
+                1: CSS_PSEUDO_ELEMENT_FUNCTION@41..47
+                  0: CSS_IDENTIFIER@41..44
+                    0: IDENT@41..44 "cue" [] []
+                  1: L_PAREN@44..45 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR@45..46
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@45..46
+                      0: CSS_IDENTIFIER@45..46
+                        0: IDENT@45..46 "b" [] []
+                    2: CSS_SUB_SELECTOR_LIST@46..46
+                  3: R_PAREN@46..47 ")" [] []
+          1: CSS_SPACE_LITERAL@47..48 " " [] []
+          2: CSS_COMPOUND_SELECTOR@48..52
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@48..52
+              0: CSS_IDENTIFIER@48..52
+                0: IDENT@48..52 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@52..52
+      1: CSS_BLOCK@52..54
+        0: L_CURLY@52..53 "{" [] []
+        1: CSS_DECLARATION_LIST@53..53
+        2: R_CURLY@53..54 "}" [] []
+    3: CSS_RULE@54..81
+      0: CSS_SELECTOR_LIST@54..79
+        0: CSS_COMPLEX_SELECTOR@54..79
+          0: CSS_COMPOUND_SELECTOR@54..74
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@54..74
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@54..74
+                0: COLON2@54..57 "::" [Newline("\n")] []
+                1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@57..74
+                  0: HIGHLIGHT_KW@57..66 "highlight" [] []
+                  1: L_PAREN@66..67 "(" [] []
+                  2: CSS_IDENTIFIER@67..73
+                    0: IDENT@67..73 "sample" [] []
+                  3: R_PAREN@73..74 ")" [] []
+          1: CSS_SPACE_LITERAL@74..75 " " [] []
+          2: CSS_COMPOUND_SELECTOR@75..79
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@75..79
+              0: CSS_IDENTIFIER@75..79
+                0: IDENT@75..79 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@79..79
+      1: CSS_BLOCK@79..81
+        0: L_CURLY@79..80 "{" [] []
+        1: CSS_DECLARATION_LIST@80..80
+        2: R_CURLY@80..81 "}" [] []
+    4: CSS_RULE@81..103
+      0: CSS_SELECTOR_LIST@81..101
+        0: CSS_COMPLEX_SELECTOR@81..101
+          0: CSS_COMPOUND_SELECTOR@81..96
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@81..96
+              0: CSS_PSEUDO_ELEMENT_SELECTOR@81..96
+                0: COLON2@81..84 "::" [Newline("\n")] []
+                1: CSS_PSEUDO_ELEMENT_PART@84..96
+                  0: PART_KW@84..88 "part" [] []
+                  1: L_PAREN@88..89 "(" [] []
+                  2: CSS_IDENTIFIER@89..95
+                    0: IDENT@89..95 "active" [] []
+                  3: R_PAREN@95..96 ")" [] []
+          1: CSS_SPACE_LITERAL@96..97 " " [] []
+          2: CSS_COMPOUND_SELECTOR@97..101
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@97..101
+              0: CSS_IDENTIFIER@97..101
+                0: IDENT@97..101 "div" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@101..101
+      1: CSS_BLOCK@101..103
+        0: L_CURLY@101..102 "{" [] []
+        1: CSS_DECLARATION_LIST@102..102
+        2: R_CURLY@102..103 "}" [] []
+    5: CSS_RULE@103..130
+      0: CSS_SELECTOR_LIST@103..128
+        0: CSS_COMPOUND_SELECTOR@103..128
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@103..128
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@103..128
+              0: COLON2@103..106 "::" [Newline("\n")] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@106..128
+                0: CSS_IDENTIFIER@106..109
+                  0: IDENT@106..109 "cue" [] []
+                1: L_PAREN@109..110 "(" [] []
+                2: CSS_COMPLEX_SELECTOR@110..126
+                  0: CSS_COMPOUND_SELECTOR@110..111
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@110..111
+                      0: CSS_IDENTIFIER@110..111
+                        0: IDENT@110..111 "b" [] []
+                    2: CSS_SUB_SELECTOR_LIST@111..111
+                  1: CSS_SPACE_LITERAL@111..112 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@112..126
+                    0: (empty)
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@112..126
+                      0: CSS_PSEUDO_ELEMENT_SELECTOR@112..126
+                        0: COLON2@112..114 "::" [] []
+                        1: CSS_PSEUDO_ELEMENT_PART@114..126
+                          0: PART_KW@114..118 "part" [] []
+                          1: L_PAREN@118..119 "(" [] []
+                          2: CSS_IDENTIFIER@119..125
+                            0: IDENT@119..125 "active" [] []
+                          3: R_PAREN@125..126 ")" [] []
+                3: R_PAREN@126..128 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@128..130
+        0: L_CURLY@128..129 "{" [] []
+        1: CSS_DECLARATION_LIST@129..129
+        2: R_CURLY@129..130 "}" [] []
+  1: EOF@130..131 "" [Newline("\n")] []
+
+```
+
+

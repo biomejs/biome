@@ -35,13 +35,13 @@ from; /* 4 */
 ```
 comments.js:1:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal but instead found 'from'
+  × Expected a string literal but instead found 'from'.
   
   > 1 │ /* 0 */import /* 1 */module /* 2 */from /* 3 */from /* 4 */"./module.wasm"/* 5 */;
       │                                                ^^^^
     2 │ 
   
-  i Expected a string literal here
+  i Expected a string literal here.
   
   > 1 │ /* 0 */import /* 1 */module /* 2 */from /* 3 */from /* 4 */"./module.wasm"/* 5 */;
       │                                                ^^^^

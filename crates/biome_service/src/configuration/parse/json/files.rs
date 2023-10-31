@@ -1,27 +1,25 @@
 use crate::configuration::FilesConfiguration;
-use biome_deserialize::json::{has_only_known_keys, VisitJsonNode};
+use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
 use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::SyntaxNode;
 use std::num::NonZeroU64;
 
-impl VisitNode<JsonLanguage> for FilesConfiguration {
-    fn visit_member_name(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, FilesConfiguration::KNOWN_KEYS, diagnostics)
-    }
+impl FilesConfiguration {
+    const ALLOWED_KEYS: &'static [&'static str] =
+        &["maxSize", "ignore", "include", "ignoreUnknown"];
+}
 
+impl VisitNode<JsonLanguage> for FilesConfiguration {
     fn visit_map(
         &mut self,
         key: &SyntaxNode<JsonLanguage>,
         value: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         match name_text {
             "maxSize" => {
                 self.max_size =
@@ -41,7 +39,9 @@ impl VisitNode<JsonLanguage> for FilesConfiguration {
             "ignoreUnknown" => {
                 self.ignore_unknown = self.map_to_boolean(&value, name_text, diagnostics);
             }
-            _ => {}
+            _ => {
+                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+            }
         }
         Some(())
     }

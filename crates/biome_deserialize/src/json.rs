@@ -6,7 +6,7 @@ use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonBooleanValue, JsonLanguage, JsonMemberName, JsonNumberValue,
     JsonObjectValue, JsonRoot, JsonStringValue, JsonSyntaxNode,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use indexmap::IndexSet;
 use std::num::ParseIntError;
 
@@ -35,27 +35,16 @@ impl JsonDeserialize for () {
 pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     /// Convenient function to use inside [visit_map].
     ///
-    /// It casts key to [JsonMemberName] and verifies that key name is correct by calling
-    /// [visit_member_name].
-    ///
-    /// It casts the value to [AnyJsonValue].
-    ///
-    /// ## Errors
-    ///
-    /// The function will emit a generic diagnostic if [visit_member_name] is not implemented by
-    /// the visitor that calls this function.
+    /// It casts `key` to [JsonMemberName] and the `value` to [AnyJsonValue].
     fn get_key_and_value(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<(TokenText, AnyJsonValue)> {
-        let member = key.clone().cast::<JsonMemberName>()?;
-        self.visit_member_name(member.syntax(), diagnostics)?;
-        let name = member.inner_string_text().ok()?;
-        let value = value.clone().cast::<AnyJsonValue>()?;
-
-        Some((name, value))
+    ) -> Option<(JsonMemberName, AnyJsonValue)> {
+        Some((
+            JsonMemberName::cast_ref(key)?,
+            AnyJsonValue::cast_ref(value)?,
+        ))
     }
 
     /// It attempts to map a [AnyJsonValue] to a string.
@@ -64,7 +53,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
     ///
     /// ## Errors
     ///
-    /// The function will emit a generic diagnostic if the `visitor` doesn't implement [visit_member_value]
+    /// The function will emit a generic diagnostic if the `visitor` doesn't implement [visit_value]
     fn map_to_known_string(
         &mut self,
         value: &AnyJsonValue,
@@ -72,7 +61,7 @@ pub trait VisitJsonNode: VisitNode<JsonLanguage> {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
         if JsonStringValue::can_cast(value.syntax().kind()) {
-            self.visit_member_value(value.syntax(), diagnostics)?;
+            self.visit_value(value.syntax(), diagnostics)?;
             return Some(());
         }
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_for_value(
@@ -459,51 +448,36 @@ fn emit_diagnostic_form_number(
     }
 }
 
-/// Convenient function to check if the current [JsonMemberName] belongs to a sub set of
-/// `allowed_keys`
-pub fn has_only_known_keys(
-    node: &JsonSyntaxNode,
+/// Convenient function to report that `key` is not allowed and
+/// to suggest a key in `allowed_keys`.
+pub fn report_unknown_map_key(
+    key: &JsonMemberName,
     allowed_keys: &[&str],
     diagnostics: &mut Vec<DeserializationDiagnostic>,
-) -> Option<()> {
-    node.clone().cast::<JsonMemberName>().and_then(|node| {
-        let key_name = node.inner_string_text().ok()?;
-        if allowed_keys.contains(&key_name.text()) {
-            Some(())
-        } else {
-            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                key_name.text(),
-                node.range(),
-                allowed_keys,
-            ));
-            None
-        }
-    })
+) {
+    if let Ok(name) = key.inner_string_text() {
+        diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+            name.text(),
+            key.range(),
+            allowed_keys,
+        ))
+    }
 }
 
-/// Convenient function that returns a [JsonStringValue] from a generic node, and checks
-/// if it's content matches the `allowed_keys`.
-///
-/// Useful when when you're parsing an `enum` and you still need to verify the value of the node, but
-/// still need it.
-pub fn with_only_known_variants(
-    node: &JsonSyntaxNode,
-    allowed_keys: &[&str],
+/// Convenient function to report that `variant` is not allowed and
+/// to suggest a variant in `allowed_variant`.
+pub fn report_unknown_variant(
+    variant: &JsonStringValue,
+    allowed_variants: &[&str],
     diagnostics: &mut Vec<DeserializationDiagnostic>,
-) -> Option<JsonStringValue> {
-    node.clone().cast::<JsonStringValue>().and_then(|node| {
-        let key_name = node.inner_string_text().ok()?;
-        if allowed_keys.contains(&key_name.text()) {
-            Some(node)
-        } else {
-            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                key_name.text(),
-                node.range(),
-                allowed_keys,
-            ));
-            None
-        }
-    })
+) {
+    if let Ok(value) = variant.inner_string_text() {
+        diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+            value.text(),
+            variant.range(),
+            allowed_variants,
+        ));
+    }
 }
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
@@ -521,7 +495,7 @@ pub fn with_only_known_variants(
 /// ```
 /// use biome_deserialize::{DeserializationDiagnostic,  VisitNode, Deserialized};
 /// use biome_deserialize::json::deserialize_from_json_str;
-/// use biome_deserialize::json::{with_only_known_variants, has_only_known_keys, JsonDeserialize, VisitJsonNode};
+/// use biome_deserialize::json::{report_unknown_map_key, JsonDeserialize, VisitJsonNode};
 /// use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 /// use biome_json_syntax::JsonRoot;
 /// use biome_rowan::AstNode;
@@ -532,18 +506,17 @@ pub fn with_only_known_variants(
 /// }
 ///
 /// impl VisitNode<JsonLanguage> for NewConfiguration {
-///     fn visit_member_name(&mut self, node: &JsonSyntaxNode, diagnostics: &mut Vec<DeserializationDiagnostic>) -> Option<()> {
-///         has_only_known_keys(node, &["lorem"], diagnostics)
-///     }
-///
 ///     fn visit_map(&mut self, key: &JsonSyntaxNode, value: &JsonSyntaxNode, diagnostics: &mut Vec<DeserializationDiagnostic>) -> Option<()> {
-///         let (key, value) = self.get_key_and_value(key, value, diagnostics)?;
-///
-///         match key.text() {
+///         let (key, value) = self.get_key_and_value(key, value)?;
+///         let name_text = key.inner_string_text().ok()?;
+///         let name_text = name_text.text();
+///         match name_text {
 ///             "lorem" => {
-///                 self.lorem = self.map_to_boolean(&value, key.text(), diagnostics)?
+///                 self.lorem = self.map_to_boolean(&value, name_text, diagnostics)?
 ///             }
-///             _ => {}
+///             _ => {
+///                 report_unknown_map_key(&key, &["lorem"], diagnostics);
+///             }
 ///         }
 ///         Some(())
 ///     }

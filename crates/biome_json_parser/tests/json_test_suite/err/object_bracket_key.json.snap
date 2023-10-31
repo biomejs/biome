@@ -73,13 +73,13 @@ JsonRoot {
 ```
 object_bracket_key.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property but instead found '['
+  × Expected a property but instead found '['.
   
   > 1 │ {[: "x"}
       │  ^
     2 │ 
   
-  i Expected a property here
+  i Expected a property here.
   
   > 1 │ {[: "x"}
       │  ^
@@ -87,13 +87,13 @@ object_bracket_key.json:1:2 parse ━━━━━━━━━━━━━━━�
   
 object_bracket_key.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ':'
+  × Expected an array, an object, or a literal but instead found ':'.
   
   > 1 │ {[: "x"}
       │   ^
     2 │ 
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ {[: "x"}
       │   ^

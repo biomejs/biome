@@ -53,7 +53,7 @@ class X {
 ```
 short_name_method.js:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found ':'
+  × Expected an expression, or an assignment but instead found ':'.
   
     1 │ class X {
     2 │   constructor() {
@@ -62,7 +62,7 @@ short_name_method.js:3:24 parse ━━━━━━━━━━━━━━━━
     4 │   }
     5 │   
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     1 │ class X {
     2 │   constructor() {

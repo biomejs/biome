@@ -289,35 +289,93 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-
-    let is_highlight = is_at_pseudo_highlight_element(p);
-
-    if is_highlight {
-        p.bump(HIGHLIGHT_KW);
+    if is_at_pseudo_element_highlight(p) {
+        parse_pseudo_element_highlight(p)
+    } else if is_at_pseudo_element_part(p) {
+        parse_pseudo_element_part(p)
+    } else if is_at_pseudo_element_function(p) {
+        parse_pseudo_element_function(p)
     } else {
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    }
-
-    if p.eat(T!['(']) {
-        let kind = if is_highlight {
-            parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-            CSS_PSEUDO_ELEMENT_HIGHLIGHT
-        } else {
-            parse_selector(p).or_add_diagnostic(p, expect_any_selector);
-            CSS_PSEUDO_ELEMENT_FUNCTION
-        };
-
-        let context = selector_lex_context(p);
-        p.expect_with_context(T![')'], context);
-
-        Present(m.complete(p, kind))
-    } else {
-        Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
+        parse_pseudo_element_identifier(p)
     }
 }
 
 #[inline]
-pub(crate) fn is_at_pseudo_highlight_element(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_pseudo_element_highlight(p: &mut CssParser) -> bool {
     p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['('])
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_highlight(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_pseudo_element_highlight(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(HIGHLIGHT_KW);
+    p.bump(T!['(']);
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+
+    let context = selector_lex_context(p);
+    p.expect_with_context(T![')'], context);
+
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_HIGHLIGHT))
+}
+
+#[inline]
+pub(crate) fn is_at_pseudo_element_part(p: &mut CssParser) -> bool {
+    p.at(PART_KW) && p.nth_at(1, T!['('])
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_part(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_pseudo_element_part(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(PART_KW);
+    p.bump(T!['(']);
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+
+    let context = selector_lex_context(p);
+    p.expect_with_context(T![')'], context);
+
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_PART))
+}
+
+#[inline]
+pub(crate) fn is_at_pseudo_element_function(p: &mut CssParser) -> bool {
+    is_at_identifier(p) && !p.at(PART_KW) && !p.at(HIGHLIGHT_KW) && p.nth_at(1, T!['('])
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_function(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_pseudo_element_function(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.bump(T!['(']);
+    parse_selector(p).or_add_diagnostic(p, expect_any_selector);
+
+    let context = selector_lex_context(p);
+    p.expect_with_context(T![')'], context);
+
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_FUNCTION))
+}
+
+#[inline]
+pub(crate) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
 }

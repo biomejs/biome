@@ -108,6 +108,14 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             {
                 panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes");
             }
+
+            let syntax = parsed.syntax();
+            if has_bogus_nodes_or_empty_slots(&syntax) {
+                panic!(
+                    "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
+                    syntax
+                )
+            }
         }
         ExpectedOutcome::Fail => {
             if parsed.diagnostics().is_empty() {
@@ -128,7 +136,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"::cue {}"#;
+    let code = r#"::part(sample) {}"#;
     let root = parse_css(code, CssParserOptions::default());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());

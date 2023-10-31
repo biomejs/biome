@@ -573,6 +573,10 @@ impl ArrowFunctionLayout {
                 {
                     should_break = should_break || should_break_chain(&current)?;
 
+                    if let Some(body) = JsArrowFunctionExpression::cast_ref(next.syntax()) {
+                        should_break = should_break || should_break_chain(&body)?;
+                    }
+
                     if head.is_none() {
                         head = Some(current);
                     } else {

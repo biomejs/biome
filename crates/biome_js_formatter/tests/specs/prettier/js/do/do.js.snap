@@ -285,7 +285,7 @@ do {
 ```
 do.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found 'do'
+  × Expected an expression, or an assignment but instead found 'do'.
   
     1 │ const envSpecific = {
     2 │   domain:
@@ -294,7 +294,7 @@ do.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━�
     4 │       if(env === 'production') 'https://abc.mno.com/';
     5 │       else if(env === 'development') 'http://localhost:4000';
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     1 │ const envSpecific = {
     2 │   domain:
@@ -331,7 +331,7 @@ do.js:4:14 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:4:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body but instead found ''https://abc.mno.com/''
+  × Expected a function body but instead found ''https://abc.mno.com/''.
   
     2 │   domain:
     3 │     do {
@@ -340,7 +340,7 @@ do.js:4:32 parse ━━━━━━━━━━━━━━━━━━━━━
     5 │       else if(env === 'development') 'http://localhost:4000';
     6 │     }
   
-  i Expected a function body here
+  i Expected a function body here.
   
     2 │   domain:
     3 │     do {
@@ -364,7 +364,7 @@ do.js:4:54 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found 'else'
+  × Expected a statement but instead found 'else'.
   
     3 │     do {
     4 │       if(env === 'production') 'https://abc.mno.com/';
@@ -373,7 +373,7 @@ do.js:5:7 parse ━━━━━━━━━━━━━━━━━━━━━�
     6 │     }
     7 │ };
   
-  i Expected a statement here
+  i Expected a statement here.
   
     3 │     do {
     4 │       if(env === 'production') 'https://abc.mno.com/';
@@ -384,8 +384,8 @@ do.js:5:7 parse ━━━━━━━━━━━━━━━━━━━━━�
   
 do.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}
-    }'
+  × Expected a statement but instead found '}
+    }'.
   
     4 │       if(env === 'production') 'https://abc.mno.com/';
     5 │       else if(env === 'development') 'http://localhost:4000';
@@ -396,7 +396,7 @@ do.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━�
     8 │ 
     9 │ let x = do {
   
-  i Expected a statement here
+  i Expected a statement here.
   
     4 │       if(env === 'production') 'https://abc.mno.com/';
     5 │       else if(env === 'development') 'http://localhost:4000';
@@ -409,7 +409,7 @@ do.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━�
   
 do.js:9:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found 'do'
+  × Expected an expression, or an assignment but instead found 'do'.
   
      7 │ };
      8 │ 
@@ -418,7 +418,7 @@ do.js:9:9 parse ━━━━━━━━━━━━━━━━━━━━━�
     10 │   let tmp = f();
     11 │   tmp * tmp + 1
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
      7 │ };
      8 │ 
@@ -442,7 +442,7 @@ do.js:12:2 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:14:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found 'do'
+  × Expected an expression, or an assignment but instead found 'do'.
   
     12 │ };
     13 │ 
@@ -451,7 +451,7 @@ do.js:14:9 parse ━━━━━━━━━━━━━━━━━━━━━
     15 │   if (foo()) { f() }
     16 │   else if (bar()) { g() }
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     12 │ };
     13 │ 
@@ -573,7 +573,7 @@ do.js:38:8 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:39:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found 'do'
+  × Expected an expression but instead found 'do'.
   
     37 │ (do {});
     38 │ (do {} + 1);
@@ -582,7 +582,7 @@ do.js:39:6 parse ━━━━━━━━━━━━━━━━━━━━━
     40 │ () => do {};
     41 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     37 │ (do {});
     38 │ (do {} + 1);
@@ -606,7 +606,7 @@ do.js:39:11 parse ━━━━━━━━━━━━━━━━━━━━�
   
 do.js:40:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body, or an expression but instead found 'do'
+  × Expected a function body, or an expression but instead found 'do'.
   
     38 │ (do {} + 1);
     39 │ (1 + do {});
@@ -615,7 +615,7 @@ do.js:40:7 parse ━━━━━━━━━━━━━━━━━━━━━
     41 │ 
     42 │ (do {
   
-  i Expected a function body, or an expression here
+  i Expected a function body, or an expression here.
   
     38 │ (do {} + 1);
     39 │ (1 + do {});
@@ -665,7 +665,7 @@ do.js:47:2 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:49:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body, or an expression but instead found 'do'
+  × Expected a function body, or an expression but instead found 'do'.
   
     47 │ });
     48 │ 
@@ -674,7 +674,7 @@ do.js:49:7 parse ━━━━━━━━━━━━━━━━━━━━━
     50 │   var obj = { foo: "bar", bar: "foo" };
     51 │   for (var key in obj) {
   
-  i Expected a function body, or an expression here
+  i Expected a function body, or an expression here.
   
     47 │ });
     48 │ 
@@ -698,7 +698,7 @@ do.js:54:2 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:56:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body, or an expression but instead found 'do'
+  × Expected a function body, or an expression but instead found 'do'.
   
     54 │ };
     55 │ 
@@ -707,7 +707,7 @@ do.js:56:17 parse ━━━━━━━━━━━━━━━━━━━━�
     57 │   var obj = { foo: "bar", bar: "foo" };
     58 │   for (var key in obj) {
   
-  i Expected a function body, or an expression here
+  i Expected a function body, or an expression here.
   
     54 │ };
     55 │ 
@@ -731,7 +731,7 @@ do.js:61:2 parse ━━━━━━━━━━━━━━━━━━━━━
   
 do.js:63:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body, or an expression but instead found 'do'
+  × Expected a function body, or an expression but instead found 'do'.
   
     61 │ };
     62 │ 
@@ -740,7 +740,7 @@ do.js:63:18 parse ━━━━━━━━━━━━━━━━━━━━�
     64 │   var obj = { foo: "bar", bar: "foo" };
     65 │   for (var key in obj) {
   
-  i Expected a function body, or an expression here
+  i Expected a function body, or an expression here.
   
     61 │ };
     62 │ 

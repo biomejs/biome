@@ -25,6 +25,6 @@ pub(crate) fn jsx_expected_closing_tag(
         format!("Expected corresponding JSX closing tag for '{opening_name}'."),
         opening_range,
     )
-    .detail(opening_range, "Opening tag")
-    .detail(closing_range, "closing tag")
+    .with_detail(opening_range, "Opening tag")
+    .with_detail(closing_range, "closing tag")
 }

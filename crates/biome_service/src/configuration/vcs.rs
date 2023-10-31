@@ -83,8 +83,6 @@ pub enum VcsClientKind {
 }
 
 impl VcsClientKind {
-    pub const KNOWN_VALUES: &'static [&'static str] = &["git"];
-
     pub const fn ignore_file(&self) -> &'static str {
         match self {
             VcsClientKind::Git => GIT_IGNORE_FILE_NAME,
@@ -101,9 +99,4 @@ impl FromStr for VcsClientKind {
             _ => Err("Value not supported for VcsClientKind"),
         }
     }
-}
-
-impl VcsConfiguration {
-    pub const KNOWN_KEYS: &'static [&'static str] =
-        &["clientKind", "enabled", "useIgnoreFile", "root"];
 }

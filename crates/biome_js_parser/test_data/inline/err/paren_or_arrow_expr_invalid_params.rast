@@ -341,7 +341,7 @@ paren_or_arrow_expr_invalid_params.js:1:9 parse ━━━━━━━━━━�
 --
 paren_or_arrow_expr_invalid_params.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parameter but instead found ','
+  × Expected a parameter but instead found ','.
   
     1 │ (5 + 5) => {}
   > 2 │ (a, ,b) => {}
@@ -349,7 +349,7 @@ paren_or_arrow_expr_invalid_params.js:2:5 parse ━━━━━━━━━━�
     3 │ (a, b) =>;
     4 │ (a: string;
   
-  i Expected a parameter here
+  i Expected a parameter here.
   
     1 │ (5 + 5) => {}
   > 2 │ (a, ,b) => {}
@@ -360,7 +360,7 @@ paren_or_arrow_expr_invalid_params.js:2:5 parse ━━━━━━━━━━�
 --
 paren_or_arrow_expr_invalid_params.js:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a function body, or an expression but instead found ';'
+  × Expected a function body, or an expression but instead found ';'.
   
     1 │ (5 + 5) => {}
     2 │ (a, ,b) => {}
@@ -369,7 +369,7 @@ paren_or_arrow_expr_invalid_params.js:3:10 parse ━━━━━━━━━━�
     4 │ (a: string;
     5 │ (a, b)
   
-  i Expected a function body, or an expression here
+  i Expected a function body, or an expression here.
   
     1 │ (5 + 5) => {}
     2 │ (a, ,b) => {}

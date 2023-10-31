@@ -44,7 +44,7 @@ foo.a().b().c(#{n, o})
 ```
 tuple-and-record.js:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     1 │ foo.a().b().c([n, o])
   > 2 │ foo.a().b().c(#[n, o])
@@ -52,7 +52,7 @@ tuple-and-record.js:2:16 parse ━━━━━━━━━━━━━━━━�
     3 │ 
     4 │ foo.a().b().c({n, o})
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ foo.a().b().c([n, o])
   > 2 │ foo.a().b().c(#[n, o])
@@ -84,14 +84,14 @@ tuple-and-record.js:2:16 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     4 │ foo.a().b().c({n, o})
   > 5 │ foo.a().b().c(#{n, o})
       │                ^
     6 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ foo.a().b().c({n, o})
   > 5 │ foo.a().b().c(#{n, o})
