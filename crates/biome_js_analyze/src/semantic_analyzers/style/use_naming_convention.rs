@@ -1,5 +1,3 @@
-use std::{marker::PhantomData, str::FromStr};
-
 use crate::{
     control_flow::AnyJsControlFlowRoot,
     semantic_services::Semantic,
@@ -13,7 +11,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize::{
     json::{has_only_known_keys, with_only_known_variants, VisitJsonNode},
-    Acceptable, DeserializableLanguage, DeserializationDiagnostic, NodeVisitor, VisitNode,
+    Deserializable, DeserializableLanguage, DeserializationDiagnostic, DeserializationDiagnostics,
+    DeserializationVisitor, VisitNode,
 };
 use biome_diagnostics::Applicability;
 use biome_js_semantic::CanBeImportedExported;
@@ -31,6 +30,7 @@ use biome_rowan::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
+use std::str::FromStr;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -468,7 +468,7 @@ fn is_default<T: Default + Eq>(value: &T) -> bool {
 }
 
 impl NamingConventionOptions {
-    pub(crate) const KNOWN_KEYS: &'static [&'static str] = &["strictCase", "enumMemberCase"];
+    pub(crate) const ALLOWED_KEYS: &'static [&'static str] = &["strictCase", "enumMemberCase"];
 }
 
 impl Default for NamingConventionOptions {
@@ -496,7 +496,7 @@ impl VisitNode<JsonLanguage> for NamingConventionOptions {
         node: &SyntaxNode<JsonLanguage>,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        has_only_known_keys(node, Self::KNOWN_KEYS, diagnostics)
+        has_only_known_keys(node, Self::ALLOWED_KEYS, diagnostics)
     }
 
     fn visit_map(
@@ -521,47 +521,39 @@ impl VisitNode<JsonLanguage> for NamingConventionOptions {
     }
 }
 
-impl<L: DeserializableLanguage> NodeVisitor<L> for NamingConventionOptions {
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for NamingConventionOptions {
     fn visit_map(
-        &mut self,
         members: impl Iterator<Item = (SyntaxNode<L>, SyntaxNode<L>)>,
-        _range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        let mut result = Self::default();
         for (key, value) in members {
-            let Some(key) = L::map_to_str(key) else {
-                return;
+            let Some(key_text) = key.deserialize::<TokenText>(diagnostics) else {
+                continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "strictCase" => {
-                    L::deserialize(&mut self.strict_case, value, diagnostics);
+                    result.strict_case = value.deserialize(diagnostics).unwrap_or_default();
                 }
                 "enumMemberCase" => {
-                    L::deserialize(&mut self.enum_member_case, value, diagnostics);
+                    result.enum_member_case = value.deserialize(diagnostics).unwrap_or_default();
                 }
-                _ => (),
+                _ => diagnostics.report_unknown_key(Self::ALLOWED_KEYS),
             }
         }
+        Some(result)
     }
 }
 
-impl<L: DeserializableLanguage> NodeVisitor<L> for EnumMemberCase {
-    fn visit_str(
-        &mut self,
-        value: &str,
-        range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for EnumMemberCase {
+    fn visit_str(value: &str, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
         match value {
-            "PascalCase" => *self = Self::Pascal,
-            "CONSTANT_CASE" => *self = Self::Constant,
-            "camelCase" => *self = Self::Camel,
+            "PascalCase" => Some(Self::Pascal),
+            "CONSTANT_CASE" => Some(Self::Constant),
+            "camelCase" => Some(Self::Camel),
             _ => {
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value,
-                    range,
-                    &["PascalCase", "CONSTANT_CASE", "camelCase"],
-                ));
+                diagnostics.report_unknown_variant(&["PascalCase", "CONSTANT_CASE", "camelCase"]);
+                None
             }
         }
     }

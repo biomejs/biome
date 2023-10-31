@@ -5,7 +5,9 @@ pub mod json;
 pub mod string_set;
 
 use biome_diagnostics::{Error, Severity};
-pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic};
+pub use diagnostics::{
+    DeserializationAdvice, DeserializationDiagnostic, DeserializationDiagnostics,
+};
 use std::fmt::Debug;
 pub use string_set::{deserialize_string_set, serialize_string_set, StringSet};
 pub use visitor::*;

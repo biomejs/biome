@@ -158,3 +158,31 @@ impl Advices for DeserializationAdvice {
         Ok(())
     }
 }
+
+#[derive(Default)]
+pub struct DeserializationDiagnostics {
+    pub diagnostics: Vec<DeserializationDiagnostic>,
+    range: Option<TextRange>,
+}
+
+impl DeserializationDiagnostics {
+    pub fn set_range(&mut self, range: TextRange) {
+        self.range = Some(range);
+    }
+
+    pub fn report_incorrect_type(&mut self, _expected_type: impl Display) {
+        todo!();
+    }
+
+    pub fn report_unknown_key(&mut self, _allowed_keys: &[&str]) {
+        todo!();
+    }
+
+    pub fn report_unknown_variant(&mut self, _allowed_variants: &[&str]) {
+        todo!();
+    }
+
+    pub fn report_number_out_of_bounds(&mut self, _min: i64, _max: u64) {
+        todo!()
+    }
+}

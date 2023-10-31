@@ -1,5 +1,5 @@
-use crate::DeserializationDiagnostic;
-use biome_rowan::{Language, SyntaxNode, TextRange, TokenText};
+use crate::{diagnostics::DeserializationDiagnostics, DeserializationDiagnostic};
+use biome_rowan::{Language, SyntaxNode, TokenText};
 
 /// Generic trait to implement when resolving the configuration from a generic language
 pub trait VisitNode<L: Language>: Sized {
@@ -72,147 +72,183 @@ impl<L: Language> VisitNode<L> for () {
     }
 }
 
-pub trait NodeVisitor<L: DeserializableLanguage> {
-    fn visit_unit(&mut self, range: TextRange, diagnostics: &mut Vec<DeserializationDiagnostic>) {
-        self.fallback_on_error(range, diagnostics)
+pub trait DeserializationVisitor<L: DeserializableLanguage>: Sized {
+    fn visit_null(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Self::fallback(diagnostics)
     }
 
-    fn visit_bool(
-        &mut self,
-        _value: bool,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        self.fallback_on_error(range, diagnostics)
+    fn visit_bool(_value: bool, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Self::fallback(diagnostics)
     }
 
-    fn visit_str(
-        &mut self,
-        _value: &str,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        self.fallback_on_error(range, diagnostics)
+    fn visit_i64(_value: i64, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Self::fallback(diagnostics)
+    }
+
+    fn visit_u64(value: u64, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        // SAFE because i64::MAX is representable with u64
+        if value <= u64::try_from(i64::MAX).unwrap() {
+            Self::visit_i64(value as i64, diagnostics)
+        } else {
+            Self::fallback(diagnostics)
+        }
+    }
+
+    fn visit_token_text(
+        value: TokenText,
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        Self::visit_str(value.text(), diagnostics)
+    }
+
+    fn visit_str(_value: &str, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Self::fallback(diagnostics)
     }
 
     fn visit_map(
-        &mut self,
         _members: impl Iterator<Item = (SyntaxNode<L>, SyntaxNode<L>)>,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        self.fallback_on_error(range, diagnostics)
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        Self::fallback(diagnostics)
     }
 
     fn visit_array(
-        &mut self,
         _items: impl Iterator<Item = SyntaxNode<L>>,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        self.fallback_on_error(range, diagnostics)
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        Self::fallback(diagnostics)
     }
 
-    fn fallback_on_error(
-        &self,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        diagnostics.push(DeserializationDiagnostic::new("unsupported value").with_range(range))
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        // Default impl assume that we implement a map (struct / object).
+        diagnostics.report_incorrect_type("map");
+        None
     }
 }
 
-pub trait Acceptable<L: Language> {
-    fn deserialize(
-        &mut self,
-        value: SyntaxNode<L>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    );
+pub trait Deserializable<L: DeserializableLanguage> {
+    fn deserialize<V: DeserializationVisitor<L>>(
+        self,
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<V>;
 }
 
-impl<L: DeserializableLanguage, T: NodeVisitor<L>> Acceptable<L> for T {
-    fn deserialize(
-        &mut self,
-        value: SyntaxNode<L>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        L::deserialize(self, value, diagnostics)
+impl<L: DeserializableLanguage> Deserializable<L> for SyntaxNode<L> {
+    fn deserialize<V: DeserializationVisitor<L>>(
+        self,
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<V> {
+        L::deserialize_value(self, diagnostics)
     }
 }
 
 pub trait DeserializableLanguage: Language {
-    fn deserialize(
-        visitor: &mut impl NodeVisitor<Self>,
+    fn deserialize_value<V: DeserializationVisitor<Self>>(
         value: SyntaxNode<Self>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    );
-
-    fn map_to_str(value: SyntaxNode<Self>) -> Option<TokenText>;
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<V>;
 }
 
-impl<L: DeserializableLanguage> NodeVisitor<L> for bool {
-    fn visit_bool(
-        &mut self,
-        value: bool,
-        _range: TextRange,
-        _diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        *self = value;
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for bool {
+    fn visit_bool(value: bool, _diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Some(value)
     }
 
-    fn fallback_on_error(
-        &self,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-            "boolean", range,
-        ))
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("boolean");
+        None
     }
 }
 
-impl<L: DeserializableLanguage> NodeVisitor<L> for String {
-    fn visit_str(
-        &mut self,
-        value: &str,
-        _range: TextRange,
-        _diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        *self = value.to_string();
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for i64 {
+    fn visit_i64(value: i64, _diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Some(value)
     }
 
-    fn fallback_on_error(
-        &self,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-            "string", range,
-        ))
+    fn visit_u64(_value: u64, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_number_out_of_bounds(Self::MIN, Self::MAX as u64);
+        None
+    }
+
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("number");
+        None
     }
 }
 
-impl<L: DeserializableLanguage, T: Default + NodeVisitor<L>> NodeVisitor<L> for Vec<T> {
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for u64 {
+    fn visit_i64(_value: i64, diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_number_out_of_bounds(Self::MIN as i64, Self::MAX);
+        None
+    }
+
+    fn visit_u64(value: u64, _diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Some(value)
+    }
+
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("number");
+        None
+    }
+}
+
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for TokenText {
+    fn visit_token_text(
+        value: TokenText,
+        _diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        Some(value)
+    }
+
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("string");
+        None
+    }
+}
+
+impl<L: DeserializableLanguage> DeserializationVisitor<L> for String {
+    fn visit_str(value: &str, _diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Some(value.to_string())
+    }
+
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("string");
+        None
+    }
+}
+
+impl<L: DeserializableLanguage, T: DeserializationVisitor<L>> DeserializationVisitor<L> for Vec<T> {
     fn visit_array(
-        &mut self,
         values: impl Iterator<Item = SyntaxNode<L>>,
-        _range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        let (min_size, max_size) = values.size_hint();
+        let mut result = Vec::with_capacity(max_size.unwrap_or(min_size));
         for value in values {
-            let mut element = T::default();
-            element.deserialize(value, diagnostics);
-            self.push(element);
+            if let Some(item) = L::deserialize_value(value, diagnostics) {
+                result.push(item);
+            }
         }
+        Some(result)
     }
 
-    fn fallback_on_error(
-        &self,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type(
-            "array", range,
-        ))
+    fn fallback(diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        diagnostics.report_incorrect_type("array");
+        None
+    }
+}
+
+impl<L: DeserializableLanguage, T: DeserializationVisitor<L>> DeserializationVisitor<L>
+    for Option<T>
+{
+    fn visit_null(_diagnostics: &mut DeserializationDiagnostics) -> Option<Self> {
+        Some(None)
+    }
+
+    fn visit_map(
+        members: impl Iterator<Item = (SyntaxNode<L>, SyntaxNode<L>)>,
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<Self> {
+        Some(T::visit_map(members, diagnostics))
     }
 }

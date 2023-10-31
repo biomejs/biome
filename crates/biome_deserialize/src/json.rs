@@ -1,5 +1,6 @@
 use crate::{
-    DeserializableLanguage, DeserializationDiagnostic, Deserialized, NodeVisitor, VisitNode,
+    diagnostics::DeserializationDiagnostics, DeserializableLanguage, DeserializationDiagnostic,
+    DeserializationVisitor, Deserialized, VisitNode,
 };
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, Error};
@@ -628,15 +629,13 @@ where
 }
 
 impl DeserializableLanguage for JsonLanguage {
-    fn deserialize(
-        visitor: &mut impl NodeVisitor<JsonLanguage>,
-        value: SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) {
+    fn deserialize_value<V: DeserializationVisitor<Self>>(
+        value: SyntaxNode<Self>,
+        diagnostics: &mut DeserializationDiagnostics,
+    ) -> Option<V> {
         let range = value.text_trimmed_range();
-        let Some(value) = AnyJsonValue::cast(value) else {
-            return;
-        };
+        let value = AnyJsonValue::cast(value)?;
+        diagnostics.set_range(range);
         match value {
             AnyJsonValue::JsonArrayValue(array) => {
                 let items = array
@@ -644,17 +643,26 @@ impl DeserializableLanguage for JsonLanguage {
                     .into_iter()
                     .filter_map(|x| x.ok())
                     .map(|x| x.into_syntax());
-                visitor.visit_array(items, range, diagnostics)
+                V::visit_array(items, diagnostics)
             }
-            AnyJsonValue::JsonBogusValue(_) => visitor.fallback_on_error(range, diagnostics),
+            AnyJsonValue::JsonBogusValue(_) => V::fallback(diagnostics),
             AnyJsonValue::JsonBooleanValue(value) => {
-                let Ok(value) = value.value_token() else {
-                    return;
-                };
-                visitor.visit_bool(value.kind() == T![true], range, diagnostics)
+                let value = value.value_token().ok()?;
+                V::visit_bool(value.kind() == T![true], diagnostics)
             }
-            AnyJsonValue::JsonNullValue(_) => visitor.visit_unit(range, diagnostics),
-            AnyJsonValue::JsonNumberValue(_) => todo!(),
+            AnyJsonValue::JsonNullValue(_) => V::visit_null(diagnostics),
+            AnyJsonValue::JsonNumberValue(value) => {
+                let value = value.value_token().ok()?;
+                let value = value.text_trimmed();
+                if let Ok(value) = value.parse::<u64>() {
+                    V::visit_u64(value, diagnostics)
+                } else if let Ok(value) = value.parse::<i64>() {
+                    V::visit_i64(value, diagnostics)
+                } else {
+                    diagnostics.report_number_out_of_bounds(i64::MIN, u64::MAX);
+                    None
+                }
+            }
             AnyJsonValue::JsonObjectValue(object) => {
                 let members = object
                     .json_member_list()
@@ -663,18 +671,12 @@ impl DeserializableLanguage for JsonLanguage {
                     .filter_map(|x| {
                         Some((x.name().ok()?.into_syntax(), x.value().ok()?.into_syntax()))
                     });
-                visitor.visit_map(members, range, diagnostics)
+                V::visit_map(members, diagnostics)
             }
             AnyJsonValue::JsonStringValue(value) => {
-                let Ok(value) = value.inner_string_text() else {
-                    return;
-                };
-                visitor.visit_str(value.text(), range, diagnostics)
+                let value = value.inner_string_text().ok()?;
+                V::visit_token_text(value, diagnostics)
             }
         }
-    }
-
-    fn map_to_str(value: SyntaxNode<JsonLanguage>) -> Option<TokenText> {
-        JsonStringValue::cast(value).and_then(|value| value.inner_string_text().ok())
     }
 }
