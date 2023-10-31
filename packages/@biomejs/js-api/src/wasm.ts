@@ -1,8 +1,9 @@
 export type WasmBundler = typeof import("@biomejs/wasm-bundler");
 export type WasmNodejs = typeof import("@biomejs/wasm-nodejs");
-export type WasmWeb = typeof import("@biomejs/wasm-web");
+// export type WasmWeb = typeof import("@biomejs/wasm-web");
 
-export type WasmModule = WasmBundler | WasmNodejs | WasmWeb;
+// export type WasmModule = WasmBundler | WasmNodejs | WasmWeb;
+export type WasmModule = WasmBundler | WasmNodejs;
 
 /**
  * What kind of client Biome should use to communicate with the binary
