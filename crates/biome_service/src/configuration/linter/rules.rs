@@ -2752,6 +2752,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(no_misrefactored_shorthand_assign) = other.no_misrefactored_shorthand_assign {
             self.no_misrefactored_shorthand_assign = Some(no_misrefactored_shorthand_assign);
         }
+        if let Some(no_this_in_static) = other.no_this_in_static {
+            self.no_this_in_static = Some(no_this_in_static);
+        }
         if let Some(no_unused_imports) = other.no_unused_imports {
             self.no_unused_imports = Some(no_unused_imports);
         }
