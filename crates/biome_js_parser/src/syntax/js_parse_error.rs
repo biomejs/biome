@@ -8,7 +8,7 @@ use biome_js_syntax::TextRange;
 use biome_parser::diagnostic::{expected_any, expected_node};
 
 pub(crate) fn expected_function_body(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("function body", range).into_diagnostic(p)
+    expected_node("function body", range, p)
 }
 
 pub(crate) fn expected_class_member_name(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -21,12 +21,12 @@ pub(crate) fn expected_class_member_name(p: &JsParser, range: TextRange) -> Pars
             "computed name",
         ],
         range,
+        p,
     )
-    .into_diagnostic(p)
 }
 
 pub(crate) fn expected_arrow_body(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["function body", "expression"], range).into_diagnostic(p)
+    expected_any(&["function body", "expression"], range, p)
 }
 
 pub(crate) fn expected_object_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -39,11 +39,11 @@ pub(crate) fn expected_object_member(p: &JsParser, range: TextRange) -> ParseDia
             "method",
         ],
         range,
+        p,
     )
-    .into_diagnostic(p)
 }
 pub(crate) fn expected_array_element(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["property", "expression", "method"], range).into_diagnostic(p)
+    expected_any(&["property", "expression", "method"], range, p)
 }
 
 pub(crate) fn expected_object_member_name(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -55,92 +55,92 @@ pub(crate) fn expected_object_member_name(p: &JsParser, range: TextRange) -> Par
             "computed property",
         ],
         range,
+        p,
     )
-    .into_diagnostic(p)
 }
 
 pub(crate) fn expected_block_statement(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("block statement", range).into_diagnostic(p)
+    expected_node("block statement", range, p)
 }
 
 pub(crate) fn expected_catch_clause(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("catch clause", range).into_diagnostic(p)
+    expected_node("catch clause", range, p)
 }
 
 pub(crate) fn expected_parameter(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("parameter", range).into_diagnostic(p)
+    expected_node("parameter", range, p)
 }
 
 pub(crate) fn expected_parameters(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("parenthesis '('", range).into_diagnostic(p)
+    expected_node("parenthesis '('", range, p)
 }
 
 pub(crate) fn expected_case_or_default(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["default", "case"], range).into_diagnostic(p)
+    expected_any(&["default", "case"], range, p)
 }
 
 pub(crate) fn expected_case(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("case", range).into_diagnostic(p)
+    expected_node("case", range, p)
 }
 
 pub(crate) fn expected_assignment_target(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["identifier", "assignment target"], range).into_diagnostic(p)
+    expected_any(&["identifier", "assignment target"], range, p)
 }
 
 pub(crate) fn expected_simple_assignment_target(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["identifier", "member expression"], range).into_diagnostic(p)
+    expected_any(&["identifier", "member expression"], range, p)
 }
 
 pub(crate) fn expected_identifier(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("identifier", range).into_diagnostic(p)
+    expected_node("identifier", range, p)
 }
 
 pub(crate) fn expected_statement(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("statement", range).into_diagnostic(p)
+    expected_node("statement", range, p)
 }
 
 pub(crate) fn expected_binding(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["identifier", "array pattern", "object pattern"], range).into_diagnostic(p)
+    expected_any(&["identifier", "array pattern", "object pattern"], range, p)
 }
 
 pub(crate) fn expected_class_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["property ", "method", "getter", "setter"], range).into_diagnostic(p)
+    expected_any(&["property ", "method", "getter", "setter"], range, p)
 }
 
 pub(crate) fn expected_class_parameters(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("class parameters", range).into_diagnostic(p)
+    expected_node("class parameters", range, p)
 }
 
 pub(crate) fn expected_constructor_parameters(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("constructor parameters", range).into_diagnostic(p)
+    expected_node("constructor parameters", range, p)
 }
 
 pub(crate) fn expected_class_method_body(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("class method body", range).into_diagnostic(p)
+    expected_node("class method body", range, p)
 }
 
 pub(crate) fn expected_module_source(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("string literal", range).into_diagnostic(p)
+    expected_node("string literal", range, p)
 }
 
 pub(crate) fn expected_named_import(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["namespace import", "named imports"], range).into_diagnostic(p)
+    expected_any(&["namespace import", "named imports"], range, p)
 }
 
 pub(crate) fn expected_literal_export_name(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["string literal", "identifier"], range).into_diagnostic(p)
+    expected_any(&["string literal", "identifier"], range, p)
 }
 
 pub(crate) fn expected_export_clause(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["class", "function", "variable declaration"], range).into_diagnostic(p)
+    expected_any(&["class", "function", "variable declaration"], range, p)
 }
 
 pub(crate) fn expected_export_name_specifier(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("export name", range).into_diagnostic(p)
+    expected_node("export name", range, p)
 }
 
 pub(crate) fn expected_named_import_specifier(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("identifier", range).into_diagnostic(p)
+    expected_node("identifier", range, p)
 }
 
 pub(crate) fn duplicate_assertion_keys_error(
@@ -155,19 +155,19 @@ pub(crate) fn duplicate_assertion_keys_error(
 }
 
 pub(crate) fn expected_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("expression", range).into_diagnostic(p)
+    expected_node("expression", range, p)
 }
 
 pub(crate) fn expected_expression_assignment(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["expression", "assignment"], range).into_diagnostic(p)
+    expected_any(&["expression", "assignment"], range, p)
 }
 
 pub(crate) fn expected_unary_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("unary expression", range).into_diagnostic(p)
+    expected_node("unary expression", range, p)
 }
 
 pub(crate) fn expected_property_or_signature(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["property", "signature"], range).into_diagnostic(p)
+    expected_any(&["property", "signature"], range, p)
 }
 
 pub(crate) fn expected_declaration(p: &JsParser, range: TextRange) -> ParseDiagnostic {
@@ -181,15 +181,15 @@ pub(crate) fn expected_declaration(p: &JsParser, range: TextRange) -> ParseDiagn
             "type alias",
         ],
         range,
+        p,
     )
-    .into_diagnostic(p)
 }
 
 pub(crate) fn expected_export_default_declaration(
     p: &JsParser,
     range: TextRange,
 ) -> ParseDiagnostic {
-    let expected = if TypeScript.is_supported(p) {
+    if TypeScript.is_supported(p) {
         expected_any(
             &[
                 "class declaration",
@@ -197,12 +197,11 @@ pub(crate) fn expected_export_default_declaration(
                 "interface declaration",
             ],
             range,
+            p,
         )
     } else {
-        expected_any(&["class declaration", "function declaration"], range)
-    };
-
-    expected.into_diagnostic(p)
+        expected_any(&["class declaration", "function declaration"], range, p)
+    }
 }
 
 pub(crate) fn unexpected_body_inside_ambient_context(

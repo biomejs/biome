@@ -121,6 +121,65 @@ impl ParseDiagnostic {
         }
     }
 
+    pub fn new_single_node(name: &str, range: TextRange, p: &impl Parser) -> Self {
+        let names = format!("{} {}", article_for(name), name);
+        let msg = if p.source().text().text_len() <= range.start() {
+            format!("Expected {} but instead found the end of the file.", names)
+        } else {
+            format!("Expected {} but instead found '{}'.", names, p.text(range))
+        };
+        Self {
+            span: range.as_span(),
+            message: MessageAndDescription::from(msg),
+            advice: ParserAdvice::default(),
+        }
+        .with_detail(range, format!("Expected {} here.", names))
+    }
+
+    pub fn new_with_any(names: &[&str], range: TextRange, p: &impl Parser) -> Self {
+        debug_assert!(names.len() > 1, "Requires at least 2 names");
+
+        if names.len() < 2 {
+            return Self::new_single_node(names.first().unwrap_or(&"<missing>"), range, p);
+        }
+
+        let mut joined_names = String::new();
+
+        for (index, name) in names.iter().enumerate() {
+            if index > 0 {
+                joined_names.push_str(", ");
+            }
+
+            if index == names.len() - 1 {
+                joined_names.push_str("or ");
+            }
+
+            joined_names.push_str(article_for(name));
+            joined_names.push(' ');
+            joined_names.push_str(name);
+        }
+
+        let msg = if p.source().text().text_len() <= range.start() {
+            format!(
+                "Expected {} but instead found the end of the file.",
+                joined_names
+            )
+        } else {
+            format!(
+                "Expected {} but instead found '{}'.",
+                joined_names,
+                p.text(range)
+            )
+        };
+
+        Self {
+            span: range.as_span(),
+            message: MessageAndDescription::from(msg),
+            advice: ParserAdvice::default(),
+        }
+        .with_detail(range, format!("Expected {} here.", joined_names))
+    }
+
     pub const fn is_error(&self) -> bool {
         true
     }
@@ -368,84 +427,19 @@ where
 }
 
 /// Creates a diagnostic saying that the node `name` was expected at range
-pub fn expected_node(name: &str, range: TextRange) -> ExpectedNodeDiagnosticBuilder {
-    ExpectedNodeDiagnosticBuilder::with_single_node(name, range)
+pub fn expected_node(name: &str, range: TextRange, p: &impl Parser) -> ParseDiagnostic {
+    ParseDiagnostic::new_single_node(name, range, p)
 }
 
 /// Creates a diagnostic saying that any of the nodes in `names` was expected at range
-pub fn expected_any(names: &[&str], range: TextRange) -> ExpectedNodeDiagnosticBuilder {
-    ExpectedNodeDiagnosticBuilder::with_any(names, range)
+pub fn expected_any(names: &[&str], range: TextRange, p: &impl Parser) -> ParseDiagnostic {
+    ParseDiagnostic::new_with_any(names, range, p)
 }
 
 /// Creates a diagnostic with message "Unexpected value." and then it lists the values that should be expected.
 pub fn expect_one_of(names: &[&str], range: TextRange) -> ParseDiagnostic {
     ParseDiagnostic::new("Unexpected value or character.", range)
         .with_alternatives("Expected one of:", names)
-}
-
-pub struct ExpectedNodeDiagnosticBuilder {
-    names: String,
-    range: TextRange,
-}
-
-impl ExpectedNodeDiagnosticBuilder {
-    fn with_single_node(name: &str, range: TextRange) -> Self {
-        ExpectedNodeDiagnosticBuilder {
-            names: format!("{} {}", article_for(name), name),
-            range,
-        }
-    }
-
-    fn with_any(names: &[&str], range: TextRange) -> Self {
-        debug_assert!(names.len() > 1, "Requires at least 2 names");
-
-        if names.len() < 2 {
-            return Self::with_single_node(names.first().unwrap_or(&"<missing>"), range);
-        }
-
-        let mut joined_names = String::new();
-
-        for (index, name) in names.iter().enumerate() {
-            if index > 0 {
-                joined_names.push_str(", ");
-            }
-
-            if index == names.len() - 1 {
-                joined_names.push_str("or ");
-            }
-
-            joined_names.push_str(article_for(name));
-            joined_names.push(' ');
-            joined_names.push_str(name);
-        }
-
-        Self {
-            names: joined_names,
-            range,
-        }
-    }
-}
-
-impl<P: Parser> ToDiagnostic<P> for ExpectedNodeDiagnosticBuilder {
-    fn into_diagnostic(self, p: &P) -> ParseDiagnostic {
-        let range = &self.range;
-
-        let msg = if p.source().text().text_len() <= range.start() {
-            format!(
-                "Expected {} but instead found the end of the file.",
-                self.names
-            )
-        } else {
-            format!(
-                "Expected {} but instead found '{}'.",
-                self.names,
-                p.text(*range)
-            )
-        };
-
-        let diag = p.err_builder(msg, self.range);
-        diag.with_detail(self.range, format!("Expected {} here.", self.names))
-    }
 }
 
 fn article_for(name: &str) -> &'static str {

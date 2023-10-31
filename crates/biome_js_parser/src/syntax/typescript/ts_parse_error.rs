@@ -5,7 +5,7 @@ use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_ts_enum_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["identifier", "string literal", "computed name"], range).into_diagnostic(p)
+    expected_any(&["identifier", "string literal", "computed name"], range, p)
 }
 
 pub(crate) fn unexpected_abstract_member_with_body(
@@ -122,11 +122,11 @@ pub(crate) fn ts_set_accessor_return_type_error(
 }
 
 pub(crate) fn expected_ts_type(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("type", range).into_diagnostic(p)
+    expected_node("type", range, p)
 }
 
 pub(crate) fn expected_ts_type_parameter(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("type parameter", range).into_diagnostic(p)
+    expected_node("type parameter", range, p)
 }
 
 pub(crate) fn infer_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
