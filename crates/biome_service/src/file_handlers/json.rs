@@ -147,6 +147,7 @@ impl ExtensionHandler for JsonFileHandler {
                 rename: None,
                 fix_all: Some(fix_all),
                 organize_imports: Some(organize_imports),
+                diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),

@@ -13,7 +13,8 @@ use crate::file_handlers::{
 use crate::settings::{WorkspaceSettings, WorkspaceSettingsHandleMut};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
+    OrganizeImportsResult, PullDiagnosticsAndActionsResult, RageEntry, RageParams, RageResult,
+    ServerInfo,
 };
 use crate::{
     file_handlers::Features, settings::WorkspaceSettingsHandle, Workspace, WorkspaceError,
@@ -530,6 +531,13 @@ impl Workspace for WorkspaceServer {
         Ok(document.content.clone())
     }
 
+    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
+        let document = self
+            .documents
+            .get(&params.path)
+            .ok_or(WorkspaceError::not_found())?;
+        Ok(document.content.clone())
+    }
     /// Change the content of an open file
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
         {
@@ -631,6 +639,57 @@ impl Workspace for WorkspaceServer {
             manifest,
             language,
         }))
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        let feature = if params.categories.is_syntax() {
+            FeatureName::Format
+        } else {
+            FeatureName::Lint
+        };
+
+        let parse = self.get_parse(params.path.clone(), Some(feature))?;
+        let settings = self.settings.read().unwrap();
+
+        if let Some(lint) = self
+            .get_capabilities(&params.path)
+            .analyzer
+            .diagnostics_and_actions
+        {
+            let rules = settings.linter().rules.as_ref();
+            let overrides = &settings.override_settings;
+            let mut rule_filter_list =
+                self.build_rule_filter_list(rules, overrides, params.path.as_path());
+            if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+            }
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
+
+            info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
+                trace!("Analyzer filter to apply to lint: {:?}", &filter);
+
+                let result = lint(LintParams {
+                    parse,
+                    filter,
+                    rules,
+                    settings: self.settings(),
+                    max_diagnostics: params.max_diagnostics,
+                    path: &params.path,
+                });
+
+                Ok(result)
+            })
+        } else {
+            Ok(PullDiagnosticsAndActionsResult {
+                diagnostics_with_actions: vec![],
+                errors: 0,
+                skipped_diagnostics: 0,
+            })
+        }
     }
 
     /// Runs the given file through the formatter using the provided options

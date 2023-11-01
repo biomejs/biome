@@ -41,6 +41,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
     pub(crate) json_linter: Option<PartialJsonLinter>,
     pub(crate) css_linter: Option<PartialCssLinter>,
+    pub(crate) review: bool,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -64,9 +65,19 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         javascript_linter,
         css_linter,
         json_linter,
+        review,
     } = payload;
+
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
+    if review && (!apply_unsafe && !apply) {
+        if !apply_unsafe {
+            return Err(CliDiagnostic::missing_argument("apply-unsafe", "lint"));
+        } else if !apply {
+            return Err(CliDiagnostic::missing_argument("apply", "lint"));
+        }
+    }
+    // no point in doing the traversal if all the checks have been disabled
     let fix_file_mode = determine_fix_file_mode(
         FixFileModeOptions {
             apply,
@@ -162,8 +173,8 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             fix_file_mode,
             stdin,
             rule,
-        })
-        .set_report(&cli_options),
+            review
+        }),
         session,
         &cli_options,
         paths,

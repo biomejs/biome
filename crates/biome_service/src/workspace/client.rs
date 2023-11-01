@@ -2,6 +2,7 @@ use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OpenProjectParams,
     OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams, RageResult,
     RegisterProjectFolderParams, ServerInfo, UnregisterProjectFolderParams, UpdateProjectParams,
+    PullDiagnosticsAndActionsResult
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -179,6 +180,13 @@ where
 
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         self.request("biome/pull_actions", params)
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.request("biome/pull_diagnostics_and_actions", params)
     }
 
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {

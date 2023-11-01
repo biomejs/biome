@@ -134,6 +134,7 @@ impl<'app> CliSession<'app> {
                 css_linter,
                 javascript_linter,
                 json_linter,
+                review,
             } => commands::lint::lint(
                 self,
                 LintCommandPayload {
@@ -155,6 +156,7 @@ impl<'app> CliSession<'app> {
                     css_linter,
                     javascript_linter,
                     json_linter,
+                    review,
                 },
             ),
             BiomeCommand::Ci {

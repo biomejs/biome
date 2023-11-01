@@ -6,7 +6,9 @@ use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::{LinterSettings, OverrideSettings, Settings};
-use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
+use crate::workspace::{
+    DocumentFileSource, OrganizeImportsResult, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     settings::{
         FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
@@ -904,5 +906,94 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
         Ok(OrganizeImportsResult {
             code: tree.syntax().to_string(),
         })
+    }
+}
+
+fn diagnostics_and_actions(params: LintParams) -> PullDiagnosticsAndActionsResult {
+    if params.parse.has_errors() {
+        return PullDiagnosticsAndActionsResult {
+            errors: 0,
+            diagnostics_with_actions: vec![],
+            skipped_diagnostics: 0,
+        };
+    }
+    let Ok(file_source) = params.parse.file_source(params.path) else {
+        return PullDiagnosticsAndActionsResult {
+            errors: 0,
+            diagnostics_with_actions: vec![],
+            skipped_diagnostics: 0,
+        };
+    };
+    let tree = params.parse.tree();
+    let mut diagnostics = vec![];
+    let mut errors = 0;
+    let analyzer_options =
+        compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+
+    let mut diagnostic_count = diagnostics.len() as u64;
+
+    let has_lint = params.filter.categories.contains(RuleCategories::LINT);
+
+    info!("Analyze file {}", params.path.display());
+    let (_, _) = analyze(
+        &tree,
+        params.filter,
+        &analyzer_options,
+        file_source,
+        |signal| {
+            if let Some(mut diagnostic) = signal.diagnostic() {
+                // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                if !has_lint && diagnostic.category() == Some(category!("suppressions/unused")) {
+                    return ControlFlow::<Never>::Continue(());
+                }
+
+                diagnostic_count += 1;
+
+                // We do now check if the severity of the diagnostics should be changed.
+                // The configuration allows to change the severity of the diagnostics emitted by rules.
+                let severity = diagnostic
+                    .category()
+                    .filter(|category| category.name().starts_with("lint/"))
+                    .map(|category| {
+                        params
+                            .rules
+                            .and_then(|rules| rules.get_severity_from_code(category))
+                            .unwrap_or(Severity::Warning)
+                    })
+                    .unwrap_or_else(|| diagnostic.severity());
+
+                if severity >= Severity::Error {
+                    errors += 1;
+                }
+
+                if diagnostic_count <= params.max_diagnostics {
+                    let actions: Vec<_> = signal
+                        .actions()
+                        .into_code_action_iter()
+                        .map(|item| CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            suggestion: item.suggestion,
+                        })
+                        .collect();
+
+                    let error = diagnostic.with_severity(severity);
+
+                    diagnostics.push((biome_diagnostics::serde::Diagnostic::new(error), actions));
+                }
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);
+
+    PullDiagnosticsAndActionsResult {
+        diagnostics_with_actions: diagnostics,
+        errors,
+        skipped_diagnostics,
     }
 }

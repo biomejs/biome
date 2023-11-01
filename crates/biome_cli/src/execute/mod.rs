@@ -132,6 +132,9 @@ pub enum TraversalMode {
         /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
         /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
         rule: Option<RuleSelector>,
+
+        /// Whether the user wants to review the changes using the `--review` argument
+        review: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -267,6 +270,16 @@ impl Execution {
             | TraversalMode::CI { .. }
             | TraversalMode::Migrate { .. }
             | TraversalMode::Search { .. } => None,
+        }
+    }
+
+    pub(crate) fn interactive(&self) -> bool {
+        match &self.traversal_mode {
+            TraversalMode::Lint { review, .. } => *review,
+            TraversalMode::Format { .. }
+            | TraversalMode::CI
+            | TraversalMode::Migrate { .. }
+            | TraversalMode::Check { .. } => false,
         }
     }
 

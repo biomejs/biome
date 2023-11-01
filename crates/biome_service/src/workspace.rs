@@ -528,6 +528,14 @@ pub struct PullActionsResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct PullDiagnosticsAndActionsResult {
+    pub diagnostics_with_actions: Vec<(biome_diagnostics::serde::Diagnostic, Vec<CodeAction>)>,
+    pub errors: usize,
+    pub skipped_diagnostics: u64,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
@@ -833,6 +841,11 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// position within a file
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
@@ -950,6 +963,19 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             max_diagnostics: max_diagnostics.into(),
             rule,
         })
+    }
+
+    pub fn pull_diagnostics_and_actions(
+        &self,
+        categories: RuleCategories,
+        max_diagnostics: u64,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.workspace
+            .pull_diagnostics_and_actions(PullDiagnosticsParams {
+                path: self.path.clone(),
+                categories,
+                max_diagnostics,
+            })
     }
 
     pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {

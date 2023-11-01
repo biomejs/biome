@@ -5,7 +5,9 @@ use self::{
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
-use crate::workspace::{FixFileMode, OrganizeImportsResult};
+use crate::workspace::{
+    CodeAction, FixFileMode, OrganizeImportsResult, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     settings::WorkspaceSettingsHandle,
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
@@ -387,6 +389,8 @@ pub(crate) struct CodeActionsParams<'a> {
 }
 
 type Lint = fn(LintParams) -> LintResults;
+type DiagnosticsAndActions = fn(LintParams) -> PullDiagnosticsAndActionsResult;
+
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
@@ -396,6 +400,8 @@ type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceEr
 pub struct AnalyzerCapabilities {
     /// It lints a file
     pub(crate) lint: Option<Lint>,
+    /// Extract diagnostics and relative actions
+    pub(crate) diagnostics_and_actions: Option<DiagnosticsAndActions>,
     /// It extracts code actions for a file
     pub(crate) code_actions: Option<CodeActions>,
     /// Applies fixes to a file
