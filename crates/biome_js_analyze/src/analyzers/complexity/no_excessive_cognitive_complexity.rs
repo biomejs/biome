@@ -415,7 +415,7 @@ impl VisitNode<JsonLanguage> for ComplexityOptions {
         if name_text == "maxAllowedComplexity" {
             if let Some(value) = value
                 .as_json_number_value()
-                .and_then(|number_value| u8::from_str(&number_value.syntax().to_string()).ok())
+                .and_then(|number_value| u8::from_str(&number_value.text()).ok())
                 // Don't allow 0 or no code would pass.
                 // And don't allow MAX_SCORE or we can't detect exceeding it.
                 .filter(|&number| number > 0 && number < MAX_SCORE)
