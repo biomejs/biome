@@ -7,8 +7,8 @@ expression: content
 ```json
 {
   "overrides": [
-    { "include": ["special/**"], "formatter": { "lineWidth": 20 } },
-    { "include": ["special/**"], "formatter": { "lineWidth": 130 } }
+    { "include": ["special/**"], "formatter": { "lineWidth": 130 } },
+    { "include": ["special/**"], "formatter": { "lineWidth": 20 } }
   ]
 }
 ```

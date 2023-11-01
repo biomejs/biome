@@ -82,7 +82,7 @@ method_getter_err.js:2:2 parse ━━━━━━━━━━━━━━━━�
 --
 method_getter_err.js:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'.
   
     1 │ class foo {
   > 2 │  get {}
@@ -90,7 +90,7 @@ method_getter_err.js:2:6 parse ━━━━━━━━━━━━━━━━�
     3 │ }
     4 │ 
   
-  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
   
     1 │ class foo {
   > 2 │  get {}
@@ -101,7 +101,7 @@ method_getter_err.js:2:6 parse ━━━━━━━━━━━━━━━━�
 --
 method_getter_err.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     1 │ class foo {
     2 │  get {}
@@ -109,7 +109,7 @@ method_getter_err.js:3:1 parse ━━━━━━━━━━━━━━━━�
       │ ^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ class foo {
     2 │  get {}

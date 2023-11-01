@@ -81,7 +81,7 @@ super.f(?); // partial application allowed for call on |SuperProperty|
 ```
 partial-application.js:5:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     3 │ function add(x, y) { return x + y; }
     4 │ 
@@ -90,7 +90,7 @@ partial-application.js:5:23 parse ━━━━━━━━━━━━━━━�
     6 │ addOne(2); // 3
     7 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     3 │ function add(x, y) { return x + y; }
     4 │ 
@@ -101,7 +101,7 @@ partial-application.js:5:23 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:8:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, 10'
+  × Expected an expression but instead found '?, 10'.
   
      6 │ addOne(2); // 3
      7 │ 
@@ -110,7 +110,7 @@ partial-application.js:8:20 parse ━━━━━━━━━━━━━━━�
      9 │ addTen(2); // 12
     10 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
      6 │ addOne(2); // 3
      7 │ 
@@ -133,7 +133,7 @@ partial-application.js:12:4 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:12:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     11 │ let newScore = player.score
   > 12 │   |> add(7, ?)
@@ -141,7 +141,7 @@ partial-application.js:12:13 parse ━━━━━━━━━━━━━━━
     13 │   |> clamp(0, 100, ?); // shallow stack, the pipe to `clamp` is the same frame as the pipe to `add`.
     14 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     11 │ let newScore = player.score
   > 12 │   |> add(7, ?)
@@ -164,7 +164,7 @@ partial-application.js:13:4 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:13:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     11 │ let newScore = player.score
     12 │   |> add(7, ?)
@@ -173,7 +173,7 @@ partial-application.js:13:20 parse ━━━━━━━━━━━━━━━
     14 │ 
     15 │ f(x, ?)           // partial application from left
   
-  i Expected an expression here
+  i Expected an expression here.
   
     11 │ let newScore = player.score
     12 │   |> add(7, ?)
@@ -184,7 +184,7 @@ partial-application.js:13:20 parse ━━━━━━━━━━━━━━━
   
 partial-application.js:15:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     13 │   |> clamp(0, 100, ?); // shallow stack, the pipe to `clamp` is the same frame as the pipe to `add`.
     14 │ 
@@ -193,7 +193,7 @@ partial-application.js:15:6 parse ━━━━━━━━━━━━━━━�
     16 │ f(?, x)           // partial application from right
     17 │ f(?, x, ?)        // partial application for any arg
   
-  i Expected an expression here
+  i Expected an expression here.
   
     13 │   |> clamp(0, 100, ?); // shallow stack, the pipe to `clamp` is the same frame as the pipe to `add`.
     14 │ 
@@ -204,7 +204,7 @@ partial-application.js:15:6 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:16:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, x'
+  × Expected an expression but instead found '?, x'.
   
     15 │ f(x, ?)           // partial application from left
   > 16 │ f(?, x)           // partial application from right
@@ -212,7 +212,7 @@ partial-application.js:16:3 parse ━━━━━━━━━━━━━━━�
     17 │ f(?, x, ?)        // partial application for any arg
     18 │ o.f(x, ?)         // partial application from left
   
-  i Expected an expression here
+  i Expected an expression here.
   
     15 │ f(x, ?)           // partial application from left
   > 16 │ f(?, x)           // partial application from right
@@ -222,7 +222,7 @@ partial-application.js:16:3 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:17:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, x, ?'
+  × Expected an expression but instead found '?, x, ?'.
   
     15 │ f(x, ?)           // partial application from left
     16 │ f(?, x)           // partial application from right
@@ -231,7 +231,7 @@ partial-application.js:17:3 parse ━━━━━━━━━━━━━━━�
     18 │ o.f(x, ?)         // partial application from left
     19 │ o.f(?, x)         // partial application from right
   
-  i Expected an expression here
+  i Expected an expression here.
   
     15 │ f(x, ?)           // partial application from left
     16 │ f(?, x)           // partial application from right
@@ -242,7 +242,7 @@ partial-application.js:17:3 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:18:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     16 │ f(?, x)           // partial application from right
     17 │ f(?, x, ?)        // partial application for any arg
@@ -251,7 +251,7 @@ partial-application.js:18:8 parse ━━━━━━━━━━━━━━━�
     19 │ o.f(?, x)         // partial application from right
     20 │ o.f(?, x, ?)      // partial application for any arg
   
-  i Expected an expression here
+  i Expected an expression here.
   
     16 │ f(?, x)           // partial application from right
     17 │ f(?, x, ?)        // partial application for any arg
@@ -262,7 +262,7 @@ partial-application.js:18:8 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:19:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, x'
+  × Expected an expression but instead found '?, x'.
   
     17 │ f(?, x, ?)        // partial application for any arg
     18 │ o.f(x, ?)         // partial application from left
@@ -271,7 +271,7 @@ partial-application.js:19:5 parse ━━━━━━━━━━━━━━━�
     20 │ o.f(?, x, ?)      // partial application for any arg
     21 │ super.f(?)        // partial application allowed for call on |SuperProperty|
   
-  i Expected an expression here
+  i Expected an expression here.
   
     17 │ f(?, x, ?)        // partial application for any arg
     18 │ o.f(x, ?)         // partial application from left
@@ -282,7 +282,7 @@ partial-application.js:19:5 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:20:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?, x, ?'
+  × Expected an expression but instead found '?, x, ?'.
   
     18 │ o.f(x, ?)         // partial application from left
     19 │ o.f(?, x)         // partial application from right
@@ -291,7 +291,7 @@ partial-application.js:20:5 parse ━━━━━━━━━━━━━━━�
     21 │ super.f(?)        // partial application allowed for call on |SuperProperty|
     22 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     18 │ o.f(x, ?)         // partial application from left
     19 │ o.f(?, x)         // partial application from right
@@ -302,7 +302,7 @@ partial-application.js:20:5 parse ━━━━━━━━━━━━━━━�
   
 partial-application.js:21:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '?'
+  × Expected an expression but instead found '?'.
   
     19 │ o.f(?, x)         // partial application from right
     20 │ o.f(?, x, ?)      // partial application for any arg
@@ -310,7 +310,7 @@ partial-application.js:21:9 parse ━━━━━━━━━━━━━━━�
        │         ^
     22 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     19 │ o.f(?, x)         // partial application from right
     20 │ o.f(?, x, ?)      // partial application for any arg

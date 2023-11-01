@@ -3620,7 +3620,7 @@ type_parameter_modifier.ts:30:20 parse ━━━━━━━━━━━━━�
 --
 type_parameter_modifier.ts:31:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found 'in'
+  × Expected a type parameter but instead found 'in'.
   
     29 │ type Foo<i\\u006E T> = {}
     30 │ type Foo<ou\\u0074 T> = {}
@@ -3629,7 +3629,7 @@ type_parameter_modifier.ts:31:13 parse ━━━━━━━━━━━━━�
     32 │ type Foo<out in> = {}
     33 │ type Foo<out in T> = {}
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     29 │ type Foo<i\\u006E T> = {}
     30 │ type Foo<ou\\u0074 T> = {}
@@ -3641,7 +3641,7 @@ type_parameter_modifier.ts:31:13 parse ━━━━━━━━━━━━━�
 --
 type_parameter_modifier.ts:32:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found 'in'
+  × Expected a type parameter but instead found 'in'.
   
     30 │ type Foo<ou\\u0074 T> = {}
     31 │ type Foo<in in> = {}
@@ -3650,7 +3650,7 @@ type_parameter_modifier.ts:32:14 parse ━━━━━━━━━━━━━�
     33 │ type Foo<out in T> = {}
     34 │ type Foo<public T> = {}
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     30 │ type Foo<ou\\u0074 T> = {}
     31 │ type Foo<in in> = {}

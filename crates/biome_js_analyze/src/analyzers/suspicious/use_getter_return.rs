@@ -25,7 +25,7 @@ declare_rule! {
     /// const obj = {
     ///     get firstName() {
     ///         return;
-    ///     },
+    ///     }
     /// }
     /// ```
     ///
@@ -37,7 +37,7 @@ declare_rule! {
     ///         } else {
     ///             return null;
     ///         }
-    ///     },
+    ///     }
     /// }
     /// ```
     ///
@@ -55,7 +55,7 @@ declare_rule! {
     /// const obj = {
     ///     get firstName() {
     ///         return this.fullname.split(" ")[0];
-    ///     },
+    ///     }
     /// }
     /// ```
     ///

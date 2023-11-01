@@ -295,14 +295,14 @@ JsModule {
 --
 rest_property_assignment_target_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, or an assignment target but instead found '}'
+  × Expected an identifier, or an assignment target but instead found '}'.
   
   > 1 │ ({ ... } = a);
       │        ^
     2 │ ({ ...c = "default" } = a);
     3 │ ({ ...{a} } = b);
   
-  i Expected an identifier, or an assignment target here
+  i Expected an identifier, or an assignment target here.
   
   > 1 │ ({ ... } = a);
       │        ^

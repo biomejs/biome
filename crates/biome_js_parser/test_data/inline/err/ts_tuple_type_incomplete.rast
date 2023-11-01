@@ -47,13 +47,13 @@ JsModule {
 --
 ts_tuple_type_incomplete.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found the end of the file
+  × Expected a type but instead found the end of the file.
   
     1 │ type A = [string,
   > 2 │ 
       │ 
   
-  i Expected a type here
+  i Expected a type here.
   
     1 │ type A = [string,
   > 2 │ 

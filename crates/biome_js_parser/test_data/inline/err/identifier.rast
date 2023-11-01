@@ -53,14 +53,14 @@ identifier.js:1:1 parse ━━━━━━━━━━━━━━━━━━�
 --
 identifier.js:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found ';'
+  × Expected an unary expression but instead found ';'.
   
     1 │ yield;
   > 2 │ await;
       │      ^
     3 │ 
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     1 │ yield;
   > 2 │ await;

@@ -55,7 +55,7 @@ info: json/json/array.json
 ```
 array.json:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
     2 │   [
     3 │ 1,null],
@@ -64,7 +64,7 @@ array.json:4:11 parse ━━━━━━━━━━━━━━━━━━━�
     5 │   [null,],
     6 │   [0,],
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
     2 │   [
     3 │ 1,null],
@@ -75,7 +75,7 @@ array.json:4:11 parse ━━━━━━━━━━━━━━━━━━━�
   
 array.json:5:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
     3 │ 1,null],
     4 │   [1,null,],
@@ -84,7 +84,7 @@ array.json:5:9 parse ━━━━━━━━━━━━━━━━━━━�
     6 │   [0,],
     7 │   [false,],
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
     3 │ 1,null],
     4 │   [1,null,],
@@ -95,7 +95,7 @@ array.json:5:9 parse ━━━━━━━━━━━━━━━━━━━�
   
 array.json:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
     4 │   [1,null,],
     5 │   [null,],
@@ -104,7 +104,7 @@ array.json:6:6 parse ━━━━━━━━━━━━━━━━━━━�
     7 │   [false,],
     8 │   ['',]
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
     4 │   [1,null,],
     5 │   [null,],
@@ -115,7 +115,7 @@ array.json:6:6 parse ━━━━━━━━━━━━━━━━━━━�
   
 array.json:7:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
     5 │   [null,],
     6 │   [0,],
@@ -124,7 +124,7 @@ array.json:7:10 parse ━━━━━━━━━━━━━━━━━━━�
     8 │   ['',]
     9 │ ]
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
     5 │   [null,],
     6 │   [0,],
@@ -148,7 +148,7 @@ array.json:8:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 array.json:8:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
      6 │   [0,],
      7 │   [false,],
@@ -157,7 +157,7 @@ array.json:8:7 parse ━━━━━━━━━━━━━━━━━━━�
      9 │ ]
     10 │ 
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
      6 │   [0,],
      7 │   [false,],

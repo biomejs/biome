@@ -74,7 +74,7 @@ cross-object-2.json:3:5 parse ━━━━━━━━━━━━━━━━�
   
 cross-object-2.json:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property but instead found '}'
+  × Expected a property but instead found '}'.
   
     1 │ {a:
     2 │ { "b": 2, "c": 3,
@@ -83,7 +83,7 @@ cross-object-2.json:3:11 parse ━━━━━━━━━━━━━━━━�
     4 │ c: {d:     6}
     5 │ }
   
-  i Expected a property here
+  i Expected a property here.
   
     1 │ {a:
     2 │ { "b": 2, "c": 3,

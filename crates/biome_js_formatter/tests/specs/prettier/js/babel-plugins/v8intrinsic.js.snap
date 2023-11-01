@@ -94,7 +94,7 @@ foo % bar();
 ```
 v8intrinsic.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '%DebugPrint(foo)'
+  × Expected a statement but instead found '%DebugPrint(foo)'.
   
     1 │ // https://github.com/babel/babel/pull/10148
     2 │ 
@@ -102,7 +102,7 @@ v8intrinsic.js:3:1 parse ━━━━━━━━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ // https://github.com/babel/babel/pull/10148
     2 │ 
@@ -112,7 +112,7 @@ v8intrinsic.js:3:1 parse ━━━━━━━━━━━━━━━━━━�
   
 v8intrinsic.js:19:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '%'
+  × Expected an expression but instead found '%'.
   
     17 │ // %DebugPrint?.(null)
     18 │ 
@@ -121,7 +121,7 @@ v8intrinsic.js:19:5 parse ━━━━━━━━━━━━━━━━━━
     20 │ 
     21 │ function *foo() {
   
-  i Expected an expression here
+  i Expected an expression here.
   
     17 │ // %DebugPrint?.(null)
     18 │ 

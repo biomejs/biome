@@ -220,7 +220,7 @@ export interface ExtendsLongOneWithGenerics
 ```
 break.ts:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     3 │   AnotherType,
     4 │   YetAnotherType,
@@ -229,7 +229,7 @@ break.ts:5:1 parse ━━━━━━━━━━━━━━━━━━━━�
     6 │   m(): void;
     7 │ };
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     3 │   AnotherType,
     4 │   YetAnotherType,
@@ -240,7 +240,7 @@ break.ts:5:1 parse ━━━━━━━━━━━━━━━━━━━━�
   
 break.ts:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type parameter but instead found '>'
+  × Expected a type parameter but instead found '>'.
   
     14 │   DifferentType3,
     15 │   DifferentType4,
@@ -249,7 +249,7 @@ break.ts:16:1 parse ━━━━━━━━━━━━━━━━━━━━
     17 │   m() {};
     18 │ };
   
-  i Expected a type parameter here
+  i Expected a type parameter here.
   
     14 │   DifferentType3,
     15 │   DifferentType4,

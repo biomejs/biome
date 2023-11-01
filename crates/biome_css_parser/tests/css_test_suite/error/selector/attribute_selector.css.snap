@@ -139,14 +139,14 @@ CssRoot {
 ```
 attribute_selector.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '.'
+  × Expected an identifier but instead found '.'.
   
   > 1 │ [ .class {}
       │   ^
     2 │ 
     3 │ [title="foo" P] {}
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
   > 1 │ [ .class {}
       │   ^
@@ -155,7 +155,7 @@ attribute_selector.css:1:3 parse ━━━━━━━━━━━━━━━�
   
 attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a s, a S, an i, or a I but instead found 'P'
+  × Expected a s, a S, an i, or a I but instead found 'P'.
   
     1 │ [ .class {}
     2 │ 
@@ -163,7 +163,7 @@ attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━�
       │              ^
     4 │ 
   
-  i Expected a s, a S, an i, or a I here
+  i Expected a s, a S, an i, or a I here.
   
     1 │ [ .class {}
     2 │ 

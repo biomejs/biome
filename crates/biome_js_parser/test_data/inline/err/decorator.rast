@@ -1132,7 +1132,7 @@ decorator.ts:2:2 parse ━━━━━━━━━━━━━━━━━━━
 --
 decorator.ts:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '++'
+  × Expected an expression but instead found '++'.
   
     1 │ @'dsads' class MyClass {}
     2 │ @1 class MyClass {}
@@ -1141,7 +1141,7 @@ decorator.ts:3:2 parse ━━━━━━━━━━━━━━━━━━━
     4 │ @[] in 1 class MyClass {}
     5 │ @[] class MyClass {}
   
-  i Expected an expression here
+  i Expected an expression here.
   
     1 │ @'dsads' class MyClass {}
     2 │ @1 class MyClass {}
@@ -1237,7 +1237,7 @@ decorator.ts:4:1 parse ━━━━━━━━━━━━━━━━━━━
 --
 decorator.ts:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found 'in 1'
+  × Expected a statement but instead found 'in 1'.
   
     2 │ @1 class MyClass {}
     3 │ @++1 class MyClass {}
@@ -1246,7 +1246,7 @@ decorator.ts:4:5 parse ━━━━━━━━━━━━━━━━━━━
     5 │ @[] class MyClass {}
     6 │ @() => {} class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
     2 │ @1 class MyClass {}
     3 │ @++1 class MyClass {}
@@ -1298,7 +1298,7 @@ decorator.ts:6:1 parse ━━━━━━━━━━━━━━━━━━━
 --
 decorator.ts:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '=>'
+  × Expected a statement but instead found '=>'.
   
     4 │ @[] in 1 class MyClass {}
     5 │ @[] class MyClass {}
@@ -1307,7 +1307,7 @@ decorator.ts:6:5 parse ━━━━━━━━━━━━━━━━━━━
     7 │ @1 == 2 ? true : false class MyClass {}
     8 │ @await fn class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
     4 │ @[] in 1 class MyClass {}
     5 │ @[] class MyClass {}
@@ -1345,7 +1345,7 @@ decorator.ts:7:1 parse ━━━━━━━━━━━━━━━━━━━
 --
 decorator.ts:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '== 2 ? true : false'
+  × Expected a statement but instead found '== 2 ? true : false'.
   
     5 │ @[] class MyClass {}
     6 │ @() => {} class MyClass {}
@@ -1354,7 +1354,7 @@ decorator.ts:7:4 parse ━━━━━━━━━━━━━━━━━━━
     8 │ @await fn class MyClass {}
     9 │ @function(){} class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
     5 │ @[] class MyClass {}
     6 │ @() => {} class MyClass {}
@@ -1448,7 +1448,7 @@ decorator.ts:10:1 parse ━━━━━━━━━━━━━━━━━━�
 --
 decorator.ts:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found 'instanceof Object'
+  × Expected a statement but instead found 'instanceof Object'.
   
      8 │ @await fn class MyClass {}
      9 │ @function(){} class MyClass {}
@@ -1457,7 +1457,7 @@ decorator.ts:10:6 parse ━━━━━━━━━━━━━━━━━━�
     11 │ @1 === 2 class MyClass {}
     12 │ @new Object() class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
      8 │ @await fn class MyClass {}
      9 │ @function(){} class MyClass {}
@@ -1495,7 +1495,7 @@ decorator.ts:11:1 parse ━━━━━━━━━━━━━━━━━━�
 --
 decorator.ts:11:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '=== 2'
+  × Expected a statement but instead found '=== 2'.
   
      9 │ @function(){} class MyClass {}
     10 │ @obj instanceof Object class MyClass {}
@@ -1504,7 +1504,7 @@ decorator.ts:11:4 parse ━━━━━━━━━━━━━━━━━━�
     12 │ @new Object() class MyClass {}
     13 │ @{} class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
      9 │ @function(){} class MyClass {}
     10 │ @obj instanceof Object class MyClass {}
@@ -1582,7 +1582,7 @@ decorator.ts:15:1 parse ━━━━━━━━━━━━━━━━━━�
 --
 decorator.ts:15:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ',b'
+  × Expected a statement but instead found ',b'.
   
     13 │ @{} class MyClass {}
     14 │ @a++ class MyClass {}
@@ -1591,7 +1591,7 @@ decorator.ts:15:3 parse ━━━━━━━━━━━━━━━━━━�
     16 │ @`${d}foo` class MyClass {}
     17 │ @obj as MyType class MyClass {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
     13 │ @{} class MyClass {}
     14 │ @a++ class MyClass {}
@@ -1689,7 +1689,7 @@ decorator.ts:17:16 parse ━━━━━━━━━━━━━━━━━━�
 --
 decorator.ts:18:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found '<'
+  × Expected an expression but instead found '<'.
   
     16 │ @`${d}foo` class MyClass {}
     17 │ @obj as MyType class MyClass {}
@@ -1698,7 +1698,7 @@ decorator.ts:18:2 parse ━━━━━━━━━━━━━━━━━━�
     19 │ @obj satisfies MyType class MyClass {}
     20 │ @obj! class MyClass {}
   
-  i Expected an expression here
+  i Expected an expression here.
   
     16 │ @`${d}foo` class MyClass {}
     17 │ @obj as MyType class MyClass {}

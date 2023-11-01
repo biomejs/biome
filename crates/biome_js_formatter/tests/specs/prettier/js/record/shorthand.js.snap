@@ -43,7 +43,7 @@ console.log(record.url); // https://github.com/tc39/proposal-record-tuple
 ```
 shorthand.js:2:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ const url = "https://github.com/tc39/proposal-record-tuple";
   > 2 │ const record = #{ url }
@@ -51,7 +51,7 @@ shorthand.js:2:17 parse ━━━━━━━━━━━━━━━━━━�
     3 │ console.log(record.url) // https://github.com/tc39/proposal-record-tuple
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ const url = "https://github.com/tc39/proposal-record-tuple";
   > 2 │ const record = #{ url }

@@ -49,7 +49,7 @@ errorOnInitializerInInterfaceProperty.ts:2:17 parse ━━━━━━━━━�
   
 errorOnInitializerInInterfaceProperty.ts:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, or a signature but instead found ';'
+  × Expected a property, or a signature but instead found ';'.
   
     1 │ interface Foo {
   > 2 │     bar: number = 5;
@@ -57,7 +57,7 @@ errorOnInitializerInInterfaceProperty.ts:2:20 parse ━━━━━━━━━�
     3 │ }
     4 │ 
   
-  i Expected a property, or a signature here
+  i Expected a property, or a signature here.
   
     1 │ interface Foo {
   > 2 │     bar: number = 5;
@@ -67,7 +67,7 @@ errorOnInitializerInInterfaceProperty.ts:2:20 parse ━━━━━━━━━�
   
 errorOnInitializerInInterfaceProperty.ts:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     1 │ interface Foo {
     2 │     bar: number = 5;
@@ -75,7 +75,7 @@ errorOnInitializerInInterfaceProperty.ts:3:1 parse ━━━━━━━━━�
       │ ^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ interface Foo {
     2 │     bar: number = 5;

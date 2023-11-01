@@ -202,8 +202,8 @@ fn expect_closing_fragment(
                 "JSX fragment has no corresponding closing tag.",
                 opening_range,
             )
-            .detail(opening_range, "Opening fragment")
-            .detail(name.range(p), "Closing tag"),
+            .with_detail(opening_range, "Opening fragment")
+            .with_detail(name.range(p), "Closing tag"),
         );
     }
 

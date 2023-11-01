@@ -72,14 +72,14 @@ let h:
 ```
 jsdoc_only_types.ts:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '*'
+  × Expected a type but instead found '*'.
   
   > 1 │ let a: *;
       │        ^
     2 │ function b(x: ?) {}
     3 │ let c: ?string;
   
-  i Expected a type here
+  i Expected a type here.
   
   > 1 │ let a: *;
       │        ^
@@ -88,7 +88,7 @@ jsdoc_only_types.ts:1:8 parse ━━━━━━━━━━━━━━━━�
   
 jsdoc_only_types.ts:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '?'
+  × Expected a type but instead found '?'.
   
     1 │ let a: *;
   > 2 │ function b(x: ?) {}
@@ -96,7 +96,7 @@ jsdoc_only_types.ts:2:15 parse ━━━━━━━━━━━━━━━━�
     3 │ let c: ?string;
     4 │ let d: string?;
   
-  i Expected a type here
+  i Expected a type here.
   
     1 │ let a: *;
   > 2 │ function b(x: ?) {}
@@ -106,7 +106,7 @@ jsdoc_only_types.ts:2:15 parse ━━━━━━━━━━━━━━━━�
   
 jsdoc_only_types.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '?'
+  × Expected a type but instead found '?'.
   
     1 │ let a: *;
     2 │ function b(x: ?) {}
@@ -115,7 +115,7 @@ jsdoc_only_types.ts:3:8 parse ━━━━━━━━━━━━━━━━�
     4 │ let d: string?;
     5 │ let e: ?(string | number);
   
-  i Expected a type here
+  i Expected a type here.
   
     1 │ let a: *;
     2 │ function b(x: ?) {}
@@ -155,7 +155,7 @@ jsdoc_only_types.ts:4:14 parse ━━━━━━━━━━━━━━━━�
   
 jsdoc_only_types.ts:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '?'
+  × Expected a type but instead found '?'.
   
     3 │ let c: ?string;
     4 │ let d: string?;
@@ -164,7 +164,7 @@ jsdoc_only_types.ts:5:8 parse ━━━━━━━━━━━━━━━━�
     6 │ let f: !string;
     7 │ let g: string!;
   
-  i Expected a type here
+  i Expected a type here.
   
     3 │ let c: ?string;
     4 │ let d: string?;
@@ -175,7 +175,7 @@ jsdoc_only_types.ts:5:8 parse ━━━━━━━━━━━━━━━━�
   
 jsdoc_only_types.ts:6:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '!'
+  × Expected a type but instead found '!'.
   
     4 │ let d: string?;
     5 │ let e: ?(string | number);
@@ -184,7 +184,7 @@ jsdoc_only_types.ts:6:8 parse ━━━━━━━━━━━━━━━━�
     7 │ let g: string!;
     8 │ let h: !(string | number);
   
-  i Expected a type here
+  i Expected a type here.
   
     4 │ let d: string?;
     5 │ let e: ?(string | number);
@@ -224,7 +224,7 @@ jsdoc_only_types.ts:7:14 parse ━━━━━━━━━━━━━━━━�
   
 jsdoc_only_types.ts:8:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '!'
+  × Expected a type but instead found '!'.
   
     6 │ let f: !string;
     7 │ let g: string!;
@@ -232,7 +232,7 @@ jsdoc_only_types.ts:8:8 parse ━━━━━━━━━━━━━━━━�
       │        ^
     9 │ 
   
-  i Expected a type here
+  i Expected a type here.
   
     6 │ let f: !string;
     7 │ let g: string!;

@@ -38,12 +38,12 @@ JsonRoot {
 ```
 structure_end_array.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ']'
+  × Expected an array, an object, or a literal but instead found ']'.
   
   > 1 │ ]
       │ ^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ]
       │ ^

@@ -45,7 +45,7 @@ a = #;
 ```
 tuple.js:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     4 │ ]
     5 │ 
@@ -54,7 +54,7 @@ tuple.js:6:6 parse ━━━━━━━━━━━━━━━━━━━━�
     7 │   <div/>,
     8 │   <div/>,
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ ]
     5 │ 

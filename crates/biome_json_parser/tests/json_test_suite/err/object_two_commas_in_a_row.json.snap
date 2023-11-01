@@ -77,12 +77,12 @@ JsonRoot {
 ```
 object_two_commas_in_a_row.json:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property but instead found ','
+  × Expected a property but instead found ','.
   
   > 1 │ {"a":"b",,"c":"d"}
       │          ^
   
-  i Expected a property here
+  i Expected a property here.
   
   > 1 │ {"a":"b",,"c":"d"}
       │          ^

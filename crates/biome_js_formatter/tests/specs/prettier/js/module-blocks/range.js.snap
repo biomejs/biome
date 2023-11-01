@@ -137,7 +137,7 @@ range.js:4:36 parse ━━━━━━━━━━━━━━━━━━━━
   
 range.js:4:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '})'
+  × Expected a statement but instead found '})'.
   
     2 │ };
     3 │ 
@@ -145,7 +145,7 @@ range.js:4:38 parse ━━━━━━━━━━━━━━━━━━━━
       │                                      ^^
     5 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     2 │ };
     3 │ 

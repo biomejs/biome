@@ -52,7 +52,7 @@ class C {
 ```
 nested-bindings.js:4:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a member name, or a rest pattern but instead found '#x: [x]'
+  × Expected an identifier, a member name, or a rest pattern but instead found '#x: [x]'.
   
     2 │   #x = 1;
     3 │   m() {
@@ -61,7 +61,7 @@ nested-bindings.js:4:17 parse ━━━━━━━━━━━━━━━━�
     5 │   }
     6 │ }
   
-  i Expected an identifier, a member name, or a rest pattern here
+  i Expected an identifier, a member name, or a rest pattern here.
   
     2 │   #x = 1;
     3 │   m() {
@@ -72,7 +72,7 @@ nested-bindings.js:4:17 parse ━━━━━━━━━━━━━━━━�
   
 nested-bindings.js:4:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a member name, or a rest pattern but instead found '#x: y'
+  × Expected an identifier, a member name, or a rest pattern but instead found '#x: y'.
   
     2 │   #x = 1;
     3 │   m() {
@@ -81,7 +81,7 @@ nested-bindings.js:4:37 parse ━━━━━━━━━━━━━━━━�
     5 │   }
     6 │ }
   
-  i Expected an identifier, a member name, or a rest pattern here
+  i Expected an identifier, a member name, or a rest pattern here.
   
     2 │   #x = 1;
     3 │   m() {

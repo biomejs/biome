@@ -69,7 +69,7 @@ tuple-and-record.js:2:17 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     1 │ class A extends {} {}
   > 2 │ class B extends #{} {}
@@ -77,7 +77,7 @@ tuple-and-record.js:2:18 parse ━━━━━━━━━━━━━━━━�
     3 │ 
     4 │ class C extends [] {}
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ class A extends {} {}
   > 2 │ class B extends #{} {}
@@ -97,7 +97,7 @@ tuple-and-record.js:2:17 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'.
   
     1 │ class A extends {} {}
   > 2 │ class B extends #{} {}
@@ -105,7 +105,7 @@ tuple-and-record.js:2:18 parse ━━━━━━━━━━━━━━━━�
     3 │ 
     4 │ class C extends [] {}
   
-  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
   
     1 │ class A extends {} {}
   > 2 │ class B extends #{} {}
@@ -135,14 +135,14 @@ tuple-and-record.js:5:17 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:5:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}
       │                  ^
     6 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}
@@ -160,14 +160,14 @@ tuple-and-record.js:5:17 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ']'
+  × Expected an expression but instead found ']'.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}
       │                   ^
     6 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}
@@ -185,14 +185,14 @@ tuple-and-record.js:5:18 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:5:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '{'.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}
       │                     ^
     6 │ 
   
-  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
   
     4 │ class C extends [] {}
   > 5 │ class D extends #[] {}

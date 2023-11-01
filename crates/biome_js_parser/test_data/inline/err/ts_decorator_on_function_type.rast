@@ -473,14 +473,14 @@ JsModule {
 --
 ts_decorator_on_function_type.ts:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '@'
+  × Expected a type but instead found '@'.
   
   > 1 │ type I = (@dec x, second, @dec third = 'default') => string;
       │           ^
     2 │ type I = (@dec.fn() x, second, @dec.fn() third = 'default') => string;
     3 │ type I = (@dec() x, second, @dec() third = 'default') => string;
   
-  i Expected a type here
+  i Expected a type here.
   
   > 1 │ type I = (@dec x, second, @dec third = 'default') => string;
       │           ^
@@ -526,7 +526,7 @@ ts_decorator_on_function_type.ts:1:49 parse ━━━━━━━━━━━━
 --
 ts_decorator_on_function_type.ts:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '@'
+  × Expected a type but instead found '@'.
   
     1 │ type I = (@dec x, second, @dec third = 'default') => string;
   > 2 │ type I = (@dec.fn() x, second, @dec.fn() third = 'default') => string;
@@ -534,7 +534,7 @@ ts_decorator_on_function_type.ts:2:11 parse ━━━━━━━━━━━━
     3 │ type I = (@dec() x, second, @dec() third = 'default') => string;
     4 │ 
   
-  i Expected a type here
+  i Expected a type here.
   
     1 │ type I = (@dec x, second, @dec third = 'default') => string;
   > 2 │ type I = (@dec.fn() x, second, @dec.fn() third = 'default') => string;
@@ -585,7 +585,7 @@ ts_decorator_on_function_type.ts:2:59 parse ━━━━━━━━━━━━
 --
 ts_decorator_on_function_type.ts:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a type but instead found '@'
+  × Expected a type but instead found '@'.
   
     1 │ type I = (@dec x, second, @dec third = 'default') => string;
     2 │ type I = (@dec.fn() x, second, @dec.fn() third = 'default') => string;
@@ -593,7 +593,7 @@ ts_decorator_on_function_type.ts:3:11 parse ━━━━━━━━━━━━
       │           ^
     4 │ 
   
-  i Expected a type here
+  i Expected a type here.
   
     1 │ type I = (@dec x, second, @dec third = 'default') => string;
     2 │ type I = (@dec.fn() x, second, @dec.fn() third = 'default') => string;

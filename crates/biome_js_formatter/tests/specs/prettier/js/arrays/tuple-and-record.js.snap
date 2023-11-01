@@ -87,7 +87,7 @@ a = [
 ```
 tuple-and-record.js:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     6 │ a = [
   > 7 │   #[1,2],
@@ -95,7 +95,7 @@ tuple-and-record.js:7:4 parse ━━━━━━━━━━━━━━━━�
     8 │   #[1,2],
     9 │ ]
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     6 │ a = [
   > 7 │   #[1,2],
@@ -127,7 +127,7 @@ tuple-and-record.js:7:4 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:8:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
      6 │ a = [
      7 │   #[1,2],
@@ -136,7 +136,7 @@ tuple-and-record.js:8:4 parse ━━━━━━━━━━━━━━━━�
      9 │ ]
     10 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
      6 │ a = [
      7 │   #[1,2],
@@ -171,7 +171,7 @@ tuple-and-record.js:8:4 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:17:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     16 │ a = [
   > 17 │   #{a, b},
@@ -179,7 +179,7 @@ tuple-and-record.js:17:4 parse ━━━━━━━━━━━━━━━━�
     18 │   #{a, b},
     19 │ ]
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     16 │ a = [
   > 17 │   #{a, b},
@@ -211,7 +211,7 @@ tuple-and-record.js:17:4 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:18:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     16 │ a = [
     17 │   #{a, b},
@@ -220,7 +220,7 @@ tuple-and-record.js:18:4 parse ━━━━━━━━━━━━━━━━�
     19 │ ]
     20 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     16 │ a = [
     17 │   #{a, b},

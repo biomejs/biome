@@ -47,13 +47,13 @@ JsModule {
 --
 type_arguments_incomplete.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found the end of the file
+  × Expected an expression but instead found the end of the file.
   
     1 │ func<T,
   > 2 │ 
       │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     1 │ func<T,
   > 2 │ 

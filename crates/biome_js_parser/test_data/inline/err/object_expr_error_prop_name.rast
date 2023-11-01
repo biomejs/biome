@@ -148,14 +148,14 @@ JsModule {
 --
 object_expr_error_prop_name.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'.
   
   > 1 │ let a = { /: 6, /: /foo/ }
       │           ^
     2 │ let b = {{}}
     3 │ 
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
   > 1 │ let a = { /: 6, /: /foo/ }
       │           ^
@@ -165,14 +165,14 @@ object_expr_error_prop_name.js:1:11 parse ━━━━━━━━━━━━�
 --
 object_expr_error_prop_name.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'.
   
   > 1 │ let a = { /: 6, /: /foo/ }
       │                 ^
     2 │ let b = {{}}
     3 │ 
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
   > 1 │ let a = { /: 6, /: /foo/ }
       │                 ^
@@ -182,14 +182,14 @@ object_expr_error_prop_name.js:1:17 parse ━━━━━━━━━━━━�
 --
 object_expr_error_prop_name.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '{'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '{'.
   
     1 │ let a = { /: 6, /: /foo/ }
   > 2 │ let b = {{}}
       │          ^
     3 │ 
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
     1 │ let a = { /: 6, /: /foo/ }
   > 2 │ let b = {{}}
@@ -199,14 +199,14 @@ object_expr_error_prop_name.js:2:10 parse ━━━━━━━━━━━━�
 --
 object_expr_error_prop_name.js:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     1 │ let a = { /: 6, /: /foo/ }
   > 2 │ let b = {{}}
       │            ^
     3 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ let a = { /: 6, /: /foo/ }
   > 2 │ let b = {{}}

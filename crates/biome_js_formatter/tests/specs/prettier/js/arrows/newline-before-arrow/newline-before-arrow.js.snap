@@ -59,14 +59,14 @@ newline-before-arrow.js:1:7 parse ━━━━━━━━━━━━━━━�
   
 newline-before-arrow.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '=> x'
+  × Expected a statement but instead found '=> x'.
   
     1 │ async x
   > 2 │ => x
       │ ^^^^
     3 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ async x
   > 2 │ => x

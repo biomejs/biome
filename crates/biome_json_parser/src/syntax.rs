@@ -324,7 +324,7 @@ fn parse_rest(p: &mut JsonParser, value: ParsedSyntax) {
 
         p.error(
             p.err_builder("End of file expected", range)
-                .hint("Use an array for a sequence of values: `[1, 2]`"),
+                .with_hint("Use an array for a sequence of values: `[1, 2]`"),
         );
     }
 
@@ -334,9 +334,9 @@ fn parse_rest(p: &mut JsonParser, value: ParsedSyntax) {
 }
 
 fn expected_value(p: &JsonParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["array", "object", "literal"], range).into_diagnostic(p)
+    expected_any(&["array", "object", "literal"], range, p)
 }
 
 fn expected_property(p: &JsonParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("property", range).into_diagnostic(p)
+    expected_node("property", range, p)
 }

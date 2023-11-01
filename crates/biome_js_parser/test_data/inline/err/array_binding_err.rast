@@ -289,7 +289,7 @@ array_binding_err.js:1:8 parse ━━━━━━━━━━━━━━━━�
 --
 array_binding_err.js:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an array pattern, or an object pattern but instead found '='
+  × Expected an identifier, an array pattern, or an object pattern but instead found '='.
   
     1 │ let [a b] = [1, 2];
   > 2 │ let [="default"] = [1, 2];
@@ -297,7 +297,7 @@ array_binding_err.js:2:6 parse ━━━━━━━━━━━━━━━━�
     3 │ let ["default"] = [1, 2];
     4 │ let [[c ] = [];
   
-  i Expected an identifier, an array pattern, or an object pattern here
+  i Expected an identifier, an array pattern, or an object pattern here.
   
     1 │ let [a b] = [1, 2];
   > 2 │ let [="default"] = [1, 2];
@@ -308,7 +308,7 @@ array_binding_err.js:2:6 parse ━━━━━━━━━━━━━━━━�
 --
 array_binding_err.js:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found '"default"'
+  × Expected an identifier, an object pattern, an array pattern, or a rest pattern but instead found '"default"'.
   
     1 │ let [a b] = [1, 2];
     2 │ let [="default"] = [1, 2];
@@ -317,7 +317,7 @@ array_binding_err.js:3:6 parse ━━━━━━━━━━━━━━━━�
     4 │ let [[c ] = [];
     5 │ 
   
-  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here
+  i Expected an identifier, an object pattern, an array pattern, or a rest pattern here.
   
     1 │ let [a b] = [1, 2];
     2 │ let [="default"] = [1, 2];

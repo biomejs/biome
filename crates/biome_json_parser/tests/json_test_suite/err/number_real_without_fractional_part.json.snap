@@ -48,12 +48,12 @@ JsonRoot {
 ```
 number_real_without_fractional_part.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '1.'
+  × Expected an array, an object, or a literal but instead found '1.'.
   
   > 1 │ [1.]
       │  ^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ [1.]
       │  ^^

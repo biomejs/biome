@@ -149,7 +149,7 @@ pipeline-operator-fsharp.js:5:4 parse ━━━━━━━━━━━━━━
   
 pipeline-operator-fsharp.js:6:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found '|'
+  × Expected an unary expression but instead found '|'.
   
     4 │ promise
     5 │   |> await
@@ -158,7 +158,7 @@ pipeline-operator-fsharp.js:6:3 parse ━━━━━━━━━━━━━━
     7 │   |> capitalize
     8 │   |> x => x + '!'
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     4 │ promise
     5 │   |> await

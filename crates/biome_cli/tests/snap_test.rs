@@ -354,14 +354,17 @@ pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
 }
 
 /// It checks if the contents of a file matches the passed `expected_content`
-pub fn assert_file_contents(fs: &MemoryFileSystem, file: &Path, expected_content: &str) {
-    let mut file = fs.open(file).expect("file was removed");
+pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Path, expected_content: &str) {
+    let mut file = fs.open(path).expect("file was removed");
 
     let mut content = String::new();
     file.read_to_string(&mut content)
         .expect("failed to read file from memory FS");
 
-    assert_eq!(content, expected_content);
-
-    // drop(file);
+    assert_eq!(
+        content,
+        expected_content,
+        "file {} doesn't match the expected content",
+        path.display()
+    );
 }

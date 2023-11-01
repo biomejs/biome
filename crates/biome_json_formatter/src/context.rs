@@ -86,6 +86,18 @@ impl JsonFormatOptions {
         self.line_width = line_width;
         self
     }
+
+    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
+        self.indent_style = indent_style;
+    }
+
+    pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
+        self.indent_width = indent_width;
+    }
+
+    pub fn set_line_width(&mut self, line_width: LineWidth) {
+        self.line_width = line_width;
+    }
 }
 
 impl FormatOptions for JsonFormatOptions {
