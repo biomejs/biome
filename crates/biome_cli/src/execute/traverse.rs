@@ -487,8 +487,8 @@ fn process_messages(options: ProcessMessagesOptions) {
                 new,
                 diff_kind,
             } => {
-                if mode.is_ci() {
-                    // A diff is an error in CI mode
+                // A diff is an error in CI mode and in format check mode
+                if mode.is_ci() || !mode.is_format_write() {
                     *errors += 1;
                 }
 
