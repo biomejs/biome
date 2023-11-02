@@ -32,7 +32,14 @@ class BiomeFormatterProvider : AsyncDocumentFormattingService() {
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         val ioFile = request.ioFile ?: return null
         val project = request.context.project
+        val configPath = BiomeUtils.getBiomeConfigPath(project)
+
         val params = SmartList("format", "--stdin-file-path", ioFile.path)
+
+        if (!configPath.isNullOrEmpty()) {
+            params.add("--config-path")
+            params.add(configPath)
+        }        
 
         val exePath = BiomeUtils.getBiomeExecutablePath(project)
 
