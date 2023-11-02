@@ -39,7 +39,7 @@ codegen-linter:
   cargo lintdoc
 
 # Generates code generated files for the website
-codegen-website:
+gen-web:
   cargo codegen-website
 
 # Generates the linter documentation and Rust documentation

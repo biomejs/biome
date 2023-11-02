@@ -192,6 +192,14 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Format { .. })
     }
 
+    pub(crate) const fn is_format_write(&self) -> bool {
+        if let TraversalMode::Format { write, .. } = self.traversal_mode {
+            write
+        } else {
+            false
+        }
+    }
+
     /// Whether the traversal mode requires write access to files
     pub(crate) const fn requires_write_access(&self) -> bool {
         match self.traversal_mode {
