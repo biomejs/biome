@@ -47,8 +47,11 @@ invalid.ts:2:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    2 │ import·type·A·from·"mod";
-      │ -------------------------
+     1  1 │   // Header comment
+     2    │ - import·type·A·from·"mod";
+     3  2 │   
+     4  3 │   // Header comment
+  
 
 ```
 
@@ -67,8 +70,12 @@ invalid.ts:5:18 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    5 │ import·type·*·as·B·from·"mod";·//·Import·comment
-      │ ------------------------------------------------
+     3  3 │   
+     4  4 │   // Header comment
+     5    │ - import·type·*·as·B·from·"mod";·//·Import·comment
+     6  5 │   
+     7  6 │   // Header comment
+  
 
 ```
 
@@ -87,8 +94,12 @@ invalid.ts:8:15 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    8 │ import·type·{·C·}·from·"mod";·//·Import·comment
-      │ -----------------------------------------------
+     6  6 │   
+     7  7 │   // Header comment
+     8    │ - import·type·{·C·}·from·"mod";·//·Import·comment
+     9  8 │   
+    10  9 │   // Header comment
+  
 
 ```
 
@@ -283,8 +294,11 @@ invalid.ts:24:20 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    24 │ import·type·{·L·as·M,·}·from·"mod";·//·Import·comment
-       │ -----------------------------------------------------
+    22 22 │   
+    23 23 │   // Header comment
+    24    │ - import·type·{·L·as·M,·}·from·"mod";·//·Import·comment
+    25 24 │   
+  
 
 ```
 
