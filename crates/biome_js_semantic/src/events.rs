@@ -5,8 +5,7 @@ use biome_js_syntax::{
     AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyTsType, JsImportNamedClause,
 };
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TextRange,
-    TsTypeParameterName,
+    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
 };
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
@@ -25,7 +24,7 @@ pub enum SemanticEvent {
     /// - Functions parameters
     /// - Type parameters
     DeclarationFound {
-        name_token: JsSyntaxToken,
+        range: TextRange,
         scope_id: usize,
         hoisted_scope_id: Option<usize>,
     },
@@ -102,8 +101,8 @@ pub enum SemanticEvent {
 impl SemanticEvent {
     pub fn range(&self) -> TextRange {
         match self {
-            Self::DeclarationFound { name_token, .. } => name_token.text_range(),
-            Self::ScopeStarted { range, .. }
+            Self::DeclarationFound { range, .. }
+            | Self::ScopeStarted { range, .. }
             | Self::ScopeEnded { range, .. }
             | Self::Read { range, .. }
             | Self::HoistedRead { range, .. }
@@ -365,150 +364,159 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn enter_identifier_binding(&mut self, node: &AnyJsIdentifierBinding) -> Option<()> {
-        let name_token = node.name_token().ok()?;
-        let name = name_token.token_text_trimmed();
-        let name_range = name_token.text_range();
-        let info = BindingInfo::new(name_range);
+    fn enter_identifier_binding(&mut self, node: &AnyJsIdentifierBinding) {
         let mut hoisted_scope_id = None;
-        let is_exported = if let Some(declaration) = node.declaration() {
-            let is_exported = declaration.export().is_some();
-            match declaration {
-                AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                    hoisted_scope_id = if declarator.declaration()?.is_var() {
-                        self.scope_index_to_hoist_declarations(0)
-                    } else {
-                        None
-                    };
-                    self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
-                }
-                AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
-                | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
-                    hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
-                    self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
-                }
-                AnyJsBindingDeclaration::JsClassExpression(_)
-                | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
-                    self.push_binding(None, BindingName::Value(name.clone()), info.clone());
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::JsClassDeclaration(_)
-                | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
-                | AnyJsBindingDeclaration::TsEnumDeclaration(_) => {
-                    // These declarations have their own scope.
-                    // Thus we need to hoist the declaration to the parent scope.
-                    hoisted_scope_id = self
-                        .scopes
-                        .get(self.scopes.len() - 2)
-                        .map(|scope| scope.scope_id);
-                    self.push_binding(
-                        hoisted_scope_id,
-                        BindingName::Value(name.clone()),
-                        info.clone(),
-                    );
-                    self.push_binding(hoisted_scope_id, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-                | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => {
-                    // These declarations have their own scope.
-                    // Thus we need to hoist the declaration to the parent scope.
-                    hoisted_scope_id = self
-                        .scopes
-                        .get(self.scopes.len() - 2)
-                        .map(|scope| scope.scope_id);
-                    self.push_binding(hoisted_scope_id, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
-                    // This declarations has its own scope.
-                    // Thus we need to hoist the declaration to the parent scope.
-                    hoisted_scope_id = self
-                        .scopes
-                        .get(self.scopes.len() - 2)
-                        .map(|scope| scope.scope_id);
-                    self.push_binding(hoisted_scope_id, BindingName::Value(name.clone()), info);
-                }
-                AnyJsBindingDeclaration::TsMappedType(_)
-                | AnyJsBindingDeclaration::TsTypeParameter(_) => {
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
-                    let info = info.into_imported();
-                    if clause.type_token().is_none() {
-                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+        let is_exported = if let Ok(name_token) = node.name_token() {
+            let info = BindingInfo::new(name_token.text_range());
+            let name = name_token.token_text_trimmed();
+            if let Some(declaration) = node.declaration() {
+                let is_exported = declaration.export().is_some();
+                match declaration {
+                    AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                        let is_var = declarator
+                            .declaration()
+                            .map(|x| x.is_var())
+                            .unwrap_or(false);
+                        hoisted_scope_id = if is_var {
+                            self.scope_index_to_hoist_declarations(0)
+                        } else {
+                            None
+                        };
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
-                    let info = info.into_imported();
-                    if clause.type_token().is_none() {
-                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                    AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
+                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
+                        hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
-                    let info = info.into_imported();
-                    if declaration.type_token().is_none() {
+                    AnyJsBindingDeclaration::JsClassExpression(_)
+                    | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
                         self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        self.push_binding(None, BindingName::Type(name), info);
                     }
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-                | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-                    let clause = declaration.parent::<JsImportNamedClause>()?;
-                    let info = info.into_imported();
-                    if clause.type_token().is_none() {
-                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                    AnyJsBindingDeclaration::JsClassDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+                    | AnyJsBindingDeclaration::TsEnumDeclaration(_) => {
+                        // These declarations have their own scope.
+                        // Thus we need to hoist the declaration to the parent scope.
+                        hoisted_scope_id = self
+                            .scopes
+                            .get(self.scopes.len() - 2)
+                            .map(|scope| scope.scope_id);
+                        self.push_binding(
+                            hoisted_scope_id,
+                            BindingName::Value(name.clone()),
+                            info.clone(),
+                        );
+                        self.push_binding(hoisted_scope_id, BindingName::Type(name), info);
                     }
-                    self.push_binding(None, BindingName::Type(name), info);
-                }
-                AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
-                | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-                | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
-                    let specifier =
-                        AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
-                    let info = info.into_imported();
-                    if !specifier.imports_only_types() {
-                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                    AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+                    | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => {
+                        // These declarations have their own scope.
+                        // Thus we need to hoist the declaration to the parent scope.
+                        hoisted_scope_id = self
+                            .scopes
+                            .get(self.scopes.len() - 2)
+                            .map(|scope| scope.scope_id);
+                        self.push_binding(hoisted_scope_id, BindingName::Type(name), info);
                     }
-                    self.push_binding(None, BindingName::Type(name), info);
+                    AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
+                        // This declarations has its own scope.
+                        // Thus we need to hoist the declaration to the parent scope.
+                        hoisted_scope_id = self
+                            .scopes
+                            .get(self.scopes.len() - 2)
+                            .map(|scope| scope.scope_id);
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name.clone()), info);
+                    }
+                    AnyJsBindingDeclaration::TsMappedType(_)
+                    | AnyJsBindingDeclaration::TsTypeParameter(_) => {
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
+                        let info = info.into_imported();
+                        if clause.type_token().is_none() {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        }
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
+                        let info = info.into_imported();
+                        if clause.type_token().is_none() {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        }
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
+                        let info = info.into_imported();
+                        if declaration.type_token().is_none() {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        }
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+                    | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+                        let is_import_type = declaration
+                            .parent::<JsImportNamedClause>()
+                            .map(|clause| clause.type_token().is_none())
+                            .unwrap_or(false);
+                        let info = info.into_imported();
+                        if is_import_type {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        }
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+                    | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                    | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
+                        let specifier =
+                            AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
+                        let info = info.into_imported();
+                        if !specifier.imports_only_types() {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        }
+                        self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                    | AnyJsBindingDeclaration::JsBogusParameter(_)
+                    | AnyJsBindingDeclaration::JsFormalParameter(_)
+                    | AnyJsBindingDeclaration::JsRestParameter(_)
+                    | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+                    | AnyJsBindingDeclaration::TsPropertyParameter(_)
+                    | AnyJsBindingDeclaration::JsCatchDeclaration(_) => {
+                        self.push_binding(None, BindingName::Value(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsInferType(_) => {
+                        // Delay the declaration of parameter types that are inferred.
+                        // Their scope corresponds to the true branch of the conditional type.
+                        self.infers
+                            .push(TsTypeParameterName::unwrap_cast(node.syntax().clone()));
+                        return;
+                    }
                 }
-                AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-                | AnyJsBindingDeclaration::JsBogusParameter(_)
-                | AnyJsBindingDeclaration::JsFormalParameter(_)
-                | AnyJsBindingDeclaration::JsRestParameter(_)
-                | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-                | AnyJsBindingDeclaration::TsPropertyParameter(_)
-                | AnyJsBindingDeclaration::JsCatchDeclaration(_) => {
-                    self.push_binding(None, BindingName::Value(name), info);
-                }
-                AnyJsBindingDeclaration::TsInferType(_) => {
-                    // Delay the declaration of parameter types that are inferred.
-                    // Their scope corresponds to the true branch of the conditional type.
-                    self.infers
-                        .push(TsTypeParameterName::unwrap_cast(node.syntax().clone()));
-                    return Some(());
-                }
+                is_exported
+            } else {
+                // Handle identifiers in bogus nodes,
+                self.push_binding(None, BindingName::Value(name), info);
+                false
             }
-            is_exported
         } else {
-            // Handle identifiers in bogus nodes,
-            self.push_binding(None, BindingName::Value(name), info);
+            // The binding has a bogus name
             false
         };
         let scope_id = self.current_scope_mut().scope_id;
         self.stash.push_back(SemanticEvent::DeclarationFound {
             scope_id,
             hoisted_scope_id,
-            name_token,
+            range: node.syntax().text_range(),
         });
         if is_exported {
             self.stash.push_back(SemanticEvent::Exported {
                 range: node.syntax().text_range(),
             });
         }
-        Some(())
     }
 
     fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
@@ -657,7 +665,7 @@ impl SemanticEventExtractor {
                 self.stash.push_back(SemanticEvent::DeclarationFound {
                     scope_id,
                     hoisted_scope_id: None,
-                    name_token,
+                    range: name_range,
                 });
             }
         }
