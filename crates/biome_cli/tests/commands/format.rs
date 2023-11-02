@@ -1954,8 +1954,6 @@ fn treat_known_json_files_as_jsonc_files() {
 
 /* some other comment*/1, 2, 3]
 	"#;
-    let ts = Path::new("files/typescript.json");
-    fs.insert(ts.into(), code.as_bytes());
     let eslint = Path::new("files/.eslintrc.json");
     fs.insert(eslint.into(), code.as_bytes());
     let jshint = Path::new("files/.jshintrc");
@@ -1969,7 +1967,6 @@ fn treat_known_json_files_as_jsonc_files() {
         Args::from(
             [
                 ("format"),
-                ts.as_os_str().to_str().unwrap(),
                 eslint.as_os_str().to_str().unwrap(),
                 jshint.as_os_str().to_str().unwrap(),
                 babel.as_os_str().to_str().unwrap(),

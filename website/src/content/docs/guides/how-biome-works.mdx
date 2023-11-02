@@ -67,9 +67,17 @@ will use the configuration file `app/frontend/biome.json`;
 
 ## Known Files
 
-The project configuration files like `package.json`, `package-lock.json`, `tsconfig.json`, `jsconfig.json` are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
+The following files are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
 
-The following files:
+- `package.json`
+- `package-lock.json`
+- `tsconfig.json`
+- `jsconfig.json`
+
+
+
+The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
+
 - `tslint.json`
 - `babel.config.json`
 - `.babelrc.json`
@@ -83,4 +91,4 @@ The following files:
 - `.hintrc`
 - `.babelrc`
 
-Are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
+
