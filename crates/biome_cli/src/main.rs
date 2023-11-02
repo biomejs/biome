@@ -11,7 +11,6 @@ use biome_cli::{
 use biome_console::{markup, ConsoleExt, EnvConsole};
 use biome_diagnostics::{set_bottom_frame, PrintDiagnostic};
 use biome_service::workspace;
-use bpaf::{Args, ParseFailure};
 use std::process::{ExitCode, Termination};
 use tokio::runtime::Runtime;
 
@@ -28,34 +27,21 @@ fn main() -> ExitCode {
     set_bottom_frame(main as usize);
 
     let mut console = EnvConsole::default();
-    let command = biome_command().run_inner(Args::current_args());
-    match command {
-        Ok(command) => {
-            let color_mode = to_color_mode(command.get_color());
-            console.set_color(color_mode);
+    let command = biome_command().fallback_to_usage().run();
 
-            let is_verbose = command.is_verbose();
-            let result = run_workspace(&mut console, command);
-            match result {
-                Err(termination) => {
-                    console.error(markup! {
+    let color_mode = to_color_mode(command.get_color());
+    console.set_color(color_mode);
+
+    let is_verbose = command.is_verbose();
+    let result = run_workspace(&mut console, command);
+    match result {
+        Err(termination) => {
+            console.error(markup! {
                         {if is_verbose { PrintDiagnostic::verbose(&termination) } else { PrintDiagnostic::simple(&termination) }}
                     });
-                    termination.report()
-                }
-                Ok(_) => ExitCode::SUCCESS,
-            }
+            termination.report()
         }
-        Err(failure) => {
-            return if let ParseFailure::Stdout(help, _) = &failure {
-                console.log(markup! {{help.to_string()}});
-                ExitCode::SUCCESS
-            } else {
-                let diagnostic = CliDiagnostic::parse_error_bpaf(failure);
-                console.error(markup! { {PrintDiagnostic::simple(&diagnostic)}});
-                ExitCode::FAILURE
-            }
-        }
+        Ok(_) => ExitCode::SUCCESS,
     }
 }
 

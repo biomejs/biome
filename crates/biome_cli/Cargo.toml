@@ -34,7 +34,7 @@ biome_rowan          = { workspace = true }
 biome_service        = { workspace = true }
 biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true }
-bpaf                 = { workspace = true }
+bpaf                 = { workspace = true, features = ["bright-color"] }
 crossbeam            = "0.8.1"
 dashmap              = { workspace = true }
 hdrhistogram         = { version = "7.5.0", default-features = false }
