@@ -10,60 +10,6 @@ import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 {/** Make sure to update the redirect in `static/_redirects` when changing the configuration title --> **/}
 
-# Configuration
-
-The configuration file is considered **optional**, Biome has good defaults. Use the configuration
-file to change those defaults.
-
-The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
-directory is usually the directory containing your project's `package.json`.
-
-Here's an example:
-
-<CodeBlockHeader filename="biome.json" />
-
-```json
-{
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "tab",
-    "lineWidth": 120
-  },
-  "linter": {
-    "enabled": false
-  }
-}
-```
-
-This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled.
-
-## Configuration file resolution
-
-Biome uses auto discovery to find the nearest `biome.json` file. It starts looking for `biome.json` in the current
-working directory, and then it starts looking in the parent directories until:
-- it finds a `biome.json` file;
-- it applies Biome's defaults if **no `biome.json` is found**;
-
-Here's an example:
-
-```
-└── app
-    ├── backend
-    │   ├── package.json
-    │   └── biome.json
-    └── frontend
-        ├── legacy
-        │   └── package.json
-        ├── new
-        │   └── package.json
-        └── biome.json
-
-```
-
-- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
-- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
-will use the configuration file `app/frontend/biome.json`;
-
 ## `$schema`
 
 Allows to pass a path to a JSON schema file.

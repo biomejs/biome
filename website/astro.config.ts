@@ -178,6 +178,14 @@ export default defineConfig({
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
 						},
+						{
+							label: "How Biome works",
+							link: "/guides/how-biome-works",
+							badge: {
+								text: "New",
+								variant: "note",
+							},
+						},
 					],
 				},
 				{
@@ -214,11 +222,7 @@ export default defineConfig({
 						{ label: "Language support", link: "/internals/language-support" },
 						{
 							label: "Architecture",
-							link: "/internals/architecture",
-							badge: {
-								text: "Updated",
-								variant: "note",
-							},
+							link: "/internals/architecture"
 						},
 						{ label: "Credits", link: "/internals/credits" },
 						{ label: "Versioning", link: "/internals/versioning" },
