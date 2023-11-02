@@ -8,6 +8,7 @@ export function f<T>() {}
 export class C<T> {}
 export type Alias<T> = number
 export type Inferred<T> = T extends (infer I)[] ? number : never;
+export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
 ```
 
 # Diagnostics
@@ -67,6 +68,7 @@ invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   > 3 │ export type Alias<T> = number
       │                   ^
     4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+    5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
@@ -77,12 +79,13 @@ invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     3   │ - export·type·Alias<T>·=·number
       3 │ + export·type·Alias<_T>·=·number
     4 4 │   export type Inferred<T> = T extends (infer I)[] ? number : never;
+    5 5 │   export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
 
 ```
 
 ```
-invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is unused.
   
@@ -90,15 +93,24 @@ invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     3 │ export type Alias<T> = number
   > 4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
       │                                            ^
+    5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
-  i Unsafe fix: If this is intentional, prepend I with an underscore.
+
+```
+
+```
+invalidTypeParam.ts:5:62 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
   
-    2 2 │   export class C<T> {}
-    3 3 │   export type Alias<T> = number
-    4   │ - export·type·Inferred<T>·=·T·extends·(infer·I)[]·?·number·:·never;
-      4 │ + export·type·Inferred<T>·=·T·extends·(infer·_I)[]·?·number·:·never;
+    3 │ export type Alias<T> = number
+    4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
+  > 5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
+      │                                                              ^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
 
 ```

@@ -10,3 +10,5 @@ export type Mapped = { [K in keyof number]: K };
 // See https://github.com/biomejs/biome/issues/639
 export type Mapped2 = { [K in number]: number };
 export type Inferred<T> = T extends (infer I)[] ? Set<I> : Set<unknown>;
+// See https://github.com/biomejs/biome/issues/565
+export type TestUnionType<T> = T extends (infer B)[] | infer B ? B : never;
