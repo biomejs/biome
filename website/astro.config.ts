@@ -186,6 +186,14 @@ export default defineConfig({
 								variant: "note",
 							},
 						},
+						{
+							label: "Integrate Biome in your editor",
+							link: "/guides/integrate-in-editor",
+							badge: {
+								text: "New",
+								variant: "note",
+							},
+						},
 					],
 				},
 				{
@@ -222,7 +230,7 @@ export default defineConfig({
 						{ label: "Language support", link: "/internals/language-support" },
 						{
 							label: "Architecture",
-							link: "/internals/architecture"
+							link: "/internals/architecture",
 						},
 						{ label: "Credits", link: "/internals/credits" },
 						{ label: "Versioning", link: "/internals/versioning" },
