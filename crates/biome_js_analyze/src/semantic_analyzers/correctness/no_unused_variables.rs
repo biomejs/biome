@@ -147,10 +147,11 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     match binding.declaration()? {
         // ok to not be used
-        AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionExpression(_) => None,
+        | AnyJsBindingDeclaration::JsFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+        | AnyJsBindingDeclaration::TsMappedType(_) => None,
 
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
@@ -198,7 +199,6 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         AnyJsBindingDeclaration::JsCatchDeclaration(_)
         // Type parameters are never ok to be unused
         | AnyJsBindingDeclaration::TsInferType(_)
-        | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_) => Some(SuggestedFix::PrefixUnderscore),
 
         // Bindings under unknown parameter are never ok to be unused
