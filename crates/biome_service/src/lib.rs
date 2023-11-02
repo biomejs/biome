@@ -5,6 +5,8 @@ use std::ops::{Deref, DerefMut};
 
 pub mod configuration;
 pub mod file_handlers;
+pub mod project_handlers;
+
 pub mod matcher;
 pub mod settings;
 pub mod workspace;
@@ -22,6 +24,7 @@ pub use crate::matcher::{MatchOptions, Matcher, Pattern};
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate
 pub use crate::file_handlers::JsFormatterSettings;
+pub use crate::project_handlers::Manifests;
 pub use crate::workspace::Workspace;
 pub const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,

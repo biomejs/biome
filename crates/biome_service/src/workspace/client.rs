@@ -1,6 +1,7 @@
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, RageParams, RageResult, ServerInfo,
+    OrganizeImportsResult, ProjectFeaturesParams, ProjectFeaturesResult, RageParams, RageResult,
+    ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -113,6 +114,13 @@ where
 
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         self.request("biome/update_settings", params)
+    }
+
+    fn project_features(
+        &self,
+        params: ProjectFeaturesParams,
+    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
+        self.request("rome/project_features", params)
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {

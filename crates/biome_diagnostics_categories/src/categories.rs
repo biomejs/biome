@@ -195,6 +195,7 @@ define_categories! {
     "organizeImports",
     "migrate",
     "deserialize",
+    "project",
     "internalError/io",
     "internalError/fs",
     "internalError/panic",

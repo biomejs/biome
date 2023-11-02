@@ -60,30 +60,29 @@ pub(crate) fn analyze_and_snap(
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
 
-    let (_, errors) =
-        biome_migrate::migrate_configuration(&root.value().unwrap(), input_file, |event| {
-            if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
-                    if !action.is_suppression() {
-                        check_code_action(input_file, input_code, &action);
-                        diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
-                    }
-                }
-
-                let error = diag.with_severity(Severity::Warning);
-                diagnostics.push(diagnostic_to_string(file_name, input_code, error));
-                return ControlFlow::Continue(());
-            }
-
+    let (_, errors) = biome_migrate::migrate_configuration(&root, input_file, |event| {
+        if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {
                     check_code_action(input_file, input_code, &action);
-                    code_fixes.push(code_fix_to_string(input_code, action));
+                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
 
-            ControlFlow::<Never>::Continue(())
-        });
+            let error = diag.with_severity(Severity::Warning);
+            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            return ControlFlow::Continue(());
+        }
+
+        for action in event.actions() {
+            if !action.is_suppression() {
+                check_code_action(input_file, input_code, &action);
+                code_fixes.push(code_fix_to_string(input_code, action));
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
