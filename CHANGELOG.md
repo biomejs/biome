@@ -32,6 +32,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#639](https://github.com/biomejs/biome/issues/639) by ignoring unused TypeScript's mapped key. Contributed by @Conaclos
 
+- Fix [#565](https://github.com/biomejs/biome/issues/565) by handling several `infer` with the same name in extends clauses of TypeScript's conditional types.
+
 ### Parser
 
 ### VSCode
