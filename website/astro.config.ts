@@ -186,6 +186,10 @@ export default defineConfig({
 								variant: "note",
 							},
 						},
+						{
+							label: "Integration with editors",
+							link: "/guides/integration-with-editors",
+						},
 					],
 				},
 				{
