@@ -178,6 +178,10 @@ export default defineConfig({
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
 						},
+						{
+							label: "Biome Behaviours",
+							link: "/configuration",
+						},
 					],
 				},
 				{
