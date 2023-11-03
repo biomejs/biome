@@ -17,6 +17,8 @@ export namespace X {
 
     export let Unknown_Style_2 = 0
 }
+
+export const fooYPosition = 0;
 ```
 
 # Diagnostics
@@ -112,8 +114,22 @@ invalidTopLevelVariable.ts:12:16 lint/style/useNamingConvention ━━━━━�
   > 12 │     export let Unknown_Style_2 = 0
        │                ^^^^^^^^^^^^^^^
     13 │ }
+    14 │ 
   
   i The name could be renamed to `unknownStyle2`.
+  
+
+```
+
+```
+invalidTopLevelVariable.ts:15:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! If `strict` is `true`, then two consecutive uppercase characters are not allowed in camelCase and PascalCase.
+  
+    13 │ }
+    14 │ 
+  > 15 │ export const fooYPosition = 0;
+       │              ^^^^^^^^^^^^
   
 
 ```

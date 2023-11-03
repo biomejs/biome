@@ -11,3 +11,5 @@ export namespace X {
 
     export let Unknown_Style_2 = 0
 }
+
+export const fooYPosition = 0;
