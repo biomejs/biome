@@ -539,9 +539,8 @@ impl Rule for UseExhaustiveDependencies {
                     let filter_dependency_text = dependency_text.replace("?", "");
                     let capture_deeper_than_dependency =
                         filter_capture_text.starts_with(&filter_dependency_text);
-                    let dependency_deeper_than_capture = filter_dependency_text
-                        .replace("?", "")
-                        .starts_with(&filter_capture_text);
+                    let dependency_deeper_than_capture =
+                        filter_dependency_text.starts_with(&filter_capture_text);
                     match (
                         capture_deeper_than_dependency,
                         dependency_deeper_than_capture,
