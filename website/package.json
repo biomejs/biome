@@ -2,7 +2,7 @@
 	"name": "@biomejs/website",
 	"private": true,
 	"scripts": {
-		"start": "astro dev --open",
+		"start": "astro dev",
 		"format": "cargo biome-cli-dev format --write .",
 		"tsc": "tsc --skipLibCheck",
 		"check": "cargo biome-cli-dev check ./",
@@ -20,7 +20,7 @@
 		"@astrojs/rss": "^2.4.4",
 		"@astrojs/starlight": "^0.10.2",
 		"@astrojs/vercel": "^5.0.1",
-		"@biomejs/wasm-web": "link:../packages/@biomejs/wasm-web",
+		 "@biomejs/wasm-web": "link:../packages/@biomejs/wasm-web",
 		"@codemirror/lang-javascript": "6.1.8",
 		"@codemirror/lang-json": "6.0.1",
 		"@codemirror/lint": "6.2.1",

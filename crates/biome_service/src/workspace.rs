@@ -276,6 +276,16 @@ pub struct UpdateSettingsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ProjectFeaturesParams {
+    pub manifest_path: RomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ProjectFeaturesResult {}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct OpenFileParams {
     pub path: RomePath,
     pub content: String,
@@ -524,6 +534,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError>;
+
+    /// Given a file, the workspace tries to understand if this file is a "manifest" of a project.
+    fn project_features(
+        &self,
+        _params: ProjectFeaturesParams,
+    ) -> Result<ProjectFeaturesResult, WorkspaceError> {
+        todo!()
+    }
 
     /// Checks if the current path is ignored by the workspace, against a particular feature.
     ///

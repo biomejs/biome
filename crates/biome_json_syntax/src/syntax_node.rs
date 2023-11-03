@@ -5,7 +5,7 @@
 //!
 //! This is a simple wrapper around the `rowan` crate which does most of the heavy lifting and is language agnostic.
 
-use crate::{AnyJsonValue, JsonSyntaxKind};
+use crate::{JsonRoot, JsonSyntaxKind};
 use biome_rowan::Language;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -13,7 +13,7 @@ pub struct JsonLanguage;
 
 impl Language for JsonLanguage {
     type Kind = JsonSyntaxKind;
-    type Root = AnyJsonValue;
+    type Root = JsonRoot;
 }
 
 pub type JsonSyntaxNode = biome_rowan::SyntaxNode<JsonLanguage>;

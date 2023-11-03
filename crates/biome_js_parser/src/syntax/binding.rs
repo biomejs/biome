@@ -212,8 +212,8 @@ impl ParseArrayPattern<BindingPatternWithDefault> for ArrayBindingPattern {
                 "rest pattern",
             ],
             range,
+            p,
         )
-        .into_diagnostic(p)
     }
 
     #[inline]
@@ -246,7 +246,7 @@ impl ParseObjectPattern for ObjectBindingPattern {
 
     #[inline]
     fn expected_property_pattern_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["identifier", "member name", "rest pattern"], range).into_diagnostic(p)
+        expected_any(&["identifier", "member name", "rest pattern"], range, p)
     }
 
     // test js object_property_binding

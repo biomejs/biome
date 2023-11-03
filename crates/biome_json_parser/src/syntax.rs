@@ -334,9 +334,9 @@ fn parse_rest(p: &mut JsonParser, value: ParsedSyntax) {
 }
 
 fn expected_value(p: &JsonParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["array", "object", "literal"], range).into_diagnostic(p)
+    expected_any(&["array", "object", "literal"], range, p)
 }
 
 fn expected_property(p: &JsonParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("property", range).into_diagnostic(p)
+    expected_node("property", range, p)
 }

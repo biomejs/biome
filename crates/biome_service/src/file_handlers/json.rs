@@ -282,14 +282,8 @@ fn lint(params: LintParams) -> LintResults {
         let has_lint = params.filter.categories.contains(RuleCategories::LINT);
         let analyzer_options =
             compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
-        let Ok(value) = &root.value() else {
-            return LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
-            };
-        };
-        let (_, analyze_diagnostics) = analyze(value, params.filter, &analyzer_options, |signal| {
+
+        let (_, analyze_diagnostics) = analyze(&root, params.filter, &analyzer_options, |signal| {
             if let Some(mut diagnostic) = signal.diagnostic() {
                 // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
                 if !has_lint && diagnostic.category() == Some(category!("suppressions/unused")) {

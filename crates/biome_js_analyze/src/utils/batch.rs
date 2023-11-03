@@ -6,7 +6,7 @@ use biome_js_syntax::{
     JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList,
     JsVariableStatement, JsxChildList, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutation};
+use biome_rowan::{chain_trivia_pieces, AstNode, AstSeparatedList, BatchMutation};
 
 pub trait JsBatchMutation {
     /// Removes the declarator, and:
@@ -312,20 +312,22 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
         let Some(pieces) = node.first_leading_trivia().map(|trivia| trivia.pieces()) else {
             return;
         };
-        let (sibling, new_sibling) =
-            if let Some(next_sibling) = node.last_token().and_then(|x| x.next_token()) {
-                (
-                    next_sibling.clone(),
-                    next_sibling.prepend_trivia_pieces(pieces),
-                )
-            } else if let Some(prev_sibling) = node.first_token().and_then(|x| x.prev_token()) {
-                (
-                    prev_sibling.clone(),
-                    prev_sibling.append_trivia_pieces(pieces),
-                )
-            } else {
-                return;
-            };
+        let (sibling, new_sibling) = if let Some(next_sibling) =
+            node.last_token().and_then(|x| x.next_token())
+        {
+            let mut next_sibling_leading_trivia = next_sibling.leading_trivia().pieces().peekable();
+            // Remove next newline
+            next_sibling_leading_trivia.next_if(|piece| piece.is_newline());
+            (
+                next_sibling.clone(),
+                next_sibling.with_leading_trivia_pieces(chain_trivia_pieces(
+                    pieces,
+                    next_sibling_leading_trivia,
+                )),
+            )
+        } else {
+            return;
+        };
         self.replace_token_discard_trivia(sibling, new_sibling);
     }
 }

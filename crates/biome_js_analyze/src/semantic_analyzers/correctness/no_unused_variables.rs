@@ -13,7 +13,7 @@ use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsExpressionStatement, JsFileSource, JsForStatement,
     JsFunctionExpression, JsIdentifierExpression, JsParenthesizedExpression, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 
@@ -147,10 +147,11 @@ fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedF
 fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     match binding.declaration()? {
         // ok to not be used
-        AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionExpression(_) => None,
+        | AnyJsBindingDeclaration::JsFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+        | AnyJsBindingDeclaration::TsMappedType(_) => None,
 
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
@@ -197,9 +198,27 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         // Bindings under catch are never ok to be unused
         AnyJsBindingDeclaration::JsCatchDeclaration(_)
         // Type parameters are never ok to be unused
-        | AnyJsBindingDeclaration::TsInferType(_)
-        | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_) => Some(SuggestedFix::PrefixUnderscore),
+
+        AnyJsBindingDeclaration::TsInferType(_) => {
+            let binding_name_token = binding.name_token().ok()?;
+            let binding_name = binding_name_token.text_trimmed();
+            let conditional_type = binding.syntax().ancestors().find_map(TsConditionalType::cast)?;
+            let last_binding_name_token = conditional_type.extends_type().ok()?.syntax()
+                .descendants()
+                .filter_map(TsInferType::cast)
+                .filter_map(|infer_type| infer_type.name().ok()?.ident_token().ok())
+                .filter(|infer_type_name| infer_type_name.text_trimmed() == binding_name)
+                .last()?;
+            // We ignore `infer T` that precedes another `infer T`.
+            // Thus, only the last `infer T` is considered.
+            // See https://github.com/biomejs/biome/issues/565
+            if binding_name_token.text_range() == last_binding_name_token.text_range() {
+                Some(SuggestedFix::NoSuggestion)
+            } else {
+                None
+            }
+        }
 
         // Bindings under unknown parameter are never ok to be unused
         AnyJsBindingDeclaration::JsBogusParameter(_)

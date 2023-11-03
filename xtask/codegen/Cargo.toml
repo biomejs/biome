@@ -15,6 +15,7 @@ pico-args      = { version = "0.5.0", features = ["eq-separator"] }
 proc-macro2    = { version = "1.0.63", features = ["span-locations"] }
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
 quote          = "1.0.14"
+serde          = { workspace = true, optional = true }
 ungrammar      = "1.14.9"
 ureq           = "2.4.0"
 walkdir        = "2.3.2"
@@ -47,6 +48,7 @@ configuration = [
   "biome_json_syntax",
   "pulldown-cmark",
 ]
+license = ["ureq/default", "ureq/json", "ureq/serde_json", "serde", "serde_json"]
 schema = [
   "schemars",
   "serde_json",

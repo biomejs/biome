@@ -382,6 +382,7 @@ pub fn generate_type<'a>(
         } else {
             // If the schema for this type is not an object, emit it as a type alias
             let (ts_type, optional, description) = schema_object_type(queue, root_schema, schema);
+
             assert!(!optional, "optional nested types are not supported");
 
             let current_module = AnyJsDeclaration::from(
@@ -452,10 +453,11 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 17] {
+pub fn methods() -> [WorkspaceMethod; 18] {
     [
         WorkspaceMethod::of::<SupportsFeatureParams, SupportsFeatureResult>("file_features"),
         workspace_method!(update_settings),
+        workspace_method!(project_features),
         workspace_method!(open_file),
         workspace_method!(change_file),
         workspace_method!(close_file),

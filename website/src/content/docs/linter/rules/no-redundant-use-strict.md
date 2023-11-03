@@ -41,8 +41,13 @@ function foo() {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the redundant </span><span style="color: lightgreen;"><strong>use strict</strong></span><span style="color: lightgreen;"> directive.</span>
   
-<strong>  </strong><strong>  3 │ </strong><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">→ </span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">u</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">s</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">t</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">;</span>
-<strong>  </strong><strong>    │ </strong>   <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+    <strong>1</strong> <strong>1</strong><strong> │ </strong>  &quot;use strict&quot;;
+    <strong>2</strong> <strong>2</strong><strong> │ </strong>  function foo() {
+    <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>i</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>;</strong></span>
+    <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">}</span>
+      <strong>3</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;">}</span>
+    <strong>5</strong> <strong>4</strong><strong> │ </strong>  
+  
 </code></pre>
 
 ```js
@@ -73,8 +78,11 @@ function foo() {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the redundant </span><span style="color: lightgreen;"><strong>use strict</strong></span><span style="color: lightgreen;"> directive.</span>
   
-<strong>  </strong><strong>  2 │ </strong><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">u</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">s</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">t</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">;</span>
-<strong>  </strong><strong>    │ </strong><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+    <strong>1</strong> <strong>1</strong><strong> │ </strong>  &quot;use strict&quot;;
+    <strong>2</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>i</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>;</strong></span>
+    <strong>3</strong> <strong>2</strong><strong> │ </strong>  
+    <strong>4</strong> <strong>3</strong><strong> │ </strong>  function foo() {
+  
 </code></pre>
 
 ```js
@@ -105,8 +113,12 @@ function foo() {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the redundant </span><span style="color: lightgreen;"><strong>use strict</strong></span><span style="color: lightgreen;"> directive.</span>
   
-<strong>  </strong><strong>  3 │ </strong><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">u</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">s</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">t</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">;</span>
-<strong>  </strong><strong>    │ </strong><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+    <strong>1</strong> <strong>1</strong><strong> │ </strong>  function foo() {
+    <strong>2</strong> <strong>2</strong><strong> │ </strong>  &quot;use strict&quot;;
+    <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>i</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>;</strong></span>
+    <strong>4</strong> <strong>3</strong><strong> │ </strong>  }
+    <strong>5</strong> <strong>4</strong><strong> │ </strong>  
+  
 </code></pre>
 
 ```js
@@ -141,8 +153,14 @@ class C1 {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the redundant </span><span style="color: lightgreen;"><strong>use strict</strong></span><span style="color: lightgreen;"> directive.</span>
   
-<strong>  </strong><strong>  3 │ </strong><span style="opacity: 0.8;">→ </span><span style="opacity: 0.8;">→ </span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">u</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">s</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">t</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">;</span>
-<strong>  </strong><strong>    │ </strong>    <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+    <strong>1</strong> <strong>1</strong><strong> │ </strong>  class C1 {
+    <strong>2</strong> <strong>2</strong><strong> │ </strong>  	test() {
+    <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>i</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>;</strong></span>
+    <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;">}</span>
+      <strong>3</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;">}</span>
+    <strong>5</strong> <strong>4</strong><strong> │ </strong>  }
+    <strong>6</strong> <strong>5</strong><strong> │ </strong>  
+  
 </code></pre>
 
 ```js
@@ -178,8 +196,14 @@ const C2 = class {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the redundant </span><span style="color: lightgreen;"><strong>use strict</strong></span><span style="color: lightgreen;"> directive.</span>
   
-<strong>  </strong><strong>  3 │ </strong><span style="opacity: 0.8;">→ </span><span style="opacity: 0.8;">→ </span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">u</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span><span style="color: Tomato;">s</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">t</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">;</span>
-<strong>  </strong><strong>    │ </strong>    <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+    <strong>1</strong> <strong>1</strong><strong> │ </strong>  const C2 = class {
+    <strong>2</strong> <strong>2</strong><strong> │ </strong>  	test() {
+    <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>i</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>;</strong></span>
+    <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">→ </span></span><span style="color: Tomato;">}</span>
+      <strong>3</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">→ </span></span><span style="color: MediumSeaGreen;">}</span>
+    <strong>5</strong> <strong>4</strong><strong> │ </strong>  };
+    <strong>6</strong> <strong>5</strong><strong> │ </strong>  
+  
 </code></pre>
 
 ### Valid

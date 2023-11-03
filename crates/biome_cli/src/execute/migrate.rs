@@ -39,10 +39,8 @@ pub(crate) fn run(
     let mut tree = parsed.tree();
     let mut actions = Vec::new();
     loop {
-        let (action, _) = migrate_configuration(
-            &tree.value().unwrap(),
-            configuration_file_path.as_path(),
-            |signal| {
+        let (action, _) =
+            migrate_configuration(&tree, configuration_file_path.as_path(), |signal| {
                 let current_diagnostic = signal.diagnostic();
                 if current_diagnostic.is_some() {
                     errors += 1;
@@ -53,8 +51,7 @@ pub(crate) fn run(
                 }
 
                 ControlFlow::Continue(())
-            },
-        );
+            });
 
         match action {
             Some(action) => {

@@ -1,0 +1,11 @@
+{
+	"dependencies": {
+		"foo": "bar"
+	},
+	"devDependencies": {
+		"foo": "bar"
+	},
+	"optionalDependencies": {
+		"foo": "bar"
+	}
+}

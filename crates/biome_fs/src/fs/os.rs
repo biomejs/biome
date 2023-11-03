@@ -241,7 +241,13 @@ fn handle_dir_entry<'scope>(
     if file_type.is_file() {
         if matches!(
             path.file_name().and_then(OsStr::to_str),
-            Some("package.json" | "package-lock.json" | "tsconfig.json" | "jsconfig.json")
+            Some(
+                "package.json"
+                    | "package-lock.json"
+                    | "typescript.json"
+                    | "tsconfig.json"
+                    | "jsconfig.json"
+            )
         ) {
             return;
         }

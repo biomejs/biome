@@ -29,6 +29,11 @@ import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
 // Header comment
 import { L as M, } from "mod"; // Import comment
 
+// See https://github.com/biomejs/biome/issues/653
+import {a} from 'a'
+import {d} from 'd'
+import {b} from 'b'
+export const bb = a + b
 ```
 
 # Diagnostics
@@ -47,8 +52,11 @@ invalid.js:2:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    2 │ import·A·from·"mod";
-      │ --------------------
+     1  1 │   // Header comment
+     2    │ - import·A·from·"mod";
+     3  2 │   
+     4  3 │   // Header comment
+  
 
 ```
 
@@ -67,8 +75,12 @@ invalid.js:5:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    5 │ import·*·as·B·from·"mod";·//·Import·comment
-      │ -------------------------------------------
+     3  3 │   
+     4  4 │   // Header comment
+     5    │ - import·*·as·B·from·"mod";·//·Import·comment
+     6  5 │   
+     7  6 │   // Header comment
+  
 
 ```
 
@@ -87,8 +99,12 @@ invalid.js:8:10 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    8 │ import·{·C·}·from·"mod";·//·Import·comment
-      │ ------------------------------------------
+     6  6 │   
+     7  7 │   // Header comment
+     8    │ - import·{·C·}·from·"mod";·//·Import·comment
+     9  8 │   
+    10  9 │   // Header comment
+  
 
 ```
 
@@ -278,13 +294,44 @@ invalid.js:24:15 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   > 24 │ import { L as M, } from "mod"; // Import comment
        │               ^
     25 │ 
+    26 │ // See https://github.com/biomejs/biome/issues/653
   
   i Unused imports might be the result of an incomplete refactoring.
   
   i Safe fix: Remove the unused import.
   
-    24 │ import·{·L·as·M,·}·from·"mod";·//·Import·comment
-       │ ------------------------------------------------
+    22 22 │   
+    23 23 │   // Header comment
+    24    │ - import·{·L·as·M,·}·from·"mod";·//·Import·comment
+    25 24 │   
+    26 25 │   // See https://github.com/biomejs/biome/issues/653
+  
+
+```
+
+```
+invalid.js:28:9 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    26 │ // See https://github.com/biomejs/biome/issues/653
+    27 │ import {a} from 'a'
+  > 28 │ import {d} from 'd'
+       │         ^
+    29 │ import {b} from 'b'
+    30 │ export const bb = a + b
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    26 26 │   // See https://github.com/biomejs/biome/issues/653
+    27 27 │   import {a} from 'a'
+    28    │ - import·{d}·from·'d'
+    29    │ - import·{b}·from·'b'
+       28 │ + import·{b}·from·'b'
+    30 29 │   export const bb = a + b
+  
 
 ```
 

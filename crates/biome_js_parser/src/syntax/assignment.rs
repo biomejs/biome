@@ -235,7 +235,7 @@ impl ParseArrayPattern<AssignmentPatternWithDefault> for ArrayAssignmentPattern 
 
     #[inline]
     fn expected_element_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["assignment target", "rest element", "comma"], range).into_diagnostic(p)
+        expected_any(&["assignment target", "rest element", "comma"], range, p)
     }
 
     #[inline]
@@ -267,7 +267,7 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
 
     #[inline]
     fn expected_property_pattern_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["assignment target", "rest property"], range).into_diagnostic(p)
+        expected_any(&["assignment target", "rest property"], range, p)
     }
 
     // test js property_assignment_target

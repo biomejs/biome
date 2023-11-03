@@ -40,8 +40,12 @@ invalid.jsx:1:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    1 │ import·X·from·"react"
-      │ ---------------------
+     1    │ - import·X·from·"react"
+     2    │ - import·*·as·X·from·"react"
+        1 │ + import·*·as·X·from·"react"
+     3  2 │   import { default as X } from "react"
+     4  3 │   
+  
 
 ```
 
@@ -60,8 +64,13 @@ invalid.jsx:2:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    2 │ import·*·as·X·from·"react"
-      │ --------------------------
+     1  1 │   import X from "react"
+     2    │ - import·*·as·X·from·"react"
+     3    │ - import·{·default·as·X·}·from·"react"
+        2 │ + import·{·default·as·X·}·from·"react"
+     4  3 │   
+     5  4 │   import React from "x"
+  
 
 ```
 
@@ -81,8 +90,12 @@ invalid.jsx:3:21 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    3 │ import·{·default·as·X·}·from·"react"
-      │ ------------------------------------
+     1  1 │   import X from "react"
+     2  2 │   import * as X from "react"
+     3    │ - import·{·default·as·X·}·from·"react"
+     4  3 │   
+     5  4 │   import React from "x"
+  
 
 ```
 
@@ -102,8 +115,14 @@ invalid.jsx:5:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    5 │ import·React·from·"x"
-      │ ---------------------
+     3  3 │   import { default as X } from "react"
+     4  4 │   
+     5    │ - import·React·from·"x"
+     6    │ - import·*·as·React·from·"x"
+        5 │ + import·*·as·React·from·"x"
+     7  6 │   import { default as React } from "x"
+     8  7 │   import React, { useEffect } from "x"
+  
 
 ```
 
@@ -122,8 +141,14 @@ invalid.jsx:6:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    6 │ import·*·as·React·from·"x"
-      │ --------------------------
+     4  4 │   
+     5  5 │   import React from "x"
+     6    │ - import·*·as·React·from·"x"
+     7    │ - import·{·default·as·React·}·from·"x"
+        6 │ + import·{·default·as·React·}·from·"x"
+     8  7 │   import React, { useEffect } from "x"
+     9  8 │   
+  
 
 ```
 
@@ -143,8 +168,14 @@ invalid.jsx:7:21 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    7 │ import·{·default·as·React·}·from·"x"
-      │ ------------------------------------
+     5  5 │   import React from "x"
+     6  6 │   import * as React from "x"
+     7    │ - import·{·default·as·React·}·from·"x"
+     8    │ - import·React,·{·useEffect·}·from·"x"
+        7 │ + import·React,·{·useEffect·}·from·"x"
+     9  8 │   
+    10  9 │   // unsupported patterns
+  
 
 ```
 
@@ -287,8 +318,14 @@ invalid.jsx:15:8 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Remove the unused import.
   
-    15 │ import·React·from·"react"
-       │ -------------------------
+    13 13 │   
+    14 14 │   // React import (no exception)
+    15    │ - import·React·from·"react"
+    16    │ - import·*·as·React·from·"react"
+       15 │ + import·*·as·React·from·"react"
+    17 16 │   import { default as React } from "react"
+    18 17 │   import React, { useEffect } from "react"
+  
 
 ```
 
@@ -308,8 +345,14 @@ invalid.jsx:16:13 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    16 │ import·*·as·React·from·"react"
-       │ ------------------------------
+    14 14 │   // React import (no exception)
+    15 15 │   import React from "react"
+    16    │ - import·*·as·React·from·"react"
+    17    │ - import·{·default·as·React·}·from·"react"
+       16 │ + import·{·default·as·React·}·from·"react"
+    18 17 │   import React, { useEffect } from "react"
+    19 18 │   
+  
 
 ```
 
@@ -329,8 +372,13 @@ invalid.jsx:17:21 lint/nursery/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unused import.
   
-    17 │ import·{·default·as·React·}·from·"react"
-       │ ----------------------------------------
+    15 15 │   import React from "react"
+    16 16 │   import * as React from "react"
+    17    │ - import·{·default·as·React·}·from·"react"
+    18    │ - import·React,·{·useEffect·}·from·"react"
+       17 │ + import·React,·{·useEffect·}·from·"react"
+    19 18 │   
+  
 
 ```
 
