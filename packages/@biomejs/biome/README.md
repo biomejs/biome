@@ -50,7 +50,7 @@ npx @biomejs/biome check --apply ./src
 npx @biomejs/biome ci ./src
 ```
 
-If you want to give Biome a run without installing it, you can also experiment with our [online playground](https://biomejs.dev/playground/).
+If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
 
 ## Documentation
 
