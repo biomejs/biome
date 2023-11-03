@@ -26,29 +26,54 @@
 
 </div>
 
-**Biome** formats and lints your code in a [fraction of a second][bench].
+**Biome** is a toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
-**Biome** supports JavaScript, TypeScript, JSON, and CSS.
-It aims to support [all main languages][language-support] of modern web development.
+### Installation
 
-**Biome** has sane defaults and requires minimal configuration.
-**Biome** helps you as much as possible by displaying detailed and contextualized diagnostics.
-Read more about our [project philosophy][biome-philosophy].
+```shell
+npm install --save-dev --save-exact @biomejs/biome
+```
 
-**Biome** unifies functionality that has previously been separate tools.
-Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelizing work, caching, and configuration.
+### Usage
 
-**Biome** is designed to eventually replace [Babel](https://babeljs.io/), [ESLint](https://eslint.org/), [webpack](https://webpack.js.org/), [Prettier](https://prettier.io/), [Jest](https://jestjs.io/), and others.
+```shell
+# format files
+npx @biomejs/biome format --write ./src
 
-**Biome** has first-class IDE support,
-with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
+# lint files
+npx @biomejs/biome lint ./src
 
-**Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
+# run format, lint, etc. and apply the safe suggestions
+npx @biomejs/biome check --apply ./src
+
+# check all files against format, lint, etc. in CI environments
+npx @biomejs/biome ci ./src
+```
+
+If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
 
 ## Documentation
 
 Check out our [homepage][biomejs] to learn more about Biome,
 or directly head to the [Getting Started guide][getting-started] to start using Biome.
+
+## About Biome
+
+**Biome** formats and lints your code in a [fraction of a second][bench].
+
+**Biome** [doesn't require Node.js](https://biomejs.dev/guides/manual-installation/) to function.
+
+**Biome** has first-class LSP support, with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
+
+**Biome** supports JavaScript, TypeScript, JSON, and more. It aims to support [all main languages][language-support] of modern web development.
+
+**Biome** has sane defaults and it doesn't require configuration.
+
+**Biome** helps you as much as possible by displaying detailed and contextualized diagnostics. Read more about our [project philosophy][biome-philosophy].
+
+**Biome** unifies functionality that has previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
+
+**Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
 [bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
