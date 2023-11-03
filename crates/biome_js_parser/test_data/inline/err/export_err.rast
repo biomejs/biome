@@ -23,13 +23,13 @@ JsModule {
 --
 export_err.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a class, a function, or a variable declaration but instead found the end of the file
+  × Expected a class, a function, or a variable declaration but instead found the end of the file.
   
     1 │ export
   > 2 │ 
       │ 
   
-  i Expected a class, a function, or a variable declaration here
+  i Expected a class, a function, or a variable declaration here.
   
     1 │ export
   > 2 │ 

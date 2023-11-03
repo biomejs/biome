@@ -134,7 +134,7 @@ The source is generated from the [`ungram` files](https://github.com/biomejs/bio
 ##### `cargo codegen test`
 
 This command will create new tests for JS or JSON parser.
-These tests are generated from inline comments found inside the source code. 
+These tests are generated from inline comments found inside the source code.
 
 On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
 
@@ -355,7 +355,7 @@ Make sure that the created subsections are ordered in the following order:
 Because the website displays the changelog, you should update the website using the following command:
 
 ```sh
-just codegen-website
+just gen-web
 ```
 
 #### Writing a changelog line

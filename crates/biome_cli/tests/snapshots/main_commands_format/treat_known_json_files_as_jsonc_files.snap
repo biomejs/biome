@@ -32,33 +32,18 @@ expression: content
 	
 ```
 
-## `files/typescript.json`
+# Termination Message
 
-```json
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-/*test*/ [
+  × Some errors were emitted while running checks.
+  
 
-/* some other comment*/1, 2, 3]
-	
+
 ```
 
 # Emitted Messages
-
-```block
-files/typescript.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Formatter would have printed the following content:
-  
-    1   │ - 
-    2   │ - /*test*/·[
-    3   │ - 
-    4   │ - /*·some·other·comment*/1,·2,·3]
-    5   │ - → 
-      1 │ + /*test*/·[/*·some·other·comment*/·1,·2,·3]
-      2 │ + 
-  
-
-```
 
 ```block
 files/.eslintrc.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -109,7 +94,7 @@ files/.babelrc format ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Compared 4 file(s) in <TIME>
+Compared 3 file(s) in <TIME>
 ```
 
 

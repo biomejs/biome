@@ -1,17 +1,18 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{AnyTsType, JsSyntaxKind};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, TsVoidType};
 use biome_rowan::{AstNode, SyntaxNode};
 
 declare_rule! {
     /// Disallow `void` type outside of generic or return types.
     ///
-    /// `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. void can also be misleading for other developers even if used correctly.
+    /// `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. `void` can also be misleading for other developers even if used correctly.
     ///
     /// > The `void` type means cannot be mixed with any other types, other than `never`, which accepts all types.
-    /// > If you think you need this then you probably want the undefined type instead.
+    /// > If you think you need this then you probably want the `undefined` type instead.
     ///
     /// ## Examples
+    ///
     /// ### Invalid
     ///
     /// ```ts,expect_diagnostic
@@ -44,7 +45,6 @@ declare_rule! {
     ///
     /// ```ts
     /// function printArg<T = void>(arg: T) {}
-    /// printArg<void>(undefined);
     /// ```
     pub(crate) NoConfusingVoidType {
         version: "1.2.0",
@@ -53,55 +53,64 @@ declare_rule! {
     }
 }
 
-type Language = <AnyTsType as AstNode>::Language;
-
-// We only focus on union type
-pub enum VoidTypeIn {
+/// We only focus on union type
+pub enum VoidTypeContext {
     Union,
     Unknown,
 }
 
 impl Rule for NoConfusingVoidType {
-    type Query = Ast<AnyTsType>;
-    type State = VoidTypeIn;
+    type Query = Ast<TsVoidType>;
+    type State = VoidTypeContext;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        if let AnyTsType::TsVoidType(node) = node {
-            let result = node_in(node.syntax());
-            return result;
-        }
-
-        None
+        decide_void_type_context(node.syntax())
     }
+
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        return Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {{match_message(state)}},
-            )
-            .note(markup! {
-                "Remove "<Emphasis>"void"</Emphasis>
-            }),
-        );
+        let message = match state {
+            VoidTypeContext::Union => "void is not valid as a constituent in a union type",
+            VoidTypeContext::Unknown => {
+                "void is only valid as a return type or a type argument in generic type"
+            }
+        };
+
+        Some(
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(
+                markup! {
+                    "Remove "<Emphasis>"void"</Emphasis>
+                },
+            ),
+        )
     }
 }
 
-fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
+fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeContext> {
     for parent in node.parent()?.ancestors() {
         match parent.kind() {
+            JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
+                // checks if the union type contains a generic type has a void type as argument
+                for child in parent.descendants() {
+                    if child.kind() == JsSyntaxKind::TS_TYPE_ARGUMENT_LIST {
+                        let found_void_type = child
+                            .descendants()
+                            .any(|descendant| descendant.kind() == JsSyntaxKind::TS_VOID_TYPE);
+                        if found_void_type {
+                            return None;
+                        }
+                    }
+                }
+            }
+
             // (string | void)
-            // string | void
             // string & void
             // arg: void
             // fn<T = void>() {}
             JsSyntaxKind::TS_PARENTHESIZED_TYPE
-            | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST
             | JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
             | JsSyntaxKind::TS_TYPE_ANNOTATION
             | JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {
@@ -109,32 +118,35 @@ fn node_in(node: &SyntaxNode<Language>) -> Option<VoidTypeIn> {
             }
 
             JsSyntaxKind::TS_UNION_TYPE => {
-                return Some(VoidTypeIn::Union);
+                return Some(VoidTypeContext::Union);
+            }
+
+            // Promise<void>
+            JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
+                // handle generic function that has a void type argument
+                // e.g. functionGeneric<void>(undefined);
+                let Some(grand_parent) = parent.grand_parent() else {
+                    continue;
+                };
+                if grand_parent.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
+                    return Some(VoidTypeContext::Unknown);
+                }
+                return None;
             }
 
             // function fn(this: void) {}
             // fn(): void;
             // fn<T = void>() {}
-            // Promise<void>
             JsSyntaxKind::TS_THIS_PARAMETER
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
             | JsSyntaxKind::TS_TYPE_PARAMETER
-            | JsSyntaxKind::TS_FUNCTION_TYPE
-            | JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
+            | JsSyntaxKind::TS_FUNCTION_TYPE => {
                 return None;
             }
 
-            _ => return Some(VoidTypeIn::Unknown),
+            _ => return Some(VoidTypeContext::Unknown),
         }
     }
 
-    Some(VoidTypeIn::Unknown)
-}
-
-fn match_message(node: &VoidTypeIn) -> String {
-    if matches!(node, VoidTypeIn::Union) {
-        return "void is not valid as a constituent in a union type".into();
-    }
-
-    "void is only valid as a return type or a type argument in generic type".into()
+    Some(VoidTypeContext::Unknown)
 }

@@ -166,14 +166,14 @@ JsModule {
 --
 if_stmt_err.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found 'else'
+  × Expected a statement but instead found 'else'.
   
   > 1 │ if (true) else {}
       │           ^^^^
     2 │ if (true) else
     3 │ if else {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
   > 1 │ if (true) else {}
       │           ^^^^
@@ -183,7 +183,7 @@ if_stmt_err.js:1:11 parse ━━━━━━━━━━━━━━━━━━
 --
 if_stmt_err.js:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found 'else'
+  × Expected a statement but instead found 'else'.
   
     1 │ if (true) else {}
   > 2 │ if (true) else
@@ -191,7 +191,7 @@ if_stmt_err.js:2:11 parse ━━━━━━━━━━━━━━━━━━
     3 │ if else {}
     4 │ if () {} else {}
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ if (true) else {}
   > 2 │ if (true) else
@@ -216,7 +216,7 @@ if_stmt_err.js:3:4 parse ━━━━━━━━━━━━━━━━━━�
 --
 if_stmt_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     2 │ if (true) else
     3 │ if else {}
@@ -225,7 +225,7 @@ if_stmt_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━�
     5 │ if (true)}}}} {}
     6 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     2 │ if (true) else
     3 │ if else {}
@@ -237,7 +237,7 @@ if_stmt_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━�
 --
 if_stmt_err.js:5:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     3 │ if else {}
     4 │ if () {} else {}
@@ -245,7 +245,7 @@ if_stmt_err.js:5:10 parse ━━━━━━━━━━━━━━━━━━
       │          ^
     6 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     3 │ if else {}
     4 │ if () {} else {}

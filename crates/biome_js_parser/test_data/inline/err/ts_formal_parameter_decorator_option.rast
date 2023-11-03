@@ -177,6 +177,8 @@ ts_formal_parameter_decorator_option.ts:2:16 parse ━━━━━━━━━�
     3 │    method(@dec x) {}
     4 │ }
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -190,6 +192,8 @@ ts_formal_parameter_decorator_option.ts:3:11 parse ━━━━━━━━━�
       │           ^^^^
     4 │ }
     5 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   

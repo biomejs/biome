@@ -38,7 +38,7 @@ class Person {
 const obj = {
     get firstName() {
         return;
-    },
+    }
 }
 ```
 
@@ -50,7 +50,7 @@ const obj = {
     <strong>2 │ </strong>    get firstName() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>        return;
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>4 │ </strong>    },
+    <strong>4 │ </strong>    }
     <strong>5 │ </strong>}
   
 </code></pre>
@@ -63,27 +63,24 @@ class Option {
         } else {
             return null;
         }
-    },
+    }
 }
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/useGetterReturn.js:2:5 <a href="https://biomejs.dev/linter/rules/use-getter-return">lint/suspicious/useGetterReturn</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found ','</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>getter</strong></span><span style="color: Tomato;"> should </span><span style="color: Tomato;"><strong>return</strong></span><span style="color: Tomato;"> a value.</span>
   
-     <strong>6 │ </strong>            return null;
-     <strong>7 │ </strong>        }
-   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    },
-    <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong>
-     <strong>9 │ </strong>}
-    <strong>10 │ </strong>
-  
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Expected an identifier, a string literal, a number literal, a private field name, or a computed name here</span>
-  
-     <strong>6 │ </strong>            return null;
-     <strong>7 │ </strong>        }
-   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    },
-    <strong>   │ </strong>     <strong><span style="color: Tomato;">^</span></strong>
+     <strong>1 │ </strong>class Option {
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    get value() {
+    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>        if (this.hasValue) {
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>            log();
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>        } else {
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>            return null;
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>        }
+   <strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>    }
+    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
      <strong>9 │ </strong>}
     <strong>10 │ </strong>
   
@@ -103,7 +100,7 @@ class Person {
 const obj = {
     get firstName() {
         return this.fullname.split(" ")[0];
-    },
+    }
 }
 ```
 

@@ -477,14 +477,14 @@ JsModule {
 --
 import_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a default import, a namespace import, or a named import but instead found ';'
+  × Expected a default import, a namespace import, or a named import but instead found ';'.
   
   > 1 │ import;
       │       ^
     2 │ import *;
     3 │ import * as c, { a, b } from "c";
   
-  i Expected a default import, a namespace import, or a named import here
+  i Expected a default import, a namespace import, or a named import here.
   
   > 1 │ import;
       │       ^
@@ -593,7 +593,7 @@ import_err.js:7:14 parse ━━━━━━━━━━━━━━━━━━�
 --
 import_err.js:8:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found ''
+  × Expected a string literal, or an identifier but instead found ''.
   
      6 │ import { default } from "c";
      7 │ import { "a" } from "c";
@@ -602,7 +602,7 @@ import_err.js:8:10 parse ━━━━━━━━━━━━━━━━━━�
      9 │ import 4 from "c";
     10 │ import y from 4;
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
      6 │ import { default } from "c";
      7 │ import { "a" } from "c";
@@ -614,7 +614,7 @@ import_err.js:8:10 parse ━━━━━━━━━━━━━━━━━━�
 --
 import_err.js:9:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a default import, a namespace import, or a named import but instead found '4'
+  × Expected a default import, a namespace import, or a named import but instead found '4'.
   
      7 │ import { "a" } from "c";
      8 │ import { as x } from "c";
@@ -623,7 +623,7 @@ import_err.js:9:8 parse ━━━━━━━━━━━━━━━━━━�
     10 │ import y from 4;
     11 │ 
   
-  i Expected a default import, a namespace import, or a named import here
+  i Expected a default import, a namespace import, or a named import here.
   
      7 │ import { "a" } from "c";
      8 │ import { as x } from "c";
@@ -695,7 +695,7 @@ import_err.js:9:15 parse ━━━━━━━━━━━━━━━━━━�
 --
 import_err.js:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal but instead found '4'
+  × Expected a string literal but instead found '4'.
   
      8 │ import { as x } from "c";
      9 │ import 4 from "c";
@@ -703,7 +703,7 @@ import_err.js:10:15 parse ━━━━━━━━━━━━━━━━━━
        │               ^
     11 │ 
   
-  i Expected a string literal here
+  i Expected a string literal here.
   
      8 │ import { as x } from "c";
      9 │ import 4 from "c";

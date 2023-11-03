@@ -22,3 +22,9 @@ import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
 
 // Header comment
 import { L as M, } from "mod"; // Import comment
+
+// See https://github.com/biomejs/biome/issues/653
+import {a} from 'a'
+import {d} from 'd'
+import {b} from 'b'
+export const bb = a + b

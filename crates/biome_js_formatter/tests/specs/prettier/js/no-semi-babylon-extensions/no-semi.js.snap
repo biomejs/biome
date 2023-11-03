@@ -55,7 +55,7 @@ class A {
 ```
 no-semi.js:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '::b.c'
+  × Expected a statement but instead found '::b.c'.
   
     1 │ a
   > 2 │ ;::b.c
@@ -63,7 +63,7 @@ no-semi.js:2:2 parse ━━━━━━━━━━━━━━━━━━━�
     3 │ 
     4 │ class A {
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ a
   > 2 │ ;::b.c

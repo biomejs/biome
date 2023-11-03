@@ -141,7 +141,7 @@ function StatelessFunctionalComponent4([
 ```
 tuple-and-record.js:22:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     20 │   title = '',
     21 │   items = [],
@@ -150,7 +150,7 @@ tuple-and-record.js:22:6 parse ━━━━━━━━━━━━━━━━�
     23 │ }
     24 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     20 │   title = '',
     21 │   items = [],
@@ -185,7 +185,7 @@ tuple-and-record.js:22:6 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:46:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     44 │   title = '',
     45 │   items = [],
@@ -194,7 +194,7 @@ tuple-and-record.js:46:6 parse ━━━━━━━━━━━━━━━━�
     47 │ }
     48 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     44 │   title = '',
     45 │   items = [],

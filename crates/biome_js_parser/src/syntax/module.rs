@@ -240,8 +240,8 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
             expected_any(
                 &["default import", "namespace import", "named import"],
                 range,
+                p,
             )
-            .into_diagnostic(p)
         });
 
         let end = p.cur_range().start();
@@ -626,7 +626,7 @@ impl ParseSeparatedList for ImportAssertionList {
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}']]),
             )
             .enable_recovery_on_line_break(),
-            |p, range| expected_node("import assertion entry", range).into_diagnostic(p),
+            |p, range| expected_node("import assertion entry", range, p),
         )
     }
 
@@ -662,9 +662,11 @@ fn parse_import_assertion_entry(
             p.bump_remap(T![ident]);
         }
         T![:] => {
-            p.error(
-                expected_any(&["identifier", "string literal"], p.cur_range()).into_diagnostic(p),
-            );
+            p.error(expected_any(
+                &["identifier", "string literal"],
+                p.cur_range(),
+                p,
+            ));
         }
         _ => {
             m.abandon(p);
@@ -1305,8 +1307,8 @@ fn parse_export_default_clause(p: &mut JsParser) -> ParsedSyntax {
                         "Illegal duplicate default export declarations",
                         clause.range(p),
                     )
-                    .detail(clause.range(p), "multiple default exports are erroneous")
-                    .detail(
+                    .with_detail(clause.range(p), "multiple default exports are erroneous")
+                    .with_detail(
                         existing_default_item.range.clone(),
                         "the module's default export is first defined here",
                     );

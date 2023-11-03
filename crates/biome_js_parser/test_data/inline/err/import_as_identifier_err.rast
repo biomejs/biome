@@ -61,13 +61,13 @@ JsModule {
 --
 import_as_identifier_err.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a string literal, or an identifier but instead found ''
+  × Expected a string literal, or an identifier but instead found ''.
   
   > 1 │ import { as c } from "test";
       │          
     2 │ 
   
-  i Expected a string literal, or an identifier here
+  i Expected a string literal, or an identifier here.
   
   > 1 │ import { as c } from "test";
       │          

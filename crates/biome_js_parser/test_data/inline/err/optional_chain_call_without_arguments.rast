@@ -142,7 +142,7 @@ JsModule {
 --
 optional_chain_call_without_arguments.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found ';'
+  × Expected an identifier but instead found ';'.
   
     1 │ let a = { test: null };
   > 2 │ a.test?.;
@@ -150,7 +150,7 @@ optional_chain_call_without_arguments.ts:2:9 parse ━━━━━━━━━�
     3 │ a.test?.<ab;
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ let a = { test: null };
   > 2 │ a.test?.;
@@ -161,7 +161,7 @@ optional_chain_call_without_arguments.ts:2:9 parse ━━━━━━━━━�
 --
 optional_chain_call_without_arguments.ts:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '<'
+  × Expected an identifier but instead found '<'.
   
     1 │ let a = { test: null };
     2 │ a.test?.;
@@ -169,7 +169,7 @@ optional_chain_call_without_arguments.ts:3:9 parse ━━━━━━━━━�
       │         ^
     4 │ 
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     1 │ let a = { test: null };
     2 │ a.test?.;

@@ -44,7 +44,7 @@ class C {
 ```
 async-arrow-params.js:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '#x'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '#x'.
   
     1 │ class C {
     2 │   #x = 1;
@@ -53,7 +53,7 @@ async-arrow-params.js:3:17 parse ━━━━━━━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
     1 │ class C {
     2 │   #x = 1;
@@ -88,7 +88,7 @@ async-arrow-params.js:3:3 parse ━━━━━━━━━━━━━━━━
   
 async-arrow-params.js:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '=>'
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '=>'.
   
     1 │ class C {
     2 │   #x = 1;
@@ -97,7 +97,7 @@ async-arrow-params.js:3:26 parse ━━━━━━━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
   
     1 │ class C {
     2 │   #x = 1;
@@ -108,7 +108,7 @@ async-arrow-params.js:3:26 parse ━━━━━━━━━━━━━━━�
   
 async-arrow-params.js:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '}'
+  × Expected a statement but instead found '}'.
   
     2 │   #x = 1;
     3 │   #p = async ({ #x: x }) => {}
@@ -116,7 +116,7 @@ async-arrow-params.js:4:1 parse ━━━━━━━━━━━━━━━━
       │ ^
     5 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     2 │   #x = 1;
     3 │   #p = async ({ #x: x }) => {}

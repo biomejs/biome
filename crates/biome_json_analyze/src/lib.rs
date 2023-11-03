@@ -136,7 +136,7 @@ mod tests {
         let rule_filter = RuleFilter::Rule("nursery", "noDuplicateKeys");
         let options = AnalyzerOptions::default();
         analyze(
-            &parsed.tree().value().unwrap(),
+            &parsed.tree(),
             AnalysisFilter {
                 enabled_rules: Some(slice::from_ref(&rule_filter)),
                 ..AnalysisFilter::default()

@@ -32,7 +32,7 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Error:                        expected an array, an object, or a literal but instead found '}'
+  Error:                        Expected an array, an object, or a literal but instead found '}'.
   Status:                       Loaded with errors
   Formatter disabled:           false
   Linter disabled:              false

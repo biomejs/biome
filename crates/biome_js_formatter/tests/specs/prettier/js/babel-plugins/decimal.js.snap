@@ -145,7 +145,7 @@ typeof 1m === "decimal128";
 ```
 decimal.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '100m'
+  × Expected a statement but instead found '100m'.
   
     1 │ // https://github.com/babel/babel/pull/11640
     2 │ 
@@ -154,7 +154,7 @@ decimal.js:3:1 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ 9223372036854775807m;
     5 │ 0.m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ // https://github.com/babel/babel/pull/11640
     2 │ 
@@ -178,7 +178,7 @@ decimal.js:3:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '9223372036854775807m'
+  × Expected a statement but instead found '9223372036854775807m'.
   
     3 │ 100m;
   > 4 │ 9223372036854775807m;
@@ -186,7 +186,7 @@ decimal.js:4:1 parse ━━━━━━━━━━━━━━━━━━━�
     5 │ 0.m;
     6 │ 3.1415926535897932m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     3 │ 100m;
   > 4 │ 9223372036854775807m;
@@ -208,7 +208,7 @@ decimal.js:4:20 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '0.m'
+  × Expected a statement but instead found '0.m'.
   
     3 │ 100m;
     4 │ 9223372036854775807m;
@@ -217,7 +217,7 @@ decimal.js:5:1 parse ━━━━━━━━━━━━━━━━━━━�
     6 │ 3.1415926535897932m;
     7 │ 100.000m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     3 │ 100m;
     4 │ 9223372036854775807m;
@@ -241,7 +241,7 @@ decimal.js:5:3 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '3.1415926535897932m'
+  × Expected a statement but instead found '3.1415926535897932m'.
   
     4 │ 9223372036854775807m;
     5 │ 0.m;
@@ -250,7 +250,7 @@ decimal.js:6:1 parse ━━━━━━━━━━━━━━━━━━━�
     7 │ 100.000m;
     8 │ .1m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     4 │ 9223372036854775807m;
     5 │ 0.m;
@@ -274,7 +274,7 @@ decimal.js:6:19 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '100.000m'
+  × Expected a statement but instead found '100.000m'.
   
     5 │ 0.m;
     6 │ 3.1415926535897932m;
@@ -283,7 +283,7 @@ decimal.js:7:1 parse ━━━━━━━━━━━━━━━━━━━�
     8 │ .1m;
     9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
   
-  i Expected a statement here
+  i Expected a statement here.
   
     5 │ 0.m;
     6 │ 3.1415926535897932m;
@@ -307,7 +307,7 @@ decimal.js:7:8 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '.1m'
+  × Expected a statement but instead found '.1m'.
   
      6 │ 3.1415926535897932m;
      7 │ 100.000m;
@@ -316,7 +316,7 @@ decimal.js:8:1 parse ━━━━━━━━━━━━━━━━━━━�
      9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
     10 │ 1.m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      6 │ 3.1415926535897932m;
      7 │ 100.000m;
@@ -340,7 +340,7 @@ decimal.js:8:3 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '0m'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '0m'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -349,7 +349,7 @@ decimal.js:9:4 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -373,7 +373,7 @@ decimal.js:9:5 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a property, a shorthand property, a getter, a setter, or a method but instead found '.1m() {'
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '.1m() {'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -382,7 +382,7 @@ decimal.js:9:11 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a property, a shorthand property, a getter, a setter, or a method here
+  i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -432,7 +432,7 @@ decimal.js:9:28 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ', set 3m(_)'
+  × Expected a statement but instead found ', set 3m(_)'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -441,7 +441,7 @@ decimal.js:9:33 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -465,7 +465,7 @@ decimal.js:9:40 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ', async 4m()'
+  × Expected a statement but instead found ', async 4m()'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -474,7 +474,7 @@ decimal.js:9:46 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -498,7 +498,7 @@ decimal.js:9:55 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:61 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ', *.5m()'
+  × Expected a statement but instead found ', *.5m()'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -507,7 +507,7 @@ decimal.js:9:61 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -531,7 +531,7 @@ decimal.js:9:66 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:9:73 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '})'
+  × Expected a statement but instead found '})'.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -540,7 +540,7 @@ decimal.js:9:73 parse ━━━━━━━━━━━━━━━━━━━�
     10 │ 1.m;
     11 │ 100m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      7 │ 100.000m;
      8 │ .1m;
@@ -551,7 +551,7 @@ decimal.js:9:73 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '1.m'
+  × Expected a statement but instead found '1.m'.
   
      8 │ .1m;
      9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
@@ -560,7 +560,7 @@ decimal.js:10:1 parse ━━━━━━━━━━━━━━━━━━━�
     11 │ 100m;
     12 │ 9223372036854775807m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      8 │ .1m;
      9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
@@ -584,7 +584,7 @@ decimal.js:10:3 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '100m'
+  × Expected a statement but instead found '100m'.
   
      9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
     10 │ 1.m;
@@ -593,7 +593,7 @@ decimal.js:11:1 parse ━━━━━━━━━━━━━━━━━━━�
     12 │ 9223372036854775807m;
     13 │ 100.m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
      9 │ ({ 0m: 0, .1m() {}, get 0.2m(){}, set 3m(_){}, async 4m() {}, *.5m() {} });
     10 │ 1.m;
@@ -617,7 +617,7 @@ decimal.js:11:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '9223372036854775807m'
+  × Expected a statement but instead found '9223372036854775807m'.
   
     10 │ 1.m;
     11 │ 100m;
@@ -626,7 +626,7 @@ decimal.js:12:1 parse ━━━━━━━━━━━━━━━━━━━�
     13 │ 100.m;
     14 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     10 │ 1.m;
     11 │ 100m;
@@ -650,7 +650,7 @@ decimal.js:12:20 parse ━━━━━━━━━━━━━━━━━━━
   
 decimal.js:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '100.m'
+  × Expected a statement but instead found '100.m'.
   
     11 │ 100m;
     12 │ 9223372036854775807m;
@@ -659,7 +659,7 @@ decimal.js:13:1 parse ━━━━━━━━━━━━━━━━━━━�
     14 │ 
     15 │ // Invalid decimal
   
-  i Expected a statement here
+  i Expected a statement here.
   
     11 │ 100m;
     12 │ 9223372036854775807m;
@@ -683,7 +683,7 @@ decimal.js:13:5 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '2e9m'
+  × Expected a statement but instead found '2e9m'.
   
     15 │ // Invalid decimal
   > 16 │ 2e9m;
@@ -691,7 +691,7 @@ decimal.js:16:1 parse ━━━━━━━━━━━━━━━━━━━�
     17 │ 016432m;
     18 │ 089m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     15 │ // Invalid decimal
   > 16 │ 2e9m;
@@ -713,7 +713,7 @@ decimal.js:16:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '016432m'
+  × Expected a statement but instead found '016432m'.
   
     15 │ // Invalid decimal
     16 │ 2e9m;
@@ -722,7 +722,7 @@ decimal.js:17:1 parse ━━━━━━━━━━━━━━━━━━━�
     18 │ 089m;
     19 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     15 │ // Invalid decimal
     16 │ 2e9m;
@@ -746,7 +746,7 @@ decimal.js:17:7 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '089m'
+  × Expected a statement but instead found '089m'.
   
     16 │ 2e9m;
     17 │ 016432m;
@@ -755,7 +755,7 @@ decimal.js:18:1 parse ━━━━━━━━━━━━━━━━━━━�
     19 │ 
     20 │ // https://github.com/tc39/proposal-decimal
   
-  i Expected a statement here
+  i Expected a statement here.
   
     16 │ 2e9m;
     17 │ 016432m;
@@ -779,7 +779,7 @@ decimal.js:18:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 decimal.js:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '.1m + .2m === .3m'
+  × Expected a statement but instead found '.1m + .2m === .3m'.
   
     20 │ // https://github.com/tc39/proposal-decimal
   > 21 │ .1m + .2m === .3m;
@@ -787,7 +787,7 @@ decimal.js:21:1 parse ━━━━━━━━━━━━━━━━━━━�
     22 │ 2.00m;
     23 │ -0m;
   
-  i Expected a statement here
+  i Expected a statement here.
   
     20 │ // https://github.com/tc39/proposal-decimal
   > 21 │ .1m + .2m === .3m;
@@ -833,7 +833,7 @@ decimal.js:21:17 parse ━━━━━━━━━━━━━━━━━━━
   
 decimal.js:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '2.00m'
+  × Expected a statement but instead found '2.00m'.
   
     20 │ // https://github.com/tc39/proposal-decimal
     21 │ .1m + .2m === .3m;
@@ -842,7 +842,7 @@ decimal.js:22:1 parse ━━━━━━━━━━━━━━━━━━━�
     23 │ -0m;
     24 │ typeof 1m === "bigdecimal";
   
-  i Expected a statement here
+  i Expected a statement here.
   
     20 │ // https://github.com/tc39/proposal-decimal
     21 │ .1m + .2m === .3m;

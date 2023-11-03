@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    json::{has_only_known_keys, VisitJsonNode},
+    json::{report_unknown_map_key, VisitJsonNode},
     DeserializationDiagnostic, VisitNode,
 };
 use biome_js_syntax::{
@@ -398,27 +398,24 @@ impl FromStr for ComplexityOptions {
     }
 }
 
-impl VisitNode<JsonLanguage> for ComplexityOptions {
-    fn visit_member_name(
-        &mut self,
-        node: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        has_only_known_keys(node, &["maxAllowedComplexity"], diagnostics)
-    }
+impl ComplexityOptions {
+    const ALLOWED_KEYS: &'static [&'static str] = &["maxAllowedComplexity"];
+}
 
+impl VisitNode<JsonLanguage> for ComplexityOptions {
     fn visit_map(
         &mut self,
         key: &JsonSyntaxNode,
         value: &JsonSyntaxNode,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value, diagnostics)?;
-        let name_text = name.text();
+        let (name, value) = self.get_key_and_value(key, value)?;
+        let name_text = name.inner_string_text().ok()?;
+        let name_text = name_text.text();
         if name_text == "maxAllowedComplexity" {
             if let Some(value) = value
                 .as_json_number_value()
-                .and_then(|number_value| u8::from_str(&number_value.syntax().to_string()).ok())
+                .and_then(|number_value| u8::from_str(&number_value.text()).ok())
                 // Don't allow 0 or no code would pass.
                 // And don't allow MAX_SCORE or we can't detect exceeding it.
                 .filter(|&number| number > 0 && number < MAX_SCORE)
@@ -433,6 +430,8 @@ impl VisitNode<JsonLanguage> for ComplexityOptions {
                     .with_range(value.range()),
                 );
             }
+        } else {
+            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
         Some(())
     }

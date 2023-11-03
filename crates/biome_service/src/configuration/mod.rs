@@ -122,18 +122,6 @@ impl Default for Configuration {
 }
 
 impl Configuration {
-    const KNOWN_KEYS: &'static [&'static str] = &[
-        "vcs",
-        "files",
-        "linter",
-        "formatter",
-        "javascript",
-        "json",
-        "$schema",
-        "organizeImports",
-        "extends",
-        "overrides",
-    ];
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter
             .as_ref()
@@ -156,10 +144,7 @@ impl Configuration {
     }
 
     pub fn is_vcs_disabled(&self) -> bool {
-        self.vcs
-            .as_ref()
-            .map(|f| matches!(f.enabled, Some(false)))
-            .unwrap_or(true)
+        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
 }
 
@@ -395,10 +380,6 @@ pub struct FilesConfiguration {
     pub ignore_unknown: Option<bool>,
 }
 
-impl FilesConfiguration {
-    const KNOWN_KEYS: &'static [&'static str] = &["maxSize", "ignore", "include", "ignoreUnknown"];
-}
-
 impl MergeWith<FilesConfiguration> for FilesConfiguration {
     fn merge_with(&mut self, other: FilesConfiguration) {
         if let Some(ignore) = other.ignore {
@@ -582,15 +563,10 @@ pub fn create_config(
 pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerRules {
     let linter_settings = &settings.linter;
     let overrides = &settings.override_settings;
+    let mut analyzer_rules = AnalyzerRules::default();
+    if let Some(rules) = linter_settings.rules.as_ref() {
+        push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+    }
 
-    overrides
-        .as_analyzer_rules_options(path)
-        .unwrap_or_else(|| {
-            let mut analyzer_rules = AnalyzerRules::default();
-            if let Some(rules) = linter_settings.rules.as_ref() {
-                push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
-            }
-
-            analyzer_rules
-        })
+    overrides.override_analyzer_rules(path, analyzer_rules)
 }

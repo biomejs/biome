@@ -108,14 +108,14 @@ await_in_module.js:1:5 parse ━━━━━━━━━━━━━━━━━
 --
 await_in_module.js:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an unary expression but instead found ')'
+  × Expected an unary expression but instead found ')'.
   
     1 │ let await = 10;
   > 2 │ console.log(await);
       │                  ^
     3 │ 
   
-  i Expected an unary expression here
+  i Expected an unary expression here.
   
     1 │ let await = 10;
   > 2 │ console.log(await);

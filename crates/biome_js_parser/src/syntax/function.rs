@@ -90,7 +90,7 @@ pub(super) fn parse_function_declaration(
             // if (true) function a() {}
             // label1: function b() {}
             // while (true) function c() {}
-            p.error(p.err_builder("In strict mode code, functions can only be declared at top level or inside a block", function.range(p)).hint( "wrap the function in a block statement"));
+            p.error(p.err_builder("In strict mode code, functions can only be declared at top level or inside a block", function.range(p)).with_hint( "wrap the function in a block statement"));
             function.change_to_bogus(p);
         } else if !matches!(context, StatementContext::If | StatementContext::Label) {
             // test js function_in_if_or_labelled_stmt_loose_mode
@@ -99,7 +99,7 @@ pub(super) fn parse_function_declaration(
             // if (true) function b() {} else function c() {}
             // if (true) function d() {}
             // if (true) "test"; else function e() {}
-            p.error(p.err_builder("In non-strict mode code, functions can only be declared at top level, inside a block, or as the body of an if or labelled statement", function.range(p)).hint( "wrap the function in a block statement"));
+            p.error(p.err_builder("In non-strict mode code, functions can only be declared at top level, inside a block, or as the body of an if or labelled statement", function.range(p)).with_hint( "wrap the function in a block statement"));
             function.change_to_bogus(p);
         }
     }
@@ -435,7 +435,7 @@ fn parse_ambient_function(
                 "A 'declare' function cannot have a function body",
                 body.range(p),
             )
-            .hint("remove this body"),
+            .with_hint("remove this body"),
         );
     }
 
@@ -477,7 +477,7 @@ pub(crate) fn parse_ts_type_annotation_or_error(p: &mut JsParser) -> ParsedSynta
                 "return types can only be used in TypeScript files",
                 annotation.range(p),
             )
-            .hint("remove this type annotation")
+            .with_hint("remove this type annotation")
         },
     )
 }

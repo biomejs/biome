@@ -89,7 +89,7 @@ let tuple = // Comment
 ```
 tuple-and-record.js:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '{'
+  × Expected an identifier but instead found '{'.
   
     6 │ let record = // Comment
   > 7 │ #{
@@ -97,7 +97,7 @@ tuple-and-record.js:7:2 parse ━━━━━━━━━━━━━━━━�
     8 │   key: 'value'
     9 │ }
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     6 │ let record = // Comment
   > 7 │ #{
@@ -146,7 +146,7 @@ tuple-and-record.js:7:2 parse ━━━━━━━━━━━━━━━━�
   
 tuple-and-record.js:17:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an identifier but instead found '['
+  × Expected an identifier but instead found '['.
   
     16 │ let tuple = // Comment
   > 17 │ #[
@@ -154,7 +154,7 @@ tuple-and-record.js:17:2 parse ━━━━━━━━━━━━━━━━�
     18 │   'value'
     19 │ ]
   
-  i Expected an identifier here
+  i Expected an identifier here.
   
     16 │ let tuple = // Comment
   > 17 │ #[

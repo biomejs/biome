@@ -48,12 +48,12 @@ JsonRoot {
 ```
 string_incomplete_surrogate_escape_invalid.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '"\uD800\uD800\x"'
+  × Expected an array, an object, or a literal but instead found '"\uD800\uD800\x"'.
   
   > 1 │ ["\uD800\uD800\x"]
       │  ^^^^^^^^^^^^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ["\uD800\uD800\x"]
       │  ^^^^^^^^^^^^^^^^

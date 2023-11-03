@@ -34,11 +34,7 @@ pub struct ParseDiagnostic {
 /// Possible details related to the diagnostic
 #[derive(Debug, Default, Clone)]
 struct ParserAdvice {
-    /// A list a possible details that can be attached to the diagnostic.
-    /// Useful to explain the nature errors.
-    detail_list: Vec<ParserAdviceDetail>,
-    /// A message for the user that should tell the user how to fix the issue
-    hint: Option<MarkupBuf>,
+    advice_list: Vec<ParserAdviceKind>,
 }
 
 /// The structure of the advice. A message that gives details, a possible range so
@@ -51,31 +47,67 @@ struct ParserAdviceDetail {
     span: Option<TextRange>,
 }
 
+#[derive(Debug, Clone)]
+enum ParserAdviceKind {
+    /// A list a possible details that can be attached to the diagnostic.
+    /// Useful to explain the nature errors.
+    Detail(ParserAdviceDetail),
+    /// A message for the user that should tell the user how to fix the issue
+    Hint(MarkupBuf),
+    List(MarkupBuf, Vec<MarkupBuf>),
+}
+
 impl ParserAdvice {
-    fn add_detail(&mut self, message: impl Display, range: Option<TextRange>) {
-        self.detail_list.push(ParserAdviceDetail {
-            message: markup! { {message} }.to_owned(),
-            span: range,
-        });
+    fn add_detail(&mut self, message: impl Display, range: impl AsSpan) {
+        self.advice_list
+            .push(ParserAdviceKind::Detail(ParserAdviceDetail {
+                message: markup! { {message} }.to_owned(),
+                span: range.as_span(),
+            }));
     }
 
     fn add_hint(&mut self, message: impl Display) {
-        self.hint = Some(markup! { { message } }.to_owned());
+        self.advice_list
+            .push(ParserAdviceKind::Hint(markup! { { message } }.to_owned()));
+    }
+
+    fn add_hint_with_alternatives(&mut self, message: impl Display, alternatives: &[impl Display]) {
+        self.advice_list.push(ParserAdviceKind::List(
+            markup! {{message}}.to_owned(),
+            alternatives
+                .iter()
+                .map(|msg| markup! {{msg}}.to_owned())
+                .collect(),
+        ))
     }
 }
 
 impl Advices for ParserAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        for detail in &self.detail_list {
-            let ParserAdviceDetail { span, message } = detail;
-            visitor.record_log(LogCategory::Info, &markup! { {message} }.to_owned())?;
+        for advice_kind in &self.advice_list {
+            match advice_kind {
+                ParserAdviceKind::Detail(detail) => {
+                    let ParserAdviceDetail { span, message } = detail;
+                    visitor.record_log(LogCategory::Info, message)?;
 
-            let location = Location::builder().span(span).build();
-            visitor.record_frame(location)?;
+                    let location = Location::builder().span(span).build();
+                    visitor.record_frame(location)?;
+                }
+                ParserAdviceKind::Hint(hint) => {
+                    visitor.record_log(LogCategory::Info, hint)?;
+                }
+                ParserAdviceKind::List(message, list) => {
+                    visitor.record_log(LogCategory::Info, message)?;
+
+                    let list: Vec<_> = list
+                        .iter()
+                        .map(|suggestion| suggestion as &dyn Display)
+                        .collect();
+                    visitor.record_list(&list)?;
+                }
+            }
         }
-        if let Some(hint) = &self.hint {
-            visitor.record_log(LogCategory::Info, &markup! { {hint} }.to_owned())?;
-        }
+
         Ok(())
     }
 }
@@ -87,6 +119,65 @@ impl ParseDiagnostic {
             message: MessageAndDescription::from(markup! { {message} }.to_owned()),
             advice: ParserAdvice::default(),
         }
+    }
+
+    pub fn new_single_node(name: &str, range: TextRange, p: &impl Parser) -> Self {
+        let names = format!("{} {}", article_for(name), name);
+        let msg = if p.source().text().text_len() <= range.start() {
+            format!("Expected {} but instead found the end of the file.", names)
+        } else {
+            format!("Expected {} but instead found '{}'.", names, p.text(range))
+        };
+        Self {
+            span: range.as_span(),
+            message: MessageAndDescription::from(msg),
+            advice: ParserAdvice::default(),
+        }
+        .with_detail(range, format!("Expected {} here.", names))
+    }
+
+    pub fn new_with_any(names: &[&str], range: TextRange, p: &impl Parser) -> Self {
+        debug_assert!(names.len() > 1, "Requires at least 2 names");
+
+        if names.len() < 2 {
+            return Self::new_single_node(names.first().unwrap_or(&"<missing>"), range, p);
+        }
+
+        let mut joined_names = String::new();
+
+        for (index, name) in names.iter().enumerate() {
+            if index > 0 {
+                joined_names.push_str(", ");
+            }
+
+            if index == names.len() - 1 {
+                joined_names.push_str("or ");
+            }
+
+            joined_names.push_str(article_for(name));
+            joined_names.push(' ');
+            joined_names.push_str(name);
+        }
+
+        let msg = if p.source().text().text_len() <= range.start() {
+            format!(
+                "Expected {} but instead found the end of the file.",
+                joined_names
+            )
+        } else {
+            format!(
+                "Expected {} but instead found '{}'.",
+                joined_names,
+                p.text(range)
+            )
+        };
+
+        Self {
+            span: range.as_span(),
+            message: MessageAndDescription::from(msg),
+            advice: ParserAdvice::default(),
+        }
+        .with_detail(range, format!("Expected {} here.", joined_names))
     }
 
     pub const fn is_error(&self) -> bool {
@@ -110,7 +201,7 @@ impl ParseDiagnostic {
     /// let source = "const a";
     /// let range = TextRange::new(TextSize::from(0), TextSize::from(5));
     /// let mut diagnostic = ParseDiagnostic::new("this is wrong!", range)
-    ///     .detail(TextRange::new(TextSize::from(6), TextSize::from(7)), "This is reason why it's broken");
+    ///     .with_detail(TextRange::new(TextSize::from(6), TextSize::from(7)), "This is reason why it's broken");
     ///
     /// let mut write = biome_diagnostics::termcolor::Buffer::no_color();
     /// let error = diagnostic
@@ -129,8 +220,7 @@ impl ParseDiagnostic {
     ///     "{}",
     ///     std::str::from_utf8(write.as_slice()).expect("non utf8 in error buffer")
     /// ).expect("");
-    ///
-    pub fn detail(mut self, range: impl AsSpan, message: impl Display) -> Self {
+    pub fn with_detail(mut self, range: impl AsSpan, message: impl Display) -> Self {
         self.advice.add_detail(message, range.as_span());
         self
     }
@@ -152,7 +242,7 @@ impl ParseDiagnostic {
     /// let source = "const a";
     /// let range = TextRange::new(TextSize::from(0), TextSize::from(5));
     /// let mut diagnostic = ParseDiagnostic::new("this is wrong!", range)
-    ///     .hint("You should delete the code");
+    ///     .with_hint("You should delete the code");
     ///
     /// let mut write = biome_diagnostics::termcolor::Buffer::no_color();
     /// let error = diagnostic
@@ -177,8 +267,59 @@ impl ParseDiagnostic {
     /// assert!(result.contains("> 1 │ const a"));
     /// ```
     ///
-    pub fn hint(mut self, message: impl Display) -> Self {
+    pub fn with_hint(mut self, message: impl Display) -> Self {
         self.advice.add_hint(message);
+        self
+    }
+
+    /// A message that also allows to list of alternatives in case a fixed range of values/characters are expected.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// # use biome_console::fmt::{Termcolor};
+    /// # use biome_console::markup;
+    /// # use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, console::fmt::Formatter};
+    /// # use biome_parser::diagnostic::ParseDiagnostic;
+    /// # use biome_rowan::{TextSize, TextRange};
+    /// # use std::fmt::Write;
+    ///
+    /// let source = "const a";
+    /// let range = TextRange::new(TextSize::from(0), TextSize::from(5));
+    /// let mut diagnostic = ParseDiagnostic::new("this is wrong!", range)
+    ///     .with_alternatives("Expected one of the following values:", &["foo", "bar"]);
+    ///
+    /// let mut write = biome_diagnostics::termcolor::Buffer::no_color();
+    /// let error = diagnostic
+    ///     .clone()
+    ///     .with_file_path("example.js")
+    ///     .with_file_source_code(source.to_string());
+    /// Formatter::new(&mut Termcolor(&mut write))
+    ///     .write_markup(markup! {
+    ///     {PrintDiagnostic::verbose(&error)}
+    /// })
+    ///     .expect("failed to emit diagnostic");
+    ///
+    /// let mut result = String::new();
+    /// write!(
+    ///     result,
+    ///     "{}",
+    ///     std::str::from_utf8(write.as_slice()).expect("non utf8 in error buffer")
+    /// ).expect("");
+    ///
+    /// assert!(result.contains("× this is wrong!"));
+    /// assert!(result.contains("i Expected one of the following values:"));
+    /// assert!(result.contains("- foo"));
+    /// assert!(result.contains("- bar"));
+    /// ```
+    ///
+    pub fn with_alternatives(
+        mut self,
+        message: impl Display,
+        alternatives: &[impl Display],
+    ) -> Self {
+        self.advice
+            .add_hint_with_alternatives(message, alternatives);
         self
     }
 
@@ -251,13 +392,13 @@ where
                 format!("expected `{}` but instead the file ends", self.0),
                 p.cur_range(),
             )
-            .detail(p.cur_range(), "the file ends here")
+            .with_detail(p.cur_range(), "the file ends here")
         } else {
             p.err_builder(
                 format!("expected `{}` but instead found `{}`", self.0, p.cur_text()),
                 p.cur_range(),
             )
-            .hint(format!("Remove {}", p.cur_text()))
+            .with_hint(format!("Remove {}", p.cur_text()))
         }
     }
 }
@@ -274,90 +415,31 @@ where
                 format!("expected {} but instead the file ends", self.0),
                 p.cur_range(),
             )
-            .detail(p.cur_range(), "the file ends here")
+            .with_detail(p.cur_range(), "the file ends here")
         } else {
             p.err_builder(
                 format!("expected {} but instead found `{}`", self.0, p.cur_text()),
                 p.cur_range(),
             )
-            .hint(format!("Remove {}", p.cur_text()))
+            .with_hint(format!("Remove {}", p.cur_text()))
         }
     }
 }
 
 /// Creates a diagnostic saying that the node `name` was expected at range
-pub fn expected_node(name: &str, range: TextRange) -> ExpectedNodeDiagnosticBuilder {
-    ExpectedNodeDiagnosticBuilder::with_single_node(name, range)
+pub fn expected_node(name: &str, range: TextRange, p: &impl Parser) -> ParseDiagnostic {
+    ParseDiagnostic::new_single_node(name, range, p)
 }
 
 /// Creates a diagnostic saying that any of the nodes in `names` was expected at range
-pub fn expected_any(names: &[&str], range: TextRange) -> ExpectedNodeDiagnosticBuilder {
-    ExpectedNodeDiagnosticBuilder::with_any(names, range)
+pub fn expected_any(names: &[&str], range: TextRange, p: &impl Parser) -> ParseDiagnostic {
+    ParseDiagnostic::new_with_any(names, range, p)
 }
 
-pub struct ExpectedNodeDiagnosticBuilder {
-    names: String,
-    range: TextRange,
-}
-
-impl ExpectedNodeDiagnosticBuilder {
-    fn with_single_node(name: &str, range: TextRange) -> Self {
-        ExpectedNodeDiagnosticBuilder {
-            names: format!("{} {}", article_for(name), name),
-            range,
-        }
-    }
-
-    fn with_any(names: &[&str], range: TextRange) -> Self {
-        debug_assert!(names.len() > 1, "Requires at least 2 names");
-
-        if names.len() < 2 {
-            return Self::with_single_node(names.first().unwrap_or(&"<missing>"), range);
-        }
-
-        let mut joined_names = String::new();
-
-        for (index, name) in names.iter().enumerate() {
-            if index > 0 {
-                joined_names.push_str(", ");
-            }
-
-            if index == names.len() - 1 {
-                joined_names.push_str("or ");
-            }
-
-            joined_names.push_str(article_for(name));
-            joined_names.push(' ');
-            joined_names.push_str(name);
-        }
-
-        Self {
-            names: joined_names,
-            range,
-        }
-    }
-}
-
-impl<P: Parser> ToDiagnostic<P> for ExpectedNodeDiagnosticBuilder {
-    fn into_diagnostic(self, p: &P) -> ParseDiagnostic {
-        let range = &self.range;
-
-        let msg = if p.source().text().text_len() <= range.start() {
-            format!(
-                "expected {} but instead found the end of the file",
-                self.names
-            )
-        } else {
-            format!(
-                "expected {} but instead found '{}'",
-                self.names,
-                p.text(*range)
-            )
-        };
-
-        let diag = p.err_builder(msg, self.range);
-        diag.detail(self.range, format!("Expected {} here", self.names))
-    }
+/// Creates a diagnostic with message "Unexpected value." and then it lists the values that should be expected.
+pub fn expect_one_of(names: &[&str], range: TextRange) -> ParseDiagnostic {
+    ParseDiagnostic::new("Unexpected value or character.", range)
+        .with_alternatives("Expected one of:", names)
 }
 
 fn article_for(name: &str) -> &'static str {

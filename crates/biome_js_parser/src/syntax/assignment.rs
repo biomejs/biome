@@ -235,7 +235,7 @@ impl ParseArrayPattern<AssignmentPatternWithDefault> for ArrayAssignmentPattern 
 
     #[inline]
     fn expected_element_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["assignment target", "rest element", "comma"], range).into_diagnostic(p)
+        expected_any(&["assignment target", "rest element", "comma"], range, p)
     }
 
     #[inline]
@@ -267,7 +267,7 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
 
     #[inline]
     fn expected_property_pattern_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["assignment target", "rest property"], range).into_diagnostic(p)
+        expected_any(&["assignment target", "rest property"], range, p)
     }
 
     // test js property_assignment_target
@@ -487,7 +487,7 @@ impl RewriteParseEvents for ReparseAssignment {
                             format!("Invalid assignment to `{}`", completed.text(p)),
                             range,
                         )
-                        .hint("This expression cannot be assigned to"),
+                        .with_hint("This expression cannot be assigned to"),
                     );
                 }
                 _ => {}

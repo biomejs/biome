@@ -67,12 +67,12 @@ JsonRoot {
 ```
 object_double_colon.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found ':'
+  × Expected an array, an object, or a literal but instead found ':'.
   
   > 1 │ {"x"::"b"}
       │      ^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ {"x"::"b"}
       │      ^

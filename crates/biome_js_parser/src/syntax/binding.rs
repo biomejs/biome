@@ -95,7 +95,7 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                     ),
                         identifier.range(p),
                     )
-                    .hint("Rename the let identifier here");
+                    .with_hint("Rename the let identifier here");
 
                 p.error(err);
                 identifier.change_to_bogus(p);
@@ -111,14 +111,14 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                         ),
                         identifier.range(p),
                     )
-                    .detail(
+                    .with_detail(
                         identifier.range(p),
                         format!(
                             "a second declaration of `{}` is not allowed",
                             identifier_name
                         ),
                     )
-                    .detail(
+                    .with_detail(
                         *existing,
                         format!("`{}` is first declared here", identifier_name),
                     );
@@ -212,8 +212,8 @@ impl ParseArrayPattern<BindingPatternWithDefault> for ArrayBindingPattern {
                 "rest pattern",
             ],
             range,
+            p,
         )
-        .into_diagnostic(p)
     }
 
     #[inline]
@@ -246,7 +246,7 @@ impl ParseObjectPattern for ObjectBindingPattern {
 
     #[inline]
     fn expected_property_pattern_error(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-        expected_any(&["identifier", "member name", "rest pattern"], range).into_diagnostic(p)
+        expected_any(&["identifier", "member name", "rest pattern"], range, p)
     }
 
     // test js object_property_binding
@@ -320,7 +320,7 @@ impl ParseObjectPattern for ObjectBindingPattern {
                     let inner_range = inner.range(p);
                     // Don't add multiple errors
                     if inner.kind(p) != JS_BOGUS_BINDING {
-                        p.error(p.err_builder("Expected identifier binding", inner_range,).hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
+                        p.error(p.err_builder("Expected identifier binding", inner_range,).with_hint( "Object rest patterns must bind to an identifier, other patterns are not allowed."));
                     }
 
                     inner.change_kind(p, JS_BOGUS_BINDING);

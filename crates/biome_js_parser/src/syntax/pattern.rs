@@ -249,11 +249,11 @@ fn validate_rest_pattern(
                 "rest element cannot have a default",
                 default_start..p.cur_range().start(),
             )
-            .detail(
+            .with_detail(
                 default_start..p.cur_range().start(),
                 "Remove the default value here",
             )
-            .detail(rest_range, "Rest element"),
+            .with_detail(rest_range, "Rest element"),
         );
 
         let mut invalid = rest_marker.complete(p, kind);
@@ -262,15 +262,15 @@ fn validate_rest_pattern(
     } else if p.at(T![,]) && p.nth_at(1, end_token) {
         p.error(
             p.err_builder("rest element may not have a trailing comma", p.cur_range())
-                .detail(p.cur_range(), "Remove the trailing comma here")
-                .detail(rest.range(p), "Rest element"),
+                .with_detail(p.cur_range(), "Remove the trailing comma here")
+                .with_detail(rest.range(p), "Rest element"),
         );
         rest.change_to_bogus(p);
         rest
     } else {
         p.error(
             p.err_builder("rest element must be the last element", rest.range(p),)
-                .hint(
+                .with_hint(
                     format!(
                     "Move the rest element to the end of the pattern, right before the closing '{}'",
                     end_token.to_string().unwrap(),

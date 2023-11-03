@@ -637,6 +637,8 @@ ts_decorator_constructor.ts:2:17 parse ━━━━━━━━━━━━━�
     3 │ }
     4 │ class CC {
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -650,6 +652,8 @@ ts_decorator_constructor.ts:5:17 parse ━━━━━━━━━━━━━�
       │                 ^^^^^^^^^^^^^^
     6 │ }
     7 │ class CC {
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
@@ -665,6 +669,8 @@ ts_decorator_constructor.ts:8:17 parse ━━━━━━━━━━━━━�
      9 │ }
     10 │ class CCC {
   
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   
 --
@@ -678,6 +684,8 @@ ts_decorator_constructor.ts:11:17 parse ━━━━━━━━━━━━━�
        │                 ^^^^^^^^^^^^^^^^^^^^^
     12 │ }
     13 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
   
   i You can enable parameter decorators by setting the `unsafeParameterDecoratorsEnabled` option to `true` in your configuration file.
   

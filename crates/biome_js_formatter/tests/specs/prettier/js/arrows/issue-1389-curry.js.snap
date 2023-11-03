@@ -37,15 +37,7 @@ const makeSomeFunction2 =
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,5 @@
- const foobar =
--  (argumentOne, argumentTwo, argumentThree) =>
--  (...restOfTheArguments) => {
-+  (argumentOne, argumentTwo, argumentThree) => (...restOfTheArguments) => {
-     return "baz";
-   };
- 
-@@ -9,10 +8,8 @@
+@@ -9,10 +9,8 @@
      return "baz";
    };
  
@@ -64,7 +56,8 @@ const makeSomeFunction2 =
 
 ```js
 const foobar =
-  (argumentOne, argumentTwo, argumentThree) => (...restOfTheArguments) => {
+  (argumentOne, argumentTwo, argumentThree) =>
+  (...restOfTheArguments) => {
     return "baz";
   };
 

@@ -765,6 +765,10 @@ export interface Nursery {
 	 */
 	noMisrefactoredShorthandAssign?: RuleConfiguration;
 	/**
+	 * Disallow this and super in static contexts.
+	 */
+	noThisInStatic?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1263,6 +1267,10 @@ export interface Hooks {
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+export interface ProjectFeaturesParams {
+	manifest_path: RomePath;
+}
+export interface ProjectFeaturesResult {}
 export interface OpenFileParams {
 	content: string;
 	language_hint?: Language;
@@ -1432,6 +1440,7 @@ export type Category =
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"
+	| "lint/nursery/noThisInStatic"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -1524,6 +1533,7 @@ export type Category =
 	| "organizeImports"
 	| "migrate"
 	| "deserialize"
+	| "project"
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
@@ -1774,6 +1784,9 @@ export interface RenameResult {
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
+	projectFeatures(
+		params: ProjectFeaturesParams,
+	): Promise<ProjectFeaturesResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -1802,6 +1815,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
+		},
+		projectFeatures(params) {
+			return transport.request("biome/project_features", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

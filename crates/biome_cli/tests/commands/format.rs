@@ -130,7 +130,7 @@ fn print() {
         Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let mut file = fs
         .open(file_path)
@@ -263,7 +263,7 @@ fn lint_warning() {
         Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let mut file = fs
         .open(file_path)
@@ -1514,7 +1514,7 @@ fn max_diagnostics_default() {
         Args::from([("format"), ("src")].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let mut diagnostic_count = 0;
     let mut filtered_messages = Vec::new();
@@ -1567,7 +1567,7 @@ fn max_diagnostics() {
         Args::from([("format"), ("--max-diagnostics"), ("10"), ("src")].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let mut diagnostic_count = 0;
     let mut filtered_messages = Vec::new();
@@ -1647,7 +1647,7 @@ fn print_verbose() {
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1866,7 +1866,7 @@ fn ignore_comments_error_when_allow_comments() {
         Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1896,7 +1896,7 @@ fn format_jsonc_files() {
         Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1933,7 +1933,7 @@ fn format_json_when_allow_trailing_commas() {
         Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1954,8 +1954,6 @@ fn treat_known_json_files_as_jsonc_files() {
 
 /* some other comment*/1, 2, 3]
 	"#;
-    let ts = Path::new("files/typescript.json");
-    fs.insert(ts.into(), code.as_bytes());
     let eslint = Path::new("files/.eslintrc.json");
     fs.insert(eslint.into(), code.as_bytes());
     let jshint = Path::new("files/.jshintrc");
@@ -1969,7 +1967,6 @@ fn treat_known_json_files_as_jsonc_files() {
         Args::from(
             [
                 ("format"),
-                ts.as_os_str().to_str().unwrap(),
                 eslint.as_os_str().to_str().unwrap(),
                 jshint.as_os_str().to_str().unwrap(),
                 babel.as_os_str().to_str().unwrap(),
@@ -1978,7 +1975,7 @@ fn treat_known_json_files_as_jsonc_files() {
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

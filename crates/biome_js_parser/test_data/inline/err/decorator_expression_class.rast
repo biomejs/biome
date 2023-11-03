@@ -319,14 +319,14 @@ decorator_expression_class.js:1:9 parse ━━━━━━━━━━━━━�
 --
 decorator_expression_class.js:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parenthesis '(' but instead found '=>'
+  × Expected a parenthesis '(' but instead found '=>'.
   
   > 1 │ let a = @decorator () => {};
       │                       ^^
     2 │ let b = @first @second function foo() {}
     3 │ let a = @decorator ( () => {} )
   
-  i Expected a parenthesis '(' here
+  i Expected a parenthesis '(' here.
   
   > 1 │ let a = @decorator () => {};
       │                       ^^
@@ -362,14 +362,14 @@ decorator_expression_class.js:3:9 parse ━━━━━━━━━━━━━�
 --
 decorator_expression_class.js:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression, or an assignment but instead found the end of the file
+  × Expected an expression, or an assignment but instead found the end of the file.
   
     2 │ let b = @first @second function foo() {}
     3 │ let a = @decorator ( () => {} )
   > 4 │ 
       │ 
   
-  i Expected an expression, or an assignment here
+  i Expected an expression, or an assignment here.
   
     2 │ let b = @first @second function foo() {}
     3 │ let a = @decorator ( () => {} )

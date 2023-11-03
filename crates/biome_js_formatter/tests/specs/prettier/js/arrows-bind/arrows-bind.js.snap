@@ -82,7 +82,7 @@ arrows-bind.js:2:9 parse ━━━━━━━━━━━━━━━━━━�
   
 arrows-bind.js:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found ':'
+  × Expected a statement but instead found ':'.
   
     1 │ a => ({}::b()``[''].c++ && 0 ? 0 : 0);
     2 │ (a => b)::c;
@@ -90,7 +90,7 @@ arrows-bind.js:3:3 parse ━━━━━━━━━━━━━━━━━━�
       │   ^
     4 │ 
   
-  i Expected a statement here
+  i Expected a statement here.
   
     1 │ a => ({}::b()``[''].c++ && 0 ? 0 : 0);
     2 │ (a => b)::c;

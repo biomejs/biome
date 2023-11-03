@@ -1,21 +1,45 @@
-type PossibleValues = string | number | void;
-type MorePossibleValues = string | ((number & any) | (string | void));
-
-function logSomething(thing: void) {}
-function printArg<T = void>(arg: T) {}
-logAndReturn<void>(undefined);
-
-let voidPromise: Promise<void> = new Promise<void>(() => { });
-let voidMap: Map<string, void> = new Map<string, void>();
+// ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
+function takeVoid(thing: void) {}
+const arrowGeneric = <T extends void>(arg: T) => {};
+const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+function functionGeneric<T extends void>(arg: T) {}
+function functionGeneric2<T extends void = void>(arg: T) {}
+declare function functionDeclaration<T extends void>(arg: T): void;
+declare function functionDeclaration2<T extends void = void>(arg: T): void;
+functionGeneric<void>(undefined);
+declare function voidArray(args: void[]): void[];
+let value = undefined as void;
+let value = <void>undefined;
+function takesThings(...things: void[]): void {}
+type KeyofVoid = keyof void;
 
 interface Interface {
-	prop: void;
+  lambda: () => void;
+  voidProp: void;
 }
 
-class MyClass {
-	private readonly propName: void;
+class ClassName {
+  private readonly propName: void;
+}
+let letVoid: void;
+type VoidType = void;
+class OtherClassName {
+  private propName: VoidType;
 }
 
-let foo: void;
-let bar = 1 as unknown as void;
-let baz = 1 as unknown as void | string;
+type UnionType = string | number | void;
+type UnionType = string | ((number & any) | (string | void));
+declare function test(): number | void;
+declare function test<T extends number | void>(): T;
+type IntersectionType = string & number & void;
+
+type MappedType<T> = {
+  [K in keyof T]: void;
+};
+
+type ConditionalType<T> = {
+  [K in keyof T]: T[K] extends string ? void : string;
+};
+type ManyVoid = readonly void[];
+function foo(arr: readonly void[]) {}
+type invalidVoidUnion = void | Map<string, number>;

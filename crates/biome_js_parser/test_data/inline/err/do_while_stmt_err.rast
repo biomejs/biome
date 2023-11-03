@@ -100,7 +100,7 @@ JsModule {
 --
 do_while_stmt_err.js:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an expression but instead found ')'
+  × Expected an expression but instead found ')'.
   
     1 │ do while (true)
   > 2 │ do while ()
@@ -108,7 +108,7 @@ do_while_stmt_err.js:2:11 parse ━━━━━━━━━━━━━━━━
     3 │ do while true
     4 │ 
   
-  i Expected an expression here
+  i Expected an expression here.
   
     1 │ do while (true)
   > 2 │ do while ()

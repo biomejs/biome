@@ -444,7 +444,7 @@ function_decl_err.js:1:9 parse ━━━━━━━━━━━━━━━━�
 --
 function_decl_err.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a parenthesis '(' but instead found '{'
+  × Expected a parenthesis '(' but instead found '{'.
   
     1 │ function() {}
   > 2 │ function foo {}
@@ -452,7 +452,7 @@ function_decl_err.js:2:14 parse ━━━━━━━━━━━━━━━━
     3 │ function {}
     4 │ function *() {}
   
-  i Expected a parenthesis '(' here
+  i Expected a parenthesis '(' here.
   
     1 │ function() {}
   > 2 │ function foo {}

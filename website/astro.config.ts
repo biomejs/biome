@@ -178,6 +178,22 @@ export default defineConfig({
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
 						},
+						{
+							label: "How Biome works",
+							link: "/guides/how-biome-works",
+							badge: {
+								text: "New",
+								variant: "note",
+							},
+						},
+						{
+							label: "Integrate Biome in your editor",
+							link: "/guides/integrate-in-editor",
+							badge: {
+								text: "New",
+								variant: "note",
+							},
+						},
 					],
 				},
 				{
@@ -215,10 +231,6 @@ export default defineConfig({
 						{
 							label: "Architecture",
 							link: "/internals/architecture",
-							badge: {
-								text: "Updated",
-								variant: "note",
-							},
 						},
 						{ label: "Credits", link: "/internals/credits" },
 						{ label: "Versioning", link: "/internals/versioning" },

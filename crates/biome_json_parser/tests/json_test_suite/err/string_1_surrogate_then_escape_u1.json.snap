@@ -48,12 +48,12 @@ JsonRoot {
 ```
 string_1_surrogate_then_escape_u1.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '"\uD800\u1"'
+  × Expected an array, an object, or a literal but instead found '"\uD800\u1"'.
   
   > 1 │ ["\uD800\u1"]
       │  ^^^^^^^^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ ["\uD800\u1"]
       │  ^^^^^^^^^^^

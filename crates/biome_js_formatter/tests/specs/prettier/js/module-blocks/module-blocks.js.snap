@@ -435,7 +435,7 @@ module-blocks.js:23:27 parse ━━━━━━━━━━━━━━━━━
   
 module-blocks.js:24:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '})'
+  × Expected a statement but instead found '})'.
   
     22 │ const worker = new Worker(module {
     23 │   export const foo = "foo";
@@ -444,7 +444,7 @@ module-blocks.js:24:1 parse ━━━━━━━━━━━━━━━━━�
     25 │ 
     26 │ let m = module {
   
-  i Expected a statement here
+  i Expected a statement here.
   
     22 │ const worker = new Worker(module {
     23 │   export const foo = "foo";
@@ -670,7 +670,7 @@ module-blocks.js:36:36 parse ━━━━━━━━━━━━━━━━━
   
 module-blocks.js:36:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected a statement but instead found '})'
+  × Expected a statement but instead found '})'.
   
     34 │ let moduleBlock = module { export let y = 1; };
     35 │ 
@@ -679,7 +679,7 @@ module-blocks.js:36:38 parse ━━━━━━━━━━━━━━━━━
     37 │ 
     38 │ let m = module { /* foo */ };
   
-  i Expected a statement here
+  i Expected a statement here.
   
     34 │ let moduleBlock = module { export let y = 1; };
     35 │ 

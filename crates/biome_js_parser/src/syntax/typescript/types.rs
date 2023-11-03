@@ -2115,7 +2115,7 @@ fn parse_ts_type_member_semi(p: &mut JsParser) {
     if !optional_semi(p) {
         let err = p
             .err_builder("';' expected'", p.cur_range())
-            .hint("An explicit or implicit semicolon is expected here...");
+            .with_hint("An explicit or implicit semicolon is expected here...");
 
         p.error(err);
     }

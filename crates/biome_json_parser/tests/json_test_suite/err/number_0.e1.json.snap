@@ -48,12 +48,12 @@ JsonRoot {
 ```
 number_0.e1.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected an array, an object, or a literal but instead found '0.e1'
+  × Expected an array, an object, or a literal but instead found '0.e1'.
   
   > 1 │ [0.e1]
       │  ^^^^
   
-  i Expected an array, an object, or a literal here
+  i Expected an array, an object, or a literal here.
   
   > 1 │ [0.e1]
       │  ^^^^

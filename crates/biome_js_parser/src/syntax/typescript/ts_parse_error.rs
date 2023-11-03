@@ -5,7 +5,7 @@ use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_ts_enum_member(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(&["identifier", "string literal", "computed name"], range).into_diagnostic(p)
+    expected_any(&["identifier", "string literal", "computed name"], range, p)
 }
 
 pub(crate) fn unexpected_abstract_member_with_body(
@@ -78,8 +78,8 @@ pub(crate) fn ts_accessibility_modifier_already_seen(
     first_range: TextRange,
 ) -> ParseDiagnostic {
     p.err_builder("Accessibility modifier already seen.", second_range)
-        .detail(second_range, "duplicate modifier")
-        .detail(first_range, "first modifier")
+        .with_detail(second_range, "duplicate modifier")
+        .with_detail(first_range, "first modifier")
 }
 
 pub(crate) fn ts_only_syntax_error(
@@ -88,7 +88,7 @@ pub(crate) fn ts_only_syntax_error(
     range: TextRange,
 ) -> ParseDiagnostic {
     p.err_builder(format!("{} are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.", syntax)
-        ,range).hint( "TypeScript only syntax")
+        ,range).with_hint( "TypeScript only syntax")
 }
 
 pub(crate) fn ts_accessor_type_parameters_error(
@@ -122,11 +122,11 @@ pub(crate) fn ts_set_accessor_return_type_error(
 }
 
 pub(crate) fn expected_ts_type(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("type", range).into_diagnostic(p)
+    expected_node("type", range, p)
 }
 
 pub(crate) fn expected_ts_type_parameter(p: &JsParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("type parameter", range).into_diagnostic(p)
+    expected_node("type parameter", range, p)
 }
 
 pub(crate) fn infer_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {

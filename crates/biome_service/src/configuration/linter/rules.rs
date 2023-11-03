@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::RuleConfiguration;
+use crate::{MergeWith, RuleConfiguration};
 use biome_analyze::RuleFilter;
 use biome_diagnostics::{Category, Severity};
 use bpaf::Bpaf;
@@ -58,6 +58,56 @@ impl Default for Rules {
             security: None,
             style: None,
             suspicious: None,
+        }
+    }
+}
+impl MergeWith<Rules> for Rules {
+    fn merge_with(&mut self, other: Rules) {
+        if let Some(recommended) = other.recommended {
+            self.recommended = Some(recommended);
+        }
+        if let Some(all) = other.all {
+            self.all = Some(all);
+        }
+        if let Some(other) = other.a11y {
+            let a11y = self.a11y.get_or_insert(A11y::default());
+            a11y.merge_with(other);
+        }
+        if let Some(other) = other.complexity {
+            let complexity = self.complexity.get_or_insert(Complexity::default());
+            complexity.merge_with(other);
+        }
+        if let Some(other) = other.correctness {
+            let correctness = self.correctness.get_or_insert(Correctness::default());
+            correctness.merge_with(other);
+        }
+        if let Some(other) = other.nursery {
+            let nursery = self.nursery.get_or_insert(Nursery::default());
+            nursery.merge_with(other);
+        }
+        if let Some(other) = other.performance {
+            let performance = self.performance.get_or_insert(Performance::default());
+            performance.merge_with(other);
+        }
+        if let Some(other) = other.security {
+            let security = self.security.get_or_insert(Security::default());
+            security.merge_with(other);
+        }
+        if let Some(other) = other.style {
+            let style = self.style.get_or_insert(Style::default());
+            style.merge_with(other);
+        }
+        if let Some(other) = other.suspicious {
+            let suspicious = self.suspicious.get_or_insert(Suspicious::default());
+            suspicious.merge_with(other);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Rules)
+    where
+        Rules: Default,
+    {
+        if other != Rules::default() {
+            self.merge_with(other)
         }
     }
 }
@@ -208,10 +258,7 @@ impl Rules {
     pub(crate) const fn is_not_all(&self) -> bool {
         matches!(self.all, Some(false))
     }
-    #[doc = r" It returns a tuple of filters. The first element of the tuple are the enabled rules,"]
-    #[doc = r" while the second element are the disabled rules."]
-    #[doc = r""]
-    #[doc = r" Only one element of the tuple is [Some] at the time."]
+    #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
     pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -338,6 +385,35 @@ impl Rules {
             enabled_rules.extend(Suspicious::recommended_rules_as_filters());
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
+    }
+    #[doc = r" It returns only the disabled rules"]
+    pub fn as_disabled_rules(&self) -> IndexSet<RuleFilter> {
+        let mut disabled_rules = IndexSet::new();
+        if let Some(group) = self.a11y.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.complexity.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.correctness.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.nursery.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.performance.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.security.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.style.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.suspicious.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        disabled_rules
     }
 }
 #[derive(Deserialize, Default, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
@@ -492,6 +568,99 @@ pub struct A11y {
     #[bpaf(long("use-valid-lang"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_lang: Option<RuleConfiguration>,
+}
+impl MergeWith<A11y> for A11y {
+    fn merge_with(&mut self, other: A11y) {
+        if let Some(no_access_key) = other.no_access_key {
+            self.no_access_key = Some(no_access_key);
+        }
+        if let Some(no_aria_unsupported_elements) = other.no_aria_unsupported_elements {
+            self.no_aria_unsupported_elements = Some(no_aria_unsupported_elements);
+        }
+        if let Some(no_autofocus) = other.no_autofocus {
+            self.no_autofocus = Some(no_autofocus);
+        }
+        if let Some(no_blank_target) = other.no_blank_target {
+            self.no_blank_target = Some(no_blank_target);
+        }
+        if let Some(no_distracting_elements) = other.no_distracting_elements {
+            self.no_distracting_elements = Some(no_distracting_elements);
+        }
+        if let Some(no_header_scope) = other.no_header_scope {
+            self.no_header_scope = Some(no_header_scope);
+        }
+        if let Some(no_noninteractive_element_to_interactive_role) =
+            other.no_noninteractive_element_to_interactive_role
+        {
+            self.no_noninteractive_element_to_interactive_role =
+                Some(no_noninteractive_element_to_interactive_role);
+        }
+        if let Some(no_noninteractive_tabindex) = other.no_noninteractive_tabindex {
+            self.no_noninteractive_tabindex = Some(no_noninteractive_tabindex);
+        }
+        if let Some(no_positive_tabindex) = other.no_positive_tabindex {
+            self.no_positive_tabindex = Some(no_positive_tabindex);
+        }
+        if let Some(no_redundant_alt) = other.no_redundant_alt {
+            self.no_redundant_alt = Some(no_redundant_alt);
+        }
+        if let Some(no_redundant_roles) = other.no_redundant_roles {
+            self.no_redundant_roles = Some(no_redundant_roles);
+        }
+        if let Some(no_svg_without_title) = other.no_svg_without_title {
+            self.no_svg_without_title = Some(no_svg_without_title);
+        }
+        if let Some(use_alt_text) = other.use_alt_text {
+            self.use_alt_text = Some(use_alt_text);
+        }
+        if let Some(use_anchor_content) = other.use_anchor_content {
+            self.use_anchor_content = Some(use_anchor_content);
+        }
+        if let Some(use_aria_props_for_role) = other.use_aria_props_for_role {
+            self.use_aria_props_for_role = Some(use_aria_props_for_role);
+        }
+        if let Some(use_button_type) = other.use_button_type {
+            self.use_button_type = Some(use_button_type);
+        }
+        if let Some(use_heading_content) = other.use_heading_content {
+            self.use_heading_content = Some(use_heading_content);
+        }
+        if let Some(use_html_lang) = other.use_html_lang {
+            self.use_html_lang = Some(use_html_lang);
+        }
+        if let Some(use_iframe_title) = other.use_iframe_title {
+            self.use_iframe_title = Some(use_iframe_title);
+        }
+        if let Some(use_key_with_click_events) = other.use_key_with_click_events {
+            self.use_key_with_click_events = Some(use_key_with_click_events);
+        }
+        if let Some(use_key_with_mouse_events) = other.use_key_with_mouse_events {
+            self.use_key_with_mouse_events = Some(use_key_with_mouse_events);
+        }
+        if let Some(use_media_caption) = other.use_media_caption {
+            self.use_media_caption = Some(use_media_caption);
+        }
+        if let Some(use_valid_anchor) = other.use_valid_anchor {
+            self.use_valid_anchor = Some(use_valid_anchor);
+        }
+        if let Some(use_valid_aria_props) = other.use_valid_aria_props {
+            self.use_valid_aria_props = Some(use_valid_aria_props);
+        }
+        if let Some(use_valid_aria_values) = other.use_valid_aria_values {
+            self.use_valid_aria_values = Some(use_valid_aria_values);
+        }
+        if let Some(use_valid_lang) = other.use_valid_lang {
+            self.use_valid_lang = Some(use_valid_lang);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: A11y)
+    where
+        A11y: Default,
+    {
+        if other != A11y::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl A11y {
     const GROUP_NAME: &'static str = "a11y";
@@ -1092,6 +1261,87 @@ pub struct Complexity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_simplified_logic_expression: Option<RuleConfiguration>,
 }
+impl MergeWith<Complexity> for Complexity {
+    fn merge_with(&mut self, other: Complexity) {
+        if let Some(no_banned_types) = other.no_banned_types {
+            self.no_banned_types = Some(no_banned_types);
+        }
+        if let Some(no_excessive_cognitive_complexity) = other.no_excessive_cognitive_complexity {
+            self.no_excessive_cognitive_complexity = Some(no_excessive_cognitive_complexity);
+        }
+        if let Some(no_extra_boolean_cast) = other.no_extra_boolean_cast {
+            self.no_extra_boolean_cast = Some(no_extra_boolean_cast);
+        }
+        if let Some(no_for_each) = other.no_for_each {
+            self.no_for_each = Some(no_for_each);
+        }
+        if let Some(no_multiple_spaces_in_regular_expression_literals) =
+            other.no_multiple_spaces_in_regular_expression_literals
+        {
+            self.no_multiple_spaces_in_regular_expression_literals =
+                Some(no_multiple_spaces_in_regular_expression_literals);
+        }
+        if let Some(no_static_only_class) = other.no_static_only_class {
+            self.no_static_only_class = Some(no_static_only_class);
+        }
+        if let Some(no_useless_catch) = other.no_useless_catch {
+            self.no_useless_catch = Some(no_useless_catch);
+        }
+        if let Some(no_useless_constructor) = other.no_useless_constructor {
+            self.no_useless_constructor = Some(no_useless_constructor);
+        }
+        if let Some(no_useless_empty_export) = other.no_useless_empty_export {
+            self.no_useless_empty_export = Some(no_useless_empty_export);
+        }
+        if let Some(no_useless_fragments) = other.no_useless_fragments {
+            self.no_useless_fragments = Some(no_useless_fragments);
+        }
+        if let Some(no_useless_label) = other.no_useless_label {
+            self.no_useless_label = Some(no_useless_label);
+        }
+        if let Some(no_useless_rename) = other.no_useless_rename {
+            self.no_useless_rename = Some(no_useless_rename);
+        }
+        if let Some(no_useless_switch_case) = other.no_useless_switch_case {
+            self.no_useless_switch_case = Some(no_useless_switch_case);
+        }
+        if let Some(no_useless_this_alias) = other.no_useless_this_alias {
+            self.no_useless_this_alias = Some(no_useless_this_alias);
+        }
+        if let Some(no_useless_type_constraint) = other.no_useless_type_constraint {
+            self.no_useless_type_constraint = Some(no_useless_type_constraint);
+        }
+        if let Some(no_void) = other.no_void {
+            self.no_void = Some(no_void);
+        }
+        if let Some(no_with) = other.no_with {
+            self.no_with = Some(no_with);
+        }
+        if let Some(use_flat_map) = other.use_flat_map {
+            self.use_flat_map = Some(use_flat_map);
+        }
+        if let Some(use_literal_keys) = other.use_literal_keys {
+            self.use_literal_keys = Some(use_literal_keys);
+        }
+        if let Some(use_optional_chain) = other.use_optional_chain {
+            self.use_optional_chain = Some(use_optional_chain);
+        }
+        if let Some(use_simple_number_keys) = other.use_simple_number_keys {
+            self.use_simple_number_keys = Some(use_simple_number_keys);
+        }
+        if let Some(use_simplified_logic_expression) = other.use_simplified_logic_expression {
+            self.use_simplified_logic_expression = Some(use_simplified_logic_expression);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Complexity)
+    where
+        Complexity: Default,
+    {
+        if other != Complexity::default() {
+            self.merge_with(other);
+        }
+    }
+}
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
     pub(crate) const GROUP_RULES: [&'static str; 22] = [
@@ -1688,6 +1938,111 @@ pub struct Correctness {
     #[bpaf(long("use-yield"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_yield: Option<RuleConfiguration>,
+}
+impl MergeWith<Correctness> for Correctness {
+    fn merge_with(&mut self, other: Correctness) {
+        if let Some(no_children_prop) = other.no_children_prop {
+            self.no_children_prop = Some(no_children_prop);
+        }
+        if let Some(no_const_assign) = other.no_const_assign {
+            self.no_const_assign = Some(no_const_assign);
+        }
+        if let Some(no_constant_condition) = other.no_constant_condition {
+            self.no_constant_condition = Some(no_constant_condition);
+        }
+        if let Some(no_constructor_return) = other.no_constructor_return {
+            self.no_constructor_return = Some(no_constructor_return);
+        }
+        if let Some(no_empty_pattern) = other.no_empty_pattern {
+            self.no_empty_pattern = Some(no_empty_pattern);
+        }
+        if let Some(no_global_object_calls) = other.no_global_object_calls {
+            self.no_global_object_calls = Some(no_global_object_calls);
+        }
+        if let Some(no_inner_declarations) = other.no_inner_declarations {
+            self.no_inner_declarations = Some(no_inner_declarations);
+        }
+        if let Some(no_invalid_constructor_super) = other.no_invalid_constructor_super {
+            self.no_invalid_constructor_super = Some(no_invalid_constructor_super);
+        }
+        if let Some(no_new_symbol) = other.no_new_symbol {
+            self.no_new_symbol = Some(no_new_symbol);
+        }
+        if let Some(no_nonoctal_decimal_escape) = other.no_nonoctal_decimal_escape {
+            self.no_nonoctal_decimal_escape = Some(no_nonoctal_decimal_escape);
+        }
+        if let Some(no_precision_loss) = other.no_precision_loss {
+            self.no_precision_loss = Some(no_precision_loss);
+        }
+        if let Some(no_render_return_value) = other.no_render_return_value {
+            self.no_render_return_value = Some(no_render_return_value);
+        }
+        if let Some(no_self_assign) = other.no_self_assign {
+            self.no_self_assign = Some(no_self_assign);
+        }
+        if let Some(no_setter_return) = other.no_setter_return {
+            self.no_setter_return = Some(no_setter_return);
+        }
+        if let Some(no_string_case_mismatch) = other.no_string_case_mismatch {
+            self.no_string_case_mismatch = Some(no_string_case_mismatch);
+        }
+        if let Some(no_switch_declarations) = other.no_switch_declarations {
+            self.no_switch_declarations = Some(no_switch_declarations);
+        }
+        if let Some(no_undeclared_variables) = other.no_undeclared_variables {
+            self.no_undeclared_variables = Some(no_undeclared_variables);
+        }
+        if let Some(no_unnecessary_continue) = other.no_unnecessary_continue {
+            self.no_unnecessary_continue = Some(no_unnecessary_continue);
+        }
+        if let Some(no_unreachable) = other.no_unreachable {
+            self.no_unreachable = Some(no_unreachable);
+        }
+        if let Some(no_unreachable_super) = other.no_unreachable_super {
+            self.no_unreachable_super = Some(no_unreachable_super);
+        }
+        if let Some(no_unsafe_finally) = other.no_unsafe_finally {
+            self.no_unsafe_finally = Some(no_unsafe_finally);
+        }
+        if let Some(no_unsafe_optional_chaining) = other.no_unsafe_optional_chaining {
+            self.no_unsafe_optional_chaining = Some(no_unsafe_optional_chaining);
+        }
+        if let Some(no_unused_labels) = other.no_unused_labels {
+            self.no_unused_labels = Some(no_unused_labels);
+        }
+        if let Some(no_unused_variables) = other.no_unused_variables {
+            self.no_unused_variables = Some(no_unused_variables);
+        }
+        if let Some(no_void_elements_with_children) = other.no_void_elements_with_children {
+            self.no_void_elements_with_children = Some(no_void_elements_with_children);
+        }
+        if let Some(no_void_type_return) = other.no_void_type_return {
+            self.no_void_type_return = Some(no_void_type_return);
+        }
+        if let Some(use_exhaustive_dependencies) = other.use_exhaustive_dependencies {
+            self.use_exhaustive_dependencies = Some(use_exhaustive_dependencies);
+        }
+        if let Some(use_hook_at_top_level) = other.use_hook_at_top_level {
+            self.use_hook_at_top_level = Some(use_hook_at_top_level);
+        }
+        if let Some(use_is_nan) = other.use_is_nan {
+            self.use_is_nan = Some(use_is_nan);
+        }
+        if let Some(use_valid_for_direction) = other.use_valid_for_direction {
+            self.use_valid_for_direction = Some(use_valid_for_direction);
+        }
+        if let Some(use_yield) = other.use_yield {
+            self.use_yield = Some(use_yield);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Correctness)
+    where
+        Correctness: Default,
+    {
+        if other != Correctness::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
@@ -2302,6 +2657,10 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misrefactored_shorthand_assign: Option<RuleConfiguration>,
+    #[doc = "Disallow this and super in static contexts."]
+    #[bpaf(long("no-this-in-static"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_this_in_static: Option<RuleConfiguration>,
     #[doc = "Disallow unused imports."]
     #[bpaf(long("no-unused-imports"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2364,9 +2723,81 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_assign: Option<RuleConfiguration>,
 }
+impl MergeWith<Nursery> for Nursery {
+    fn merge_with(&mut self, other: Nursery) {
+        if let Some(no_approximative_numeric_constant) = other.no_approximative_numeric_constant {
+            self.no_approximative_numeric_constant = Some(no_approximative_numeric_constant);
+        }
+        if let Some(no_duplicate_json_keys) = other.no_duplicate_json_keys {
+            self.no_duplicate_json_keys = Some(no_duplicate_json_keys);
+        }
+        if let Some(no_empty_block_statements) = other.no_empty_block_statements {
+            self.no_empty_block_statements = Some(no_empty_block_statements);
+        }
+        if let Some(no_empty_character_class_in_regex) = other.no_empty_character_class_in_regex {
+            self.no_empty_character_class_in_regex = Some(no_empty_character_class_in_regex);
+        }
+        if let Some(no_interactive_element_to_noninteractive_role) =
+            other.no_interactive_element_to_noninteractive_role
+        {
+            self.no_interactive_element_to_noninteractive_role =
+                Some(no_interactive_element_to_noninteractive_role);
+        }
+        if let Some(no_invalid_new_builtin) = other.no_invalid_new_builtin {
+            self.no_invalid_new_builtin = Some(no_invalid_new_builtin);
+        }
+        if let Some(no_misleading_instantiator) = other.no_misleading_instantiator {
+            self.no_misleading_instantiator = Some(no_misleading_instantiator);
+        }
+        if let Some(no_misrefactored_shorthand_assign) = other.no_misrefactored_shorthand_assign {
+            self.no_misrefactored_shorthand_assign = Some(no_misrefactored_shorthand_assign);
+        }
+        if let Some(no_this_in_static) = other.no_this_in_static {
+            self.no_this_in_static = Some(no_this_in_static);
+        }
+        if let Some(no_unused_imports) = other.no_unused_imports {
+            self.no_unused_imports = Some(no_unused_imports);
+        }
+        if let Some(no_useless_else) = other.no_useless_else {
+            self.no_useless_else = Some(no_useless_else);
+        }
+        if let Some(no_useless_lone_block_statements) = other.no_useless_lone_block_statements {
+            self.no_useless_lone_block_statements = Some(no_useless_lone_block_statements);
+        }
+        if let Some(use_aria_activedescendant_with_tabindex) =
+            other.use_aria_activedescendant_with_tabindex
+        {
+            self.use_aria_activedescendant_with_tabindex =
+                Some(use_aria_activedescendant_with_tabindex);
+        }
+        if let Some(use_arrow_function) = other.use_arrow_function {
+            self.use_arrow_function = Some(use_arrow_function);
+        }
+        if let Some(use_as_const_assertion) = other.use_as_const_assertion {
+            self.use_as_const_assertion = Some(use_as_const_assertion);
+        }
+        if let Some(use_grouped_type_import) = other.use_grouped_type_import {
+            self.use_grouped_type_import = Some(use_grouped_type_import);
+        }
+        if let Some(use_import_restrictions) = other.use_import_restrictions {
+            self.use_import_restrictions = Some(use_import_restrictions);
+        }
+        if let Some(use_shorthand_assign) = other.use_shorthand_assign {
+            self.use_shorthand_assign = Some(use_shorthand_assign);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Nursery)
+    where
+        Nursery: Default,
+    {
+        if other != Nursery::default() {
+            self.merge_with(other);
+        }
+    }
+}
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 17] = [
+    pub(crate) const GROUP_RULES: [&'static str; 18] = [
         "noApproximativeNumericConstant",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
@@ -2375,6 +2806,7 @@ impl Nursery {
         "noInvalidNewBuiltin",
         "noMisleadingInstantiator",
         "noMisrefactoredShorthandAssign",
+        "noThisInStatic",
         "noUnusedImports",
         "noUselessElse",
         "noUselessLoneBlockStatements",
@@ -2400,12 +2832,12 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 17] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 18] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2423,6 +2855,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2479,49 +2912,54 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_this_in_static.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_useless_else.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_useless_else.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_as_const_assertion.as_ref() {
+        if let Some(rule) = self.use_arrow_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_as_const_assertion.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
@@ -2568,49 +3006,54 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_this_in_static.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_useless_else.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_useless_else.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_arrow_function.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_as_const_assertion.as_ref() {
+        if let Some(rule) = self.use_arrow_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_as_const_assertion.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
         index_set
@@ -2626,7 +3069,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 8] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 17] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 18] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -2659,6 +3102,7 @@ impl Nursery {
             "noInvalidNewBuiltin" => self.no_invalid_new_builtin.as_ref(),
             "noMisleadingInstantiator" => self.no_misleading_instantiator.as_ref(),
             "noMisrefactoredShorthandAssign" => self.no_misrefactored_shorthand_assign.as_ref(),
+            "noThisInStatic" => self.no_this_in_static.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUselessElse" => self.no_useless_else.as_ref(),
             "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
@@ -2700,6 +3144,24 @@ pub struct Performance {
     #[bpaf(long("no-delete"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_delete: Option<RuleConfiguration>,
+}
+impl MergeWith<Performance> for Performance {
+    fn merge_with(&mut self, other: Performance) {
+        if let Some(no_accumulating_spread) = other.no_accumulating_spread {
+            self.no_accumulating_spread = Some(no_accumulating_spread);
+        }
+        if let Some(no_delete) = other.no_delete {
+            self.no_delete = Some(no_delete);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Performance)
+    where
+        Performance: Default,
+    {
+        if other != Performance::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl Performance {
     const GROUP_NAME: &'static str = "performance";
@@ -2825,6 +3287,27 @@ pub struct Security {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dangerously_set_inner_html_with_children: Option<RuleConfiguration>,
+}
+impl MergeWith<Security> for Security {
+    fn merge_with(&mut self, other: Security) {
+        if let Some(no_dangerously_set_inner_html) = other.no_dangerously_set_inner_html {
+            self.no_dangerously_set_inner_html = Some(no_dangerously_set_inner_html);
+        }
+        if let Some(no_dangerously_set_inner_html_with_children) =
+            other.no_dangerously_set_inner_html_with_children
+        {
+            self.no_dangerously_set_inner_html_with_children =
+                Some(no_dangerously_set_inner_html_with_children);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Security)
+    where
+        Security: Default,
+    {
+        if other != Security::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl Security {
     const GROUP_NAME: &'static str = "security";
@@ -3101,6 +3584,105 @@ pub struct Style {
     #[bpaf(long("use-while"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleConfiguration>,
+}
+impl MergeWith<Style> for Style {
+    fn merge_with(&mut self, other: Style) {
+        if let Some(no_arguments) = other.no_arguments {
+            self.no_arguments = Some(no_arguments);
+        }
+        if let Some(no_comma_operator) = other.no_comma_operator {
+            self.no_comma_operator = Some(no_comma_operator);
+        }
+        if let Some(no_implicit_boolean) = other.no_implicit_boolean {
+            self.no_implicit_boolean = Some(no_implicit_boolean);
+        }
+        if let Some(no_inferrable_types) = other.no_inferrable_types {
+            self.no_inferrable_types = Some(no_inferrable_types);
+        }
+        if let Some(no_namespace) = other.no_namespace {
+            self.no_namespace = Some(no_namespace);
+        }
+        if let Some(no_negation_else) = other.no_negation_else {
+            self.no_negation_else = Some(no_negation_else);
+        }
+        if let Some(no_non_null_assertion) = other.no_non_null_assertion {
+            self.no_non_null_assertion = Some(no_non_null_assertion);
+        }
+        if let Some(no_parameter_assign) = other.no_parameter_assign {
+            self.no_parameter_assign = Some(no_parameter_assign);
+        }
+        if let Some(no_parameter_properties) = other.no_parameter_properties {
+            self.no_parameter_properties = Some(no_parameter_properties);
+        }
+        if let Some(no_restricted_globals) = other.no_restricted_globals {
+            self.no_restricted_globals = Some(no_restricted_globals);
+        }
+        if let Some(no_shouty_constants) = other.no_shouty_constants {
+            self.no_shouty_constants = Some(no_shouty_constants);
+        }
+        if let Some(no_unused_template_literal) = other.no_unused_template_literal {
+            self.no_unused_template_literal = Some(no_unused_template_literal);
+        }
+        if let Some(no_var) = other.no_var {
+            self.no_var = Some(no_var);
+        }
+        if let Some(use_block_statements) = other.use_block_statements {
+            self.use_block_statements = Some(use_block_statements);
+        }
+        if let Some(use_collapsed_else_if) = other.use_collapsed_else_if {
+            self.use_collapsed_else_if = Some(use_collapsed_else_if);
+        }
+        if let Some(use_const) = other.use_const {
+            self.use_const = Some(use_const);
+        }
+        if let Some(use_default_parameter_last) = other.use_default_parameter_last {
+            self.use_default_parameter_last = Some(use_default_parameter_last);
+        }
+        if let Some(use_enum_initializers) = other.use_enum_initializers {
+            self.use_enum_initializers = Some(use_enum_initializers);
+        }
+        if let Some(use_exponentiation_operator) = other.use_exponentiation_operator {
+            self.use_exponentiation_operator = Some(use_exponentiation_operator);
+        }
+        if let Some(use_fragment_syntax) = other.use_fragment_syntax {
+            self.use_fragment_syntax = Some(use_fragment_syntax);
+        }
+        if let Some(use_literal_enum_members) = other.use_literal_enum_members {
+            self.use_literal_enum_members = Some(use_literal_enum_members);
+        }
+        if let Some(use_naming_convention) = other.use_naming_convention {
+            self.use_naming_convention = Some(use_naming_convention);
+        }
+        if let Some(use_numeric_literals) = other.use_numeric_literals {
+            self.use_numeric_literals = Some(use_numeric_literals);
+        }
+        if let Some(use_self_closing_elements) = other.use_self_closing_elements {
+            self.use_self_closing_elements = Some(use_self_closing_elements);
+        }
+        if let Some(use_shorthand_array_type) = other.use_shorthand_array_type {
+            self.use_shorthand_array_type = Some(use_shorthand_array_type);
+        }
+        if let Some(use_single_case_statement) = other.use_single_case_statement {
+            self.use_single_case_statement = Some(use_single_case_statement);
+        }
+        if let Some(use_single_var_declarator) = other.use_single_var_declarator {
+            self.use_single_var_declarator = Some(use_single_var_declarator);
+        }
+        if let Some(use_template) = other.use_template {
+            self.use_template = Some(use_template);
+        }
+        if let Some(use_while) = other.use_while {
+            self.use_while = Some(use_while);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Style)
+    where
+        Style: Default,
+    {
+        if other != Style::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl Style {
     const GROUP_NAME: &'static str = "style";
@@ -3829,6 +4411,141 @@ pub struct Suspicious {
     #[bpaf(long("use-valid-typeof"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_typeof: Option<RuleConfiguration>,
+}
+impl MergeWith<Suspicious> for Suspicious {
+    fn merge_with(&mut self, other: Suspicious) {
+        if let Some(no_array_index_key) = other.no_array_index_key {
+            self.no_array_index_key = Some(no_array_index_key);
+        }
+        if let Some(no_assign_in_expressions) = other.no_assign_in_expressions {
+            self.no_assign_in_expressions = Some(no_assign_in_expressions);
+        }
+        if let Some(no_async_promise_executor) = other.no_async_promise_executor {
+            self.no_async_promise_executor = Some(no_async_promise_executor);
+        }
+        if let Some(no_catch_assign) = other.no_catch_assign {
+            self.no_catch_assign = Some(no_catch_assign);
+        }
+        if let Some(no_class_assign) = other.no_class_assign {
+            self.no_class_assign = Some(no_class_assign);
+        }
+        if let Some(no_comment_text) = other.no_comment_text {
+            self.no_comment_text = Some(no_comment_text);
+        }
+        if let Some(no_compare_neg_zero) = other.no_compare_neg_zero {
+            self.no_compare_neg_zero = Some(no_compare_neg_zero);
+        }
+        if let Some(no_confusing_labels) = other.no_confusing_labels {
+            self.no_confusing_labels = Some(no_confusing_labels);
+        }
+        if let Some(no_confusing_void_type) = other.no_confusing_void_type {
+            self.no_confusing_void_type = Some(no_confusing_void_type);
+        }
+        if let Some(no_console_log) = other.no_console_log {
+            self.no_console_log = Some(no_console_log);
+        }
+        if let Some(no_const_enum) = other.no_const_enum {
+            self.no_const_enum = Some(no_const_enum);
+        }
+        if let Some(no_control_characters_in_regex) = other.no_control_characters_in_regex {
+            self.no_control_characters_in_regex = Some(no_control_characters_in_regex);
+        }
+        if let Some(no_debugger) = other.no_debugger {
+            self.no_debugger = Some(no_debugger);
+        }
+        if let Some(no_double_equals) = other.no_double_equals {
+            self.no_double_equals = Some(no_double_equals);
+        }
+        if let Some(no_duplicate_case) = other.no_duplicate_case {
+            self.no_duplicate_case = Some(no_duplicate_case);
+        }
+        if let Some(no_duplicate_class_members) = other.no_duplicate_class_members {
+            self.no_duplicate_class_members = Some(no_duplicate_class_members);
+        }
+        if let Some(no_duplicate_jsx_props) = other.no_duplicate_jsx_props {
+            self.no_duplicate_jsx_props = Some(no_duplicate_jsx_props);
+        }
+        if let Some(no_duplicate_object_keys) = other.no_duplicate_object_keys {
+            self.no_duplicate_object_keys = Some(no_duplicate_object_keys);
+        }
+        if let Some(no_duplicate_parameters) = other.no_duplicate_parameters {
+            self.no_duplicate_parameters = Some(no_duplicate_parameters);
+        }
+        if let Some(no_empty_interface) = other.no_empty_interface {
+            self.no_empty_interface = Some(no_empty_interface);
+        }
+        if let Some(no_explicit_any) = other.no_explicit_any {
+            self.no_explicit_any = Some(no_explicit_any);
+        }
+        if let Some(no_extra_non_null_assertion) = other.no_extra_non_null_assertion {
+            self.no_extra_non_null_assertion = Some(no_extra_non_null_assertion);
+        }
+        if let Some(no_fallthrough_switch_clause) = other.no_fallthrough_switch_clause {
+            self.no_fallthrough_switch_clause = Some(no_fallthrough_switch_clause);
+        }
+        if let Some(no_function_assign) = other.no_function_assign {
+            self.no_function_assign = Some(no_function_assign);
+        }
+        if let Some(no_global_is_finite) = other.no_global_is_finite {
+            self.no_global_is_finite = Some(no_global_is_finite);
+        }
+        if let Some(no_global_is_nan) = other.no_global_is_nan {
+            self.no_global_is_nan = Some(no_global_is_nan);
+        }
+        if let Some(no_import_assign) = other.no_import_assign {
+            self.no_import_assign = Some(no_import_assign);
+        }
+        if let Some(no_label_var) = other.no_label_var {
+            self.no_label_var = Some(no_label_var);
+        }
+        if let Some(no_prototype_builtins) = other.no_prototype_builtins {
+            self.no_prototype_builtins = Some(no_prototype_builtins);
+        }
+        if let Some(no_redeclare) = other.no_redeclare {
+            self.no_redeclare = Some(no_redeclare);
+        }
+        if let Some(no_redundant_use_strict) = other.no_redundant_use_strict {
+            self.no_redundant_use_strict = Some(no_redundant_use_strict);
+        }
+        if let Some(no_self_compare) = other.no_self_compare {
+            self.no_self_compare = Some(no_self_compare);
+        }
+        if let Some(no_shadow_restricted_names) = other.no_shadow_restricted_names {
+            self.no_shadow_restricted_names = Some(no_shadow_restricted_names);
+        }
+        if let Some(no_sparse_array) = other.no_sparse_array {
+            self.no_sparse_array = Some(no_sparse_array);
+        }
+        if let Some(no_unsafe_declaration_merging) = other.no_unsafe_declaration_merging {
+            self.no_unsafe_declaration_merging = Some(no_unsafe_declaration_merging);
+        }
+        if let Some(no_unsafe_negation) = other.no_unsafe_negation {
+            self.no_unsafe_negation = Some(no_unsafe_negation);
+        }
+        if let Some(use_default_switch_clause_last) = other.use_default_switch_clause_last {
+            self.use_default_switch_clause_last = Some(use_default_switch_clause_last);
+        }
+        if let Some(use_getter_return) = other.use_getter_return {
+            self.use_getter_return = Some(use_getter_return);
+        }
+        if let Some(use_is_array) = other.use_is_array {
+            self.use_is_array = Some(use_is_array);
+        }
+        if let Some(use_namespace_keyword) = other.use_namespace_keyword {
+            self.use_namespace_keyword = Some(use_namespace_keyword);
+        }
+        if let Some(use_valid_typeof) = other.use_valid_typeof {
+            self.use_valid_typeof = Some(use_valid_typeof);
+        }
+    }
+    fn merge_with_if_not_default(&mut self, other: Suspicious)
+    where
+        Suspicious: Default,
+    {
+        if other != Suspicious::default() {
+            self.merge_with(other);
+        }
+    }
 }
 impl Suspicious {
     const GROUP_NAME: &'static str = "suspicious";
