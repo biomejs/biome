@@ -389,27 +389,8 @@ function f() {\n\targuments;\n}
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test1)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, expected);
-    drop(file);
-
-    content.clear();
-
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
-
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
+    assert_file_contents(&fs, test1, expected);
+    assert_file_contents(&fs, test2, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

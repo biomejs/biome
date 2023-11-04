@@ -5,7 +5,7 @@ use crate::{
     UNFORMATTED,
 };
 use biome_console::{BufferConsole, MarkupBuf};
-use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
 use std::path::{Path, PathBuf};
@@ -680,6 +680,14 @@ import A from "a.js"
 something( )
     "#;
 
+    let expect = r#"
+import { B, C } from "b.js"
+import A from "a.js"
+
+
+something( )
+    "#;
+
     let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), rome_json.as_bytes());
 
@@ -694,15 +702,8 @@ something( )
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("ci target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, expect);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_formatter_linter_organize_imports",
