@@ -112,7 +112,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@39..41 "::" [] [],
-                                element: CssPseudoElementFunction {
+                                element: CssPseudoElementFunctionSelector {
                                     name: CssIdentifier {
                                         value_token: IDENT@41..44 "cue" [] [],
                                     },
@@ -158,10 +158,10 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@54..57 "::" [Newline("\n")] [],
-                                element: CssPseudoElementHighlight {
-                                    name_token: HIGHLIGHT_KW@57..66 "highlight" [] [],
+                                element: CssPseudoElementFunctionIdentifier {
+                                    name: HIGHLIGHT_KW@57..66 "highlight" [] [],
                                     l_paren_token: L_PAREN@66..67 "(" [] [],
-                                    custom_highlight_name: CssIdentifier {
+                                    ident: CssIdentifier {
                                         value_token: IDENT@67..73 "sample" [] [],
                                     },
                                     r_paren_token: R_PAREN@73..74 ")" [] [],
@@ -196,8 +196,8 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@81..84 "::" [Newline("\n")] [],
-                                element: CssPseudoElementPart {
-                                    name_token: PART_KW@84..88 "part" [] [],
+                                element: CssPseudoElementFunctionIdentifier {
+                                    name: PART_KW@84..88 "part" [] [],
                                     l_paren_token: L_PAREN@88..89 "(" [] [],
                                     ident: CssIdentifier {
                                         value_token: IDENT@89..95 "active" [] [],
@@ -233,7 +233,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@103..106 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@106..109 "cue" [] [],
                                 },
@@ -255,8 +255,8 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssPseudoElementSelector {
                                                 double_colon_token: COLON2@112..114 "::" [] [],
-                                                element: CssPseudoElementPart {
-                                                    name_token: PART_KW@114..118 "part" [] [],
+                                                element: CssPseudoElementFunctionIdentifier {
+                                                    name: PART_KW@114..118 "part" [] [],
                                                     l_paren_token: L_PAREN@118..119 "(" [] [],
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@119..125 "active" [] [],
@@ -350,7 +350,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@39..47
               0: CSS_PSEUDO_ELEMENT_SELECTOR@39..47
                 0: COLON2@39..41 "::" [] []
-                1: CSS_PSEUDO_ELEMENT_FUNCTION@41..47
+                1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@41..47
                   0: CSS_IDENTIFIER@41..44
                     0: IDENT@41..44 "cue" [] []
                   1: L_PAREN@44..45 "(" [] []
@@ -381,7 +381,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@54..74
               0: CSS_PSEUDO_ELEMENT_SELECTOR@54..74
                 0: COLON2@54..57 "::" [Newline("\n")] []
-                1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@57..74
+                1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@57..74
                   0: HIGHLIGHT_KW@57..66 "highlight" [] []
                   1: L_PAREN@66..67 "(" [] []
                   2: CSS_IDENTIFIER@67..73
@@ -407,7 +407,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@81..96
               0: CSS_PSEUDO_ELEMENT_SELECTOR@81..96
                 0: COLON2@81..84 "::" [Newline("\n")] []
-                1: CSS_PSEUDO_ELEMENT_PART@84..96
+                1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@84..96
                   0: PART_KW@84..88 "part" [] []
                   1: L_PAREN@88..89 "(" [] []
                   2: CSS_IDENTIFIER@89..95
@@ -432,7 +432,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@103..128
             0: CSS_PSEUDO_ELEMENT_SELECTOR@103..128
               0: COLON2@103..106 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@106..128
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@106..128
                 0: CSS_IDENTIFIER@106..109
                   0: IDENT@106..109 "cue" [] []
                 1: L_PAREN@109..110 "(" [] []
@@ -450,7 +450,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@112..126
                       0: CSS_PSEUDO_ELEMENT_SELECTOR@112..126
                         0: COLON2@112..114 "::" [] []
-                        1: CSS_PSEUDO_ELEMENT_PART@114..126
+                        1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@114..126
                           0: PART_KW@114..118 "part" [] []
                           1: L_PAREN@118..119 "(" [] []
                           2: CSS_IDENTIFIER@119..125

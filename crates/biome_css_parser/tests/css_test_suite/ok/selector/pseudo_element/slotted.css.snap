@@ -28,7 +28,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@2..9 "slotted" [] [],
                                 },
@@ -60,7 +60,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@15..18 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@18..25 "slotted" [] [],
                                 },
@@ -94,7 +94,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@34..37 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@37..44 "slotted" [] [],
                                 },
@@ -128,7 +128,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@59..62 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@62..69 "SLOTTED" [] [],
                                 },
@@ -172,7 +172,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..13
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..13
               0: COLON2@0..2 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@2..13
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@2..13
                 0: CSS_IDENTIFIER@2..9
                   0: IDENT@2..9 "slotted" [] []
                 1: L_PAREN@9..10 "(" [] []
@@ -194,7 +194,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@15..32
             0: CSS_PSEUDO_ELEMENT_SELECTOR@15..32
               0: COLON2@15..18 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@18..32
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@18..32
                 0: CSS_IDENTIFIER@18..25
                   0: IDENT@18..25 "slotted" [] []
                 1: L_PAREN@25..26 "(" [] []
@@ -217,7 +217,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@34..57
             0: CSS_PSEUDO_ELEMENT_SELECTOR@34..57
               0: COLON2@34..37 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@37..57
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@37..57
                 0: CSS_IDENTIFIER@37..44
                   0: IDENT@37..44 "slotted" [] []
                 1: L_PAREN@44..48 "(" [] [Whitespace("   ")]
@@ -240,7 +240,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@59..76
             0: CSS_PSEUDO_ELEMENT_SELECTOR@59..76
               0: COLON2@59..62 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@62..76
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@62..76
                 0: CSS_IDENTIFIER@62..69
                   0: IDENT@62..69 "SLOTTED" [] []
                 1: L_PAREN@69..70 "(" [] []
