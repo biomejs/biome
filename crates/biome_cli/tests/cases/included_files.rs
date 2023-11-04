@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use biome_service::DynRef;
@@ -53,29 +53,9 @@ fn does_handle_only_included_files() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, UNFORMATTED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FORMATTED);
-
-    drop(file);
+    assert_file_contents(&fs, test, FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -122,29 +102,9 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, FORMATTED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FORMATTED);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED);
-
-    drop(file);
+    assert_file_contents(&fs, test, UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -180,17 +140,7 @@ fn does_handle_if_included_in_formatter() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FORMATTED);
-
-    drop(file);
+    assert_file_contents(&fs, test, FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -237,29 +187,9 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, FORMATTED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FORMATTED);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED);
-
-    drop(file);
+    assert_file_contents(&fs, test, UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -355,29 +285,9 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, FIX_AFTER);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FIX_AFTER);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FIX_BEFORE);
-
-    drop(file);
+    assert_file_contents(&fs, test, FIX_BEFORE);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -426,29 +336,9 @@ fn does_organize_imports_of_included_files() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, UNORGANIZED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNORGANIZED);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, ORGANIZED);
-
-    drop(file);
+    assert_file_contents(&fs, test, ORGANIZED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -497,29 +387,9 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, test2, ORGANIZED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, ORGANIZED);
-
-    drop(file);
-
-    let mut file = fs
-        .open(test)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNORGANIZED);
-
-    drop(file);
+    assert_file_contents(&fs, test, UNORGANIZED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

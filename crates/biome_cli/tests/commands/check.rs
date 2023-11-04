@@ -14,7 +14,7 @@ use crate::configs::{
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
-use crate::snap_test::{markup_to_string, SnapshotPayload};
+use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{assert_cli_snapshot, run_cli, FORMATTED, LINT_ERROR, PARSE_ERROR};
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
@@ -389,27 +389,8 @@ function f() {\n\targuments;\n}
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test1)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, expected);
-    drop(file);
-
-    content.clear();
-
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
-
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
+    assert_file_contents(&fs, test1, expected);
+    assert_file_contents(&fs, test2, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1561,17 +1542,7 @@ import * as something from "../something";
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, expected);
-
-    drop(file);
+    assert_file_contents(&fs, file_path, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1601,17 +1572,7 @@ import * as something from "../something";
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, content);
-
-    drop(file);
+    assert_file_contents(&fs, file_path, content);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1631,6 +1592,9 @@ fn should_organize_imports_diff_on_check() {
     let content = r#"import { lorem, foom, bar } from "foo";
 import * as something from "../something";
 "#;
+    let expected = r#"import { bar, foom, lorem } from "foo";
+import * as something from "../something";
+"#;
     fs.insert(file_path.into(), content.as_bytes());
 
     let result = run_cli(
@@ -1648,17 +1612,7 @@ import * as something from "../something";
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, content);
-
-    drop(file);
+    assert_file_contents(&fs, file_path, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1700,17 +1654,7 @@ import * as something from "../something";
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, content);
-
-    drop(file);
+    assert_file_contents(&fs, file_path, content);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1754,17 +1698,7 @@ import * as something from "../something";
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, expected);
-
-    drop(file);
+    assert_file_contents(&fs, file_path, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2044,30 +1978,8 @@ ignored/
         ),
     );
 
-    let mut file = fs
-        .open(file_path1)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, code1);
-    drop(file);
-
-    let mut file = fs
-        .open(file_path2)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, code2);
-
-    drop(file);
-
-    content.clear();
+    assert_file_contents(&fs, file_path1, code1);
+    assert_file_contents(&fs, file_path2, code2);
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 

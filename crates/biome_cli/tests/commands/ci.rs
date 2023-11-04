@@ -1,11 +1,11 @@
 use crate::configs::{CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED};
-use crate::snap_test::SnapshotPayload;
+use crate::snap_test::{assert_file_contents, SnapshotPayload};
 use crate::{
     assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR,
     UNFORMATTED,
 };
 use biome_console::{BufferConsole, MarkupBuf};
-use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
 use std::path::{Path, PathBuf};
@@ -66,21 +66,11 @@ fn ok() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, FORMATTED);
+    assert_file_contents(&fs, file_path, FORMATTED);
 
     if console.out_buffer.len() != 1 {
         panic!("unexpected console content: {:#?}", console.out_buffer);
     }
-
-    drop(file);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -187,17 +177,8 @@ fn ci_does_not_run_formatter() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(input_file)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, input_file, UNFORMATTED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_run_formatter",
@@ -230,17 +211,8 @@ fn ci_does_not_run_formatter_via_cli() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(input_file)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, input_file, UNFORMATTED);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_run_formatter_via_cli",
@@ -271,17 +243,8 @@ fn ci_does_not_run_linter() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, CUSTOM_FORMAT_BEFORE);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, CUSTOM_FORMAT_BEFORE);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_run_linter",
@@ -314,17 +277,8 @@ fn ci_does_not_run_linter_via_cli() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, UNFORMATTED_AND_INCORRECT);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED_AND_INCORRECT);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_run_linter_via_cli",
@@ -361,17 +315,8 @@ import * as something from "../something";
 
     // assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, content);
 
-    let mut received = String::new();
-    file.read_to_string(&mut received)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(received, content);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_does_not_organize_imports_via_cli",
@@ -409,17 +354,8 @@ fn ci_errors_for_all_disabled_checks() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("formatting target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, UNFORMATTED_AND_INCORRECT);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, UNFORMATTED_AND_INCORRECT);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_errors_for_all_disabled_checks",
@@ -567,15 +503,6 @@ fn ci_runs_linter_not_formatter_issue_3495() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("ci target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_runs_linter_not_formatter_issue_3495",
@@ -753,6 +680,14 @@ import A from "a.js"
 something( )
     "#;
 
+    let expect = r#"
+import { B, C } from "b.js"
+import A from "a.js"
+
+
+something( )
+    "#;
+
     let file_path = Path::new("biome.json");
     fs.insert(file_path.into(), rome_json.as_bytes());
 
@@ -767,15 +702,8 @@ something( )
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(file_path)
-        .expect("ci target file was removed by the CLI");
+    assert_file_contents(&fs, file_path, expect);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_formatter_linter_organize_imports",
