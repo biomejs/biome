@@ -131,6 +131,9 @@ invalidTopLevelVariable.ts:15:14 lint/style/useNamingConvention ━━━━━�
   > 15 │ export const fooYPosition = 0;
        │              ^^^^^^^^^^^^
   
+  i If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strict` option to `false`.
+     Check rule options for more inforamtion.
+  
 
 ```
 

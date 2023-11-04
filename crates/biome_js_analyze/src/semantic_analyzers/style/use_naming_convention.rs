@@ -354,7 +354,9 @@ impl Rule for UseNamingConvention {
                     markup! {
                         "If `strict` is `true`, then two consecutive uppercase characters are not allowed in camelCase and PascalCase."
                     },
-                ));
+                ).note(markup! {
+                    "If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strict` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-naming-convention#options">"options"</Hyperlink>" for more inforamtion."
+                }));
             }
         }
 
