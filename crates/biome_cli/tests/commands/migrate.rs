@@ -1,7 +1,7 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
-use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
@@ -46,15 +46,8 @@ fn migrate_config_up_to_date() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut file = fs.open(configuration_path).expect("file to open");
+    assert_file_contents(&fs, configuration_path, configuration);
 
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, configuration);
-
-    drop(file);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_config_up_to_date",

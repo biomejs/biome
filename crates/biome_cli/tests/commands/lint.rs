@@ -14,7 +14,7 @@ use crate::configs::{
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
-use crate::snap_test::{markup_to_string, SnapshotPayload};
+use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{assert_cli_snapshot, run_cli, FORMATTED, LINT_ERROR, PARSE_ERROR};
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
@@ -384,27 +384,8 @@ function f() { arguments; }
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let mut file = fs
-        .open(test1)
-        .expect("formatting target file was removed by the CLI");
-
-    let mut content = String::new();
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    assert_eq!(content, expected);
-    drop(file);
-
-    content.clear();
-
-    let mut file = fs
-        .open(test2)
-        .expect("formatting target file was removed by the CLI");
-
-    file.read_to_string(&mut content)
-        .expect("failed to read file from memory FS");
-
-    drop(file);
+    assert_file_contents(&fs, test1, expected);
+    assert_file_contents(&fs, test2, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

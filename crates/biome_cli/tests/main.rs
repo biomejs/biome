@@ -291,9 +291,8 @@ mod configuration {
 
 mod reporter_json {
     use super::*;
-    use crate::snap_test::SnapshotPayload;
+    use crate::snap_test::{assert_file_contents, SnapshotPayload};
     use crate::UNFORMATTED;
-    use biome_fs::FileSystemExt;
     use bpaf::Args;
 
     #[test]
@@ -321,19 +320,8 @@ mod reporter_json {
 
         assert!(result.is_ok(), "run_cli returned {result:?}");
 
-        let mut file = fs
-            .open(file_path)
-            .expect("formatting target file was removed by the CLI");
+        assert_file_contents(&fs, file_path, UNFORMATTED);
 
-        let mut content = String::new();
-        file.read_to_string(&mut content)
-            .expect("failed to read file from memory FS");
-
-        assert_eq!(content, UNFORMATTED);
-
-        assert_eq!(console.out_buffer.len(), 1);
-
-        drop(file);
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
             "reports_formatter_check_mode",
@@ -367,19 +355,9 @@ mod reporter_json {
 
         assert!(result.is_ok(), "run_cli returned {result:?}");
 
-        let mut file = fs
-            .open(file_path)
-            .expect("formatting target file was removed by the CLI");
-
-        let mut content = String::new();
-        file.read_to_string(&mut content)
-            .expect("failed to read file from memory FS");
-
-        assert_eq!(content, FORMATTED);
+        assert_file_contents(&fs, file_path, FORMATTED);
 
         assert_eq!(console.out_buffer.len(), 1);
-
-        drop(file);
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
