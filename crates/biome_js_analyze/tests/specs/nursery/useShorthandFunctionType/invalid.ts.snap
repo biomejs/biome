@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+interface Example {
+ (): string;
+}
+
+function foo(example: { (): number }): number {
+ return example();
+}
+```
+
+# Diagnostics
+```
+invalid.ts:2:2 lint/nursery/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a function type instead of a call signature.
+  
+    1 │ interface Example {
+  > 2 │  (): string;
+      │  ^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+    1   │ - interface·Example·{
+    2   │ - ·():·string;
+    3   │ - }
+      1 │ + type·Example·=·()·=>·string
+    4 2 │   
+    5 3 │   function foo(example: { (): number }): number {
+  
+
+```
+
+```
+invalid.ts:5:25 lint/nursery/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a function type instead of a call signature.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function foo(example: { (): number }): number {
+      │                         ^^^^^^^^^^
+    6 │  return example();
+    7 │ }
+  
+  i Types containing only a call signature can be shortened to a function type.
+  
+  i Safe fix: Convert object type to type alias.
+  
+    3 3 │   }
+    4 4 │   
+    5   │ - function·foo(example:·{·():·number·}):·number·{
+      5 │ + function·foo(example:·()·=>·number):·number·{
+    6 6 │    return example();
+    7 7 │   }
+  
+
+```
+
+

@@ -2722,6 +2722,15 @@ pub struct Nursery {
     #[bpaf(long("use-shorthand-assign"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_assign: Option<RuleConfiguration>,
+    #[doc = "Enforce using function types instead of object type with call signatures."]
+    #[bpaf(
+        long("use-shorthand-function-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_shorthand_function_type: Option<RuleConfiguration>,
 }
 impl MergeWith<Nursery> for Nursery {
     fn merge_with(&mut self, other: Nursery) {
@@ -2785,6 +2794,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_shorthand_assign) = other.use_shorthand_assign {
             self.use_shorthand_assign = Some(use_shorthand_assign);
         }
+        if let Some(use_shorthand_function_type) = other.use_shorthand_function_type {
+            self.use_shorthand_function_type = Some(use_shorthand_function_type);
+        }
     }
     fn merge_with_if_not_default(&mut self, other: Nursery)
     where
@@ -2797,7 +2809,7 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 18] = [
+    pub(crate) const GROUP_RULES: [&'static str; 19] = [
         "noApproximativeNumericConstant",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
@@ -2816,6 +2828,7 @@ impl Nursery {
         "useGroupedTypeImport",
         "useImportRestrictions",
         "useShorthandAssign",
+        "useShorthandFunctionType",
     ];
     const RECOMMENDED_RULES: [&'static str; 8] = [
         "noDuplicateJsonKeys",
@@ -2837,7 +2850,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 18] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 19] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2856,6 +2869,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2962,6 +2976,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3056,6 +3075,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -3069,7 +3093,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 8] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 18] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 19] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3114,6 +3138,7 @@ impl Nursery {
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
             "useShorthandAssign" => self.use_shorthand_assign.as_ref(),
+            "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
             _ => None,
         }
     }

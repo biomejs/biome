@@ -808,6 +808,10 @@ export interface Nursery {
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration;
+	/**
+	 * Enforce using function types instead of object type with call signatures.
+	 */
+	useShorthandFunctionType?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1451,6 +1455,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useShorthandAssign"
+	| "lint/nursery/useShorthandFunctionType"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"

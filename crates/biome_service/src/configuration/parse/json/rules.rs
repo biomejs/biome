@@ -904,6 +904,15 @@ impl VisitNode<JsonLanguage> for Nursery {
                 configuration.map_rule_configuration(&value, "useShorthandAssign", diagnostics)?;
                 self.use_shorthand_assign = Some(configuration);
             }
+            "useShorthandFunctionType" => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(
+                    &value,
+                    "useShorthandFunctionType",
+                    diagnostics,
+                )?;
+                self.use_shorthand_function_type = Some(configuration);
+            }
             _ => {
                 report_unknown_map_key(
                     &name,
@@ -928,6 +937,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                         "useGroupedTypeImport",
                         "useImportRestrictions",
                         "useShorthandAssign",
+                        "useShorthandFunctionType",
                     ],
                     diagnostics,
                 );

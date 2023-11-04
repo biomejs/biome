@@ -1159,6 +1159,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useShorthandFunctionType": {
+					"description": "Enforce using function types instead of object type with call signatures.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			}
 		},

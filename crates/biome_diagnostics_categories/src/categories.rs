@@ -111,6 +111,7 @@ define_categories! {
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useShorthandAssign": "https://biomejs.dev/lint/rules/use-shorthand-assign",
+    "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/lint/rules/use-shorthand-function-type",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
