@@ -266,7 +266,7 @@ diagnostic in the resulting documentation page.
 For simplicity, use `just` to run all the commands with:
 
 ```shell
-just codegen-linter
+just gen-lint
 ```
 
 This command runs several sub-commands:
