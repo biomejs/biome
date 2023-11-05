@@ -3,10 +3,7 @@ import path from "node:path";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import vercel from "@astrojs/vercel/static";
-import type { AstroIntegration } from "astro";
-import compress from "astro-compress";
 import { defineConfig } from "astro/config";
-import { globby } from "globby";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
@@ -103,44 +100,6 @@ async function inline({
 	);
 }
 
-function inlineIntegration(): AstroIntegration {
-	return {
-		name: "inline",
-		hooks: {
-			"astro:build:done": async ({ dir }) => {
-				const paths = await globby(`${dir}/**/*.html`);
-				const files: Files = new Map();
-
-				await Promise.all(
-					paths.map(async (path) => {
-						files.set(path, await fs.readFile(path, "utf8"));
-					}),
-				);
-
-				await inline({
-					files,
-					root: dir.pathname,
-					replacements: [
-						{
-							regex: /<script type="module" src="(.*?)"><\/script>/g,
-							tagBefore: '<script async defer type="module">',
-							tagAfter: "</script>",
-						},
-						{
-							regex: /<link rel="stylesheet" href="(.*?)"\s*\/?>/g,
-							tagBefore: "<style>",
-							tagAfter: "</style>",
-						},
-					],
-				});
-
-				for (const [path, content] of files) {
-					await fs.writeFile(path, content);
-				}
-			},
-		},
-	};
-}
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -152,11 +111,6 @@ export default defineConfig({
 
 	integrations: [
 		react(),
-		inlineIntegration(),
-		compress({
-			path: "./build",
-			HTML: false,
-		}),
 		starlight({
 			title: "",
 			sidebar: [
