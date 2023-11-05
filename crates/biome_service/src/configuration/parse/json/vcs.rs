@@ -1,81 +1,92 @@
 use crate::configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonStringValue};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::TokenText;
 
-impl VcsConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] =
-        &["clientKind", "enabled", "useIgnoreFile", "root"];
+impl Deserializable for VcsConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(VcsConfigurationVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for VcsConfiguration {
+struct VcsConfigurationVisitor;
+impl DeserializationVisitor for VcsConfigurationVisitor {
+    type Output = VcsConfiguration;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "clientKind" => {
-                let mut client_kind = VcsClientKind::default();
-                client_kind.map_to_known_string(&value, name_text, diagnostics)?;
-                self.client_kind = Some(client_kind);
-            }
-            "enabled" => {
-                self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "useIgnoreFile" => {
-                self.use_ignore_file = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "root" => {
-                self.root = self.map_to_string(&value, name_text, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["clientKind", "enabled", "useIgnoreFile", "root"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            let key = key.text();
+            match key {
+                "clientKind" => {
+                    result.client_kind = Some(Deserializable::deserialize(value, diagnostics)?);
+                }
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                "useIgnoreFile" => {
+                    result.use_ignore_file = Deserializable::deserialize(value, diagnostics);
+                }
+                "root" => {
+                    result.root = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key,
+                        range,
+                        ALLOWED_KEYS,
+                    ));
+                }
             }
         }
-        Some(())
+        if result.client_kind.is_none() && !result.is_disabled() {
+            diagnostics.push(
+                DeserializationDiagnostic::new(markup! {
+                    "You enabled the VCS integration, but you didn't specify a client."
+                })
+                .with_range(range)
+                .with_note("Biome will disable the VCS integration until the issue is fixed."),
+            );
+            result.enabled = Some(false);
+        }
+        Some(result)
     }
 }
 
-impl VcsClientKind {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["git"];
-}
-
-impl VisitNode<JsonLanguage> for VcsClientKind {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for VcsClientKind {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        if node.inner_string_text().ok()?.text() == "git" {
-            *self = VcsClientKind::Git;
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["git"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        if let Ok(value) = value.text().parse::<Self>() {
+            Some(value)
         } else {
-            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
+            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                value.text(),
+                range,
+                ALLOWED_VARIANTS,
+            ));
+            None
         }
-        Some(())
-    }
-}
-
-pub(crate) fn validate_vcs_configuration(
-    node: &AnyJsonValue,
-    configuration: &mut VcsConfiguration,
-    diagnostics: &mut Vec<DeserializationDiagnostic>,
-) {
-    if configuration.client_kind.is_none() && !configuration.is_disabled() {
-        diagnostics.push(
-            DeserializationDiagnostic::new(markup! {
-                "You enabled the VCS integration, but you didn't specify a client."
-            })
-            .with_range(node.range())
-            .with_note("Biome will disable the VCS integration until the issue is fixed."),
-        );
-        configuration.enabled = Some(false);
     }
 }

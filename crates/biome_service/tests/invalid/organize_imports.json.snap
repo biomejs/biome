@@ -4,7 +4,7 @@ expression: organize_imports.json
 ---
 organize_imports.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key enabled is incorrect. Expected a boolean.
+  × Incorrect type, expected a boolean.
   
     1 │ {
     2 │ 	"organizeImports": {

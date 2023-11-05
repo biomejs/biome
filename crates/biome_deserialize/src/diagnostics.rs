@@ -5,7 +5,46 @@ use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticTags, LogCategory, MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::{SyntaxError, TextRange};
+use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
+
+bitflags! {
+    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+    pub struct ExpectedType: u8 {
+        const NULL = 1 << 0;
+        const BOOL = 1 << 1;
+        const NUMBER = 1 << 2;
+        const STR = 1 << 3;
+        const ARRAY = 1 << 4;
+        const MAP = 1 << 5;
+    }
+}
+
+impl Display for ExpectedType {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        if self.is_empty() {
+            return write!(fmt, "no value");
+        }
+        let mut is_not_first = false;
+        for expected_type in self.iter() {
+            if is_not_first {
+                write!(fmt, " or ")?;
+            }
+            let expected_type = match expected_type {
+                ExpectedType::NULL => "null",
+                ExpectedType::BOOL => "a boolean",
+                ExpectedType::NUMBER => "a number",
+                ExpectedType::STR => "a string",
+                ExpectedType::ARRAY => "an array",
+                ExpectedType::MAP => "an object",
+                _ => unreachable!("Unhandled deserialization type."),
+            };
+            write!(fmt, "{}", expected_type)?;
+            is_not_first = true;
+        }
+        Ok(())
+    }
+}
 
 /// Diagnostic emitted during the deserialization
 #[derive(Debug, Serialize, Clone, Deserialize, Diagnostic)]
@@ -35,21 +74,22 @@ impl DeserializationDiagnostic {
         }
     }
 
-    /// Emitted when the type of a value is incorrect.
-    pub fn new_incorrect_type_for_value(
-        key_name: impl Display,
-        expected_type: impl Display,
-        range: impl AsSpan,
-    ) -> Self {
+    /// Emitted when a generic node has an incorrect type
+    pub fn new_incorrect_type(expected_type: ExpectedType, range: impl AsSpan) -> Self {
         Self::new(markup! {
-                "The value of key "<Emphasis>{{key_name}}</Emphasis>" is incorrect. Expected a "<Emphasis>{{expected_type}}"."</Emphasis>
-            }).with_range(range)
+            "Incorrect type, expected "<Emphasis>{expected_type}"."</Emphasis>
+        })
+        .with_range(range)
     }
 
     /// Emitted when a generic node has an incorrect type
-    pub fn new_incorrect_type(expected_type: impl Display, range: impl AsSpan) -> Self {
+    pub fn new_out_of_bound_integer(
+        min: impl Display,
+        max: impl Display,
+        range: impl AsSpan,
+    ) -> Self {
         Self::new(markup! {
-            "Incorrect type, expected a "<Emphasis>{{expected_type}}"."</Emphasis>
+            "The number should be an integer between "<Emphasis>{min}</Emphasis>" and "<Emphasis>{max}</Emphasis>"."
         })
         .with_range(range)
     }

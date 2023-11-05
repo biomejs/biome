@@ -4,18 +4,17 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    json::{report_unknown_map_key, VisitJsonNode},
-    DeserializationDiagnostic, VisitNode,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
 };
 use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator,
 };
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{num::NonZeroU8, str::FromStr};
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -93,7 +92,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let calculated_score = ctx.query().score.calculated_score;
-        (calculated_score > ctx.options().max_allowed_complexity).then_some(())
+        (calculated_score > ctx.options().max_allowed_complexity.get()).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -378,13 +377,13 @@ pub struct ComplexityScore {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ComplexityOptions {
     /// The maximum complexity score that we allow. Anything higher is considered excessive.
-    pub max_allowed_complexity: u8,
+    pub max_allowed_complexity: NonZeroU8,
 }
 
 impl Default for ComplexityOptions {
     fn default() -> Self {
         Self {
-            max_allowed_complexity: 15,
+            max_allowed_complexity: NonZeroU8::new(15).unwrap(),
         }
     }
 }
@@ -398,41 +397,47 @@ impl FromStr for ComplexityOptions {
     }
 }
 
-impl ComplexityOptions {
-    const ALLOWED_KEYS: &'static [&'static str] = &["maxAllowedComplexity"];
+impl Deserializable for ComplexityOptions {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(ComplexityOptionsVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for ComplexityOptions {
+struct ComplexityOptionsVisitor;
+impl DeserializationVisitor for ComplexityOptionsVisitor {
+    type Output = ComplexityOptions;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "maxAllowedComplexity" {
-            if let Some(value) = value
-                .as_json_number_value()
-                .and_then(|number_value| u8::from_str(&number_value.text()).ok())
-                // Don't allow 0 or no code would pass.
-                // And don't allow MAX_SCORE or we can't detect exceeding it.
-                .filter(|&number| number > 0 && number < MAX_SCORE)
-            {
-                self.max_allowed_complexity = value;
-            } else {
-                diagnostics.push(
-                    DeserializationDiagnostic::new(markup! {
-                        "The field "<Emphasis>"maxAllowedComplexity"</Emphasis>
-                        " must contain an integer between 1 and "{MAX_SCORE - 1}
-                    })
-                    .with_range(value.range()),
-                );
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["maxAllowedComplexity"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "maxAllowedComplexity" => {
+                    if let Some(val) = Deserializable::deserialize(value, diagnostics) {
+                        result.max_allowed_complexity = val;
+                    }
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
             }
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
-        Some(())
+        Some(result)
     }
 }

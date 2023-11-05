@@ -1,89 +1,134 @@
 mod formatter;
 
 use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptParser};
-use crate::configuration::{JavascriptConfiguration, JavascriptFormatter};
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use biome_rowan::SyntaxNode;
+use crate::configuration::JavascriptConfiguration;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::TokenText;
 
-impl JavascriptConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] =
-        &["formatter", "globals", "organizeImports", "parser"];
-}
-
-impl VisitNode<JsonLanguage> for JavascriptConfiguration {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for JavascriptConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "formatter" => {
-                let mut javascript_formatter = JavascriptFormatter::default();
-                javascript_formatter.map_to_object(&value, name_text, diagnostics)?;
-                self.formatter = Some(javascript_formatter);
-            }
-            "parser" => {
-                let mut parser = JavascriptParser::default();
-                parser.map_to_object(&value, name_text, diagnostics)?;
-                self.parser = Some(parser);
-            }
-            "globals" => {
-                self.globals = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "organizeImports" => {
-                let mut javascript_organize_imports = JavascriptOrganizeImports::default();
-                javascript_organize_imports.map_to_object(&value, name_text, diagnostics)?;
-                self.organize_imports = Some(javascript_organize_imports);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-
-        Some(())
+    ) -> Option<Self> {
+        value.deserialize(JavascriptConfigurationVisitor, diagnostics)
     }
 }
 
-impl VisitNode<JsonLanguage> for JavascriptOrganizeImports {
+struct JavascriptConfigurationVisitor;
+impl DeserializationVisitor for JavascriptConfigurationVisitor {
+    type Output = JavascriptConfiguration;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        _key: &JsonSyntaxNode,
-        _value: &JsonSyntaxNode,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["formatter", "globals", "organizeImports", "parser"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "formatter" => {
+                    result.formatter = Deserializable::deserialize(value, diagnostics);
+                }
+                "parser" => {
+                    result.parser = Deserializable::deserialize(value, diagnostics);
+                }
+                "globals" => {
+                    result.globals = Deserializable::deserialize(value, diagnostics);
+                }
+                "organizeImports" => {
+                    result.organize_imports = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key.text(),
+                        key_range,
+                        ALLOWED_KEYS,
+                    ));
+                }
+            }
+        }
+        Some(result)
+    }
+}
+
+impl Deserializable for JavascriptOrganizeImports {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(JavascriptOrganizeImportsVisitor, diagnostics)
+    }
+}
+
+struct JavascriptOrganizeImportsVisitor;
+impl DeserializationVisitor for JavascriptOrganizeImportsVisitor {
+    type Output = JavascriptOrganizeImports;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        _members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
         _diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        Some(())
+    ) -> Option<Self::Output> {
+        Some(Self::Output::default())
     }
 }
 
-impl JavascriptParser {
-    const ALLOWED_KEYS: &'static [&'static str] = &["unsafeParameterDecoratorsEnabled"];
+impl Deserializable for JavascriptParser {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(JavascriptParserVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for JavascriptParser {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "unsafeParameterDecoratorsEnabled" {
-            self.unsafe_parameter_decorators_enabled =
-                self.map_to_boolean(&value, name_text, diagnostics);
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-        }
+struct JavascriptParserVisitor;
+impl DeserializationVisitor for JavascriptParserVisitor {
+    type Output = JavascriptParser;
 
-        Some(())
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["unsafeParameterDecoratorsEnabled"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "unsafeParameterDecoratorsEnabled" => {
+                    result.unsafe_parameter_decorators_enabled =
+                        Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key.text(),
+                        key_range,
+                        ALLOWED_KEYS,
+                    ));
+                }
+            }
+        }
+        Some(result)
     }
 }

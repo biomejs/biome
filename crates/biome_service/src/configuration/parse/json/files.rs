@@ -1,48 +1,58 @@
 use crate::configuration::FilesConfiguration;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
-use std::num::NonZeroU64;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::{TextRange, TokenText};
 
-impl FilesConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] =
-        &["maxSize", "ignore", "include", "ignoreUnknown"];
+impl Deserializable for FilesConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(FilesConfigurationVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for FilesConfiguration {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "maxSize" => {
-                self.max_size =
-                    NonZeroU64::new(self.map_to_u64(&value, name_text, u64::MAX, diagnostics)?);
-            }
-            "ignore" => {
-                self.ignore = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
+struct FilesConfigurationVisitor;
+impl DeserializationVisitor for FilesConfigurationVisitor {
+    type Output = FilesConfiguration;
 
-            "include" => {
-                self.include = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "ignoreUnknown" => {
-                self.ignore_unknown = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["maxSize", "ignore", "include", "ignoreUnknown"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "maxSize" => {
+                    result.max_size = Deserializable::deserialize(value, diagnostics);
+                }
+                "ignore" => {
+                    result.ignore = Deserializable::deserialize(value, diagnostics);
+                }
+                "include" => {
+                    result.include = Deserializable::deserialize(value, diagnostics);
+                }
+                "ignoreUnknown" => {
+                    result.ignore_unknown = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
             }
         }
-        Some(())
+        Some(result)
     }
 }

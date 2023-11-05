@@ -4,7 +4,7 @@ expression: formatter_format_with_errors_incorrect_type.json
 ---
 formatter_format_with_errors_incorrect_type.json:3:23 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key formatWithErrors is incorrect. Expected a boolean.
+  × Incorrect type, expected a boolean.
   
     1 │ {
     2 │ 	"formatter": {

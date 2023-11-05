@@ -1,42 +1,55 @@
 use crate::configuration::organize_imports::OrganizeImports;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::{TextRange, TokenText};
 
-impl OrganizeImports {
-    const ALLOWED_KEYS: &'static [&'static str] = &["enabled", "ignore", "include"];
+impl Deserializable for OrganizeImports {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(OrganizeImportsVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for OrganizeImports {
+struct OrganizeImportsVisitor;
+impl DeserializationVisitor for OrganizeImportsVisitor {
+    type Output = OrganizeImports;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "enabled" => {
-                self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "ignore" => {
-                self.ignore = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "include" => {
-                self.include = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["enabled", "ignore", "include"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                "ignore" => {
+                    result.ignore = Deserializable::deserialize(value, diagnostics);
+                }
+                "include" => {
+                    result.include = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
             }
         }
-
-        Some(())
+        Some(result)
     }
 }

@@ -1,7 +1,6 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
-use biome_deserialize::json::report_unknown_variant;
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::token::string::Quote;
 use biome_formatter::{
@@ -9,8 +8,7 @@ use biome_formatter::{
     LineWidth, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
-use biome_json_syntax::{JsonLanguage, JsonStringValue};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_rowan::TokenText;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -318,7 +316,7 @@ impl fmt::Display for JsFormatOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
-        writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Line width: {}", self.line_width.get())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;
         writeln!(f, "Quote properties: {}", self.quote_properties)?;
@@ -416,23 +414,26 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
-impl QuoteStyle {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["double", "single"];
-}
-
-impl VisitNode<JsonLanguage> for QuoteStyle {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for QuoteStyle {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
-            *self = value;
-        } else {
-            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["double", "single"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        match value.text() {
+            "double" => Some(QuoteStyle::Double),
+            "single" => Some(QuoteStyle::Single),
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value.text(),
+                    range,
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
         }
-        Some(())
     }
 }
 
@@ -470,23 +471,26 @@ impl fmt::Display for QuoteProperties {
     }
 }
 
-impl QuoteProperties {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["preserve", "asNeeded"];
-}
-
-impl VisitNode<JsonLanguage> for QuoteProperties {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for QuoteProperties {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        match node.inner_string_text().ok()?.text() {
-            "asNeeded" => *self = Self::AsNeeded,
-            "preserve" => *self = Self::Preserve,
-            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["preserve", "asNeeded"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        match value.text() {
+            "asNeeded" => Some(QuoteProperties::AsNeeded),
+            "preserve" => Some(QuoteProperties::Preserve),
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value.text(),
+                    range,
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
         }
-        Some(())
     }
 }
 
@@ -533,23 +537,26 @@ impl fmt::Display for Semicolons {
     }
 }
 
-impl Semicolons {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["always", "asNeeded"];
-}
-
-impl VisitNode<JsonLanguage> for Semicolons {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Semicolons {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        match node.inner_string_text().ok()?.text() {
-            "asNeeded" => *self = Self::AsNeeded,
-            "always" => *self = Self::Always,
-            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["always", "asNeeded"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        match value.text() {
+            "always" => Some(Semicolons::Always),
+            "asNeeded" => Some(Semicolons::AsNeeded),
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value.text(),
+                    range,
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
         }
-        Some(())
     }
 }
 
@@ -597,22 +604,25 @@ impl fmt::Display for ArrowParentheses {
     }
 }
 
-impl ArrowParentheses {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["asNeeded", "always"];
-}
-
-impl VisitNode<JsonLanguage> for ArrowParentheses {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for ArrowParentheses {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        match node.inner_string_text().ok()?.text() {
-            "asNeeded" => *self = Self::AsNeeded,
-            "always" => *self = Self::Always,
-            _ => report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics),
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["asNeeded", "always"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        match value.text() {
+            "always" => Some(ArrowParentheses::Always),
+            "asNeeded" => Some(ArrowParentheses::AsNeeded),
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value.text(),
+                    range,
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
         }
-        Some(())
     }
 }

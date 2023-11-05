@@ -4,7 +4,7 @@ expression: formatter_incorrect_type.json
 ---
 formatter_incorrect_type.json:2:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key formatter is incorrect. Expected a object.
+  × Incorrect type, expected an object.
   
     1 │ {
   > 2 │ 	"formatter": "string"

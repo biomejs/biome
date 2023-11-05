@@ -2,222 +2,245 @@ use crate::configuration::overrides::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
 };
-use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
-use crate::configuration::{JavascriptConfiguration, JsonConfiguration, PlainIndentStyle};
-use crate::Rules;
-use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_formatter::LineWidth;
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode};
-use biome_rowan::AstNode;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::TokenText;
 
-impl VisitNode<JsonLanguage> for Overrides {
-    fn visit_array_member(
-        &mut self,
-        element: &JsonSyntaxNode,
+impl Deserializable for Overrides {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let mut pattern = OverridePattern::default();
-        let element = AnyJsonValue::cast_ref(element)?;
-        pattern.map_to_object(&element, "overrides", diagnostics)?;
-        self.0.push(pattern);
-        Some(())
+    ) -> Option<Self> {
+        Some(Overrides(Deserializable::deserialize(value, diagnostics)?))
     }
 }
 
-impl OverridePattern {
-    const ALLOWED_KEYS: &'static [&'static str] = &[
-        "ignore",
-        "include",
-        "formatter",
-        "linter",
-        "organizeImports",
-        "javascript",
-        "json",
-    ];
-}
-
-impl VisitNode<JsonLanguage> for OverridePattern {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
+impl Deserializable for OverridePattern {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "ignore" => {
-                self.ignore = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "include" => {
-                self.include = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "formatter" => {
-                let mut formatter = OverrideFormatterConfiguration::default();
-                formatter.map_to_object(&value, name_text, diagnostics)?;
-                self.formatter = Some(formatter);
-            }
-            "linter" => {
-                let mut linter = OverrideLinterConfiguration::default();
-                linter.map_to_object(&value, name_text, diagnostics)?;
-                self.linter = Some(linter);
-            }
-            "organizeImports" => {
-                let mut organize_imports = OverrideOrganizeImportsConfiguration::default();
-                organize_imports.map_to_object(&value, name_text, diagnostics)?;
-                self.organize_imports = Some(organize_imports);
-            }
-            "javascript" => {
-                let mut javascript = JavascriptConfiguration::default();
-                javascript.map_to_object(&value, name_text, diagnostics)?;
-                self.javascript = Some(javascript);
-            }
-            "json" => {
-                let mut json = JsonConfiguration::default();
-                json.map_to_object(&value, name_text, diagnostics)?;
-                self.json = Some(json);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-
-        Some(())
+    ) -> Option<Self> {
+        value.deserialize(OverridePatternVisitor, diagnostics)
     }
 }
 
-impl OverrideFormatterConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] = &[
-        "enabled",
-        "formatWithErrors",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-    ];
-}
+struct OverridePatternVisitor;
+impl DeserializationVisitor for OverridePatternVisitor {
+    type Output = OverridePattern;
 
-impl VisitNode<JsonLanguage> for OverrideFormatterConfiguration {
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "enabled" => {
-                self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-
-            "indentStyle" => {
-                let mut indent_style = PlainIndentStyle::default();
-                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
-                self.indent_style = Some(indent_style);
-            }
-            "indentSize" => {
-                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
-                diagnostics.push(DeserializationDiagnostic::new_deprecated(
-                    name_text,
-                    key.text_trimmed_range(),
-                    "formatter.indentWidth",
-                ));
-            }
-            "indentWidth" => {
-                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
-            }
-            "lineWidth" => {
-                let line_width = self.map_to_u16(&value, name_text, LineWidth::MAX, diagnostics)?;
-
-                self.line_width = Some(match LineWidth::try_from(line_width) {
-                    Ok(result) => result,
-                    Err(err) => {
-                        diagnostics.push(
-                            DeserializationDiagnostic::new(err.to_string())
-                                .with_range(value.range())
-                                .with_note(
-                                    markup! {"Maximum value accepted is "{{LineWidth::MAX}}},
-                                ),
-                        );
-                        LineWidth::default()
-                    }
-                });
-            }
-            "formatWithErrors" => {
-                self.format_with_errors = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-
-        Some(())
-    }
-}
-
-impl OverrideLinterConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] = &["enabled", "rules"];
-}
-
-impl VisitNode<JsonLanguage> for OverrideLinterConfiguration {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "enabled" => {
-                self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "rules" => {
-                let mut rules = Rules::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    rules.map_to_object(&value, name_text, diagnostics)?;
-                    self.rules = Some(rules);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &[
+            "ignore",
+            "include",
+            "formatter",
+            "linter",
+            "organizeImports",
+            "javascript",
+            "json",
+        ];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "ignore" => {
+                    result.ignore = Deserializable::deserialize(value, diagnostics);
                 }
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+                "include" => {
+                    result.include = Deserializable::deserialize(value, diagnostics);
+                }
+                "formatter" => {
+                    result.formatter = Deserializable::deserialize(value, diagnostics);
+                }
+                "linter" => {
+                    result.linter = Deserializable::deserialize(value, diagnostics);
+                }
+                "organizeImports" => {
+                    result.organize_imports = Deserializable::deserialize(value, diagnostics);
+                }
+                "javascript" => {
+                    result.javascript = Deserializable::deserialize(value, diagnostics);
+                }
+                "json" => {
+                    result.json = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
             }
         }
-
-        Some(())
+        Some(result)
     }
 }
 
-impl OverrideOrganizeImportsConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] = &["enabled"];
+impl Deserializable for OverrideFormatterConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(OverrideFormatterConfigurationVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for OverrideOrganizeImportsConfiguration {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "enabled" {
-            self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-        }
+struct OverrideFormatterConfigurationVisitor;
+impl DeserializationVisitor for OverrideFormatterConfigurationVisitor {
+    type Output = OverrideFormatterConfiguration;
 
-        Some(())
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &[
+            "enabled",
+            "formatWithErrors",
+            "indentStyle",
+            "indentSize",
+            "indentWidth",
+            "lineWidth",
+        ];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                "indentStyle" => {
+                    result.indent_style = Deserializable::deserialize(value, diagnostics);
+                }
+                "indentSize" => {
+                    result.indent_width = Deserializable::deserialize(value, diagnostics);
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                        key.text(),
+                        key_range,
+                        "formatter.indentWidth",
+                    ));
+                }
+                "indentWidth" => {
+                    result.indent_width = Deserializable::deserialize(value, diagnostics);
+                }
+                "lineWidth" => {
+                    result.line_width = Deserializable::deserialize(value, diagnostics);
+                }
+                "formatWithErrors" => {
+                    result.format_with_errors = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
+    }
+}
+
+impl Deserializable for OverrideLinterConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(OverrideLinterConfigurationVisitor, diagnostics)
+    }
+}
+
+struct OverrideLinterConfigurationVisitor;
+impl DeserializationVisitor for OverrideLinterConfigurationVisitor {
+    type Output = OverrideLinterConfiguration;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["enabled", "rules"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                "rules" => {
+                    result.rules = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
+    }
+}
+
+impl Deserializable for OverrideOrganizeImportsConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(OverrideOrganizeImportsConfigurationVisitor, diagnostics)
+    }
+}
+
+struct OverrideOrganizeImportsConfigurationVisitor;
+impl DeserializationVisitor for OverrideOrganizeImportsConfigurationVisitor {
+    type Output = OverrideOrganizeImportsConfiguration;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["enabled"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
     }
 }

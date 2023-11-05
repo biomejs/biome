@@ -367,6 +367,7 @@ mod test {
 }"#;
         let _result =
             deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default())
-                .into_deserialized();
+                .into_deserialized()
+                .unwrap_or_default();
     }
 }

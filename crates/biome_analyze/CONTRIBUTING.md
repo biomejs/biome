@@ -300,20 +300,144 @@ just ready
 ### Rule configuration
 
 Some rules may allow customization using configuration.
-The first step is to setup a struct to represent the rule configuration.
+Biome tries to introduce a minimum of the rule configuration.
+Before adding an option discuss that.
+
+The first step is to create the data representation of the rule's configuration.
 
 ```rust,ignore
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReactExtensiveDependenciesOptions {
-    hooks_config: FxHashMap<String, ReactHookConfiguration>,
-    stable_config: FxHashSet<StableReactHookConfiguration>,
+#[derive(Debug, Default, Clone)]
+pub struct GreatRuleOptions {
+    main_behavior: Behavior,
+    extra_behaviors: Vec<Behavior>,
 }
 
-impl Rule for UseExhaustiveDependencies {
+#[derive(Debug, Default, Clone)]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
+```
+
+You also need to picture the equivalent data representation in _JSON_:
+
+```json
+{
+    "mainBehavior": "A",
+    "extraBehaviors": ["C"]
+}
+```
+
+So, you have to implement the `Deserializable` trait for these two types.
+An implementation can reuse an existing type that implements `Deserializable`.
+For example, we could deserialize `Behavior` by first deserializing a string,
+and then checking that the string is either `A`, `B`, or `C`.
+This is what we do in the following code snippet.
+Note that, instead of using `String`, we use `TokenText`.
+This avoids a string allocation.
+
+```rust,ignore
+impl Deserializable for Behavior {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["A", "B", "C"];
+        let range = value.range();
+        let value = TokenText::deserialize(value, diagnostics)?;
+        match value.text() {
+            "A" => Some(Behavior.A),
+            "B" => Some(Behavior.B),
+            "C" => Some(Behavior.C),
+            _ => {
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    value.text(),
+                    range,
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
+        }
+    }
+}
+```
+
+Implementing `Deserializable` for `GreatRuleOptions` requires more work,
+because we cannot rely on an existing deserializable type.
+We have to use a _deserialization visitor_.
+We create a visitor by creating a zero-sized `struct` that implements `DeserializationVisitor`.
+A visitor must specify the type that it produces in its associated type `Output`.
+Here the visitor produces a `GreatRuleOptions`.
+It must also specify which type is expected with the associated constant `EXPECTED_TYPE`.
+Here we deserialize an object (a _map_ of string-value pairs).
+Thus, it expects a `ExpectedType::MAP`.
+So we implement `visit_map` that traverses the key-value pairs,
+deserializes every key as a string (a token text to avoid allocating a string),
+and deserializes the value based on the key.
+
+```rust,ignore
+impl Deserializable for GreatRuleOptions {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(GreatRuleOptionsVisitor, diagnostics)
+    }
+}
+
+struct GreatRuleOptionsVisitor;
+impl DeserializationVisitor for GreatRuleOptionsVisitor {
+    type Output = GreatRuleOptions;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["mainBehavior", "extraBehavior"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "mainBehavior" => {
+                    if let Some(strict_case) = Deserialize::deserialize(value, diagnostics) {
+                        result.main_behavior = value;
+                    }
+                }
+                "extraBehavior" => {
+                    if let Some(enum_member_case) = Deserialize::deserialize(value, diagnostics) {
+                        result.extra_behavior = enum_member_case;
+                    }
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
+    }
+}
+```
+
+Once done, you can set the associated type `Options` of the rule:
+
+
+```rust,ignore
+impl Rule for GreatRule {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Vec<Self::State>;
-    type Options = ReactExtensiveDependenciesOptions;
+    type Options = GreatRuleOptions;
 
     ...
 }
@@ -327,10 +451,10 @@ This allows the rule to be configured inside `biome.json` file like:
     "rules": {
       "recommended": true,
       "nursery": {
-        "useExhaustiveDependencies": {
+        "greatRule": {
           "level": "error",
           "options": {
-            "hooks": [["useMyEffect", 0, 1]]
+            "mainBehavior": "A"
           }
         }
       }
@@ -343,6 +467,34 @@ A rule can retrieve its option with:
 
 ```rust,ignore
 let options = ctx.options();
+```
+
+The compiler should warn you that `GreatRuleOptions` does not implement some required types.
+We currently require implementing _serde_'s traits `Deserialize`/`Serialize` and _Bpaf_'s parser trait.
+You can simply use a derive macros:
+
+```rust,ignore
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Bpaf)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct GreatRuleOptions {
+    #[bpaf(hide)]
+    #[serde(default, skip_serializing_if = "is_default")]
+    main_behavior: Behavior,
+
+    #[bpaf(hide)]
+    #[serde(default, skip_serializing_if = "is_default")]
+    extra_behaviors: Vec<Behavior>,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
 ```
 
 ### Deprecate a rule

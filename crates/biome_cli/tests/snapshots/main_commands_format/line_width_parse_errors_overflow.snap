@@ -10,7 +10,7 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `321`: The line width exceeds the maximum value (320) 
+      couldn't parse `321`: The line width should be between 1 and 320 
   
 
 

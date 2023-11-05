@@ -205,7 +205,7 @@ pub fn serialize_line_width<S>(line_width: &Option<LineWidth>, s: S) -> Result<S
 where
     S: serde::ser::Serializer,
 {
-    s.serialize_u16(line_width.unwrap_or_default().value())
+    s.serialize_u16(line_width.unwrap_or_default().get())
 }
 
 #[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Default)]

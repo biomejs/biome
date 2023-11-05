@@ -4,7 +4,7 @@ expression: lisence_not_string.json
 ---
 lisence_not_string.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key license is incorrect. Expected a string.
+  × Incorrect type, expected a string.
   
     1 │ {
   > 2 │ 	"license": false

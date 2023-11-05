@@ -1,121 +1,170 @@
 use crate::configuration::json::{JsonConfiguration, JsonFormatter, JsonParser};
-use crate::configuration::PlainIndentStyle;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_formatter::LineWidth;
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
+use biome_rowan::TokenText;
 
-impl JsonConfiguration {
-    const ALLOWED_KEYS: &'static [&'static str] = &["parser", "formatter"];
-}
-
-impl VisitNode<JsonLanguage> for JsonConfiguration {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for JsonConfiguration {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "parser" => {
-                let mut parser = JsonParser::default();
-                parser.map_to_object(&value, name_text, diagnostics)?;
-                self.parser = Some(parser);
-            }
-            "formatter" => {
-                let mut formatter = JsonFormatter::default();
-                formatter.map_to_object(&value, name_text, diagnostics)?;
-                self.formatter = Some(formatter);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-        Some(())
+    ) -> Option<Self> {
+        value.deserialize(JsonConfigurationVisitor, diagnostics)
     }
 }
 
-impl JsonParser {
-    const ALLOWED_KEYS: &'static [&'static str] = &["allowComments", "allowTrailingCommas"];
-}
+struct JsonConfigurationVisitor;
+impl DeserializationVisitor for JsonConfigurationVisitor {
+    type Output = JsonConfiguration;
 
-impl VisitNode<JsonLanguage> for JsonParser {
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "allowComments" => {
-                self.allow_comments = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "allowTrailingCommas" => {
-                self.allow_trailing_commas = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["parser", "formatter"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "parser" => {
+                    result.parser = Deserializable::deserialize(value, diagnostics);
+                }
+                "formatter" => {
+                    result.formatter = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key.text(),
+                        key_range,
+                        ALLOWED_KEYS,
+                    ));
+                }
             }
         }
-        Some(())
+        Some(result)
     }
 }
 
-impl JsonFormatter {
-    const ALLOWED_KEYS: &'static [&'static str] = &[
-        "enabled",
-        "indentStyle",
-        "indentSize",
-        "indentWidth",
-        "lineWidth",
-    ];
+impl Deserializable for JsonParser {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(JsonParserVisitor, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for JsonFormatter {
+struct JsonParserVisitor;
+impl DeserializationVisitor for JsonParserVisitor {
+    type Output = JsonParser;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "enabled" => {
-                self.enabled = self.map_to_boolean(&value, name_text, diagnostics);
-            }
-            "indentStyle" => {
-                let mut indent_style = PlainIndentStyle::default();
-                indent_style.map_to_known_string(&value, name_text, diagnostics)?;
-                self.indent_style = Some(indent_style);
-            }
-            "indentSize" => {
-                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
-                diagnostics.push(DeserializationDiagnostic::new_deprecated(
-                    name_text,
-                    key.text_trimmed_range(),
-                    "json.formatter.indentWidth",
-                ));
-            }
-            "indentWidth" => {
-                self.indent_width = self.map_to_u8(&value, name_text, u8::MAX, diagnostics);
-            }
-            "lineWidth" => {
-                let line_width = self.map_to_u16(&value, name_text, LineWidth::MAX, diagnostics)?;
-                self.line_width = LineWidth::try_from(line_width).ok();
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["allowComments", "allowTrailingCommas"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "allowComments" => {
+                    result.allow_comments = Deserializable::deserialize(value, diagnostics);
+                }
+                "allowTrailingCommas" => {
+                    result.allow_trailing_commas = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key.text(),
+                        key_range,
+                        ALLOWED_KEYS,
+                    ));
+                }
             }
         }
-        Some(())
+        Some(result)
+    }
+}
+
+impl Deserializable for JsonFormatter {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(JsonFormatterVisitor, diagnostics)
+    }
+}
+
+struct JsonFormatterVisitor;
+impl DeserializationVisitor for JsonFormatterVisitor {
+    type Output = JsonFormatter;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &[
+            "enabled",
+            "indentStyle",
+            "indentSize",
+            "indentWidth",
+            "lineWidth",
+        ];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "enabled" => {
+                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                }
+                "indentStyle" => {
+                    result.indent_style = Deserializable::deserialize(value, diagnostics);
+                }
+                "indentSize" => {
+                    result.indent_width = Deserializable::deserialize(value, diagnostics);
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                        key.text(),
+                        key_range,
+                        "json.formatter.indentWidth",
+                    ));
+                }
+                "indentWidth" => {
+                    result.indent_width = Deserializable::deserialize(value, diagnostics);
+                }
+                "lineWidth" => {
+                    result.line_width = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => {
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        key.text(),
+                        key_range,
+                        ALLOWED_KEYS,
+                    ));
+                }
+            }
+        }
+        Some(result)
     }
 }

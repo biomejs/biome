@@ -2,15 +2,16 @@ use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    ExpectedType,
+};
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast};
+use biome_rowan::{AstNode, SyntaxNodeCast, TokenText};
 use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -217,15 +218,62 @@ pub struct HooksOptions {
     pub hooks: Vec<Hooks>,
 }
 
-impl HooksOptions {
-    const ALLOWED_KEYS: &'static [&'static str] = &["hooks"];
-}
-
 impl FromStr for HooksOptions {
     type Err = ();
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(HooksOptions::default())
+    }
+}
+
+impl Deserializable for HooksOptions {
+    fn deserialize(
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(HooksOptionsVisitor, diagnostics)
+    }
+}
+
+struct HooksOptionsVisitor;
+impl DeserializationVisitor for HooksOptionsVisitor {
+    type Output = HooksOptions;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["hooks"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "hooks" => {
+                    let val_range = value.range();
+                    result.hooks =
+                        Deserializable::deserialize(value, diagnostics).unwrap_or_default();
+                    if result.hooks.is_empty() {
+                        diagnostics.push(
+                            DeserializationDiagnostic::new("At least one element is needed")
+                                .with_range(val_range),
+                        );
+                    }
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
     }
 }
 
@@ -246,48 +294,6 @@ pub struct Hooks {
     pub dependencies_index: Option<usize>,
 }
 
-impl Hooks {
-    const ALLOWED_KEYS: &'static [&'static str] = &["name", "closureIndex", "dependenciesIndex"];
-}
-
-impl VisitNode<JsonLanguage> for Hooks {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "name" => {
-                self.name = self.map_to_string(&value, name_text, diagnostics)?;
-                if self.name.is_empty() {
-                    diagnostics.push(
-                        DeserializationDiagnostic::new(markup!(
-                            "The field "<Emphasis>"name"</Emphasis>" is mandatory"
-                        ))
-                        .with_range(value.range()),
-                    )
-                }
-            }
-            "closureIndex" => {
-                self.closure_index = self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
-            }
-            "dependenciesIndex" => {
-                self.dependencies_index =
-                    self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-
-        Some(())
-    }
-}
-
 impl FromStr for Hooks {
     type Err = ();
 
@@ -296,36 +302,62 @@ impl FromStr for Hooks {
     }
 }
 
-impl VisitNode<JsonLanguage> for HooksOptions {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
+impl Deserializable for Hooks {
+    fn deserialize(
+        value: impl DeserializableValue,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "hooks" {
-            let array = value.as_json_array_value()?;
-            if array.elements().len() < 1 {
-                diagnostics.push(
-                    DeserializationDiagnostic::new("At least one element is needed")
-                        .with_range(array.range()),
-                );
-                return Some(());
-            }
+    ) -> Option<Self> {
+        value.deserialize(HooksVisitor, diagnostics)
+    }
+}
 
-            for element in array.elements() {
-                let element = element.ok()?;
-                let mut hooks = Hooks::default();
-                hooks.map_to_object(&element, "hooks", diagnostics)?;
-                self.hooks.push(hooks);
+struct HooksVisitor;
+impl DeserializationVisitor for HooksVisitor {
+    type Output = Hooks;
+
+    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["name", "closureIndex", "dependenciesIndex"];
+        let mut result = Self::Output::default();
+        for (key, value) in members {
+            let key_range = key.range();
+            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                continue;
+            };
+            match key.text() {
+                "name" => {
+                    let val_range = value.range();
+                    result.name =
+                        Deserializable::deserialize(value, diagnostics).unwrap_or_default();
+                    if result.name.is_empty() {
+                        diagnostics.push(
+                            DeserializationDiagnostic::new(markup!(
+                                "The field "<Emphasis>"name"</Emphasis>" is mandatory"
+                            ))
+                            .with_range(val_range),
+                        )
+                    }
+                }
+                "closureIndex" => {
+                    result.closure_index = Deserializable::deserialize(value, diagnostics);
+                }
+                "dependenciesIndex" => {
+                    result.dependencies_index = Deserializable::deserialize(value, diagnostics);
+                }
+                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    key.text(),
+                    key_range,
+                    ALLOWED_KEYS,
+                )),
             }
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
-        Some(())
+        Some(result)
     }
 }
 

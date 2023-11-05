@@ -151,15 +151,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
         rule_visitor_call.push(quote! {
             #group_name_string_literal => {
-                let mut visitor = #group_struct_name::default();
-                if are_recommended_and_all_correct(
-                    &value,
-                    name_text,
-                    diagnostics,
-                )? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.#property_group_name = Some(visitor);
-                }
+                result.#property_group_name = Deserializable::deserialize(value, diagnostics);
             }
         });
     }
@@ -312,42 +304,65 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let visitors = quote! {
         use crate::configuration::linter::*;
         use crate::Rules;
-        use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-        use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-        use biome_json_syntax::JsonLanguage;
-        use biome_rowan::SyntaxNode;
-        use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
+        use biome_console::markup;
+        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, ExpectedType};
+        use biome_rowan::{TextRange, TokenText};
 
-        impl VisitNode<JsonLanguage> for Rules {
-            fn visit_map(
-                &mut self,
-                key: &SyntaxNode<JsonLanguage>,
-                value: &SyntaxNode<JsonLanguage>,
+        impl Deserializable for Rules {
+            fn deserialize(
+                value: impl DeserializableValue,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<()> {
-                let (name, value) = self.get_key_and_value(key, value)?;
-                let name_text = name.inner_string_text().ok()?;
-                let name_text = name_text.text();
-                match name_text {
-                    "recommended" => {
-                        self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-                    }
-
-                    "all" => {
-                        self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-                    }
-
-                    #( #rule_visitor_call )*
-
-                    _ => {
-                        report_unknown_map_key(&name, &[#( #group_name_list ),*], diagnostics);
+            ) -> Option<Self> {
+                struct Visitor;
+                impl DeserializationVisitor for Visitor  {
+                    type Output =Rules;
+                    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+                    fn visit_map(
+                        self,
+                        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+                        range: TextRange,
+                        diagnostics: &mut Vec<DeserializationDiagnostic>,
+                    ) -> Option<Self::Output> {
+                        let mut recommended_is_set = false;
+                        let mut result = Self::Output::default();
+                        for (key, value) in members {
+                            let key_range = key.range();
+                            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                                continue;
+                            };
+                            match key.text() {
+                                "recommended" => {
+                                    recommended_is_set = true;
+                                    result.recommended = Deserializable::deserialize(value, diagnostics);
+                                }
+                                "all" => {
+                                    result.all = Deserializable::deserialize(value, diagnostics);
+                                }
+                                #( #rule_visitor_call ),*,
+                                _ => {
+                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                        key.text(),
+                                        key_range,
+                                        &[#( #group_name_list ),*],
+                                    ));
+                                }
+                            }
+                        }
+                        if recommended_is_set && matches!(result.recommended, Some(true)) && matches!(result.all, Some(true)) {
+                            diagnostics
+                                .push(DeserializationDiagnostic::new(markup!(
+                                    <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
+                                ))
+                                .with_range(range)
+                                .with_note(markup!("Biome will fallback to its defaults for this section.")));
+                            return Some(Self::Output::default());
+                        }
+                        Some(result)
                     }
                 }
-
-                Some(())
+                value.deserialize(Visitor, diagnostics)
             }
         }
-
         #( #visitor_rule_list )*
     };
 
@@ -662,40 +677,65 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
         group_rules.push(Literal::string(rule_name));
         visitor_rule_line.push(quote! {
             #rule_name => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, #rule_name, diagnostics)?;
-                self.#rule_identifier = Some(configuration);
+                result.#rule_identifier = RuleConfiguration::deserialize_from_rule_name(#rule_name, value, diagnostics);
             }
         });
     }
 
     quote! {
-        impl VisitNode<JsonLanguage> for #group_struct_name {
-            fn visit_map(
-                &mut self,
-                key: &SyntaxNode<JsonLanguage>,
-                value: &SyntaxNode<JsonLanguage>,
+        impl Deserializable for #group_struct_name {
+            fn deserialize(
+                value: impl DeserializableValue,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
-            ) -> Option<()> {
-                let (name, value) = self.get_key_and_value(key, value)?;
-                let name_text = name.inner_string_text().ok()?;
-                let name_text = name_text.text();
-                match name_text {
-                    "recommended" => {
-                        self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-                    }
-
-                    "all" => {
-                        self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-                    }
-
-                    #( #visitor_rule_line ),*,
-                    _ => {
-                        report_unknown_map_key(&name, &[#( #group_rules ),*], diagnostics);
+            ) -> Option<Self> {
+                struct Visitor;
+                impl DeserializationVisitor for Visitor  {
+                    type Output =#group_struct_name;
+                    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+                    fn visit_map(
+                        self,
+                        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+                        range: TextRange,
+                        diagnostics: &mut Vec<DeserializationDiagnostic>,
+                    ) -> Option<Self::Output> {
+                        let mut recommended_is_set = false;
+                        let mut result = Self::Output::default();
+                        for (key, value) in members {
+                            let key_range = key.range();
+                            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                                continue;
+                            };
+                            match key.text() {
+                                "recommended" => {
+                                    recommended_is_set = true;
+                                    result.recommended = Deserializable::deserialize(value, diagnostics);
+                                }
+                                "all" => {
+                                    result.all = Deserializable::deserialize(value, diagnostics);
+                                }
+                                #( #visitor_rule_line ),*,
+                                _ => {
+                                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                        key.text(),
+                                        key_range,
+                                        &[#( #group_rules ),*],
+                                    ));
+                                }
+                            }
+                        }
+                        if recommended_is_set && matches!(result.recommended, Some(true)) && matches!(result.all, Some(true)) {
+                            diagnostics
+                                .push(DeserializationDiagnostic::new(markup!(
+                                    <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
+                                ))
+                                .with_range(range)
+                                .with_note(markup!("Biome will fallback to its defaults for this section.")));
+                            return Some(Self::Output::default());
+                        }
+                        Some(result)
                     }
                 }
-
-                Some(())
+                value.deserialize(Visitor, diagnostics)
             }
         }
     }

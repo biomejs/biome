@@ -17,8 +17,7 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::JsonLanguage;
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -51,19 +50,23 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
-    pub fn new_from_rule_name(rule_name: &str) -> Option<Self> {
+    pub fn deserialize_from_rule_name(
+        rule_name: &str,
+        value: impl DeserializableValue,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
         match rule_name {
             "noExcessiveCognitiveComplexity" => {
-                Some(Self::Complexity(ComplexityOptions::default()))
+                Deserializable::deserialize(value, diagnostics).map(Self::Complexity)
             }
             "noRestrictedGlobals" => {
-                Some(Self::RestrictedGlobals(RestrictedGlobalsOptions::default()))
+                Deserializable::deserialize(value, diagnostics).map(Self::RestrictedGlobals)
             }
             "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                Some(Self::Hooks(HooksOptions::default()))
+                Deserializable::deserialize(value, diagnostics).map(Self::Hooks)
             }
             "useNamingConvention" => {
-                Some(Self::NamingConvention(NamingConventionOptions::default()))
+                Deserializable::deserialize(value, diagnostics).map(Self::NamingConvention)
             }
             "useValidAriaRole" => Some(Self::ValidAriaRole(ValidAriaRoleOptions::default())),
             _ => None,
