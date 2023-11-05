@@ -411,7 +411,7 @@ When releasing a new version of a Biome, follow these steps:
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
-   Then execute `just codegen-linter`.
+   Then execute `just gen-lint`.
 
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
 

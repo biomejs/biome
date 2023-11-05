@@ -32,7 +32,7 @@ codegen-bindings:
   cargo codegen-bindings
 
 # Generates code generated files for the linter
-codegen-linter:
+gen-lint:
   cargo codegen analyzer
   cargo codegen-configuration
   just codegen-bindings
@@ -50,13 +50,13 @@ documentation:
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-lintrule path rulename:
   cargo run -p xtask_codegen -- newlintrule --path={{path}} --name={{rulename}}
-  just codegen-linter
+  just gen-lint
   just documentation
 
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:
 	cargo run -p xtask_codegen -- promoterule --rule={{rulename}} --group={{group}}
-	just codegen-linter
+	just gen-lint
 	just documentation
 	-cargo test -p biome_js_analyze -- {{snakecase(rulename)}}
 	cargo insta accept

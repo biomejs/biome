@@ -100,7 +100,6 @@ async function inline({
 	);
 }
 
-
 const site = "https://biomejs.dev";
 // https://astro.build/config
 export default defineConfig({
