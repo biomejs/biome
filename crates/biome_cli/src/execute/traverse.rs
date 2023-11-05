@@ -580,8 +580,8 @@ fn process_messages(options: ProcessMessagesOptions) {
         }
     }
 
-    if mode.is_ci() && mode.should_report_to_terminal() {
-        // TODO: Check for env var GITHUB_ACTIONS=true somewhere and pass it here
+    let emit_gh_diags = mode.is_ci() && mode.should_report_to_terminal() && mode.is_running_in_ci();
+    if emit_gh_diags {
         for diagnostic in diagnostics_to_print {
             console.log(markup! {
                 {PrintGitHubDiagnostic::simple(&diagnostic)}
