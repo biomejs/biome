@@ -1,5 +1,6 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use biome_diagnostics::Severity;
 use bpaf::Bpaf;
 use std::str::FromStr;
 
@@ -66,6 +67,17 @@ pub struct CliOptions {
         display_fallback
     )]
     pub log_kind: LoggingKind,
+
+    #[bpaf(
+        long("diagnostic-level"),
+        argument("info|warn|error"),
+        fallback(Severity::default()),
+        display_fallback
+    )]
+    /// The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
+    pub diagnostic_level: Severity,
 }
 
 #[derive(Debug, Clone)]
