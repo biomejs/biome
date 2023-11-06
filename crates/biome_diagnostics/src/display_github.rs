@@ -32,8 +32,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
             return Ok(());
         };
 
-        // TODO: Escape file names
-        let file_name = match &location.resource {
+        let file_name_unescaped = match &location.resource {
             Some(Resource::File(file)) => file,
             _ => return Ok(()),
         };
@@ -44,7 +43,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
 
         let title = "TODO"; // TODO
 
-        let prefix = match diagnostic.severity() {
+        let command = match diagnostic.severity() {
             Severity::Error | Severity::Fatal => "error",
             Severity::Warning => "warning",
             Severity::Hint => "notice",
@@ -54,17 +53,55 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
         fmt.write_str(
             format! {
                 "::{} file={},line={},endLine={},col={},endColumn={}::{}",
-                prefix,
-                file_name,
-                start.line_number,
-                end.line_number,
-                start.column_number,
-                end.column_number,
-                title,
+                command, // constant, doesn't need escaping
+                escape_property(file_name_unescaped),
+                start.line_number, // integer, doesn't need escaping
+                end.line_number, // integer, doesn't need escaping
+                start.column_number, // integer, doesn't need escaping
+                end.column_number, // integer, doesn't need escaping
+                escape_data(title),
             }
             .as_str(),
         )?;
 
         Ok(())
     }
+}
+
+fn escape_data<S: AsRef<str>>(value: S) -> String {
+    let value = value.as_ref();
+
+    // Refs:
+    // - https://github.com/actions/runner/blob/a4c57f27477077e57545af79851551ff7f5632bd/src/Runner.Common/ActionCommand.cs#L18-L22
+    // - https://github.com/actions/toolkit/blob/fe3e7ce9a7f995d29d1fcfd226a32bca407f9dc8/packages/core/src/command.ts#L80-L94
+    let mut result = String::with_capacity(value.len());
+    for c in value.chars() {
+        match c {
+            '\r' => result.push_str("%0D"),
+            '\n' => result.push_str("%0A"),
+            '%' => result.push_str("%25"),
+            _ => result.push(c),
+        }
+    }
+    result
+}
+
+fn escape_property<S: AsRef<str>>(value: S) -> String {
+    let value = value.as_ref();
+
+    // Refs:
+    // - https://github.com/actions/runner/blob/a4c57f27477077e57545af79851551ff7f5632bd/src/Runner.Common/ActionCommand.cs#L25-L32
+    // - https://github.com/actions/toolkit/blob/fe3e7ce9a7f995d29d1fcfd226a32bca407f9dc8/packages/core/src/command.ts#L80-L94
+    let mut result = String::with_capacity(value.len());
+    for c in value.chars() {
+        match c {
+            '\r' => result.push_str("%0D"),
+            '\n' => result.push_str("%0A"),
+            ':' => result.push_str("%3A"),
+            ',' => result.push_str("%2C"),
+            '%' => result.push_str("%25"),
+            _ => result.push(c),
+        }
+    }
+    result
 }
