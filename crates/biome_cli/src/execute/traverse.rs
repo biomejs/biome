@@ -1,4 +1,5 @@
 use super::process_file::{process_file, DiffKind, FileStatus, Message};
+use super::ExecutionEnvironment;
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
@@ -580,8 +581,14 @@ fn process_messages(options: ProcessMessagesOptions) {
         }
     }
 
-    let emit_gh_diags = mode.is_ci() && mode.should_report_to_terminal() && mode.is_running_in_ci();
-    if emit_gh_diags {
+    let running_on_github = matches!(
+        mode.traversal_mode(),
+        TraversalMode::CI {
+            environment: Some(ExecutionEnvironment::GitHub),
+        }
+    );
+
+    if running_on_github {
         for diagnostic in diagnostics_to_print {
             console.log(markup! {{PrintGitHubDiagnostic::simple(&diagnostic)}});
         }
