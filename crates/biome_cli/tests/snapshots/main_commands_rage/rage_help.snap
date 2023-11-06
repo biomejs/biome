@@ -29,6 +29,10 @@ Global options applied to all commands
                               [default: none]
         --log-kind=<pretty|compact|json>  How the log should look like.
                               [default: pretty]
+        --diagnostic-level=<info|warn|error>  The level of logging. In order, from the most verbose to
+                              the least verbose: debug, info, warn, error.
+                              The value `none` won't show any logging.
+                              [default: information]
 
 Available options:
         --daemon-logs         Prints the Biome daemon server logs

@@ -572,7 +572,7 @@ fn process_messages(options: ProcessMessagesOptions) {
     }
 
     for diagnostic in diagnostics_to_print {
-        if diagnostic.severity() == *diagnostic_level {
+        if diagnostic.severity() >= *diagnostic_level {
             console.error(markup! {
                 {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
             });
