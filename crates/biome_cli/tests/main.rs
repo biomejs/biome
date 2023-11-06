@@ -385,7 +385,7 @@ pub(crate) fn run_cli<'app>(
     };
 
     let factory = ServerFactory::default();
-    let connection = factory.create();
+    let connection = factory.create(None);
 
     let runtime = Runtime::new().expect("failed to create runtime");
 

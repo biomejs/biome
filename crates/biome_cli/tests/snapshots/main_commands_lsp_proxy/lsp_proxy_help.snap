@@ -7,10 +7,12 @@ expression: content
 ```block
 Acts as a server for the Language Server Protocol over stdin/stdout
 
-Usage: lsp-proxy 
+Usage: lsp-proxy [--config-path=PATH]
 
 Available options:
-    -h, --help  Prints help information
+        --config-path=PATH  Allows to set a custom path when discovering the configuration file `biome.json`
+                            [env:BIOME_CONFIG_PATH: N/A]
+    -h, --help              Prints help information
 
 ```
 

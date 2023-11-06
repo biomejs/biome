@@ -5,6 +5,7 @@ use std::{
     io::{self, ErrorKind},
     mem::swap,
     os::windows::process::CommandExt,
+    path::PathBuf,
     pin::Pin,
     process::Command,
     sync::Arc,
@@ -67,7 +68,7 @@ async fn try_connect() -> io::Result<NamedPipeClient> {
 const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
 
 /// Spawn the daemon server process in the background
-fn spawn_daemon(stop_on_disconnect: bool) -> io::Result<()> {
+fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::Result<()> {
     let binary = env::current_exe()?;
 
     let mut cmd = Command::new(binary);
@@ -75,6 +76,10 @@ fn spawn_daemon(stop_on_disconnect: bool) -> io::Result<()> {
 
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
+    }
+
+    if let Some(config_path) = config_path {
+        cmd.arg(format!("--config-path={}", config_path.display()));
     }
 
     cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
@@ -168,14 +173,17 @@ impl AsyncWrite for ClientWriteHalf {
 ///
 /// Returns false if the daemon process was already running or true if it had
 /// to be started
-pub(crate) async fn ensure_daemon(stop_on_disconnect: bool) -> io::Result<bool> {
+pub(crate) async fn ensure_daemon(
+    stop_on_disconnect: bool,
+    config_path: Option<PathBuf>,
+) -> io::Result<bool> {
     let mut did_spawn = false;
 
     loop {
         match open_socket().await {
             Ok(Some(_)) => break,
             Ok(None) => {
-                spawn_daemon(stop_on_disconnect)?;
+                spawn_daemon(stop_on_disconnect, config_path.clone())?;
                 did_spawn = true;
                 time::sleep(Duration::from_millis(50)).await;
             }
@@ -189,14 +197,17 @@ pub(crate) async fn ensure_daemon(stop_on_disconnect: bool) -> io::Result<bool> 
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global pipe name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true).await?;
+    ensure_daemon(true, None).await?;
     println!("{}", get_pipe_name());
     Ok(())
 }
 
 /// Start listening on the global pipe and accepting connections with the
 /// provided [ServerFactory]
-pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
+pub(crate) async fn run_daemon(
+    factory: ServerFactory,
+    config_path: Option<PathBuf>,
+) -> io::Result<Infallible> {
     let mut prev_server = ServerOptions::new()
         .first_pipe_instance(true)
         .create(get_pipe_name())?;
@@ -206,7 +217,7 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
         let mut next_server = ServerOptions::new().create(get_pipe_name())?;
         swap(&mut prev_server, &mut next_server);
 
-        let connection = factory.create();
+        let connection = factory.create(config_path.clone());
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, next_server).instrument(span.or_current()));
     }
