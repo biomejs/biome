@@ -533,8 +533,14 @@ impl Rule for UseExhaustiveDependencies {
                 let mut suggested_fix = None;
                 let mut is_captured_covered = false;
                 for (dependency_text, dependency_range) in deps.iter() {
-                    let capture_deeper_than_dependency = capture_text.starts_with(dependency_text);
-                    let dependency_deeper_than_capture = dependency_text.starts_with(capture_text);
+                    // capture_text and dependency_text should filter the "?" inside
+                    // in order to ignore optional chaining
+                    let filter_capture_text = capture_text.replace('?', "");
+                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let capture_deeper_than_dependency =
+                        filter_capture_text.starts_with(&filter_dependency_text);
+                    let dependency_deeper_than_capture =
+                        filter_dependency_text.starts_with(&filter_capture_text);
                     match (
                         capture_deeper_than_dependency,
                         dependency_deeper_than_capture,
@@ -586,8 +592,14 @@ impl Rule for UseExhaustiveDependencies {
             for (dependency_text, dep_range) in deps {
                 let mut covers_any_capture = false;
                 for (capture_text, _, _) in captures.iter() {
-                    let capture_deeper_dependency = capture_text.starts_with(&dependency_text);
-                    let dependency_deeper_capture = dependency_text.starts_with(capture_text);
+                    // capture_text and dependency_text should filter the "?" inside
+                    // in order to ignore optional chaining
+                    let filter_capture_text = capture_text.replace('?', "");
+                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let capture_deeper_dependency =
+                        filter_capture_text.starts_with(&filter_dependency_text);
+                    let dependency_deeper_capture =
+                        filter_dependency_text.starts_with(&filter_capture_text);
                     if capture_deeper_dependency || dependency_deeper_capture {
                         covers_any_capture = true;
                         break;
