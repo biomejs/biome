@@ -572,15 +572,6 @@ fn process_messages(options: ProcessMessagesOptions) {
             }
         }
     }
-
-    for diagnostic in diagnostics_to_print {
-        if diagnostic.severity() >= *diagnostic_level {
-            console.error(markup! {
-                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-            });
-        }
-    }
-
     let running_on_github = matches!(
         mode.traversal_mode(),
         TraversalMode::CI {
@@ -588,8 +579,14 @@ fn process_messages(options: ProcessMessagesOptions) {
         }
     );
 
-    if running_on_github {
-        for diagnostic in diagnostics_to_print {
+    for diagnostic in diagnostics_to_print {
+        if diagnostic.severity() >= *diagnostic_level {
+            console.error(markup! {
+                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+        }
+
+        if running_on_github {
             console.log(markup! {{PrintGitHubDiagnostic::simple(&diagnostic)}});
         }
     }
