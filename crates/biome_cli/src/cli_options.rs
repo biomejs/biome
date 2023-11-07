@@ -70,13 +70,11 @@ pub struct CliOptions {
 
     #[bpaf(
         long("diagnostic-level"),
-        argument("info|warning|error"),
+        argument("info|warn|error"),
         fallback(Severity::default()),
         display_fallback
     )]
-    /// The level of diagnostics to show. In order, from the most verbose to the least verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
+    /// The level of diagnostics to show. In order, from the most verbose to the least verbose: info, warn, error.
     pub diagnostic_level: Severity,
 }
 

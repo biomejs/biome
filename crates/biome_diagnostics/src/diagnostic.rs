@@ -137,12 +137,14 @@ impl FromStr for Severity {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "hint" => Ok(Self::Hint),
-            "information" => Ok(Self::Information),
-            "warning" => Ok(Self::Warning),
+            "hint" => Ok(Self::Information),
+            "info" => Ok(Self::Information),
+            "warn" => Ok(Self::Warning),
             "error" => Ok(Self::Error),
-            "fatal" => Ok(Self::Fatal),
-            v => Err(format!("Found unexpected value ({}), valid values are: hint, information, warning, error, fatal.", v)),
+            v => Err(format!(
+                "Found unexpected value ({}), valid values are: info, warn, error.",
+                v
+            )),
         }
     }
 }
@@ -151,8 +153,8 @@ impl Display for Severity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Hint => write!(f, "hint"),
-            Self::Information => write!(f, "information"),
-            Self::Warning => write!(f, "warning"),
+            Self::Information => write!(f, "info"),
+            Self::Warning => write!(f, "warn"),
             Self::Error => write!(f, "error"),
             Self::Fatal => write!(f, "fatal"),
         }
