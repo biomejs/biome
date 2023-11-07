@@ -57,7 +57,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@26..28 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@28..38 "cue-region" [] [],
                                 },
@@ -98,7 +98,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@56..58 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@58..68 "cue-region" [] [],
                                 },
@@ -164,7 +164,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@26..48
             0: CSS_PSEUDO_ELEMENT_SELECTOR@26..48
               0: COLON2@26..28 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@28..48
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@28..48
                 0: CSS_IDENTIFIER@28..38
                   0: IDENT@28..38 "cue-region" [] []
                 1: L_PAREN@38..39 "(" [] []
@@ -191,7 +191,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@56..84
             0: CSS_PSEUDO_ELEMENT_SELECTOR@56..84
               0: COLON2@56..58 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@58..84
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@58..84
                 0: CSS_IDENTIFIER@58..68
                   0: IDENT@58..68 "cue-region" [] []
                 1: L_PAREN@68..72 "(" [] [Whitespace("   ")]

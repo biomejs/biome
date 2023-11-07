@@ -29,8 +29,8 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@21..23 "::" [] [],
-                            element: CssPseudoElementPart {
-                                name_token: PART_KW@23..27 "part" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: PART_KW@23..27 "part" [] [],
                                 l_paren_token: L_PAREN@27..28 "(" [] [],
                                 ident: CssIdentifier {
                                     value_token: IDENT@28..34 "active" [] [],
@@ -59,8 +59,8 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@60..62 "::" [] [],
-                            element: CssPseudoElementPart {
-                                name_token: PART_KW@62..66 "part" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: PART_KW@62..66 "part" [] [],
                                 l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
                                 ident: CssIdentifier {
                                     value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
@@ -97,7 +97,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@21..36
             0: CSS_PSEUDO_ELEMENT_SELECTOR@21..36
               0: COLON2@21..23 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_PART@23..36
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@23..36
                 0: PART_KW@23..27 "part" [] []
                 1: L_PAREN@27..28 "(" [] []
                 2: CSS_IDENTIFIER@28..34
@@ -117,7 +117,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@60..81
             0: CSS_PSEUDO_ELEMENT_SELECTOR@60..81
               0: COLON2@60..62 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_PART@62..81
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@62..81
                 0: PART_KW@62..66 "part" [] []
                 1: L_PAREN@66..70 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@70..79
