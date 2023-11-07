@@ -1,6 +1,6 @@
 use std::io;
 
-use biome_console::fmt;
+use biome_console::{fmt, MarkupBuf, markup};
 
 use crate::display::frame::SourceFile;
 use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Resource, Severity};
@@ -41,12 +41,17 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
         let start = source.location(span.start())?;
         let end = source.location(span.end())?;
 
-        let title = "TODO"; // TODO
-
         let command = match diagnostic.severity() {
             Severity::Error | Severity::Fatal => "error",
             Severity::Warning => "warning",
             Severity::Hint | Severity::Information => "notice",
+        };
+
+        let title = {
+            let mut message = MarkupBuf::default();
+            let mut fmt = fmt::Formatter::new(&mut message);
+            fmt.write_markup(markup!({ PrintDiagnosticMessage(diagnostic) }))?;
+            markup_to_string(&message)
         };
 
         fmt.write_str(
@@ -58,11 +63,21 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
                 end.line_number, // integer, doesn't need escaping
                 start.column_number, // integer, doesn't need escaping
                 end.column_number, // integer, doesn't need escaping
-                escape_data(title),
+                title.map(escape_data).unwrap_or(String::new()),
             }
             .as_str(),
         )?;
 
+        Ok(())
+    }
+}
+
+struct PrintDiagnosticMessage<'fmt, D: ?Sized>(&'fmt D);
+
+impl<'fmt, D: Diagnostic + ?Sized> fmt::Display for PrintDiagnosticMessage<'fmt, D> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        let Self(diagnostic) = *self;
+        diagnostic.message(fmt)?;
         Ok(())
     }
 }
@@ -103,4 +118,12 @@ fn escape_property<S: AsRef<str>>(value: S) -> String {
         }
     }
     result
+}
+
+fn markup_to_string(markup: &MarkupBuf) -> Option<String> {
+    let mut buffer = Vec::new();
+    let mut write = fmt::Termcolor(termcolor::NoColor::new(&mut buffer));
+    let mut fmt = fmt::Formatter::new(&mut write);
+    fmt.write_markup(markup! { {markup} }).ok()?;
+    String::from_utf8(buffer).ok()
 }
