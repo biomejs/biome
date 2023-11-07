@@ -46,8 +46,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'fmt
         let command = match diagnostic.severity() {
             Severity::Error | Severity::Fatal => "error",
             Severity::Warning => "warning",
-            Severity::Hint => "notice",
-            Severity::Information => return Ok(()),
+            Severity::Hint | Severity::Information => "notice",
         };
 
         fmt.write_str(
