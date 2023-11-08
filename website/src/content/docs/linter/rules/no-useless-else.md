@@ -28,10 +28,10 @@ while (x > 0) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
-  
+
     <strong>2 │ </strong>    if (f(x)) {
     <strong>3 │ </strong>        break;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    } else {
@@ -41,9 +41,9 @@ while (x > 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
-  
+
     <strong>1 │ </strong>while (x &gt; 0) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (f(x)) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -54,9 +54,9 @@ while (x > 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
-  
+
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (f(x)) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          break;
     <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">}</span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><strong>l</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>{</strong></span>
@@ -64,8 +64,8 @@ while (x > 0) {
     <strong>5</strong> <strong>5</strong><strong> │ </strong>          x++
     <strong>6</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>7</strong> <strong>6</strong><strong> │ </strong>  }
-    <strong>8</strong> <strong>7</strong><strong> │ </strong>  
-  
+    <strong>8</strong> <strong>7</strong><strong> │ </strong>
+
 </code></pre>
 
 ```jsx
@@ -78,10 +78,10 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
-  
+
     <strong>2 │ </strong>    if (x &lt; 0) {
     <strong>3 │ </strong>        return 0;
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    } else {
@@ -91,9 +91,9 @@ function f() {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
-  
+
     <strong>1 │ </strong>function f() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -104,9 +104,9 @@ function f() {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
-  
+
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          return 0;
     <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">}</span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><strong>l</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>{</strong></span>
@@ -114,8 +114,8 @@ function f() {
     <strong>5</strong> <strong>5</strong><strong> │ </strong>          return x;
     <strong>6</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>7</strong> <strong>6</strong><strong> │ </strong>  }
-    <strong>8</strong> <strong>7</strong><strong> │ </strong>  
-  
+    <strong>8</strong> <strong>7</strong><strong> │ </strong>
+
 </code></pre>
 
 ```jsx
@@ -128,10 +128,10 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
-  
+
     <strong>2 │ </strong>    if (x &lt; 0) {
     <strong>3 │ </strong>        throw new RangeError();
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    } else {
@@ -141,9 +141,9 @@ function f() {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
-  
+
     <strong>1 │ </strong>function f() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -154,9 +154,9 @@ function f() {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Omit the </span><span style="color: lightgreen;"><strong>else</strong></span><span style="color: lightgreen;"> clause.</span>
-  
+
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      if (x &lt; 0) {
     <strong>3</strong> <strong>3</strong><strong> │ </strong>          throw new RangeError();
     <strong>4</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">}</span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><strong>l</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>{</strong></span>
@@ -164,8 +164,8 @@ function f() {
     <strong>5</strong> <strong>5</strong><strong> │ </strong>          return x;
     <strong>6</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>7</strong> <strong>6</strong><strong> │ </strong>  }
-    <strong>8</strong> <strong>7</strong><strong> │ </strong>  
-  
+    <strong>8</strong> <strong>7</strong><strong> │ </strong>
+
 </code></pre>
 
 ## Valid

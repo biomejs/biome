@@ -24,23 +24,23 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
-  
+
     <strong>1 │ </strong>if (condition) {
     <strong>2 │ </strong>    // ...
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>} else {
-   <strong>   │ </strong>        
+   <strong>   │ </strong>
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    if (anotherCondition) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>        // ...
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    }
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>}
     <strong>8 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use collapsed </span><span style="color: lightgreen;"><strong>else if</strong></span><span style="color: lightgreen;"> instead.</span>
-  
+
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  if (condition) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>      // ...
     <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">}</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">e</span><span style="color: Tomato;">l</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>{</strong></span>
@@ -50,8 +50,8 @@ if (condition) {
     <strong>6</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>7</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">}</span>
       <strong>5</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;">}</span>
-    <strong>8</strong> <strong>6</strong><strong> │ </strong>  
-  
+    <strong>8</strong> <strong>6</strong><strong> │ </strong>
+
 </code></pre>
 
 ```jsx
@@ -66,14 +66,14 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
-  
+
      <strong>1 │ </strong>if (condition) {
      <strong>2 │ </strong>    // ...
    <strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>} else {
-    <strong>   │ </strong>        
+    <strong>   │ </strong>
    <strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    if (anotherCondition) {
    <strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>        // ...
    <strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    } else {
@@ -82,9 +82,9 @@ if (condition) {
     <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
      <strong>9 │ </strong>}
     <strong>10 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use collapsed </span><span style="color: lightgreen;"><strong>else if</strong></span><span style="color: lightgreen;"> instead.</span>
-  
+
     <strong> 1</strong> <strong>1</strong><strong> │ </strong>  if (condition) {
     <strong> 2</strong> <strong>2</strong><strong> │ </strong>      // ...
     <strong> 3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">}</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;">e</span><span style="color: Tomato;">l</span><span style="color: Tomato;">s</span><span style="color: Tomato;">e</span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>{</strong></span>
@@ -96,8 +96,8 @@ if (condition) {
     <strong> 8</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><span style="opacity: 0.8;">·</span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong> 9</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;">}</span>
        <strong>7</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;"><span style="opacity: 0.8;">·</span></span><span style="color: MediumSeaGreen;">}</span>
-    <strong>10</strong> <strong>8</strong><strong> │ </strong>  
-  
+    <strong>10</strong> <strong>8</strong><strong> │ </strong>
+
 </code></pre>
 
 ```jsx
@@ -111,14 +111,14 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
-  
+
     <strong>1 │ </strong>if (condition) {
     <strong>2 │ </strong>    // ...
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>} else {
-   <strong>   │ </strong>        
+   <strong>   │ </strong>
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>    // Comment
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    if (anotherCondition) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>        // ...
@@ -126,7 +126,7 @@ if (condition) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
     <strong>8 │ </strong>}
     <strong>9 │ </strong>
-  
+
 </code></pre>
 
 ### Valid

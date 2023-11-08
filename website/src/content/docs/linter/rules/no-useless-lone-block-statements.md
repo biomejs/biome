@@ -24,16 +24,16 @@ Source: https://eslint.org/docs/latest/rules/no-lone-blocks
 {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:1:1 <a href="https://biomejs.dev/lint/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This block statement doesn't serve any purpose and can be safely removed.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>{}
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.</span>
-  
+
 </code></pre>
 
 ```jsx
@@ -45,10 +45,10 @@ if (foo) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:3:3 <a href="https://biomejs.dev/lint/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUselessLoneBlockStatements.js:3:3 <a href="https://biomejs.dev/linter/rules/no-useless-lone-block-statements">lint/nursery/noUselessLoneBlockStatements</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This block statement doesn't serve any purpose and can be safely removed.</span>
-  
+
     <strong>1 │ </strong>if (foo) {
     <strong>2 │ </strong>  bar();
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>  {
@@ -58,19 +58,19 @@ if (foo) {
    <strong>   │ </strong>  <strong><span style="color: Tomato;">^</span></strong>
     <strong>6 │ </strong>}
     <strong>7 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Standalone block statements without any block-level declarations are redundant in JavaScript and can be removed to simplify the code.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove redundant block.</span>
-  
+
     <strong>1</strong> <strong>1</strong><strong> │ </strong>  if (foo) {
     <strong>2</strong> <strong>2</strong><strong> │ </strong>    bar();
     <strong>3</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>{</strong></span>
     <strong>4</strong> <strong>3</strong><strong> │ </strong>      baz();
     <strong>5</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>6</strong> <strong>4</strong><strong> │ </strong>  }
-    <strong>7</strong> <strong>5</strong><strong> │ </strong>  
-  
+    <strong>7</strong> <strong>5</strong><strong> │ </strong>
+
 </code></pre>
 
 ## Valid
