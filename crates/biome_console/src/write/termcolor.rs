@@ -5,7 +5,7 @@ use std::{
 
 use termcolor::{Color, ColorSpec, WriteColor};
 use unicode_segmentation::UnicodeSegmentation;
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_width::UnicodeWidthStr;
 
 use crate::{fmt::MarkupElements, MarkupElement};
 
@@ -196,10 +196,15 @@ where
     }
 }
 
+/// This is not 100% bulletproof, but it's the best way I found
+/// to tell if a unicode grapheme is whitespace char or not
+/// as perceived by a human
 fn grapheme_is_whitespace(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_whitespace())
 }
 
+/// Determines if a grapheme contains code points which are out of the ASCII
+/// range and thus cannot be printed where unicode is not supported.
 fn grapheme_contains_non_ascii(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_ascii())
 }
