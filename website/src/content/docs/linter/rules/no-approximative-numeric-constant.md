@@ -20,7 +20,7 @@ Source: https://rust-lang.github.io/rust-clippy/master/#approx_constant
 let x = 3.141;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/lint/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
   
@@ -36,7 +36,7 @@ let x = 3.141;
 let x = 2.302;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/lint/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
   

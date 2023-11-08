@@ -318,7 +318,7 @@ The following rules are now recommended:
   The rule enforce use of `as const` assertion to infer literal types.
   Contributed by @unvalley
 
-- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
+- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign) rule.
   The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
   Contributed by @victor-teles
 - Add [noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant/) rule. Contributed by @nikeee

@@ -33,7 +33,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <div aria-activedescendant={someID} />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAriaActivedescendantWithTabindex.js:1:1 <a href="https://biomejs.dev/lint/rules/use-aria-activedescendant-with-tabindex">lint/nursery/useAriaActivedescendantWithTabindex</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAriaActivedescendantWithTabindex.js:1:1 <a href="https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex">lint/nursery/useAriaActivedescendantWithTabindex</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Enforce elements with aria-activedescendant are tabbable.</span>
   

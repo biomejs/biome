@@ -22,7 +22,7 @@ Source: https://eslint.org/docs/latest/rules/operator-assignment/
 a = a + 1;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>+=</strong></span><span style="color: Orange;">.</span>
   
@@ -42,7 +42,7 @@ a = a + 1;
 a = a - 1;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>-=</strong></span><span style="color: Orange;">.</span>
   
@@ -62,7 +62,7 @@ a = a - 1;
 a = a * 1;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/use-shorthand-assign">lint/nursery/useShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Assignment </span><span style="color: Orange;"><strong>(=)</strong></span><span style="color: Orange;"> can be replaced with operator assignment </span><span style="color: Orange;"><strong>*=</strong></span><span style="color: Orange;">.</span>
   
