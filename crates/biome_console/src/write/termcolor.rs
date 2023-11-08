@@ -4,7 +4,8 @@ use std::{
 };
 
 use termcolor::{Color, ColorSpec, WriteColor};
-use unicode_width::UnicodeWidthChar;
+use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 use crate::{fmt::MarkupElements, MarkupElement};
 
@@ -145,29 +146,62 @@ where
     fn write_str(&mut self, content: &str) -> fmt::Result {
         let mut buffer = [0; 4];
 
-        for item in content.chars() {
-            // Replace non-whitespace, zero-width characters with the Unicode replacement character
-            let is_whitespace = item.is_whitespace();
-            let is_zero_width = UnicodeWidthChar::width(item).map_or(true, |width| width == 0);
-            let item = if !is_whitespace && is_zero_width {
-                char::REPLACEMENT_CHARACTER
-            } else if cfg!(windows) || !self.writer.supports_color() {
-                // Unicode is currently poorly supported on most Windows
-                // terminal clients, so we always strip emojis in Windows
-                unicode_to_ascii(item)
-            } else {
-                item
+        for grapheme in content.graphemes(true) {
+            eprintln!("grapheme {}", grapheme);
+            let width = UnicodeWidthStr::width(grapheme);
+            let is_whitespace = grapheme_is_whitespace(grapheme);
+
+            eprintln!("grapheme width {}", width);
+
+            if !is_whitespace && width == 0 {
+                let char_to_write = char::REPLACEMENT_CHARACTER;
+                char_to_write.encode_utf8(&mut buffer);
+
+                if let Err(err) = self.writer.write_all(&buffer[..char_to_write.len_utf8()]) {
+                    self.error = Err(err);
+                    return Err(fmt::Error);
+                }
+
+                continue;
+            }
+
+            // Unicode is currently poorly supported on most Windows
+            // terminal clients, so we always strip emojis in Windows
+            if cfg!(windows) || !self.writer.supports_color() {
+                let is_ascii = grapheme_contains_non_ascii(grapheme);
+
+                if !is_ascii {
+                    let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
+
+                    replacement.encode_utf8(&mut buffer);
+
+                    if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
+                        self.error = Err(err);
+                        return Err(fmt::Error);
+                    }
+                }
             };
 
-            item.encode_utf8(&mut buffer);
-            if let Err(err) = self.writer.write_all(&buffer[..item.len_utf8()]) {
-                self.error = Err(err);
-                return Err(fmt::Error);
+            for char in grapheme.chars() {
+                char.encode_utf8(&mut buffer);
+
+                if let Err(err) = self.writer.write_all(&buffer[..char.len_utf8()]) {
+                    self.error = Err(err);
+                    return Err(fmt::Error);
+                }
             }
         }
 
         Ok(())
     }
+}
+
+fn grapheme_is_whitespace(grapheme: &str) -> bool {
+    grapheme.chars().all(|c| c.is_whitespace())
+}
+
+fn grapheme_contains_non_ascii(grapheme: &str) -> bool {
+    grapheme.chars().all(|c| c.is_ascii())
 }
 
 /// Replace emoji characters with similar but more widely supported ASCII
@@ -200,8 +234,8 @@ mod tests {
         // tabs, newline, ...) and non-ASCII unicode characters as-is but
         // redact zero-width characters (RTL override, null character, bell,
         // zero-width space, ...)
-        const INPUT: &str = "t\tes t\r\n\u{202D}t\0es\x07t\u{202E}\nt\u{200B}es🐛t";
-        const OUTPUT: &str = "t\tes t\r\n\u{FFFD}t\u{FFFD}es\u{FFFD}t\u{FFFD}\nt\u{FFFD}es🐛t";
+        const INPUT: &str = "t\tes t\r\n\u{202D}t\0es\x07t\u{202E}\nt\u{200B}es🐛t1️⃣";
+        const OUTPUT: &str = "t\tes t\r\n\u{FFFD}t\u{FFFD}es\u{FFFD}t\u{FFFD}\nt\u{FFFD}es🐛t1️⃣";
 
         let mut buffer = Vec::new();
 

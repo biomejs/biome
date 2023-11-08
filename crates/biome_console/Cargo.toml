@@ -19,6 +19,7 @@ schemars        = { workspace = true, optional = true }
 serde           = { workspace = true, optional = true, features = ["derive"] }
 termcolor       = "1.1.2"
 unicode-width   = "0.1.9"
+unicode-segmentation = "1.10.1"
 
 [dev-dependencies]
 trybuild = "1.0"
