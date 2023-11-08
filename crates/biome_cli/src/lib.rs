@@ -74,7 +74,7 @@ impl<'app> CliSession<'app> {
         let result = match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
             BiomeCommand::Rage(_, daemon_logs) => commands::rage::rage(self, daemon_logs),
-            BiomeCommand::Start => commands::daemon::start(self),
+            BiomeCommand::Start(config_path) => commands::daemon::start(self, config_path),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 apply,
@@ -165,13 +165,14 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Init => commands::init::init(self),
-            BiomeCommand::LspProxy => commands::daemon::lsp_proxy(),
+            BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate(cli_options, write) => {
                 commands::migrate::migrate(self, cli_options, write)
             }
-            BiomeCommand::RunServer { stop_on_disconnect } => {
-                commands::daemon::run_server(stop_on_disconnect)
-            }
+            BiomeCommand::RunServer {
+                stop_on_disconnect,
+                config_path,
+            } => commands::daemon::run_server(stop_on_disconnect, config_path),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
         };
 

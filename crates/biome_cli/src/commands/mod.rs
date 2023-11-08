@@ -11,6 +11,7 @@ use biome_service::configuration::{
 use biome_service::Configuration;
 use bpaf::Bpaf;
 use std::ffi::OsString;
+use std::path::PathBuf;
 
 pub(crate) mod check;
 pub(crate) mod ci;
@@ -40,7 +41,11 @@ pub enum BiomeCommand {
     ),
     /// Start the Biome daemon server process
     #[bpaf(command)]
-    Start,
+    Start(
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        Option<PathBuf>,
+    ),
 
     /// Stop the Biome daemon server process
     #[bpaf(command)]
@@ -186,7 +191,11 @@ pub enum BiomeCommand {
     Init,
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
-    LspProxy,
+    LspProxy(
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        Option<PathBuf>,
+    ),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate(
@@ -200,6 +209,9 @@ pub enum BiomeCommand {
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        config_path: Option<PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -215,8 +227,8 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
-            BiomeCommand::LspProxy
-            | BiomeCommand::Start
+            BiomeCommand::LspProxy(_)
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
@@ -234,9 +246,9 @@ impl BiomeCommand {
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
             BiomeCommand::Init
-            | BiomeCommand::Start
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
-            | BiomeCommand::LspProxy
+            | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => false,
         }
@@ -255,10 +267,10 @@ impl BiomeCommand {
             | BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::Start
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
-            | BiomeCommand::LspProxy
+            | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket => false,
         }
@@ -272,9 +284,9 @@ impl BiomeCommand {
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Migrate(cli_options, _) => cli_options.log_level.clone(),
             BiomeCommand::Version(_)
-            | BiomeCommand::LspProxy
+            | BiomeCommand::LspProxy(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::Start
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
@@ -290,8 +302,8 @@ impl BiomeCommand {
             | BiomeCommand::Migrate(cli_options, _) => cli_options.log_kind.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::LspProxy
-            | BiomeCommand::Start
+            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }

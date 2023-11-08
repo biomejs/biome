@@ -16,6 +16,7 @@ use futures::FutureExt;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -510,7 +511,7 @@ impl ServerFactory {
     }
 
     /// Create a new [ServerConnection] from this factory
-    pub fn create(&self) -> ServerConnection {
+    pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
         let workspace = self
             .workspace
             .clone()
@@ -519,7 +520,11 @@ impl ServerFactory {
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let session = Session::new(session_key, client, workspace, self.cancellation.clone());
+            let mut session =
+                Session::new(session_key, client, workspace, self.cancellation.clone());
+            if let Some(path) = config_path {
+                session.set_config_path(path);
+            }
             let handle = Arc::new(session);
 
             let mut sessions = self.sessions.lock().unwrap();
