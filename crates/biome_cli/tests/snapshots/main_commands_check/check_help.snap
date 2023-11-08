@@ -77,8 +77,9 @@ Global options applied to all commands
                               [default: none]
         --log-kind=<pretty|compact|json>  How the log should look like.
                               [default: pretty]
-        --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the most
-                              verbose to the least verbose: info, warn, error.
+        --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the lowest
+                              to the most important: info, warn, error. Passing `--diagnostic-level=error`
+                              will cause Biome to print only diagnostics that contain only errors.
                               [default: info]
 
 Available positional items:
