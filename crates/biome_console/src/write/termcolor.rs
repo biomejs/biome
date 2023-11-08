@@ -147,11 +147,8 @@ where
         let mut buffer = [0; 4];
 
         for grapheme in content.graphemes(true) {
-            eprintln!("grapheme {}", grapheme);
             let width = UnicodeWidthStr::width(grapheme);
             let is_whitespace = grapheme_is_whitespace(grapheme);
-
-            eprintln!("grapheme width {}", width);
 
             if !is_whitespace && width == 0 {
                 let char_to_write = char::REPLACEMENT_CHARACTER;
