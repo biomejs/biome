@@ -74,7 +74,7 @@ pub struct CliOptions {
         fallback(Severity::default()),
         display_fallback
     )]
-    /// The level of diagnostics to show. In order, from the most verbose to the least verbose: info, warn, error.
+    /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     pub diagnostic_level: Severity,
 }
 
