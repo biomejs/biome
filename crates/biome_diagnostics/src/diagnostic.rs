@@ -152,7 +152,7 @@ impl FromStr for Severity {
 impl Display for Severity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Hint => write!(f, "hint"),
+            Self::Hint => write!(f, "info"),
             Self::Information => write!(f, "info"),
             Self::Warning => write!(f, "warn"),
             Self::Error => write!(f, "error"),
