@@ -169,7 +169,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@67..69 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@69..72 "cue" [] [],
                                 },
@@ -234,7 +234,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@106..108 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@108..118 "cue-region" [] [],
                                 },
@@ -336,8 +336,8 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@193..195 "::" [] [],
-                            element: CssPseudoElementPart {
-                                name_token: PART_KW@195..199 "part" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: PART_KW@195..199 "part" [] [],
                                 l_paren_token: L_PAREN@199..200 "(" [] [],
                                 ident: CssIdentifier {
                                     value_token: IDENT@200..203 "tab" [] [],
@@ -408,7 +408,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@241..245 "::" [Newline("\n"), Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@245..252 "slotted" [] [],
                                 },
@@ -440,7 +440,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@258..261 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@261..268 "slotted" [] [],
                                 },
@@ -707,7 +707,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@67..76
             0: CSS_PSEUDO_ELEMENT_SELECTOR@67..76
               0: COLON2@67..69 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@69..76
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@69..76
                 0: CSS_IDENTIFIER@69..72
                   0: IDENT@69..72 "cue" [] []
                 1: L_PAREN@72..73 "(" [] []
@@ -749,7 +749,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@106..135
             0: CSS_PSEUDO_ELEMENT_SELECTOR@106..135
               0: COLON2@106..108 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@108..135
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@108..135
                 0: CSS_IDENTIFIER@108..118
                   0: IDENT@108..118 "cue-region" [] []
                 1: L_PAREN@118..119 "(" [] []
@@ -816,7 +816,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@193..205
             0: CSS_PSEUDO_ELEMENT_SELECTOR@193..205
               0: COLON2@193..195 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_PART@195..205
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@195..205
                 0: PART_KW@195..199 "part" [] []
                 1: L_PAREN@199..200 "(" [] []
                 2: CSS_IDENTIFIER@200..203
@@ -864,7 +864,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@241..256
             0: CSS_PSEUDO_ELEMENT_SELECTOR@241..256
               0: COLON2@241..245 "::" [Newline("\n"), Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@245..256
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@245..256
                 0: CSS_IDENTIFIER@245..252
                   0: IDENT@245..252 "slotted" [] []
                 1: L_PAREN@252..253 "(" [] []
@@ -886,7 +886,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@258..275
             0: CSS_PSEUDO_ELEMENT_SELECTOR@258..275
               0: COLON2@258..261 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@261..275
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@261..275
                 0: CSS_IDENTIFIER@261..268
                   0: IDENT@261..268 "slotted" [] []
                 1: L_PAREN@268..269 "(" [] []

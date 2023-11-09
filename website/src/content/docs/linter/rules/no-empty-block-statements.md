@@ -26,7 +26,7 @@ Source: https://eslint.org/docs/latest/rules/no-empty/
 function emptyFunctionBody () {}
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:1:31 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -46,7 +46,7 @@ try {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:3:13 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   
@@ -69,7 +69,7 @@ class Foo {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/lint/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyBlockStatements.js:2:3 <a href="https://biomejs.dev/linter/rules/no-empty-block-statements">lint/nursery/noEmptyBlockStatements</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected empty block.</span>
   

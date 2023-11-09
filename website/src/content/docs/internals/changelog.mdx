@@ -21,6 +21,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### CLI
 
 - Remove the CLI options from the `lsp-proxy`, as they were never meant to be passed to that command. Contributed by @ematipico
+- Add option `--config-path` to `lsp-proxy` and `start` commands. It's now possible to tell the Daemon server to load `biome.json` from a custom path. Contributed by @ematipico
+
+- Add new `--diagnostic-level` option to let users control the level of diagnostics printed by the CLI. Possible values are: `"info"`, `"warn"`, `"hint"`. Contributed by @simonxabris
 
 #### Bug fixes
 
@@ -39,10 +42,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix [#639](https://github.com/biomejs/biome/issues/639) by ignoring unused TypeScript's mapped key. Contributed by @Conaclos
-
 - Fix [#565](https://github.com/biomejs/biome/issues/565) by handling several `infer` with the same name in extends clauses of TypeScript's conditional types. Contributed by @Conaclos
-
 - Fix [#653](https://github.com/biomejs/biome/issues/653). [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly removes the entire line where the unused `import` is. Contributed by @Conaclos
+- Fix [#607](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, ignore optional chaining, Contributed by @msdlisper
 
 - Fix [#676](https://github.com/biomejs/biome/issues/676), by using the correct node for the `"noreferrer"` when applying the code action. Contributed by @ematipico
 
@@ -94,7 +96,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
 - Support more a11y roles and fix some methods for a11y lint rules Contributed @nissy-dev
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
-- Fix [#607](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, ignore optional chaining, Contributed by @msdlisper
 
 ### Parser
 
@@ -323,7 +324,7 @@ The following rules are now recommended:
   The rule enforce use of `as const` assertion to infer literal types.
   Contributed by @unvalley
 
-- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
+- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign) rule.
   The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
   Contributed by @victor-teles
 - Add [noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant/) rule. Contributed by @nikeee

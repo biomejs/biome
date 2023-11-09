@@ -11,7 +11,7 @@ use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, ParserProgress, TokenSet};
+use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
@@ -27,6 +27,7 @@ pub(crate) fn parse_root(p: &mut CssParser) {
     m.complete(p, CSS_ROOT);
 }
 
+#[inline]
 pub(crate) fn parse_rule_list(p: &mut CssParser) {
     let mut progress = ParserProgress::default();
 
@@ -34,23 +35,14 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
     while !p.at(EOF) {
         progress.assert_progressing(p);
 
-        if parse_rule(p)
-            .or_recover(
-                p,
-                &ParseRecovery::new(CSS_BOGUS_RULE, RULE_RECOVERY_SET),
-                expect_any_selector,
-            )
-            .is_err()
-        {
-            break;
-        }
+        parse_rule(p);
     }
 
     rules.complete(p, CSS_RULE_LIST);
 }
 
 #[inline]
-pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_rule(p: &mut CssParser) -> CompletedMarker {
     let m = p.start();
 
     CssSelectorList.parse_list(p);
@@ -63,12 +55,10 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
         )
         .is_err()
     {
-        m.abandon(p);
-        return Absent;
+        return m.complete(p, CSS_BOGUS_RULE);
     }
 
-    let completed = m.complete(p, CSS_RULE);
-    Present(completed)
+    m.complete(p, CSS_RULE)
 }
 
 const SELECTOR_RECOVERY_SET: TokenSet<CssSyntaxKind> = RULE_RECOVERY_SET.union(token_set![T![,]]);

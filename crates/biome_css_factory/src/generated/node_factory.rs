@@ -547,14 +547,30 @@ pub fn css_pseudo_class_selector_parameters(
         ],
     ))
 }
-pub fn css_pseudo_element_function(
+pub fn css_pseudo_element_function_identifier(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    ident: CssIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoElementFunctionIdentifier {
+    CssPseudoElementFunctionIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_element_function_selector(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
     selector: AnyCssSelector,
     r_paren_token: SyntaxToken,
-) -> CssPseudoElementFunction {
-    CssPseudoElementFunction::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION,
+) -> CssPseudoElementFunctionSelector {
+    CssPseudoElementFunctionSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR,
         [
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
@@ -563,42 +579,10 @@ pub fn css_pseudo_element_function(
         ],
     ))
 }
-pub fn css_pseudo_element_highlight(
-    name_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    custom_highlight_name: CssIdentifier,
-    r_paren_token: SyntaxToken,
-) -> CssPseudoElementHighlight {
-    CssPseudoElementHighlight::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_ELEMENT_HIGHLIGHT,
-        [
-            Some(SyntaxElement::Token(name_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(custom_highlight_name.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
 pub fn css_pseudo_element_identifier(ident: CssIdentifier) -> CssPseudoElementIdentifier {
     CssPseudoElementIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_ELEMENT_IDENTIFIER,
         [Some(SyntaxElement::Node(ident.into_syntax()))],
-    ))
-}
-pub fn css_pseudo_element_part(
-    name_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    ident: CssIdentifier,
-    r_paren_token: SyntaxToken,
-) -> CssPseudoElementPart {
-    CssPseudoElementPart::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_ELEMENT_PART,
-        [
-            Some(SyntaxElement::Token(name_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(ident.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
     ))
 }
 pub fn css_pseudo_element_selector(

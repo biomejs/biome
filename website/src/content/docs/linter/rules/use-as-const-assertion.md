@@ -28,7 +28,7 @@ Source: https://typescript-eslint.io/rules/prefer-as-const/
 let bar: 2 = 2;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:10 <a href="https://biomejs.dev/lint/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:10 <a href="https://biomejs.dev/linter/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of type annotation.</span>
   
@@ -50,7 +50,7 @@ let bar: 2 = 2;
 let foo = { bar: 'baz' as 'baz' };
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:27 <a href="https://biomejs.dev/lint/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useAsConstAssertion.js:1:27 <a href="https://biomejs.dev/linter/rules/use-as-const-assertion">lint/nursery/useAsConstAssertion</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use </span><span style="color: Tomato;"><strong>as const</strong></span><span style="color: Tomato;"> instead of </span><span style="color: Tomato;"><strong>as</strong></span><span style="color: Tomato;"> with a literal type.</span>
   

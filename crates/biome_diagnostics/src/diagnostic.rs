@@ -1,4 +1,9 @@
-use std::{convert::Infallible, fmt::Debug, io};
+use std::{
+    convert::Infallible,
+    fmt::{Debug, Display},
+    io,
+    str::FromStr,
+};
 
 use bitflags::bitflags;
 use serde::{Deserialize, Serialize};
@@ -107,7 +112,9 @@ pub trait Diagnostic: Debug {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Default,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 /// The severity to associate to a diagnostic.
@@ -115,6 +122,7 @@ pub enum Severity {
     /// Reports a hint.
     Hint,
     /// Reports an information.
+    #[default]
     Information,
     /// Reports a warning.
     Warning,
@@ -122,6 +130,35 @@ pub enum Severity {
     Error,
     /// Reports a crash.
     Fatal,
+}
+
+impl FromStr for Severity {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "hint" => Ok(Self::Information),
+            "info" => Ok(Self::Information),
+            "warn" => Ok(Self::Warning),
+            "error" => Ok(Self::Error),
+            v => Err(format!(
+                "Found unexpected value ({}), valid values are: info, warn, error.",
+                v
+            )),
+        }
+    }
+}
+
+impl Display for Severity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Hint => write!(f, "info"),
+            Self::Information => write!(f, "info"),
+            Self::Warning => write!(f, "warn"),
+            Self::Error => write!(f, "error"),
+            Self::Fatal => write!(f, "fatal"),
+        }
+    }
 }
 
 /// Internal enum used to automatically generate bit offsets for [DiagnosticTags]

@@ -52,7 +52,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@8..11 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@11..14 "cue" [] [],
                                 },
@@ -103,7 +103,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@34..37 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@37..40 "cue" [] [],
                                 },
@@ -185,7 +185,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@86..88 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@88..91 "cue" [] [],
                                 },
@@ -223,7 +223,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@103..105 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@105..108 "cue" [] [],
                                 },
@@ -285,7 +285,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@8..32
             0: CSS_PSEUDO_ELEMENT_SELECTOR@8..32
               0: COLON2@8..11 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@11..32
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@11..32
                 0: CSS_IDENTIFIER@11..14
                   0: IDENT@11..14 "cue" [] []
                 1: L_PAREN@14..15 "(" [] []
@@ -319,7 +319,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@34..64
             0: CSS_PSEUDO_ELEMENT_SELECTOR@34..64
               0: COLON2@34..37 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@37..64
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@37..64
                 0: CSS_IDENTIFIER@37..40
                   0: IDENT@37..40 "cue" [] []
                 1: L_PAREN@40..44 "(" [] [Whitespace("   ")]
@@ -372,7 +372,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@86..95
             0: CSS_PSEUDO_ELEMENT_SELECTOR@86..95
               0: COLON2@86..88 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@88..95
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@88..95
                 0: CSS_IDENTIFIER@88..91
                   0: IDENT@88..91 "cue" [] []
                 1: L_PAREN@91..92 "(" [] []
@@ -397,7 +397,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@103..116
             0: CSS_PSEUDO_ELEMENT_SELECTOR@103..116
               0: COLON2@103..105 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@105..116
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@105..116
                 0: CSS_IDENTIFIER@105..108
                   0: IDENT@105..108 "cue" [] []
                 1: L_PAREN@108..109 "(" [] []

@@ -37,7 +37,7 @@ Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-th
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:5:9 <a href="https://biomejs.dev/lint/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:5:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Using </span><span style="color: Orange;"><strong>this</strong></span><span style="color: Orange;"> in a </span><span style="color: Orange;"><strong>static</strong></span><span style="color: Orange;"> context can be confusing.</span>
   
@@ -68,7 +68,7 @@ Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-th
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:3:9 <a href="https://biomejs.dev/lint/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:3:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Using </span><span style="color: Orange;"><strong>super</strong></span><span style="color: Orange;"> in a </span><span style="color: Orange;"><strong>static</strong></span><span style="color: Orange;"> context can be confusing.</span>
   

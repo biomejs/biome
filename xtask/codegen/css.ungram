@@ -172,9 +172,8 @@ CssPseudoElementSelector =
 
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
-	| CssPseudoElementFunction
-  | CssPseudoElementHighlight
-  | CssPseudoElementPart
+	| CssPseudoElementFunctionSelector
+  | CssPseudoElementFunctionIdentifier
 
 // a::after {}
 //    ^^^^^
@@ -183,24 +182,18 @@ CssPseudoElementIdentifier =
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssPseudoElementFunction =
+CssPseudoElementFunctionSelector =
 	name: CssIdentifier
 	'('
 	selector: AnyCssSelector
 	')'
 
 // ::highlight(sample) {}
-// ^^^^^^^^^^^^^^^^^^^
-CssPseudoElementHighlight =
-	name: 'highlight'
-	'('
-	custom_highlight_name: CssIdentifier
-	')'
-
+//   ^^^^^^^^^^^^^^^^^
 // ::part(active) {}
-//        ^^^^^^
-CssPseudoElementPart =
-	name: 'part'
+//   ^^^^^^^^^^^^
+CssPseudoElementFunctionIdentifier =
+	name: ('highlight' | 'part')
 	'('
 	ident: CssIdentifier
 	')'

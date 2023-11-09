@@ -1,5 +1,6 @@
 use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use biome_diagnostics::Severity;
 use bpaf::Bpaf;
 use std::str::FromStr;
 
@@ -66,6 +67,15 @@ pub struct CliOptions {
         display_fallback
     )]
     pub log_kind: LoggingKind,
+
+    #[bpaf(
+        long("diagnostic-level"),
+        argument("info|warn|error"),
+        fallback(Severity::default()),
+        display_fallback
+    )]
+    /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+    pub diagnostic_level: Severity,
 }
 
 #[derive(Debug, Clone)]

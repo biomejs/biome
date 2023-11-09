@@ -31,10 +31,10 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssPseudoElementHighlight {
-                                name_token: HIGHLIGHT_KW@2..11 "highlight" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: HIGHLIGHT_KW@2..11 "highlight" [] [],
                                 l_paren_token: L_PAREN@11..12 "(" [] [],
-                                custom_highlight_name: CssIdentifier {
+                                ident: CssIdentifier {
                                     value_token: IDENT@12..18 "sample" [] [],
                                 },
                                 r_paren_token: R_PAREN@18..20 ")" [] [Whitespace(" ")],
@@ -61,10 +61,10 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@28..30 "::" [] [],
-                            element: CssPseudoElementHighlight {
-                                name_token: HIGHLIGHT_KW@30..39 "highlight" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: HIGHLIGHT_KW@30..39 "highlight" [] [],
                                 l_paren_token: L_PAREN@39..40 "(" [] [],
-                                custom_highlight_name: CssIdentifier {
+                                ident: CssIdentifier {
                                     value_token: IDENT@40..43 "bar" [] [],
                                 },
                                 r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
@@ -91,10 +91,10 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@53..55 "::" [] [],
-                            element: CssPseudoElementHighlight {
-                                name_token: HIGHLIGHT_KW@55..64 "highlight" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: HIGHLIGHT_KW@55..64 "highlight" [] [],
                                 l_paren_token: L_PAREN@64..65 "(" [] [],
-                                custom_highlight_name: CssIdentifier {
+                                ident: CssIdentifier {
                                     value_token: IDENT@65..68 "foo" [] [],
                                 },
                                 r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
@@ -127,7 +127,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..20
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..20
               0: COLON2@0..2 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@2..20
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@2..20
                 0: HIGHLIGHT_KW@2..11 "highlight" [] []
                 1: L_PAREN@11..12 "(" [] []
                 2: CSS_IDENTIFIER@12..18
@@ -147,7 +147,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@28..45
             0: CSS_PSEUDO_ELEMENT_SELECTOR@28..45
               0: COLON2@28..30 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@30..45
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@30..45
                 0: HIGHLIGHT_KW@30..39 "highlight" [] []
                 1: L_PAREN@39..40 "(" [] []
                 2: CSS_IDENTIFIER@40..43
@@ -167,7 +167,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@53..70
             0: CSS_PSEUDO_ELEMENT_SELECTOR@53..70
               0: COLON2@53..55 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_HIGHLIGHT@55..70
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@55..70
                 0: HIGHLIGHT_KW@55..64 "highlight" [] []
                 1: L_PAREN@64..65 "(" [] []
                 2: CSS_IDENTIFIER@65..68
