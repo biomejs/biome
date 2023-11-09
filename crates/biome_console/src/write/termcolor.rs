@@ -237,8 +237,8 @@ mod tests {
         // tabs, newline, ...) and non-ASCII unicode characters as-is but
         // redact zero-width characters (RTL override, null character, bell,
         // zero-width space, ...)
-        const INPUT: &str = "t\tes t\r\n\u{202D}t\0es\x07t\u{202E}\nt\u{200B}es🐛t1️⃣";
-        const OUTPUT: &str = "t\tes t\r\n\u{FFFD}t\u{FFFD}es\u{FFFD}t\u{FFFD}\nt\u{FFFD}es🐛t1️⃣";
+        const INPUT: &str = "t\tes t\r\n\u{202D}t\0es\x07t\u{202E}\nt\u{200B}es🐛t";
+        const OUTPUT: &str = "t\tes t\r\n\u{FFFD}t\u{FFFD}es\u{FFFD}t\u{FFFD}\nt\u{FFFD}es🐛t";
 
         let mut buffer = Vec::new();
 
@@ -269,6 +269,27 @@ mod tests {
                 <Hyperlink href="https://biomejs.dev/">"link"</Hyperlink>
             })
             .unwrap();
+
+        assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+    }
+
+    #[test]
+    fn test_printing_complex_emojis() {
+        const INPUT: &str = "⚠️1️⃣ℹ️";
+        const OUTPUT: &str = "⚠️1️⃣ℹ️";
+
+        let mut buffer = Vec::new();
+
+        {
+            let writer = termcolor::Ansi::new(&mut buffer);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
 
         assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
     }
