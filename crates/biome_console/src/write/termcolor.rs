@@ -165,7 +165,7 @@ where
             // Unicode is currently poorly supported on most Windows
             // terminal clients, so we always strip emojis in Windows
             if cfg!(windows) || !self.writer.supports_color() {
-                let is_ascii = grapheme_contains_non_ascii(grapheme);
+                let is_ascii = grapheme_is_ascii(grapheme);
 
                 if !is_ascii {
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
@@ -176,6 +176,8 @@ where
                         self.error = Err(err);
                         return Err(fmt::Error);
                     }
+
+                    continue;
                 }
             };
 
@@ -193,16 +195,15 @@ where
     }
 }
 
-/// This is not 100% bulletproof, but it's the best way I found
-/// to tell if a unicode grapheme is whitespace char or not
-/// as perceived by a human
+/// Determines if a unicode grapheme consists only of code points
+/// which are considered whitepsace characters in ASCII
 fn grapheme_is_whitespace(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_whitespace())
 }
 
 /// Determines if a grapheme contains code points which are out of the ASCII
 /// range and thus cannot be printed where unicode is not supported.
-fn grapheme_contains_non_ascii(grapheme: &str) -> bool {
+fn grapheme_is_ascii(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_ascii())
 }
 
