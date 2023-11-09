@@ -19,25 +19,24 @@ declare_rule! {
     ///
     /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-role.md
     ///
-    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    ///  ```js,expect_diagnostic
-    ///   <div role="datepicker"></div>
-    ///  ```
-    ///
-    ///  ```js,expect_diagnostic
-    ///   <div role="range"></div>
-    ///  ```
-    ///
-    ///  ```js,expect_diagnostic
-    ///   <div role=""></div>
+    /// ```js,expect_diagnostic
+    /// <div role="datepicker"></div>
     /// ```
     ///
     /// ```js,expect_diagnostic
-    ///   <Foo role="foo"></Foo>
+    /// <div role="range"></div>
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// <div role=""></div>
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// <Foo role="foo"></Foo>
     /// ```
     ///
     /// ### Valid
@@ -56,16 +55,18 @@ declare_rule! {
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "allowInvalidRoles": ["invalid", "text"],
+    ///         "allowInvalidRoles": ["invalid-role", "text"],
     ///         "nonIgnoreDom": true
     ///     }
     /// }
     /// ```
     ///
     /// ## Accessibility guidelines
+    ///
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     /// ## Resources
+    ///
     /// - [Chrome Audit Rules, AX_ARIA_01](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_01)
     /// - [DPUB-ARIA roles](https://www.w3.org/TR/dpub-aria-1.0/)
     /// - [MDN: Using ARIA: Roles, states, and properties](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques)
@@ -146,7 +147,6 @@ impl Rule for UseValidAriaRole {
         }
 
         let role_attribute = node.find_attribute_by_name("role")?;
-
         let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
         let mut role_attribute_value = role_attribute_value.split(' ');
@@ -165,7 +165,6 @@ impl Rule for UseValidAriaRole {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -184,9 +183,7 @@ impl Rule for UseValidAriaRole {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         let role_attribute = node.find_attribute_by_name("role")?;
-
         mutation.remove_node(role_attribute);
-
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
