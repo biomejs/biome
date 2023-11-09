@@ -42,6 +42,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#676](https://github.com/biomejs/biome/issues/676), by using the correct node for the `"noreferrer"` when applying the code action. Contributed by @ematipico
 
+-Fix [#455](https://github.com/biomejs/biome/issues/455). The CLI can now print complex emojis to the console correctly.
+
 ### Parser
 
 ### VSCode
