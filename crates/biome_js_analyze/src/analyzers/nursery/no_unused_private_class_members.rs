@@ -119,9 +119,9 @@ fn traverse_members_usage(
     syntax: &JsSyntaxNode,
     mut private_members: FxHashSet<AnyMember>,
 ) -> Vec<AnyMember> {
-    let mut iter = syntax.preorder();
+    let iter = syntax.preorder();
 
-    while let Some(event) = iter.next() {
+    for event in iter {
         match event {
             biome_rowan::WalkEvent::Enter(node) => {
                 if let Some(js_name) = AnyJsName::cast(node) {
