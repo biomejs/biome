@@ -277,6 +277,7 @@ mod tests {
     fn test_printing_complex_emojis() {
         const INPUT: &str = "⚠️1️⃣ℹ️";
         const OUTPUT: &str = "⚠️1️⃣ℹ️";
+        const WINDOWS_OUTPUT: &str = "!1i";
 
         let mut buffer = Vec::new();
 
@@ -291,6 +292,10 @@ mod tests {
             adapter.error.unwrap();
         }
 
-        assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+        if cfg!(windows) {
+            assert_eq!(from_utf8(&buffer).unwrap(), WINDOWS_OUTPUT);
+        } else {
+            assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+        }
     }
 }
