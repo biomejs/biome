@@ -10,13 +10,6 @@ type a= {
     ]: C  |  D
   }
 
-type a= {
-    [
-      A in
-      // prettier-ignore
-      B
-    ]: C  |  D
-  }
 
 type a= {
     [A in B]:
@@ -31,13 +24,6 @@ type a= {
     ]: C  |  D
   }
 
-type a= {
-    [
-      A in
-      /* prettier-ignore */
-      B
-    ]: C  |  D
-  }
 
 type a= {
     [A in B]:
