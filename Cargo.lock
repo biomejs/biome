@@ -212,6 +212,7 @@ dependencies = [
  "serde",
  "termcolor",
  "trybuild",
+ "unicode-segmentation",
  "unicode-width",
 ]
 
