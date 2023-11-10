@@ -848,6 +848,15 @@ impl VisitNode<JsonLanguage> for Nursery {
                 configuration.map_rule_configuration(&value, "noUnusedImports", diagnostics)?;
                 self.no_unused_imports = Some(configuration);
             }
+            "noUnusedPrivateClassMembers" => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(
+                    &value,
+                    "noUnusedPrivateClassMembers",
+                    diagnostics,
+                )?;
+                self.no_unused_private_class_members = Some(configuration);
+            }
             "noUselessElse" => {
                 let mut configuration = RuleConfiguration::default();
                 configuration.map_rule_configuration(&value, "noUselessElse", diagnostics)?;
@@ -920,6 +929,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                         "noMisrefactoredShorthandAssign",
                         "noThisInStatic",
                         "noUnusedImports",
+                        "noUnusedPrivateClassMembers",
                         "noUselessElse",
                         "noUselessLoneBlockStatements",
                         "useAriaActivedescendantWithTabindex",

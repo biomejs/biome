@@ -102,6 +102,7 @@ define_categories! {
     "lint/nursery/noMisrefactoredShorthandAssign": "https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign",
     "lint/nursery/noThisInStatic": "https://biomejs.dev/linter/rules/no-this-in-static",
     "lint/nursery/noUnusedImports": "https://biomejs.dev/linter/rules/no-unused-imports",
+    "lint/nursery/noUnusedPrivateClassMembers": "https://biomejs.dev/linter/rules/no-unused-private-class-members",
     "lint/nursery/noUselessElse": "https://biomejs.dev/linter/rules/no-useless-else",
     "lint/nursery/noUselessLoneBlockStatements": "https://biomejs.dev/linter/rules/no-useless-lone-block-statements",
     "lint/nursery/useAriaActivedescendantWithTabindex": "https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",

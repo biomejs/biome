@@ -96,6 +96,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
 - Support more a11y roles and fix some methods for a11y lint rules Contributed @nissy-dev
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+- Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+
+#### New features
+
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
+  The rule disallow unused private class members.
+  Contributed by @victor-teles
 
 ### Parser
 
