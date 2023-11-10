@@ -8,4 +8,5 @@ import org.jetbrains.annotations.ApiStatus
 @ApiStatus.Internal
 class BiomeSettingsState : BaseState() {
     var executablePath by string()
+    var configPath by string()
 }
