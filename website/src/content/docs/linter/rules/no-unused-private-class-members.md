@@ -29,7 +29,7 @@ class OnlyWrite {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:2 <a href="https://biomejs.dev/lint/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:2 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   
@@ -57,7 +57,7 @@ class OnlyWrite {
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/lint/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noUnusedPrivateClassMembers.js:2:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   
@@ -74,7 +74,7 @@ class OnlyWrite {
     <strong>3</strong> <strong>2</strong><strong> │ </strong>  
     <strong>4</strong> <strong>3</strong><strong> │ </strong>     private unusedMethod() {
   
-nursery/noUnusedPrivateClassMembers.js:4:12 <a href="https://biomejs.dev/lint/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+nursery/noUnusedPrivateClassMembers.js:4:12 <a href="https://biomejs.dev/linter/rules/no-unused-private-class-members">lint/nursery/noUnusedPrivateClassMembers</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This private class member is defined but never used.</span>
   

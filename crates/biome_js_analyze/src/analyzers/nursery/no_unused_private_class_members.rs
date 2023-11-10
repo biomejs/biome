@@ -119,28 +119,36 @@ fn traverse_members_usage(
     syntax: &JsSyntaxNode,
     mut private_members: FxHashSet<AnyMember>,
 ) -> Vec<AnyMember> {
-    for node in syntax.descendants() {
-        if let Some(js_name) = AnyJsName::cast(node) {
-            private_members.retain(|private_member| {
-                let member_being_used = private_member.match_js_name(&js_name) == Some(true);
-                let is_write_only =
-                    is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
-                let is_update_expression = is_update_expression(&js_name);
+    let mut iter = syntax.preorder();
 
-                if member_being_used && is_update_expression {
-                    return true;
+    while let Some(event) = iter.next() {
+        match event {
+            biome_rowan::WalkEvent::Enter(node) => {
+                if let Some(js_name) = AnyJsName::cast(node) {
+                    private_members.retain(|private_member| {
+                        let member_being_used =
+                            private_member.match_js_name(&js_name) == Some(true);
+                        let is_write_only =
+                            is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
+                        let is_in_update_expression = is_in_update_expression(&js_name);
+
+                        if member_being_used && is_in_update_expression {
+                            return true;
+                        }
+
+                        if member_being_used && is_write_only {
+                            return true;
+                        }
+
+                        false
+                    });
+
+                    if private_members.is_empty() {
+                        break;
+                    }
                 }
-
-                if member_being_used && is_write_only {
-                    return true;
-                }
-
-                false
-            });
-
-            if private_members.is_empty() {
-                break;
             }
+            biome_rowan::WalkEvent::Leave(_) => continue,
         }
     }
 
@@ -176,7 +184,7 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
                 .filter_map(|param| match param.ok()? {
                     biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(
                         ts_property,
-                    ) => Some(AnyMember::TsPropertyParameter(ts_property)),
+                    ) => Some(ts_property.into()),
                     _ => None,
                 })
                 .collect();
@@ -186,7 +194,22 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
     FxHashSet::default()
 }
 
-/// Check whether the js name is in a write only assignment.
+/// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
+/// This function inspects the syntax tree around the given `AnyJsName` to check whether it is involved in an assignment operation and whether that assignment can be write-only.
+///
+/// # Returns
+///
+/// - `Some(true)`: If the `js_name` is in a write-only assignment.
+/// - `Some(false)`: If the `js_name` is in a assignments that also reads like shorthand operators
+/// - `None`: If the parent is not present or grand parent is not a JsAssignmentExpression
+///
+/// # Examples of write only expressions
+///
+/// ```js
+/// this.usedOnlyInWrite = 2;
+/// this.usedOnlyInWrite = this.usedOnlyInWrite;
+/// ```
+///
 fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let parent = js_name.syntax().parent()?;
     let grand_parent = parent.parent()?;
@@ -210,7 +233,7 @@ fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     Some(true)
 }
 
-fn is_update_expression(js_name: &AnyJsName) -> bool {
+fn is_in_update_expression(js_name: &AnyJsName) -> bool {
     let grand_parent = js_name.syntax().grand_parent();
 
     grand_parent.kind().is_some_and(|kind| {
