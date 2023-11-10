@@ -81,6 +81,10 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
+    /// const fooYPosition = 0;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// function f(FirstParam) {}
     /// ```
     ///
@@ -324,6 +328,7 @@ impl Rule for UseNamingConvention {
             element,
             suggested_name,
         } = state;
+        let options = ctx.options();
         let name = ctx.query().name().ok()?;
         let name = name.text();
         let trimmed_name = trim_underscore_dollar(name);
@@ -338,6 +343,23 @@ impl Rule for UseNamingConvention {
         } else {
             markup! {""}.to_owned()
         };
+
+        if options.strict_case {
+            let case_type = Case::identify(name, false);
+            let case_strict = Case::identify(name, true);
+            if case_type == Case::Camel && case_strict == Case::Unknown {
+                return Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    ctx.query().syntax().text_trimmed_range(),
+                    markup! {
+                        "Two consecutive uppercase characters are not allowed in camelCase and PascalCase because `strictCase` is set to `true`."
+                    },
+                ).note(markup! {
+                    "If you want to use consecutive uppercase characters in camelCase and PascalCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-naming-convention#options">"options"</Hyperlink>" for more inforamtion."
+                }));
+            }
+        }
+
         Some(RuleDiagnostic::new(
             rule_category!(),
             ctx.query().syntax().text_trimmed_range(),
