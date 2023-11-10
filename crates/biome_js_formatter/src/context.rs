@@ -1,6 +1,6 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::token::string::Quote;
 use biome_formatter::{
@@ -8,7 +8,6 @@ use biome_formatter::{
     LineWidth, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
-use biome_rowan::TokenText;
 use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -416,19 +415,18 @@ impl From<QuoteStyle> for Quote {
 
 impl Deserializable for QuoteStyle {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         const ALLOWED_VARIANTS: &[&str] = &["double", "single"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.text() {
+        match Text::deserialize(value, name, diagnostics)?.text() {
             "double" => Some(QuoteStyle::Double),
             "single" => Some(QuoteStyle::Single),
-            _ => {
+            unknown_variant => {
                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value.text(),
-                    range,
+                    unknown_variant,
+                    value.range(),
                     ALLOWED_VARIANTS,
                 ));
                 None
@@ -473,19 +471,18 @@ impl fmt::Display for QuoteProperties {
 
 impl Deserializable for QuoteProperties {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["preserve", "asNeeded"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.text() {
+        match Text::deserialize(value, name, diagnostics)?.text() {
             "asNeeded" => Some(QuoteProperties::AsNeeded),
             "preserve" => Some(QuoteProperties::Preserve),
-            _ => {
+            unknown_variant => {
+                const ALLOWED_VARIANTS: &[&str] = &["preserve", "asNeeded"];
                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value.text(),
-                    range,
+                    unknown_variant,
+                    value.range(),
                     ALLOWED_VARIANTS,
                 ));
                 None
@@ -539,19 +536,18 @@ impl fmt::Display for Semicolons {
 
 impl Deserializable for Semicolons {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["always", "asNeeded"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.text() {
+        match Text::deserialize(value, name, diagnostics)?.text() {
             "always" => Some(Semicolons::Always),
             "asNeeded" => Some(Semicolons::AsNeeded),
-            _ => {
+            unknown_value => {
+                const ALLOWED_VARIANTS: &[&str] = &["always", "asNeeded"];
                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value.text(),
-                    range,
+                    unknown_value,
+                    value.range(),
                     ALLOWED_VARIANTS,
                 ));
                 None
@@ -606,19 +602,18 @@ impl fmt::Display for ArrowParentheses {
 
 impl Deserializable for ArrowParentheses {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["asNeeded", "always"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.text() {
+        match Text::deserialize(value, name, diagnostics)?.text() {
             "always" => Some(ArrowParentheses::Always),
             "asNeeded" => Some(ArrowParentheses::AsNeeded),
-            _ => {
+            unknown_value => {
+                const ALLOWED_VARIANTS: &[&str] = &["asNeeded", "always"];
                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value.text(),
-                    range,
+                    unknown_value,
+                    value.range(),
                     ALLOWED_VARIANTS,
                 ));
                 None

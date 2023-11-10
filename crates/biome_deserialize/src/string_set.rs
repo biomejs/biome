@@ -3,6 +3,7 @@ use indexmap::IndexSet;
 use serde::de::{SeqAccess, Visitor};
 use serde::ser::SerializeSeq;
 use serde::{Deserialize, Serialize};
+use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 // To implement serde's traits, we encapsulate `IndexSet<String>` in a new type `StringSet`.
@@ -16,24 +17,22 @@ impl StringSet {
         Self(index_set)
     }
 
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn index_set(&self) -> &IndexSet<String> {
-        &self.0
-    }
-
     pub fn into_index_set(self) -> IndexSet<String> {
         self.0
     }
+}
 
-    pub fn extend(&mut self, entries: impl IntoIterator<Item = String>) {
-        self.0.extend(entries);
+impl Deref for StringSet {
+    type Target = IndexSet<String>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for StringSet {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -42,12 +41,6 @@ impl FromStr for StringSet {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(StringSet::default())
-    }
-}
-
-impl From<IndexSet<String>> for StringSet {
-    fn from(value: IndexSet<String>) -> Self {
-        Self::new(value)
     }
 }
 
@@ -95,9 +88,10 @@ impl Serialize for StringSet {
 
 impl Deserializable for StringSet {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<crate::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Deserializable::deserialize(value, diagnostics).map(StringSet)
+        Deserializable::deserialize(value, name, diagnostics).map(StringSet)
     }
 }

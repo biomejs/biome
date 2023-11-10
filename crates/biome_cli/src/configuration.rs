@@ -75,7 +75,7 @@ impl LoadedConfiguration {
             .cloned()
             .unwrap_or(fs.working_directory().unwrap_or(PathBuf::from("./")));
         let mut deserialized_configurations = vec![];
-        for path in extends.index_set() {
+        for path in extends.iter() {
             let config_path = directory_path.join(path);
             let mut file = fs
 					.open_with_options(config_path.as_path(), OpenOptions::default().read(true))

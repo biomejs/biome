@@ -3,17 +3,17 @@ mod formatter;
 use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptParser};
 use crate::configuration::JavascriptConfiguration;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
-use biome_rowan::TokenText;
 
 impl Deserializable for JavascriptConfiguration {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(JavascriptConfigurationVisitor, diagnostics)
+        value.deserialize(JavascriptConfigurationVisitor, name, diagnostics)
     }
 }
 
@@ -21,38 +21,39 @@ struct JavascriptConfigurationVisitor;
 impl DeserializationVisitor for JavascriptConfigurationVisitor {
     type Output = JavascriptConfiguration;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: biome_rowan::TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["formatter", "globals", "organizeImports", "parser"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "formatter" => {
-                    result.formatter = Deserializable::deserialize(value, diagnostics);
+                    result.formatter = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "parser" => {
-                    result.parser = Deserializable::deserialize(value, diagnostics);
+                    result.parser = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "globals" => {
-                    result.globals = Deserializable::deserialize(value, diagnostics);
+                    result.globals = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "organizeImports" => {
-                    result.organize_imports = Deserializable::deserialize(value, diagnostics);
+                    result.organize_imports =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
-                _ => {
+                unknown_key => {
                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key.text(),
-                        key_range,
+                        unknown_key,
+                        key.range(),
                         ALLOWED_KEYS,
                     ));
                 }
@@ -64,10 +65,11 @@ impl DeserializationVisitor for JavascriptConfigurationVisitor {
 
 impl Deserializable for JavascriptOrganizeImports {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(JavascriptOrganizeImportsVisitor, diagnostics)
+        value.deserialize(JavascriptOrganizeImportsVisitor, name, diagnostics)
     }
 }
 
@@ -75,12 +77,13 @@ struct JavascriptOrganizeImportsVisitor;
 impl DeserializationVisitor for JavascriptOrganizeImportsVisitor {
     type Output = JavascriptOrganizeImports;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        _members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        _members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: biome_rowan::TextRange,
+        _name: &str,
         _diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         Some(Self::Output::default())
@@ -89,10 +92,11 @@ impl DeserializationVisitor for JavascriptOrganizeImportsVisitor {
 
 impl Deserializable for JavascriptParser {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(JavascriptParserVisitor, diagnostics)
+        value.deserialize(JavascriptParserVisitor, name, diagnostics)
     }
 }
 
@@ -100,30 +104,30 @@ struct JavascriptParserVisitor;
 impl DeserializationVisitor for JavascriptParserVisitor {
     type Output = JavascriptParser;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: biome_rowan::TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["unsafeParameterDecoratorsEnabled"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "unsafeParameterDecoratorsEnabled" => {
                     result.unsafe_parameter_decorators_enabled =
-                        Deserializable::deserialize(value, diagnostics);
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
-                _ => {
+                unknown_key => {
                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key.text(),
-                        key_range,
+                        unknown_key,
+                        key.range(),
                         ALLOWED_KEYS,
                     ));
                 }

@@ -12,8 +12,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
 use biome_diagnostics::Applicability;
 use biome_js_semantic::CanBeImportedExported;
@@ -509,10 +509,11 @@ impl FromStr for NamingConventionOptions {
 
 impl Deserializable for NamingConventionOptions {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(NamingConventionOptionsVisitor, diagnostics)
+        value.deserialize(NamingConventionOptionsVisitor, name, diagnostics)
     }
 }
 
@@ -520,35 +521,38 @@ struct NamingConventionOptionsVisitor;
 impl DeserializationVisitor for NamingConventionOptionsVisitor {
     type Output = NamingConventionOptions;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["strictCase", "enumMemberCase"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "strictCase" => {
-                    if let Some(strict_case) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(strict_case) =
+                        Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
                         result.strict_case = strict_case;
                     }
                 }
                 "enumMemberCase" => {
-                    if let Some(case) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(case) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
                         result.enum_member_case = case;
                     }
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }
@@ -590,18 +594,18 @@ impl FromStr for EnumMemberCase {
 
 impl Deserializable for EnumMemberCase {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         const ALLOWED_VARIANTS: &[&str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        if let Ok(value) = value.text().parse::<Self>() {
+        let value_text = Text::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
             Some(value)
         } else {
             diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                value.text(),
-                range,
+                value_text.text(),
+                value.range(),
                 ALLOWED_VARIANTS,
             ));
             None

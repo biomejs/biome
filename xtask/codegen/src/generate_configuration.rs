@@ -151,7 +151,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
         rule_visitor_call.push(quote! {
             #group_name_string_literal => {
-                result.#property_group_name = Deserializable::deserialize(value, diagnostics);
+                result.#property_group_name = Deserializable::deserialize(&value, &key_text, diagnostics);
             }
         });
     }
@@ -305,44 +305,45 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use crate::configuration::linter::*;
         use crate::Rules;
         use biome_console::markup;
-        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, ExpectedType};
-        use biome_rowan::{TextRange, TokenText};
+        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType};
+        use biome_rowan::TextRange;
 
         impl Deserializable for Rules {
             fn deserialize(
-                value: impl DeserializableValue,
+                value: &impl DeserializableValue,
+                name: &str,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self> {
                 struct Visitor;
                 impl DeserializationVisitor for Visitor  {
                     type Output =Rules;
-                    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+                    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
                     fn visit_map(
                         self,
-                        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+                        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
                         range: TextRange,
+                        _name: &str,
                         diagnostics: &mut Vec<DeserializationDiagnostic>,
                     ) -> Option<Self::Output> {
                         let mut recommended_is_set = false;
                         let mut result = Self::Output::default();
-                        for (key, value) in members {
-                            let key_range = key.range();
-                            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                        for (key, value) in members.flatten() {
+                            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
                             };
-                            match key.text() {
+                            match key_text.text() {
                                 "recommended" => {
                                     recommended_is_set = true;
-                                    result.recommended = Deserializable::deserialize(value, diagnostics);
+                                    result.recommended = Deserializable::deserialize(&value, &key_text, diagnostics);
                                 }
                                 "all" => {
-                                    result.all = Deserializable::deserialize(value, diagnostics);
+                                    result.all = Deserializable::deserialize(&value, &key_text, diagnostics);
                                 }
                                 #( #rule_visitor_call ),*,
-                                _ => {
+                                unknown_key => {
                                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                        key.text(),
-                                        key_range,
+                                        unknown_key,
+                                        key.range(),
                                         &[#( #group_name_list ),*],
                                     ));
                                 }
@@ -360,7 +361,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                         Some(result)
                     }
                 }
-                value.deserialize(Visitor, diagnostics)
+                value.deserialize(Visitor, name, diagnostics)
             }
         }
         #( #visitor_rule_list )*
@@ -677,7 +678,7 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
         group_rules.push(Literal::string(rule_name));
         visitor_rule_line.push(quote! {
             #rule_name => {
-                result.#rule_identifier = RuleConfiguration::deserialize_from_rule_name(#rule_name, value, diagnostics);
+                result.#rule_identifier = Deserializable::deserialize(&value, #rule_name, diagnostics);
             }
         });
     }
@@ -685,39 +686,40 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
     quote! {
         impl Deserializable for #group_struct_name {
             fn deserialize(
-                value: impl DeserializableValue,
+                value: &impl DeserializableValue,
+                name: &str,
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self> {
                 struct Visitor;
                 impl DeserializationVisitor for Visitor  {
                     type Output =#group_struct_name;
-                    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+                    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
                     fn visit_map(
                         self,
-                        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+                        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
                         range: TextRange,
+                        _name: &str,
                         diagnostics: &mut Vec<DeserializationDiagnostic>,
                     ) -> Option<Self::Output> {
                         let mut recommended_is_set = false;
                         let mut result = Self::Output::default();
-                        for (key, value) in members {
-                            let key_range = key.range();
-                            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+                        for (key, value) in members.flatten() {
+                            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
                             };
-                            match key.text() {
+                            match key_text.text() {
                                 "recommended" => {
                                     recommended_is_set = true;
-                                    result.recommended = Deserializable::deserialize(value, diagnostics);
+                                    result.recommended = Deserializable::deserialize(&value, &key_text, diagnostics);
                                 }
                                 "all" => {
-                                    result.all = Deserializable::deserialize(value, diagnostics);
+                                    result.all = Deserializable::deserialize(&value, &key_text, diagnostics);
                                 }
                                 #( #visitor_rule_line ),*,
-                                _ => {
+                                unknown_key => {
                                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                                        key.text(),
-                                        key_range,
+                                        unknown_key,
+                                        key.range(),
                                         &[#( #group_rules ),*],
                                     ));
                                 }
@@ -735,7 +737,7 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
                         Some(result)
                     }
                 }
-                value.deserialize(Visitor, diagnostics)
+                value.deserialize(Visitor, name, diagnostics)
             }
         }
     }

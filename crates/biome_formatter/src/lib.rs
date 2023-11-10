@@ -52,7 +52,7 @@ use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
 pub use arguments::{Argument, Arguments};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TokenNumber,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
 };
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
@@ -177,24 +177,25 @@ impl LineWidth {
 
 impl Default for LineWidth {
     fn default() -> Self {
-        // Safe unwrap because 80 is greater than `0` and i lower than `u16::MAX``.
         Self(80)
     }
 }
 
 impl Deserializable for LineWidth {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let range = value.range();
-        let value = TokenNumber::deserialize(value, diagnostics)?;
-        if let Ok(value) = value.text().parse::<Self>() {
+        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        let diagnostic =
-            DeserializationDiagnostic::new_out_of_bound_integer(Self::MIN, Self::MAX, range);
-        diagnostics.push(diagnostic);
+        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+            Self::MIN,
+            Self::MAX,
+            value.range(),
+        ));
         None
     }
 }

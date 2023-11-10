@@ -1,10 +1,9 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
 use biome_formatter::prelude::{if_group_breaks, text};
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
-use biome_rowan::TokenText;
 use std::fmt;
 use std::str::FromStr;
 
@@ -106,20 +105,19 @@ impl fmt::Display for TrailingComma {
 
 impl Deserializable for TrailingComma {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["all", "es5", "none"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.text() {
+        match Text::deserialize(value, name, diagnostics)?.text() {
             "all" => Some(TrailingComma::All),
             "es5" => Some(TrailingComma::Es5),
             "none" => Some(TrailingComma::None),
-            _ => {
+            unknown_variant => {
+                const ALLOWED_VARIANTS: &[&str] = &["all", "es5", "none"];
                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    value.text(),
-                    range,
+                    unknown_variant,
+                    value.range(),
                     ALLOWED_VARIANTS,
                 ));
                 None

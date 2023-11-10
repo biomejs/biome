@@ -1,16 +1,16 @@
 use crate::Configuration;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
-use biome_rowan::TokenText;
 
 impl Deserializable for Configuration {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(ConfigurationVisitor, diagnostics)
+        value.deserialize(ConfigurationVisitor, name, diagnostics)
     }
 }
 
@@ -18,12 +18,13 @@ struct ConfigurationVisitor;
 impl DeserializationVisitor for ConfigurationVisitor {
     type Output = Configuration;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: biome_rowan::TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &[
@@ -39,45 +40,45 @@ impl DeserializationVisitor for ConfigurationVisitor {
             "overrides",
         ];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "$schema" => {
-                    result.schema = Deserializable::deserialize(value, diagnostics);
+                    result.schema = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "files" => {
-                    result.files = Deserializable::deserialize(value, diagnostics);
+                    result.files = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "vcs" => {
-                    result.vcs = Deserializable::deserialize(value, diagnostics);
+                    result.vcs = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "formatter" => {
-                    result.formatter = Deserializable::deserialize(value, diagnostics);
+                    result.formatter = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "linter" => {
-                    result.linter = Deserializable::deserialize(value, diagnostics);
+                    result.linter = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "javascript" => {
-                    result.javascript = Deserializable::deserialize(value, diagnostics);
+                    result.javascript = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "json" => {
-                    result.json = Deserializable::deserialize(value, diagnostics);
+                    result.json = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "organizeImports" => {
-                    result.organize_imports = Deserializable::deserialize(value, diagnostics);
+                    result.organize_imports =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "extends" => {
-                    result.extends = Deserializable::deserialize(value, diagnostics);
+                    result.extends = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "overrides" => {
-                    result.overrides = Deserializable::deserialize(value, diagnostics);
+                    result.overrides = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }

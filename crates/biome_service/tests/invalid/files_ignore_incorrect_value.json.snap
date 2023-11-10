@@ -4,7 +4,7 @@ expression: files_ignore_incorrect_value.json
 ---
 files_ignore_incorrect_value.json:3:25 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incorrect type, expected a string.
+  × Incorrect type, expected a string, but received a boolean.
   
     1 │ {
     2 │ 	"files": {

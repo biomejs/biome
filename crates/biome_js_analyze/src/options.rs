@@ -17,6 +17,7 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
+use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
@@ -50,29 +51,6 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
-    pub fn deserialize_from_rule_name(
-        rule_name: &str,
-        value: impl DeserializableValue,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match rule_name {
-            "noExcessiveCognitiveComplexity" => {
-                Deserializable::deserialize(value, diagnostics).map(Self::Complexity)
-            }
-            "noRestrictedGlobals" => {
-                Deserializable::deserialize(value, diagnostics).map(Self::RestrictedGlobals)
-            }
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                Deserializable::deserialize(value, diagnostics).map(Self::Hooks)
-            }
-            "useNamingConvention" => {
-                Deserializable::deserialize(value, diagnostics).map(Self::NamingConvention)
-            }
-            "useValidAriaRole" => Some(Self::ValidAriaRole(ValidAriaRoleOptions::default())),
-            _ => None,
-        }
-    }
-
     pub fn extract_option(&self, rule_key: &RuleKey) -> RuleOptions {
         match rule_key.rule_name() {
             "noExcessiveCognitiveComplexity" => {
@@ -116,30 +94,35 @@ impl PossibleOptions {
     }
 }
 
-impl VisitNode<JsonLanguage> for PossibleOptions {
-    fn visit_map(
-        &mut self,
-        key: &biome_rowan::SyntaxNode<JsonLanguage>,
-        value: &biome_rowan::SyntaxNode<JsonLanguage>,
+impl Deserializable for PossibleOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        match self {
-            PossibleOptions::Complexity(options) => {
-                options.visit_map(key, value, diagnostics)?;
+    ) -> Option<Self> {
+        match rule_name {
+            "noExcessiveCognitiveComplexity" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::Complexity)
             }
-            PossibleOptions::Hooks(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::RestrictedGlobals),
+            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
-            PossibleOptions::NamingConvention(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            "useNamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::NamingConvention),
+            "useValidAriaRole" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::ValidAriaRole)
             }
-            PossibleOptions::RestrictedGlobals(options) => {
-                options.visit_map(key, value, diagnostics)?;
-            }
-            PossibleOptions::ValidAriaRole(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            _ => {
+                diagnostics.push(
+                    DeserializationDiagnostic::new(markup! {
+                        "The rule "<Emphasis>{rule_name}</Emphasis>" doesn't accept any options."
+                    })
+                    .with_range(value.range()),
+                );
+                None
             }
         }
-        Some(())
     }
 }

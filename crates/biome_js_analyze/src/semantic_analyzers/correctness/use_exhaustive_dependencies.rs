@@ -3,15 +3,15 @@ use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
-use biome_rowan::{AstNode, SyntaxNodeCast, TokenText};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -228,10 +228,11 @@ impl FromStr for HooksOptions {
 
 impl Deserializable for HooksOptions {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(HooksOptionsVisitor, diagnostics)
+        value.deserialize(HooksOptionsVisitor, name, diagnostics)
     }
 }
 
@@ -239,26 +240,26 @@ struct HooksOptionsVisitor;
 impl DeserializationVisitor for HooksOptionsVisitor {
     type Output = HooksOptions;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["hooks"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "hooks" => {
                     let val_range = value.range();
-                    result.hooks =
-                        Deserializable::deserialize(value, diagnostics).unwrap_or_default();
+                    result.hooks = Deserializable::deserialize(&value, &key_text, diagnostics)
+                        .unwrap_or_default();
                     if result.hooks.is_empty() {
                         diagnostics.push(
                             DeserializationDiagnostic::new("At least one element is needed")
@@ -266,9 +267,9 @@ impl DeserializationVisitor for HooksOptionsVisitor {
                         );
                     }
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    text,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }
@@ -304,10 +305,11 @@ impl FromStr for Hooks {
 
 impl Deserializable for Hooks {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(HooksVisitor, diagnostics)
+        value.deserialize(HooksVisitor, name, diagnostics)
     }
 }
 
@@ -315,26 +317,26 @@ struct HooksVisitor;
 impl DeserializationVisitor for HooksVisitor {
     type Output = Hooks;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["name", "closureIndex", "dependenciesIndex"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "name" => {
                     let val_range = value.range();
-                    result.name =
-                        Deserializable::deserialize(value, diagnostics).unwrap_or_default();
+                    result.name = Deserializable::deserialize(&value, &key_text, diagnostics)
+                        .unwrap_or_default();
                     if result.name.is_empty() {
                         diagnostics.push(
                             DeserializationDiagnostic::new(markup!(
@@ -345,14 +347,16 @@ impl DeserializationVisitor for HooksVisitor {
                     }
                 }
                 "closureIndex" => {
-                    result.closure_index = Deserializable::deserialize(value, diagnostics);
+                    result.closure_index =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "dependenciesIndex" => {
-                    result.dependencies_index = Deserializable::deserialize(value, diagnostics);
+                    result.dependencies_index =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }

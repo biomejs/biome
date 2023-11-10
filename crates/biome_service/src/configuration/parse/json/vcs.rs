@@ -1,17 +1,17 @@
 use crate::configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
-use biome_rowan::TokenText;
 
 impl Deserializable for VcsConfiguration {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(VcsConfigurationVisitor, diagnostics)
+        value.deserialize(VcsConfigurationVisitor, name, diagnostics)
     }
 }
 
@@ -19,38 +19,40 @@ struct VcsConfigurationVisitor;
 impl DeserializationVisitor for VcsConfigurationVisitor {
     type Output = VcsConfiguration;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         range: biome_rowan::TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["clientKind", "enabled", "useIgnoreFile", "root"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            let key = key.text();
-            match key {
+            match key_text.text() {
                 "clientKind" => {
-                    result.client_kind = Some(Deserializable::deserialize(value, diagnostics)?);
+                    result.client_kind =
+                        Some(Deserializable::deserialize(&value, &key_text, diagnostics)?);
                 }
                 "enabled" => {
-                    result.enabled = Deserializable::deserialize(value, diagnostics);
+                    result.enabled = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "useIgnoreFile" => {
-                    result.use_ignore_file = Deserializable::deserialize(value, diagnostics);
+                    result.use_ignore_file =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "root" => {
-                    result.root = Deserializable::deserialize(value, diagnostics);
+                    result.root = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        key,
-                        range,
+                        &key_text,
+                        key.range(),
                         ALLOWED_KEYS,
                     ));
                 }
@@ -72,18 +74,18 @@ impl DeserializationVisitor for VcsConfigurationVisitor {
 
 impl Deserializable for VcsClientKind {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["git"];
-        let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        if let Ok(value) = value.text().parse::<Self>() {
+        let value_text = Text::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.text().parse::<Self>() {
             Some(value)
         } else {
+            const ALLOWED_VARIANTS: &[&str] = &["git"];
             diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                value.text(),
-                range,
+                value_text.text(),
+                value.range(),
                 ALLOWED_VARIANTS,
             ));
             None

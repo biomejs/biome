@@ -2,10 +2,9 @@ use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    Deserialized, ExpectedType,
+    Deserialized, Text, VisitableType,
 };
 use biome_json_syntax::JsonLanguage;
-use biome_rowan::TokenText;
 use biome_text_size::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 use std::ops::Add;
@@ -37,10 +36,11 @@ pub struct Version(node_semver::Version);
 
 impl Deserializable for PackageJson {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(PackageJsonVisitor, diagnostics)
+        value.deserialize(PackageJsonVisitor, name, diagnostics)
     }
 }
 
@@ -48,47 +48,52 @@ struct PackageJsonVisitor;
 impl DeserializationVisitor for PackageJsonVisitor {
     type Output = PackageJson;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "version" => {
-                    result.version = Deserializable::deserialize(value, diagnostics);
+                    result.version = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "name" => {
-                    result.name = Deserializable::deserialize(value, diagnostics);
+                    result.name = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "license" => {
                     let license_range = value.range();
                     // TODO: add proper parsing of license, e.g. support for AND keywords
-                    result.license = Deserializable::deserialize(value, diagnostics)
+                    result.license = Deserializable::deserialize(&value, &key_text, diagnostics)
                         .map(|license| (license, license_range));
                 }
                 "description" => {
-                    result.description = Deserializable::deserialize(value, diagnostics);
+                    result.description =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "dependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
                         result.dependencies = deps;
                     }
                 }
                 "devDependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
                         result.dev_dependencies = deps;
                     }
                 }
                 "optionalDependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
                         result.optional_dependencies = deps;
                     }
                 }
@@ -104,11 +109,13 @@ impl DeserializationVisitor for PackageJsonVisitor {
 
 impl Deserializable for Dependencies {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(Dependencies(Deserializable::deserialize(
             value,
+            name,
             diagnostics,
         )?))
     }
@@ -116,12 +123,13 @@ impl Deserializable for Dependencies {
 
 impl Deserializable for Version {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         let range = value.range();
-        let value = TokenText::deserialize(value, diagnostics)?;
-        match value.parse() {
+        let value = Text::deserialize(value, name, diagnostics)?;
+        match value.text().parse() {
             Ok(version) => Some(Version(version)),
             Err(err) => {
                 let (start, end) = err.location();

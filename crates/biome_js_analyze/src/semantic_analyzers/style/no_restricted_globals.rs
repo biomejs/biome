@@ -3,12 +3,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::AstNode;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -82,10 +82,11 @@ impl FromStr for RestrictedGlobalsOptions {
 
 impl Deserializable for RestrictedGlobalsOptions {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(RestrictedGlobalsOptionsVisitor, diagnostics)
+        value.deserialize(RestrictedGlobalsOptionsVisitor, name, diagnostics)
     }
 }
 
@@ -93,28 +94,28 @@ struct RestrictedGlobalsOptionsVisitor;
 impl DeserializationVisitor for RestrictedGlobalsOptionsVisitor {
     type Output = RestrictedGlobalsOptions;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["deniedGlobals"];
         let mut denied_globals = None;
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "deniedGlobals" => {
-                    denied_globals = Deserializable::deserialize(value, diagnostics);
+                    denied_globals = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }

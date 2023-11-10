@@ -4,14 +4,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    ExpectedType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
 use biome_js_syntax::{
     AnyFunctionLike, JsBreakStatement, JsContinueStatement, JsElseClause, JsLanguage,
     JsLogicalExpression, JsLogicalOperator,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::{num::NonZeroU8, str::FromStr};
@@ -399,10 +399,11 @@ impl FromStr for ComplexityOptions {
 
 impl Deserializable for ComplexityOptions {
     fn deserialize(
-        value: impl DeserializableValue,
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(ComplexityOptionsVisitor, diagnostics)
+        value.deserialize(ComplexityOptionsVisitor, name, diagnostics)
     }
 }
 
@@ -410,30 +411,30 @@ struct ComplexityOptionsVisitor;
 impl DeserializationVisitor for ComplexityOptionsVisitor {
     type Output = ComplexityOptions;
 
-    const EXPECTED_TYPE: ExpectedType = ExpectedType::MAP;
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
     fn visit_map(
         self,
-        members: impl Iterator<Item = (impl DeserializableValue, impl DeserializableValue)>,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["maxAllowedComplexity"];
         let mut result = Self::Output::default();
-        for (key, value) in members {
-            let key_range = key.range();
-            let Some(key) = TokenText::deserialize(key, diagnostics) else {
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
-            match key.text() {
+            match key_text.text() {
                 "maxAllowedComplexity" => {
-                    if let Some(val) = Deserializable::deserialize(value, diagnostics) {
+                    if let Some(val) = Deserializable::deserialize(&value, &key_text, diagnostics) {
                         result.max_allowed_complexity = val;
                     }
                 }
-                _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    key.text(),
-                    key_range,
+                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    text,
+                    key.range(),
                     ALLOWED_KEYS,
                 )),
             }

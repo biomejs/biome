@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 bitflags! {
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    pub struct ExpectedType: u8 {
+    pub struct VisitableType: u8 {
         const NULL = 1 << 0;
         const BOOL = 1 << 1;
         const NUMBER = 1 << 2;
@@ -20,27 +20,25 @@ bitflags! {
     }
 }
 
-impl Display for ExpectedType {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+impl std::fmt::Display for VisitableType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         if self.is_empty() {
             return write!(fmt, "no value");
         }
-        let mut is_not_first = false;
-        for expected_type in self.iter() {
-            if is_not_first {
-                write!(fmt, " or ")?;
+        for (i, expected_type) in self.iter().enumerate() {
+            if i != 0 {
+                write!(fmt, ", or ")?;
             }
             let expected_type = match expected_type {
-                ExpectedType::NULL => "null",
-                ExpectedType::BOOL => "a boolean",
-                ExpectedType::NUMBER => "a number",
-                ExpectedType::STR => "a string",
-                ExpectedType::ARRAY => "an array",
-                ExpectedType::MAP => "an object",
+                VisitableType::NULL => "null",
+                VisitableType::BOOL => "a boolean",
+                VisitableType::NUMBER => "a number",
+                VisitableType::STR => "a string",
+                VisitableType::ARRAY => "an array",
+                VisitableType::MAP => "an object",
                 _ => unreachable!("Unhandled deserialization type."),
             };
             write!(fmt, "{}", expected_type)?;
-            is_not_first = true;
         }
         Ok(())
     }
@@ -75,51 +73,67 @@ impl DeserializationDiagnostic {
     }
 
     /// Emitted when a generic node has an incorrect type
-    pub fn new_incorrect_type(expected_type: ExpectedType, range: impl AsSpan) -> Self {
+    pub fn new_incorrect_type(
+        actual_type: VisitableType,
+        expected_type: VisitableType,
+        range: impl AsSpan,
+    ) -> Self {
         Self::new(markup! {
-            "Incorrect type, expected "<Emphasis>{expected_type}"."</Emphasis>
+            "Incorrect type, expected "<Emphasis>{format_args!("{}", expected_type)}</Emphasis>", but received "<Emphasis>{format_args!("{}", actual_type)}</Emphasis>"."
+        })
+        .with_range(range)
+    }
+
+    /// Emitted when a generic node has an incorrect type
+    pub fn new_incorrect_type_with_name(
+        actual_type: VisitableType,
+        expected_type: VisitableType,
+        name: &str,
+        range: impl AsSpan,
+    ) -> Self {
+        if name.is_empty() {
+            return Self::new_incorrect_type(actual_type, expected_type, range);
+        }
+        Self::new(markup! {
+            <Emphasis>{name}</Emphasis>" has an incorrect type, expected "<Emphasis>{format_args!("{}", expected_type)}</Emphasis>", but received "<Emphasis>{format_args!("{}", actual_type)}</Emphasis>"."
         })
         .with_range(range)
     }
 
     /// Emitted when a generic node has an incorrect type
     pub fn new_out_of_bound_integer(
-        min: impl Display,
-        max: impl Display,
+        min: impl std::fmt::Display,
+        max: impl std::fmt::Display,
         range: impl AsSpan,
     ) -> Self {
         Self::new(markup! {
-            "The number should be an integer between "<Emphasis>{min}</Emphasis>" and "<Emphasis>{max}</Emphasis>"."
+            "The number should be an integer between "<Emphasis>{format_args!("{}", min)}</Emphasis>" and "<Emphasis>{format_args!("{}", max)}</Emphasis>"."
         })
         .with_range(range)
     }
 
     /// Emitted when there's an unknown key, against a set of known ones
-    pub fn new_unknown_key(
-        key_name: impl Display,
-        range: impl AsSpan,
-        known_members: &[&str],
-    ) -> Self {
-        Self::new(markup!("Found an unknown key `"<Emphasis>{{ key_name }}</Emphasis>"`." ))
+    pub fn new_unknown_key(key_name: &str, range: impl AsSpan, allowed_keys: &[&str]) -> Self {
+        Self::new(markup!("Found an unknown key `"<Emphasis>{key_name}</Emphasis>"`." ))
             .with_range(range)
-            .note_with_list("Accepted keys", known_members)
+            .note_with_list("Accepted keys", allowed_keys)
     }
 
     /// Emitted when there's an unknown value, against a set of known ones
     pub fn new_unknown_value(
-        variant_name: impl Display,
+        variant_name: &str,
         range: impl AsSpan,
-        known_variants: &[&str],
+        allowed_variants: &[&str],
     ) -> Self {
-        Self::new(markup! {"Found an unknown value `"<Emphasis>{{ variant_name }}</Emphasis>"`."})
+        Self::new(markup! {"Found an unknown value `"<Emphasis>{variant_name}</Emphasis>"`."})
             .with_range(range)
-            .note_with_list("Accepted values:", known_variants)
+            .note_with_list("Accepted values:", allowed_variants)
     }
 
     /// Emitted when there's a deprecated property
-    pub fn new_deprecated(key_name: impl Display, range: impl AsSpan, instead: &str) -> Self {
+    pub fn new_deprecated(key_name: &str, range: impl AsSpan, instead: &str) -> Self {
         Self::new(
-            markup! { "The property "<Emphasis>{{key_name}}</Emphasis>" is deprecated. Use "<Emphasis>{{instead}}</Emphasis>" instead." },
+            markup! { "The property "<Emphasis>{key_name}</Emphasis>" is deprecated. Use "<Emphasis>{{instead}}</Emphasis>" instead." },
         )
         .with_range(range)
         .with_tags(DiagnosticTags::DEPRECATED_CODE).with_custom_severity(Severity::Warning)
@@ -196,5 +210,24 @@ impl Advices for DeserializationAdvice {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_visitable_type_fmt() {
+        assert_eq!(VisitableType::empty().to_string(), "no value");
+        assert_eq!(VisitableType::NULL.to_string(), "null");
+        assert_eq!(
+            VisitableType::NULL.union(VisitableType::BOOL).to_string(),
+            "null, or a boolean"
+        );
+        assert_eq!(
+            VisitableType::all().to_string(),
+            "null, or a boolean, or a number, or a string, or an array, or an object"
+        );
     }
 }
