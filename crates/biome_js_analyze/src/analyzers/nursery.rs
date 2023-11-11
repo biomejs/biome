@@ -12,6 +12,7 @@ pub(crate) mod no_useless_else;
 pub(crate) mod no_useless_lone_block_statements;
 pub(crate) mod use_arrow_function;
 pub(crate) mod use_as_const_assertion;
+pub(crate) mod use_await;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
 pub(crate) mod use_shorthand_assign;
@@ -30,6 +31,7 @@ declare_group! {
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: use_arrow_function :: UseArrowFunction ,
             self :: use_as_const_assertion :: UseAsConstAssertion ,
+            self :: use_await :: UseAwait ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_shorthand_assign :: UseShorthandAssign ,

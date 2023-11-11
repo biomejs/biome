@@ -1146,6 +1146,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAwait": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [
