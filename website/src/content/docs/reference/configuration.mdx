@@ -45,7 +45,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
@@ -53,9 +53,9 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "formatter": {
-    "indentSize": 2
+    "indentWidth": 2
   },
   "javascript": {
     "formatter": {
@@ -68,7 +68,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "linter": {
     "rules": {
       "complexity": {
