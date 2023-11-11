@@ -45,7 +45,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
@@ -53,9 +53,9 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "formatter": {
-    "indentWidth": 2
+    "indentSize": 2
   },
   "javascript": {
     "formatter": {
@@ -68,7 +68,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -436,10 +436,6 @@ The style of the indentation. It can be `"tab"` or `"space"`.
 How big the indentation should be.
 
 > Default: `2`
-
-:::caution
-`formatter.indentSize` is deprecated, use `formatter.indentWidth` instead.
-:::
 
 ### `formatter.indentWidth`
 
