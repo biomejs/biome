@@ -415,6 +415,12 @@ When releasing a new version of a Biome, follow these steps:
 
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
 
+## Resources
+
+We have several resources explaining about Biome. They will help you understand the project and codebase.
+
+- [Rust Dublin October 2023 - Biome - YouTube](https://youtu.be/stxiUYmHn0s?si=C9cMsc93nNrZa-r1)
+- [Rome, a Modern Toolchain! by Emanuele Stoppa - GitNation](https://portal.gitnation.org/contents/rome-a-modern-toolchain)
 
 ## Current Members
 
