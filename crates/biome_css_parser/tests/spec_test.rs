@@ -137,7 +137,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-::highlight() {}
+:lang(fr-be, "de") > q {}
+
     "#;
     let root = parse_css(code, CssParserOptions::default());
     let syntax = root.syntax();

@@ -30,7 +30,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@2..6 "cue" [] [Whitespace(" ")],
                                 },
                             },
@@ -159,7 +159,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@72..74 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@74..78 "cue" [] [Whitespace(" ")],
                                 },
                             },
