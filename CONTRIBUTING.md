@@ -2,6 +2,22 @@
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 
+# Table of Contents
+- [Asking Questions, Making Proposals](#asking-questions-making-proposals)
+- [Reporting Bugs](#reporting-bugs)
+- [Getting Started](#getting-started)
+- [Install the Required Tools](#install-the-required-tools)
+- [Crates Development](#crates-development)
+- [VS Code Extension Development](#vs-code-extension-development)
+- [IntelliJ Extension Development](#intellij-plugin-development)
+- [Node.js Development](#nodejs-development)
+- [Website Development](#website-development)
+- [Commit Messages](#commit-messages)
+- [Creating Pull Requests](#creating-pull-requests)
+- [Releasing](#releasing)
+- [Resources](#resources)
+- [Current Members](#current-members)
+
 ## Asking questions, making proposals
 
 If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/bare-ts/tools/discussions).
