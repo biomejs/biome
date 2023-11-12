@@ -1,11 +1,10 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, ServiceBag,
-    Visitor, VisitorContext,
+    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsAwaitExpression, TextRange, WalkEvent};
+use biome_js_syntax::{AnyFunctionLike, JsAwaitExpression, JsLanguage, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
-
 
 declare_rule! {
     /// Ensure `async` functions utilize `await`.
