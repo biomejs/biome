@@ -33,6 +33,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useAriaActivedescendantWithTabindex
   - useArrowFunction
   - useAsConstAssertion
+  - useAwait
   - useGroupedTypeImport
   - useImportRestrictions
   - useShorthandAssign
