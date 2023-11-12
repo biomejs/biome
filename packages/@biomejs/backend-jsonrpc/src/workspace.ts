@@ -801,7 +801,7 @@ export interface Nursery {
 	 */
 	useAsConstAssertion?: RuleConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Ensure async functions utilize await.
 	 */
 	useAwait?: RuleConfiguration;
 	/**

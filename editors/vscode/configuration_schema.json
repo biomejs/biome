@@ -1147,7 +1147,7 @@
 					]
 				},
 				"useAwait": {
-					"description": "Succinct description of the rule.",
+					"description": "Ensure async functions utilize await.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
