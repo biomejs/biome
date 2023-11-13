@@ -33,6 +33,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - useAriaActivedescendantWithTabindex
   - useArrowFunction
   - useAsConstAssertion
+  - useAwait
   - useGroupedTypeImport
   - useImportRestrictions
   - useShorthandAssign

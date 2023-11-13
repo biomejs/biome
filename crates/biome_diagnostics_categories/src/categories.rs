@@ -108,6 +108,7 @@ define_categories! {
     "lint/nursery/useAriaActivedescendantWithTabindex": "https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",
     "lint/nursery/useArrowFunction": "https://biomejs.dev/linter/rules/use-arrow-function",
     "lint/nursery/useAsConstAssertion": "https://biomejs.dev/linter/rules/use-as-const-assertion",
+    "lint/nursery/useAwait": "https://biomejs.dev/linter/rules/use-await",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",

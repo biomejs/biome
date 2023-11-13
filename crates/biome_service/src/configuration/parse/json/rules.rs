@@ -890,6 +890,11 @@ impl VisitNode<JsonLanguage> for Nursery {
                 configuration.map_rule_configuration(&value, "useAsConstAssertion", diagnostics)?;
                 self.use_as_const_assertion = Some(configuration);
             }
+            "useAwait" => {
+                let mut configuration = RuleConfiguration::default();
+                configuration.map_rule_configuration(&value, "useAwait", diagnostics)?;
+                self.use_await = Some(configuration);
+            }
             "useGroupedTypeImport" => {
                 let mut configuration = RuleConfiguration::default();
                 configuration.map_rule_configuration(
@@ -935,6 +940,7 @@ impl VisitNode<JsonLanguage> for Nursery {
                         "useAriaActivedescendantWithTabindex",
                         "useArrowFunction",
                         "useAsConstAssertion",
+                        "useAwait",
                         "useGroupedTypeImport",
                         "useImportRestrictions",
                         "useShorthandAssign",

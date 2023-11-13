@@ -59,6 +59,18 @@ impl AnyFunctionLike {
         }
     }
 
+    pub fn is_async(&self) -> bool {
+        match self {
+            AnyFunctionLike::AnyJsFunction(any_js_function) => any_js_function.is_async(),
+            AnyFunctionLike::JsMethodClassMember(method_class_member) => {
+                method_class_member.async_token().is_some()
+            }
+            AnyFunctionLike::JsMethodObjectMember(method_obj_member) => {
+                method_obj_member.async_token().is_some()
+            }
+        }
+    }
+
     pub fn name_range(&self) -> Option<TextRange> {
         match self {
             AnyFunctionLike::AnyJsFunction(js_function) => {
