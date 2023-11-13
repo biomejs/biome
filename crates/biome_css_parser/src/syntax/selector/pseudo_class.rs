@@ -290,8 +290,7 @@ fn parse_relative_selector(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_RELATIVE_SELECTOR))
 }
 
-const PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET: TokenSet<CssSyntaxKind> =
-    token_set![LANG_KW];
+const PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET: TokenSet<CssSyntaxKind> = token_set![LANG_KW];
 
 #[inline]
 fn is_at_pseudo_class_function_value_list(p: &mut CssParser) -> bool {
