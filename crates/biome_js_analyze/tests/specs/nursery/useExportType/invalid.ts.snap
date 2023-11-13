@@ -1,0 +1,226 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```js
+import { type T1, V1 } from "./mod.ts";
+export { T1, V1 };
+
+import type { T2, T3 } from "./mod.ts";
+export { T2, T3 };
+
+import type T4 from "./mod.ts";
+export { T4 };
+
+import type * as ns from "./mod.ts";
+export { ns };
+
+interface Interface {}
+type TypeAlias = {}
+enum Enum {}
+function func() {}
+class Class {}
+export { Interface, TypeAlias, Enum, func as f, Class };
+```
+
+# Diagnostics
+```
+invalid.ts:2:10 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    1 │ import { type T1, V1 } from "./mod.ts";
+  > 2 │ export { T1, V1 };
+      │          ^^
+    3 │ 
+    4 │ import type { T2, T3 } from "./mod.ts";
+  
+  i The type is defined here.
+  
+  > 1 │ import { type T1, V1 } from "./mod.ts";
+      │               ^^
+    2 │ export { T1, V1 };
+    3 │ 
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use an inline type export.
+  
+    2 │ export·{·type·T1,·V1·};
+      │          +++++         
+
+```
+
+```
+invalid.ts:5:10 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    4 │ import type { T2, T3 } from "./mod.ts";
+  > 5 │ export { T2, T3 };
+      │          ^^
+    6 │ 
+    7 │ import type T4 from "./mod.ts";
+  
+  i The type is defined here.
+  
+    2 │ export { T1, V1 };
+    3 │ 
+  > 4 │ import type { T2, T3 } from "./mod.ts";
+      │               ^^
+    5 │ export { T2, T3 };
+    6 │ 
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use an inline type export.
+  
+    5 │ export·{·type·T2,·T3·};
+      │          +++++         
+
+```
+
+```
+invalid.ts:5:14 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    4 │ import type { T2, T3 } from "./mod.ts";
+  > 5 │ export { T2, T3 };
+      │              ^^
+    6 │ 
+    7 │ import type T4 from "./mod.ts";
+  
+  i The type is defined here.
+  
+    2 │ export { T1, V1 };
+    3 │ 
+  > 4 │ import type { T2, T3 } from "./mod.ts";
+      │                   ^^
+    5 │ export { T2, T3 };
+    6 │ 
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use an inline type export.
+  
+    5 │ export·{·T2,·type·T3·};
+      │              +++++     
+
+```
+
+```
+invalid.ts:8:10 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+     7 │ import type T4 from "./mod.ts";
+   > 8 │ export { T4 };
+       │          ^^
+     9 │ 
+    10 │ import type * as ns from "./mod.ts";
+  
+  i The type is defined here.
+  
+    5 │ export { T2, T3 };
+    6 │ 
+  > 7 │ import type T4 from "./mod.ts";
+      │             ^^
+    8 │ export { T4 };
+    9 │ 
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+    8 │ export·type·{·T4·};
+      │        +++++       
+
+```
+
+```
+invalid.ts:11:10 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    10 │ import type * as ns from "./mod.ts";
+  > 11 │ export { ns };
+       │          ^^
+    12 │ 
+    13 │ interface Interface {}
+  
+  i The type is defined here.
+  
+     8 │ export { T4 };
+     9 │ 
+  > 10 │ import type * as ns from "./mod.ts";
+       │                  ^^
+    11 │ export { ns };
+    12 │ 
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+    11 │ export·type·{·ns·};
+       │        +++++       
+
+```
+
+```
+invalid.ts:18:10 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    16 │ function func() {}
+    17 │ class Class {}
+  > 18 │ export { Interface, TypeAlias, Enum, func as f, Class };
+       │          ^^^^^^^^^
+  
+  i The type is defined here.
+  
+    11 │ export { ns };
+    12 │ 
+  > 13 │ interface Interface {}
+       │           ^^^^^^^^^
+    14 │ type TypeAlias = {}
+    15 │ enum Enum {}
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use an inline type export.
+  
+    18 │ export·{·type·Interface,·TypeAlias,·Enum,·func·as·f,·Class·};
+       │          +++++                                               
+
+```
+
+```
+invalid.ts:18:21 lint/nursery/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This export is only a type and should thus use export type.
+  
+    16 │ function func() {}
+    17 │ class Class {}
+  > 18 │ export { Interface, TypeAlias, Enum, func as f, Class };
+       │                     ^^^^^^^^^
+  
+  i The type is defined here.
+  
+    13 │ interface Interface {}
+  > 14 │ type TypeAlias = {}
+       │      ^^^^^^^^^
+    15 │ enum Enum {}
+    16 │ function func() {}
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use an inline type export.
+  
+    18 │ export·{·Interface,·type·TypeAlias,·Enum,·func·as·f,·Class·};
+       │                     +++++                                    
+
+```
+
+

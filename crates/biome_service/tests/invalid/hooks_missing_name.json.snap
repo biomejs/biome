@@ -27,6 +27,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
   - useAwait
+  - useExportType
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions

@@ -966,6 +966,10 @@ impl Deserializable for Nursery {
                             result.use_await =
                                 Deserializable::deserialize(&value, "useAwait", diagnostics);
                         }
+                        "useExportType" => {
+                            result.use_export_type =
+                                Deserializable::deserialize(&value, "useExportType", diagnostics);
+                        }
                         "useForOf" => {
                             result.use_for_of =
                                 Deserializable::deserialize(&value, "useForOf", diagnostics);
@@ -1022,6 +1026,7 @@ impl Deserializable for Nursery {
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
                                     "useAwait",
+                                    "useExportType",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",

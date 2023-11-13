@@ -27,6 +27,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
   - useAwait
+  - useExportType
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions

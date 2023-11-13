@@ -822,6 +822,10 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
+	 * Promotes the use of export type for type-only types.
+	 */
+	useExportType?: RuleConfiguration;
+	/**
 	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
 	useForOf?: RuleConfiguration;
@@ -1520,6 +1524,7 @@ export type Category =
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useExportType"
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"

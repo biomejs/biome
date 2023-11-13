@@ -1,16 +1,17 @@
 use crate::{
-    JsArrowFunctionExpression, JsBogusNamedImportSpecifier, JsBogusParameter, JsCatchDeclaration,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
-    JsConstructorClassMember, JsConstructorParameterList, JsConstructorParameters,
-    JsDefaultImportSpecifier, JsExport, JsFormalParameter, JsFunctionDeclaration,
-    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsIdentifierBinding,
-    JsImportDefaultClause, JsImportNamespaceClause, JsMethodClassMember, JsMethodObjectMember,
-    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsParameterList, JsParameters,
-    JsRestParameter, JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
-    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
-    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
-    TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
+    AnyJsImportClause, AnyJsNamedImportSpecifier, JsArrowFunctionExpression,
+    JsBogusNamedImportSpecifier, JsBogusParameter, JsCatchDeclaration, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsConstructorClassMember,
+    JsConstructorParameterList, JsConstructorParameters, JsDefaultImportSpecifier, JsExport,
+    JsFormalParameter, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
+    JsFunctionExpression, JsIdentifierBinding, JsImportDefaultClause, JsImportNamespaceClause,
+    JsMethodClassMember, JsMethodObjectMember, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
+    JsParameterList, JsParameters, JsRestParameter, JsSetterClassMember, JsSetterObjectMember,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator, TsCallSignatureTypeMember, TsConstructSignatureTypeMember,
+    TsConstructorSignatureClassMember, TsConstructorType, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration, TsFunctionType,
+    TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
     TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration, TsMappedType,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsModuleDeclaration,
     TsPropertyParameter, TsSetterSignatureClassMember, TsSetterSignatureTypeMember,
@@ -285,16 +286,36 @@ impl AnyJsIdentifierBinding {
         is_under_object_pattern_binding(self.syntax())
     }
 
-    pub fn with_name_token(self, name_token: JsSyntaxToken) -> AnyJsIdentifierBinding {
+    /// Returns true if this binding is only a type and not a runtime value.
+    pub fn is_type_only(&self) -> bool {
         match self {
             AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
-                AnyJsIdentifierBinding::JsIdentifierBinding(binding.with_name_token(name_token))
+                if let Some(specifier) = binding.parent::<AnyJsNamedImportSpecifier>() {
+                    return specifier.imports_only_types();
+                }
+                if let Some(clause) = binding.parent::<AnyJsImportClause>() {
+                    return clause.type_token().is_some();
+                }
             }
             AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
-                AnyJsIdentifierBinding::TsIdentifierBinding(binding.with_name_token(name_token))
+                // ignore TypeScript namespaces
+                return binding.parent::<TsModuleDeclaration>().is_none();
             }
-            AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
-                AnyJsIdentifierBinding::TsTypeParameterName(binding.with_ident_token(name_token))
+            AnyJsIdentifierBinding::TsTypeParameterName(_) => {}
+        }
+        false
+    }
+
+    pub fn with_name_token(self, name_token: JsSyntaxToken) -> Self {
+        match self {
+            Self::JsIdentifierBinding(binding) => {
+                Self::JsIdentifierBinding(binding.with_name_token(name_token))
+            }
+            Self::TsIdentifierBinding(binding) => {
+                Self::TsIdentifierBinding(binding.with_name_token(name_token))
+            }
+            Self::TsTypeParameterName(binding) => {
+                Self::TsTypeParameterName(binding.with_ident_token(name_token))
             }
         }
     }
