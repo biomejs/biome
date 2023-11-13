@@ -30,21 +30,23 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// class OnlyWrite {
-    ///  #usedOnlyInWrite = 5;
+    ///   #usedOnlyInWrite = 5;
     ///
-    ///  method() {
-    ///		this.#usedOnlyInWrite = 212;
-    ///  }
+    ///   method() {
+    ///	    this.#usedOnlyInWrite = 212;
+    ///   }
     /// }
     /// ```
     ///
     /// ```ts,expect_diagnostic
     ///  class TsBioo {
     ///    private unusedProperty = 5;
+    ///  }
+    /// ```
     ///
-    ///    private unusedMethod() {
-
-    ///    };
+    /// ```ts,expect_diagnostic
+    ///  class TsBioo {
+    ///    private unusedMethod() {}
     ///  }
     /// ```
     ///
@@ -52,11 +54,11 @@ declare_rule! {
     ///
     /// ```js
     /// class UsedMember {
-    ///  #usedMember = 42;
+    ///   #usedMember = 42;
     ///
-    ///  method() {
-    ///		return this.#usedMember;
-    ///  }
+    ///   method() {
+    ///	    return this.#usedMember;
+    ///   }
     /// }
     /// ```
     ///
