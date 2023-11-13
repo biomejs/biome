@@ -147,7 +147,9 @@ impl Rule for UseAwait {
                 },
             )
             .note(markup! {
-                "Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'."
+                <Emphasis>"Async"</Emphasis>" functions without "<Emphasis>"await"</Emphasis>" expressions may not need to be declared "<Emphasis>"async"</Emphasis>"."
+            }).detail(ctx.query().range(), markup! {
+                "Remove this "<Emphasis>"async"</Emphasis>" modifier, or add an "<Emphasis>"await"</Emphasis>" expression in the function."
             }),
         )
     }
