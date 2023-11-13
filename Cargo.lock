@@ -267,6 +267,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "bitflags 2.3.1",
  "indexmap",
  "schemars",
  "serde",
@@ -323,6 +324,7 @@ name = "biome_formatter"
 version = "0.2.0"
 dependencies = [
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_syntax",
@@ -419,6 +421,7 @@ dependencies = [
 name = "biome_js_formatter"
 version = "0.2.0"
 dependencies = [
+ "biome_console",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_diagnostics_categories",

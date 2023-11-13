@@ -1,1625 +1,1792 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::configuration::linter::*;
-use crate::configuration::parse::json::linter::are_recommended_and_all_correct;
 use crate::Rules;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
-impl VisitNode<JsonLanguage> for Rules {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+use biome_console::markup;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
+use biome_rowan::TextRange;
+impl Deserializable for Rules {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "a11y" => {
-                let mut visitor = A11y::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.a11y = Some(visitor);
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Rules;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "a11y" => {
+                            result.a11y =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "complexity" => {
+                            result.complexity =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "correctness" => {
+                            result.correctness =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "nursery" => {
+                            result.nursery =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "performance" => {
+                            result.performance =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "security" => {
+                            result.security =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "style" => {
+                            result.style =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "suspicious" => {
+                            result.suspicious =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "a11y",
+                                    "complexity",
+                                    "correctness",
+                                    "nursery",
+                                    "performance",
+                                    "security",
+                                    "style",
+                                    "suspicious",
+                                ],
+                            ));
+                        }
+                    }
                 }
-            }
-            "complexity" => {
-                let mut visitor = Complexity::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.complexity = Some(visitor);
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
                 }
-            }
-            "correctness" => {
-                let mut visitor = Correctness::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.correctness = Some(visitor);
-                }
-            }
-            "nursery" => {
-                let mut visitor = Nursery::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.nursery = Some(visitor);
-                }
-            }
-            "performance" => {
-                let mut visitor = Performance::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.performance = Some(visitor);
-                }
-            }
-            "security" => {
-                let mut visitor = Security::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.security = Some(visitor);
-                }
-            }
-            "style" => {
-                let mut visitor = Style::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.style = Some(visitor);
-                }
-            }
-            "suspicious" => {
-                let mut visitor = Suspicious::default();
-                if are_recommended_and_all_correct(&value, name_text, diagnostics)? {
-                    visitor.map_to_object(&value, name_text, diagnostics)?;
-                    self.suspicious = Some(visitor);
-                }
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "a11y",
-                        "complexity",
-                        "correctness",
-                        "nursery",
-                        "performance",
-                        "security",
-                        "style",
-                        "suspicious",
-                    ],
-                    diagnostics,
-                );
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for A11y {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for A11y {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noAccessKey" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noAccessKey", diagnostics)?;
-                self.no_access_key = Some(configuration);
-            }
-            "noAriaUnsupportedElements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noAriaUnsupportedElements",
-                    diagnostics,
-                )?;
-                self.no_aria_unsupported_elements = Some(configuration);
-            }
-            "noAutofocus" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noAutofocus", diagnostics)?;
-                self.no_autofocus = Some(configuration);
-            }
-            "noBlankTarget" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noBlankTarget", diagnostics)?;
-                self.no_blank_target = Some(configuration);
-            }
-            "noDistractingElements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDistractingElements",
-                    diagnostics,
-                )?;
-                self.no_distracting_elements = Some(configuration);
-            }
-            "noHeaderScope" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noHeaderScope", diagnostics)?;
-                self.no_header_scope = Some(configuration);
-            }
-            "noNoninteractiveElementToInteractiveRole" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noNoninteractiveElementToInteractiveRole",
-                    diagnostics,
-                )?;
-                self.no_noninteractive_element_to_interactive_role = Some(configuration);
-            }
-            "noNoninteractiveTabindex" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noNoninteractiveTabindex",
-                    diagnostics,
-                )?;
-                self.no_noninteractive_tabindex = Some(configuration);
-            }
-            "noPositiveTabindex" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noPositiveTabindex", diagnostics)?;
-                self.no_positive_tabindex = Some(configuration);
-            }
-            "noRedundantAlt" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noRedundantAlt", diagnostics)?;
-                self.no_redundant_alt = Some(configuration);
-            }
-            "noRedundantRoles" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noRedundantRoles", diagnostics)?;
-                self.no_redundant_roles = Some(configuration);
-            }
-            "noSvgWithoutTitle" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noSvgWithoutTitle", diagnostics)?;
-                self.no_svg_without_title = Some(configuration);
-            }
-            "useAltText" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useAltText", diagnostics)?;
-                self.use_alt_text = Some(configuration);
-            }
-            "useAnchorContent" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useAnchorContent", diagnostics)?;
-                self.use_anchor_content = Some(configuration);
-            }
-            "useAriaPropsForRole" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useAriaPropsForRole", diagnostics)?;
-                self.use_aria_props_for_role = Some(configuration);
-            }
-            "useButtonType" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useButtonType", diagnostics)?;
-                self.use_button_type = Some(configuration);
-            }
-            "useHeadingContent" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useHeadingContent", diagnostics)?;
-                self.use_heading_content = Some(configuration);
-            }
-            "useHtmlLang" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useHtmlLang", diagnostics)?;
-                self.use_html_lang = Some(configuration);
-            }
-            "useIframeTitle" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useIframeTitle", diagnostics)?;
-                self.use_iframe_title = Some(configuration);
-            }
-            "useKeyWithClickEvents" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useKeyWithClickEvents",
-                    diagnostics,
-                )?;
-                self.use_key_with_click_events = Some(configuration);
-            }
-            "useKeyWithMouseEvents" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useKeyWithMouseEvents",
-                    diagnostics,
-                )?;
-                self.use_key_with_mouse_events = Some(configuration);
-            }
-            "useMediaCaption" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useMediaCaption", diagnostics)?;
-                self.use_media_caption = Some(configuration);
-            }
-            "useValidAnchor" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidAnchor", diagnostics)?;
-                self.use_valid_anchor = Some(configuration);
-            }
-            "useValidAriaProps" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidAriaProps", diagnostics)?;
-                self.use_valid_aria_props = Some(configuration);
-            }
-            "useValidAriaValues" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidAriaValues", diagnostics)?;
-                self.use_valid_aria_values = Some(configuration);
-            }
-            "useValidLang" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidLang", diagnostics)?;
-                self.use_valid_lang = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noAccessKey",
-                        "noAriaUnsupportedElements",
-                        "noAutofocus",
-                        "noBlankTarget",
-                        "noDistractingElements",
-                        "noHeaderScope",
-                        "noNoninteractiveElementToInteractiveRole",
-                        "noNoninteractiveTabindex",
-                        "noPositiveTabindex",
-                        "noRedundantAlt",
-                        "noRedundantRoles",
-                        "noSvgWithoutTitle",
-                        "useAltText",
-                        "useAnchorContent",
-                        "useAriaPropsForRole",
-                        "useButtonType",
-                        "useHeadingContent",
-                        "useHtmlLang",
-                        "useIframeTitle",
-                        "useKeyWithClickEvents",
-                        "useKeyWithMouseEvents",
-                        "useMediaCaption",
-                        "useValidAnchor",
-                        "useValidAriaProps",
-                        "useValidAriaValues",
-                        "useValidLang",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = A11y;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noAccessKey" => {
+                            result.no_access_key =
+                                Deserializable::deserialize(&value, "noAccessKey", diagnostics);
+                        }
+                        "noAriaUnsupportedElements" => {
+                            result.no_aria_unsupported_elements = Deserializable::deserialize(
+                                &value,
+                                "noAriaUnsupportedElements",
+                                diagnostics,
+                            );
+                        }
+                        "noAutofocus" => {
+                            result.no_autofocus =
+                                Deserializable::deserialize(&value, "noAutofocus", diagnostics);
+                        }
+                        "noBlankTarget" => {
+                            result.no_blank_target =
+                                Deserializable::deserialize(&value, "noBlankTarget", diagnostics);
+                        }
+                        "noDistractingElements" => {
+                            result.no_distracting_elements = Deserializable::deserialize(
+                                &value,
+                                "noDistractingElements",
+                                diagnostics,
+                            );
+                        }
+                        "noHeaderScope" => {
+                            result.no_header_scope =
+                                Deserializable::deserialize(&value, "noHeaderScope", diagnostics);
+                        }
+                        "noNoninteractiveElementToInteractiveRole" => {
+                            result.no_noninteractive_element_to_interactive_role =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "noNoninteractiveElementToInteractiveRole",
+                                    diagnostics,
+                                );
+                        }
+                        "noNoninteractiveTabindex" => {
+                            result.no_noninteractive_tabindex = Deserializable::deserialize(
+                                &value,
+                                "noNoninteractiveTabindex",
+                                diagnostics,
+                            );
+                        }
+                        "noPositiveTabindex" => {
+                            result.no_positive_tabindex = Deserializable::deserialize(
+                                &value,
+                                "noPositiveTabindex",
+                                diagnostics,
+                            );
+                        }
+                        "noRedundantAlt" => {
+                            result.no_redundant_alt =
+                                Deserializable::deserialize(&value, "noRedundantAlt", diagnostics);
+                        }
+                        "noRedundantRoles" => {
+                            result.no_redundant_roles = Deserializable::deserialize(
+                                &value,
+                                "noRedundantRoles",
+                                diagnostics,
+                            );
+                        }
+                        "noSvgWithoutTitle" => {
+                            result.no_svg_without_title = Deserializable::deserialize(
+                                &value,
+                                "noSvgWithoutTitle",
+                                diagnostics,
+                            );
+                        }
+                        "useAltText" => {
+                            result.use_alt_text =
+                                Deserializable::deserialize(&value, "useAltText", diagnostics);
+                        }
+                        "useAnchorContent" => {
+                            result.use_anchor_content = Deserializable::deserialize(
+                                &value,
+                                "useAnchorContent",
+                                diagnostics,
+                            );
+                        }
+                        "useAriaPropsForRole" => {
+                            result.use_aria_props_for_role = Deserializable::deserialize(
+                                &value,
+                                "useAriaPropsForRole",
+                                diagnostics,
+                            );
+                        }
+                        "useButtonType" => {
+                            result.use_button_type =
+                                Deserializable::deserialize(&value, "useButtonType", diagnostics);
+                        }
+                        "useHeadingContent" => {
+                            result.use_heading_content = Deserializable::deserialize(
+                                &value,
+                                "useHeadingContent",
+                                diagnostics,
+                            );
+                        }
+                        "useHtmlLang" => {
+                            result.use_html_lang =
+                                Deserializable::deserialize(&value, "useHtmlLang", diagnostics);
+                        }
+                        "useIframeTitle" => {
+                            result.use_iframe_title =
+                                Deserializable::deserialize(&value, "useIframeTitle", diagnostics);
+                        }
+                        "useKeyWithClickEvents" => {
+                            result.use_key_with_click_events = Deserializable::deserialize(
+                                &value,
+                                "useKeyWithClickEvents",
+                                diagnostics,
+                            );
+                        }
+                        "useKeyWithMouseEvents" => {
+                            result.use_key_with_mouse_events = Deserializable::deserialize(
+                                &value,
+                                "useKeyWithMouseEvents",
+                                diagnostics,
+                            );
+                        }
+                        "useMediaCaption" => {
+                            result.use_media_caption =
+                                Deserializable::deserialize(&value, "useMediaCaption", diagnostics);
+                        }
+                        "useValidAnchor" => {
+                            result.use_valid_anchor =
+                                Deserializable::deserialize(&value, "useValidAnchor", diagnostics);
+                        }
+                        "useValidAriaProps" => {
+                            result.use_valid_aria_props = Deserializable::deserialize(
+                                &value,
+                                "useValidAriaProps",
+                                diagnostics,
+                            );
+                        }
+                        "useValidAriaValues" => {
+                            result.use_valid_aria_values = Deserializable::deserialize(
+                                &value,
+                                "useValidAriaValues",
+                                diagnostics,
+                            );
+                        }
+                        "useValidLang" => {
+                            result.use_valid_lang =
+                                Deserializable::deserialize(&value, "useValidLang", diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noAccessKey",
+                                    "noAriaUnsupportedElements",
+                                    "noAutofocus",
+                                    "noBlankTarget",
+                                    "noDistractingElements",
+                                    "noHeaderScope",
+                                    "noNoninteractiveElementToInteractiveRole",
+                                    "noNoninteractiveTabindex",
+                                    "noPositiveTabindex",
+                                    "noRedundantAlt",
+                                    "noRedundantRoles",
+                                    "noSvgWithoutTitle",
+                                    "useAltText",
+                                    "useAnchorContent",
+                                    "useAriaPropsForRole",
+                                    "useButtonType",
+                                    "useHeadingContent",
+                                    "useHtmlLang",
+                                    "useIframeTitle",
+                                    "useKeyWithClickEvents",
+                                    "useKeyWithMouseEvents",
+                                    "useMediaCaption",
+                                    "useValidAnchor",
+                                    "useValidAriaProps",
+                                    "useValidAriaValues",
+                                    "useValidLang",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Complexity {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Complexity {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noBannedTypes" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noBannedTypes", diagnostics)?;
-                self.no_banned_types = Some(configuration);
-            }
-            "noExcessiveCognitiveComplexity" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noExcessiveCognitiveComplexity",
-                    diagnostics,
-                )?;
-                self.no_excessive_cognitive_complexity = Some(configuration);
-            }
-            "noExtraBooleanCast" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noExtraBooleanCast", diagnostics)?;
-                self.no_extra_boolean_cast = Some(configuration);
-            }
-            "noForEach" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noForEach", diagnostics)?;
-                self.no_for_each = Some(configuration);
-            }
-            "noMultipleSpacesInRegularExpressionLiterals" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noMultipleSpacesInRegularExpressionLiterals",
-                    diagnostics,
-                )?;
-                self.no_multiple_spaces_in_regular_expression_literals = Some(configuration);
-            }
-            "noStaticOnlyClass" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noStaticOnlyClass", diagnostics)?;
-                self.no_static_only_class = Some(configuration);
-            }
-            "noUselessCatch" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessCatch", diagnostics)?;
-                self.no_useless_catch = Some(configuration);
-            }
-            "noUselessConstructor" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUselessConstructor",
-                    diagnostics,
-                )?;
-                self.no_useless_constructor = Some(configuration);
-            }
-            "noUselessEmptyExport" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUselessEmptyExport",
-                    diagnostics,
-                )?;
-                self.no_useless_empty_export = Some(configuration);
-            }
-            "noUselessFragments" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessFragments", diagnostics)?;
-                self.no_useless_fragments = Some(configuration);
-            }
-            "noUselessLabel" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessLabel", diagnostics)?;
-                self.no_useless_label = Some(configuration);
-            }
-            "noUselessRename" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessRename", diagnostics)?;
-                self.no_useless_rename = Some(configuration);
-            }
-            "noUselessSwitchCase" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessSwitchCase", diagnostics)?;
-                self.no_useless_switch_case = Some(configuration);
-            }
-            "noUselessThisAlias" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessThisAlias", diagnostics)?;
-                self.no_useless_this_alias = Some(configuration);
-            }
-            "noUselessTypeConstraint" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUselessTypeConstraint",
-                    diagnostics,
-                )?;
-                self.no_useless_type_constraint = Some(configuration);
-            }
-            "noVoid" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noVoid", diagnostics)?;
-                self.no_void = Some(configuration);
-            }
-            "noWith" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noWith", diagnostics)?;
-                self.no_with = Some(configuration);
-            }
-            "useFlatMap" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useFlatMap", diagnostics)?;
-                self.use_flat_map = Some(configuration);
-            }
-            "useLiteralKeys" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useLiteralKeys", diagnostics)?;
-                self.use_literal_keys = Some(configuration);
-            }
-            "useOptionalChain" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useOptionalChain", diagnostics)?;
-                self.use_optional_chain = Some(configuration);
-            }
-            "useSimpleNumberKeys" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useSimpleNumberKeys", diagnostics)?;
-                self.use_simple_number_keys = Some(configuration);
-            }
-            "useSimplifiedLogicExpression" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useSimplifiedLogicExpression",
-                    diagnostics,
-                )?;
-                self.use_simplified_logic_expression = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noBannedTypes",
-                        "noExcessiveCognitiveComplexity",
-                        "noExtraBooleanCast",
-                        "noForEach",
-                        "noMultipleSpacesInRegularExpressionLiterals",
-                        "noStaticOnlyClass",
-                        "noUselessCatch",
-                        "noUselessConstructor",
-                        "noUselessEmptyExport",
-                        "noUselessFragments",
-                        "noUselessLabel",
-                        "noUselessRename",
-                        "noUselessSwitchCase",
-                        "noUselessThisAlias",
-                        "noUselessTypeConstraint",
-                        "noVoid",
-                        "noWith",
-                        "useFlatMap",
-                        "useLiteralKeys",
-                        "useOptionalChain",
-                        "useSimpleNumberKeys",
-                        "useSimplifiedLogicExpression",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Complexity;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noBannedTypes" => {
+                            result.no_banned_types =
+                                Deserializable::deserialize(&value, "noBannedTypes", diagnostics);
+                        }
+                        "noExcessiveCognitiveComplexity" => {
+                            result.no_excessive_cognitive_complexity = Deserializable::deserialize(
+                                &value,
+                                "noExcessiveCognitiveComplexity",
+                                diagnostics,
+                            );
+                        }
+                        "noExtraBooleanCast" => {
+                            result.no_extra_boolean_cast = Deserializable::deserialize(
+                                &value,
+                                "noExtraBooleanCast",
+                                diagnostics,
+                            );
+                        }
+                        "noForEach" => {
+                            result.no_for_each =
+                                Deserializable::deserialize(&value, "noForEach", diagnostics);
+                        }
+                        "noMultipleSpacesInRegularExpressionLiterals" => {
+                            result.no_multiple_spaces_in_regular_expression_literals =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "noMultipleSpacesInRegularExpressionLiterals",
+                                    diagnostics,
+                                );
+                        }
+                        "noStaticOnlyClass" => {
+                            result.no_static_only_class = Deserializable::deserialize(
+                                &value,
+                                "noStaticOnlyClass",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessCatch" => {
+                            result.no_useless_catch =
+                                Deserializable::deserialize(&value, "noUselessCatch", diagnostics);
+                        }
+                        "noUselessConstructor" => {
+                            result.no_useless_constructor = Deserializable::deserialize(
+                                &value,
+                                "noUselessConstructor",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessEmptyExport" => {
+                            result.no_useless_empty_export = Deserializable::deserialize(
+                                &value,
+                                "noUselessEmptyExport",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessFragments" => {
+                            result.no_useless_fragments = Deserializable::deserialize(
+                                &value,
+                                "noUselessFragments",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessLabel" => {
+                            result.no_useless_label =
+                                Deserializable::deserialize(&value, "noUselessLabel", diagnostics);
+                        }
+                        "noUselessRename" => {
+                            result.no_useless_rename =
+                                Deserializable::deserialize(&value, "noUselessRename", diagnostics);
+                        }
+                        "noUselessSwitchCase" => {
+                            result.no_useless_switch_case = Deserializable::deserialize(
+                                &value,
+                                "noUselessSwitchCase",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessThisAlias" => {
+                            result.no_useless_this_alias = Deserializable::deserialize(
+                                &value,
+                                "noUselessThisAlias",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessTypeConstraint" => {
+                            result.no_useless_type_constraint = Deserializable::deserialize(
+                                &value,
+                                "noUselessTypeConstraint",
+                                diagnostics,
+                            );
+                        }
+                        "noVoid" => {
+                            result.no_void =
+                                Deserializable::deserialize(&value, "noVoid", diagnostics);
+                        }
+                        "noWith" => {
+                            result.no_with =
+                                Deserializable::deserialize(&value, "noWith", diagnostics);
+                        }
+                        "useFlatMap" => {
+                            result.use_flat_map =
+                                Deserializable::deserialize(&value, "useFlatMap", diagnostics);
+                        }
+                        "useLiteralKeys" => {
+                            result.use_literal_keys =
+                                Deserializable::deserialize(&value, "useLiteralKeys", diagnostics);
+                        }
+                        "useOptionalChain" => {
+                            result.use_optional_chain = Deserializable::deserialize(
+                                &value,
+                                "useOptionalChain",
+                                diagnostics,
+                            );
+                        }
+                        "useSimpleNumberKeys" => {
+                            result.use_simple_number_keys = Deserializable::deserialize(
+                                &value,
+                                "useSimpleNumberKeys",
+                                diagnostics,
+                            );
+                        }
+                        "useSimplifiedLogicExpression" => {
+                            result.use_simplified_logic_expression = Deserializable::deserialize(
+                                &value,
+                                "useSimplifiedLogicExpression",
+                                diagnostics,
+                            );
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noBannedTypes",
+                                    "noExcessiveCognitiveComplexity",
+                                    "noExtraBooleanCast",
+                                    "noForEach",
+                                    "noMultipleSpacesInRegularExpressionLiterals",
+                                    "noStaticOnlyClass",
+                                    "noUselessCatch",
+                                    "noUselessConstructor",
+                                    "noUselessEmptyExport",
+                                    "noUselessFragments",
+                                    "noUselessLabel",
+                                    "noUselessRename",
+                                    "noUselessSwitchCase",
+                                    "noUselessThisAlias",
+                                    "noUselessTypeConstraint",
+                                    "noVoid",
+                                    "noWith",
+                                    "useFlatMap",
+                                    "useLiteralKeys",
+                                    "useOptionalChain",
+                                    "useSimpleNumberKeys",
+                                    "useSimplifiedLogicExpression",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Correctness {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Correctness {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noChildrenProp" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noChildrenProp", diagnostics)?;
-                self.no_children_prop = Some(configuration);
-            }
-            "noConstAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConstAssign", diagnostics)?;
-                self.no_const_assign = Some(configuration);
-            }
-            "noConstantCondition" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConstantCondition", diagnostics)?;
-                self.no_constant_condition = Some(configuration);
-            }
-            "noConstructorReturn" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConstructorReturn", diagnostics)?;
-                self.no_constructor_return = Some(configuration);
-            }
-            "noEmptyPattern" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noEmptyPattern", diagnostics)?;
-                self.no_empty_pattern = Some(configuration);
-            }
-            "noGlobalObjectCalls" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noGlobalObjectCalls", diagnostics)?;
-                self.no_global_object_calls = Some(configuration);
-            }
-            "noInnerDeclarations" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noInnerDeclarations", diagnostics)?;
-                self.no_inner_declarations = Some(configuration);
-            }
-            "noInvalidConstructorSuper" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noInvalidConstructorSuper",
-                    diagnostics,
-                )?;
-                self.no_invalid_constructor_super = Some(configuration);
-            }
-            "noNewSymbol" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noNewSymbol", diagnostics)?;
-                self.no_new_symbol = Some(configuration);
-            }
-            "noNonoctalDecimalEscape" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noNonoctalDecimalEscape",
-                    diagnostics,
-                )?;
-                self.no_nonoctal_decimal_escape = Some(configuration);
-            }
-            "noPrecisionLoss" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noPrecisionLoss", diagnostics)?;
-                self.no_precision_loss = Some(configuration);
-            }
-            "noRenderReturnValue" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noRenderReturnValue", diagnostics)?;
-                self.no_render_return_value = Some(configuration);
-            }
-            "noSelfAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noSelfAssign", diagnostics)?;
-                self.no_self_assign = Some(configuration);
-            }
-            "noSetterReturn" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noSetterReturn", diagnostics)?;
-                self.no_setter_return = Some(configuration);
-            }
-            "noStringCaseMismatch" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noStringCaseMismatch",
-                    diagnostics,
-                )?;
-                self.no_string_case_mismatch = Some(configuration);
-            }
-            "noSwitchDeclarations" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noSwitchDeclarations",
-                    diagnostics,
-                )?;
-                self.no_switch_declarations = Some(configuration);
-            }
-            "noUndeclaredVariables" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUndeclaredVariables",
-                    diagnostics,
-                )?;
-                self.no_undeclared_variables = Some(configuration);
-            }
-            "noUnnecessaryContinue" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUnnecessaryContinue",
-                    diagnostics,
-                )?;
-                self.no_unnecessary_continue = Some(configuration);
-            }
-            "noUnreachable" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnreachable", diagnostics)?;
-                self.no_unreachable = Some(configuration);
-            }
-            "noUnreachableSuper" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnreachableSuper", diagnostics)?;
-                self.no_unreachable_super = Some(configuration);
-            }
-            "noUnsafeFinally" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnsafeFinally", diagnostics)?;
-                self.no_unsafe_finally = Some(configuration);
-            }
-            "noUnsafeOptionalChaining" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUnsafeOptionalChaining",
-                    diagnostics,
-                )?;
-                self.no_unsafe_optional_chaining = Some(configuration);
-            }
-            "noUnusedLabels" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnusedLabels", diagnostics)?;
-                self.no_unused_labels = Some(configuration);
-            }
-            "noUnusedVariables" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnusedVariables", diagnostics)?;
-                self.no_unused_variables = Some(configuration);
-            }
-            "noVoidElementsWithChildren" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noVoidElementsWithChildren",
-                    diagnostics,
-                )?;
-                self.no_void_elements_with_children = Some(configuration);
-            }
-            "noVoidTypeReturn" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noVoidTypeReturn", diagnostics)?;
-                self.no_void_type_return = Some(configuration);
-            }
-            "useExhaustiveDependencies" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useExhaustiveDependencies",
-                    diagnostics,
-                )?;
-                self.use_exhaustive_dependencies = Some(configuration);
-            }
-            "useHookAtTopLevel" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useHookAtTopLevel", diagnostics)?;
-                self.use_hook_at_top_level = Some(configuration);
-            }
-            "useIsNan" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useIsNan", diagnostics)?;
-                self.use_is_nan = Some(configuration);
-            }
-            "useValidForDirection" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useValidForDirection",
-                    diagnostics,
-                )?;
-                self.use_valid_for_direction = Some(configuration);
-            }
-            "useYield" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useYield", diagnostics)?;
-                self.use_yield = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noChildrenProp",
-                        "noConstAssign",
-                        "noConstantCondition",
-                        "noConstructorReturn",
-                        "noEmptyPattern",
-                        "noGlobalObjectCalls",
-                        "noInnerDeclarations",
-                        "noInvalidConstructorSuper",
-                        "noNewSymbol",
-                        "noNonoctalDecimalEscape",
-                        "noPrecisionLoss",
-                        "noRenderReturnValue",
-                        "noSelfAssign",
-                        "noSetterReturn",
-                        "noStringCaseMismatch",
-                        "noSwitchDeclarations",
-                        "noUndeclaredVariables",
-                        "noUnnecessaryContinue",
-                        "noUnreachable",
-                        "noUnreachableSuper",
-                        "noUnsafeFinally",
-                        "noUnsafeOptionalChaining",
-                        "noUnusedLabels",
-                        "noUnusedVariables",
-                        "noVoidElementsWithChildren",
-                        "noVoidTypeReturn",
-                        "useExhaustiveDependencies",
-                        "useHookAtTopLevel",
-                        "useIsNan",
-                        "useValidForDirection",
-                        "useYield",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Correctness;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noChildrenProp" => {
+                            result.no_children_prop =
+                                Deserializable::deserialize(&value, "noChildrenProp", diagnostics);
+                        }
+                        "noConstAssign" => {
+                            result.no_const_assign =
+                                Deserializable::deserialize(&value, "noConstAssign", diagnostics);
+                        }
+                        "noConstantCondition" => {
+                            result.no_constant_condition = Deserializable::deserialize(
+                                &value,
+                                "noConstantCondition",
+                                diagnostics,
+                            );
+                        }
+                        "noConstructorReturn" => {
+                            result.no_constructor_return = Deserializable::deserialize(
+                                &value,
+                                "noConstructorReturn",
+                                diagnostics,
+                            );
+                        }
+                        "noEmptyPattern" => {
+                            result.no_empty_pattern =
+                                Deserializable::deserialize(&value, "noEmptyPattern", diagnostics);
+                        }
+                        "noGlobalObjectCalls" => {
+                            result.no_global_object_calls = Deserializable::deserialize(
+                                &value,
+                                "noGlobalObjectCalls",
+                                diagnostics,
+                            );
+                        }
+                        "noInnerDeclarations" => {
+                            result.no_inner_declarations = Deserializable::deserialize(
+                                &value,
+                                "noInnerDeclarations",
+                                diagnostics,
+                            );
+                        }
+                        "noInvalidConstructorSuper" => {
+                            result.no_invalid_constructor_super = Deserializable::deserialize(
+                                &value,
+                                "noInvalidConstructorSuper",
+                                diagnostics,
+                            );
+                        }
+                        "noNewSymbol" => {
+                            result.no_new_symbol =
+                                Deserializable::deserialize(&value, "noNewSymbol", diagnostics);
+                        }
+                        "noNonoctalDecimalEscape" => {
+                            result.no_nonoctal_decimal_escape = Deserializable::deserialize(
+                                &value,
+                                "noNonoctalDecimalEscape",
+                                diagnostics,
+                            );
+                        }
+                        "noPrecisionLoss" => {
+                            result.no_precision_loss =
+                                Deserializable::deserialize(&value, "noPrecisionLoss", diagnostics);
+                        }
+                        "noRenderReturnValue" => {
+                            result.no_render_return_value = Deserializable::deserialize(
+                                &value,
+                                "noRenderReturnValue",
+                                diagnostics,
+                            );
+                        }
+                        "noSelfAssign" => {
+                            result.no_self_assign =
+                                Deserializable::deserialize(&value, "noSelfAssign", diagnostics);
+                        }
+                        "noSetterReturn" => {
+                            result.no_setter_return =
+                                Deserializable::deserialize(&value, "noSetterReturn", diagnostics);
+                        }
+                        "noStringCaseMismatch" => {
+                            result.no_string_case_mismatch = Deserializable::deserialize(
+                                &value,
+                                "noStringCaseMismatch",
+                                diagnostics,
+                            );
+                        }
+                        "noSwitchDeclarations" => {
+                            result.no_switch_declarations = Deserializable::deserialize(
+                                &value,
+                                "noSwitchDeclarations",
+                                diagnostics,
+                            );
+                        }
+                        "noUndeclaredVariables" => {
+                            result.no_undeclared_variables = Deserializable::deserialize(
+                                &value,
+                                "noUndeclaredVariables",
+                                diagnostics,
+                            );
+                        }
+                        "noUnnecessaryContinue" => {
+                            result.no_unnecessary_continue = Deserializable::deserialize(
+                                &value,
+                                "noUnnecessaryContinue",
+                                diagnostics,
+                            );
+                        }
+                        "noUnreachable" => {
+                            result.no_unreachable =
+                                Deserializable::deserialize(&value, "noUnreachable", diagnostics);
+                        }
+                        "noUnreachableSuper" => {
+                            result.no_unreachable_super = Deserializable::deserialize(
+                                &value,
+                                "noUnreachableSuper",
+                                diagnostics,
+                            );
+                        }
+                        "noUnsafeFinally" => {
+                            result.no_unsafe_finally =
+                                Deserializable::deserialize(&value, "noUnsafeFinally", diagnostics);
+                        }
+                        "noUnsafeOptionalChaining" => {
+                            result.no_unsafe_optional_chaining = Deserializable::deserialize(
+                                &value,
+                                "noUnsafeOptionalChaining",
+                                diagnostics,
+                            );
+                        }
+                        "noUnusedLabels" => {
+                            result.no_unused_labels =
+                                Deserializable::deserialize(&value, "noUnusedLabels", diagnostics);
+                        }
+                        "noUnusedVariables" => {
+                            result.no_unused_variables = Deserializable::deserialize(
+                                &value,
+                                "noUnusedVariables",
+                                diagnostics,
+                            );
+                        }
+                        "noVoidElementsWithChildren" => {
+                            result.no_void_elements_with_children = Deserializable::deserialize(
+                                &value,
+                                "noVoidElementsWithChildren",
+                                diagnostics,
+                            );
+                        }
+                        "noVoidTypeReturn" => {
+                            result.no_void_type_return = Deserializable::deserialize(
+                                &value,
+                                "noVoidTypeReturn",
+                                diagnostics,
+                            );
+                        }
+                        "useExhaustiveDependencies" => {
+                            result.use_exhaustive_dependencies = Deserializable::deserialize(
+                                &value,
+                                "useExhaustiveDependencies",
+                                diagnostics,
+                            );
+                        }
+                        "useHookAtTopLevel" => {
+                            result.use_hook_at_top_level = Deserializable::deserialize(
+                                &value,
+                                "useHookAtTopLevel",
+                                diagnostics,
+                            );
+                        }
+                        "useIsNan" => {
+                            result.use_is_nan =
+                                Deserializable::deserialize(&value, "useIsNan", diagnostics);
+                        }
+                        "useValidForDirection" => {
+                            result.use_valid_for_direction = Deserializable::deserialize(
+                                &value,
+                                "useValidForDirection",
+                                diagnostics,
+                            );
+                        }
+                        "useYield" => {
+                            result.use_yield =
+                                Deserializable::deserialize(&value, "useYield", diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noChildrenProp",
+                                    "noConstAssign",
+                                    "noConstantCondition",
+                                    "noConstructorReturn",
+                                    "noEmptyPattern",
+                                    "noGlobalObjectCalls",
+                                    "noInnerDeclarations",
+                                    "noInvalidConstructorSuper",
+                                    "noNewSymbol",
+                                    "noNonoctalDecimalEscape",
+                                    "noPrecisionLoss",
+                                    "noRenderReturnValue",
+                                    "noSelfAssign",
+                                    "noSetterReturn",
+                                    "noStringCaseMismatch",
+                                    "noSwitchDeclarations",
+                                    "noUndeclaredVariables",
+                                    "noUnnecessaryContinue",
+                                    "noUnreachable",
+                                    "noUnreachableSuper",
+                                    "noUnsafeFinally",
+                                    "noUnsafeOptionalChaining",
+                                    "noUnusedLabels",
+                                    "noUnusedVariables",
+                                    "noVoidElementsWithChildren",
+                                    "noVoidTypeReturn",
+                                    "useExhaustiveDependencies",
+                                    "useHookAtTopLevel",
+                                    "useIsNan",
+                                    "useValidForDirection",
+                                    "useYield",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Nursery {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Nursery {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noApproximativeNumericConstant" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noApproximativeNumericConstant",
-                    diagnostics,
-                )?;
-                self.no_approximative_numeric_constant = Some(configuration);
-            }
-            "noDefaultExport" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDefaultExport", diagnostics)?;
-                self.no_default_export = Some(configuration);
-            }
-            "noDuplicateJsonKeys" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDuplicateJsonKeys", diagnostics)?;
-                self.no_duplicate_json_keys = Some(configuration);
-            }
-            "noEmptyBlockStatements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noEmptyBlockStatements",
-                    diagnostics,
-                )?;
-                self.no_empty_block_statements = Some(configuration);
-            }
-            "noEmptyCharacterClassInRegex" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noEmptyCharacterClassInRegex",
-                    diagnostics,
-                )?;
-                self.no_empty_character_class_in_regex = Some(configuration);
-            }
-            "noInteractiveElementToNoninteractiveRole" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noInteractiveElementToNoninteractiveRole",
-                    diagnostics,
-                )?;
-                self.no_interactive_element_to_noninteractive_role = Some(configuration);
-            }
-            "noInvalidNewBuiltin" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noInvalidNewBuiltin", diagnostics)?;
-                self.no_invalid_new_builtin = Some(configuration);
-            }
-            "noMisleadingInstantiator" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noMisleadingInstantiator",
-                    diagnostics,
-                )?;
-                self.no_misleading_instantiator = Some(configuration);
-            }
-            "noMisrefactoredShorthandAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noMisrefactoredShorthandAssign",
-                    diagnostics,
-                )?;
-                self.no_misrefactored_shorthand_assign = Some(configuration);
-            }
-            "noThisInStatic" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noThisInStatic", diagnostics)?;
-                self.no_this_in_static = Some(configuration);
-            }
-            "noUnusedImports" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnusedImports", diagnostics)?;
-                self.no_unused_imports = Some(configuration);
-            }
-            "noUnusedPrivateClassMembers" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUnusedPrivateClassMembers",
-                    diagnostics,
-                )?;
-                self.no_unused_private_class_members = Some(configuration);
-            }
-            "noUselessElse" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUselessElse", diagnostics)?;
-                self.no_useless_else = Some(configuration);
-            }
-            "noUselessLoneBlockStatements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUselessLoneBlockStatements",
-                    diagnostics,
-                )?;
-                self.no_useless_lone_block_statements = Some(configuration);
-            }
-            "useAriaActivedescendantWithTabindex" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useAriaActivedescendantWithTabindex",
-                    diagnostics,
-                )?;
-                self.use_aria_activedescendant_with_tabindex = Some(configuration);
-            }
-            "useArrowFunction" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useArrowFunction", diagnostics)?;
-                self.use_arrow_function = Some(configuration);
-            }
-            "useAsConstAssertion" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useAsConstAssertion", diagnostics)?;
-                self.use_as_const_assertion = Some(configuration);
-            }
-            "useAwait" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useAwait", diagnostics)?;
-                self.use_await = Some(configuration);
-            }
-            "useGroupedTypeImport" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useGroupedTypeImport",
-                    diagnostics,
-                )?;
-                self.use_grouped_type_import = Some(configuration);
-            }
-            "useImportRestrictions" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useImportRestrictions",
-                    diagnostics,
-                )?;
-                self.use_import_restrictions = Some(configuration);
-            }
-            "useShorthandAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useShorthandAssign", diagnostics)?;
-                self.use_shorthand_assign = Some(configuration);
-            }
-            "useValidAriaRole" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidAriaRole", diagnostics)?;
-                self.use_valid_aria_role = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noApproximativeNumericConstant",
-                        "noDefaultExport",
-                        "noDuplicateJsonKeys",
-                        "noEmptyBlockStatements",
-                        "noEmptyCharacterClassInRegex",
-                        "noInteractiveElementToNoninteractiveRole",
-                        "noInvalidNewBuiltin",
-                        "noMisleadingInstantiator",
-                        "noMisrefactoredShorthandAssign",
-                        "noThisInStatic",
-                        "noUnusedImports",
-                        "noUnusedPrivateClassMembers",
-                        "noUselessElse",
-                        "noUselessLoneBlockStatements",
-                        "useAriaActivedescendantWithTabindex",
-                        "useArrowFunction",
-                        "useAsConstAssertion",
-                        "useAwait",
-                        "useGroupedTypeImport",
-                        "useImportRestrictions",
-                        "useShorthandAssign",
-                        "useValidAriaRole",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Nursery;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noApproximativeNumericConstant" => {
+                            result.no_approximative_numeric_constant = Deserializable::deserialize(
+                                &value,
+                                "noApproximativeNumericConstant",
+                                diagnostics,
+                            );
+                        }
+                        "noDefaultExport" => {
+                            result.no_default_export =
+                                Deserializable::deserialize(&value, "noDefaultExport", diagnostics);
+                        }
+                        "noDuplicateJsonKeys" => {
+                            result.no_duplicate_json_keys = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateJsonKeys",
+                                diagnostics,
+                            );
+                        }
+                        "noEmptyBlockStatements" => {
+                            result.no_empty_block_statements = Deserializable::deserialize(
+                                &value,
+                                "noEmptyBlockStatements",
+                                diagnostics,
+                            );
+                        }
+                        "noEmptyCharacterClassInRegex" => {
+                            result.no_empty_character_class_in_regex = Deserializable::deserialize(
+                                &value,
+                                "noEmptyCharacterClassInRegex",
+                                diagnostics,
+                            );
+                        }
+                        "noInteractiveElementToNoninteractiveRole" => {
+                            result.no_interactive_element_to_noninteractive_role =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "noInteractiveElementToNoninteractiveRole",
+                                    diagnostics,
+                                );
+                        }
+                        "noInvalidNewBuiltin" => {
+                            result.no_invalid_new_builtin = Deserializable::deserialize(
+                                &value,
+                                "noInvalidNewBuiltin",
+                                diagnostics,
+                            );
+                        }
+                        "noMisleadingInstantiator" => {
+                            result.no_misleading_instantiator = Deserializable::deserialize(
+                                &value,
+                                "noMisleadingInstantiator",
+                                diagnostics,
+                            );
+                        }
+                        "noMisrefactoredShorthandAssign" => {
+                            result.no_misrefactored_shorthand_assign = Deserializable::deserialize(
+                                &value,
+                                "noMisrefactoredShorthandAssign",
+                                diagnostics,
+                            );
+                        }
+                        "noThisInStatic" => {
+                            result.no_this_in_static =
+                                Deserializable::deserialize(&value, "noThisInStatic", diagnostics);
+                        }
+                        "noUnusedImports" => {
+                            result.no_unused_imports =
+                                Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
+                        }
+                        "noUnusedPrivateClassMembers" => {
+                            result.no_unused_private_class_members = Deserializable::deserialize(
+                                &value,
+                                "noUnusedPrivateClassMembers",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessElse" => {
+                            result.no_useless_else =
+                                Deserializable::deserialize(&value, "noUselessElse", diagnostics);
+                        }
+                        "noUselessLoneBlockStatements" => {
+                            result.no_useless_lone_block_statements = Deserializable::deserialize(
+                                &value,
+                                "noUselessLoneBlockStatements",
+                                diagnostics,
+                            );
+                        }
+                        "useAriaActivedescendantWithTabindex" => {
+                            result.use_aria_activedescendant_with_tabindex =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "useAriaActivedescendantWithTabindex",
+                                    diagnostics,
+                                );
+                        }
+                        "useArrowFunction" => {
+                            result.use_arrow_function = Deserializable::deserialize(
+                                &value,
+                                "useArrowFunction",
+                                diagnostics,
+                            );
+                        }
+                        "useAsConstAssertion" => {
+                            result.use_as_const_assertion = Deserializable::deserialize(
+                                &value,
+                                "useAsConstAssertion",
+                                diagnostics,
+                            );
+                        }
+                        "useAwait" => {
+                            result.use_await =
+                                Deserializable::deserialize(&value, "useAwait", diagnostics);
+                        }
+                        "useGroupedTypeImport" => {
+                            result.use_grouped_type_import = Deserializable::deserialize(
+                                &value,
+                                "useGroupedTypeImport",
+                                diagnostics,
+                            );
+                        }
+                        "useImportRestrictions" => {
+                            result.use_import_restrictions = Deserializable::deserialize(
+                                &value,
+                                "useImportRestrictions",
+                                diagnostics,
+                            );
+                        }
+                        "useShorthandAssign" => {
+                            result.use_shorthand_assign = Deserializable::deserialize(
+                                &value,
+                                "useShorthandAssign",
+                                diagnostics,
+                            );
+                        }
+                        "useValidAriaRole" => {
+                            result.use_valid_aria_role = Deserializable::deserialize(
+                                &value,
+                                "useValidAriaRole",
+                                diagnostics,
+                            );
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noApproximativeNumericConstant",
+                                    "noDefaultExport",
+                                    "noDuplicateJsonKeys",
+                                    "noEmptyBlockStatements",
+                                    "noEmptyCharacterClassInRegex",
+                                    "noInteractiveElementToNoninteractiveRole",
+                                    "noInvalidNewBuiltin",
+                                    "noMisleadingInstantiator",
+                                    "noMisrefactoredShorthandAssign",
+                                    "noThisInStatic",
+                                    "noUnusedImports",
+                                    "noUnusedPrivateClassMembers",
+                                    "noUselessElse",
+                                    "noUselessLoneBlockStatements",
+                                    "useAriaActivedescendantWithTabindex",
+                                    "useArrowFunction",
+                                    "useAsConstAssertion",
+                                    "useAwait",
+                                    "useGroupedTypeImport",
+                                    "useImportRestrictions",
+                                    "useShorthandAssign",
+                                    "useValidAriaRole",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Performance {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Performance {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noAccumulatingSpread" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noAccumulatingSpread",
-                    diagnostics,
-                )?;
-                self.no_accumulating_spread = Some(configuration);
-            }
-            "noDelete" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDelete", diagnostics)?;
-                self.no_delete = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &["recommended", "all", "noAccumulatingSpread", "noDelete"],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Performance;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noAccumulatingSpread" => {
+                            result.no_accumulating_spread = Deserializable::deserialize(
+                                &value,
+                                "noAccumulatingSpread",
+                                diagnostics,
+                            );
+                        }
+                        "noDelete" => {
+                            result.no_delete =
+                                Deserializable::deserialize(&value, "noDelete", diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &["recommended", "all", "noAccumulatingSpread", "noDelete"],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Security {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Security {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noDangerouslySetInnerHtml" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDangerouslySetInnerHtml",
-                    diagnostics,
-                )?;
-                self.no_dangerously_set_inner_html = Some(configuration);
-            }
-            "noDangerouslySetInnerHtmlWithChildren" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDangerouslySetInnerHtmlWithChildren",
-                    diagnostics,
-                )?;
-                self.no_dangerously_set_inner_html_with_children = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noDangerouslySetInnerHtml",
-                        "noDangerouslySetInnerHtmlWithChildren",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Security;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noDangerouslySetInnerHtml" => {
+                            result.no_dangerously_set_inner_html = Deserializable::deserialize(
+                                &value,
+                                "noDangerouslySetInnerHtml",
+                                diagnostics,
+                            );
+                        }
+                        "noDangerouslySetInnerHtmlWithChildren" => {
+                            result.no_dangerously_set_inner_html_with_children =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "noDangerouslySetInnerHtmlWithChildren",
+                                    diagnostics,
+                                );
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noDangerouslySetInnerHtml",
+                                    "noDangerouslySetInnerHtmlWithChildren",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Style {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Style {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noArguments" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noArguments", diagnostics)?;
-                self.no_arguments = Some(configuration);
-            }
-            "noCommaOperator" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noCommaOperator", diagnostics)?;
-                self.no_comma_operator = Some(configuration);
-            }
-            "noImplicitBoolean" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noImplicitBoolean", diagnostics)?;
-                self.no_implicit_boolean = Some(configuration);
-            }
-            "noInferrableTypes" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noInferrableTypes", diagnostics)?;
-                self.no_inferrable_types = Some(configuration);
-            }
-            "noNamespace" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noNamespace", diagnostics)?;
-                self.no_namespace = Some(configuration);
-            }
-            "noNegationElse" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noNegationElse", diagnostics)?;
-                self.no_negation_else = Some(configuration);
-            }
-            "noNonNullAssertion" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noNonNullAssertion", diagnostics)?;
-                self.no_non_null_assertion = Some(configuration);
-            }
-            "noParameterAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noParameterAssign", diagnostics)?;
-                self.no_parameter_assign = Some(configuration);
-            }
-            "noParameterProperties" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noParameterProperties",
-                    diagnostics,
-                )?;
-                self.no_parameter_properties = Some(configuration);
-            }
-            "noRestrictedGlobals" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noRestrictedGlobals", diagnostics)?;
-                self.no_restricted_globals = Some(configuration);
-            }
-            "noShoutyConstants" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noShoutyConstants", diagnostics)?;
-                self.no_shouty_constants = Some(configuration);
-            }
-            "noUnusedTemplateLiteral" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUnusedTemplateLiteral",
-                    diagnostics,
-                )?;
-                self.no_unused_template_literal = Some(configuration);
-            }
-            "noVar" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noVar", diagnostics)?;
-                self.no_var = Some(configuration);
-            }
-            "useBlockStatements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useBlockStatements", diagnostics)?;
-                self.use_block_statements = Some(configuration);
-            }
-            "useCollapsedElseIf" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useCollapsedElseIf", diagnostics)?;
-                self.use_collapsed_else_if = Some(configuration);
-            }
-            "useConst" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useConst", diagnostics)?;
-                self.use_const = Some(configuration);
-            }
-            "useDefaultParameterLast" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useDefaultParameterLast",
-                    diagnostics,
-                )?;
-                self.use_default_parameter_last = Some(configuration);
-            }
-            "useEnumInitializers" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useEnumInitializers", diagnostics)?;
-                self.use_enum_initializers = Some(configuration);
-            }
-            "useExponentiationOperator" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useExponentiationOperator",
-                    diagnostics,
-                )?;
-                self.use_exponentiation_operator = Some(configuration);
-            }
-            "useFragmentSyntax" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useFragmentSyntax", diagnostics)?;
-                self.use_fragment_syntax = Some(configuration);
-            }
-            "useLiteralEnumMembers" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useLiteralEnumMembers",
-                    diagnostics,
-                )?;
-                self.use_literal_enum_members = Some(configuration);
-            }
-            "useNamingConvention" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useNamingConvention", diagnostics)?;
-                self.use_naming_convention = Some(configuration);
-            }
-            "useNumericLiterals" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useNumericLiterals", diagnostics)?;
-                self.use_numeric_literals = Some(configuration);
-            }
-            "useSelfClosingElements" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useSelfClosingElements",
-                    diagnostics,
-                )?;
-                self.use_self_closing_elements = Some(configuration);
-            }
-            "useShorthandArrayType" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useShorthandArrayType",
-                    diagnostics,
-                )?;
-                self.use_shorthand_array_type = Some(configuration);
-            }
-            "useSingleCaseStatement" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useSingleCaseStatement",
-                    diagnostics,
-                )?;
-                self.use_single_case_statement = Some(configuration);
-            }
-            "useSingleVarDeclarator" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useSingleVarDeclarator",
-                    diagnostics,
-                )?;
-                self.use_single_var_declarator = Some(configuration);
-            }
-            "useTemplate" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useTemplate", diagnostics)?;
-                self.use_template = Some(configuration);
-            }
-            "useWhile" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useWhile", diagnostics)?;
-                self.use_while = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noArguments",
-                        "noCommaOperator",
-                        "noImplicitBoolean",
-                        "noInferrableTypes",
-                        "noNamespace",
-                        "noNegationElse",
-                        "noNonNullAssertion",
-                        "noParameterAssign",
-                        "noParameterProperties",
-                        "noRestrictedGlobals",
-                        "noShoutyConstants",
-                        "noUnusedTemplateLiteral",
-                        "noVar",
-                        "useBlockStatements",
-                        "useCollapsedElseIf",
-                        "useConst",
-                        "useDefaultParameterLast",
-                        "useEnumInitializers",
-                        "useExponentiationOperator",
-                        "useFragmentSyntax",
-                        "useLiteralEnumMembers",
-                        "useNamingConvention",
-                        "useNumericLiterals",
-                        "useSelfClosingElements",
-                        "useShorthandArrayType",
-                        "useSingleCaseStatement",
-                        "useSingleVarDeclarator",
-                        "useTemplate",
-                        "useWhile",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Style;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noArguments" => {
+                            result.no_arguments =
+                                Deserializable::deserialize(&value, "noArguments", diagnostics);
+                        }
+                        "noCommaOperator" => {
+                            result.no_comma_operator =
+                                Deserializable::deserialize(&value, "noCommaOperator", diagnostics);
+                        }
+                        "noImplicitBoolean" => {
+                            result.no_implicit_boolean = Deserializable::deserialize(
+                                &value,
+                                "noImplicitBoolean",
+                                diagnostics,
+                            );
+                        }
+                        "noInferrableTypes" => {
+                            result.no_inferrable_types = Deserializable::deserialize(
+                                &value,
+                                "noInferrableTypes",
+                                diagnostics,
+                            );
+                        }
+                        "noNamespace" => {
+                            result.no_namespace =
+                                Deserializable::deserialize(&value, "noNamespace", diagnostics);
+                        }
+                        "noNegationElse" => {
+                            result.no_negation_else =
+                                Deserializable::deserialize(&value, "noNegationElse", diagnostics);
+                        }
+                        "noNonNullAssertion" => {
+                            result.no_non_null_assertion = Deserializable::deserialize(
+                                &value,
+                                "noNonNullAssertion",
+                                diagnostics,
+                            );
+                        }
+                        "noParameterAssign" => {
+                            result.no_parameter_assign = Deserializable::deserialize(
+                                &value,
+                                "noParameterAssign",
+                                diagnostics,
+                            );
+                        }
+                        "noParameterProperties" => {
+                            result.no_parameter_properties = Deserializable::deserialize(
+                                &value,
+                                "noParameterProperties",
+                                diagnostics,
+                            );
+                        }
+                        "noRestrictedGlobals" => {
+                            result.no_restricted_globals = Deserializable::deserialize(
+                                &value,
+                                "noRestrictedGlobals",
+                                diagnostics,
+                            );
+                        }
+                        "noShoutyConstants" => {
+                            result.no_shouty_constants = Deserializable::deserialize(
+                                &value,
+                                "noShoutyConstants",
+                                diagnostics,
+                            );
+                        }
+                        "noUnusedTemplateLiteral" => {
+                            result.no_unused_template_literal = Deserializable::deserialize(
+                                &value,
+                                "noUnusedTemplateLiteral",
+                                diagnostics,
+                            );
+                        }
+                        "noVar" => {
+                            result.no_var =
+                                Deserializable::deserialize(&value, "noVar", diagnostics);
+                        }
+                        "useBlockStatements" => {
+                            result.use_block_statements = Deserializable::deserialize(
+                                &value,
+                                "useBlockStatements",
+                                diagnostics,
+                            );
+                        }
+                        "useCollapsedElseIf" => {
+                            result.use_collapsed_else_if = Deserializable::deserialize(
+                                &value,
+                                "useCollapsedElseIf",
+                                diagnostics,
+                            );
+                        }
+                        "useConst" => {
+                            result.use_const =
+                                Deserializable::deserialize(&value, "useConst", diagnostics);
+                        }
+                        "useDefaultParameterLast" => {
+                            result.use_default_parameter_last = Deserializable::deserialize(
+                                &value,
+                                "useDefaultParameterLast",
+                                diagnostics,
+                            );
+                        }
+                        "useEnumInitializers" => {
+                            result.use_enum_initializers = Deserializable::deserialize(
+                                &value,
+                                "useEnumInitializers",
+                                diagnostics,
+                            );
+                        }
+                        "useExponentiationOperator" => {
+                            result.use_exponentiation_operator = Deserializable::deserialize(
+                                &value,
+                                "useExponentiationOperator",
+                                diagnostics,
+                            );
+                        }
+                        "useFragmentSyntax" => {
+                            result.use_fragment_syntax = Deserializable::deserialize(
+                                &value,
+                                "useFragmentSyntax",
+                                diagnostics,
+                            );
+                        }
+                        "useLiteralEnumMembers" => {
+                            result.use_literal_enum_members = Deserializable::deserialize(
+                                &value,
+                                "useLiteralEnumMembers",
+                                diagnostics,
+                            );
+                        }
+                        "useNamingConvention" => {
+                            result.use_naming_convention = Deserializable::deserialize(
+                                &value,
+                                "useNamingConvention",
+                                diagnostics,
+                            );
+                        }
+                        "useNumericLiterals" => {
+                            result.use_numeric_literals = Deserializable::deserialize(
+                                &value,
+                                "useNumericLiterals",
+                                diagnostics,
+                            );
+                        }
+                        "useSelfClosingElements" => {
+                            result.use_self_closing_elements = Deserializable::deserialize(
+                                &value,
+                                "useSelfClosingElements",
+                                diagnostics,
+                            );
+                        }
+                        "useShorthandArrayType" => {
+                            result.use_shorthand_array_type = Deserializable::deserialize(
+                                &value,
+                                "useShorthandArrayType",
+                                diagnostics,
+                            );
+                        }
+                        "useSingleCaseStatement" => {
+                            result.use_single_case_statement = Deserializable::deserialize(
+                                &value,
+                                "useSingleCaseStatement",
+                                diagnostics,
+                            );
+                        }
+                        "useSingleVarDeclarator" => {
+                            result.use_single_var_declarator = Deserializable::deserialize(
+                                &value,
+                                "useSingleVarDeclarator",
+                                diagnostics,
+                            );
+                        }
+                        "useTemplate" => {
+                            result.use_template =
+                                Deserializable::deserialize(&value, "useTemplate", diagnostics);
+                        }
+                        "useWhile" => {
+                            result.use_while =
+                                Deserializable::deserialize(&value, "useWhile", diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noArguments",
+                                    "noCommaOperator",
+                                    "noImplicitBoolean",
+                                    "noInferrableTypes",
+                                    "noNamespace",
+                                    "noNegationElse",
+                                    "noNonNullAssertion",
+                                    "noParameterAssign",
+                                    "noParameterProperties",
+                                    "noRestrictedGlobals",
+                                    "noShoutyConstants",
+                                    "noUnusedTemplateLiteral",
+                                    "noVar",
+                                    "useBlockStatements",
+                                    "useCollapsedElseIf",
+                                    "useConst",
+                                    "useDefaultParameterLast",
+                                    "useEnumInitializers",
+                                    "useExponentiationOperator",
+                                    "useFragmentSyntax",
+                                    "useLiteralEnumMembers",
+                                    "useNamingConvention",
+                                    "useNumericLiterals",
+                                    "useSelfClosingElements",
+                                    "useShorthandArrayType",
+                                    "useSingleCaseStatement",
+                                    "useSingleVarDeclarator",
+                                    "useTemplate",
+                                    "useWhile",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }
-impl VisitNode<JsonLanguage> for Suspicious {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for Suspicious {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "recommended" => {
-                self.recommended = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "all" => {
-                self.all = Some(self.map_to_boolean(&value, name_text, diagnostics)?);
-            }
-            "noArrayIndexKey" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noArrayIndexKey", diagnostics)?;
-                self.no_array_index_key = Some(configuration);
-            }
-            "noAssignInExpressions" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noAssignInExpressions",
-                    diagnostics,
-                )?;
-                self.no_assign_in_expressions = Some(configuration);
-            }
-            "noAsyncPromiseExecutor" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noAsyncPromiseExecutor",
-                    diagnostics,
-                )?;
-                self.no_async_promise_executor = Some(configuration);
-            }
-            "noCatchAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noCatchAssign", diagnostics)?;
-                self.no_catch_assign = Some(configuration);
-            }
-            "noClassAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noClassAssign", diagnostics)?;
-                self.no_class_assign = Some(configuration);
-            }
-            "noCommentText" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noCommentText", diagnostics)?;
-                self.no_comment_text = Some(configuration);
-            }
-            "noCompareNegZero" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noCompareNegZero", diagnostics)?;
-                self.no_compare_neg_zero = Some(configuration);
-            }
-            "noConfusingLabels" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConfusingLabels", diagnostics)?;
-                self.no_confusing_labels = Some(configuration);
-            }
-            "noConfusingVoidType" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConfusingVoidType", diagnostics)?;
-                self.no_confusing_void_type = Some(configuration);
-            }
-            "noConsoleLog" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConsoleLog", diagnostics)?;
-                self.no_console_log = Some(configuration);
-            }
-            "noConstEnum" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noConstEnum", diagnostics)?;
-                self.no_const_enum = Some(configuration);
-            }
-            "noControlCharactersInRegex" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noControlCharactersInRegex",
-                    diagnostics,
-                )?;
-                self.no_control_characters_in_regex = Some(configuration);
-            }
-            "noDebugger" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDebugger", diagnostics)?;
-                self.no_debugger = Some(configuration);
-            }
-            "noDoubleEquals" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDoubleEquals", diagnostics)?;
-                self.no_double_equals = Some(configuration);
-            }
-            "noDuplicateCase" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDuplicateCase", diagnostics)?;
-                self.no_duplicate_case = Some(configuration);
-            }
-            "noDuplicateClassMembers" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDuplicateClassMembers",
-                    diagnostics,
-                )?;
-                self.no_duplicate_class_members = Some(configuration);
-            }
-            "noDuplicateJsxProps" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noDuplicateJsxProps", diagnostics)?;
-                self.no_duplicate_jsx_props = Some(configuration);
-            }
-            "noDuplicateObjectKeys" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDuplicateObjectKeys",
-                    diagnostics,
-                )?;
-                self.no_duplicate_object_keys = Some(configuration);
-            }
-            "noDuplicateParameters" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noDuplicateParameters",
-                    diagnostics,
-                )?;
-                self.no_duplicate_parameters = Some(configuration);
-            }
-            "noEmptyInterface" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noEmptyInterface", diagnostics)?;
-                self.no_empty_interface = Some(configuration);
-            }
-            "noExplicitAny" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noExplicitAny", diagnostics)?;
-                self.no_explicit_any = Some(configuration);
-            }
-            "noExtraNonNullAssertion" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noExtraNonNullAssertion",
-                    diagnostics,
-                )?;
-                self.no_extra_non_null_assertion = Some(configuration);
-            }
-            "noFallthroughSwitchClause" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noFallthroughSwitchClause",
-                    diagnostics,
-                )?;
-                self.no_fallthrough_switch_clause = Some(configuration);
-            }
-            "noFunctionAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noFunctionAssign", diagnostics)?;
-                self.no_function_assign = Some(configuration);
-            }
-            "noGlobalIsFinite" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noGlobalIsFinite", diagnostics)?;
-                self.no_global_is_finite = Some(configuration);
-            }
-            "noGlobalIsNan" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noGlobalIsNan", diagnostics)?;
-                self.no_global_is_nan = Some(configuration);
-            }
-            "noImportAssign" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noImportAssign", diagnostics)?;
-                self.no_import_assign = Some(configuration);
-            }
-            "noLabelVar" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noLabelVar", diagnostics)?;
-                self.no_label_var = Some(configuration);
-            }
-            "noPrototypeBuiltins" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noPrototypeBuiltins", diagnostics)?;
-                self.no_prototype_builtins = Some(configuration);
-            }
-            "noRedeclare" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noRedeclare", diagnostics)?;
-                self.no_redeclare = Some(configuration);
-            }
-            "noRedundantUseStrict" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noRedundantUseStrict",
-                    diagnostics,
-                )?;
-                self.no_redundant_use_strict = Some(configuration);
-            }
-            "noSelfCompare" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noSelfCompare", diagnostics)?;
-                self.no_self_compare = Some(configuration);
-            }
-            "noShadowRestrictedNames" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noShadowRestrictedNames",
-                    diagnostics,
-                )?;
-                self.no_shadow_restricted_names = Some(configuration);
-            }
-            "noSparseArray" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noSparseArray", diagnostics)?;
-                self.no_sparse_array = Some(configuration);
-            }
-            "noUnsafeDeclarationMerging" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "noUnsafeDeclarationMerging",
-                    diagnostics,
-                )?;
-                self.no_unsafe_declaration_merging = Some(configuration);
-            }
-            "noUnsafeNegation" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "noUnsafeNegation", diagnostics)?;
-                self.no_unsafe_negation = Some(configuration);
-            }
-            "useDefaultSwitchClauseLast" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(
-                    &value,
-                    "useDefaultSwitchClauseLast",
-                    diagnostics,
-                )?;
-                self.use_default_switch_clause_last = Some(configuration);
-            }
-            "useGetterReturn" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useGetterReturn", diagnostics)?;
-                self.use_getter_return = Some(configuration);
-            }
-            "useIsArray" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useIsArray", diagnostics)?;
-                self.use_is_array = Some(configuration);
-            }
-            "useNamespaceKeyword" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useNamespaceKeyword", diagnostics)?;
-                self.use_namespace_keyword = Some(configuration);
-            }
-            "useValidTypeof" => {
-                let mut configuration = RuleConfiguration::default();
-                configuration.map_rule_configuration(&value, "useValidTypeof", diagnostics)?;
-                self.use_valid_typeof = Some(configuration);
-            }
-            _ => {
-                report_unknown_map_key(
-                    &name,
-                    &[
-                        "recommended",
-                        "all",
-                        "noArrayIndexKey",
-                        "noAssignInExpressions",
-                        "noAsyncPromiseExecutor",
-                        "noCatchAssign",
-                        "noClassAssign",
-                        "noCommentText",
-                        "noCompareNegZero",
-                        "noConfusingLabels",
-                        "noConfusingVoidType",
-                        "noConsoleLog",
-                        "noConstEnum",
-                        "noControlCharactersInRegex",
-                        "noDebugger",
-                        "noDoubleEquals",
-                        "noDuplicateCase",
-                        "noDuplicateClassMembers",
-                        "noDuplicateJsxProps",
-                        "noDuplicateObjectKeys",
-                        "noDuplicateParameters",
-                        "noEmptyInterface",
-                        "noExplicitAny",
-                        "noExtraNonNullAssertion",
-                        "noFallthroughSwitchClause",
-                        "noFunctionAssign",
-                        "noGlobalIsFinite",
-                        "noGlobalIsNan",
-                        "noImportAssign",
-                        "noLabelVar",
-                        "noPrototypeBuiltins",
-                        "noRedeclare",
-                        "noRedundantUseStrict",
-                        "noSelfCompare",
-                        "noShadowRestrictedNames",
-                        "noSparseArray",
-                        "noUnsafeDeclarationMerging",
-                        "noUnsafeNegation",
-                        "useDefaultSwitchClauseLast",
-                        "useGetterReturn",
-                        "useIsArray",
-                        "useNamespaceKeyword",
-                        "useValidTypeof",
-                    ],
-                    diagnostics,
-                );
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Suspicious;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut recommended_is_set = false;
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "recommended" => {
+                            recommended_is_set = true;
+                            result.recommended =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "all" => {
+                            result.all =
+                                Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noArrayIndexKey" => {
+                            result.no_array_index_key =
+                                Deserializable::deserialize(&value, "noArrayIndexKey", diagnostics);
+                        }
+                        "noAssignInExpressions" => {
+                            result.no_assign_in_expressions = Deserializable::deserialize(
+                                &value,
+                                "noAssignInExpressions",
+                                diagnostics,
+                            );
+                        }
+                        "noAsyncPromiseExecutor" => {
+                            result.no_async_promise_executor = Deserializable::deserialize(
+                                &value,
+                                "noAsyncPromiseExecutor",
+                                diagnostics,
+                            );
+                        }
+                        "noCatchAssign" => {
+                            result.no_catch_assign =
+                                Deserializable::deserialize(&value, "noCatchAssign", diagnostics);
+                        }
+                        "noClassAssign" => {
+                            result.no_class_assign =
+                                Deserializable::deserialize(&value, "noClassAssign", diagnostics);
+                        }
+                        "noCommentText" => {
+                            result.no_comment_text =
+                                Deserializable::deserialize(&value, "noCommentText", diagnostics);
+                        }
+                        "noCompareNegZero" => {
+                            result.no_compare_neg_zero = Deserializable::deserialize(
+                                &value,
+                                "noCompareNegZero",
+                                diagnostics,
+                            );
+                        }
+                        "noConfusingLabels" => {
+                            result.no_confusing_labels = Deserializable::deserialize(
+                                &value,
+                                "noConfusingLabels",
+                                diagnostics,
+                            );
+                        }
+                        "noConfusingVoidType" => {
+                            result.no_confusing_void_type = Deserializable::deserialize(
+                                &value,
+                                "noConfusingVoidType",
+                                diagnostics,
+                            );
+                        }
+                        "noConsoleLog" => {
+                            result.no_console_log =
+                                Deserializable::deserialize(&value, "noConsoleLog", diagnostics);
+                        }
+                        "noConstEnum" => {
+                            result.no_const_enum =
+                                Deserializable::deserialize(&value, "noConstEnum", diagnostics);
+                        }
+                        "noControlCharactersInRegex" => {
+                            result.no_control_characters_in_regex = Deserializable::deserialize(
+                                &value,
+                                "noControlCharactersInRegex",
+                                diagnostics,
+                            );
+                        }
+                        "noDebugger" => {
+                            result.no_debugger =
+                                Deserializable::deserialize(&value, "noDebugger", diagnostics);
+                        }
+                        "noDoubleEquals" => {
+                            result.no_double_equals =
+                                Deserializable::deserialize(&value, "noDoubleEquals", diagnostics);
+                        }
+                        "noDuplicateCase" => {
+                            result.no_duplicate_case =
+                                Deserializable::deserialize(&value, "noDuplicateCase", diagnostics);
+                        }
+                        "noDuplicateClassMembers" => {
+                            result.no_duplicate_class_members = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateClassMembers",
+                                diagnostics,
+                            );
+                        }
+                        "noDuplicateJsxProps" => {
+                            result.no_duplicate_jsx_props = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateJsxProps",
+                                diagnostics,
+                            );
+                        }
+                        "noDuplicateObjectKeys" => {
+                            result.no_duplicate_object_keys = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateObjectKeys",
+                                diagnostics,
+                            );
+                        }
+                        "noDuplicateParameters" => {
+                            result.no_duplicate_parameters = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateParameters",
+                                diagnostics,
+                            );
+                        }
+                        "noEmptyInterface" => {
+                            result.no_empty_interface = Deserializable::deserialize(
+                                &value,
+                                "noEmptyInterface",
+                                diagnostics,
+                            );
+                        }
+                        "noExplicitAny" => {
+                            result.no_explicit_any =
+                                Deserializable::deserialize(&value, "noExplicitAny", diagnostics);
+                        }
+                        "noExtraNonNullAssertion" => {
+                            result.no_extra_non_null_assertion = Deserializable::deserialize(
+                                &value,
+                                "noExtraNonNullAssertion",
+                                diagnostics,
+                            );
+                        }
+                        "noFallthroughSwitchClause" => {
+                            result.no_fallthrough_switch_clause = Deserializable::deserialize(
+                                &value,
+                                "noFallthroughSwitchClause",
+                                diagnostics,
+                            );
+                        }
+                        "noFunctionAssign" => {
+                            result.no_function_assign = Deserializable::deserialize(
+                                &value,
+                                "noFunctionAssign",
+                                diagnostics,
+                            );
+                        }
+                        "noGlobalIsFinite" => {
+                            result.no_global_is_finite = Deserializable::deserialize(
+                                &value,
+                                "noGlobalIsFinite",
+                                diagnostics,
+                            );
+                        }
+                        "noGlobalIsNan" => {
+                            result.no_global_is_nan =
+                                Deserializable::deserialize(&value, "noGlobalIsNan", diagnostics);
+                        }
+                        "noImportAssign" => {
+                            result.no_import_assign =
+                                Deserializable::deserialize(&value, "noImportAssign", diagnostics);
+                        }
+                        "noLabelVar" => {
+                            result.no_label_var =
+                                Deserializable::deserialize(&value, "noLabelVar", diagnostics);
+                        }
+                        "noPrototypeBuiltins" => {
+                            result.no_prototype_builtins = Deserializable::deserialize(
+                                &value,
+                                "noPrototypeBuiltins",
+                                diagnostics,
+                            );
+                        }
+                        "noRedeclare" => {
+                            result.no_redeclare =
+                                Deserializable::deserialize(&value, "noRedeclare", diagnostics);
+                        }
+                        "noRedundantUseStrict" => {
+                            result.no_redundant_use_strict = Deserializable::deserialize(
+                                &value,
+                                "noRedundantUseStrict",
+                                diagnostics,
+                            );
+                        }
+                        "noSelfCompare" => {
+                            result.no_self_compare =
+                                Deserializable::deserialize(&value, "noSelfCompare", diagnostics);
+                        }
+                        "noShadowRestrictedNames" => {
+                            result.no_shadow_restricted_names = Deserializable::deserialize(
+                                &value,
+                                "noShadowRestrictedNames",
+                                diagnostics,
+                            );
+                        }
+                        "noSparseArray" => {
+                            result.no_sparse_array =
+                                Deserializable::deserialize(&value, "noSparseArray", diagnostics);
+                        }
+                        "noUnsafeDeclarationMerging" => {
+                            result.no_unsafe_declaration_merging = Deserializable::deserialize(
+                                &value,
+                                "noUnsafeDeclarationMerging",
+                                diagnostics,
+                            );
+                        }
+                        "noUnsafeNegation" => {
+                            result.no_unsafe_negation = Deserializable::deserialize(
+                                &value,
+                                "noUnsafeNegation",
+                                diagnostics,
+                            );
+                        }
+                        "useDefaultSwitchClauseLast" => {
+                            result.use_default_switch_clause_last = Deserializable::deserialize(
+                                &value,
+                                "useDefaultSwitchClauseLast",
+                                diagnostics,
+                            );
+                        }
+                        "useGetterReturn" => {
+                            result.use_getter_return =
+                                Deserializable::deserialize(&value, "useGetterReturn", diagnostics);
+                        }
+                        "useIsArray" => {
+                            result.use_is_array =
+                                Deserializable::deserialize(&value, "useIsArray", diagnostics);
+                        }
+                        "useNamespaceKeyword" => {
+                            result.use_namespace_keyword = Deserializable::deserialize(
+                                &value,
+                                "useNamespaceKeyword",
+                                diagnostics,
+                            );
+                        }
+                        "useValidTypeof" => {
+                            result.use_valid_typeof =
+                                Deserializable::deserialize(&value, "useValidTypeof", diagnostics);
+                        }
+                        unknown_key => {
+                            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                                unknown_key,
+                                key.range(),
+                                &[
+                                    "recommended",
+                                    "all",
+                                    "noArrayIndexKey",
+                                    "noAssignInExpressions",
+                                    "noAsyncPromiseExecutor",
+                                    "noCatchAssign",
+                                    "noClassAssign",
+                                    "noCommentText",
+                                    "noCompareNegZero",
+                                    "noConfusingLabels",
+                                    "noConfusingVoidType",
+                                    "noConsoleLog",
+                                    "noConstEnum",
+                                    "noControlCharactersInRegex",
+                                    "noDebugger",
+                                    "noDoubleEquals",
+                                    "noDuplicateCase",
+                                    "noDuplicateClassMembers",
+                                    "noDuplicateJsxProps",
+                                    "noDuplicateObjectKeys",
+                                    "noDuplicateParameters",
+                                    "noEmptyInterface",
+                                    "noExplicitAny",
+                                    "noExtraNonNullAssertion",
+                                    "noFallthroughSwitchClause",
+                                    "noFunctionAssign",
+                                    "noGlobalIsFinite",
+                                    "noGlobalIsNan",
+                                    "noImportAssign",
+                                    "noLabelVar",
+                                    "noPrototypeBuiltins",
+                                    "noRedeclare",
+                                    "noRedundantUseStrict",
+                                    "noSelfCompare",
+                                    "noShadowRestrictedNames",
+                                    "noSparseArray",
+                                    "noUnsafeDeclarationMerging",
+                                    "noUnsafeNegation",
+                                    "useDefaultSwitchClauseLast",
+                                    "useGetterReturn",
+                                    "useIsArray",
+                                    "useNamespaceKeyword",
+                                    "useValidTypeof",
+                                ],
+                            ));
+                        }
+                    }
+                }
+                if recommended_is_set
+                    && matches!(result.recommended, Some(true))
+                    && matches!(result.all, Some(true))
+                {
+                    diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+                    return Some(Self::Output::default());
+                }
+                Some(result)
             }
         }
-        Some(())
+        value.deserialize(Visitor, name, diagnostics)
     }
 }

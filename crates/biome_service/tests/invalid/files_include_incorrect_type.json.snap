@@ -4,7 +4,7 @@ expression: files_include_incorrect_type.json
 ---
 files_include_incorrect_type.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key include is incorrect. Expected a array.
+  × include has an incorrect type, expected an array, but received a string.
   
     1 │ {
     2 │ 	"files": {

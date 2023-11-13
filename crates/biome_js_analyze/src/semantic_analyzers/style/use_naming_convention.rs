@@ -12,8 +12,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    json::{report_unknown_map_key, report_unknown_variant, VisitJsonNode},
-    DeserializationDiagnostic, VisitNode,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
 };
 use biome_diagnostics::Applicability;
 use biome_js_semantic::CanBeImportedExported;
@@ -24,9 +24,8 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
 use biome_js_unicode_table::is_js_ident;
-use biome_json_syntax::{JsonLanguage, JsonStringValue};
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxNode, SyntaxResult, TokenText,
+    declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TextRange, TokenText,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -477,10 +476,6 @@ pub struct NamingConventionOptions {
     pub enum_member_case: EnumMemberCase,
 }
 
-impl NamingConventionOptions {
-    const ALLOWED_KEYS: &'static [&'static str] = &["strictCase", "enumMemberCase"];
-}
-
 const fn default_strict_case() -> bool {
     true
 }
@@ -512,29 +507,57 @@ impl FromStr for NamingConventionOptions {
     }
 }
 
-impl VisitNode<JsonLanguage> for NamingConventionOptions {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for NamingConventionOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "strictCase" => {
-                self.strict_case = self.map_to_boolean(&value, name_text, diagnostics)?
-            }
-            "enumMemberCase" => {
-                self.enum_member_case
-                    .map_to_known_string(&value, name_text, diagnostics)?;
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self> {
+        value.deserialize(NamingConventionOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct NamingConventionOptionsVisitor;
+impl DeserializationVisitor for NamingConventionOptionsVisitor {
+    type Output = NamingConventionOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["strictCase", "enumMemberCase"];
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "strictCase" => {
+                    if let Some(strict_case) =
+                        Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.strict_case = strict_case;
+                    }
+                }
+                "enumMemberCase" => {
+                    if let Some(case) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.enum_member_case = case;
+                    }
+                }
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
             }
         }
-        Some(())
+        Some(result)
     }
 }
 
@@ -569,23 +592,24 @@ impl FromStr for EnumMemberCase {
     }
 }
 
-impl EnumMemberCase {
-    const ALLOWED_VARIANTS: &'static [&'static str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
-}
-
-impl VisitNode<JsonLanguage> for EnumMemberCase {
-    fn visit_value(
-        &mut self,
-        node: &SyntaxNode<JsonLanguage>,
+impl Deserializable for EnumMemberCase {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let node = JsonStringValue::cast_ref(node)?;
-        if let Ok(value) = node.inner_string_text().ok()?.text().parse::<Self>() {
-            *self = value;
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["camelCase", "CONSTANT_CASE", "PascalCase"];
+        let value_text = Text::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            Some(value)
         } else {
-            report_unknown_variant(&node, Self::ALLOWED_VARIANTS, diagnostics);
+            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                value_text.text(),
+                value.range(),
+                ALLOWED_VARIANTS,
+            ));
+            None
         }
-        Some(())
     }
 }
 

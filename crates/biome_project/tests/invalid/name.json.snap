@@ -4,7 +4,7 @@ expression: name.json
 ---
 name.json:2:10 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key name is incorrect. Expected a string.
+  × name has an incorrect type, expected a string, but received a boolean.
   
     1 │ {
   > 2 │ 	"name": false

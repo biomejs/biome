@@ -200,7 +200,7 @@ where
 
         let (output_code, printed) = self.formatted(&parsed, self.options.clone());
 
-        let max_width = self.options.line_width().value() as usize;
+        let max_width = self.options.line_width().get() as usize;
 
         snapshot_builder = snapshot_builder
             .with_output_and_options(
@@ -222,7 +222,7 @@ where
             for (index, options) in test_options.into_iter().enumerate() {
                 let (output_code, printed) = self.formatted(&parsed, options.clone());
 
-                let max_width = options.line_width().value() as usize;
+                let max_width = options.line_width().get() as usize;
 
                 snapshot_builder = snapshot_builder
                     .with_output_and_options(

@@ -174,6 +174,7 @@ impl Display for RageConfiguration<'_, '_> {
             Ok(None) => KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?,
             Ok(Some(result)) => {
                 let (configuration, diagnostics) = result.deserialized.consume();
+                let configuration = configuration.unwrap_or_default();
                 let status = if !diagnostics.is_empty() {
                     for diagnostic in diagnostics {
                         (markup! {

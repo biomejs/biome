@@ -4,7 +4,7 @@ expression: vcs_missing_client.json
 ---
 vcs_missing_client.json:4:20 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key useIgnoreFile is incorrect. Expected a boolean.
+  × useIgnoreFile has an incorrect type, expected a boolean, but received a string.
   
     2 │ 	"vcs": {
     3 │ 		"enabled": true,

@@ -1,97 +1,88 @@
-use crate::configuration::json::JsonConfiguration;
-use crate::configuration::organize_imports::OrganizeImports;
-use crate::configuration::overrides::Overrides;
-use crate::configuration::parse::json::vcs::validate_vcs_configuration;
-use crate::configuration::vcs::VcsConfiguration;
-use crate::configuration::{
-    FilesConfiguration, FormatterConfiguration, JavascriptConfiguration, LinterConfiguration,
-};
 use crate::Configuration;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, StringSet, VisitNode};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::SyntaxNode;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 
-impl Configuration {
-    const ALLOWED_KEYS: &'static [&'static str] = &[
-        "vcs",
-        "files",
-        "linter",
-        "formatter",
-        "javascript",
-        "json",
-        "$schema",
-        "organizeImports",
-        "extends",
-        "overrides",
-    ];
+impl Deserializable for Configuration {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(ConfigurationVisitor, name, diagnostics)
+    }
 }
 
-impl VisitNode<JsonLanguage> for Configuration {
+struct ConfigurationVisitor;
+impl DeserializationVisitor for ConfigurationVisitor {
+    type Output = Configuration;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
     fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: biome_rowan::TextRange,
+        _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "$schema" => {
-                self.schema = self.map_to_string(&value, name_text, diagnostics);
-            }
-            "files" => {
-                let mut files = FilesConfiguration::default();
-                files.map_to_object(&value, name_text, diagnostics)?;
-                self.files = Some(files);
-            }
-            "vcs" => {
-                let mut vcs = VcsConfiguration::default();
-                vcs.map_to_object(&value, name_text, diagnostics)?;
-                validate_vcs_configuration(&value, &mut vcs, diagnostics);
-                self.vcs = Some(vcs);
-            }
-            "formatter" => {
-                let mut formatter = FormatterConfiguration::default();
-                formatter.map_to_object(&value, name_text, diagnostics)?;
-                self.formatter = Some(formatter);
-            }
-            "linter" => {
-                let mut linter = LinterConfiguration::default();
-                linter.map_to_object(&value, name_text, diagnostics)?;
-                self.linter = Some(linter);
-            }
-            "javascript" => {
-                let mut javascript = JavascriptConfiguration::default();
-                javascript.map_to_object(&value, name_text, diagnostics)?;
-                self.javascript = Some(javascript);
-            }
-            "json" => {
-                let mut json = JsonConfiguration::default();
-                json.map_to_object(&value, name_text, diagnostics)?;
-                self.json = Some(json);
-            }
-            "organizeImports" => {
-                let mut organize_imports = OrganizeImports::default();
-                organize_imports.map_to_object(&value, name_text, diagnostics)?;
-                self.organize_imports = Some(organize_imports);
-            }
-            "extends" => {
-                self.extends = self
-                    .map_to_index_set_string(&value, name_text, diagnostics)
-                    .map(StringSet::new);
-            }
-            "overrides" => {
-                let mut overrides = Overrides::default();
-                overrides.map_to_array(&value, name_text, diagnostics)?;
-                self.overrides = Some(overrides);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &[
+            "vcs",
+            "files",
+            "linter",
+            "formatter",
+            "javascript",
+            "json",
+            "$schema",
+            "organizeImports",
+            "extends",
+            "overrides",
+        ];
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "$schema" => {
+                    result.schema = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "files" => {
+                    result.files = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "vcs" => {
+                    result.vcs = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "formatter" => {
+                    result.formatter = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "linter" => {
+                    result.linter = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "javascript" => {
+                    result.javascript = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "json" => {
+                    result.json = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "organizeImports" => {
+                    result.organize_imports =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "extends" => {
+                    result.extends = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "overrides" => {
+                    result.overrides = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
             }
         }
-
-        Some(())
+        Some(result)
     }
 }

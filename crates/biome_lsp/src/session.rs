@@ -408,6 +408,7 @@ impl Session {
         let status = match load_config(&self.fs, base_path) {
             Ok(Some(payload)) => {
                 let (configuration, diagnostics) = payload.deserialized.consume();
+                let configuration = configuration.unwrap_or_default();
                 if !diagnostics.is_empty() {
                     warn!("The deserialization of the configuration resulted in errors. Biome will use its defaults where possible.");
                 }

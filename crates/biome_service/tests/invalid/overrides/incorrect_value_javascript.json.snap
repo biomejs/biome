@@ -4,7 +4,7 @@ expression: incorrect_value_javascript.json
 ---
 incorrect_value_javascript.json:4:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key javascript is incorrect. Expected a object.
+  × javascript has an incorrect type, expected an object, but received an array.
   
     2 │ 	"overrides": [
     3 │ 		{

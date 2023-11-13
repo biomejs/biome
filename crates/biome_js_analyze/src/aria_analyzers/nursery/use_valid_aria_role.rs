@@ -5,12 +5,12 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::{
+    Deserializable, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType,
+};
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNode};
+use biome_rowan::{AstNode, BatchMutationExt};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -89,10 +89,6 @@ pub struct ValidAriaRoleOptions {
     ignore_non_dom: bool,
 }
 
-impl ValidAriaRoleOptions {
-    pub const ALLOWED_KEYS: &'static [&'static str] = &["allowInvalidRoles", "ignoreNonDom"];
-}
-
 impl FromStr for ValidAriaRoleOptions {
     type Err = ();
 
@@ -101,30 +97,63 @@ impl FromStr for ValidAriaRoleOptions {
     }
 }
 
-impl VisitNode<JsonLanguage> for ValidAriaRoleOptions {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for ValidAriaRoleOptions {
+    fn deserialize(
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "allowInvalidRoles" => {
-                self.allowed_invalid_roles =
-                    self.map_to_array_of_strings(&value, name_text, diagnostics)?;
-            }
-            "ignoreNonDom" => {
-                self.ignore_non_dom = self.map_to_boolean(&value, name_text, diagnostics)?;
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
+    ) -> Option<Self> {
+        value.deserialize(ValidAriaRoleOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct ValidAriaRoleOptionsVisitor;
+impl DeserializationVisitor for ValidAriaRoleOptionsVisitor {
+    type Output = ValidAriaRoleOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<
+            Item = Option<(
+                impl biome_deserialize::DeserializableValue,
+                impl biome_deserialize::DeserializableValue,
+            )>,
+        >,
+        _range: biome_rowan::TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "allowInvalidRoles" => {
+                    if let Some(roles) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.allowed_invalid_roles = roles;
+                    }
+                }
+                "ignoreNonDom" => {
+                    if let Some(value) = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.ignore_non_dom = value;
+                    }
+                }
+                unknown_key => {
+                    const ALLOWED_KEYS: &[&str] = &["allowInvalidRoles", "ignoreNonDom"];
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        unknown_key,
+                        key.range(),
+                        ALLOWED_KEYS,
+                    ));
+                }
             }
         }
-
-        Some(())
+        Some(result)
     }
 }
 

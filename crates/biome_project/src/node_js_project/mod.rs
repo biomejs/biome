@@ -32,7 +32,7 @@ impl Project for NodeJsProject {
     fn deserialize_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
         let manifest = Self::Manifest::deserialize_manifest(content);
         let (package, deserialize_diagnostics) = manifest.consume();
-        self.manifest = package;
+        self.manifest = package.unwrap_or_default();
         self.diagnostics = deserialize_diagnostics;
     }
 

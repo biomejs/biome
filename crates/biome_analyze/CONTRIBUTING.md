@@ -299,27 +299,18 @@ just ready
 
 ### Rule configuration
 
-Some rules may allow customization using configuration.
-The first step is to setup a struct to represent the rule configuration.
+Some rules may allow customization using options.
+We try to keep rule options to a minimum and only when needed.
+Before adding an option, it's worth a discussion.
+Options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
 
-```rust,ignore
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReactExtensiveDependenciesOptions {
-    hooks_config: FxHashMap<String, ReactHookConfiguration>,
-    stable_config: FxHashSet<StableReactHookConfiguration>,
-}
+Let's assume that the rule we implement support the following options:
 
-impl Rule for UseExhaustiveDependencies {
-    type Query = Semantic<JsCallExpression>;
-    type State = Fix;
-    type Signals = Vec<Self::State>;
-    type Options = ReactExtensiveDependenciesOptions;
+- `behavior`: a string among `"A"`, `"B"`, and `"C"`;
+- `threshold`: an integer between 0 and 255;
+- `behaviorExceptions`: an array of strings.
 
-    ...
-}
-```
-
-This allows the rule to be configured inside `biome.json` file like:
+We would like to set the options in the `biome.json` configuration file:
 
 ```json
 {
@@ -327,11 +318,10 @@ This allows the rule to be configured inside `biome.json` file like:
     "rules": {
       "recommended": true,
       "nursery": {
-        "useExhaustiveDependencies": {
-          "level": "error",
-          "options": {
-            "hooks": [["useMyEffect", 0, 1]]
-          }
+        "my-rule": {
+          "behavior": "A",
+          "threshold": 30,
+          "behaviorExceptions": ["f"],
         }
       }
     }
@@ -339,10 +329,176 @@ This allows the rule to be configured inside `biome.json` file like:
 }
 ```
 
+The first step is to create the Rust data representation of the rule's options.
+
+```rust,ignore
+#[derive(Debug, Default, Clone)]
+pub struct MyRuleOptions {
+    behavior: Behavior,
+    threshold: u8,
+    behavior_exceptions: Vec<String>
+}
+
+#[derive(Debug, Default, Clone)]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
+```
+
+To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
+they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
+
+In the following code, we implement `Deserializable` for `Behavior`.
+We first deserialize the input into a `TokenText`.
+Then we validate the retrieved text by checking that it is one of the allowed string variants.
+If it is an unknown variant, we emit a diagnostic and return `None` to signal that the deserialization failed.
+Otherwise, we return the corresponding variant.
+
+```rust,ignore
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationVisitor, Text};
+
+impl Deserializable for Behavior {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        match Text::deserialize(&value, name, diagnostics)?.text() {
+            "A" => Some(Behavior::A),
+            "B" => Some(Behavior::B),
+            "C" => Some(Behavior::C),
+            unknown_variant => {
+                const ALLOWED_VARIANTS: &[&str] = &["A", "B", "C"];
+                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                    unknown_variant,
+                    value.range(),
+                    ALLOWED_VARIANTS,
+                ));
+                None
+            }
+        }
+    }
+}
+```
+
+To implement `Deserializable` for `MyRuleOptions`,
+we cannot reuse an existing deserializer because a `struct` has custom fields.
+Instead, we delegate the deserialization to a visitor.
+We implement a visitor by implementing the `DeserializationVisitor` trait from the `biome_deserialize` crate.
+The visitor traverses every field (key-value pair) of our object and deserialize them.
+If an unknown field is found, we emit a diagnostic.
+
+```rust,ignore
+use biome_deserialize::{DeserializationDiagnostic,  Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+
+impl Deserializable for MyRuleOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+name: &str,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(MyRuleOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct MyRuleOptionsVisitor;
+impl DeserializationVisitor for MyRuleOptionsVisitor {
+    type Output = MyRuleOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _name: &str,
+        _range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "behavior" => {
+                    if let Some(behavior) = Deserialize::deserialize(&value, &key_text, diagnostics) {
+                        result.behavior = behavior;
+                    }
+                }
+                "threshold" => {
+                    if let Some(threshold) = Deserialize::deserialize(&value, &key_text, diagnostics) {
+                        result.behavior = threshold;
+                    }
+                }
+                "behaviorExceptions" => {
+                    if let Some(exceptions) = Deserialize::deserialize(&value, &key_text, diagnostics) {
+                        result.behavior_exceptions = exceptions;
+                    }
+                }
+                unknown_key => {
+                    const ALLOWED_KEYS: &[&str] = &["behavior", "threshold", "behaviorExceptions"];
+                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                        unknown_key,
+                        key.range(),
+                        ALLOWED_KEYS,
+                    ))
+                }
+            }
+        }
+        Some(result)
+    }
+}
+```
+
+Once done, you can set the associated type `Options` of the rule:
+
+```rust,ignore
+impl Rule for MyRule {
+    type Query = Semantic<JsCallExpression>;
+    type State = Fix;
+    type Signals = Vec<Self::State>;
+    type Options = MyRuleOptions;
+
+    ...
+}
+```
+
 A rule can retrieve its option with:
 
 ```rust,ignore
 let options = ctx.options();
+```
+
+The compiler should warn you that `MyRuleOptions` does not implement some required types.
+We currently require implementing _serde_'s traits `Deserialize`/`Serialize` and _Bpaf_'s parser trait.
+You can simply use a derive macros:
+
+```rust,ignore
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Bpaf)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MyRuleOptions {
+    #[bpaf(hide)]
+    #[serde(default, skip_serializing_if = "is_default")]
+    main_behavior: Behavior,
+
+    #[bpaf(hide)]
+    #[serde(default, skip_serializing_if = "is_default")]
+    extra_behaviors: Vec<Behavior>,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
 ```
 
 ### Deprecate a rule

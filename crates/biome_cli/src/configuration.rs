@@ -31,8 +31,11 @@ impl LoadedConfiguration {
     /// If a configuration can't be resolved from the file system, the operation will fail.
     pub fn apply_extends(mut self, fs: &DynRef<dyn FileSystem>) -> Result<Self, WorkspaceError> {
         let deserialized = self.deserialize_extends(fs)?;
-        let (configurations, errors): (Vec<_>, Vec<_>) =
-            deserialized.into_iter().map(|d| d.consume()).unzip();
+        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
+            .into_iter()
+            .map(|d| d.consume())
+            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
+            .unzip();
 
         let extended_configuration = configurations.into_iter().reduce(
             |mut previous_configuration, current_configuration| {
@@ -72,7 +75,7 @@ impl LoadedConfiguration {
             .cloned()
             .unwrap_or(fs.working_directory().unwrap_or(PathBuf::from("./")));
         let mut deserialized_configurations = vec![];
-        for path in extends.index_set() {
+        for path in extends.iter() {
             let config_path = directory_path.join(path);
             let mut file = fs
 					.open_with_options(config_path.as_path(), OpenOptions::default().read(true))
@@ -172,7 +175,7 @@ impl From<Option<ConfigurationPayload>> for LoadedConfiguration {
             } = value;
             let (configuration, diagnostics) = deserialized.consume();
             LoadedConfiguration {
-                configuration,
+                configuration: configuration.unwrap_or_default(),
                 diagnostics,
                 directory_path: Some(configuration_directory_path),
                 file_path: Some(configuration_file_path),

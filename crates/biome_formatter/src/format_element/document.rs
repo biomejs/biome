@@ -160,7 +160,7 @@ impl FormatOptions for IrFormatOptions {
     }
 
     fn line_width(&self) -> LineWidth {
-        LineWidth(80)
+        LineWidth::default()
     }
 
     fn as_print_options(&self) -> PrinterOptions {
