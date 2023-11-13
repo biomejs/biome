@@ -18,6 +18,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - recommended
   - all
   - noApproximativeNumericConstant
+  - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
   - noEmptyCharacterClassInRegex
