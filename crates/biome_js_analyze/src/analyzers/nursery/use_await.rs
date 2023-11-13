@@ -46,7 +46,7 @@ declare_rule! {
     /// async function noop() { }
     /// ```
     pub(crate) UseAwait {
-        version: "1.0.0",
+        version: "1.3.0",
         name: "useAwait",
         recommended: true,
     }
