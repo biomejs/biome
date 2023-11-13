@@ -143,7 +143,7 @@ impl Rule for UseAwait {
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "This async function lacks an "<Emphasis>"await"</Emphasis>" expression."
+                    "This "<Emphasis>"async"</Emphasis>" function lacks an "<Emphasis>"await"</Emphasis>" expression."
                 },
             )
             .note(markup! {
