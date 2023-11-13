@@ -816,6 +816,10 @@ export interface Nursery {
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration;
+	/**
+	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
+	 */
+	useValidAriaRole?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1214,7 +1218,8 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| HooksOptions
 	| NamingConventionOptions
-	| RestrictedGlobalsOptions;
+	| RestrictedGlobalsOptions
+	| ValidAriaRoleOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1254,6 +1259,10 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals?: string[];
+}
+export interface ValidAriaRoleOptions {
+	allowedInvalidRoles: string[];
+	ignoreNonDom: boolean;
 }
 export interface Hooks {
 	/**
@@ -1461,6 +1470,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useShorthandAssign"
+	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"

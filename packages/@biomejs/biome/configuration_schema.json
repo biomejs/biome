@@ -1173,6 +1173,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useValidAriaRole": {
+					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			}
 		},
@@ -1359,6 +1366,10 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
+				},
+				{
+					"description": "Options for `useValidAriaRole` rule",
+					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
 				}
 			]
 		},
@@ -2009,6 +2020,18 @@
 					"enum": ["none"]
 				}
 			]
+		},
+		"ValidAriaRoleOptions": {
+			"type": "object",
+			"required": ["allowedInvalidRoles", "ignoreNonDom"],
+			"properties": {
+				"allowedInvalidRoles": {
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreNonDom": { "type": "boolean" }
+			},
+			"additionalProperties": false
 		},
 		"VcsClientKind": {
 			"oneOf": [

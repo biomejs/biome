@@ -2735,6 +2735,10 @@ pub struct Nursery {
     #[bpaf(long("use-shorthand-assign"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_assign: Option<RuleConfiguration>,
+    #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
+    #[bpaf(long("use-valid-aria-role"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_valid_aria_role: Option<RuleConfiguration>,
 }
 impl MergeWith<Nursery> for Nursery {
     fn merge_with(&mut self, other: Nursery) {
@@ -2804,6 +2808,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_shorthand_assign) = other.use_shorthand_assign {
             self.use_shorthand_assign = Some(use_shorthand_assign);
         }
+        if let Some(use_valid_aria_role) = other.use_valid_aria_role {
+            self.use_valid_aria_role = Some(use_valid_aria_role);
+        }
     }
     fn merge_with_if_not_default(&mut self, other: Nursery)
     where
@@ -2816,7 +2823,7 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 20] = [
+    pub(crate) const GROUP_RULES: [&'static str; 21] = [
         "noApproximativeNumericConstant",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
@@ -2837,8 +2844,9 @@ impl Nursery {
         "useGroupedTypeImport",
         "useImportRestrictions",
         "useShorthandAssign",
+        "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES: [&'static str; 9] = [
+    const RECOMMENDED_RULES: [&'static str; 10] = [
         "noDuplicateJsonKeys",
         "noEmptyCharacterClassInRegex",
         "noInvalidNewBuiltin",
@@ -2848,8 +2856,9 @@ impl Nursery {
         "useAsConstAssertion",
         "useAwait",
         "useGroupedTypeImport",
+        "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 9] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 10] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
@@ -2859,8 +2868,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 20] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 21] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2881,6 +2891,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2997,6 +3008,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3101,6 +3117,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -3111,10 +3132,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 9] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 10] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 20] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 21] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3161,6 +3182,7 @@ impl Nursery {
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
             "useShorthandAssign" => self.use_shorthand_assign.as_ref(),
+            "useValidAriaRole" => self.use_valid_aria_role.as_ref(),
             _ => None,
         }
     }
