@@ -78,7 +78,17 @@ invalid.js:1:1 lint/nursery/useAwait ━━━━━━━━━━━━━━�
     4 │ 
     5 │ (async function fetchDataImmediate() {
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+  > 1 │ async function fetchData() {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	return fetch('/data');
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ (async function fetchDataImmediate() {
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -98,7 +108,19 @@ invalid.js:5:2 lint/nursery/useAwait ━━━━━━━━━━━━━━�
     8 │ 
     9 │ const obj = {
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    3 │ }
+    4 │ 
+  > 5 │ (async function fetchDataImmediate() {
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ 	return fetch('/data');
+  > 7 │ })();
+      │ ^
+    8 │ 
+    9 │ const obj = {
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -117,7 +139,18 @@ invalid.js:10:2 lint/nursery/useAwait ━━━━━━━━━━━━━━
     13 │ };
     14 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+     9 │ const obj = {
+  > 10 │ 	async fetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 11 │ 		return fetch('/data');
+  > 12 │ 	},
+       │ 	^
+    13 │ };
+    14 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -136,7 +169,18 @@ invalid.js:16:2 lint/nursery/useAwait ━━━━━━━━━━━━━━
     19 │ }
     20 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    15 │ class DataFetcher {
+  > 16 │ 	async fetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 17 │ 		return fetch('/data');
+  > 18 │ 	}
+       │ 	^
+    19 │ }
+    20 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -155,7 +199,18 @@ invalid.js:22:2 lint/nursery/useAwait ━━━━━━━━━━━━━━
     25 │ }
     26 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    21 │ async function outer() {
+  > 22 │ 	async function innerFetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 23 │ 		return fetch('/data');
+  > 24 │ 	}
+       │ 	^
+    25 │ }
+    26 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -177,7 +232,21 @@ invalid.js:21:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
     26 │ 
     27 │ async function outer() {
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    19 │ }
+    20 │ 
+  > 21 │ async function outer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 22 │ 	async function innerFetchData() {
+  > 23 │ 		return fetch('/data');
+  > 24 │ 	}
+  > 25 │ }
+       │ ^
+    26 │ 
+    27 │ async function outer() {
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -196,7 +265,18 @@ invalid.js:28:2 lint/nursery/useAwait ━━━━━━━━━━━━━━
     31 │ 	return fetch('/another-data');
     32 │ }
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    27 │ async function outer() {
+  > 28 │ 	async function innerFetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │ 		return fetch('/data');
+  > 30 │ 	}
+       │ 	^
+    31 │ 	return fetch('/another-data');
+    32 │ }
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -219,7 +299,22 @@ invalid.js:27:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
     33 │ 
     34 │ async function outer() {
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    25 │ }
+    26 │ 
+  > 27 │ async function outer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 28 │ 	async function innerFetchData() {
+  > 29 │ 		return fetch('/data');
+  > 30 │ 	}
+  > 31 │ 	return fetch('/another-data');
+  > 32 │ }
+       │ ^
+    33 │ 
+    34 │ async function outer() {
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -242,7 +337,22 @@ invalid.js:34:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
     40 │ 
     41 │ async function complexFunction() {
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    32 │ }
+    33 │ 
+  > 34 │ async function outer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │ 	async function innerFetchData() {
+  > 36 │ 		return await fetch('/data');
+  > 37 │ 	}
+  > 38 │ 	return fetch('/another-data');
+  > 39 │ }
+       │ ^
+    40 │ 
+    41 │ async function complexFunction() {
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -262,7 +372,19 @@ invalid.js:43:3 lint/nursery/useAwait ━━━━━━━━━━━━━━
     46 │ 	};
     47 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    41 │ async function complexFunction() {
+    42 │ 	const obj = {
+  > 43 │ 		async fetchData() {
+       │ 		^^^^^^^^^^^^^^^^^^^
+  > 44 │ 			return fetch('/data');
+  > 45 │ 		},
+       │ 		^
+    46 │ 	};
+    47 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -281,7 +403,18 @@ invalid.js:49:3 lint/nursery/useAwait ━━━━━━━━━━━━━━
     52 │ 	}
     53 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    48 │ 	class NestedDataFetcher {
+  > 49 │ 		async fetchData() {
+       │ 		^^^^^^^^^^^^^^^^^^^
+  > 50 │ 			return fetch('/data');
+  > 51 │ 		}
+       │ 		^
+    52 │ 	}
+    53 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
@@ -303,7 +436,21 @@ invalid.js:41:1 lint/nursery/useAwait ━━━━━━━━━━━━━━
        │ ^
     58 │ 
   
-  i Async functions should contain at least one 'await' expression. Functions with no 'await' may not need to be declared 'async'.
+  i Remove this async modifier, or add an await expression in the function.
+  
+    39 │ }
+    40 │ 
+  > 41 │ async function complexFunction() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 42 │ 	const obj = {
+        ...
+  > 55 │ 		return fetch('condition-data');
+  > 56 │ 	}
+  > 57 │ }
+       │ ^
+    58 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
   
 
 ```
