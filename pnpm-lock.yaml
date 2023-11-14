@@ -78,8 +78,6 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0
 
-  packages/@biomejs/wasm-web: {}
-
   website:
     devDependencies:
       '@astrojs/prism':
