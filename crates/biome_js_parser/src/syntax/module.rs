@@ -271,9 +271,22 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     // import type foo from "./mod";
     // import type * as foo2 from "./mod";
     // import type { foo3 } from "mod";
-    let is_typed = p.at(T![type])
-        && (matches!(p.nth(1), T![*] | T!['{'])
-            || (is_nth_at_identifier_binding(p, 1) && !p.nth_at(1, T![from])));
+    // import type from from "./mod";
+    let is_typed = 'is_typed: {
+        if !p.at(T![type]) {
+            break 'is_typed false;
+        }
+
+        if matches!(p.nth(1), T![*] | T!['{']) {
+            break 'is_typed true;
+        }
+
+        if !is_nth_at_identifier_binding(p, 1) {
+            break 'is_typed false;
+        }
+
+        !p.nth_at(1, T![from]) || p.nth_at(2, T![from])
+    };
 
     if is_typed {
         p.eat(T![type]);
