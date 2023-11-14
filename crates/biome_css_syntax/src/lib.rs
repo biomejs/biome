@@ -63,7 +63,14 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     const EOF: Self = EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, CSS_BOGUS)
+        matches!(
+            self,
+            CSS_BOGUS
+                | CSS_BOGUS_RULE
+                | CSS_BOGUS_SELECTOR
+                | CSS_BOGUS_SUB_SELECTOR
+                | CSS_BOGUS_BODY
+        )
     }
 
     fn to_bogus(&self) -> Self {

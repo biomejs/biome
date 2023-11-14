@@ -152,11 +152,13 @@ CssPseudoClassSelector =
 
 AnyCssPseudoClass =
 	CssPseudoClassIdentifier
+	| CssPseudoClassFunctionIdentifier
 	| CssPseudoClassFunctionSelector
 	| CssPseudoClassFunctionSelectorList
 	| CssPseudoClassFunctionCompoundSelector
 	| CssPseudoClassFunctionCompoundSelectorList
 	| CssPseudoClassFunctionRelativeSelectorList
+	| CssPseudoClassFunctionValueList
 
 CssPseudoClassIdentifier =
 	name: CssIdentifier

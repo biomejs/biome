@@ -2520,9 +2520,11 @@ impl AnyCssCompoundSelector {
 pub enum AnyCssPseudoClass {
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
+    CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier),
     CssPseudoClassFunctionRelativeSelectorList(CssPseudoClassFunctionRelativeSelectorList),
     CssPseudoClassFunctionSelector(CssPseudoClassFunctionSelector),
     CssPseudoClassFunctionSelectorList(CssPseudoClassFunctionSelectorList),
+    CssPseudoClassFunctionValueList(CssPseudoClassFunctionValueList),
     CssPseudoClassIdentifier(CssPseudoClassIdentifier),
 }
 impl AnyCssPseudoClass {
@@ -2539,6 +2541,14 @@ impl AnyCssPseudoClass {
     ) -> Option<&CssPseudoClassFunctionCompoundSelectorList> {
         match &self {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_function_identifier(
+        &self,
+    ) -> Option<&CssPseudoClassFunctionIdentifier> {
+        match &self {
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -2561,6 +2571,14 @@ impl AnyCssPseudoClass {
     ) -> Option<&CssPseudoClassFunctionSelectorList> {
         match &self {
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_function_value_list(
+        &self,
+    ) -> Option<&CssPseudoClassFunctionValueList> {
+        match &self {
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(item) => Some(item),
             _ => None,
         }
     }
@@ -5506,6 +5524,11 @@ impl From<CssPseudoClassFunctionCompoundSelectorList> for AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(node)
     }
 }
+impl From<CssPseudoClassFunctionIdentifier> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionIdentifier) -> AnyCssPseudoClass {
+        AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(node)
+    }
+}
 impl From<CssPseudoClassFunctionRelativeSelectorList> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionRelativeSelectorList) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(node)
@@ -5521,6 +5544,11 @@ impl From<CssPseudoClassFunctionSelectorList> for AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(node)
     }
 }
+impl From<CssPseudoClassFunctionValueList> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionValueList) -> AnyCssPseudoClass {
+        AnyCssPseudoClass::CssPseudoClassFunctionValueList(node)
+    }
+}
 impl From<CssPseudoClassIdentifier> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassIdentifier) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassIdentifier(node)
@@ -5530,18 +5558,22 @@ impl AstNode for AnyCssPseudoClass {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssPseudoClassFunctionCompoundSelector::KIND_SET
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
+        .union(CssPseudoClassFunctionIdentifier::KIND_SET)
         .union(CssPseudoClassFunctionRelativeSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionSelector::KIND_SET)
         .union(CssPseudoClassFunctionSelectorList::KIND_SET)
+        .union(CssPseudoClassFunctionValueList::KIND_SET)
         .union(CssPseudoClassIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
                 | CSS_PSEUDO_CLASS_IDENTIFIER
         )
     }
@@ -5555,6 +5587,11 @@ impl AstNode for AnyCssPseudoClass {
             CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST => {
                 AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(
                     CssPseudoClassFunctionCompoundSelectorList { syntax },
+                )
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
+                AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(
+                    CssPseudoClassFunctionIdentifier { syntax },
                 )
             }
             CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST => {
@@ -5572,6 +5609,11 @@ impl AstNode for AnyCssPseudoClass {
                     CssPseudoClassFunctionSelectorList { syntax },
                 )
             }
+            CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST => {
+                AnyCssPseudoClass::CssPseudoClassFunctionValueList(
+                    CssPseudoClassFunctionValueList { syntax },
+                )
+            }
             CSS_PSEUDO_CLASS_IDENTIFIER => {
                 AnyCssPseudoClass::CssPseudoClassIdentifier(CssPseudoClassIdentifier { syntax })
             }
@@ -5583,9 +5625,11 @@ impl AstNode for AnyCssPseudoClass {
         match self {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => &it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => &it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassIdentifier(it) => &it.syntax,
         }
     }
@@ -5593,9 +5637,11 @@ impl AstNode for AnyCssPseudoClass {
         match self {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassIdentifier(it) => it.syntax,
         }
     }
@@ -5609,6 +5655,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -5616,6 +5663,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoClass::CssPseudoClassIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -5625,9 +5673,11 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
         match n {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into(),
+            AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.into(),
+            AnyCssPseudoClass::CssPseudoClassFunctionValueList(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassIdentifier(it) => it.into(),
         }
     }

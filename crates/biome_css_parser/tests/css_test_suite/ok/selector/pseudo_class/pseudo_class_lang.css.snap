@@ -28,22 +28,20 @@ CssRoot {
                     nesting_selector_token: missing (optional),
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@0..1 ":" [] [],
-                                CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@1..5 "lang" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@5..6 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@6..13 "\\*-Latn" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@13..15 ")" [] [Whitespace(" ")],
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..1 ":" [] [],
+                            class: CssPseudoClassFunctionValueList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..5 "lang" [] [],
                                 },
-                            ],
+                                l_paren_token: L_PAREN@5..6 "(" [] [],
+                                value_list: CssPseudoValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@6..13 "\\*-Latn" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@13..15 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -60,22 +58,20 @@ CssRoot {
                     nesting_selector_token: missing (optional),
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@17..19 ":" [Newline("\n")] [],
-                                CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@19..23 "lang" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@23..24 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssString {
-                                            value_token: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@32..34 ")" [] [Whitespace(" ")],
+                        CssPseudoClassSelector {
+                            colon_token: COLON@17..19 ":" [Newline("\n")] [],
+                            class: CssPseudoClassFunctionValueList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@19..23 "lang" [] [],
                                 },
-                            ],
+                                l_paren_token: L_PAREN@23..24 "(" [] [],
+                                value_list: CssPseudoValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@32..34 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -96,22 +92,20 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@41..42 ":" [] [],
-                                CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@42..46 "lang" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@46..47 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@47..52 "fr-be" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@52..54 ")" [] [Whitespace(" ")],
+                        CssPseudoClassSelector {
+                            colon_token: COLON@41..42 ":" [] [],
+                            class: CssPseudoClassFunctionValueList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@42..46 "lang" [] [],
                                 },
-                            ],
+                                l_paren_token: L_PAREN@46..47 "(" [] [],
+                                value_list: CssPseudoValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@47..52 "fr-be" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@52..54 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -132,22 +126,20 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@61..62 ":" [] [],
-                                CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@62..66 "lang" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@66..67 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@67..69 "de" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
+                        CssPseudoClassSelector {
+                            colon_token: COLON@61..62 ":" [] [],
+                            class: CssPseudoClassFunctionValueList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@62..66 "lang" [] [],
                                 },
-                            ],
+                                l_paren_token: L_PAREN@66..67 "(" [] [],
+                                value_list: CssPseudoValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@67..69 "de" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -168,26 +160,24 @@ CssRoot {
                         },
                     },
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@78..79 ":" [] [],
-                                CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@79..83 "lang" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@83..84 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@84..86 "de" [] [],
-                                        },
-                                        COMMA@86..88 "," [] [Whitespace(" ")],
-                                        CssIdentifier {
-                                            value_token: IDENT@88..90 "fr" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@90..92 ")" [] [Whitespace(" ")],
+                        CssPseudoClassSelector {
+                            colon_token: COLON@78..79 ":" [] [],
+                            class: CssPseudoClassFunctionValueList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@79..83 "lang" [] [],
                                 },
-                            ],
+                                l_paren_token: L_PAREN@83..84 "(" [] [],
+                                value_list: CssPseudoValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@84..86 "de" [] [],
+                                    },
+                                    COMMA@86..88 "," [] [Whitespace(" ")],
+                                    CssIdentifier {
+                                        value_token: IDENT@88..90 "fr" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@90..92 ")" [] [Whitespace(" ")],
+                            },
                         },
                     ],
                 },
@@ -205,22 +195,20 @@ CssRoot {
                         nesting_selector_token: missing (optional),
                         simple_selector: missing (optional),
                         sub_selectors: CssSubSelectorList [
-                            CssBogusSubSelector {
-                                items: [
-                                    COLON@94..96 ":" [Newline("\n")] [],
-                                    CssPseudoClassFunctionValueList {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@96..100 "lang" [] [],
-                                        },
-                                        l_paren_token: L_PAREN@100..101 "(" [] [],
-                                        value_list: CssPseudoValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@101..106 "fr-be" [] [],
-                                            },
-                                        ],
-                                        r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
+                            CssPseudoClassSelector {
+                                colon_token: COLON@94..96 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionValueList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@96..100 "lang" [] [],
                                     },
-                                ],
+                                    l_paren_token: L_PAREN@100..101 "(" [] [],
+                                    value_list: CssPseudoValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@101..106 "fr-be" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -249,22 +237,20 @@ CssRoot {
                         nesting_selector_token: missing (optional),
                         simple_selector: missing (optional),
                         sub_selectors: CssSubSelectorList [
-                            CssBogusSubSelector {
-                                items: [
-                                    COLON@114..116 ":" [Newline("\n")] [],
-                                    CssPseudoClassFunctionValueList {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@116..120 "lang" [] [],
-                                        },
-                                        l_paren_token: L_PAREN@120..121 "(" [] [],
-                                        value_list: CssPseudoValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@121..123 "de" [] [],
-                                            },
-                                        ],
-                                        r_paren_token: R_PAREN@123..125 ")" [] [Whitespace(" ")],
+                            CssPseudoClassSelector {
+                                colon_token: COLON@114..116 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionValueList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@116..120 "lang" [] [],
                                     },
-                                ],
+                                    l_paren_token: L_PAREN@120..121 "(" [] [],
+                                    value_list: CssPseudoValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@121..123 "de" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@123..125 ")" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -302,7 +288,7 @@ CssRoot {
           0: (empty)
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..15
-            0: CSS_BOGUS_SUB_SELECTOR@0..15
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..15
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@1..15
                 0: CSS_IDENTIFIER@1..5
@@ -322,7 +308,7 @@ CssRoot {
           0: (empty)
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@17..34
-            0: CSS_BOGUS_SUB_SELECTOR@17..34
+            0: CSS_PSEUDO_CLASS_SELECTOR@17..34
               0: COLON@17..19 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@19..34
                 0: CSS_IDENTIFIER@19..23
@@ -344,7 +330,7 @@ CssRoot {
             0: CSS_IDENTIFIER@36..41
               0: IDENT@36..41 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@41..54
-            0: CSS_BOGUS_SUB_SELECTOR@41..54
+            0: CSS_PSEUDO_CLASS_SELECTOR@41..54
               0: COLON@41..42 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@42..54
                 0: CSS_IDENTIFIER@42..46
@@ -366,7 +352,7 @@ CssRoot {
             0: CSS_IDENTIFIER@56..61
               0: IDENT@56..61 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@61..71
-            0: CSS_BOGUS_SUB_SELECTOR@61..71
+            0: CSS_PSEUDO_CLASS_SELECTOR@61..71
               0: COLON@61..62 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@62..71
                 0: CSS_IDENTIFIER@62..66
@@ -388,7 +374,7 @@ CssRoot {
             0: CSS_IDENTIFIER@73..78
               0: IDENT@73..78 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@78..92
-            0: CSS_BOGUS_SUB_SELECTOR@78..92
+            0: CSS_PSEUDO_CLASS_SELECTOR@78..92
               0: COLON@78..79 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@79..92
                 0: CSS_IDENTIFIER@79..83
@@ -412,7 +398,7 @@ CssRoot {
             0: (empty)
             1: (empty)
             2: CSS_SUB_SELECTOR_LIST@94..108
-              0: CSS_BOGUS_SUB_SELECTOR@94..108
+              0: CSS_PSEUDO_CLASS_SELECTOR@94..108
                 0: COLON@94..96 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@96..108
                   0: CSS_IDENTIFIER@96..100
@@ -440,7 +426,7 @@ CssRoot {
             0: (empty)
             1: (empty)
             2: CSS_SUB_SELECTOR_LIST@114..125
-              0: CSS_BOGUS_SUB_SELECTOR@114..125
+              0: CSS_PSEUDO_CLASS_SELECTOR@114..125
                 0: COLON@114..116 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@116..125
                   0: CSS_IDENTIFIER@116..120
