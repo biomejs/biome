@@ -6,7 +6,7 @@ use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
     JsAssignmentExpression, JsAssignmentOperator, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
-    TsAccessibilityModifier, TsPropertyParameter,
+    TsAccessibilityModifier, TsPropertyParameter, JsArrowFunctionExpression
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt,
@@ -14,7 +14,7 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashSet;
 
-use crate::{utils::is_node_equal, JsRuleAction};
+use crate::{utils::is_node_equal, JsRuleAction, control_flow::AnyJsControlFlowRoot};
 
 declare_rule! {
     /// Disallow unused private class members
@@ -121,11 +121,18 @@ fn traverse_members_usage(
     syntax: &JsSyntaxNode,
     mut private_members: FxHashSet<AnyMember>,
 ) -> Vec<AnyMember> {
-    let iter = syntax.preorder();
+    let mut iter = syntax.preorder();
 
-    for event in iter {
+    while let Some(event) = iter.next() {
         match event {
             biome_rowan::WalkEvent::Enter(node) => {
+                if AnyJsControlFlowRoot::can_cast(node.kind())
+                    && !JsArrowFunctionExpression::can_cast(node.kind())
+                {
+                    iter.skip_subtree();
+                    continue;
+                }
+
                 if let Some(js_name) = AnyJsName::cast(node) {
                     private_members.retain(|private_member| {
                         let member_being_used =
