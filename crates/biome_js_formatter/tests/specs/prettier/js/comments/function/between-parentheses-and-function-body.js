@@ -12,6 +12,7 @@ function function_declaration()
 //   return 42
 // })();
 
+
 // FIXME
 // TODO: reformat issue
 // (function ()
@@ -34,7 +35,7 @@ a = {
   // this is a function
   {},
 
-  // bar: function()
-  // // this is a function
-  // {},
+// bar: function()
+// // this is a function
+// {},
 }

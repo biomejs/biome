@@ -4,7 +4,7 @@
 		"start": "node prepare_tests"
 	},
 	"dependencies": {
-		"prettier": "3.0.0"
+		"prettier": "3.1.0"
 	},
 	"engines": {
 		"pnpm": "^8.0.0"

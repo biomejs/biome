@@ -22,7 +22,6 @@ info: typescript/instantiation-expression/property-access.ts
 // (Array<string>)[`a`];
 // (Array<string>)?.[`a`];
 // (Array<string>)[(Array<string>)];
-
 ```
 
 

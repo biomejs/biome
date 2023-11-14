@@ -15,7 +15,6 @@ interface RelayProps {
   | void, // articles type may be void
 }
 
-
 // FIXME
 // TODO: reformat issue
 // type FooBar = null // null
