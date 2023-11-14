@@ -753,6 +753,10 @@ export interface Nursery {
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
 	/**
+	 * Disallow use of implicit any type on variable declarations.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
+	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
@@ -1458,6 +1462,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
+	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"

@@ -6,6 +6,7 @@ pub(crate) mod no_approximative_numeric_constant;
 pub(crate) mod no_default_export;
 pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_empty_character_class_in_regex;
+pub(crate) mod no_implicit_any_let;
 pub(crate) mod no_misleading_instantiator;
 pub(crate) mod no_misrefactored_shorthand_assign;
 pub(crate) mod no_unused_private_class_members;
@@ -26,6 +27,7 @@ declare_group! {
             self :: no_default_export :: NoDefaultExport ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex ,
+            self :: no_implicit_any_let :: NoImplicitAnyLet ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
