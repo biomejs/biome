@@ -1065,6 +1065,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImplicitAnyLet": {
+					"description": "Disallow use of implicit any type on variable declarations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInteractiveElementToNoninteractiveRole": {
 					"description": "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
 					"anyOf": [

@@ -753,6 +753,10 @@ export interface Nursery {
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
 	/**
+	 * Disallow use of implicit any type on variable declarations.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
+	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
@@ -760,10 +764,6 @@ export interface Nursery {
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleConfiguration;
-	/**
-	 * Restrict use of implicit any type in Typescript.
-	 */
-	noImplicitAnyLet?: RuleConfiguration;
 	/**
 	 * Enforce proper usage of new and constructor.
 	 */
