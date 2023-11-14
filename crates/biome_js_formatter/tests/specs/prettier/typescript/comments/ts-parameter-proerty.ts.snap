@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/comments/ts-parameter-proerty.ts
+---
+
+# Input
+
+```ts
+class A {
+  constructor(
+      private readonly paramProp: Type,
+    // comment
+  ) {
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,6 @@
+ class A {
+-  constructor(private readonly paramProp: Type) // comment
+-  {}
++  constructor(
++    private readonly paramProp: Type,
++    // comment
++  ) {}
+ }
+```
+
+# Output
+
+```ts
+class A {
+  constructor(
+    private readonly paramProp: Type,
+    // comment
+  ) {}
+}
+```
+
+

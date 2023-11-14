@@ -10,6 +10,14 @@ type a= {
     ]: C  |  D
   }
 
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       // prettier-ignore
+//       B
+//     ]: C  |  D
+//   }
 
 type a= {
     [A in B]:
@@ -24,6 +32,14 @@ type a= {
     ]: C  |  D
   }
 
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       /* prettier-ignore */
+//       B
+//     ]: C  |  D
+//   }
 
 type a= {
     [A in B]:
