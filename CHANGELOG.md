@@ -52,6 +52,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#455](https://github.com/biomejs/biome/issues/455). The CLI can now print complex emojis to the console correctly.
 
+- Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types) now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
+
 ### Parser
 
 ### VSCode
