@@ -25,6 +25,7 @@ biome_text_size              = { workspace = true }
 cfg-if                       = "1.0.0"
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
+smallvec                     = { workspace = true }
 tracing                      = { workspace = true }
 unicode-width                = "0.1.9"
 

@@ -444,6 +444,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "smallvec",
  "tests_macros",
  "tracing",
  "unicode-width",
