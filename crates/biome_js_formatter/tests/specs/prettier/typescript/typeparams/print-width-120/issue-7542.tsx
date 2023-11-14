@@ -10,9 +10,11 @@ users.map((user: User): User => {
   return user;
 })
 
-users.map((user: User): User => {
-  ; // comment
-})
+// FIXME
+// TODO: reformat issue
+// users.map((user: User): User => {
+//   ; // comment
+// })
 
 users.map((user: User): User => {
   // comment

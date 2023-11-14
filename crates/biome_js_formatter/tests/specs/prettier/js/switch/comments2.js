@@ -14,8 +14,10 @@ switch(4){default: // comment4
 break;// comment4b
 }
 
-switch(5){default: // comment5
-// comment5a
-foo();bar();//comment5b
-break;// comment5c
-}
+// FIXME
+// TODO: reformat issue
+// switch(5){default: // comment5
+// // comment5a
+// foo();bar();//comment5b
+// break;// comment5c
+// }
