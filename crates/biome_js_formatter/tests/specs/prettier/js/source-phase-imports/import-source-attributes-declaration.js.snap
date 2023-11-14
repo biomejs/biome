@@ -1,0 +1,131 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/source-phase-imports/import-source-attributes-declaration.js
+---
+
+# Input
+
+```js
+import source s from "x" with { attr: "val" };
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,5 @@
+-import source s from "x" with { attr: "val" };
++import source
++s;
++from;
++("x");
++with { attr: "val" }
+```
+
+# Output
+
+```js
+import source
+s;
+from;
+("x");
+with { attr: "val" }
+```
+
+# Errors
+```
+import-source-attributes-declaration.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `from` but instead found `s`
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │               ^
+    2 │ 
+  
+  i Remove s
+  
+import-source-attributes-declaration.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                 ^^^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                 ^^^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │               ^^^^^^
+    2 │ 
+  
+import-source-attributes-declaration.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                      ^^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                      ^^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                 ^^^^^^^^
+    2 │ 
+  
+import-source-attributes-declaration.js:1:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                          ^^^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                          ^^^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                      ^^^^^^^^
+    2 │ 
+  
+import-source-attributes-declaration.js:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `{`
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                               ^
+    2 │ 
+  
+  i Remove {
+  
+import-source-attributes-declaration.js:1:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `with` statements are not allowed in strict mode
+  
+  > 1 │ import source s from "x" with { attr: "val" };
+      │                          ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+

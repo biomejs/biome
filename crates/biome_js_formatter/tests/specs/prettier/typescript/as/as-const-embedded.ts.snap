@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/as/as-const-embedded.ts
+---
+
+# Input
+
+```ts
+const GQL_QUERY_WITH_CONST = /* GraphQL */ `
+  query S { shop }
+` as const;
+
+const HTML_WITH_CONST = /* HTML */ `
+<div>
+<h1>foo</h1>
+  <p>foo</p>
+</div>
+` as const;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,10 @@
+ const GQL_QUERY_WITH_CONST = /* GraphQL */ `
+-  query S {
+-    shop
+-  }
++  query S { shop }
+ ` as const;
+ 
+ const HTML_WITH_CONST = /* HTML */ `
+-  <div>
+-    <h1>foo</h1>
+-    <p>foo</p>
+-  </div>
++<div>
++<h1>foo</h1>
++  <p>foo</p>
++</div>
+ ` as const;
+```
+
+# Output
+
+```ts
+const GQL_QUERY_WITH_CONST = /* GraphQL */ `
+  query S { shop }
+` as const;
+
+const HTML_WITH_CONST = /* HTML */ `
+<div>
+<h1>foo</h1>
+  <p>foo</p>
+</div>
+` as const;
+```
+
+
