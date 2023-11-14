@@ -196,12 +196,12 @@ JsForVariableDeclaration =
 
 JsBreakStatement =
     'break'
-    (label: 'ident')?
+    (label: JsLabel)?
     ';'?
 
 JsContinueStatement =
     'continue'
-    (label: 'ident')?
+    (label: JsLabel)?
     ';'?
 
 
@@ -217,9 +217,10 @@ JsWithStatement =
 
 
 JsLabeledStatement =
-    label: 'ident' ':'
+    label: JsLabel ':'
     body: AnyJsStatement
 
+JsLabel = value: 'ident'
 
 JsSwitchStatement =
     'switch' '(' discriminant: AnyJsExpression ')'

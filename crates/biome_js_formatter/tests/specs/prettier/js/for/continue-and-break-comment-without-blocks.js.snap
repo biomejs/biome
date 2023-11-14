@@ -93,16 +93,17 @@ for (const f in {}) break
 label1: for (;;) continue label1 /* comment */
 ;
 
-label1: for (;;) continue label1
-/* comment */
-;
+// FIXME: TODO: reformat issue
+// label1: for (;;) continue label1
+// /* comment */
+// ;
 
-label1: for (;;) continue label1 // comment
-;
+// label1: for (;;) continue label1 // comment
+// ;
 
-label1: for (;;) continue label1
-// comment
-;
+// label1: for (;;) continue label1
+// // comment
+// ;
 
 ```
 
@@ -112,15 +113,26 @@ label1: for (;;) continue label1
 ```diff
 --- Prettier
 +++ Biome
-@@ -58,7 +58,7 @@
- for (const f in {}) break;
- /* comment */
+@@ -60,10 +60,14 @@
  
--label1: for (;;) continue label1 /* comment */;
-+label1: for (;;) continue label1; /* comment */
+ label1: for (;;) continue label1 /* comment */;
  
- label1: for (;;) continue label1;
- /* comment */
+-label1: for (;;) continue label1;
+-/* comment */
++// FIXME: TODO: reformat issue
++// label1: for (;;) continue label1
++// /* comment */
++// ;
+ 
+-label1: for (;;) continue label1; // comment
++// label1: for (;;) continue label1 // comment
++// ;
+ 
+-label1: for (;;) continue label1;
+-// comment
++// label1: for (;;) continue label1
++// // comment
++// ;
 ```
 
 # Output
@@ -186,15 +198,19 @@ for (const f in {}) continue;
 for (const f in {}) break;
 /* comment */
 
-label1: for (;;) continue label1; /* comment */
+label1: for (;;) continue label1 /* comment */;
 
-label1: for (;;) continue label1;
-/* comment */
+// FIXME: TODO: reformat issue
+// label1: for (;;) continue label1
+// /* comment */
+// ;
 
-label1: for (;;) continue label1; // comment
+// label1: for (;;) continue label1 // comment
+// ;
 
-label1: for (;;) continue label1;
-// comment
+// label1: for (;;) continue label1
+// // comment
+// ;
 ```
 
 

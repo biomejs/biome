@@ -3,7 +3,9 @@ JsScript {
     directives: JsDirectiveList [],
     statements: JsStatementList [
         JsLabeledStatement {
-            label_token: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] [],
+            label: JsLabel {
+                value_token: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] [],
+            },
             colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
             body: JsFunctionDeclaration {
                 async_token: missing (optional),
@@ -36,7 +38,8 @@ JsScript {
   1: JS_DIRECTIVE_LIST@0..0
   2: JS_STATEMENT_LIST@0..33
     0: JS_LABELED_STATEMENT@0..33
-      0: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] []
+      0: JS_LABEL@0..16
+        0: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] []
       1: COLON@16..18 ":" [] [Whitespace(" ")]
       2: JS_FUNCTION_DECLARATION@18..33
         0: (empty)

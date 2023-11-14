@@ -31,7 +31,9 @@ JsModule {
             else_clause: missing (optional),
         },
         JsLabeledStatement {
-            label_token: IDENT@25..32 "label1" [Newline("\n")] [],
+            label: JsLabel {
+                value_token: IDENT@25..32 "label1" [Newline("\n")] [],
+            },
             colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
             body: JsBogusStatement {
                 items: [
@@ -109,7 +111,8 @@ JsModule {
           3: R_CURLY@24..25 "}" [] []
       5: (empty)
     1: JS_LABELED_STATEMENT@25..49
-      0: IDENT@25..32 "label1" [Newline("\n")] []
+      0: JS_LABEL@25..32
+        0: IDENT@25..32 "label1" [Newline("\n")] []
       1: COLON@32..34 ":" [] [Whitespace(" ")]
       2: JS_BOGUS_STATEMENT@34..49
         0: FUNCTION_KW@34..43 "function" [] [Whitespace(" ")]
