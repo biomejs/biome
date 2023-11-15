@@ -150,14 +150,14 @@ impl DiffReport {
                     _ => match report_type {
                         ReportType::Json => {
                             if incompatible_only {
-                                "incompatible_report.json".to_string()
+                                "report_incompatible.json".to_string()
                             } else {
                                 "report.json".to_string()
                             }
                         }
                         ReportType::Markdown => {
                             if incompatible_only {
-                                "incompatible_report.md".to_string()
+                                "report_incompatible.md".to_string()
                             } else {
                                 "report.md".to_string()
                             }
