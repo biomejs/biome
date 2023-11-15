@@ -34,7 +34,7 @@ impl FormatNodeRule<JsExportFromClause> for FormatJsExportFromClause {
         write!(f, [from_token.format(), space(), source.format()])?;
 
         if let Some(assertion) = assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         FormatStatementSemicolon::new(semicolon_token.as_ref()).fmt(f)

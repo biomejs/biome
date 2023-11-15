@@ -112,7 +112,7 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
         write![f, [space(), from_token.format(), space(), source.format(),]]?;
 
         if let Some(assertion) = assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         Ok(())

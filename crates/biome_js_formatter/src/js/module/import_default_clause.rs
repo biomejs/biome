@@ -33,7 +33,7 @@ impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
         ]?;
 
         if let Some(assertion) = assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         Ok(())
