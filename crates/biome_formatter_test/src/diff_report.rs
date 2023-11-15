@@ -18,6 +18,12 @@ struct SingleFileMetricData {
     diff: Option<String>,
 }
 
+impl SingleFileMetricData {
+    fn is_compatible(&self) -> bool {
+        (self.single_file_compatibility * 100_f64) >= 100.00
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize)]
 struct PrettierCompatibilityMetricData {
     file_based_average_prettier_similarity: f64,
@@ -39,7 +45,7 @@ impl FromStr for ReportType {
 
 struct DiffReportItem {
     file_name: &'static str,
-    rome_formatted_result: String,
+    biome_formatted_result: String,
     prettier_formatted_result: String,
 }
 pub struct DiffReport {
@@ -79,7 +85,7 @@ impl DiffReport {
     pub fn report(
         &self,
         file_name: &'static str,
-        rome_formatted_result: &str,
+        biome_formatted_result: &str,
         prettier_formatted_result: &str,
     ) {
         match env::var("REPORT_PRETTIER") {
@@ -87,7 +93,7 @@ impl DiffReport {
                 if !Self::is_ignored(file_name) {
                     self.state.lock().unwrap().push(DiffReportItem {
                         file_name,
-                        rome_formatted_result: rome_formatted_result.to_owned(),
+                        biome_formatted_result: biome_formatted_result.to_owned(),
                         prettier_formatted_result: prettier_formatted_result.to_owned(),
                     });
                 }
@@ -141,13 +147,22 @@ impl DiffReport {
                         ReportType::Markdown => "report.md".to_string(),
                     },
                 };
-                self.report_prettier(report_type, report_filename);
+                let exclude_compatible = match env::var("EXCLUDE_COMPATIBLE") {
+                    Ok(value) if value == "1" => true,
+                    _ => false,
+                };
+                self.report_prettier(report_type, report_filename, exclude_compatible);
             }
             _ => {}
         }
     }
 
-    fn report_prettier(&self, report_type: ReportType, report_filename: String) {
+    fn report_prettier(
+        &self,
+        report_type: ReportType,
+        report_filename: String,
+        exclude_compatible: bool,
+    ) {
         let mut state = self.state.lock().unwrap();
         state.sort_by_key(|DiffReportItem { file_name, .. }| *file_name);
 
@@ -159,41 +174,41 @@ impl DiffReport {
 
         for DiffReportItem {
             file_name,
-            rome_formatted_result,
+            biome_formatted_result,
             prettier_formatted_result,
         } in state.iter()
         {
             file_count += 1;
 
-            let rome_lines = rome_formatted_result.lines().count();
+            let biome_lines = biome_formatted_result.lines().count();
             let prettier_lines = prettier_formatted_result.lines().count();
 
-            let (matched_lines, ratio, diff) = if rome_formatted_result == prettier_formatted_result
-            {
-                (rome_lines, 1f64, None)
-            } else {
-                let mut matched_lines = 0;
-                let mut diff = String::new();
+            let (matched_lines, ratio, diff) =
+                if biome_formatted_result == prettier_formatted_result {
+                    (biome_lines, 1f64, None)
+                } else {
+                    let mut matched_lines = 0;
+                    let mut diff = String::new();
 
-                for (tag, line) in diff_lines(
-                    Algorithm::default(),
-                    prettier_formatted_result,
-                    rome_formatted_result,
-                ) {
-                    if matches!(tag, ChangeTag::Equal) {
-                        matched_lines += 1;
+                    for (tag, line) in diff_lines(
+                        Algorithm::default(),
+                        prettier_formatted_result,
+                        biome_formatted_result,
+                    ) {
+                        if matches!(tag, ChangeTag::Equal) {
+                            matched_lines += 1;
+                        }
+
+                        let line = line.strip_suffix('\n').unwrap_or(line);
+                        writeln!(diff, "{}{}", tag, line).unwrap();
                     }
 
-                    let line = line.strip_suffix('\n').unwrap_or(line);
-                    writeln!(diff, "{}{}", tag, line).unwrap();
-                }
+                    let ratio = matched_lines as f64 / biome_lines.max(prettier_lines) as f64;
 
-                let ratio = matched_lines as f64 / rome_lines.max(prettier_lines) as f64;
+                    (matched_lines, ratio, Some(diff))
+                };
 
-                (matched_lines, ratio, Some(diff))
-            };
-
-            total_lines += rome_lines.max(prettier_lines);
+            total_lines += biome_lines.max(prettier_lines);
             total_matched_lines += matched_lines;
             file_ratio_sum += ratio;
 
@@ -202,6 +217,11 @@ impl DiffReport {
                 filename: (*file_name).to_string(),
                 single_file_compatibility: ratio,
             };
+
+            // For tracking not enough compatible test cases, we skip an compatible file.
+            if exclude_compatible && single_file_metric_data.is_compatible() {
+                continue;
+            }
 
             report_metric_data.files.push(single_file_metric_data);
         }
@@ -223,6 +243,7 @@ impl DiffReport {
         report_metric_data: PrettierCompatibilityMetricData,
     ) {
         let mut report = String::new();
+
         for SingleFileMetricData {
             filename,
             single_file_compatibility,
@@ -258,13 +279,13 @@ impl DiffReport {
 
         header.push_str(
             r"
-<details>
-	<summary>Definition</summary>
+    <details>
+    	<summary>Definition</summary>
 
-	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-</details>
+    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+    </details>
 
-",
+    ",
         );
 
         write!(
@@ -275,20 +296,18 @@ impl DiffReport {
         .unwrap();
 
         header.push_str(
-            r"
-<details>
-	<summary>Definition</summary>
+                r"
+    <details>
+        <summary>Definition</summary>
 
-	$$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-</details>
+        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+    </details>
 
-
-[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-            ",
-        );
+    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+                ",
+            );
 
         let report = format!("{header}\n\n{report}");
-
         write(report_filename, report).unwrap();
     }
 
