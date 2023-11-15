@@ -140,10 +140,8 @@ impl DiffReport {
                     Ok(value) => ReportType::from_str(&value).unwrap(),
                     _ => ReportType::Markdown,
                 };
-                let incompatible_only = match env::var("INCOMPATIBLE_ONLY") {
-                    Ok(value) if value == "1" => true,
-                    _ => false,
-                };
+                let incompatible_only =
+                    matches!(env::var("INCOMPATIBLE_ONLY"), Ok(value) if value == "1");
 
                 let report_filename = match env::var("REPORT_FILENAME") {
                     Ok(value) => value,
