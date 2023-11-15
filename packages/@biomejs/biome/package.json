@@ -12,14 +12,16 @@
       "directory": "packages/@biomejs/biome"
     },
     "author": "Emanuele Stoppa",
-    "license": "MIT",
+    "license": "MIT OR Apache-2.0",
     "bugs": "https://github.com/biomejs/biome/issues",
     "description": "Biome is a toolchain for the web: formatter, linter and more",
     "files": [
         "bin/biome",
         "scripts/postinstall.js",
         "configuration_schema.json",
-        "README.md"
+        "README.md",
+        "LICENSE-APACHE",
+        "LICENSE-MIT"
     ],
     "keywords": [
         "JavaScript",
