@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 91.42
+**Average compatibility**: 91.65
 
 <details>
 	<summary>Definition</summary>
@@ -8,7 +8,7 @@
 	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 93.04
+**Compatible lines**: 93.08
 <details>
 	<summary>Definition</summary>
 
@@ -5000,13 +5000,8 @@
 
 
 # js/import-assertions/bracket-spacing/empty.js
-```diff
--export * as bar from "bar.json";
-+export * as bar from "bar.json" assert {};
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/import-assertions/bracket-spacing/re-export.js
@@ -5025,22 +5020,8 @@
 
 
 # js/import-assertions/empty.js
-```diff
- export * as foo from "foo.json";
--export * as bar from "bar.json";
--export * as baz from "baz.json" /* comment */;
-+export * as bar from "bar.json" assert {};
-+export * as baz from "baz.json" assert { /* comment */ };
- 
- import * as foo from "foo.json";
--import * as bar from "bar.json";
--import * as baz from "baz.json" /* comment */;
-+import * as bar from "bar.json" assert {};
-+import * as baz from "baz.json" assert { /* comment */ };
 
-```
-
-**Prettier Similarity**: 42.86%
+**Prettier Similarity**: 100.00%
 
 
 # js/import-assertions/multi-types.js
@@ -5079,13 +5060,8 @@
 
 
 # js/import-attributes/bracket-spacing/empty.js
-```diff
--export * as bar from "bar.json";
-+export * as bar from "bar.json" with {};
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/import-attributes/bracket-spacing/re-export.js
@@ -5104,22 +5080,8 @@
 
 
 # js/import-attributes/empty.js
-```diff
- export * as foo from "foo.json";
--export * as bar from "bar.json";
--export * as baz from "baz.json" /* comment */;
-+export * as bar from "bar.json" with {};
-+export * as baz from "baz.json" with { /* comment */ };
- 
- import * as foo from "foo.json";
--import * as bar from "bar.json";
--import * as baz from "baz.json" /* comment */;
-+import * as bar from "bar.json" with {};
-+import * as baz from "baz.json" with { /* comment */ };
 
-```
-
-**Prettier Similarity**: 42.86%
+**Prettier Similarity**: 100.00%
 
 
 # js/import-attributes/multi-types.js
