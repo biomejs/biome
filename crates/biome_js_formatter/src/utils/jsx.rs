@@ -494,7 +494,7 @@ impl<'a> Iterator for JsxSplitChunksIterator<'a> {
 
 impl FusedIterator for JsxSplitChunksIterator<'_> {}
 
-/// An iterator adaptor that allows a lookahead of two tokens
+/// An iterator adaptor that allows a lookahead of three tokens
 ///
 /// # Examples
 /// ```
@@ -506,8 +506,10 @@ impl FusedIterator for JsxSplitChunksIterator<'_> {}
 ///
 /// assert_eq!(iter.peek(), Some(&&1));
 /// assert_eq!(iter.peek_next(), Some(&&2));
+/// assert_eq!(iter.peek_next_next(), Some(&&3));
 /// assert_eq!(iter.next(), Some(&1));
 /// assert_eq!(iter.next(), Some(&2));
+/// assert_eq!(iter.next(), Some(&3));
 /// ```
 #[derive(Clone, Debug)]
 pub struct JsxChildrenIterator<I: Iterator> {
@@ -515,6 +517,7 @@ pub struct JsxChildrenIterator<I: Iterator> {
 
     peeked: Option<Option<I::Item>>,
     peeked_next: Option<Option<I::Item>>,
+    peeked_next_next: Option<Option<I::Item>>,
 }
 
 impl<I: Iterator> JsxChildrenIterator<I> {
@@ -523,6 +526,7 @@ impl<I: Iterator> JsxChildrenIterator<I> {
             iter,
             peeked: None,
             peeked_next: None,
+            peeked_next_next: None,
         }
     }
 
@@ -542,6 +546,20 @@ impl<I: Iterator> JsxChildrenIterator<I> {
             })
             .as_ref()
     }
+
+    pub fn peek_next_next(&mut self) -> Option<&I::Item> {
+        let iter = &mut self.iter;
+        let peeked = &mut self.peeked;
+        let peeked_next = &mut self.peeked_next;
+
+        self.peeked_next_next
+            .get_or_insert_with(|| {
+                peeked.get_or_insert_with(|| iter.next());
+                peeked_next.get_or_insert_with(|| iter.next());
+                iter.next()
+            })
+            .as_ref()
+    }
 }
 
 impl<I: Iterator> Iterator for JsxChildrenIterator<I> {
@@ -551,6 +569,7 @@ impl<I: Iterator> Iterator for JsxChildrenIterator<I> {
         match self.peeked.take() {
             Some(peeked) => {
                 self.peeked = self.peeked_next.take();
+                self.peeked_next = self.peeked_next_next.take();
                 peeked
             }
             None => self.iter.next(),
@@ -570,7 +589,7 @@ mod tests {
 
     #[test]
     fn jsx_children_iterator_test() {
-        let buffer = [1, 2, 3, 4];
+        let buffer = [1, 2, 3, 4, 5];
 
         let mut iter = JsxChildrenIterator::new(buffer.iter());
 
@@ -578,10 +597,14 @@ mod tests {
         assert_eq!(iter.peek(), Some(&&1));
         assert_eq!(iter.peek_next(), Some(&&2));
         assert_eq!(iter.peek_next(), Some(&&2));
+        assert_eq!(iter.peek_next_next(), Some(&&3));
+        assert_eq!(iter.peek_next_next(), Some(&&3));
 
         assert_eq!(iter.next(), Some(&1));
         assert_eq!(iter.next(), Some(&2));
 
+        assert_eq!(iter.peek_next_next(), Some(&&5));
+        assert_eq!(iter.peek_next_next(), Some(&&5));
         assert_eq!(iter.peek_next(), Some(&&4));
         assert_eq!(iter.peek_next(), Some(&&4));
         assert_eq!(iter.peek(), Some(&&3));
