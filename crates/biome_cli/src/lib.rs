@@ -11,6 +11,7 @@ use biome_fs::OsFileSystem;
 use biome_service::{App, DynRef, Workspace, WorkspaceRef};
 use std::env;
 
+mod changed;
 mod cli_options;
 mod commands;
 mod configuration;

@@ -28,6 +28,10 @@ impl Deref for StringSet {
     fn deref(&self) -> &Self::Target {
         &self.0
     }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
 }
 
 impl DerefMut for StringSet {

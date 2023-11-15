@@ -1,3 +1,4 @@
+use crate::changed::store_changed_files;
 use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
@@ -73,6 +74,10 @@ pub(crate) fn lint(
         vcs_base_path,
         &cli_options,
     )?;
+
+    if cli_options.changed {
+        store_changed_files(&mut session, &mut fs_configuration, &cli_options)?;
+    }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;
