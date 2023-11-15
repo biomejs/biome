@@ -140,18 +140,31 @@ impl DiffReport {
                     Ok(value) => ReportType::from_str(&value).unwrap(),
                     _ => ReportType::Markdown,
                 };
-                let report_filename = match env::var("REPORT_FILENAME") {
-                    Ok(value) => value,
-                    _ => match report_type {
-                        ReportType::Json => "report.json".to_string(),
-                        ReportType::Markdown => "report.md".to_string(),
-                    },
-                };
-                let exclude_compatible = match env::var("EXCLUDE_COMPATIBLE") {
+                let incompatible_only = match env::var("INCOMPATIBLE_ONLY") {
                     Ok(value) if value == "1" => true,
                     _ => false,
                 };
-                self.report_prettier(report_type, report_filename, exclude_compatible);
+
+                let report_filename = match env::var("REPORT_FILENAME") {
+                    Ok(value) => value,
+                    _ => match report_type {
+                        ReportType::Json => {
+                            if incompatible_only {
+                                "incompatible_report.json".to_string()
+                            } else {
+                                "report.json".to_string()
+                            }
+                        }
+                        ReportType::Markdown => {
+                            if incompatible_only {
+                                "incompatible_report.md".to_string()
+                            } else {
+                                "report.md".to_string()
+                            }
+                        }
+                    },
+                };
+                self.report_prettier(report_type, report_filename, incompatible_only);
             }
             _ => {}
         }
@@ -161,7 +174,7 @@ impl DiffReport {
         &self,
         report_type: ReportType,
         report_filename: String,
-        exclude_compatible: bool,
+        incompatible_only: bool,
     ) {
         let mut state = self.state.lock().unwrap();
         state.sort_by_key(|DiffReportItem { file_name, .. }| *file_name);
@@ -218,8 +231,8 @@ impl DiffReport {
                 single_file_compatibility: ratio,
             };
 
-            // For tracking not enough compatible test cases, we skip an compatible file.
-            if exclude_compatible && single_file_metric_data.is_compatible() {
+            // We'll skip compatible tests and only track incompatible ones
+            if incompatible_only && single_file_metric_data.is_compatible() {
                 continue;
             }
 
