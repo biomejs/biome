@@ -26,6 +26,9 @@ import { setContextValue } from "./utils";
 
 import resolveImpl = require("resolve/async");
 import { createRequire } from "module";
+import * as os from "os";
+import * as path from "path";
+import { copyFile } from "fs/promises";
 import type * as resolve from "resolve";
 
 const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
@@ -74,12 +77,22 @@ export async function activate(context: ExtensionContext) {
 
 	outputChannel.appendLine(`Using Biome from ${command}`);
 
+	const tmpDestination = path.resolve(os.tmpdir(), "./biome/biome.exe");
+
+	const copyFileToTmpFolder = () => {
+		outputChannel.appendLine(`Copying file to tmp folder: ${tmpDestination}`);
+
+		copyFile(command, tmpDestination);
+	};
+
+	copyFileToTmpFolder();
+
 	const statusBar = new StatusBar();
 
 	const serverOptions: ServerOptions = createMessageTransports.bind(
 		undefined,
 		outputChannel,
-		command,
+		tmpDestination,
 	);
 
 	const documentSelector: DocumentFilter[] = [
@@ -133,6 +146,21 @@ export async function activate(context: ExtensionContext) {
 			statusBar.setServerState(client, evt.newState);
 		}),
 	);
+
+	workspace.onDidChangeWorkspaceFolders((event) => {
+		for (const folder of [...event.removed, ...event.added]) {
+			// Check that the path includes node_modules/@biomejs. No reason otherwise.
+			if (folder.uri.path.includes("node_modules/@biomejs")) {
+				if (client.isRunning()) {
+					client.stop();
+				}
+				// Copy the new version to the tmpdir.
+				copyFileToTmpFolder();
+				client.start();
+				break;
+			}
+		}
+	});
 
 	const handleActiveTextEditorChanged = (textEditor?: TextEditor) => {
 		if (!textEditor) {
