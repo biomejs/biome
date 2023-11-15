@@ -65,7 +65,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
         ]?;
 
         if let Some(assertion) = &assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         write!(f, [FormatStatementSemicolon::new(semicolon_token.as_ref())])
