@@ -6,10 +6,11 @@ import {
 	ExtensionContext,
 	OutputChannel,
 	TextEditor,
-	Uri,
 	languages,
 	window,
 	workspace,
+  RelativePattern,
+  Uri,
 } from "vscode";
 import {
 	DocumentFilter,
@@ -28,8 +29,9 @@ import resolveImpl = require("resolve/async");
 import { createRequire } from "module";
 import * as os from "os";
 import * as path from "path";
-import { copyFile } from "fs/promises";
+import { copyFileSync } from "fs";
 import type * as resolve from "resolve";
+import { readFile } from "fs/promises";
 
 const resolveAsync = promisify<string, resolve.AsyncOpts, string | undefined>(
 	resolveImpl,
@@ -73,27 +75,9 @@ export async function activate(context: ExtensionContext) {
 				"yourself and use it with this extension with the biome.lspBin setting",
 		);
 		return;
-	}
-
-	outputChannel.appendLine(`Using Biome from ${command}`);
-
-	const tmpDestination = path.resolve(os.tmpdir(), "./biome/biome.exe");
-
-	const copyFileToTmpFolder = () => {
-		outputChannel.appendLine(`Copying file to tmp folder: ${tmpDestination}`);
-
-		copyFile(command, tmpDestination);
-	};
-
-	copyFileToTmpFolder();
-
-	const statusBar = new StatusBar();
-
-	const serverOptions: ServerOptions = createMessageTransports.bind(
-		undefined,
-		outputChannel,
-		tmpDestination,
-	);
+	}	
+  
+  const statusBar = new StatusBar();
 
 	const documentSelector: DocumentFilter[] = [
 		{ language: "javascript", scheme: "file" },
@@ -110,12 +94,70 @@ export async function activate(context: ExtensionContext) {
 		traceOutputChannel,
 	};
 
-	client = new LanguageClient(
-		"biome_lsp",
-		"Biome",
-		serverOptions,
-		clientOptions,
-	);
+
+  const reloadClient = async () => {
+    outputChannel.appendLine(`Using Biome from ${command}`);
+
+    let tmpDestination: string
+
+    try {
+      tmpDestination = path.resolve(os.tmpdir(), "./biome.exe");
+      outputChannel.appendLine(`Copying file to tmp folder: ${tmpDestination}`);
+      copyFileSync(command, tmpDestination);
+    } catch (error) {
+      if (error.code === 'EBUSY') {
+        // The file is busy, but attempt to use it anyways.
+        tmpDestination = path.resolve(os.tmpdir(), "./biome.exe");
+      } else {
+        outputChannel.appendLine("Error copying file: " + error)
+      }
+    }
+
+    const serverOptions: ServerOptions = createMessageTransports.bind(
+      undefined,
+      outputChannel,
+      tmpDestination ?? command,
+    );
+
+    client = new LanguageClient(
+      "biome_lsp",
+      "Biome",
+      serverOptions,
+      clientOptions,
+    );
+
+    context.subscriptions.push(
+      client.onDidChangeState((evt) => {
+        outputChannel.appendLine(evt.newState + ' ' + evt.oldState)
+        statusBar.setServerState(client, evt.newState);
+      }),
+    );
+  }
+
+  reloadClient()
+
+	const watcher = workspace.createFileSystemWatcher("**/yarn.lock");
+  context.subscriptions.push(
+    watcher.onDidChange(async() => {
+      try {
+        // When the lockfile changes, reload the biome executable.
+        outputChannel.appendLine('Reloading biome executable..');
+        if (client.isRunning()) {
+          await client.stop();
+        }
+        await reloadClient();
+
+        if (client.isRunning()) {
+          await client.restart();
+        } else {
+          await client.start();
+        }
+      } catch (error) {
+        outputChannel.appendLine('Reloading client failed: ' + error)
+        client.error("Reloading client failed", error, "force");
+      }
+    })
+  )
 
 	const session = new Session(context, client);
 
@@ -138,27 +180,6 @@ export async function activate(context: ExtensionContext) {
 			}
 		} catch (error) {
 			client.error("Restarting client failed", error, "force");
-		}
-	});
-
-	context.subscriptions.push(
-		client.onDidChangeState((evt) => {
-			statusBar.setServerState(client, evt.newState);
-		}),
-	);
-
-	workspace.onDidChangeWorkspaceFolders((event) => {
-		for (const folder of [...event.removed, ...event.added]) {
-			// Check that the path includes node_modules/@biomejs. No reason otherwise.
-			if (folder.uri.path.includes("node_modules/@biomejs")) {
-				if (client.isRunning()) {
-					client.stop();
-				}
-				// Copy the new version to the tmpdir.
-				copyFileToTmpFolder();
-				client.start();
-				break;
-			}
 		}
 	});
 
