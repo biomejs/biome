@@ -23,4 +23,5 @@ dhat-heap.json
 
 crates/biome_js_formatter/report.*
 crates/biome_json_formatter/report.*
+crates/biome_json_formatter/report_incompatible.*
 .vercel
