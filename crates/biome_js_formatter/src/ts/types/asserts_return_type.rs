@@ -21,7 +21,7 @@ impl FormatNodeRule<TsAssertsReturnType> for FormatTsAssertsReturnType {
                 asserts_token.format(),
                 space(),
                 parameter_name.format(),
-                space(),
+                predicate.is_some().then_some(space()),
                 predicate.format()
             ]
         ]
