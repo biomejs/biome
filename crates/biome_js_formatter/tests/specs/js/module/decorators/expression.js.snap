@@ -51,28 +51,20 @@ Arrow parentheses: Always
 
 ```js
 console.log(
-	(
-		@deco
-		class Foo {}
-	),
+	@deco
+	class Foo {},
 );
 console.log(
-	(
-		@deco
-		class {}
-	),
+	@deco
+	class {},
 );
 
 const a1 =
-	(
-		@deco
-		class Foo {}
-	);
+	@deco
+	class Foo {};
 const a2 =
-	(
-		@deco
-		class {}
-	);
+	@deco
+	class {};
 
 (
 	@deco
@@ -94,10 +86,8 @@ const b2 = [];
 	@deco
 	class {}
 )(
-	(
-		@deco
-		class Foo {}
-	),
+	@deco
+	class Foo {},
 ).name;
 (
 	@deco
