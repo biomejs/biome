@@ -75,7 +75,7 @@ jobs:
     needs: check
     if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
     env:
-        version: ${{ needs.check.outputs.version }}
+      version: ${{ needs.check.outputs.version }}
     outputs:
       version: ${{ env.version }}
       prerelease: ${{ needs.check.outputs.prerelease }}
@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -184,7 +184,7 @@ jobs:
           path: packages/@biomejs
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
@@ -231,7 +231,7 @@ jobs:
     needs: build
     environment: package_manager
     continue-on-error: true
-    steps: 
+    steps:
       - name: Bump Homebrew formula
         uses: dawidd6/action-homebrew-bump-formula@v3
         with:

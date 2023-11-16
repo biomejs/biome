@@ -59,7 +59,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
       - name: Install toolchain
-        run:  rustup toolchain install nightly
+        run: rustup toolchain install nightly
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Detect unused dependencies using udeps
@@ -114,7 +114,7 @@ jobs:
       - name: Build main binary
         run: cargo build -p biome_cli --release
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: Cache pnpm modules
