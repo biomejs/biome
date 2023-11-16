@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 91.65
+**Average compatibility**: 91.80
 
     <details>
     	<summary>Definition</summary>
@@ -8,7 +8,7 @@
     	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
     </details>
 
-    **Compatible lines**: 93.08
+    **Compatible lines**: 93.16
     <details>
         <summary>Definition</summary>
 
@@ -17,19 +17,6 @@
 
     [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
                 
-
-# js/arrays/holes-in-args.js
-```diff
--new Test().test().test([, 0]).test();
-+new Test()
-+  .test()
-+  .test([, 0])
-+  .test();
-
-```
-
-**Prettier Similarity**: 0.00%
-
 
 # js/arrays/issue-10159.js
 ```diff
@@ -153,51 +140,6 @@
 ```
 
 **Prettier Similarity**: 54.55%
-
-
-# js/arrows/arrow_function_expression.js
-```diff
- ((a) => {}).length;
- typeof (() => {});
- export default (() => {})();
- (() => {})()``;
- (() => {})``;
- new (() => {})();
- if ((() => {}) ? 1 : 0) {
- }
- let f = () => ({})();
- let a = () => ({}) instanceof a;
- a = () => ({}) && a;
- a = () => ({})() && a;
- a = () => ({}) && a && b;
- a = () => ({}) + a;
- a = () => ({})()() && a;
- a = () => ({}).b && a;
- a = () => ({})[b] && a;
- a = () => ({})`` && a;
- a = () => ({} = 0);
--a = () => ({}, a);
-+a = () => (({}), a);
- (a) => a instanceof {};
- (a) => ({})().b && 0;
--(a) => ({}().c = 0);
-+(a) => (({})().c = 0);
- (x) => ({})()();
- (x) => ({})()``;
- (x) => ({})().b;
- a = (b) => c;
- (x) => (y = z);
- (x) => (y += z);
- f((a) => ({})) + 1;
- ((a) => ({})) || 0;
- a = (b) => c;
- a = (b) => {
-   return c;
- };
-
-```
-
-**Prettier Similarity**: 94.29%
 
 
 # js/arrows/chain-as-arg.js
@@ -9758,44 +9700,6 @@
 ```
 
 **Prettier Similarity**: 93.33%
-
-
-# typescript/instantiation-expression/property-access.ts
-```diff
--(Array<string>).name;
--(fn1<string>).bind(obj);
--(fn2<string, number>).bind(obj);
--a[Array<string>];
--a[(Array<string>).name];
--(Array<string>).a;
--(Array<string>)?.a;
--(Array<string>)[a];
--(Array<string>)?.[a];
--(Array<string>)["a"];
--(Array<string>)?.["a"];
--(Array<string>)[`a`];
--(Array<string>)?.[`a`];
--(Array<string>)[Array<string>];
-+// FIXME
-+// TODO: parse issue
-+// (Array<string>).name;
-+// (fn1<string>).bind(obj);
-+// (fn2<string, number>).bind(obj);
-+// a[(Array<string>)];
-+// a[(Array<string>).name];
-+// (Array<string>).a;
-+// (Array<string>)?.a;
-+// (Array<string>)[a];
-+// (Array<string>)?.[a];
-+// (Array<string>)["a"];
-+// (Array<string>)?.["a"];
-+// (Array<string>)[`a`];
-+// (Array<string>)?.[`a`];
-+// (Array<string>)[(Array<string>)];
-
-```
-
-**Prettier Similarity**: 0.00%
 
 
 # typescript/interface2/break/break.ts

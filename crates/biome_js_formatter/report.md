@@ -1,23 +1,22 @@
 # Overall Metrics
 
-**Average compatibility**: 91.65
+**Average compatibility**: 91.80
 
-<details>
-	<summary>Definition</summary>
+    <details>
+    	<summary>Definition</summary>
 
-	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-</details>
+    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+    </details>
 
-**Compatible lines**: 93.08
-<details>
-	<summary>Definition</summary>
+    **Compatible lines**: 93.16
+    <details>
+        <summary>Definition</summary>
 
-	$$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-</details>
+        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+    </details>
 
-
-[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-            
+    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+                
 
 # js/array-spread/multiple.js
 
@@ -30,16 +29,8 @@
 
 
 # js/arrays/holes-in-args.js
-```diff
--new Test().test().test([, 0]).test();
-+new Test()
-+  .test()
-+  .test([, 0])
-+  .test();
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/arrays/issue-10159.js
@@ -237,48 +228,8 @@
 
 
 # js/arrows/arrow_function_expression.js
-```diff
- ((a) => {}).length;
- typeof (() => {});
- export default (() => {})();
- (() => {})()``;
- (() => {})``;
- new (() => {})();
- if ((() => {}) ? 1 : 0) {
- }
- let f = () => ({})();
- let a = () => ({}) instanceof a;
- a = () => ({}) && a;
- a = () => ({})() && a;
- a = () => ({}) && a && b;
- a = () => ({}) + a;
- a = () => ({})()() && a;
- a = () => ({}).b && a;
- a = () => ({})[b] && a;
- a = () => ({})`` && a;
- a = () => ({} = 0);
--a = () => ({}, a);
-+a = () => (({}), a);
- (a) => a instanceof {};
- (a) => ({})().b && 0;
--(a) => ({}().c = 0);
-+(a) => (({})().c = 0);
- (x) => ({})()();
- (x) => ({})()``;
- (x) => ({})().b;
- a = (b) => c;
- (x) => (y = z);
- (x) => (y += z);
- f((a) => ({})) + 1;
- ((a) => ({})) || 0;
- a = (b) => c;
- a = (b) => {
-   return c;
- };
 
-```
-
-**Prettier Similarity**: 94.29%
+**Prettier Similarity**: 100.00%
 
 
 # js/arrows/assignment-chain-with-arrow-chain.js
@@ -14567,41 +14518,8 @@
 
 
 # typescript/instantiation-expression/property-access.ts
-```diff
--(Array<string>).name;
--(fn1<string>).bind(obj);
--(fn2<string, number>).bind(obj);
--a[Array<string>];
--a[(Array<string>).name];
--(Array<string>).a;
--(Array<string>)?.a;
--(Array<string>)[a];
--(Array<string>)?.[a];
--(Array<string>)["a"];
--(Array<string>)?.["a"];
--(Array<string>)[`a`];
--(Array<string>)?.[`a`];
--(Array<string>)[Array<string>];
-+// FIXME
-+// TODO: parse issue
-+// (Array<string>).name;
-+// (fn1<string>).bind(obj);
-+// (fn2<string, number>).bind(obj);
-+// a[(Array<string>)];
-+// a[(Array<string>).name];
-+// (Array<string>).a;
-+// (Array<string>)?.a;
-+// (Array<string>)[a];
-+// (Array<string>)?.[a];
-+// (Array<string>)["a"];
-+// (Array<string>)?.["a"];
-+// (Array<string>)[`a`];
-+// (Array<string>)?.[`a`];
-+// (Array<string>)[(Array<string>)];
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/instantiation-expression/typeof.ts
