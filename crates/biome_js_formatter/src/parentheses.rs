@@ -409,6 +409,7 @@ pub(crate) enum FirstInStatementMode {
 /// the left most node or reached a statement.
 pub(crate) fn is_first_in_statement(node: JsSyntaxNode, mode: FirstInStatementMode) -> bool {
     let mut current = node;
+    let mut is_not_first_iteration = false;
 
     while let Some(parent) = current.parent() {
         let parent = match parent.kind() {
@@ -424,6 +425,7 @@ pub(crate) fn is_first_in_statement(node: JsSyntaxNode, mode: FirstInStatementMo
             | JsSyntaxKind::TS_AS_EXPRESSION
             | JsSyntaxKind::TS_SATISFIES_EXPRESSION
             | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => parent,
+
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let sequence = JsSequenceExpression::unwrap_cast(parent);
 
@@ -490,6 +492,19 @@ pub(crate) fn is_first_in_statement(node: JsSyntaxNode, mode: FirstInStatementMo
             JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
                 if mode == FirstInStatementMode::ExpressionStatementOrArrow =>
             {
+                if is_not_first_iteration
+                    && matches!(
+                        current.kind(),
+                        JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+                            | JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                            | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT
+                            | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
+                    )
+                {
+                    // The original node doesn't need parens,
+                    // because an ancestor requires parens.
+                    break;
+                }
                 let arrow = JsArrowFunctionExpression::unwrap_cast(parent);
 
                 let is_body = arrow.body().map_or(false, |body| match body {
@@ -530,7 +545,7 @@ pub(crate) fn is_first_in_statement(node: JsSyntaxNode, mode: FirstInStatementMo
             }
             _ => break,
         };
-
+        is_not_first_iteration = true;
         current = parent;
     }
 
