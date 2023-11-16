@@ -5,14 +5,14 @@ use biome_formatter::{format_args, write};
 use crate::parentheses::{
     is_callee, is_first_in_statement, FirstInStatementMode, NeedsParentheses,
 };
-use biome_js_syntax::{JsClassExpression, JsSyntaxNode};
+use biome_js_syntax::{JsClassExpression, JsSyntaxKind, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassExpression;
 
 impl FormatNodeRule<JsClassExpression> for FormatJsClassExpression {
     fn fmt_fields(&self, node: &JsClassExpression, f: &mut JsFormatter) -> FormatResult<()> {
-        if node.decorators().is_empty() {
+        if node.decorators().is_empty() || !self.needs_parentheses(node) {
             FormatClass::from(&node.clone().into()).fmt(f)
         } else {
             write!(
@@ -29,7 +29,8 @@ impl FormatNodeRule<JsClassExpression> for FormatJsClassExpression {
     }
 
     fn needs_parentheses(&self, item: &JsClassExpression) -> bool {
-        !item.decorators().is_empty() || item.needs_parentheses()
+        /*!item.decorators().is_empty() || */
+        item.needs_parentheses()
     }
 
     fn fmt_dangling_comments(
@@ -44,7 +45,8 @@ impl FormatNodeRule<JsClassExpression> for FormatJsClassExpression {
 
 impl NeedsParentheses for JsClassExpression {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        is_callee(self.syntax(), parent)
+        (parent.kind() == JsSyntaxKind::JS_EXTENDS_CLAUSE && !self.decorators().is_empty())
+            || is_callee(self.syntax(), parent)
             || is_first_in_statement(
                 self.clone().into(),
                 FirstInStatementMode::ExpressionOrExportDefault,
