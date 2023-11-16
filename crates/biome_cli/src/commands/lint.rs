@@ -76,7 +76,7 @@ pub(crate) fn lint(
     )?;
 
     if cli_options.changed {
-        store_changed_files(&mut session, &mut fs_configuration, &cli_options)?;
+        store_changed_files(&mut fs_configuration, &cli_options)?;
     }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {

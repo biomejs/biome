@@ -1,13 +1,11 @@
 use std::process::Command;
 
-use biome_console::{markup, LogLevel};
 use biome_deserialize::StringSet;
-use biome_service::{configuration::FilesConfiguration, Configuration};
+use biome_service::{configuration::FilesConfiguration, settings::to_matcher, Configuration};
 
-use crate::{cli_options::CliOptions, CliDiagnostic, CliSession};
+use crate::{cli_options::CliOptions, CliDiagnostic};
 
 pub(crate) fn store_changed_files(
-    session: &mut CliSession,
     configuration: &mut Configuration,
     cli_options: &CliOptions,
 ) -> Result<(), CliDiagnostic> {
@@ -16,7 +14,7 @@ pub(crate) fn store_changed_files(
         .as_ref()
         .map_or(None, |v| v.default_branch.as_ref());
 
-    let comitish = match (cli_options.since.as_ref(), default_branch) {
+    let base = match (cli_options.since.as_ref(), default_branch) {
         (Some(since), Some(_)) => since,
         (Some(since), None) => since,
         (None, Some(branch)) => branch,
@@ -26,30 +24,38 @@ pub(crate) fn store_changed_files(
     let output = Command::new("git")
         .arg("diff")
         .arg("--name-only")
-        .arg(format!("{}...HEAD", comitish))
+        .arg(format!("{}...HEAD", base))
         .output()?;
 
     if !output.status.success() {
         todo!("Handle error when git command fails");
     }
 
-    let files: Vec<String> = String::from_utf8_lossy(&output.stdout)
-        .lines()
-        .filter(|line| !line.is_empty())
-        .map(|line| line.to_string())
-        .collect();
-
     let files_config = configuration
         .files
         .get_or_insert_with(FilesConfiguration::default);
 
     let included_files = files_config.include.get_or_insert_with(StringSet::default);
-    println!("files {:?}", &files);
+
+    let matcher = to_matcher(Some(&included_files))?;
+
+    let changed_files: Vec<String> = if let Some(matcher) = matcher {
+        String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .filter(|line| !line.is_empty())
+            .filter(|line| matcher.matches(line))
+            .map(|line| line.to_string())
+            .collect()
+    } else {
+        todo!("Figure out how to handle this error properly");
+    };
+
+    if changed_files.len() == 0 {
+        return Err(CliDiagnostic::no_files_processed());
+    };
 
     included_files.clear();
-    included_files.extend(files);
-
-    println!("included files {:?}", included_files);
+    included_files.extend(changed_files);
 
     Ok(())
 }

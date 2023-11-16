@@ -65,6 +65,9 @@ impl MergeWith<VcsConfiguration> for VcsConfiguration {
         if let Some(root) = other.root {
             self.root = Some(root);
         }
+        if let Some(default_branch) = other.default_branch {
+            self.root = Some(default_branch);
+        }
     }
 
     fn merge_with_if_not_default(&mut self, other: VcsConfiguration)
