@@ -110,6 +110,8 @@ impl<'app> CliSession<'app> {
                 stdin_file_path,
                 vcs_configuration,
                 files_configuration,
+                changed,
+                since,
             } => commands::lint::lint(
                 self,
                 LintCommandPayload {
@@ -121,6 +123,8 @@ impl<'app> CliSession<'app> {
                     stdin_file_path,
                     vcs_configuration,
                     files_configuration,
+                    changed,
+                    since,
                 },
             ),
             BiomeCommand::Ci {

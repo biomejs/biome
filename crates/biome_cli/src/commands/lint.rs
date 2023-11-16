@@ -21,6 +21,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -37,6 +39,8 @@ pub(crate) fn lint(
         stdin_file_path,
         vcs_configuration,
         files_configuration,
+        changed,
+        since,
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
@@ -75,8 +79,12 @@ pub(crate) fn lint(
         &cli_options,
     )?;
 
-    if cli_options.changed {
-        store_changed_files(&mut fs_configuration, &cli_options)?;
+    if since.is_some() && !changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if changed {
+        store_changed_files(&mut fs_configuration, since)?;
     }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {

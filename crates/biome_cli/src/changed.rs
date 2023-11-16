@@ -3,18 +3,18 @@ use std::process::Command;
 use biome_deserialize::StringSet;
 use biome_service::{configuration::FilesConfiguration, settings::to_matcher, Configuration};
 
-use crate::{cli_options::CliOptions, CliDiagnostic};
+use crate::CliDiagnostic;
 
 pub(crate) fn store_changed_files(
     configuration: &mut Configuration,
-    cli_options: &CliOptions,
+    since: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let default_branch = configuration
         .vcs
         .as_ref()
         .map_or(None, |v| v.default_branch.as_ref());
 
-    let base = match (cli_options.since.as_ref(), default_branch) {
+    let base = match (since.as_ref(), default_branch) {
         (Some(since), Some(_)) => since,
         (Some(since), None) => since,
         (None, Some(branch)) => branch,

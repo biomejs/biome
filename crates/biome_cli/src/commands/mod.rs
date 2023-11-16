@@ -121,6 +121,14 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+        /// When set to true, only the files that have been changed compared to your `defaultBranch`
+        /// configuration will be linted.
+        #[bpaf(long("changed"), switch)]
+        changed: bool,
+        /// Use this to specify the base branch to compare against when you're using the --changed
+        /// flag and the `defaultBranch` is not set in your biome.json
+        #[bpaf(long("since"), argument("REF"))]
+        since: Option<String>,
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
