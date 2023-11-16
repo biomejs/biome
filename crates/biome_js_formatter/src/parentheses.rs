@@ -524,7 +524,7 @@ pub(crate) fn is_first_in_statement(node: JsSyntaxNode, mode: FirstInStatementMo
             JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
                 if mode == FirstInStatementMode::ExpressionOrExportDefault =>
             {
-                return true;
+                return !is_not_first_iteration;
             }
 
             kind if AnyJsBinaryLikeExpression::can_cast(kind) => {
