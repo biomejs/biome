@@ -18,7 +18,7 @@ categories = ["development-tools", "web-programming"]
 edition    = "2021"
 homepage   = "https://biomejs.dev/"
 keywords   = ["parser", "linter", "formatter"]
-license    = "MIT"
+license    = "MIT OR Apache-2.0"
 repository = "https://github.com/biomejs/biome"
 
 [profile.release-with-debug]

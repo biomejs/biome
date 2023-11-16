@@ -135,7 +135,7 @@
 		"Formatter",
 		"Linter"
 	],
-	"license": "MIT",
+	"license": "MIT OR Apache-2.0",
 	"scripts": {
 		"compile": "esbuild src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node14",
 		"watch": "pnpm run compile --sourcemap --watch",
