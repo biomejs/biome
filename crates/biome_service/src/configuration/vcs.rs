@@ -34,6 +34,7 @@ pub struct VcsConfiguration {
     #[bpaf(long("vcs-root"), argument("PATH"), optional)]
     pub root: Option<String>,
 
+    /// The main branch of the project
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)]
     pub default_branch: Option<String>,

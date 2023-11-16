@@ -46,6 +46,7 @@ Set of properties to integrate Biome with a VCS software.
                               If Biome can't find the configuration, it will attempt to use the current
                               working directory. If no current working directory can't be found, Biome
                               won't use the VCS integration, and a diagnostic will be emitted
+        --vcs-default-branch=BRANCH  The main branch of the project
 
 The configuration of the filesystem
         --files-max-size=NUMBER  The maximum allowed size for source code files in bytes. Files above

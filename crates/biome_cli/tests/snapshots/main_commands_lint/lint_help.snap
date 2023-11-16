@@ -7,7 +7,7 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--apply] [--apply-unsafe] [PATH]...
+Usage: lint [--apply] [--apply-unsafe] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -19,6 +19,7 @@ Set of properties to integrate Biome with a VCS software.
                               If Biome can't find the configuration, it will attempt to use the current
                               working directory. If no current working directory can't be found, Biome
                               won't use the VCS integration, and a diagnostic will be emitted
+        --vcs-default-branch=BRANCH  The main branch of the project
 
 The configuration of the filesystem
         --files-max-size=NUMBER  The maximum allowed size for source code files in bytes. Files above
@@ -62,6 +63,10 @@ Available options:
                               The file doesn't need to exist on disk, what matters is the extension of
                               the file. Based on the extension, Biome knows how to lint the code.
                               Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+        --changed             When set to true, only the files that have been changed compared to your
+                              `defaultBranch` configuration will be linted.
+        --since=REF           Use this to specify the base branch to compare against when you're using
+                              the --changed flag and the `defaultBranch` is not set in your biome.json
     -h, --help                Prints help information
 
 ```
