@@ -7,31 +7,12 @@ expression: content
 ```block
 Acts as a server for the Language Server Protocol over stdin/stdout
 
-Usage: lsp-proxy 
-
-Global options applied to all commands
-        --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
-                              "force" forces the formatting of markup using ANSI even if the console
-                              output is determined to be incompatible
-        --use-server          Connect to a running instance of the Biome daemon server.
-        --verbose             Print additional verbose advices on diagnostics
-        --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
-                              file
-        --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.
-                              [default: 20]
-        --skip-errors         Skip over files containing syntax errors instead of emitting an error diagnostic.
-        --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
-                              during the execution of the command.
-        --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
-                              to the least verbose: debug, info, warn, error.
-                              The value `none` won't show any logging.
-                              [default: none]
-        --log-kind=<pretty|compact|json>  How the log should look like.
-                              [default: pretty]
+Usage: lsp-proxy [--config-path=PATH]
 
 Available options:
-    -h, --help                Prints help information
+        --config-path=PATH  Allows to set a custom path when discovering the configuration file `biome.json`
+                            [env:BIOME_CONFIG_PATH: N/A]
+    -h, --help              Prints help information
 
 ```
 

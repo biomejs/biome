@@ -1,0 +1,110 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/babel-plugins/source-phase-imports.js
+---
+
+# Input
+
+```js
+import source fooSource from "foo";
+import.source("x");
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,5 @@
+-import source fooSource from "foo";
++import source
++fooSource;
++from;
++("foo");
+ import.source("x");
+```
+
+# Output
+
+```js
+import source
+fooSource;
+from;
+("foo");
+import.source("x");
+```
+
+# Errors
+```
+source-phase-imports.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `from` but instead found `fooSource`
+  
+  > 1 │ import source fooSource from "foo";
+      │               ^^^^^^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+  i Remove fooSource
+  
+source-phase-imports.js:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source fooSource from "foo";
+      │                         ^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source fooSource from "foo";
+      │                         ^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source fooSource from "foo";
+      │               ^^^^^^^^^^^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+source-phase-imports.js:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source fooSource from "foo";
+      │                              ^^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source fooSource from "foo";
+      │                              ^^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source fooSource from "foo";
+      │                         ^^^^^^^^^^
+    2 │ import.source("x");
+    3 │ 
+  
+source-phase-imports.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `meta` following an import keyword, but found `source`
+  
+    1 │ import source fooSource from "foo";
+  > 2 │ import.source("x");
+      │        ^^^^^^
+    3 │ 
+  
+
+```
+
+

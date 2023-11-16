@@ -20,7 +20,7 @@ function simpleBranches() {
 ```
 invalidConfig.options:9:31 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The field maxAllowedComplexity must contain an integer between 1 and 254
+  × The number should be an integer between 1 and 255.
   
      7 │ 					"level": "error",
      8 │ 					"options": {

@@ -11,6 +11,7 @@ use biome_service::configuration::{
 use biome_service::Configuration;
 use bpaf::Bpaf;
 use std::ffi::OsString;
+use std::path::PathBuf;
 
 pub(crate) mod check;
 pub(crate) mod ci;
@@ -40,7 +41,11 @@ pub enum BiomeCommand {
     ),
     /// Start the Biome daemon server process
     #[bpaf(command)]
-    Start,
+    Start(
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        Option<PathBuf>,
+    ),
 
     /// Stop the Biome daemon server process
     #[bpaf(command)]
@@ -186,7 +191,11 @@ pub enum BiomeCommand {
     Init,
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
-    LspProxy(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+    LspProxy(
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        Option<PathBuf>,
+    ),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate(
@@ -200,6 +209,9 @@ pub enum BiomeCommand {
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
+        /// Allows to set a custom path when discovering the configuration file `biome.json`
+        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
+        config_path: Option<PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -208,37 +220,37 @@ pub enum BiomeCommand {
 impl BiomeCommand {
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self {
-            BiomeCommand::Version(cli_options) => cli_options.colors.as_ref(),
-            BiomeCommand::Rage(cli_options, ..) => cli_options.colors.as_ref(),
-            BiomeCommand::Start => None,
-            BiomeCommand::Stop => None,
-            BiomeCommand::Check { cli_options, .. } => cli_options.colors.as_ref(),
-            BiomeCommand::Lint { cli_options, .. } => cli_options.colors.as_ref(),
-            BiomeCommand::Ci { cli_options, .. } => cli_options.colors.as_ref(),
-            BiomeCommand::Format { cli_options, .. } => cli_options.colors.as_ref(),
-            BiomeCommand::Init => None,
-            BiomeCommand::LspProxy(cli_options) => cli_options.colors.as_ref(),
-            BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
-            BiomeCommand::RunServer { .. } => None,
-            BiomeCommand::PrintSocket => None,
+            BiomeCommand::Version(cli_options)
+            | BiomeCommand::Rage(cli_options, ..)
+            | BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
+            BiomeCommand::LspProxy(_)
+            | BiomeCommand::Start(_)
+            | BiomeCommand::Stop
+            | BiomeCommand::Init
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::PrintSocket => None,
         }
     }
 
     pub const fn should_use_server(&self) -> bool {
         match self {
-            BiomeCommand::Version(cli_options) => cli_options.use_server,
-            BiomeCommand::Rage(cli_options, ..) => cli_options.use_server,
-            BiomeCommand::Start => false,
-            BiomeCommand::Stop => false,
-            BiomeCommand::Check { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Lint { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Ci { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Format { cli_options, .. } => cli_options.use_server,
-            BiomeCommand::Init => false,
-            BiomeCommand::LspProxy(cli_options) => cli_options.use_server,
-            BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
-            BiomeCommand::RunServer { .. } => false,
-            BiomeCommand::PrintSocket => false,
+            BiomeCommand::Version(cli_options)
+            | BiomeCommand::Rage(cli_options, ..)
+            | BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
+            BiomeCommand::Init
+            | BiomeCommand::Start(_)
+            | BiomeCommand::Stop
+            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::PrintSocket => false,
         }
     }
 
@@ -248,19 +260,19 @@ impl BiomeCommand {
 
     pub fn is_verbose(&self) -> bool {
         match self {
-            BiomeCommand::Version(_) => false,
-            BiomeCommand::Rage(..) => false,
-            BiomeCommand::Start => false,
-            BiomeCommand::Stop => false,
-            BiomeCommand::Check { cli_options, .. } => cli_options.verbose,
-            BiomeCommand::Lint { cli_options, .. } => cli_options.verbose,
-            BiomeCommand::Format { cli_options, .. } => cli_options.verbose,
-            BiomeCommand::Ci { cli_options, .. } => cli_options.verbose,
-            BiomeCommand::Init => false,
-            BiomeCommand::LspProxy(cli_options) => cli_options.verbose,
-            BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
-            BiomeCommand::RunServer { .. } => false,
-            BiomeCommand::PrintSocket => false,
+            BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
+            BiomeCommand::Version(_)
+            | BiomeCommand::Rage(..)
+            | BiomeCommand::Start(_)
+            | BiomeCommand::Stop
+            | BiomeCommand::Init
+            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::PrintSocket => false,
         }
     }
 
@@ -270,11 +282,11 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::LspProxy(cli_options)
             | BiomeCommand::Migrate(cli_options, _) => cli_options.log_level.clone(),
             BiomeCommand::Version(_)
+            | BiomeCommand::LspProxy(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::Start
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
@@ -287,11 +299,11 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::LspProxy(cli_options)
             | BiomeCommand::Migrate(cli_options, _) => cli_options.log_kind.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
-            | BiomeCommand::Start
+            | BiomeCommand::LspProxy(_)
+            | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }

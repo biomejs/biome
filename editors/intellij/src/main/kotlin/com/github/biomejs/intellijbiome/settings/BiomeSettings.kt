@@ -12,6 +12,11 @@ class BiomeSettings :
         set(value) {
             state.executablePath = value
         }
+    var configPath: String
+        get() = state.configPath ?: ""
+        set(value) {
+            state.configPath = value
+        }
 
     companion object {
         @JvmStatic

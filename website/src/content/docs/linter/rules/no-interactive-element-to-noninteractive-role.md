@@ -28,7 +28,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <input role="img" />;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noInteractiveElementToNoninteractiveRole.js:1:1 <a href="https://biomejs.dev/lint/rules/no-interactive-element-to-noninteractive-role">lint/nursery/noInteractiveElementToNoninteractiveRole</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noInteractiveElementToNoninteractiveRole.js:1:1 <a href="https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role">lint/nursery/noInteractiveElementToNoninteractiveRole</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Interactive elements should not be assigned non-interactive roles.</span>
   

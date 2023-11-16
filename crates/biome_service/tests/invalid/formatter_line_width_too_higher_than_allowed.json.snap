@@ -4,8 +4,7 @@ expression: formatter_line_width_too_higher_than_allowed.json
 ---
 formatter_line_width_too_higher_than_allowed.json:3:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The line width exceeds the maximum value (320)
-  
+  × The number should be an integer between 1 and 320.
   
     1 │ {
     2 │ 	"formatter": {
@@ -13,8 +12,6 @@ formatter_line_width_too_higher_than_allowed.json:3:16 deserialize ━━━━�
       │ 		             ^^^
     4 │ 	}
     5 │ }
-  
-  i Maximum value accepted is 320
   
 
 

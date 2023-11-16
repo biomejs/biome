@@ -439,7 +439,7 @@
 					"description": "The maximum complexity score that we allow. Anything higher is considered excessive.",
 					"type": "integer",
 					"format": "uint8",
-					"minimum": 0.0
+					"minimum": 1.0
 				}
 			},
 			"additionalProperties": false
@@ -1037,6 +1037,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDefaultExport": {
+					"description": "Disallow default exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
@@ -1053,6 +1060,13 @@
 				},
 				"noEmptyCharacterClassInRegex": {
 					"description": "Disallow empty character classes in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImplicitAnyLet": {
+					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1100,6 +1114,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedPrivateClassMembers": {
+					"description": "Disallow unused private class members",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessElse": {
 					"description": "Disallow else block when the if block breaks early.",
 					"anyOf": [
@@ -1139,6 +1160,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAwait": {
+					"description": "Ensure async functions utilize await.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [
@@ -1155,6 +1183,13 @@
 				},
 				"useShorthandAssign": {
 					"description": "Require assignment operator shorthand where possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAriaRole": {
+					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1345,6 +1380,10 @@
 				{
 					"description": "Options for `noRestrictedGlobals` rule",
 					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
+				},
+				{
+					"description": "Options for `useValidAriaRole` rule",
+					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
 				}
 			]
 		},
@@ -1995,6 +2034,18 @@
 					"enum": ["none"]
 				}
 			]
+		},
+		"ValidAriaRoleOptions": {
+			"type": "object",
+			"required": ["allowedInvalidRoles", "ignoreNonDom"],
+			"properties": {
+				"allowedInvalidRoles": {
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreNonDom": { "type": "boolean" }
+			},
+			"additionalProperties": false
 		},
 		"VcsClientKind": {
 			"oneOf": [

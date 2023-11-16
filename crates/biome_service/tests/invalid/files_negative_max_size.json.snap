@@ -4,7 +4,7 @@ expression: files_negative_max_size.json
 ---
 files_negative_max_size.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × invalid digit found in string
+  × The number should be an integer between 1 and 18446744073709551615.
   
     1 │ {
     2 │ 	"files": {
@@ -12,8 +12,6 @@ files_negative_max_size.json:3:14 deserialize ━━━━━━━━━━━�
       │ 		           ^^^^^^
     4 │ 	}
     5 │ }
-  
-  i Value can't be negative
   
 
 

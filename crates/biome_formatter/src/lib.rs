@@ -51,6 +51,9 @@ use crate::format_element::document::Document;
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
 pub use arguments::{Argument, Arguments};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+};
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
     VecBuffer,
@@ -161,11 +164,13 @@ impl From<u8> for IndentWidth {
 pub struct LineWidth(u16);
 
 impl LineWidth {
+    /// Minimum allowed value for a valid [LineWidth]
+    pub const MIN: u16 = 1;
     /// Maximum allowed value for a valid [LineWidth]
     pub const MAX: u16 = 320;
 
     /// Return the numeric value for this [LineWidth]
-    pub fn value(&self) -> u16 {
+    pub fn get(&self) -> u16 {
         self.0
     }
 }
@@ -173,6 +178,25 @@ impl LineWidth {
 impl Default for LineWidth {
     fn default() -> Self {
         Self(80)
+    }
+}
+
+impl Deserializable for LineWidth {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            return Some(value);
+        }
+        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+            Self::MIN,
+            Self::MAX,
+            value.range(),
+        ));
+        None
     }
 }
 
@@ -217,7 +241,7 @@ impl TryFrom<u16> for LineWidth {
     type Error = LineWidthFromIntError;
 
     fn try_from(value: u16) -> Result<Self, Self::Error> {
-        if value > 0 && value <= Self::MAX {
+        if (Self::MIN..=Self::MAX).contains(&value) {
             Ok(Self(value))
         } else {
             Err(LineWidthFromIntError(value))
@@ -229,8 +253,9 @@ impl std::fmt::Display for LineWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "The line width exceeds the maximum value ({})",
-            LineWidth::MAX
+            "The line width should be between {} and {}",
+            LineWidth::MIN,
+            LineWidth::MAX,
         )
     }
 }

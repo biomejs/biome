@@ -25,6 +25,11 @@ class BiomeSettingsConfigurable(internal val project: Project) :
                     .bindText(settings::executablePath)
             }
 
+            row(BiomeBundle.message("biome.config.path.label")) {
+                textFieldWithBrowseButton(BiomeBundle.message("biome.config.path.label")) { fileChosen(it) }
+                    .bindText(settings::configPath)
+            }
+
             onApply {
                 biomeServerService.restartBiomeServer()
                 biomeServerService.notifyRestart()

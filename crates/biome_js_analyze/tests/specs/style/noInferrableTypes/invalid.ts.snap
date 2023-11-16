@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.ts
 ---
 # Input
@@ -16,7 +15,6 @@ const x: false = !1;
 const x: true = true;
 const x: true = !false;
 const x: true = !0;
-const x: null = null;
 const x: 1 = +1;
 const x: -1 = -1;
 const x: 1e-5 = 1e-5;
@@ -24,7 +22,6 @@ const x: RegExp = /a/;
 const x: "str" = "str";
 const x: "str" = `str`; // constant template string
 const x: "str2" = `str${f()}`;
-const x: undefined = void f();
 
 class X {
 	readonly x: 1 = 1;
@@ -207,7 +204,7 @@ invalid.ts:10:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
   > 10 │ const x: true = !false;
        │        ^^^^^^
     11 │ const x: true = !0;
-    12 │ const x: null = null;
+    12 │ const x: 1 = +1;
   
   i Safe fix: Remove the type annotation.
   
@@ -225,8 +222,8 @@ invalid.ts:11:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
     10 │ const x: true = !false;
   > 11 │ const x: true = !0;
        │        ^^^^^^
-    12 │ const x: null = null;
-    13 │ const x: 1 = +1;
+    12 │ const x: 1 = +1;
+    13 │ const x: -1 = -1;
   
   i Safe fix: Remove the type annotation.
   
@@ -242,15 +239,15 @@ invalid.ts:12:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
   
     10 │ const x: true = !false;
     11 │ const x: true = !0;
-  > 12 │ const x: null = null;
-       │        ^^^^^^
-    13 │ const x: 1 = +1;
-    14 │ const x: -1 = -1;
+  > 12 │ const x: 1 = +1;
+       │        ^^^
+    13 │ const x: -1 = -1;
+    14 │ const x: 1e-5 = 1e-5;
   
   i Safe fix: Remove the type annotation.
   
-    12 │ const·x:·null·=·null;
-       │        ------        
+    12 │ const·x:·1·=·+1;
+       │        ---      
 
 ```
 
@@ -260,16 +257,16 @@ invalid.ts:13:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
   ! This type annotation is trivially inferred from its initialization.
   
     11 │ const x: true = !0;
-    12 │ const x: null = null;
-  > 13 │ const x: 1 = +1;
-       │        ^^^
-    14 │ const x: -1 = -1;
-    15 │ const x: 1e-5 = 1e-5;
+    12 │ const x: 1 = +1;
+  > 13 │ const x: -1 = -1;
+       │        ^^^^
+    14 │ const x: 1e-5 = 1e-5;
+    15 │ const x: RegExp = /a/;
   
   i Safe fix: Remove the type annotation.
   
-    13 │ const·x:·1·=·+1;
-       │        ---      
+    13 │ const·x:·-1·=·-1;
+       │        ----      
 
 ```
 
@@ -278,36 +275,36 @@ invalid.ts:14:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    12 │ const x: null = null;
-    13 │ const x: 1 = +1;
-  > 14 │ const x: -1 = -1;
-       │        ^^^^
-    15 │ const x: 1e-5 = 1e-5;
-    16 │ const x: RegExp = /a/;
+    12 │ const x: 1 = +1;
+    13 │ const x: -1 = -1;
+  > 14 │ const x: 1e-5 = 1e-5;
+       │        ^^^^^^
+    15 │ const x: RegExp = /a/;
+    16 │ const x: "str" = "str";
   
   i Safe fix: Remove the type annotation.
   
-    14 │ const·x:·-1·=·-1;
-       │        ----      
+    14 │ const·x:·1e-5·=·1e-5;
+       │        ------        
 
 ```
 
 ```
-invalid.ts:15:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:16:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    13 │ const x: 1 = +1;
-    14 │ const x: -1 = -1;
-  > 15 │ const x: 1e-5 = 1e-5;
-       │        ^^^^^^
-    16 │ const x: RegExp = /a/;
-    17 │ const x: "str" = "str";
+    14 │ const x: 1e-5 = 1e-5;
+    15 │ const x: RegExp = /a/;
+  > 16 │ const x: "str" = "str";
+       │        ^^^^^^^
+    17 │ const x: "str" = `str`; // constant template string
+    18 │ const x: "str2" = `str${f()}`;
   
   i Safe fix: Remove the type annotation.
   
-    15 │ const·x:·1e-5·=·1e-5;
-       │        ------        
+    16 │ const·x:·"str"·=·"str";
+       │        -------         
 
 ```
 
@@ -316,17 +313,17 @@ invalid.ts:17:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    15 │ const x: 1e-5 = 1e-5;
-    16 │ const x: RegExp = /a/;
-  > 17 │ const x: "str" = "str";
+    15 │ const x: RegExp = /a/;
+    16 │ const x: "str" = "str";
+  > 17 │ const x: "str" = `str`; // constant template string
        │        ^^^^^^^
-    18 │ const x: "str" = `str`; // constant template string
-    19 │ const x: "str2" = `str${f()}`;
+    18 │ const x: "str2" = `str${f()}`;
+    19 │ 
   
   i Safe fix: Remove the type annotation.
   
-    17 │ const·x:·"str"·=·"str";
-       │        -------         
+    17 │ const·x:·"str"·=·`str`;·//·constant·template·string
+       │        -------                                     
 
 ```
 
@@ -335,109 +332,108 @@ invalid.ts:18:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    16 │ const x: RegExp = /a/;
-    17 │ const x: "str" = "str";
-  > 18 │ const x: "str" = `str`; // constant template string
-       │        ^^^^^^^
-    19 │ const x: "str2" = `str${f()}`;
-    20 │ const x: undefined = void f();
-  
-  i Safe fix: Remove the type annotation.
-  
-    18 │ const·x:·"str"·=·`str`;·//·constant·template·string
-       │        -------                                     
-
-```
-
-```
-invalid.ts:19:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type annotation is trivially inferred from its initialization.
-  
-    17 │ const x: "str" = "str";
-    18 │ const x: "str" = `str`; // constant template string
-  > 19 │ const x: "str2" = `str${f()}`;
+    16 │ const x: "str" = "str";
+    17 │ const x: "str" = `str`; // constant template string
+  > 18 │ const x: "str2" = `str${f()}`;
        │        ^^^^^^^^
-    20 │ const x: undefined = void f();
-    21 │ 
+    19 │ 
+    20 │ class X {
   
   i Safe fix: Remove the type annotation.
   
-    19 │ const·x:·"str2"·=·`str${f()}`;
+    18 │ const·x:·"str2"·=·`str${f()}`;
        │        --------               
 
 ```
 
 ```
-invalid.ts:20:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:21:12 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    18 │ const x: "str" = `str`; // constant template string
-    19 │ const x: "str2" = `str${f()}`;
-  > 20 │ const x: undefined = void f();
-       │        ^^^^^^^^^^^
-    21 │ 
-    22 │ class X {
-  
-  i Safe fix: Remove the type annotation.
-  
-    20 │ const·x:·undefined·=·void·f();
-       │        -----------            
-
-```
-
-```
-invalid.ts:23:12 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type annotation is trivially inferred from its initialization.
-  
-    22 │ class X {
-  > 23 │ 	readonly x: 1 = 1;
+    20 │ class X {
+  > 21 │ 	readonly x: 1 = 1;
        │ 	          ^^^
-    24 │ }
-    25 │ 
+    22 │ }
+    23 │ 
   
   i Safe fix: Remove the type annotation.
   
-    23 │ → readonly·x:·1·=·1;
+    21 │ → readonly·x:·1·=·1;
        │             ---     
 
 ```
 
 ```
-invalid.ts:27:24 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:24 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    26 │ class X {
-  > 27 │ 	constructor(readonly x: 1 = 1) {}
+    24 │ class X {
+  > 25 │ 	constructor(readonly x: 1 = 1) {}
        │ 	                      ^^^
-    28 │ }
-    29 │ 
+    26 │ }
+    27 │ 
   
   i Safe fix: Remove the type annotation.
   
-    27 │ → constructor(readonly·x:·1·=·1)·{}
+    25 │ → constructor(readonly·x:·1·=·1)·{}
        │                         ---        
 
 ```
 
 ```
-invalid.ts:31:17 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:29:17 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    30 │ // non-const contexts
-  > 31 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
+    28 │ // non-const contexts
+  > 29 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
        │                 ^^^^^^^^^^^^^^^^^^^
-    32 │ 
-    33 │ let x: bigint = 1n;
+    30 │ 
+    31 │ let x: bigint = 1n;
   
   i Safe fix: Remove the type annotation.
   
-    31 │ let·x·/*before*/:·/*inside*/·number·/*after*/·=·(1);
+    29 │ let·x·/*before*/:·/*inside*/·number·/*after*/·=·(1);
        │                 -------------------                 
+
+```
+
+```
+invalid.ts:31:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type annotation is trivially inferred from its initialization.
+  
+    29 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
+    30 │ 
+  > 31 │ let x: bigint = 1n;
+       │      ^^^^^^^^
+    32 │ let x: bigint = -1n;
+    33 │ let x: boolean = false;
+  
+  i Safe fix: Remove the type annotation.
+  
+    31 │ let·x:·bigint·=·1n;
+       │      --------      
+
+```
+
+```
+invalid.ts:32:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type annotation is trivially inferred from its initialization.
+  
+    31 │ let x: bigint = 1n;
+  > 32 │ let x: bigint = -1n;
+       │      ^^^^^^^^
+    33 │ let x: boolean = false;
+    34 │ let x: boolean = true;
+  
+  i Safe fix: Remove the type annotation.
+  
+    32 │ let·x:·bigint·=·-1n;
+       │      --------       
 
 ```
 
@@ -446,17 +442,17 @@ invalid.ts:33:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    31 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
-    32 │ 
-  > 33 │ let x: bigint = 1n;
-       │      ^^^^^^^^
-    34 │ let x: bigint = -1n;
-    35 │ let x: boolean = false;
+    31 │ let x: bigint = 1n;
+    32 │ let x: bigint = -1n;
+  > 33 │ let x: boolean = false;
+       │      ^^^^^^^^^
+    34 │ let x: boolean = true;
+    35 │ let x: boolean = !false;
   
   i Safe fix: Remove the type annotation.
   
-    33 │ let·x:·bigint·=·1n;
-       │      --------      
+    33 │ let·x:·boolean·=·false;
+       │      ---------         
 
 ```
 
@@ -465,16 +461,17 @@ invalid.ts:34:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    33 │ let x: bigint = 1n;
-  > 34 │ let x: bigint = -1n;
-       │      ^^^^^^^^
-    35 │ let x: boolean = false;
-    36 │ let x: boolean = true;
+    32 │ let x: bigint = -1n;
+    33 │ let x: boolean = false;
+  > 34 │ let x: boolean = true;
+       │      ^^^^^^^^^
+    35 │ let x: boolean = !false;
+    36 │ let x: boolean = !true;
   
   i Safe fix: Remove the type annotation.
   
-    34 │ let·x:·bigint·=·-1n;
-       │      --------       
+    34 │ let·x:·boolean·=·true;
+       │      ---------        
 
 ```
 
@@ -483,17 +480,17 @@ invalid.ts:35:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    33 │ let x: bigint = 1n;
-    34 │ let x: bigint = -1n;
-  > 35 │ let x: boolean = false;
+    33 │ let x: boolean = false;
+    34 │ let x: boolean = true;
+  > 35 │ let x: boolean = !false;
        │      ^^^^^^^^^
-    36 │ let x: boolean = true;
-    37 │ let x: boolean = !false;
+    36 │ let x: boolean = !true;
+    37 │ let x: number = +1;
   
   i Safe fix: Remove the type annotation.
   
-    35 │ let·x:·boolean·=·false;
-       │      ---------         
+    35 │ let·x:·boolean·=·!false;
+       │      ---------          
 
 ```
 
@@ -502,17 +499,17 @@ invalid.ts:36:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    34 │ let x: bigint = -1n;
-    35 │ let x: boolean = false;
-  > 36 │ let x: boolean = true;
+    34 │ let x: boolean = true;
+    35 │ let x: boolean = !false;
+  > 36 │ let x: boolean = !true;
        │      ^^^^^^^^^
-    37 │ let x: boolean = !false;
-    38 │ let x: boolean = !true;
+    37 │ let x: number = +1;
+    38 │ let x: number = -1;
   
   i Safe fix: Remove the type annotation.
   
-    36 │ let·x:·boolean·=·true;
-       │      ---------        
+    36 │ let·x:·boolean·=·!true;
+       │      ---------         
 
 ```
 
@@ -521,17 +518,17 @@ invalid.ts:37:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    35 │ let x: boolean = false;
-    36 │ let x: boolean = true;
-  > 37 │ let x: boolean = !false;
-       │      ^^^^^^^^^
-    38 │ let x: boolean = !true;
-    39 │ let x: number = +1;
+    35 │ let x: boolean = !false;
+    36 │ let x: boolean = !true;
+  > 37 │ let x: number = +1;
+       │      ^^^^^^^^
+    38 │ let x: number = -1;
+    39 │ let x: number = 1e-5;
   
   i Safe fix: Remove the type annotation.
   
-    37 │ let·x:·boolean·=·!false;
-       │      ---------          
+    37 │ let·x:·number·=·+1;
+       │      --------      
 
 ```
 
@@ -540,17 +537,17 @@ invalid.ts:38:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    36 │ let x: boolean = true;
-    37 │ let x: boolean = !false;
-  > 38 │ let x: boolean = !true;
-       │      ^^^^^^^^^
-    39 │ let x: number = +1;
-    40 │ let x: number = -1;
+    36 │ let x: boolean = !true;
+    37 │ let x: number = +1;
+  > 38 │ let x: number = -1;
+       │      ^^^^^^^^
+    39 │ let x: number = 1e-5;
+    40 │ let x: RegExp = /a/;
   
   i Safe fix: Remove the type annotation.
   
-    38 │ let·x:·boolean·=·!true;
-       │      ---------         
+    38 │ let·x:·number·=·-1;
+       │      --------      
 
 ```
 
@@ -559,36 +556,17 @@ invalid.ts:39:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    37 │ let x: boolean = !false;
-    38 │ let x: boolean = !true;
-  > 39 │ let x: number = +1;
+    37 │ let x: number = +1;
+    38 │ let x: number = -1;
+  > 39 │ let x: number = 1e-5;
        │      ^^^^^^^^
-    40 │ let x: number = -1;
-    41 │ let x: number = 1e-5;
+    40 │ let x: RegExp = /a/;
+    41 │ let x: string = "str";
   
   i Safe fix: Remove the type annotation.
   
-    39 │ let·x:·number·=·+1;
-       │      --------      
-
-```
-
-```
-invalid.ts:40:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type annotation is trivially inferred from its initialization.
-  
-    38 │ let x: boolean = !true;
-    39 │ let x: number = +1;
-  > 40 │ let x: number = -1;
-       │      ^^^^^^^^
-    41 │ let x: number = 1e-5;
-    42 │ let x: RegExp = /a/;
-  
-  i Safe fix: Remove the type annotation.
-  
-    40 │ let·x:·number·=·-1;
-       │      --------      
+    39 │ let·x:·number·=·1e-5;
+       │      --------        
 
 ```
 
@@ -597,17 +575,36 @@ invalid.ts:41:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    39 │ let x: number = +1;
-    40 │ let x: number = -1;
-  > 41 │ let x: number = 1e-5;
+    39 │ let x: number = 1e-5;
+    40 │ let x: RegExp = /a/;
+  > 41 │ let x: string = "str";
        │      ^^^^^^^^
-    42 │ let x: RegExp = /a/;
-    43 │ let x: string = "str";
+    42 │ let x: string = `str`;
+    43 │ let x: string = `str${f()}`;
   
   i Safe fix: Remove the type annotation.
   
-    41 │ let·x:·number·=·1e-5;
-       │      --------        
+    41 │ let·x:·string·=·"str";
+       │      --------         
+
+```
+
+```
+invalid.ts:42:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type annotation is trivially inferred from its initialization.
+  
+    40 │ let x: RegExp = /a/;
+    41 │ let x: string = "str";
+  > 42 │ let x: string = `str`;
+       │      ^^^^^^^^
+    43 │ let x: string = `str${f()}`;
+    44 │ let x: number = +"";
+  
+  i Safe fix: Remove the type annotation.
+  
+    42 │ let·x:·string·=·`str`;
+       │      --------         
 
 ```
 
@@ -616,17 +613,17 @@ invalid.ts:43:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    41 │ let x: number = 1e-5;
-    42 │ let x: RegExp = /a/;
-  > 43 │ let x: string = "str";
+    41 │ let x: string = "str";
+    42 │ let x: string = `str`;
+  > 43 │ let x: string = `str${f()}`;
        │      ^^^^^^^^
-    44 │ let x: string = `str`;
-    45 │ let x: string = `str${f()}`;
+    44 │ let x: number = +"";
+    45 │ let x: boolean = !"";
   
   i Safe fix: Remove the type annotation.
   
-    43 │ let·x:·string·=·"str";
-       │      --------         
+    43 │ let·x:·string·=·`str${f()}`;
+       │      --------               
 
 ```
 
@@ -635,17 +632,17 @@ invalid.ts:44:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    42 │ let x: RegExp = /a/;
-    43 │ let x: string = "str";
-  > 44 │ let x: string = `str`;
+    42 │ let x: string = `str`;
+    43 │ let x: string = `str${f()}`;
+  > 44 │ let x: number = +"";
        │      ^^^^^^^^
-    45 │ let x: string = `str${f()}`;
-    46 │ let x: number = +"";
+    45 │ let x: boolean = !"";
+    46 │ 
   
   i Safe fix: Remove the type annotation.
   
-    44 │ let·x:·string·=·`str`;
-       │      --------         
+    44 │ let·x:·number·=·+"";
+       │      --------       
 
 ```
 
@@ -654,109 +651,71 @@ invalid.ts:45:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 
   ! This type annotation is trivially inferred from its initialization.
   
-    43 │ let x: string = "str";
-    44 │ let x: string = `str`;
-  > 45 │ let x: string = `str${f()}`;
-       │      ^^^^^^^^
-    46 │ let x: number = +"";
-    47 │ let x: boolean = !"";
-  
-  i Safe fix: Remove the type annotation.
-  
-    45 │ let·x:·string·=·`str${f()}`;
-       │      --------               
-
-```
-
-```
-invalid.ts:46:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type annotation is trivially inferred from its initialization.
-  
-    44 │ let x: string = `str`;
-    45 │ let x: string = `str${f()}`;
-  > 46 │ let x: number = +"";
-       │      ^^^^^^^^
-    47 │ let x: boolean = !"";
-    48 │ 
-  
-  i Safe fix: Remove the type annotation.
-  
-    46 │ let·x:·number·=·+"";
-       │      --------       
-
-```
-
-```
-invalid.ts:47:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This type annotation is trivially inferred from its initialization.
-  
-    45 │ let x: string = `str${f()}`;
-    46 │ let x: number = +"";
-  > 47 │ let x: boolean = !"";
+    43 │ let x: string = `str${f()}`;
+    44 │ let x: number = +"";
+  > 45 │ let x: boolean = !"";
        │      ^^^^^^^^^
-    48 │ 
-    49 │ function f(x: number = 1) {}
+    46 │ 
+    47 │ function f(x: number = 1) {}
   
   i Safe fix: Remove the type annotation.
   
-    47 │ let·x:·boolean·=·!"";
+    45 │ let·x:·boolean·=·!"";
        │      ---------       
 
 ```
 
 ```
-invalid.ts:49:13 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:47:13 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    47 │ let x: boolean = !"";
-    48 │ 
-  > 49 │ function f(x: number = 1) {}
+    45 │ let x: boolean = !"";
+    46 │ 
+  > 47 │ function f(x: number = 1) {}
        │             ^^^^^^^^
-    50 │ 
-    51 │ class X {
+    48 │ 
+    49 │ class X {
   
   i Safe fix: Remove the type annotation.
   
-    49 │ function·f(x:·number·=·1)·{}
+    47 │ function·f(x:·number·=·1)·{}
        │             --------        
 
 ```
 
 ```
-invalid.ts:52:3 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:50:3 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    51 │ class X {
-  > 52 │ 	x: number = 1;
+    49 │ class X {
+  > 50 │ 	x: number = 1;
        │ 	 ^^^^^^^^
-    53 │ }
-    54 │ 
+    51 │ }
+    52 │ 
   
   i Safe fix: Remove the type annotation.
   
-    52 │ → x:·number·=·1;
+    50 │ → x:·number·=·1;
        │    --------     
 
 ```
 
 ```
-invalid.ts:56:25 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:54:25 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This type annotation is trivially inferred from its initialization.
   
-    55 │ class X {
-  > 56 │ 	constructor(protected x: number = 1) {}
+    53 │ class X {
+  > 54 │ 	constructor(protected x: number = 1) {}
        │ 	                       ^^^^^^^^
-    57 │ }
-    58 │ 
+    55 │ }
+    56 │ 
   
   i Safe fix: Remove the type annotation.
   
-    56 │ → constructor(protected·x:·number·=·1)·{}
+    54 │ → constructor(protected·x:·number·=·1)·{}
        │                          --------        
 
 ```

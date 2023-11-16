@@ -35,6 +35,7 @@ let x: 1n = 1n;
 let x: -1n = -1n;
 let x: true = true;
 let x: false = false;
+let x: undefined = void f();
 let x: null = null;
 let x: 1 = 1;
 let x: -1 = -1;
@@ -42,8 +43,6 @@ let x: 1e-5 = 1e-5;
 let x: "str" = "str";
 let x: "str" = `str`;
 let x: "str2" = `str${f()}`;
-let x: undefined = void f();
-let x: null = null;
 
 function f(x: 1 = 1) {}
 
@@ -54,3 +53,13 @@ class X {
 class X {
 	constructor(protected x: 1 = 1) {}
 }
+
+
+// In unsafe null mode, TypeScript widen unannotated variable to `any`.
+// In this mode, it is useful to keep `null` and `undefined` type annotation.
+const x: undefined = void f();
+let x: undefined = void f();
+let x: null = null;
+
+function g(a: string = null): void {}
+function h(a: string = undefined): void {}

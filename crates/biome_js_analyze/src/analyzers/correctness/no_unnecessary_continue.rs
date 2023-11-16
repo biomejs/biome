@@ -132,12 +132,17 @@ fn is_continue_un_necessary(node: &JsContinueStatement) -> Option<bool> {
             )
         })
         .collect();
+    let in_switch = ancestors
+        .iter()
+        .any(|ancestor| ancestor.kind() == JS_SWITCH_STATEMENT);
     if ancestors.is_empty() {
         return Some(true);
     }
     let loop_stmt = ancestors.last()?.parent()?;
+
     Some(
-        is_continue_last_statement(ancestors.first()?, syntax).unwrap_or(false)
+        !in_switch
+            && is_continue_last_statement(ancestors.first()?, syntax).unwrap_or(false)
             && contains_parent_loop_label(syntax, &loop_stmt).unwrap_or(false)
             && is_continue_inside_last_ancestors(&ancestors, syntax).unwrap_or(false),
     )

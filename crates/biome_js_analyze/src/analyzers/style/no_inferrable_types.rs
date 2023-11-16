@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsVariableDeclaratorList, TsPropertyParameter, TsReadonlyModifier,
     TsTypeAnnotation,
 };
+use biome_js_syntax::{AnyJsLiteralExpression, AnyTsType};
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 
@@ -149,9 +150,24 @@ impl Rule for NoInferrableTypes {
                 // In const contexts, literal type annotations are rejected.
                 // e.g. `const x: 1 = <literal>`
                 //
+                // However, we ignore `null` and `undefined` literal types,
+                // because in unsafe null mode, TypeScript widen an unannotated variable to `any`.
+                //
                 // In non-const contexts, wide type annotation are rejected.
                 // e.g. `let x: number = <literal>`
-                if (is_const && ty.is_literal_type()) || (!is_const && ty.is_primitive_type()) {
+                //
+                // However, we ignore the case where <literal> is `null`,
+                // because in unsafe null mode, it is possible to assign `null` and `undefined` to any type.
+                if (is_const && is_non_null_literal_type(&ty))
+                    || (!is_const
+                        && ty.is_primitive_type()
+                        && !matches!(
+                            init_expr,
+                            AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                            )
+                        ))
+                {
                     return Some(type_annotation);
                 }
             }
@@ -205,4 +221,14 @@ fn has_trivially_inferrable_type(expr: &AnyJsExpression) -> Option<()> {
         }
         _ => None,
     }
+}
+
+fn is_non_null_literal_type(ty: &AnyTsType) -> bool {
+    matches!(
+        ty,
+        AnyTsType::TsBooleanLiteralType(_)
+            | AnyTsType::TsBigintLiteralType(_)
+            | AnyTsType::TsNumberLiteralType(_)
+            | AnyTsType::TsStringLiteralType(_)
+    )
 }

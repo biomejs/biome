@@ -103,6 +103,7 @@ pub(crate) fn traverse(
                     report: &mut report,
                     verbose: cli_options.verbose,
                     warnings: &mut warnings,
+                    diagnostic_level: &cli_options.diagnostic_level,
                 });
             })
             .expect("failed to spawn console thread");
@@ -278,6 +279,8 @@ struct ProcessMessagesOptions<'ctx> {
     report: &'ctx mut Report,
     /// Whether the console thread should print diagnostics in verbose mode
     verbose: bool,
+    /// The diagnostic level the console thread should print
+    diagnostic_level: &'ctx Severity,
 }
 
 /// This thread receives [Message]s from the workers through the `recv_msgs`
@@ -295,6 +298,7 @@ fn process_messages(options: ProcessMessagesOptions) {
         report,
         verbose,
         warnings,
+        diagnostic_level,
     } = options;
 
     let mut paths: FxHashSet<String> = FxHashSet::default();
@@ -568,9 +572,11 @@ fn process_messages(options: ProcessMessagesOptions) {
     }
 
     for diagnostic in diagnostics_to_print {
-        console.error(markup! {
-            {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-        });
+        if diagnostic.severity() >= *diagnostic_level {
+            console.error(markup! {
+                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+        }
     }
 
     if mode.is_check() && total_skipped_suggested_fixes > 0 {

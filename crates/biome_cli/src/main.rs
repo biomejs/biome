@@ -37,8 +37,8 @@ fn main() -> ExitCode {
     match result {
         Err(termination) => {
             console.error(markup! {
-                        {if is_verbose { PrintDiagnostic::verbose(&termination) } else { PrintDiagnostic::simple(&termination) }}
-                    });
+                {if is_verbose { PrintDiagnostic::verbose(&termination) } else { PrintDiagnostic::simple(&termination) }}
+            });
             termination.report()
         }
         Ok(_) => ExitCode::SUCCESS,

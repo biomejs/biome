@@ -2,6 +2,22 @@
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 
+# Table of Contents
+- [Asking Questions, Making Proposals](#asking-questions-making-proposals)
+- [Reporting Bugs](#reporting-bugs)
+- [Getting Started](#getting-started)
+- [Install the Required Tools](#install-the-required-tools)
+- [Crates Development](#crates-development)
+- [VS Code Extension Development](#vs-code-extension-development)
+- [IntelliJ Extension Development](#intellij-plugin-development)
+- [Node.js Development](#nodejs-development)
+- [Website Development](#website-development)
+- [Commit Messages](#commit-messages)
+- [Creating Pull Requests](#creating-pull-requests)
+- [Releasing](#releasing)
+- [Resources](#resources)
+- [Current Members](#current-members)
+
 ## Asking questions, making proposals
 
 If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/bare-ts/tools/discussions).
@@ -411,10 +427,16 @@ When releasing a new version of a Biome, follow these steps:
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
-   Then execute `just codegen-linter`.
+   Then execute `just gen-lint`.
 
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
 
+## Resources
+
+We have several resources explaining about Biome. They will help you understand the project and codebase.
+
+- [Rust Dublin October 2023 - Biome - YouTube](https://youtu.be/stxiUYmHn0s?si=C9cMsc93nNrZa-r1)
+- [Rome, a Modern Toolchain! by Emanuele Stoppa - GitNation](https://portal.gitnation.org/contents/rome-a-modern-toolchain)
 
 ## Current Members
 

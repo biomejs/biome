@@ -53,7 +53,7 @@ async fn try_connect() -> io::Result<UnixStream> {
 }
 
 /// Spawn the daemon server process in the background
-fn spawn_daemon(stop_on_disconnect: bool) -> io::Result<Child> {
+fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::Result<Child> {
     let binary = env::current_exe()?;
 
     let mut cmd = Command::new(binary);
@@ -62,6 +62,9 @@ fn spawn_daemon(stop_on_disconnect: bool) -> io::Result<Child> {
 
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
+    }
+    if let Some(config_path) = config_path {
+        cmd.arg(format!("--config-path={}", config_path.display()));
     }
 
     // Create a new session for the process and make it the leader, this will
@@ -109,7 +112,10 @@ pub(crate) async fn open_socket() -> io::Result<Option<(OwnedReadHalf, OwnedWrit
 ///
 /// Returns false if the daemon process was already running or true if it had
 /// to be started
-pub(crate) async fn ensure_daemon(stop_on_disconnect: bool) -> io::Result<bool> {
+pub(crate) async fn ensure_daemon(
+    stop_on_disconnect: bool,
+    config_path: Option<PathBuf>,
+) -> io::Result<bool> {
     let mut current_child: Option<Child> = None;
     let mut last_error = None;
 
@@ -147,7 +153,7 @@ pub(crate) async fn ensure_daemon(stop_on_disconnect: bool) -> io::Result<bool> 
                 } else {
                     // Spawn the daemon process and wait a few milliseconds for
                     // it to become ready then retry the connection
-                    current_child = Some(spawn_daemon(stop_on_disconnect)?);
+                    current_child = Some(spawn_daemon(stop_on_disconnect, config_path.clone())?);
                     time::sleep(Duration::from_millis(50)).await;
                 }
             }
@@ -169,14 +175,17 @@ pub(crate) async fn ensure_daemon(stop_on_disconnect: bool) -> io::Result<bool> 
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global socket name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true).await?;
+    ensure_daemon(true, None).await?;
     println!("{}", get_socket_name().display());
     Ok(())
 }
 
 /// Start listening on the global socket and accepting connections with the
 /// provided [ServerFactory]
-pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
+pub(crate) async fn run_daemon(
+    factory: ServerFactory,
+    config_path: Option<PathBuf>,
+) -> io::Result<Infallible> {
     let path = get_socket_name();
 
     info!("Trying to connect to socket {}", path.display());
@@ -191,7 +200,7 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
 
     loop {
         let (stream, _) = listener.accept().await?;
-        let connection = factory.create();
+        let connection = factory.create(config_path.clone());
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
     }

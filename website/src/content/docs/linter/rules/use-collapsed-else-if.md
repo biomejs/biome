@@ -24,7 +24,7 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
   
@@ -66,7 +66,7 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
   
@@ -111,7 +111,7 @@ if (condition) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/lint/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/useCollapsedElseIf.js:3:9 <a href="https://biomejs.dev/linter/rules/use-collapsed-else-if">lint/style/useCollapsedElseIf</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This </span><span style="color: Orange;"><strong>if</strong></span><span style="color: Orange;"> statement can be collapsed into an </span><span style="color: Orange;"><strong>else if</strong></span><span style="color: Orange;"> statement.</span>
   

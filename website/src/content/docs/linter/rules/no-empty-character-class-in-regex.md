@@ -24,7 +24,7 @@ Source: https://eslint.org/docs/latest/rules/no-empty-character-class/
 /^a[]/.test("a"); // false
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyCharacterClassInRegex.js:1:4 <a href="https://biomejs.dev/lint/rules/no-empty-character-class-in-regex">lint/nursery/noEmptyCharacterClassInRegex</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyCharacterClassInRegex.js:1:4 <a href="https://biomejs.dev/linter/rules/no-empty-character-class-in-regex">lint/nursery/noEmptyCharacterClassInRegex</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The regular expression includes this </span><span style="color: Tomato;"><strong>empty character class</strong></span><span style="color: Tomato;">.</span>
   
@@ -42,7 +42,7 @@ Source: https://eslint.org/docs/latest/rules/no-empty-character-class/
 /^a[^]/.test("ax"); // true
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noEmptyCharacterClassInRegex.js:1:4 <a href="https://biomejs.dev/lint/rules/no-empty-character-class-in-regex">lint/nursery/noEmptyCharacterClassInRegex</a> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noEmptyCharacterClassInRegex.js:1:4 <a href="https://biomejs.dev/linter/rules/no-empty-character-class-in-regex">lint/nursery/noEmptyCharacterClassInRegex</a> ━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The regular expression includes this </span><span style="color: Tomato;"><strong>negated empty character class</strong></span><span style="color: Tomato;">.</span>
   

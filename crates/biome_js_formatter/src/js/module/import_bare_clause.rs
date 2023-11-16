@@ -14,7 +14,7 @@ impl FormatNodeRule<JsImportBareClause> for FormatJsImportBareClause {
         write!(f, [source.format()])?;
 
         if let Some(assertion) = assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         Ok(())

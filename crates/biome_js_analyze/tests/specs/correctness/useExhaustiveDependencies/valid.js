@@ -1,7 +1,7 @@
 /* should not generate diagnostics */
 
 import React from "react";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore, useMemo } from "react";
 import doSomething from 'a';
 
 // No captures
@@ -175,4 +175,13 @@ function MyComponent17() {
   useEffect(() => {
     console.log(data);
   }, [data]);
+}
+
+// https://github.com/biomejs/biome/issues/607
+function MyComponent18() {
+  const obj = Math.random() > 0.5 ? { a: 1, b: 2 } : undefined;
+
+  return useMemo(() => {
+    return obj?.a === 1 && obj.b === 2;
+  }, [obj?.a, obj?.b]);
 }

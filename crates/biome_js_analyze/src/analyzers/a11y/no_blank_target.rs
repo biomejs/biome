@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
-    jsx_string, token,
+    jsx_string, jsx_string_literal, token,
 };
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
@@ -131,7 +131,7 @@ impl Rule for NoBlankTarget {
             )))
             .with_initializer(jsx_attribute_initializer_clause(
                 token(T![=]),
-                AnyJsxAttributeValue::JsxString(jsx_string(jsx_ident("\"noreferrer\""))),
+                AnyJsxAttributeValue::JsxString(jsx_string(jsx_string_literal("noreferrer"))),
             ))
             .build();
 

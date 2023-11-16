@@ -4,7 +4,8 @@ use std::{
 };
 
 use termcolor::{Color, ColorSpec, WriteColor};
-use unicode_width::UnicodeWidthChar;
+use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr;
 
 use crate::{fmt::MarkupElements, MarkupElement};
 
@@ -145,29 +146,65 @@ where
     fn write_str(&mut self, content: &str) -> fmt::Result {
         let mut buffer = [0; 4];
 
-        for item in content.chars() {
-            // Replace non-whitespace, zero-width characters with the Unicode replacement character
-            let is_whitespace = item.is_whitespace();
-            let is_zero_width = UnicodeWidthChar::width(item).map_or(true, |width| width == 0);
-            let item = if !is_whitespace && is_zero_width {
-                char::REPLACEMENT_CHARACTER
-            } else if cfg!(windows) || !self.writer.supports_color() {
-                // Unicode is currently poorly supported on most Windows
-                // terminal clients, so we always strip emojis in Windows
-                unicode_to_ascii(item)
-            } else {
-                item
+        for grapheme in content.graphemes(true) {
+            let width = UnicodeWidthStr::width(grapheme);
+            let is_whitespace = grapheme_is_whitespace(grapheme);
+
+            if !is_whitespace && width == 0 {
+                let char_to_write = char::REPLACEMENT_CHARACTER;
+                char_to_write.encode_utf8(&mut buffer);
+
+                if let Err(err) = self.writer.write_all(&buffer[..char_to_write.len_utf8()]) {
+                    self.error = Err(err);
+                    return Err(fmt::Error);
+                }
+
+                continue;
+            }
+
+            // Unicode is currently poorly supported on most Windows
+            // terminal clients, so we always strip emojis in Windows
+            if cfg!(windows) || !self.writer.supports_color() {
+                let is_ascii = grapheme_is_ascii(grapheme);
+
+                if !is_ascii {
+                    let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
+
+                    replacement.encode_utf8(&mut buffer);
+
+                    if let Err(err) = self.writer.write_all(&buffer[..replacement.len_utf8()]) {
+                        self.error = Err(err);
+                        return Err(fmt::Error);
+                    }
+
+                    continue;
+                }
             };
 
-            item.encode_utf8(&mut buffer);
-            if let Err(err) = self.writer.write_all(&buffer[..item.len_utf8()]) {
-                self.error = Err(err);
-                return Err(fmt::Error);
+            for char in grapheme.chars() {
+                char.encode_utf8(&mut buffer);
+
+                if let Err(err) = self.writer.write_all(&buffer[..char.len_utf8()]) {
+                    self.error = Err(err);
+                    return Err(fmt::Error);
+                }
             }
         }
 
         Ok(())
     }
+}
+
+/// Determines if a unicode grapheme consists only of code points
+/// which are considered whitepsace characters in ASCII
+fn grapheme_is_whitespace(grapheme: &str) -> bool {
+    grapheme.chars().all(|c| c.is_whitespace())
+}
+
+/// Determines if a grapheme contains code points which are out of the ASCII
+/// range and thus cannot be printed where unicode is not supported.
+fn grapheme_is_ascii(grapheme: &str) -> bool {
+    grapheme.chars().all(|c| c.is_ascii())
 }
 
 /// Replace emoji characters with similar but more widely supported ASCII
@@ -234,5 +271,31 @@ mod tests {
             .unwrap();
 
         assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+    }
+
+    #[test]
+    fn test_printing_complex_emojis() {
+        const INPUT: &str = "⚠️1️⃣ℹ️";
+        const OUTPUT: &str = "⚠️1️⃣ℹ️";
+        const WINDOWS_OUTPUT: &str = "!1i";
+
+        let mut buffer = Vec::new();
+
+        {
+            let writer = termcolor::Ansi::new(&mut buffer);
+            let mut adapter = SanitizeAdapter {
+                writer,
+                error: Ok(()),
+            };
+
+            adapter.write_str(INPUT).unwrap();
+            adapter.error.unwrap();
+        }
+
+        if cfg!(windows) {
+            assert_eq!(from_utf8(&buffer).unwrap(), WINDOWS_OUTPUT);
+        } else {
+            assert_eq!(from_utf8(&buffer).unwrap(), OUTPUT);
+        }
     }
 }

@@ -20,7 +20,13 @@ info: jsx/self_closing.jsx
 
 <CodeEditor
 
-/>
+/>;
+
+<>
+    <Foo />
+    -
+    <Foo />
+</>;
 
 ```
 
@@ -53,6 +59,12 @@ Arrow parentheses: Always
 <SourceTypeSelect />;
 
 <CodeEditor />;
+
+<>
+	<Foo />
+	-
+	<Foo />
+</>;
 ```
 
 

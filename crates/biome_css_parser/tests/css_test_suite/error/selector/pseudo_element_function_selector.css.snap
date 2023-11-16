@@ -1,0 +1,243 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+::cue(div + div {}
+::cue( {}
+::cue(
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@0..2 "::" [] [],
+                            element: CssPseudoElementFunctionSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2..5 "cue" [] [],
+                                },
+                                l_paren_token: L_PAREN@5..6 "(" [] [],
+                                selector: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@6..10 "div" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    combinator: PLUS@10..12 "+" [] [Whitespace(" ")],
+                                    right: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@12..16 "div" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                                r_paren_token: missing (required),
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@16..17 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@17..18 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@18..21 "::" [Newline("\n")] [],
+                            element: CssPseudoElementFunctionSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@21..24 "cue" [] [],
+                                },
+                                l_paren_token: L_PAREN@24..26 "(" [] [Whitespace(" ")],
+                                selector: missing (required),
+                                r_paren_token: missing (required),
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@26..27 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@27..28 "}" [] [],
+            },
+        },
+        CssBogusRule {
+            items: [
+                CssSelectorList [
+                    CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoElementSelector {
+                                double_colon_token: COLON2@28..31 "::" [Newline("\n")] [],
+                                element: CssPseudoElementFunctionSelector {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@31..34 "cue" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@34..35 "(" [] [],
+                                    selector: missing (required),
+                                    r_paren_token: missing (required),
+                                },
+                            },
+                        ],
+                    },
+                ],
+            ],
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..36
+  0: CSS_RULE_LIST@0..35
+    0: CSS_RULE@0..18
+      0: CSS_SELECTOR_LIST@0..16
+        0: CSS_COMPOUND_SELECTOR@0..16
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..16
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@0..16
+              0: COLON2@0..2 "::" [] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@2..16
+                0: CSS_IDENTIFIER@2..5
+                  0: IDENT@2..5 "cue" [] []
+                1: L_PAREN@5..6 "(" [] []
+                2: CSS_COMPLEX_SELECTOR@6..16
+                  0: CSS_COMPOUND_SELECTOR@6..10
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@6..10
+                      0: CSS_IDENTIFIER@6..10
+                        0: IDENT@6..10 "div" [] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@10..10
+                  1: PLUS@10..12 "+" [] [Whitespace(" ")]
+                  2: CSS_COMPOUND_SELECTOR@12..16
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@12..16
+                      0: CSS_IDENTIFIER@12..16
+                        0: IDENT@12..16 "div" [] [Whitespace(" ")]
+                    2: CSS_SUB_SELECTOR_LIST@16..16
+                3: (empty)
+      1: CSS_BLOCK@16..18
+        0: L_CURLY@16..17 "{" [] []
+        1: CSS_DECLARATION_LIST@17..17
+        2: R_CURLY@17..18 "}" [] []
+    1: CSS_RULE@18..28
+      0: CSS_SELECTOR_LIST@18..26
+        0: CSS_COMPOUND_SELECTOR@18..26
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@18..26
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@18..26
+              0: COLON2@18..21 "::" [Newline("\n")] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@21..26
+                0: CSS_IDENTIFIER@21..24
+                  0: IDENT@21..24 "cue" [] []
+                1: L_PAREN@24..26 "(" [] [Whitespace(" ")]
+                2: (empty)
+                3: (empty)
+      1: CSS_BLOCK@26..28
+        0: L_CURLY@26..27 "{" [] []
+        1: CSS_DECLARATION_LIST@27..27
+        2: R_CURLY@27..28 "}" [] []
+    2: CSS_BOGUS_RULE@28..35
+      0: CSS_SELECTOR_LIST@28..35
+        0: CSS_COMPOUND_SELECTOR@28..35
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@28..35
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@28..35
+              0: COLON2@28..31 "::" [Newline("\n")] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@31..35
+                0: CSS_IDENTIFIER@31..34
+                  0: IDENT@31..34 "cue" [] []
+                1: L_PAREN@34..35 "(" [] []
+                2: (empty)
+                3: (empty)
+  1: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_element_function_selector.css:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │ ::cue(div + div {}
+      │                 ^
+    2 │ ::cue( {}
+    3 │ ::cue(
+  
+  i Remove {
+  
+pseudo_element_function_selector.css:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '{'.
+  
+    1 │ ::cue(div + div {}
+  > 2 │ ::cue( {}
+      │        ^
+    3 │ ::cue(
+    4 │ 
+  
+  i Expected a selector here.
+  
+    1 │ ::cue(div + div {}
+  > 2 │ ::cue( {}
+      │        ^
+    3 │ ::cue(
+    4 │ 
+  
+pseudo_element_function_selector.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found the end of the file.
+  
+    2 │ ::cue( {}
+    3 │ ::cue(
+  > 4 │ 
+      │ 
+  
+  i Expected a selector here.
+  
+    2 │ ::cue( {}
+    3 │ ::cue(
+  > 4 │ 
+      │ 
+  
+```
+
+

@@ -3,6 +3,9 @@
 use crate::analyzers::complexity::no_excessive_cognitive_complexity::{
     complexity_options, ComplexityOptions,
 };
+use crate::aria_analyzers::nursery::use_valid_aria_role::{
+    valid_aria_role_options, ValidAriaRoleOptions,
+};
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
     hooks_options, HooksOptions,
 };
@@ -14,8 +17,8 @@ use crate::semantic_analyzers::style::use_naming_convention::{
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
-use biome_json_syntax::JsonLanguage;
+use biome_console::markup;
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
 use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -34,6 +37,8 @@ pub enum PossibleOptions {
     NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
+    /// Options for `useValidAriaRole` rule
+    ValidAriaRole(#[bpaf(external(valid_aria_role_options), hide)] ValidAriaRoleOptions),
 }
 
 // Required by [Bpaf].
@@ -46,24 +51,6 @@ impl FromStr for PossibleOptions {
 }
 
 impl PossibleOptions {
-    pub fn new_from_rule_name(rule_name: &str) -> Option<Self> {
-        match rule_name {
-            "noExcessiveCognitiveComplexity" => {
-                Some(Self::Complexity(ComplexityOptions::default()))
-            }
-            "noRestrictedGlobals" => {
-                Some(Self::RestrictedGlobals(RestrictedGlobalsOptions::default()))
-            }
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
-                Some(Self::Hooks(HooksOptions::default()))
-            }
-            "useNamingConvention" => {
-                Some(Self::NamingConvention(NamingConventionOptions::default()))
-            }
-            _ => None,
-        }
-    }
-
     pub fn extract_option(&self, rule_key: &RuleKey) -> RuleOptions {
         match rule_key.rule_name() {
             "noExcessiveCognitiveComplexity" => {
@@ -94,33 +81,48 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
+            "useValidAriaRole" => {
+                let options = match self {
+                    PossibleOptions::ValidAriaRole(options) => options.clone(),
+                    _ => ValidAriaRoleOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
             // TODO: review error
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
     }
 }
 
-impl VisitNode<JsonLanguage> for PossibleOptions {
-    fn visit_map(
-        &mut self,
-        key: &biome_rowan::SyntaxNode<JsonLanguage>,
-        value: &biome_rowan::SyntaxNode<JsonLanguage>,
+impl Deserializable for PossibleOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        match self {
-            PossibleOptions::Complexity(options) => {
-                options.visit_map(key, value, diagnostics)?;
+    ) -> Option<Self> {
+        match rule_name {
+            "noExcessiveCognitiveComplexity" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::Complexity)
             }
-            PossibleOptions::Hooks(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::RestrictedGlobals),
+            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
-            PossibleOptions::NamingConvention(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            "useNamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::NamingConvention),
+            "useValidAriaRole" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::ValidAriaRole)
             }
-            PossibleOptions::RestrictedGlobals(options) => {
-                options.visit_map(key, value, diagnostics)?;
+            _ => {
+                diagnostics.push(
+                    DeserializationDiagnostic::new(markup! {
+                        "The rule "<Emphasis>{rule_name}</Emphasis>" doesn't accept any options."
+                    })
+                    .with_range(value.range()),
+                );
+                None
             }
         }
-        Some(())
     }
 }

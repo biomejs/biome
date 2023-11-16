@@ -717,7 +717,7 @@ pub fn to_matcher(string_set: Option<&StringSet>) -> Result<Option<Matcher>, Wor
             require_literal_leading_dot: false,
             require_literal_separator: false,
         });
-        for pattern in string_set.index_set() {
+        for pattern in string_set.iter() {
             matcher.add_pattern(pattern).map_err(|err| {
                 WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),

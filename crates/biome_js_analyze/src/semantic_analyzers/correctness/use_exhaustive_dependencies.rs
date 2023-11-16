@@ -2,15 +2,16 @@ use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
-use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -217,15 +218,63 @@ pub struct HooksOptions {
     pub hooks: Vec<Hooks>,
 }
 
-impl HooksOptions {
-    const ALLOWED_KEYS: &'static [&'static str] = &["hooks"];
-}
-
 impl FromStr for HooksOptions {
     type Err = ();
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(HooksOptions::default())
+    }
+}
+
+impl Deserializable for HooksOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(HooksOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct HooksOptionsVisitor;
+impl DeserializationVisitor for HooksOptionsVisitor {
+    type Output = HooksOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["hooks"];
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "hooks" => {
+                    let val_range = value.range();
+                    result.hooks = Deserializable::deserialize(&value, &key_text, diagnostics)
+                        .unwrap_or_default();
+                    if result.hooks.is_empty() {
+                        diagnostics.push(
+                            DeserializationDiagnostic::new("At least one element is needed")
+                                .with_range(val_range),
+                        );
+                    }
+                }
+                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    text,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(result)
     }
 }
 
@@ -246,48 +295,6 @@ pub struct Hooks {
     pub dependencies_index: Option<usize>,
 }
 
-impl Hooks {
-    const ALLOWED_KEYS: &'static [&'static str] = &["name", "closureIndex", "dependenciesIndex"];
-}
-
-impl VisitNode<JsonLanguage> for Hooks {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        match name_text {
-            "name" => {
-                self.name = self.map_to_string(&value, name_text, diagnostics)?;
-                if self.name.is_empty() {
-                    diagnostics.push(
-                        DeserializationDiagnostic::new(markup!(
-                            "The field "<Emphasis>"name"</Emphasis>" is mandatory"
-                        ))
-                        .with_range(value.range()),
-                    )
-                }
-            }
-            "closureIndex" => {
-                self.closure_index = self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
-            }
-            "dependenciesIndex" => {
-                self.dependencies_index =
-                    self.map_to_usize(&value, name_text, usize::MAX, diagnostics);
-            }
-            _ => {
-                report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-            }
-        }
-
-        Some(())
-    }
-}
-
 impl FromStr for Hooks {
     type Err = ();
 
@@ -296,36 +303,65 @@ impl FromStr for Hooks {
     }
 }
 
-impl VisitNode<JsonLanguage> for HooksOptions {
-    fn visit_map(
-        &mut self,
-        key: &JsonSyntaxNode,
-        value: &JsonSyntaxNode,
+impl Deserializable for Hooks {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "hooks" {
-            let array = value.as_json_array_value()?;
-            if array.elements().len() < 1 {
-                diagnostics.push(
-                    DeserializationDiagnostic::new("At least one element is needed")
-                        .with_range(array.range()),
-                );
-                return Some(());
-            }
+    ) -> Option<Self> {
+        value.deserialize(HooksVisitor, name, diagnostics)
+    }
+}
 
-            for element in array.elements() {
-                let element = element.ok()?;
-                let mut hooks = Hooks::default();
-                hooks.map_to_object(&element, "hooks", diagnostics)?;
-                self.hooks.push(hooks);
+struct HooksVisitor;
+impl DeserializationVisitor for HooksVisitor {
+    type Output = Hooks;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["name", "closureIndex", "dependenciesIndex"];
+        let mut result = Self::Output::default();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "name" => {
+                    let val_range = value.range();
+                    result.name = Deserializable::deserialize(&value, &key_text, diagnostics)
+                        .unwrap_or_default();
+                    if result.name.is_empty() {
+                        diagnostics.push(
+                            DeserializationDiagnostic::new(markup!(
+                                "The field "<Emphasis>"name"</Emphasis>" is mandatory"
+                            ))
+                            .with_range(val_range),
+                        )
+                    }
+                }
+                "closureIndex" => {
+                    result.closure_index =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "dependenciesIndex" => {
+                    result.dependencies_index =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
             }
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
         }
-        Some(())
+        Some(result)
     }
 }
 
@@ -533,8 +569,14 @@ impl Rule for UseExhaustiveDependencies {
                 let mut suggested_fix = None;
                 let mut is_captured_covered = false;
                 for (dependency_text, dependency_range) in deps.iter() {
-                    let capture_deeper_than_dependency = capture_text.starts_with(dependency_text);
-                    let dependency_deeper_than_capture = dependency_text.starts_with(capture_text);
+                    // capture_text and dependency_text should filter the "?" inside
+                    // in order to ignore optional chaining
+                    let filter_capture_text = capture_text.replace('?', "");
+                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let capture_deeper_than_dependency =
+                        filter_capture_text.starts_with(&filter_dependency_text);
+                    let dependency_deeper_than_capture =
+                        filter_dependency_text.starts_with(&filter_capture_text);
                     match (
                         capture_deeper_than_dependency,
                         dependency_deeper_than_capture,
@@ -586,8 +628,14 @@ impl Rule for UseExhaustiveDependencies {
             for (dependency_text, dep_range) in deps {
                 let mut covers_any_capture = false;
                 for (capture_text, _, _) in captures.iter() {
-                    let capture_deeper_dependency = capture_text.starts_with(&dependency_text);
-                    let dependency_deeper_capture = dependency_text.starts_with(capture_text);
+                    // capture_text and dependency_text should filter the "?" inside
+                    // in order to ignore optional chaining
+                    let filter_capture_text = capture_text.replace('?', "");
+                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let capture_deeper_dependency =
+                        filter_capture_text.starts_with(&filter_dependency_text);
+                    let dependency_deeper_capture =
+                        filter_dependency_text.starts_with(&filter_capture_text);
                     if capture_deeper_dependency || dependency_deeper_capture {
                         covers_any_capture = true;
                         break;

@@ -255,9 +255,9 @@ impl Server {
         .await
     }
 
-    /// Basic implementation of the `rome/shutdown` request for tests
-    async fn rome_shutdown(&mut self) -> Result<()> {
-        self.request::<_, ()>("biome/shutdown", "_rome_shutdown", ())
+    /// Basic implementation of the `biome/shutdown` request for tests
+    async fn biome_shutdown(&mut self) -> Result<()> {
+        self.request::<_, ()>("biome/shutdown", "_biome_shutdown", ())
             .await?
             .context("biome/shutdown returned None")?;
         Ok(())
@@ -323,7 +323,7 @@ where
 #[tokio::test]
 async fn basic_lifecycle() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -342,7 +342,7 @@ async fn basic_lifecycle() -> Result<()> {
 #[tokio::test]
 async fn document_lifecycle() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -473,7 +473,7 @@ async fn document_lifecycle() -> Result<()> {
 #[tokio::test]
 async fn document_no_extension() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -544,7 +544,7 @@ async fn document_no_extension() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -648,7 +648,7 @@ fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
 #[tokio::test]
 async fn pull_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -779,7 +779,7 @@ async fn pull_quick_fixes() -> Result<()> {
 #[tokio::test]
 async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -861,7 +861,7 @@ async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
 #[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -955,7 +955,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 #[tokio::test]
 async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1109,7 +1109,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics_for_rome_json() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1176,7 +1176,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 #[tokio::test]
 async fn no_code_actions_for_ignored_json_files() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1260,7 +1260,7 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
 #[tokio::test]
 async fn pull_code_actions_with_import_sorting() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1441,7 +1441,7 @@ if(a === -0) {}
 #[tokio::test]
 async fn pull_refactors() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1553,7 +1553,7 @@ async fn pull_refactors() -> Result<()> {
 #[tokio::test]
 async fn pull_fix_all() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1656,7 +1656,7 @@ async fn pull_fix_all() -> Result<()> {
 #[tokio::test]
 async fn change_document_remove_line() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1723,7 +1723,7 @@ isSpreadAssignment;
 #[tokio::test]
 async fn format_with_syntax_errors() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1772,7 +1772,7 @@ async fn format_with_syntax_errors() -> Result<()> {
 #[tokio::test]
 async fn server_shutdown() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1785,7 +1785,7 @@ async fn server_shutdown() -> Result<()> {
     let cancellation = factory.cancellation();
     let cancellation = cancellation.notified();
 
-    server.rome_shutdown().await?;
+    server.biome_shutdown().await?;
 
     cancellation.await;
 

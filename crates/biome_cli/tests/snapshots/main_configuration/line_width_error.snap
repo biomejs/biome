@@ -28,8 +28,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 ```block
 biome.json:3:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The line width exceeds the maximum value (320)
-  
+  × The number should be an integer between 1 and 320.
   
     1 │ {
     2 │   "formatter": {
@@ -37,8 +36,6 @@ biome.json:3:18 deserialize ━━━━━━━━━━━━━━━━━�
       │                  ^^^
     4 │   }
     5 │ }
-  
-  i Maximum value accepted is 320
   
 
 ```

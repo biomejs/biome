@@ -31,7 +31,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 ```block
 biome.json:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incorrect type, expected a string.
+  × Incorrect type, expected a string, but received a boolean.
   
     4 │   },
     5 │   "javascript": {

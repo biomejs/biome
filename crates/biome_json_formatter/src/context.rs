@@ -122,6 +122,6 @@ impl fmt::Display for JsonFormatOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
-        writeln!(f, "Line width: {}", self.line_width.value())
+        writeln!(f, "Line width: {}", self.line_width.get())
     }
 }

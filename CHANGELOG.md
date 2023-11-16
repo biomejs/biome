@@ -14,6 +14,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+- Remove the CLI options from the `lsp-proxy`, as they were never meant to be passed to that command. Contributed by @ematipico
+- Add option `--config-path` to `lsp-proxy` and `start` commands. It's now possible to tell the Daemon server to load `biome.json` from a custom path. Contributed by @ematipico
+
+- Add new `--diagnostic-level` option to let users control the level of diagnostics printed by the CLI. Possible values are: `"info"`, `"warn"`, `"hint"`. Contributed by @simonxabris
+
 #### Bug fixes
 
 - Fix the command `format`, now it returns a non-zero exit code when if there pending diffs. Contributed by @ematipico
@@ -24,17 +29,30 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#301](https://github.com/biomejs/biome/issues/301), the formatter should not break before the `in` keyword. Contributed by @ematipico
+
 ### JavaScript APIs
 
 ### Linter
 
+#### New features
+
+- Add [noDefaultExport](https://biomejs.dev/linter/rules/no-default-export) which disallows `export default`. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#639](https://github.com/biomejs/biome/issues/639) by ignoring unused TypeScript's mapped key. Contributed by @Conaclos
-
 - Fix [#565](https://github.com/biomejs/biome/issues/565) by handling several `infer` with the same name in extends clauses of TypeScript's conditional types. Contributed by @Conaclos
-
 - Fix [#653](https://github.com/biomejs/biome/issues/653). [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly removes the entire line where the unused `import` is. Contributed by @Conaclos
+- Fix [#607](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, ignore optional chaining, Contributed by @msdlisper
+
+- Fix [#676](https://github.com/biomejs/biome/issues/676), by using the correct node for the `"noreferrer"` when applying the code action. Contributed by @ematipico
+
+- Fix [#455](https://github.com/biomejs/biome/issues/455). The CLI can now print complex emojis to the console correctly.
+
+- Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types) now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
 
 ### Parser
 
@@ -83,8 +101,15 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
 - Support more a11y roles and fix some methods for a11y lint rules Contributed @nissy-dev
+- Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
--
+
+#### New features
+
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
+  The rule disallow unused private class members.
+  Contributed by @victor-teles
+
 ### Parser
 
 #### Enhancements
@@ -312,7 +337,7 @@ The following rules are now recommended:
   The rule enforce use of `as const` assertion to infer literal types.
   Contributed by @unvalley
 
-- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign) rule.
+- Add [noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign) rule.
   The rule reports shorthand assigns when variable appears on both sides. For example `x += x + b`
   Contributed by @victor-teles
 - Add [noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant/) rule. Contributed by @nikeee
@@ -947,7 +972,7 @@ The following rules are promoted:
 
 - The Biome LSP can now show diagnostics belonging to JSON lint rules.
 
-- The Biome LSP no longer applies unsafe quickfixes on-save when `editor.codeActionsOnSave.quifix.biome` is enabled.
+- The Biome LSP no longer applies unsafe quickfixes on-save when `editor.codeActionsOnSave.quickfix.biome` is enabled.
 
 - Fix [#4564](https://github.com/rome/tools/issues/4564); files too large don't emit errors.
 

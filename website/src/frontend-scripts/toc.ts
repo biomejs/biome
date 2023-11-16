@@ -111,7 +111,7 @@ class Manager {
 
 		// Calculate when this heading ends. It's either at the beginning of the next heading, or page bottom.
 		const start = this.getHeadingTop(heading);
-		let end;
+		let end: number;
 
 		const nextHeading = headingElements[i + 1];
 		if (nextHeading) {

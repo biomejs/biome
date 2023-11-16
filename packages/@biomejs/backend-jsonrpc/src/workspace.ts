@@ -737,6 +737,10 @@ export interface Nursery {
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
+	 * Disallow default exports.
+	 */
+	noDefaultExport?: RuleConfiguration;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -748,6 +752,10 @@ export interface Nursery {
 	 * Disallow empty character classes in regular expression literals.
 	 */
 	noEmptyCharacterClassInRegex?: RuleConfiguration;
+	/**
+	 * Disallow use of implicit any type on variable declarations.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
 	/**
 	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
 	 */
@@ -773,6 +781,10 @@ export interface Nursery {
 	 */
 	noUnusedImports?: RuleConfiguration;
 	/**
+	 * Disallow unused private class members
+	 */
+	noUnusedPrivateClassMembers?: RuleConfiguration;
+	/**
 	 * Disallow else block when the if block breaks early.
 	 */
 	noUselessElse?: RuleConfiguration;
@@ -797,6 +809,10 @@ export interface Nursery {
 	 */
 	useAsConstAssertion?: RuleConfiguration;
 	/**
+	 * Ensure async functions utilize await.
+	 */
+	useAwait?: RuleConfiguration;
+	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
 	useGroupedTypeImport?: RuleConfiguration;
@@ -808,6 +824,10 @@ export interface Nursery {
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration;
+	/**
+	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
+	 */
+	useValidAriaRole?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1206,7 +1226,8 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| HooksOptions
 	| NamingConventionOptions
-	| RestrictedGlobalsOptions;
+	| RestrictedGlobalsOptions
+	| ValidAriaRoleOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1246,6 +1267,10 @@ export interface RestrictedGlobalsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	deniedGlobals?: string[];
+}
+export interface ValidAriaRoleOptions {
+	allowedInvalidRoles: string[];
+	ignoreNonDom: boolean;
 }
 export interface Hooks {
 	/**
@@ -1433,24 +1458,29 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noEmptyCharacterClassInRegex"
+	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"
 	| "lint/nursery/noThisInStatic"
 	| "lint/nursery/noUnusedImports"
+	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/useAriaActivedescendantWithTabindex"
 	| "lint/nursery/useArrowFunction"
 	| "lint/nursery/useAsConstAssertion"
+	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useShorthandAssign"
+	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
