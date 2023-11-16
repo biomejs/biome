@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::process::{Command, Output};
 
 use biome_deserialize::StringSet;
 use biome_service::{configuration::FilesConfiguration, settings::to_matcher, Configuration};
@@ -21,11 +21,7 @@ pub(crate) fn store_changed_files(
         (None, None) => return Err(CliDiagnostic::incompatible_end_configuration("The `--changed` flag was set, but Biome couldn't determine the base to compare against. Either set configuration.vcs.defaultBranch or use the --since argument.")),
     };
 
-    let output = Command::new("git")
-        .arg("diff")
-        .arg("--name-only")
-        .arg(format!("{}...HEAD", base))
-        .output()?;
+    let output = run_git_diff(base)?;
 
     if !output.status.success() {
         todo!("Handle error when git command fails");
@@ -39,15 +35,24 @@ pub(crate) fn store_changed_files(
 
     let matcher = to_matcher(Some(&included_files))?;
 
-    let changed_files: Vec<String> = if let Some(matcher) = matcher {
-        String::from_utf8_lossy(&output.stdout)
-            .lines()
-            .filter(|line| !line.is_empty())
-            .filter(|line| matcher.matches(line))
-            .map(|line| line.to_string())
-            .collect()
-    } else {
-        todo!("Figure out how to handle this error properly");
+    // Process the output to get 'changed_files'
+    let changed_files: Vec<String> = match matcher {
+        Some(matcher) if !included_files.is_empty() => {
+            // Filter and collect lines that match and are non-empty
+            String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .filter(|line| !line.is_empty() && matcher.matches(line))
+                .map(ToString::to_string)
+                .collect()
+        }
+        _ => {
+            // Collect all non-empty lines if no matcher or 'included_files' is empty
+            String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .filter(|line| !line.is_empty())
+                .map(ToString::to_string)
+                .collect()
+        }
     };
 
     if changed_files.len() == 0 {
@@ -58,4 +63,12 @@ pub(crate) fn store_changed_files(
     included_files.extend(changed_files);
 
     Ok(())
+}
+
+fn run_git_diff(base: &str) -> std::io::Result<Output> {
+    return Command::new("git")
+        .arg("diff")
+        .arg("--name-only")
+        .arg(format!("{}...HEAD", base))
+        .output();
 }
