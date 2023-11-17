@@ -19,7 +19,7 @@ biome_json_syntax      = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
 tracing                = { workspace = true }
-unicode-bom = "2.0.3"
+unicode-bom            = { workspace = true }
 
 [dev-dependencies]
 insta             = { workspace = true }
