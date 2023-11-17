@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 91.80
+**Average compatibility**: 92.47
 
     <details>
     	<summary>Definition</summary>
@@ -8,7 +8,7 @@
     	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
     </details>
 
-    **Compatible lines**: 93.16
+    **Compatible lines**: 93.36
     <details>
         <summary>Definition</summary>
 
@@ -3412,74 +3412,13 @@
 
 
 # js/decorators/class-expression/arguments.js
-```diff
- console.log(
--  @deco
--  class Foo {},
-+  (
-+    @deco
-+    class Foo {}
-+  ),
- );
- console.log(
--  @deco
--  class {},
-+  (
-+    @deco
-+    class {}
-+  ),
- );
 
-```
-
-**Prettier Similarity**: 33.33%
+**Prettier Similarity**: 100.00%
 
 
 # js/decorators/class-expression/class-expression.js
-```diff
- const a1 =
--  @deco
--  class Foo {};
-+  (
-+    @deco
-+    class Foo {}
-+  );
- const a2 =
--  @deco
--  class {};
-+  (
-+    @deco
-+    class {}
-+  );
- 
- (
-   @deco
-   class Foo {}
- );
- (
-   @deco
-   class {}
- );
- 
- const b1 = [];
- (
-   @deco
-   class Foo {}
- );
- 
- const b2 = [];
- (
-   @deco
-   class {}
- );
- 
- // This is not a `ClassExpression` but `ClassDeclaration`
- @deco
- class Foo {}
 
-```
-
-**Prettier Similarity**: 77.14%
+**Prettier Similarity**: 100.00%
 
 
 # js/decorators/class-expression/member-expression.js
@@ -3493,43 +3432,8 @@
 
 
 # js/decorators/classes.js
-```diff
- @deco
- class Foo {}
- 
- @deco
- export class Bar {}
- 
- @deco
- export default class Baz {}
- 
- const foo =
--  @deco
--  class {
--    //
--  };
-+  (
-+    @deco
-+    class {
-+      //
-+    }
-+  );
- 
- const bar =
--  @deco
--  class {
--    //
--  };
-+  (
-+    @deco
-+    class {
-+      //
-+    }
-+  );
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/decorators/comments.js
@@ -3538,75 +3442,8 @@
 
 
 # js/decorators/member-expression.js
-```diff
- [
-   class {
-     @(decorators[0])
-     method() {}
-   },
-   class {
-     @decorators [0];
-     method() {}
-   },
-   class {
-     @(decorators?.[0])
-     method() {}
-   },
-   class {
--    @decorators.at(0)
-+    @(decorators.at(0))
-     method() {}
-   },
-   class {
-     @(decorators?.at(0))
-     method() {}
-   },
-   class {
--    @decorators.first
-+    @(decorators.first)
-     method() {}
-   },
-   class {
-     @(decorators?.first)
-     method() {}
-   },
-   class {
-     @(decorators[first])
-     method() {}
-   },
-   class {
-     @decorators [first];
-     method() {}
-   },
-   class {
-     @(decorators["first"])
-     method() {}
-   },
--  @(decorators[first])
--  class {
--    method() {}
--  },
--  @(decorators[0])
--  class {
--    method() {}
--  },
-+  (
-+    @(decorators[first])
-+    class {
-+      method() {}
-+    }
-+  ),
-+  (
-+    @(decorators[0])
-+    class {
-+      method() {}
-+    }
-+  ),
- ];
 
-```
-
-**Prettier Similarity**: 74.07%
+**Prettier Similarity**: 100.00%
 
 
 # js/decorators/methods.js
@@ -4082,33 +3919,18 @@
 
 
 # js/export-default/binary_and_template.js
-```diff
--export default (function () {} + foo)``;
-+export default ((function () {}) + foo)``;
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/export-default/body.js
-```diff
--export default (class {}[1] = 1);
-+export default ((class {})[1] = 1);
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/export-default/class_instance.js
-```diff
--export default (class {}.getInstance());
-+export default (class {}).getInstance();
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/export-default/escaped/default-escaped.js
@@ -4131,13 +3953,8 @@
 
 
 # js/export-default/function_tostring.js
-```diff
--export default (function () {}.toString());
-+export default (function () {}).toString();
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/export-default/iife.js
@@ -11156,13 +10973,8 @@
 
 
 # typescript/as/export_default_as.ts
-```diff
--export default (function log() {} as typeof console.log);
-+export default (function log() {}) as typeof console.log;
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/as/expression-statement.ts
@@ -11206,40 +11018,8 @@
 
 
 # typescript/assert/index.ts
-```diff
- const assertString = (x: any): asserts x => {
-   console.assert(typeof x === "string");
- };
- 
- function assertsString(x: any): asserts x {
-   console.assert(typeof x === "string");
- }
- 
- const assertStringWithGuard = (x: any): asserts x is string => {
-   console.assert(typeof x === "string");
- };
- 
- function assertsStringWithGuard(x: any): asserts x is string {
-   console.assert(typeof x === "string");
- }
- 
- interface AssertFoo {
--  isString(node: any): asserts node;
-+  isString(node: any): asserts node ;
- }
- 
- class AssertsFoo {
-   isBar(): asserts this {
-     return;
-   }
-   isBaz = (): asserts this => {
-     return;
-   };
- }
 
-```
-
-**Prettier Similarity**: 96.43%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/assignment/issue-10846.ts
@@ -14066,33 +13846,8 @@
 
 
 # typescript/decorators/legacy.ts
-```diff
- [
--  @decorator()
--  class {},
--  @decorator()
--  class A {},
-+  (
-+    @decorator()
-+    class {}
-+  ),
-+  (
-+    @decorator()
-+    class A {}
-+  ),
- ];
- 
- class A {
-   @decorator() accessor #field;
- }
- 
- class B {
-   @decorator() #field() {}
- }
 
-```
-
-**Prettier Similarity**: 55.56%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/decorators/mobx.ts
@@ -14296,13 +14051,8 @@
 
 
 # typescript/export-default/function_as.ts
-```diff
--export default (function log() {} as typeof console.log);
-+export default (function log() {}) as typeof console.log;
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/export/comment.ts
@@ -15586,13 +15336,8 @@
 
 
 # typescript/satisfies-operators/export-default-as.ts
-```diff
--export default (function log() {} satisfies typeof console.log);
-+export default (function log() {}) satisfies typeof console.log;
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/satisfies-operators/expression-statement.ts
