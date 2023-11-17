@@ -48,6 +48,20 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <input role="button" />;
 ```
 
+### Options
+
+```json
+{
+    "//": "...",
+    "options": {
+        "elementAndRoles": [
+            { "element": "span", "roles": ["button", "grid"] },
+            { "element": "div", "roles": ["button"] }
+        ]
+    }
+}
+```
+
 ## Related links
 
 - [Disable a rule](/linter/#disable-a-lint-rule)

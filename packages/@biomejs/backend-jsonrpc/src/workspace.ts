@@ -1227,7 +1227,8 @@ export type PossibleOptions =
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
-	| ValidAriaRoleOptions;
+	| ValidAriaRoleOptions
+	| InteractiveElementToNoninteractiveRoleOptions;
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
  */
@@ -1272,6 +1273,12 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+/**
+ * Options for the rule `noInteractiveElementToNoninteractiveRole`
+ */
+export interface InteractiveElementToNoninteractiveRoleOptions {
+	elementAndRoles: ElementAndRoles[];
+}
 export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -1292,6 +1299,10 @@ export interface Hooks {
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+export interface ElementAndRoles {
+	element: string;
+	roles: string[];
+}
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }

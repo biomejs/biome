@@ -675,6 +675,15 @@
 				}
 			}
 		},
+		"ElementAndRoles": {
+			"type": "object",
+			"required": ["element", "roles"],
+			"properties": {
+				"element": { "type": "string" },
+				"roles": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
 		"EnumMemberCase": {
 			"description": "Supported cases for TypeScript `enum` member names.",
 			"oneOf": [
@@ -794,6 +803,18 @@
 					"description": "List of safe hooks",
 					"type": "array",
 					"items": { "$ref": "#/definitions/Hooks" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"InteractiveElementToNoninteractiveRoleOptions": {
+			"description": "Options for the rule `noInteractiveElementToNoninteractiveRole`",
+			"type": "object",
+			"required": ["elementAndRoles"],
+			"properties": {
+				"elementAndRoles": {
+					"type": "array",
+					"items": { "$ref": "#/definitions/ElementAndRoles" }
 				}
 			},
 			"additionalProperties": false
@@ -1384,6 +1405,14 @@
 				{
 					"description": "Options for `useValidAriaRole` rule",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				},
+				{
+					"description": "Options for `noInteractiveElementToNoninteractiveRole` rule",
+					"allOf": [
+						{
+							"$ref": "#/definitions/InteractiveElementToNoninteractiveRoleOptions"
+						}
+					]
 				}
 			]
 		},

@@ -1,9 +1,11 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use crate::aria_services::Aria;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use biome_console::markup;
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, VisitableType, Text};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 use bpaf::Bpaf;
@@ -39,6 +41,19 @@ declare_rule! {
     /// <input role="button" />;
     /// ```
     ///
+    /// ### Options
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "elementAndRoles": [
+    ///             { "element": "span", "roles": ["button", "grid"] },
+    ///             { "element": "div", "roles": ["button"] }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
     pub(crate) NoInteractiveElementToNoninteractiveRole {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
@@ -52,7 +67,7 @@ declare_rule! {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct InteractiveElementToNoninteractiveRoleOptions {
     #[bpaf(external, hide, many)]
-    allowed_roles: Vec<String>,
+    pub element_and_roles: Vec<ElementAndRoles>,
 }
 
 impl FromStr for InteractiveElementToNoninteractiveRoleOptions {
@@ -69,7 +84,11 @@ impl Deserializable for InteractiveElementToNoninteractiveRoleOptions {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(InteractiveElementToNoninteractiveRoleOptionsVisitor, name, diagnostics)
+        value.deserialize(
+            InteractiveElementToNoninteractiveRoleOptionsVisitor,
+            name,
+            diagnostics,
+        )
     }
 }
 
@@ -81,30 +100,26 @@ impl DeserializationVisitor for InteractiveElementToNoninteractiveRoleOptionsVis
 
     fn visit_map(
         self,
-        members: impl Iterator<
-            Item = Option<(
-                impl biome_deserialize::DeserializableValue,
-                impl biome_deserialize::DeserializableValue,
-            )>,
-        >,
-        _range: biome_rowan::TextRange,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
         _name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["allowed_roles"];
+        const ALLOWED_KEYS: &[&str] = &["elementAndRoles"];
         let mut result = Self::Output::default();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
             };
             match key_text.text() {
-                "allowed_roles" => {
+                "elementAndRoles" => {
                     let val_range = value.range();
-                    result.allowed_roles = Deserializable::deserialize(&value, &key_text, diagnostics)
-                        .unwrap_or_default();
-                    if result.allowed_roles.is_empty() {
+                    result.element_and_roles =
+                        Deserializable::deserialize(&value, &key_text, diagnostics)
+                            .unwrap_or_default();
+                    if result.element_and_roles.is_empty() {
                         diagnostics.push(
-                            DeserializationDiagnostic::new("At least one element is needed")
+                            DeserializationDiagnostic::new("Provided atleast one interactive role that are allowed on the specified element.")
                                 .with_range(val_range),
                         );
                     }
@@ -123,34 +138,34 @@ impl DeserializationVisitor for InteractiveElementToNoninteractiveRoleOptionsVis
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ElementRoles {
+pub struct ElementAndRoles {
     #[bpaf(hide)]
     pub element: String,
-    #[bpaf(hide, argument::<String>("roles"), many)]
+    #[bpaf(hide)]
     pub roles: Vec<String>,
 }
 
-impl FromStr for ElementRoles {
+impl FromStr for ElementAndRoles {
     type Err = ();
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(ElementRoles::default())
+        Ok(ElementAndRoles::default())
     }
 }
 
-impl Deserializable for ElementRoles {
+impl Deserializable for ElementAndRoles {
     fn deserialize(
         value: &impl DeserializableValue,
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(ElementRolesVisitor, name, diagnostics)
+        value.deserialize(ElementAndRolesVisitor, name, diagnostics)
     }
 }
 
-struct ElementRolesVisitor;
-impl DeserializationVisitor for ElementRolesVisitor {
-    type Output = ElementRoles;
+struct ElementAndRolesVisitor;
+impl DeserializationVisitor for ElementAndRolesVisitor {
+    type Output = ElementAndRoles;
 
     const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
 
@@ -169,16 +184,10 @@ impl DeserializationVisitor for ElementRolesVisitor {
             };
             match key_text.text() {
                 "element" => {
-                    let val_range = value.range();
-                    result.element = Deserializable::deserialize(&value, &key_text, diagnostics)
-                        .unwrap_or_default();
-                    if result.element.is_empty() {
-                        diagnostics.push(
-                            DeserializationDiagnostic::new(markup!(
-                                "The field "<Emphasis>"name"</Emphasis>" is mandatory"
-                            ))
-                            .with_range(val_range),
-                        )
+                    if let Some(element) =
+                        Deserializable::deserialize(&value, &key_text, diagnostics)
+                    {
+                        result.element = element;
                     }
                 }
                 "roles" => {
@@ -209,7 +218,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         let aria_roles = ctx.aria_roles();
         let options = ctx.options();
 
-        let allowed_roles = options.allowed_roles;
+        let allowed_roles = &options.element_and_roles;
 
         if node.is_element() {
             let role_attribute = node.find_attribute_by_name("role")?;
@@ -222,13 +231,15 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             // check for valid role in options
             for element_and_role in allowed_roles.iter() {
                 let element = element_and_role.element.as_str();
-                let roles = element_and_role.roles;
+                let roles = &element_and_role.roles;
 
-                if element == element_name.text_trimmed() && roles.contains(&element_name.text_trimmed().to_string()) {
+                if element == element_name.text_trimmed()
+                    && roles.contains(&role_attribute_value.to_string())
+                {
                     return None;
                 }
             }
-            
+
             if !aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
                 && !aria_roles.is_role_interactive(role_attribute_value)
             {
