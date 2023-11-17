@@ -7,6 +7,14 @@ pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagn
     expected_node("identifier", range, p)
 }
 
+pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("number", range, p)
+}
+
+pub(crate) fn expected_pseudo_class_nth(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["even", "odd", "n", "<An+B>", "number"], range, p)
+}
+
 pub(crate) fn expect_any_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("selector", range, p)
 }

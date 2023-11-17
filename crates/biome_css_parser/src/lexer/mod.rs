@@ -18,6 +18,9 @@ pub enum CssLexContext {
     /// Applied when lexing CSS selectors.
     /// Doesn't skip whitespace trivia for a combinator.
     Selector,
+    /// Applied when lexing CSS pseudo nth selectors.
+    /// Distinct '-' from identifiers and '+' from numbers.
+    PseudoNthSelector,
 }
 
 impl LexContext for CssLexContext {
@@ -98,6 +101,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             Some(current) => match context {
                 CssLexContext::Regular => self.consume_token(current),
                 CssLexContext::Selector => self.consume_selector_token(current),
+                CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
             },
             None => EOF,
         };
@@ -196,7 +200,7 @@ impl<'src> CssLexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
-    fn eat_byte(&mut self, tok: CssSyntaxKind) -> CssSyntaxKind {
+    fn consume_byte(&mut self, tok: CssSyntaxKind) -> CssSyntaxKind {
         self.advance(1);
         tok
     }
@@ -449,7 +453,7 @@ impl<'src> CssLexer<'src> {
             QOT => self.consume_string_literal(current),
             SLH => self.consume_slash(),
 
-            DIG => self.consume_number(current),
+            DIG | ZER => self.consume_number(current),
 
             MIN => self.consume_min(current),
 
@@ -457,7 +461,7 @@ impl<'src> CssLexer<'src> {
                 if self.is_number_start() {
                     self.consume_number(current)
                 } else {
-                    self.eat_byte(T![+])
+                    self.consume_byte(T![+])
                 }
             }
 
@@ -465,7 +469,7 @@ impl<'src> CssLexer<'src> {
                 if self.is_number_start() {
                     self.consume_number(current)
                 } else {
-                    self.eat_byte(T![.])
+                    self.consume_byte(T![.])
                 }
             }
 
@@ -473,24 +477,24 @@ impl<'src> CssLexer<'src> {
 
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
-            IDT if self.next_byte() == Some(b'=') => self.eat_byte(T!["$="]),
+            IDT if self.next_byte() == Some(b'=') => self.consume_byte(T!["$="]),
 
             MUL => self.consume_mul(),
             CRT => self.consume_ctr(),
             COL => self.consume_col(),
-            AT_ => self.eat_byte(T![@]),
-            HAS => self.eat_byte(T![#]),
-            PNO => self.eat_byte(T!['(']),
-            PNC => self.eat_byte(T![')']),
-            BEO => self.eat_byte(T!['{']),
-            BEC => self.eat_byte(T!['}']),
-            BTO => self.eat_byte(T!('[')),
-            BTC => self.eat_byte(T![']']),
-            COM => self.eat_byte(T![,]),
-            MOR => self.eat_byte(T![>]),
+            AT_ => self.consume_byte(T![@]),
+            HAS => self.consume_byte(T![#]),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            BEO => self.consume_byte(T!['{']),
+            BEC => self.consume_byte(T!['}']),
+            BTO => self.consume_byte(T!('[')),
+            BTC => self.consume_byte(T![']']),
+            COM => self.consume_byte(T![,]),
+            MOR => self.consume_byte(T![>]),
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
-            EQL => self.eat_byte(T![=]),
+            EQL => self.consume_byte(T![=]),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -502,13 +506,22 @@ impl<'src> CssLexer<'src> {
                 }
             }
 
-            _ => self.eat_unexpected_character(),
+            _ => self.consume_unexpected_character(),
         }
     }
 
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
-            b' ' => self.eat_byte(CSS_SPACE_LITERAL),
+            b' ' => self.consume_byte(CSS_SPACE_LITERAL),
+            _ => self.consume_token(current),
+        }
+    }
+
+    fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b'-' => self.consume_byte(T![-]),
+            b'+' => self.consume_byte(T![+]),
+            b'n' | b'N' => self.consume_byte(T![n]),
             _ => self.consume_token(current),
         }
     }
@@ -739,6 +752,16 @@ impl<'src> CssLexer<'src> {
             b"is" => IS_KW,
             b"where" => WHERE_KW,
             b"lang" => LANG_KW,
+            b"of" => OF_KW,
+            b"n" => N_KW,
+            b"even" => EVEN_KW,
+            b"odd" => ODD_KW,
+            b"nth-child" => NTHCHILD_KW,
+            b"nth-last-child" => NTHLASTCHILD_KW,
+            b"nth-of-type" => NTHOFTYPE_KW,
+            b"nth-last-of-type" => NTHLASTOFTYPE_KW,
+            b"nth-col" => NTHCOL_KW,
+            b"nth-last-col" => NTHLASTCOL_KW,
             _ => IDENT,
         }
     }
@@ -915,7 +938,7 @@ impl<'src> CssLexer<'src> {
 
                 COMMENT
             }
-            _ => self.eat_unexpected_character(),
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -924,8 +947,8 @@ impl<'src> CssLexer<'src> {
         self.assert_byte(b'|');
 
         match self.next_byte() {
-            Some(b'|') => self.eat_byte(T![||]),
-            Some(b'=') => self.eat_byte(T![|=]),
+            Some(b'|') => self.consume_byte(T![||]),
+            Some(b'=') => self.consume_byte(T![|=]),
             _ => T![|],
         }
     }
@@ -935,7 +958,7 @@ impl<'src> CssLexer<'src> {
         self.assert_byte(b'~');
 
         match self.next_byte() {
-            Some(b'=') => self.eat_byte(T![~=]),
+            Some(b'=') => self.consume_byte(T![~=]),
             _ => T![~],
         }
     }
@@ -945,7 +968,7 @@ impl<'src> CssLexer<'src> {
         self.assert_byte(b':');
 
         match self.next_byte() {
-            Some(b':') => self.eat_byte(T![::]),
+            Some(b':') => self.consume_byte(T![::]),
             _ => T![:],
         }
     }
@@ -955,7 +978,7 @@ impl<'src> CssLexer<'src> {
         self.assert_byte(b'*');
 
         match self.next_byte() {
-            Some(b'=') => self.eat_byte(T![*=]),
+            Some(b'=') => self.consume_byte(T![*=]),
             _ => T![*],
         }
     }
@@ -965,7 +988,7 @@ impl<'src> CssLexer<'src> {
         self.assert_byte(b'^');
 
         match self.next_byte() {
-            Some(b'=') => self.eat_byte(T![^=]),
+            Some(b'=') => self.consume_byte(T![^=]),
             _ => T![^],
         }
     }
@@ -984,7 +1007,7 @@ impl<'src> CssLexer<'src> {
             return CDO;
         }
 
-        self.eat_byte(T![<])
+        self.consume_byte(T![<])
     }
 
     #[inline]
@@ -1013,11 +1036,11 @@ impl<'src> CssLexer<'src> {
             return self.consume_identifier();
         }
 
-        self.eat_byte(T![-])
+        self.consume_byte(T![-])
     }
 
     #[inline]
-    fn eat_unexpected_character(&mut self) -> CssSyntaxKind {
+    fn consume_unexpected_character(&mut self) -> CssSyntaxKind {
         self.assert_current_char_boundary();
 
         let char = self.current_char_unchecked();

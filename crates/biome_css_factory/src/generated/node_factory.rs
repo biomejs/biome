@@ -480,6 +480,41 @@ pub fn css_keyframes_selector(
         ],
     ))
 }
+pub fn css_nth_multiplier(sign_token: SyntaxToken) -> CssNthMultiplierBuilder {
+    CssNthMultiplierBuilder {
+        sign_token,
+        value: None,
+    }
+}
+pub struct CssNthMultiplierBuilder {
+    sign_token: SyntaxToken,
+    value: Option<CssNumber>,
+}
+impl CssNthMultiplierBuilder {
+    pub fn with_value(mut self, value: CssNumber) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssNthMultiplier {
+        CssNthMultiplier::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_NTH_MULTIPLIER,
+            [
+                Some(SyntaxElement::Token(self.sign_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
+    CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NTH_OFFSET,
+        [
+            Some(SyntaxElement::Token(sign_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_number(value_token: SyntaxToken) -> CssNumber {
     CssNumber::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NUMBER,
@@ -545,6 +580,22 @@ pub fn css_pseudo_class_function_identifier(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_nth(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    selector: AnyCssPseudoClassNthSelector,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionNth {
+    CssPseudoClassFunctionNth::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_NTH,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
@@ -617,6 +668,111 @@ pub fn css_pseudo_class_identifier(name: CssIdentifier) -> CssPseudoClassIdentif
     CssPseudoClassIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_IDENTIFIER,
         [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_pseudo_class_nth(symbol_token: SyntaxToken) -> CssPseudoClassNthBuilder {
+    CssPseudoClassNthBuilder {
+        symbol_token,
+        multiplier: None,
+        offset: None,
+    }
+}
+pub struct CssPseudoClassNthBuilder {
+    symbol_token: SyntaxToken,
+    multiplier: Option<AnyCssNthMultiplier>,
+    offset: Option<CssNthOffset>,
+}
+impl CssPseudoClassNthBuilder {
+    pub fn with_multiplier(mut self, multiplier: AnyCssNthMultiplier) -> Self {
+        self.multiplier = Some(multiplier);
+        self
+    }
+    pub fn with_offset(mut self, offset: CssNthOffset) -> Self {
+        self.offset = Some(offset);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNth {
+        CssPseudoClassNth::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH,
+            [
+                self.multiplier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.symbol_token)),
+                self.offset
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_pseudo_class_nth_identifier(value_token: SyntaxToken) -> CssPseudoClassNthIdentifier {
+    CssPseudoClassNthIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_IDENTIFIER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_pseudo_class_nth_number(value: CssNumber) -> CssPseudoClassNthNumberBuilder {
+    CssPseudoClassNthNumberBuilder {
+        value,
+        sign_token: None,
+    }
+}
+pub struct CssPseudoClassNthNumberBuilder {
+    value: CssNumber,
+    sign_token: Option<SyntaxToken>,
+}
+impl CssPseudoClassNthNumberBuilder {
+    pub fn with_sign_token(mut self, sign_token: SyntaxToken) -> Self {
+        self.sign_token = Some(sign_token);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNthNumber {
+        CssPseudoClassNthNumber::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_NUMBER,
+            [
+                self.sign_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_pseudo_class_nth_selector(
+    nth: AnyCssPseudoClassNth,
+) -> CssPseudoClassNthSelectorBuilder {
+    CssPseudoClassNthSelectorBuilder {
+        nth,
+        of_selector: None,
+    }
+}
+pub struct CssPseudoClassNthSelectorBuilder {
+    nth: AnyCssPseudoClassNth,
+    of_selector: Option<CssPseudoClassOfNthSelector>,
+}
+impl CssPseudoClassNthSelectorBuilder {
+    pub fn with_of_selector(mut self, of_selector: CssPseudoClassOfNthSelector) -> Self {
+        self.of_selector = Some(of_selector);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNthSelector {
+        CssPseudoClassNthSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_SELECTOR,
+            [
+                Some(SyntaxElement::Node(self.nth.into_syntax())),
+                self.of_selector
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_pseudo_class_of_nth_selector(
+    of_token: SyntaxToken,
+    selector_list: CssSelectorList,
+) -> CssPseudoClassOfNthSelector {
+    CssPseudoClassOfNthSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_OF_NTH_SELECTOR,
+        [
+            Some(SyntaxElement::Token(of_token)),
+            Some(SyntaxElement::Node(selector_list.into_syntax())),
+        ],
     ))
 }
 pub fn css_pseudo_class_selector(
