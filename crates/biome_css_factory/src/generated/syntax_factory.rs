@@ -980,17 +980,10 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PERCENTAGE, children)
             }
-            CSS_PSEUDO_CLASS_SELECTOR => {
+            CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [:] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
                 if let Some(element) = &current_element {
                     if CssIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
@@ -999,25 +992,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssPseudoClassSelectorParameters::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_PSEUDO_CLASS_SELECTOR.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR, children)
-            }
-            CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
                     if element.kind() == T!['('] {
                         slots.mark_present();
                         current_element = elements.next();
@@ -1025,7 +999,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssValue::can_cast(element.kind()) {
+                    if AnyCssCompoundSelector::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1040,11 +1014,296 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS.to_bogus(),
+                        CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS, children)
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssCompoundSelectorList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssRelativeSelectorList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssSelector::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_SELECTOR, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssSelectorList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST, children)
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssPseudoValueList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST, children)
+            }
+            CSS_PSEUDO_CLASS_IDENTIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_IDENTIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_IDENTIFIER, children)
+            }
+            CSS_PSEUDO_CLASS_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssPseudoClass::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_SELECTOR, children)
             }
             CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
                 let mut elements = (&children).into_iter();
@@ -1196,6 +1455,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_RATIO, children)
+            }
+            CSS_RELATIVE_SELECTOR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T ! [>] | T ! [+] | T ! [~] | T ! [||]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssSelector::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_RELATIVE_SELECTOR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_RELATIVE_SELECTOR, children)
             }
             CSS_ROOT => {
                 let mut elements = (&children).into_iter();
@@ -1423,6 +1708,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
+            CSS_COMPOUND_SELECTOR_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyCssCompoundSelector::can_cast,
+                T ! [,],
+                false,
+            ),
             CSS_DECLARATION_LIST => {
                 Self::make_node_list_syntax(kind, children, CssDeclaration::can_cast)
             }
@@ -1436,6 +1728,20 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_PARAMETER_LIST => {
                 Self::make_node_list_syntax(kind, children, CssParameter::can_cast)
             }
+            CSS_PSEUDO_VALUE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyCssPseudoValue::can_cast,
+                T ! [,],
+                false,
+            ),
+            CSS_RELATIVE_SELECTOR_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                AnyCssRelativeSelector::can_cast,
+                T ! [,],
+                false,
+            ),
             CSS_RULE_LIST => Self::make_node_list_syntax(kind, children, AnyCssRule::can_cast),
             CSS_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,

@@ -60,6 +60,60 @@ pub(crate) fn expect_any_pseudo_element(p: &CssParser, range: TextRange) -> Pars
     .into_diagnostic(p)
 }
 
+pub(crate) fn expect_any_pseudo_class(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "hover",
+            "focus",
+            "active",
+            "first-child",
+            "last-child",
+            "nth-child",
+            "nth-last-child",
+            "first-of-type",
+            "last-of-type",
+            "nth-of-type",
+            "nth-last-of-type",
+            "only-child",
+            "only-of-type",
+            "checked",
+            "disabled",
+            "enabled",
+            "required",
+            "optional",
+            "valid",
+            "invalid",
+            "in-range",
+            "out-of-range",
+            "read-only",
+            "read-write",
+            "placeholder-shown",
+            "default",
+            "checked",
+            "indeterminate",
+            "blank",
+            "empty",
+            "root",
+            "target",
+            "lang",
+            "not",
+            "is",
+            "where",
+            "fullscreen",
+            "link",
+            "visited",
+            "any-link",
+            "local-link",
+            "scope",
+            "current",
+            "past",
+            "future",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
 pub(crate) fn expect_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("body", range, p)
 }

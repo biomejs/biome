@@ -31,7 +31,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@5..7 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@7..18 "cue-region" [] [Whitespace(" ")],
                                 },
                             },

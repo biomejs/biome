@@ -35,7 +35,7 @@ CssRoot {
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@1..3 "::" [] [],
                                 element: CssPseudoElementIdentifier {
-                                    ident: CssIdentifier {
+                                    name: CssIdentifier {
                                         value_token: IDENT@3..8 "after" [] [],
                                     },
                                 },
@@ -74,7 +74,7 @@ CssRoot {
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@21..23 "::" [] [],
                                 element: CssPseudoElementIdentifier {
-                                    ident: CssIdentifier {
+                                    name: CssIdentifier {
                                         value_token: IDENT@23..26 "cue" [] [],
                                     },
                                 },

@@ -141,13 +141,50 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR => {
-                    let $pattern = unsafe { $crate::CssPseudoClassSelector::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoClassFunctionCompoundSelector::new_unchecked(node)
+                    };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS => {
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoClassFunctionCompoundSelectorList::new_unchecked(node)
+                    };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
                     let $pattern =
-                        unsafe { $crate::CssPseudoClassSelectorParameters::new_unchecked(node) };
+                        unsafe { $crate::CssPseudoClassFunctionIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoClassFunctionRelativeSelectorList::new_unchecked(node)
+                    };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassFunctionSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassFunctionSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassFunctionValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssPseudoClassIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssPseudoClassSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
@@ -171,6 +208,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_RATIO => {
                     let $pattern = unsafe { $crate::CssRatio::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_RELATIVE_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssRelativeSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_ROOT => {
@@ -233,6 +274,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAtMediaQueryList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssCompoundSelectorList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_DECLARATION_LIST => {
                     let $pattern = unsafe { $crate::CssDeclarationList::new_unchecked(node) };
                     $body
@@ -243,6 +288,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER_LIST => {
                     let $pattern = unsafe { $crate::CssParameterList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::CssPseudoValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_RELATIVE_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssRelativeSelectorList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_RULE_LIST => {

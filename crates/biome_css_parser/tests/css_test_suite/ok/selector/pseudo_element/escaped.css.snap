@@ -29,7 +29,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@3..5 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")],
                                 },
                             },

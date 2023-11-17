@@ -658,21 +658,36 @@ impl<'src> CssLexer<'src> {
         let mut buf = [0u8; 20];
         let count = self.consume_ident_sequence(&mut buf);
 
-        match &buf[..count] {
+        match buf[..count].to_ascii_lowercase().as_slice() {
             b"media" => MEDIA_KW,
             b"keyframes" => KEYFRAMES_KW,
-            b"not" => NOT_KW,
             b"and" => AND_KW,
             b"only" => ONLY_KW,
             b"or" => OR_KW,
-            b"i" | b"I" => I_KW,
-            b"s" | b"S" => S_KW,
+            b"i" => I_KW,
+            b"s" => S_KW,
             b"important" => IMPORTANT_KW,
             b"from" => FROM_KW,
             b"to" => TO_KW,
             b"var" => VAR_KW,
             b"highlight" => HIGHLIGHT_KW,
             b"part" => PART_KW,
+            b"has" => HAS_KW,
+            b"dir" => DIR_KW,
+            b"global" => GLOBAL_KW,
+            b"local" => LOCAL_KW,
+            b"-moz-any" => MOZANY_KW,
+            b"-webkit-any" => WEBKITANY_KW,
+            b"past" => PAST_KW,
+            b"current" => CURRENT_KW,
+            b"future" => FUTURE_KW,
+            b"host" => HOST_KW,
+            b"host-context" => HOSTCONTEXT_KW,
+            b"not" => NOT_KW,
+            b"matches" => MATCHES_KW,
+            b"is" => IS_KW,
+            b"where" => WHERE_KW,
+            b"lang" => LANG_KW,
             _ => IDENT,
         }
     }
@@ -937,14 +952,12 @@ impl<'src> CssLexer<'src> {
 
             // --custom-property
             if self.is_ident_start() {
-                self.advance(2);
                 return self.consume_identifier();
             }
         }
 
         // -identifier
         if self.is_ident_start() {
-            self.advance(1);
             return self.consume_identifier();
         }
 
