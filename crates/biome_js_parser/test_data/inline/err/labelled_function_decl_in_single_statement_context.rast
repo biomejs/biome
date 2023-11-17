@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -44,8 +45,9 @@ JsModule {
 
 0: JS_MODULE@0..42
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..41
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..41
     0: JS_IF_STATEMENT@0..41
       0: IF_KW@0..3 "if" [] [Whitespace(" ")]
       1: L_PAREN@3..4 "(" [] []
@@ -72,7 +74,7 @@ JsModule {
               2: JS_STATEMENT_LIST@40..40
               3: R_CURLY@40..41 "}" [] []
       5: (empty)
-  3: EOF@41..42 "" [Newline("\n")] []
+  4: EOF@41..42 "" [Newline("\n")] []
 --
 labelled_function_decl_in_single_statement_context.js:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

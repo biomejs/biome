@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -59,8 +60,9 @@ JsModule {
 
 0: JS_MODULE@0..52
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..51
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..51
     0: JS_WHILE_STATEMENT@0..13
       0: WHILE_KW@0..6 "while" [] [Whitespace(" ")]
       1: (empty)
@@ -99,7 +101,7 @@ JsModule {
       4: (empty)
     4: JS_BOGUS_STATEMENT@50..51
       0: R_CURLY@50..51 "}" [] []
-  3: EOF@51..52 "" [Newline("\n")] []
+  4: EOF@51..52 "" [Newline("\n")] []
 --
 while_stmt_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

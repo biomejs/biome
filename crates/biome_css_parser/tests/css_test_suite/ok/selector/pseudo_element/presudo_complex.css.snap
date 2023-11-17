@@ -20,6 +20,7 @@ video::cue(b) div {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -288,7 +289,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..131
-  0: CSS_RULE_LIST@0..130
+  0: (empty)
+  1: CSS_RULE_LIST@0..130
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPLEX_SELECTOR@0..13
@@ -461,7 +463,7 @@ CssRoot {
         0: L_CURLY@128..129 "{" [] []
         1: CSS_DECLARATION_LIST@129..129
         2: R_CURLY@129..130 "}" [] []
-  1: EOF@130..131 "" [Newline("\n")] []
+  2: EOF@130..131 "" [Newline("\n")] []
 
 ```
 

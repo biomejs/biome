@@ -21,6 +21,7 @@ const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
 
     parse_rule_list(p);
 

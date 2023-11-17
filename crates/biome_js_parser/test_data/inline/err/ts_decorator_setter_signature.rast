@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -222,8 +223,9 @@ JsModule {
 
 0: JS_MODULE@0..136
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..135
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..135
     0: TS_TYPE_ALIAS_DECLARATION@0..34
       0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@5..7
@@ -360,7 +362,7 @@ JsModule {
             5: (empty)
         2: R_CURLY@134..135 "}" [] []
       5: (empty)
-  3: EOF@135..136 "" [Newline("\n")] []
+  4: EOF@135..136 "" [Newline("\n")] []
 --
 ts_decorator_setter_signature.ts:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

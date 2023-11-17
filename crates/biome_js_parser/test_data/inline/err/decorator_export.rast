@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -134,8 +135,9 @@ JsModule {
 
 0: JS_MODULE@0..133
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..132
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..132
     0: JS_FUNCTION_DECLARATION@0..132
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -226,7 +228,7 @@ JsModule {
               8: JS_CLASS_MEMBER_LIST@129..129
               9: R_CURLY@129..130 "}" [] []
         3: R_CURLY@130..132 "}" [Newline("\n")] []
-  3: EOF@132..133 "" [Newline("\n")] []
+  4: EOF@132..133 "" [Newline("\n")] []
 --
 decorator_export.js:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

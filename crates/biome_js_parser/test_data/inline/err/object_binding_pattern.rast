@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -200,8 +201,9 @@ JsModule {
 
 0: JS_MODULE@0..125
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..124
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..124
     0: JS_VARIABLE_STATEMENT@0..10
       0: JS_VARIABLE_DECLARATION@0..10
         0: (empty)
@@ -333,7 +335,7 @@ JsModule {
                 1: JS_OBJECT_MEMBER_LIST@122..122
                 2: R_CURLY@122..123 "}" [] []
       1: SEMICOLON@123..124 ";" [] []
-  3: EOF@124..125 "" [Newline("\n")] []
+  4: EOF@124..125 "" [Newline("\n")] []
 --
 object_binding_pattern.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

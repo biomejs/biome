@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -105,8 +106,9 @@ JsModule {
 
 0: JS_MODULE@0..130
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..129
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..129
     0: TS_IMPORT_EQUALS_DECLARATION@0..29
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: (empty)
@@ -179,4 +181,4 @@ JsModule {
         4: JS_REFERENCE_IDENTIFIER@127..128
           0: IDENT@127..128 "a" [] []
         5: SEMICOLON@128..129 ";" [] []
-  3: EOF@129..130 "" [Newline("\n")] []
+  4: EOF@129..130 "" [Newline("\n")] []

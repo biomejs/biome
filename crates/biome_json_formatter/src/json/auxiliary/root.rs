@@ -7,13 +7,18 @@ pub(crate) struct FormatJsonRoot;
 
 impl FormatNodeRule<JsonRoot> for FormatJsonRoot {
     fn fmt_fields(&self, node: &JsonRoot, f: &mut JsonFormatter) -> FormatResult<()> {
-        let JsonRootFields { value, eof_token } = node.as_fields();
+        let JsonRootFields {
+            bom_token,
+            value,
+            eof_token,
+        } = node.as_fields();
 
         match &value {
             Ok(value) => {
                 write!(
                     f,
                     [
+                        bom_token.format(),
                         format_or_verbatim(value.format()),
                         format_removed(&eof_token?),
                         hard_line_break()

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -237,8 +238,9 @@ JsModule {
 
 0: JS_MODULE@0..279
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..278
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..278
     0: TS_INTERFACE_DECLARATION@0..28
       0: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@10..12
@@ -393,4 +395,4 @@ JsModule {
                 2: TS_NUMBER_TYPE@271..277
                   0: NUMBER_KW@271..277 "number" [] []
       1: SEMICOLON@277..278 ";" [] []
-  3: EOF@278..279 "" [Newline("\n")] []
+  4: EOF@278..279 "" [Newline("\n")] []

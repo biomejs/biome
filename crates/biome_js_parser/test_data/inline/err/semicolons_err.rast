@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -40,8 +41,9 @@ JsModule {
 
 0: JS_MODULE@0..24
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..23
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..23
     0: JS_VARIABLE_STATEMENT@0..14
       0: JS_VARIABLE_DECLARATION@0..14
         0: (empty)
@@ -63,7 +65,7 @@ JsModule {
         0: JS_REFERENCE_IDENTIFIER@20..23
           0: IDENT@20..23 "foo" [] []
       2: (empty)
-  3: EOF@23..24 "" [Newline("\n")] []
+  4: EOF@23..24 "" [Newline("\n")] []
 --
 semicolons_err.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

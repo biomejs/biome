@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonArrayValue {
         l_brack_token: L_BRACK@0..4 "[" [] [Whitespace("   ")],
         elements: JsonArrayElementList [
@@ -33,7 +34,8 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..9
-  0: JSON_ARRAY_VALUE@0..9
+  0: (empty)
+  1: JSON_ARRAY_VALUE@0..9
     0: L_BRACK@0..4 "[" [] [Whitespace("   ")]
     1: JSON_ARRAY_ELEMENT_LIST@4..8
       0: (empty)
@@ -41,7 +43,7 @@ JsonRoot {
       2: JSON_STRING_VALUE@6..8
         0: JSON_STRING_LITERAL@6..8 "\"\"" [] []
     2: R_BRACK@8..9 "]" [] []
-  1: EOF@9..9 "" [] []
+  2: EOF@9..9 "" [] []
 
 ```
 

@@ -2413,6 +2413,7 @@ pub fn js_module(
         directives,
         items,
         eof_token,
+        bom_token: None,
         interpreter_token: None,
     }
 }
@@ -2420,9 +2421,14 @@ pub struct JsModuleBuilder {
     directives: JsDirectiveList,
     items: JsModuleItemList,
     eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
     interpreter_token: Option<SyntaxToken>,
 }
 impl JsModuleBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
     pub fn with_interpreter_token(mut self, interpreter_token: SyntaxToken) -> Self {
         self.interpreter_token = Some(interpreter_token);
         self
@@ -2431,6 +2437,7 @@ impl JsModuleBuilder {
         JsModule::unwrap_cast(SyntaxNode::new_detached(
             JsSyntaxKind::JS_MODULE,
             [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.interpreter_token
                     .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
@@ -3018,6 +3025,7 @@ pub fn js_script(
         directives,
         statements,
         eof_token,
+        bom_token: None,
         interpreter_token: None,
     }
 }
@@ -3025,9 +3033,14 @@ pub struct JsScriptBuilder {
     directives: JsDirectiveList,
     statements: JsStatementList,
     eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
     interpreter_token: Option<SyntaxToken>,
 }
 impl JsScriptBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
     pub fn with_interpreter_token(mut self, interpreter_token: SyntaxToken) -> Self {
         self.interpreter_token = Some(interpreter_token);
         self
@@ -3036,6 +3049,7 @@ impl JsScriptBuilder {
         JsScript::unwrap_cast(SyntaxNode::new_detached(
             JsSyntaxKind::JS_SCRIPT,
             [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.interpreter_token
                     .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -74,8 +75,9 @@ JsModule {
 
 0: JS_MODULE@0..56
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..55
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..55
     0: JS_BOGUS_STATEMENT@0..26
       0: FUNCTION_KW@0..8 "function" [] []
       1: STAR@8..10 "*" [] [Whitespace(" ")]
@@ -123,7 +125,7 @@ JsModule {
         1: JS_DIRECTIVE_LIST@54..54
         2: JS_STATEMENT_LIST@54..54
         3: R_CURLY@54..55 "}" [] []
-  3: EOF@55..56 "" [Newline("\n")] []
+  4: EOF@55..56 "" [Newline("\n")] []
 --
 ts_function_overload_generator.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

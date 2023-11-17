@@ -40,6 +40,7 @@ ul li:not(:first-of-type) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -1358,7 +1359,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..574
-  0: CSS_RULE_LIST@0..572
+  0: (empty)
+  1: CSS_RULE_LIST@0..572
     0: CSS_RULE@0..10
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8
@@ -2224,7 +2226,7 @@ CssRoot {
         0: L_CURLY@570..571 "{" [] []
         1: CSS_DECLARATION_LIST@571..571
         2: R_CURLY@571..572 "}" [] []
-  1: EOF@572..574 "" [Newline("\n"), Newline("\n")] []
+  2: EOF@572..574 "" [Newline("\n"), Newline("\n")] []
 
 ```
 

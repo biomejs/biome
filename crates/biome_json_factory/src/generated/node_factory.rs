@@ -109,14 +109,33 @@ impl JsonObjectValueBuilder {
         ))
     }
 }
-pub fn json_root(value: AnyJsonValue, eof_token: SyntaxToken) -> JsonRoot {
-    JsonRoot::unwrap_cast(SyntaxNode::new_detached(
-        JsonSyntaxKind::JSON_ROOT,
-        [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+pub fn json_root(value: AnyJsonValue, eof_token: SyntaxToken) -> JsonRootBuilder {
+    JsonRootBuilder {
+        value,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct JsonRootBuilder {
+    value: AnyJsonValue,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl JsonRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> JsonRoot {
+        JsonRoot::unwrap_cast(SyntaxNode::new_detached(
+            JsonSyntaxKind::JSON_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn json_string_value(value_token: SyntaxToken) -> JsonStringValue {
     JsonStringValue::unwrap_cast(SyntaxNode::new_detached(

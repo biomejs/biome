@@ -14,6 +14,7 @@ use biome_js_syntax::ModuleKind;
 
 pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     let m = p.start();
+    p.eat(UNICODE_BOM);
     p.eat(JS_SHEBANG);
 
     let (statement_list, strict_snapshot) = parse_directives(p);

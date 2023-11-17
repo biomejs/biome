@@ -14,6 +14,7 @@ true
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonBooleanValue {
         value_token: TRUE_KW@0..4 "true" [] [],
     },
@@ -25,8 +26,11 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..4
-  0: JSON_BOOLEAN_VALUE@0..4
+  0: (empty)
+  1: JSON_BOOLEAN_VALUE@0..4
     0: TRUE_KW@0..4 "true" [] []
-  1: EOF@4..4 "" [] []
+  2: EOF@4..4 "" [] []
 
 ```
+
+

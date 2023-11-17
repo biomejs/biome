@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -84,8 +85,9 @@ JsModule {
 
 0: JS_MODULE@0..52
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..51
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..51
     0: JS_EXPRESSION_STATEMENT@0..13
       0: JS_CONDITIONAL_EXPRESSION@0..13
         0: JS_IDENTIFIER_EXPRESSION@0..4
@@ -135,7 +137,7 @@ JsModule {
         3: COLON@50..51 ":" [] []
         4: (empty)
       1: (empty)
-  3: EOF@51..52 "" [Newline("\n")] []
+  4: EOF@51..52 "" [Newline("\n")] []
 --
 conditional_expr_err.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -42,8 +43,9 @@ JsModule {
 
 0: JS_MODULE@0..53
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..52
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..52
     0: JS_WHILE_STATEMENT@0..52
       0: WHILE_KW@0..6 "while" [] [Whitespace(" ")]
       1: L_PAREN@6..7 "(" [] []
@@ -69,4 +71,4 @@ JsModule {
                   2: SEMICOLON@45..46 ";" [] []
               2: R_CURLY@46..50 "}" [Newline("\n"), Whitespace("  ")] []
         2: R_CURLY@50..52 "}" [Newline("\n")] []
-  3: EOF@52..53 "" [Newline("\n")] []
+  4: EOF@52..53 "" [Newline("\n")] []

@@ -11,6 +11,7 @@ pub(crate) struct FormatJsScript;
 impl FormatNodeRule<JsScript> for FormatJsScript {
     fn fmt_fields(&self, node: &JsScript, f: &mut JsFormatter) -> FormatResult<()> {
         let JsScriptFields {
+            bom_token,
             interpreter_token,
             directives,
             statements,
@@ -20,6 +21,7 @@ impl FormatNodeRule<JsScript> for FormatJsScript {
         write![
             f,
             [
+                bom_token.format(),
                 FormatInterpreterToken::new(interpreter_token.as_ref()),
                 format_leading_comments(node.syntax()),
                 directives.format(),

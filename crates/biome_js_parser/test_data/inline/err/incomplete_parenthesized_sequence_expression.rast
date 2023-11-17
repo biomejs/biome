@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -52,8 +53,9 @@ JsModule {
 
 0: JS_MODULE@0..15
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..14
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..14
     0: JS_EXPRESSION_STATEMENT@0..4
       0: JS_PARENTHESIZED_EXPRESSION@0..3
         0: L_PAREN@0..1 "(" [] []
@@ -83,7 +85,7 @@ JsModule {
               0: IDENT@12..13 "c" [] []
         2: (empty)
       1: SEMICOLON@13..14 ";" [] []
-  3: EOF@14..15 "" [Newline("\n")] []
+  4: EOF@14..15 "" [Newline("\n")] []
 --
 incomplete_parenthesized_sequence_expression.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
