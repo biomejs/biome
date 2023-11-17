@@ -12,7 +12,7 @@ pub(crate) fn store_changed_files(
     let default_branch = configuration
         .vcs
         .as_ref()
-        .map_or(None, |v| v.default_branch.as_ref());
+        .and_then(|v| v.default_branch.as_ref());
 
     let base = match (since.as_ref(), default_branch) {
         (Some(since), Some(_)) => since,
@@ -33,7 +33,7 @@ pub(crate) fn store_changed_files(
 
     let included_files = files_config.include.get_or_insert_with(StringSet::default);
 
-    let matcher = to_matcher(Some(&included_files))?;
+    let matcher = to_matcher(Some(included_files))?;
 
     // Process the output to get 'changed_files'
     let changed_files: Vec<String> = match matcher {
@@ -55,7 +55,7 @@ pub(crate) fn store_changed_files(
         }
     };
 
-    if changed_files.len() == 0 {
+    if changed_files.is_empty() {
         return Err(CliDiagnostic::no_files_processed());
     };
 
