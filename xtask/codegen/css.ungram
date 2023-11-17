@@ -323,8 +323,8 @@ CssNthOffset =
 // :nth-child(2n+1 of li, .test) {}
 //             		 ^^^^^^^^^^^^
 CssPseudoClassOfNthSelector =
- 'of'
- selector_list: CssSelectorList
+	'of'
+	selector_list: CssSelectorList
 
 // div {}
 // ^^^
