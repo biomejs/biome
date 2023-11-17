@@ -1,15 +1,18 @@
 use crate::{aria_services::Aria, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
-    jsx_attribute, jsx_attribute_initializer_clause, jsx_ident, jsx_name, jsx_string,
-    jsx_string_literal, token, jsx_attribute_list,
+    jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
+    jsx_string, jsx_string_literal, token,
 };
 use biome_js_syntax::{
-    jsx_ext::AnyJsxElement, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttributeList, T, AnyJsxAttribute,
+    jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue,
+    JsxAttributeList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
 declare_rule! {
     /// Enforce that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`.
@@ -51,6 +54,7 @@ declare_rule! {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -122,9 +126,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message:
-                markup! { "Add the tabIndex attribute." }
-                    .to_owned(),
+            message: markup! { "Add the tabIndex attribute." }.to_owned(),
             mutation,
         })
     }
