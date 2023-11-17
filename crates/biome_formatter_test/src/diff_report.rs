@@ -117,6 +117,7 @@ impl DiffReport {
             "pipeline",
             "record",
             "throw-expression",
+            "throw_expression",
             "v8intrinsic",
             "v8_intrinsic",
             "bind-expressions",
