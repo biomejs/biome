@@ -17,6 +17,8 @@ pub enum TriviaPieceKind {
     MultiLineComment,
     /// Token that the parser skipped for some reason.
     Skipped,
+    /// Unicode BOM character that may exist at the start of a file.
+    UnicodeBOM,
 }
 
 impl TriviaPieceKind {
@@ -42,6 +44,10 @@ impl TriviaPieceKind {
 
     pub const fn is_skipped(&self) -> bool {
         matches!(self, TriviaPieceKind::Skipped)
+    }
+
+    pub const fn is_unicode_bom(&self) -> bool {
+        matches!(self, TriviaPieceKind::UnicodeBOM)
     }
 }
 
@@ -101,6 +107,8 @@ pub struct SyntaxTriviaPieceWhitespace<L: Language>(SyntaxTriviaPiece<L>);
 pub struct SyntaxTriviaPieceComments<L: Language>(SyntaxTriviaPiece<L>);
 #[derive(Debug, Clone)]
 pub struct SyntaxTriviaPieceSkipped<L: Language>(SyntaxTriviaPiece<L>);
+#[derive(Debug, Clone)]
+pub struct SyntaxTriviaPieceUnicodeBOM<L: Language>(SyntaxTriviaPiece<L>);
 
 impl<L: Language> SyntaxTriviaPieceNewline<L> {
     pub fn text(&self) -> &str {
@@ -179,6 +187,30 @@ impl<L: Language> SyntaxTriviaPieceComments<L> {
 }
 
 impl<L: Language> SyntaxTriviaPieceSkipped<L> {
+    pub fn text(&self) -> &str {
+        self.0.text()
+    }
+
+    pub fn text_len(&self) -> TextSize {
+        self.0.text_len()
+    }
+
+    pub fn text_range(&self) -> TextRange {
+        self.0.text_range()
+    }
+
+    /// Returns a reference to its [SyntaxTriviaPiece]
+    pub fn as_piece(&self) -> &SyntaxTriviaPiece<L> {
+        &self.0
+    }
+
+    /// Returns its [SyntaxTriviaPiece]
+    pub fn into_piece(self) -> SyntaxTriviaPiece<L> {
+        self.0
+    }
+}
+
+impl<L: Language> SyntaxTriviaPieceUnicodeBOM<L> {
     pub fn text(&self) -> &str {
         self.0.text()
     }
@@ -408,6 +440,11 @@ impl<L: Language> SyntaxTriviaPiece<L> {
         self.trivia.kind.is_skipped()
     }
 
+    /// Returns true if this trivia piece is a [SyntaxTriviaPieceUnicodeBOM].
+    pub fn is_unicode_bom(&self) -> bool {
+        self.trivia.kind.is_unicode_bom()
+    }
+
     /// Cast this trivia piece to [SyntaxTriviaPieceNewline].
     ///
     /// ```
@@ -505,6 +542,14 @@ impl<L: Language> SyntaxTriviaPiece<L> {
         }
     }
 
+    /// Casts this piece to a Unicode BOM trivia piece.
+    pub fn as_unicode_bom(&self) -> Option<SyntaxTriviaPieceUnicodeBOM<L>> {
+        match &self.trivia.kind {
+            TriviaPieceKind::UnicodeBOM => Some(SyntaxTriviaPieceUnicodeBOM(self.clone())),
+            _ => None,
+        }
+    }
+
     pub fn token(&self) -> SyntaxToken<L> {
         SyntaxToken::from(self.raw.token().clone())
     }
@@ -519,6 +564,7 @@ impl<L: Language> fmt::Debug for SyntaxTriviaPiece<L> {
                 write!(f, "Comments(")?
             }
             TriviaPieceKind::Skipped => write!(f, "Skipped(")?,
+            TriviaPieceKind::UnicodeBOM => write!(f, "UnicodeBOM(")?,
         }
         print_debug_str(self.text(), f)?;
         write!(f, ")")
@@ -643,6 +689,10 @@ impl<L: Language> SyntaxTrivia<L> {
 
     pub fn has_skipped(&self) -> bool {
         self.pieces().any(|piece| piece.is_skipped())
+    }
+
+    pub fn has_unicode_bom(&self) -> bool {
+        self.pieces().any(|piece| piece.is_unicode_bom())
     }
 }
 

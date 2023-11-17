@@ -19,6 +19,7 @@ biome_js_unicode_table = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
 tracing                = { workspace = true }
+unicode-bom = "2.0.3"
 
 [dev-dependencies]
 biome_test_utils  = { path = "../biome_test_utils" }

@@ -7,6 +7,7 @@ use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch:
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 use std::char::REPLACEMENT_CHARACTER;
+use unicode_bom::Bom;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -40,6 +41,9 @@ pub(crate) struct CssLexer<'src> {
 
     /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
     after_newline: bool,
+
+    /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
+    unicode_bom_length: usize,
 
     /// Byte offset of the current token from the start of the source
     /// The range of the current token can be computed by `self.position - self.current_start`
@@ -78,6 +82,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
     }
@@ -139,6 +144,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
+            unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
 
@@ -149,6 +155,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.current_start = current_start;
         self.current_flags = current_flags;
         self.after_newline = after_line_break;
+        self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
 
@@ -167,6 +174,7 @@ impl<'src> CssLexer<'src> {
         Self {
             source,
             after_newline: false,
+            unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
             current_flags: TokenFlags::empty(),
@@ -256,6 +264,27 @@ impl<'src> CssLexer<'src> {
         } else {
             self.consume_whitespaces();
             WHITESPACE
+        }
+    }
+
+    /// Check if the source starts with a Unicode BOM character. If it does,
+    /// consume it and return the UNICODE_BOM token kind.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary (and realistically only at
+    /// the start position of the source).
+    fn consume_potential_bom(&mut self) -> Option<CssSyntaxKind> {
+        if let Some(first) = self.source().get(0..3) {
+            let bom = Bom::from(first.as_bytes());
+            self.unicode_bom_length = bom.len();
+            self.advance(self.unicode_bom_length);
+
+            match bom {
+                Bom::Null => None,
+                _ => Some(UNICODE_BOM),
+            }
+        } else {
+            None
         }
     }
 
@@ -450,6 +479,16 @@ impl<'src> CssLexer<'src> {
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
             EQL => self.eat_byte(T![=]),
+
+            UNI => {
+                // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
+                // perform the check. At any other position, the BOM is just considered plain whitespace.
+                if self.position == 0 && self.consume_potential_bom().is_some() {
+                    UNICODE_BOM
+                } else {
+                    self.eat_unexpected_character()
+                }
+            }
 
             _ => self.eat_unexpected_character(),
         }

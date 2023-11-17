@@ -8,6 +8,7 @@ use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, T
 use biome_parser::diagnostic::ParseDiagnostic;
 use std::iter::FusedIterator;
 use std::ops::Add;
+use unicode_bom::Bom;
 
 use crate::JsonParserOptions;
 
@@ -170,6 +171,32 @@ impl<'src> Lexer<'src> {
         }
     }
 
+    /// Check if the source starts with a Unicode BOM character. If it does,
+    /// consume it and return the UNICODE_BOM token kind.
+    ///
+    /// Note that JSON explicitly forbids BOM characters from appearing in a
+    /// network-transmitted JSON Text: https://datatracker.ietf.org/doc/html/rfc8259#section-8.1.
+    /// However, Windows editors in particular will occasionally add a BOM
+    /// anyway, and Biome should not remove those characters when present, so
+    /// they need to be tracked.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary (and realistically only at
+    /// the start position of the source).
+    fn consume_potential_bom(&mut self) -> Option<JsonSyntaxKind> {
+        if let Some(first) = self.source().get(0..3) {
+            let bom = Bom::from(first.as_bytes());
+            self.advance(bom.len());
+
+            match bom {
+                Bom::Null => None,
+                _ => Some(UNICODE_BOM),
+            }
+        } else {
+            None
+        }
+    }
+
     /// Get the UTF8 char which starts at the current byte
     ///
     /// ## Safety
@@ -292,6 +319,10 @@ impl<'src> Lexer<'src> {
 
                 if is_id_start(chr) {
                     self.lex_identifier(current)
+                } else if self.position == 0 && self.consume_potential_bom().is_some() {
+                    // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
+                    // perform the check. At any other position, the BOM is just considered plain whitespace.
+                    UNICODE_BOM
                 } else {
                     self.eat_unexpected_character()
                 }

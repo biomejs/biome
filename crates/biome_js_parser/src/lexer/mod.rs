@@ -34,6 +34,7 @@ use biome_js_unicode_table::{
 };
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use unicode_bom::Bom;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
@@ -120,6 +121,9 @@ pub(crate) struct JsLexer<'src> {
     /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
     after_newline: bool,
 
+    /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
+    unicode_bom_length: usize,
+
     /// Byte offset of the current token from the start of the source
     /// The range of the current token can be computed by `self.position - self.current_start`
     current_start: TextSize,
@@ -157,6 +161,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
     }
@@ -228,6 +233,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
             current_flags,
             current_kind,
             after_line_break,
+            unicode_bom_length,
             diagnostics_pos,
         } = checkpoint;
 
@@ -238,6 +244,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
         self.current_start = current_start;
         self.current_flags = current_flags;
         self.after_newline = after_line_break;
+        self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
     }
 
@@ -256,6 +263,7 @@ impl<'src> JsLexer<'src> {
         Self {
             source,
             after_newline: false,
+            unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
             current_flags: TokenFlags::empty(),
@@ -458,6 +466,27 @@ impl<'src> JsLexer<'src> {
         } else {
             self.consume_whitespaces();
             WHITESPACE
+        }
+    }
+
+    /// Check if the source starts with a Unicode BOM character. If it does,
+    /// consume it and return the UNICODE_BOM token kind.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary (and realistically only at
+    /// the start position of the source).
+    fn consume_potential_bom(&mut self) -> Option<JsSyntaxKind> {
+        if let Some(first) = self.source().get(0..3) {
+            let bom = Bom::from(first.as_bytes());
+            self.unicode_bom_length = bom.len();
+            self.advance(self.unicode_bom_length);
+
+            match bom {
+                Bom::Null => None,
+                _ => Some(UNICODE_BOM),
+            }
+        } else {
+            None
         }
     }
 
@@ -1347,7 +1376,9 @@ impl<'src> JsLexer<'src> {
     fn read_shebang(&mut self) -> JsSyntaxKind {
         let start = self.position;
         self.next_byte();
-        if start != 0 {
+        // Shebangs must be the first text in the file, but if there was a BOM
+        // then that may be at a slightly further position than 0.
+        if start != 0 && start != self.unicode_bom_length {
             return T![#];
         }
 
@@ -1911,6 +1942,10 @@ impl<'src> JsLexer<'src> {
             BEC => self.eat_byte(T!['}']),
             PIP => self.resolve_pipe(),
             TLD => self.eat_byte(T![~]),
+
+            // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
+            // perform the check. At any other position, the BOM is just considered plain whitespace.
+            UNI if self.position == 0 && self.consume_potential_bom().is_some() => UNICODE_BOM,
             UNI => {
                 let chr = self.current_char_unchecked();
                 if is_linebreak(chr)

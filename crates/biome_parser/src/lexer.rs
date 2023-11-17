@@ -342,6 +342,7 @@ pub struct LexerCheckpoint<Kind: SyntaxKind> {
     pub current_kind: Kind,
     pub current_flags: TokenFlags,
     pub after_line_break: bool,
+    pub unicode_bom_length: usize,
     pub diagnostics_pos: u32,
 }
 
