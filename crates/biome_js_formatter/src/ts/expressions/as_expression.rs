@@ -7,7 +7,7 @@ use crate::ts::expressions::type_assertion_expression::type_cast_like_needs_pare
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TsAsExpression};
 use biome_js_syntax::{AnyTsType, TsSatisfiesExpression};
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{declare_node_union, SyntaxNodeOptionExt, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsAsExpression;
@@ -62,9 +62,38 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesExpression {
         let expression = self.expression();
         let operation_token = self.operation_token()?;
         let ty = self.ty()?;
-
+        // edge case: `(type) as T;`
+        // This check could be implemented in `JsIdentifierExpression::needs_parentheses_with_parent`,
+        // however this could incurs a perf penality.
+        let expression_needs_parens = self
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find(|x| !TsAsOrSatisfiesExpression::can_cast(x.kind()))
+            .kind()
+            == Some(JsSyntaxKind::JS_EXPRESSION_STATEMENT)
+            && expression
+                .as_ref()
+                .ok()
+                .and_then(|expr| expr.as_js_reference_identifier()?.value_token().ok())
+                .map_or(false, |name| {
+                    // These keywords are contextually reserved by TypeSCript in strict and sloppy modes.
+                    matches!(
+                        name.text_trimmed(),
+                        "await" | "interface" | "let" | "module" | "type" | "yield" | "using"
+                    )
+                });
         let format_inner = format_with(|f| {
-            write!(f, [expression.format(), space(), operation_token.format()])?;
+            write!(
+                f,
+                [
+                    expression_needs_parens.then_some(text("(")),
+                    expression.format(),
+                    expression_needs_parens.then_some(text(")")),
+                    space(),
+                    operation_token.format()
+                ]
+            )?;
 
             if f.comments().has_leading_own_line_comment(ty.syntax()) {
                 write!(f, [indent(&format_args![hard_line_break(), &ty.format()])])
@@ -104,7 +133,7 @@ impl NeedsParentheses for TsAsOrSatisfiesExpression {
 mod tests {
 
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
-    use biome_js_syntax::{JsFileSource, TsAsExpression};
+    use biome_js_syntax::{JsFileSource, JsIdentifierExpression, TsAsExpression};
 
     #[test]
     fn needs_parentheses() {
