@@ -14,22 +14,11 @@ expression: snapshot
 
 ```
 JsonRoot {
-    value: JsonArrayValue {
-        l_brack_token: missing (required),
-        elements: JsonArrayElementList [
-            JsonBogusValue {
-                items: [
-                    ERROR_TOKEN@0..3 "\u{feff}" [] [],
-                ],
-            },
-            missing separator,
-            JsonObjectValue {
-                l_curly_token: L_CURLY@3..4 "{" [] [],
-                json_member_list: JsonMemberList [],
-                r_curly_token: R_CURLY@4..5 "}" [] [],
-            },
-        ],
-        r_brack_token: missing (required),
+    bom_token: UNICODE_BOM@0..3 "\u{feff}" [] [],
+    value: JsonObjectValue {
+        l_curly_token: L_CURLY@3..4 "{" [] [],
+        json_member_list: JsonMemberList [],
+        r_curly_token: R_CURLY@4..5 "}" [] [],
     },
     eof_token: EOF@5..5 "" [] [],
 }
@@ -39,40 +28,13 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..5
-  0: JSON_ARRAY_VALUE@0..5
-    0: (empty)
-    1: JSON_ARRAY_ELEMENT_LIST@0..5
-      0: JSON_BOGUS_VALUE@0..3
-        0: ERROR_TOKEN@0..3 "\u{feff}" [] []
-      1: (empty)
-      2: JSON_OBJECT_VALUE@3..5
-        0: L_CURLY@3..4 "{" [] []
-        1: JSON_MEMBER_LIST@4..4
-        2: R_CURLY@4..5 "}" [] []
-    2: (empty)
-  1: EOF@5..5 "" [] []
+  0: UNICODE_BOM@0..3 "\u{feff}" [] []
+  1: JSON_OBJECT_VALUE@3..5
+    0: L_CURLY@3..4 "{" [] []
+    1: JSON_MEMBER_LIST@4..4
+    2: R_CURLY@4..5 "}" [] []
+  2: EOF@5..5 "" [] []
 
-```
-
-## Diagnostics
-
-```
-structure_UTF-8_BOM_empty_object.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `�`
-  
-  > 1 │ �{}
-      │ 
-  
-structure_UTF-8_BOM_empty_object.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × End of file expected
-  
-  > 1 │ �{}
-      │ ^^
-  
-  i Use an array for a sequence of values: `[1, 2]`
-  
 ```
 
 

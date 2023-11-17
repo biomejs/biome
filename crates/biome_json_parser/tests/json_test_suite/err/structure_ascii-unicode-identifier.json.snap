@@ -14,6 +14,7 @@ aå
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonBogusValue {
         items: [
             IDENT@0..3 "aå" [] [],
@@ -27,9 +28,10 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..3
-  0: JSON_BOGUS_VALUE@0..3
+  0: (empty)
+  1: JSON_BOGUS_VALUE@0..3
     0: IDENT@0..3 "aå" [] []
-  1: EOF@3..3 "" [] []
+  2: EOF@3..3 "" [] []
 
 ```
 
