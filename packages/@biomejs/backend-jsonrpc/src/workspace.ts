@@ -195,6 +195,10 @@ export interface VcsConfiguration {
 	 */
 	clientKind?: VcsClientKind;
 	/**
+	 * The main branch of the project
+	 */
+	defaultBranch?: string;
+	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
 	enabled?: boolean;
