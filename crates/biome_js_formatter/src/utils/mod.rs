@@ -35,6 +35,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifiers,
 };
 use biome_rowan::{AstNode, AstNodeList};
+use biome_text_size::TextSize;
 pub(crate) use conditional::{AnyJsConditional, ConditionalJsxChain};
 pub(crate) use object_like::JsObjectLike;
 pub(crate) use object_pattern_like::JsObjectPatternLike;
@@ -127,7 +128,22 @@ impl<'a> FormatInterpreterToken<'a> {
 impl Format<JsFormatContext> for FormatInterpreterToken<'_> {
     fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
         if let Some(interpreter) = self.token {
-            write!(f, [interpreter.format()])?;
+            // Trim trailing spaces of the interpreter
+            let interpreter_text = interpreter.text_trimmed();
+            let trimmed_interpreter_text = interpreter_text.trim_end();
+            let diff = (interpreter_text.len() - trimmed_interpreter_text.len()) as u32;
+            let trimmed_range = interpreter
+                .text_trimmed_range()
+                .sub_end(TextSize::from(diff));
+
+            // We replace the interpreter token by its trimmed version
+            write!(
+                f,
+                [format_replaced(
+                    interpreter,
+                    &located_token_text(interpreter, trimmed_range)
+                )]
+            )?;
 
             match interpreter
                 .next_token()
