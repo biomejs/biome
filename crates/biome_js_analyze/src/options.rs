@@ -3,6 +3,9 @@
 use crate::analyzers::complexity::no_excessive_cognitive_complexity::{
     complexity_options, ComplexityOptions,
 };
+use crate::aria_analyzers::nursery::no_interactive_element_to_noninteractive_role::{
+    interactive_element_to_noninteractive_role_options , InteractiveElementToNoninteractiveRoleOptions
+};
 use crate::aria_analyzers::nursery::use_valid_aria_role::{
     valid_aria_role_options, ValidAriaRoleOptions,
 };
@@ -39,6 +42,8 @@ pub enum PossibleOptions {
     RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
     /// Options for `useValidAriaRole` rule
     ValidAriaRole(#[bpaf(external(valid_aria_role_options), hide)] ValidAriaRoleOptions),
+    /// Options for `noInteractiveElementToNoninteractiveRole` rule
+    InteractiveElementToNoninteractiveRole(#[bpaf(external(interactive_element_to_noninteractive_role_options), hide)] InteractiveElementToNoninteractiveRoleOptions),
 }
 
 // Required by [Bpaf].
@@ -88,6 +93,13 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
+            "noInteractiveElementToNoninteractiveRole" => {
+                let options = match self {
+                    PossibleOptions::InteractiveElementToNoninteractiveRole(options) => options.clone(),
+                    _ => InteractiveElementToNoninteractiveRoleOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
             // TODO: review error
             _ => panic!("This rule {:?} doesn't have options", rule_key),
         }
@@ -113,6 +125,9 @@ impl Deserializable for PossibleOptions {
                 .map(Self::NamingConvention),
             "useValidAriaRole" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::ValidAriaRole)
+            }
+            "noInteractiveElementToNoninteractiveRole" => {
+                Deserializable::deserialize(value, "options", diagnostics).map(Self::InteractiveElementToNoninteractiveRole)
             }
             _ => {
                 diagnostics.push(
