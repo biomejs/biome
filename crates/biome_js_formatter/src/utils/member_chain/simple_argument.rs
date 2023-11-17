@@ -203,7 +203,7 @@ impl SimpleArgument {
                     Ok(false)
                 }
             }
-            _ => return Ok(false),
+            _ => Ok(false),
         }
     }
 
