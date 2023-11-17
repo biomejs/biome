@@ -644,10 +644,6 @@ impl<L: Language> SyntaxTrivia<L> {
     pub fn has_skipped(&self) -> bool {
         self.pieces().any(|piece| piece.is_skipped())
     }
-
-    pub fn has_unicode_bom(&self) -> bool {
-        self.pieces().any(|piece| piece.is_unicode_bom())
-    }
 }
 
 fn print_debug_str<S: AsRef<str>>(text: S, f: &mut fmt::Formatter<'_>) -> fmt::Result {

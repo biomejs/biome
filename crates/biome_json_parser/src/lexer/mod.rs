@@ -184,6 +184,10 @@ impl<'src> Lexer<'src> {
     /// Must be called at a valid UT8 char boundary (and realistically only at
     /// the start position of the source).
     fn consume_potential_bom(&mut self) -> Option<JsonSyntaxKind> {
+        // Bom needs at least the first three bytes of the source to know if it
+        // matches the UTF-8 BOM and not an alternative. This can be expanded
+        // to more bytes to support other BOM characters if Biome decides to
+        // support other encodings like UTF-16.
         if let Some(first) = self.source().get(0..3) {
             let bom = Bom::from(first.as_bytes());
             self.advance(bom.len());
