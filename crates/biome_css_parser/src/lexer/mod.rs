@@ -502,7 +502,7 @@ impl<'src> CssLexer<'src> {
                 if self.position == 0 && self.consume_potential_bom().is_some() {
                     UNICODE_BOM
                 } else {
-                    self.eat_unexpected_character()
+                    self.consume_unexpected_character()
                 }
             }
 
