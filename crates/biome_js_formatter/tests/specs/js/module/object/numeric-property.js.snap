@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/object/numeric-property.js
+---
+
+# Input
+
+```js
+const x = {
+    // Format numbers
+    1e+2: null,
+    1E+2: null,
+    0.000: null,
+    0b01: null,
+    0B01: null,
+    0o7: null,
+    0O7: null,
+    0xf: null,
+    0Xf: null,
+    1n: null,
+    0xan: null,
+
+    // Remove quote for simple and exact floats
+    "1.5": null,
+    "9007199254740991": null,
+
+    // Keep quotes for inexact floats
+    "999999999999999999999": null,
+
+    // Keep quoted for negative numbers
+    "-1": null,
+    "-1.5": null,
+
+    // Keep quotes because the yare considered complex
+    "1e+2": null,
+    "1E+2": null,
+    "0.000": null,
+    "0b01": null,
+    "0B01": null,
+    "0o7": null,
+    "0O7": null,
+    "0xf": null,
+    "0Xf": null,
+    "1n": null,
+    "0xan": null,
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+const x = {
+	// Format numbers
+	1e2: null,
+	1e2: null,
+	0.0: null,
+	0b01: null,
+	0b01: null,
+	0o7: null,
+	0o7: null,
+	0xf: null,
+	0xf: null,
+	1n: null,
+	0xan: null,
+
+	// Remove quote for simple and exact floats
+	1.5: null,
+	9007199254740991: null,
+
+	// Keep quotes for inexact floats
+	"999999999999999999999": null,
+
+	// Keep quoted for negative numbers
+	"-1": null,
+	"-1.5": null,
+
+	// Keep quotes because the yare considered complex
+	"1e+2": null,
+	"1E+2": null,
+	"0.000": null,
+	"0b01": null,
+	"0B01": null,
+	"0o7": null,
+	"0O7": null,
+	"0xf": null,
+	"0Xf": null,
+	"1n": null,
+	"0xan": null,
+};
+```
+
+
