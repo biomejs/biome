@@ -1,7 +1,7 @@
 # Jobs run on pull request for intellij
 name: Pull request Intellij
 on:
- workflow_dispatch: ~
+  workflow_dispatch: ~
 
 jobs:
   test-ui:
@@ -32,12 +32,11 @@ jobs:
             reportName: ui-test-fails-report-mac
 
     steps:
-
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -94,4 +93,3 @@ jobs:
           name: ${{ matrix.reportName }}
           path: |
             editors/intellij/build/reports
-

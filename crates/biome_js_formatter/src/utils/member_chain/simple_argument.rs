@@ -190,6 +190,7 @@ impl SimpleArgument {
                     AnyJsArrayElement::AnyJsExpression(expression) => {
                         SimpleArgument::from(expression).is_simple_impl(depth + 1)
                     }
+                    AnyJsArrayElement::JsArrayHole(_) => true,
                     _ => false,
                 })
         } else {
