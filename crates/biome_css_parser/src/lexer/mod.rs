@@ -2,6 +2,7 @@
 #[rustfmt::skip]
 mod tests;
 
+use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -56,6 +57,8 @@ pub(crate) struct CssLexer<'src> {
     current_flags: TokenFlags,
 
     diagnostics: Vec<ParseDiagnostic>,
+
+    config: CssParserOptions,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -180,7 +183,12 @@ impl<'src> CssLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
+            config: CssParserOptions::default(),
         }
+    }
+
+    pub(crate) fn with_config(self, config: CssParserOptions) -> Self {
+        Self { config, ..self }
     }
 
     fn text_position(&self) -> TextSize {
@@ -851,9 +859,10 @@ impl<'src> CssLexer<'src> {
     fn consume_slash(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'/');
 
-        let start = self.text_position();
         match self.peek_byte() {
             Some(b'*') => {
+                let start = self.text_position();
+
                 // eat `/*`
                 self.advance(2);
 
@@ -894,7 +903,7 @@ impl<'src> CssLexer<'src> {
                     COMMENT
                 }
             }
-            Some(b'/') => {
+            Some(b'/') if self.config.allow_wrong_line_comments => {
                 self.advance(2);
 
                 while let Some(chr) = self.current_byte() {
