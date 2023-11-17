@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -27,8 +28,9 @@ JsModule {
 
 0: JS_MODULE@0..14
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..13
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
     0: JS_EXPRESSION_STATEMENT@0..6
       0: JS_BOGUS_EXPRESSION@0..5
         0: JS_BOGUS@0..5
@@ -39,7 +41,7 @@ JsModule {
         0: AWAIT_KW@6..12 "await" [Newline("\n")] []
         1: (empty)
       1: SEMICOLON@12..13 ";" [] []
-  3: EOF@13..14 "" [Newline("\n")] []
+  4: EOF@13..14 "" [Newline("\n")] []
 --
 identifier.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

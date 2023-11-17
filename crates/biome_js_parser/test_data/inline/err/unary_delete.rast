@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -116,8 +117,9 @@ JsModule {
 
 0: JS_MODULE@0..105
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..104
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..104
     0: JS_EXPRESSION_STATEMENT@0..13
       0: JS_BOGUS_EXPRESSION@0..12
         0: DELETE_KW@0..7 "delete" [] [Whitespace(" ")]
@@ -184,7 +186,7 @@ JsModule {
             0: HASH@96..97 "#" [] []
             1: IDENT@97..103 "member" [] []
       1: SEMICOLON@103..104 ";" [] []
-  3: EOF@104..105 "" [Newline("\n")] []
+  4: EOF@104..105 "" [Newline("\n")] []
 --
 unary_delete.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

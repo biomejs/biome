@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -24,8 +25,9 @@ JsModule {
 
 0: JS_MODULE@0..26
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..25
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..25
     0: JS_EXPRESSION_STATEMENT@0..25
       0: JS_BINARY_EXPRESSION@0..24
         0: JS_BINARY_EXPRESSION@0..21
@@ -37,7 +39,7 @@ JsModule {
         2: JS_NUMBER_LITERAL_EXPRESSION@23..24
           0: JS_NUMBER_LITERAL@23..24 "2" [] []
       1: SEMICOLON@24..25 ";" [] []
-  3: EOF@25..26 "" [Newline("\n")] []
+  4: EOF@25..26 "" [Newline("\n")] []
 --
 js_right_shift_comments.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -88,8 +89,9 @@ JsModule {
 
 0: JS_MODULE@0..71
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..70
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..70
     0: JS_EXPRESSION_STATEMENT@0..6
       0: JSX_TAG_EXPRESSION@0..5
         0: JSX_FRAGMENT@0..5
@@ -144,4 +146,4 @@ JsModule {
             1: SLASH@63..67 "/" [Newline("\n"), Whitespace("  ")] []
             2: R_ANGLE@67..69 ">" [Newline("\n")] []
       1: SEMICOLON@69..70 ";" [] []
-  3: EOF@70..71 "" [Newline("\n")] []
+  4: EOF@70..71 "" [Newline("\n")] []

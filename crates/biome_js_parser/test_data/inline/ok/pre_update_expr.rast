@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -26,8 +27,9 @@ JsModule {
 
 0: JS_MODULE@0..12
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..11
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..11
     0: JS_EXPRESSION_STATEMENT@0..5
       0: JS_PRE_UPDATE_EXPRESSION@0..5
         0: PLUS2@0..2 "++" [] []
@@ -40,4 +42,4 @@ JsModule {
         1: JS_IDENTIFIER_ASSIGNMENT@8..11
           0: IDENT@8..11 "foo" [] []
       1: (empty)
-  3: EOF@11..12 "" [Newline("\n")] []
+  4: EOF@11..12 "" [Newline("\n")] []

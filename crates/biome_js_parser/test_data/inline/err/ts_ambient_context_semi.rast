@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -74,8 +75,9 @@ JsModule {
 
 0: JS_MODULE@0..49
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..48
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..48
     0: TS_DECLARE_STATEMENT@0..48
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: JS_CLASS_DECLARATION@8..48
@@ -129,7 +131,7 @@ JsModule {
             6: (empty)
             7: (empty)
         9: R_CURLY@47..48 "}" [] []
-  3: EOF@48..49 "" [Newline("\n")] []
+  4: EOF@48..49 "" [Newline("\n")] []
 --
 ts_ambient_context_semi.ts:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

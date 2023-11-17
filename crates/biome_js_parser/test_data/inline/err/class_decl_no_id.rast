@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -42,8 +43,9 @@ JsModule {
 
 0: JS_MODULE@0..31
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..30
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
     0: JS_CLASS_DECLARATION@0..8
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -72,7 +74,7 @@ JsModule {
       7: L_CURLY@28..29 "{" [] []
       8: JS_CLASS_MEMBER_LIST@29..29
       9: R_CURLY@29..30 "}" [] []
-  3: EOF@30..31 "" [Newline("\n")] []
+  4: EOF@30..31 "" [Newline("\n")] []
 --
 class_decl_no_id.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

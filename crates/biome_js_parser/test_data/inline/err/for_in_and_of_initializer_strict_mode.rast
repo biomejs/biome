@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -355,8 +356,9 @@ JsModule {
 
 0: JS_MODULE@0..286
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..285
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..285
     0: JS_FOR_IN_STATEMENT@0..24
       0: FOR_KW@0..4 "for" [] [Whitespace(" ")]
       1: L_PAREN@4..5 "(" [] []
@@ -612,7 +614,7 @@ JsModule {
         2: R_CURLY@283..284 "}" [] []
     13: JS_EMPTY_STATEMENT@284..285
       0: SEMICOLON@284..285 ";" [] []
-  3: EOF@285..286 "" [Newline("\n")] []
+  4: EOF@285..286 "" [Newline("\n")] []
 --
 for_in_and_of_initializer_strict_mode.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

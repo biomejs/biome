@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -41,8 +42,9 @@ JsModule {
 
 0: JS_MODULE@0..31
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..30
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
     0: JS_EXPRESSION_STATEMENT@0..30
       0: JSX_TAG_EXPRESSION@0..29
         0: JSX_SELF_CLOSING_ELEMENT@0..29
@@ -65,7 +67,7 @@ JsModule {
           4: SLASH@27..28 "/" [] []
           5: R_ANGLE@28..29 ">" [] []
       1: SEMICOLON@29..30 ";" [] []
-  3: EOF@30..31 "" [Newline("\n")] []
+  4: EOF@30..31 "" [Newline("\n")] []
 --
 jsx_element_attribute_expression_error.jsx:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

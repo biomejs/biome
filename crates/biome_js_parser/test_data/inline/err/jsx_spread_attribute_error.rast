@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -156,8 +157,9 @@ JsModule {
 
 0: JS_MODULE@0..170
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..169
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..169
     0: JS_VARIABLE_STATEMENT@0..13
       0: JS_VARIABLE_DECLARATION@0..12
         0: (empty)
@@ -259,7 +261,7 @@ JsModule {
           4: SLASH@161..167 "/" [Newline("\n"), Whitespace("    ")] []
           5: R_ANGLE@167..168 ">" [] []
       1: SEMICOLON@168..169 ";" [] []
-  3: EOF@169..170 "" [Newline("\n")] []
+  4: EOF@169..170 "" [Newline("\n")] []
 --
 jsx_spread_attribute_error.jsx:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

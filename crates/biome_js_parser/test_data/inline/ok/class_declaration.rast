@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -72,8 +73,9 @@ JsModule {
 
 0: JS_MODULE@0..67
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..66
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..66
     0: JS_CLASS_DECLARATION@0..12
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -124,4 +126,4 @@ JsModule {
       7: L_CURLY@64..65 "{" [] []
       8: JS_CLASS_MEMBER_LIST@65..65
       9: R_CURLY@65..66 "}" [] []
-  3: EOF@66..67 "" [Newline("\n")] []
+  4: EOF@66..67 "" [Newline("\n")] []

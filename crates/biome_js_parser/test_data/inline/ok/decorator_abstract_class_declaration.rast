@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -122,8 +123,9 @@ JsModule {
 
 0: JS_MODULE@0..129
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..128
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..128
     0: JS_FUNCTION_DECLARATION@0..128
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -208,4 +210,4 @@ JsModule {
             8: JS_CLASS_MEMBER_LIST@125..125
             9: R_CURLY@125..126 "}" [] []
         3: R_CURLY@126..128 "}" [Newline("\n")] []
-  3: EOF@128..129 "" [Newline("\n")] []
+  4: EOF@128..129 "" [Newline("\n")] []

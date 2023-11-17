@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -207,8 +208,9 @@ JsModule {
 
 0: JS_MODULE@0..172
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..171
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..171
     0: JS_VARIABLE_STATEMENT@0..12
       0: JS_VARIABLE_DECLARATION@0..11
         0: (empty)
@@ -323,7 +325,7 @@ JsModule {
         4: JS_MODULE_SOURCE@165..170
           0: JS_STRING_LITERAL@165..170 "\"./e\"" [] []
         5: SEMICOLON@170..171 ";" [] []
-  3: EOF@171..172 "" [Newline("\n")] []
+  4: EOF@171..172 "" [Newline("\n")] []
 --
 ts_export_syntax_in_js.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

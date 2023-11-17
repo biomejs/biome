@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -267,8 +268,9 @@ JsModule {
 
 0: JS_MODULE@0..380
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..379
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..379
     0: JS_IMPORT@0..37
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_BARE_CLAUSE@7..36
@@ -451,7 +453,7 @@ JsModule {
           2: JS_IMPORT_ASSERTION_ENTRY_LIST@379..379
           3: (empty)
       2: (empty)
-  3: EOF@379..380 "" [Newline("\n")] []
+  4: EOF@379..380 "" [Newline("\n")] []
 --
 import_assertion_err.js:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

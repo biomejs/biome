@@ -1,4 +1,5 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
@@ -43,8 +44,9 @@ JsScript {
 
 0: JS_SCRIPT@0..1442
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..1441
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..1441
     0: JS_BOGUS_STATEMENT@0..1441
       0: JS_DECORATOR_LIST@0..0
       1: EXPORT_KW@0..17 "export" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
@@ -70,7 +72,7 @@ JsScript {
                 0: JS_STRING_LITERAL@40..1438 "\"Kinsmen hot Moria tea serves. Sticky camp spell covering forged they're Oakenshield vines. Admirable relatives march regained wheel Ere eternally on rest parts unhappy? Leave hundreds market's Argonath answered avail grieve doing goodness! Wrong miserable well-wishers wander stood immediately neither Agreed goat poison holes fire? Nobody tosses a Dwarf. Brigands Bilbo Baggins prisoner stinker birthday injuries. Kili's loosened shy spiders till. Gandalf's death was not in vain. Nor would he have you give up hope. Bread kindly ghost Beorn's jelly. Andûril two-faced bitterness biding seemed says drinking splendor feed light unnoticed one! Carven nearest Eärendil fireworks former. Mattress smelling wandering teaching appear taste wise Mithril uprooted winter forebearers wheel. Let's beside Proudfoots succumbed! Excuse Anárion stolen helpless nudge study shown holding form? Changes point Snowbourn material side outer highest eaves flash-flame relic descendant lurking. Thousand death Agreed oppose whole? Glóin head's hurts feasting fight shiny legacy. Thror's broken odds suffice believe well-protected? Rightfully manners begged Maggot's fairer. Unheard-of grog shields sad wondering gardener killed gone Galadriel! Pan Frodo fingers spreads magic parting amount interest idly naked. It's some form of Elvish. I can't read it. Silverwork Wraiths riddled enchantment apple anywhere.\"" [] []
               2: SEMICOLON@1438..1440 ";" [] [Whitespace(" ")]
           3: R_CURLY@1440..1441 "}" [] []
-  3: EOF@1441..1442 "" [Newline("\n")] []
+  4: EOF@1441..1442 "" [Newline("\n")] []
 --
 export_huge_function_in_script.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

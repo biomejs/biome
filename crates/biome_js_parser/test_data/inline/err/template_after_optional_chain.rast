@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -114,8 +115,9 @@ JsModule {
 
 0: JS_MODULE@0..77
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..76
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..76
     0: JS_EXPRESSION_STATEMENT@0..23
       0: JS_BOGUS_EXPRESSION@0..23
         0: JS_STATIC_MEMBER_EXPRESSION@0..13
@@ -182,7 +184,7 @@ JsModule {
             0: TEMPLATE_CHUNK@67..75 "template" [] []
         3: BACKTICK@75..76 "`" [] []
       1: (empty)
-  3: EOF@76..77 "" [Newline("\n")] []
+  4: EOF@76..77 "" [Newline("\n")] []
 --
 template_after_optional_chain.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

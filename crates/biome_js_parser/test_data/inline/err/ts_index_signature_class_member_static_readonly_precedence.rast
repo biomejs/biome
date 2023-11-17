@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -55,8 +56,9 @@ JsModule {
 
 0: JS_MODULE@0..53
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..52
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..52
     0: JS_CLASS_DECLARATION@0..52
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -89,7 +91,7 @@ JsModule {
               0: STRING_KW@43..49 "string" [] []
           5: SEMICOLON@49..50 ";" [] []
       9: R_CURLY@50..52 "}" [Newline("\n")] []
-  3: EOF@52..53 "" [Newline("\n")] []
+  4: EOF@52..53 "" [Newline("\n")] []
 --
 ts_index_signature_class_member_static_readonly_precedence.ts:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

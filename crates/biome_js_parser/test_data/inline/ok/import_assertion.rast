@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -165,8 +166,9 @@ JsModule {
 
 0: JS_MODULE@0..295
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..294
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..294
     0: JS_IMPORT@0..34
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_BARE_CLAUSE@7..34
@@ -281,4 +283,4 @@ JsModule {
               2: JS_STRING_LITERAL@286..293 "\"json\"" [] [Whitespace(" ")]
           3: R_CURLY@293..294 "}" [] []
       2: (empty)
-  3: EOF@294..295 "" [Newline("\n")] []
+  4: EOF@294..295 "" [Newline("\n")] []

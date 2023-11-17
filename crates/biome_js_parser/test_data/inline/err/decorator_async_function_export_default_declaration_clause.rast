@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -49,8 +50,9 @@ JsModule {
 
 0: JS_MODULE@0..51
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..50
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..50
     0: JS_BOGUS_STATEMENT@0..10
       0: JS_DECORATOR@0..10
         0: AT@0..1 "@" [] []
@@ -80,7 +82,7 @@ JsModule {
             2: JS_STATEMENT_LIST@49..49
             3: R_CURLY@49..50 "}" [] []
         2: (empty)
-  3: EOF@50..51 "" [Newline("\n")] []
+  4: EOF@50..51 "" [Newline("\n")] []
 --
 decorator_async_function_export_default_declaration_clause.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
