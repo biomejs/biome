@@ -8,7 +8,10 @@ use crate::syntax::selector::{
     is_at_compound_selector, parse_compound_selector, parse_selector,
     parse_selector_function_close_token, parse_selector_identifier, CssSelectorList,
 };
-use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_css_string, parse_number, parse_regular_identifier, parse_regular_number};
+use crate::syntax::{
+    is_at_identifier, is_nth_at_identifier, parse_css_string, parse_number,
+    parse_regular_identifier, parse_regular_number,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -432,7 +435,7 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
             CSS_PSEUDO_CLASS_NTH_IDENTIFIER
         }
         // +123
-        T![+] | T![-] if p.nth_at(1, CSS_NUMBER_LITERAL) && !is_nth_at_identifier(p, 2)  => {
+        T![+] | T![-] if p.nth_at(1, CSS_NUMBER_LITERAL) && !is_nth_at_identifier(p, 2) => {
             p.bump_any();
             parse_regular_number(p).ok();
 
