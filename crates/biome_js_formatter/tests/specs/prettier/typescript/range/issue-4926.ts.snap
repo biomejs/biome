@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/range/issue-4926.ts
+---
+
+# Input
+
+```ts
+class Foo {
+    /** Does this key match a given MinimalKey extending object? */
+    match(keyevent) {
+        // 'in' doesn't include prototypes, so it's safe for this object.
+        for (let attr in this) {
+            if (this[attr] !== keyevent[attr]) return false
+        }
+        return true
+    }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,10 @@
+ class Foo {
+-    /** Does this key match a given MinimalKey extending object? */
+-    match(keyevent) {
+-      // 'in' doesn't include prototypes, so it's safe for this object.
+-      for (let attr in this) {
+-        if (this[attr] !== keyevent[attr]) return false;
+-      }
+-      return true;
++  /** Does this key match a given MinimalKey extending object? */
++  match(keyevent) {
++    // 'in' doesn't include prototypes, so it's safe for this object.
++    for (let attr in this) {
++      if (this[attr] !== keyevent[attr]) return false;
+     }
++    return true;
++  }
+ }
+```
+
+# Output
+
+```ts
+class Foo {
+  /** Does this key match a given MinimalKey extending object? */
+  match(keyevent) {
+    // 'in' doesn't include prototypes, so it's safe for this object.
+    for (let attr in this) {
+      if (this[attr] !== keyevent[attr]) return false;
+    }
+    return true;
+  }
+}
+```
+
+

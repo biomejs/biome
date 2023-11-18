@@ -70,25 +70,43 @@ async function traverseDir(dir, input_config) {
 				const outDir = path.resolve(outPath, '..');
 				await fs.mkdir(outDir, { recursive: true });
 				await fs.copyFile(filePath, outPath);
+				const OPTIONS =
+					'====================================options=====================================';
+					const INPUT =
+						'=====================================input======================================';
 				// Extract the expected output from the snapshot text
 				const OUTPUT =
 					'=====================================output=====================================';
 				const FOOTER =
 					'================================================================================';
 
-				const start = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
-				const end = snapshotContent.match(new RegExp('\\n' + FOOTER));
+				const optionStart = snapshotContent.match(new RegExp(OPTIONS + '\\n'));
+				const inputStart = snapshotContent.match(new RegExp(INPUT + '\\n'));
+				const outputStart = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
+				const outputEnd = snapshotContent.match(new RegExp('\\n' + FOOTER));
 
-				const startOffset = start.index + start[0].length;
-				const endOffset = end.index;
-				snapshotContent = snapshotContent.substring(startOffset, endOffset);
+				const optionsStartOffset = optionStart.index + optionStart[0].length;
+				optionsContent = snapshotContent.substring(optionsStartOffset, inputStart.index);
+				const prettierOptions = parsePrettierSnapshotOptions(optionsContent);
 
-				try {
-					// We need to reformat prettier snapshot
-					// because Rome and Prettier have different default options
-					snapshotContent = await prettier.format(snapshotContent, config);
-				} catch (error) {
-					console.error(`Prettier format error in ${filePath}: ${error}`);
+				const outputStartOffset = outputStart.index + outputStart[0].length;
+				const endOffset = outputEnd.index;
+				snapshotContent = snapshotContent.substring(outputStartOffset, endOffset);
+
+				// Don't reformat output formatted in a given range
+				if (!("rangeStart" in prettierOptions || "rangeEnd" in prettierOptions)) {
+					const originalSnapshot = snapshotContent;
+					try {
+						// We need to reformat prettier snapshot
+						// because Rome and Prettier have different default options
+						snapshotContent = await prettier.format(snapshotContent, { ...config, ...prettierOptions });
+					} catch (error) {
+						console.error({ ...config, ...prettierOptions })
+						console.error(`Prettier format error in ${filePath}: ${error}`);
+					}
+					if (snapshotContent != originalSnapshot) {
+						await fs.writeFile(path.resolve(outDir, `${snapFile}-original`), originalSnapshot);
+					}
 				}
 				// Write the expected output to an additional prettier-snap
 				// file in the specs directory
@@ -114,6 +132,18 @@ async function traverseDir(dir, input_config) {
 			}
 		}
 	}
+}
+
+function parsePrettierSnapshotOptions(optionsContent) {
+	const options = {};
+	for (const line of optionsContent.split("\n")) {
+		const key_value = line.split(":");
+		if (key_value.length == 2) {
+			const [key, value] = key_value.map((s) => s.trim());
+			options[key] = JSON.parse(value);
+		}
+	}
+	return options;
 }
 
 module.exports = { extractPrettierTests };

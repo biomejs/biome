@@ -1,7 +1,9 @@
-import def, { named } from "x";
+import  def , {named}  from    'x'
 
-export * from "d";
+export *  from   'd'
 
-export const x = 42;
+export    const  x
+  =  42
 
 export default 42;
+

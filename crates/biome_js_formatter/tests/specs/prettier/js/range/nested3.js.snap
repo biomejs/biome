@@ -21,19 +21,14 @@ catch (err) {}
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,7 @@
+@@ -1,5 +1,6 @@
  try {
--  1;
--  if (condition) {
--    body;
--  }
--} catch (err) {}
+-1;if (condition) {
 +1;
 +if (condition) {
-+  body;
-+}
-+}
-+catch (err) {}
+   body;
+ }
+ }
 ```
 
 # Output

@@ -6,8 +6,6 @@ info: js/strings/escaped.js
 # Input
 
 ```js
-// FIXME
-// TODO: reformat issue
 export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
   goog.getMsg("That's all we know");
 
@@ -24,9 +22,7 @@ export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,9 @@
-+// FIXME
-+// TODO: reformat issue
+@@ -1,6 +1,7 @@
  export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
    goog.getMsg("That's all we know");
  
@@ -42,8 +38,6 @@ export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
 # Output
 
 ```js
-// FIXME
-// TODO: reformat issue
 export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
   goog.getMsg("That's all we know");
 
