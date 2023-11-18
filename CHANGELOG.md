@@ -89,6 +89,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### New Features
+
+- Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/rome/tools/issues/627)
+
 #### Bug fixes
 
 - Apply the correct layout when the right hand of an assignment expression is a await expression or a yield expression. Contributed by @ematipico

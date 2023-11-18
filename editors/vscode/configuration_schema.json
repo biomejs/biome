@@ -845,6 +845,10 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"type": ["boolean", "null"]
+				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"type": ["boolean", "null"]
