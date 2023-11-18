@@ -673,18 +673,24 @@ pub fn css_pseudo_class_identifier(name: CssIdentifier) -> CssPseudoClassIdentif
 pub fn css_pseudo_class_nth(symbol_token: SyntaxToken) -> CssPseudoClassNthBuilder {
     CssPseudoClassNthBuilder {
         symbol_token,
-        multiplier: None,
+        sign_token: None,
+        value: None,
         offset: None,
     }
 }
 pub struct CssPseudoClassNthBuilder {
     symbol_token: SyntaxToken,
-    multiplier: Option<AnyCssNthMultiplier>,
+    sign_token: Option<SyntaxToken>,
+    value: Option<CssNumber>,
     offset: Option<CssNthOffset>,
 }
 impl CssPseudoClassNthBuilder {
-    pub fn with_multiplier(mut self, multiplier: AnyCssNthMultiplier) -> Self {
-        self.multiplier = Some(multiplier);
+    pub fn with_sign_token(mut self, sign_token: SyntaxToken) -> Self {
+        self.sign_token = Some(sign_token);
+        self
+    }
+    pub fn with_value(mut self, value: CssNumber) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn with_offset(mut self, offset: CssNthOffset) -> Self {
@@ -695,7 +701,8 @@ impl CssPseudoClassNthBuilder {
         CssPseudoClassNth::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_PSEUDO_CLASS_NTH,
             [
-                self.multiplier
+                self.sign_token.map(|token| SyntaxElement::Token(token)),
+                self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.symbol_token)),
                 self.offset

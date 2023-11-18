@@ -1912,19 +1912,23 @@ impl CssPseudoClassNth {
     }
     pub fn as_fields(&self) -> CssPseudoClassNthFields {
         CssPseudoClassNthFields {
-            multiplier: self.multiplier(),
+            sign: self.sign(),
+            value: self.value(),
             symbol_token: self.symbol_token(),
             offset: self.offset(),
         }
     }
-    pub fn multiplier(&self) -> Option<AnyCssNthMultiplier> {
-        support::node(&self.syntax, 0usize)
+    pub fn sign(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> Option<CssNumber> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn symbol_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 2usize)
     }
     pub fn offset(&self) -> Option<CssNthOffset> {
-        support::node(&self.syntax, 2usize)
+        support::node(&self.syntax, 3usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1938,7 +1942,8 @@ impl Serialize for CssPseudoClassNth {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassNthFields {
-    pub multiplier: Option<AnyCssNthMultiplier>,
+    pub sign: Option<SyntaxToken>,
+    pub value: Option<CssNumber>,
     pub symbol_token: SyntaxResult<SyntaxToken>,
     pub offset: Option<CssNthOffset>,
 }
@@ -5092,10 +5097,8 @@ impl AstNode for CssPseudoClassNth {
 impl std::fmt::Debug for CssPseudoClassNth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPseudoClassNth")
-            .field(
-                "multiplier",
-                &support::DebugOptionalElement(self.multiplier()),
-            )
+            .field("sign", &support::DebugOptionalElement(self.sign()))
+            .field("value", &support::DebugOptionalElement(self.value()))
             .field(
                 "symbol_token",
                 &support::DebugSyntaxResult(self.symbol_token()),

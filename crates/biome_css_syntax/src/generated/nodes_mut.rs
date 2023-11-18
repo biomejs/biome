@@ -818,21 +818,27 @@ impl CssPseudoClassIdentifier {
     }
 }
 impl CssPseudoClassNth {
-    pub fn with_multiplier(self, element: Option<AnyCssNthMultiplier>) -> Self {
+    pub fn with_sign_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_value(self, element: Option<CssNumber>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
+            1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
     pub fn with_symbol_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
     pub fn with_offset(self, element: Option<CssNthOffset>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            2usize..=2usize,
+            3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }

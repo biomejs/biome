@@ -297,22 +297,15 @@ CssPseudoClassNthIdentifier =
 
 // :nth-child(n+8) {}
 //            ^^^
+// :nth-child(2n+1) {}
+//            ^^^^
+// :nth-child(+2n+1) {}
+//            ^^^^^
 CssPseudoClassNth =
-	multiplier: AnyCssNthMultiplier?
+	sign: ('+' | '-')?
+  value: CssNumber?
 	symbol: 'n'
 	offset: CssNthOffset?
-
-AnyCssNthMultiplier =
-	CssNumber
-	| CssNthMultiplier
-
-// :nth-child(2n+1) {}
-//            ^
-// :nth-child(+2n+1) {}
-//            ^^
-CssNthMultiplier =
-	sign: ('+' | '-')
-	value: CssNumber?
 
 // :nth-child(2n+1) {}
 //              ^^

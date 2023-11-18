@@ -9,8 +9,8 @@ use crate::syntax::selector::{
     parse_selector_function_close_token, parse_selector_identifier, CssSelectorList,
 };
 use crate::syntax::{
-    is_at_identifier, is_nth_at_identifier, parse_css_string, parse_number,
-    parse_regular_identifier, parse_regular_number,
+    is_at_identifier, parse_css_string, parse_number, parse_regular_identifier,
+    parse_regular_number,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -429,61 +429,35 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let kind = match p.cur() {
-        T![odd] | T![even] => {
-            p.bump_any();
-            CSS_PSEUDO_CLASS_NTH_IDENTIFIER
-        }
+    let kind = if matches!(p.cur(), T![odd] | T![even]) {
+        p.bump_any();
+        CSS_PSEUDO_CLASS_NTH_IDENTIFIER
+    } else {
         // +123
-        T![+] | T![-] if p.nth_at(1, CSS_NUMBER_LITERAL) && !is_nth_at_identifier(p, 2) => {
-            p.bump_any();
-            parse_regular_number(p).ok();
-
-            CSS_PSEUDO_CLASS_NTH_NUMBER
-        }
         // +n + 3
         // -n + 3
         //  n + 3
         // -2n + 1
         // +2n- 1
-        T![+] | T![-] | T![n] => {
-            parse_nth_multiplier(p).ok();
-            p.expect_with_context(T![n], CssLexContext::PseudoNthSelector);
-            parse_nth_offset(p).ok();
-
-            CSS_PSEUDO_CLASS_NTH
-        }
         // 123
         // 2n + 4
         // 2n- 4
-        _ => {
-            parse_number(p, CssLexContext::PseudoNthSelector).ok();
+        if matches!(p.cur(), T![+] | T![-]) {
+            p.bump_with_context(p.cur(), CssLexContext::PseudoNthSelector);
+        }
 
-            if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
-                parse_nth_offset(p).ok();
+        parse_number(p, CssLexContext::PseudoNthSelector).ok();
 
-                CSS_PSEUDO_CLASS_NTH
-            } else {
-                CSS_PSEUDO_CLASS_NTH_NUMBER
-            }
+        if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
+            parse_nth_offset(p).ok();
+
+            CSS_PSEUDO_CLASS_NTH
+        } else {
+            CSS_PSEUDO_CLASS_NTH_NUMBER
         }
     };
 
     Present(m.complete(p, kind))
-}
-
-#[inline]
-fn parse_nth_multiplier(p: &mut CssParser) -> ParsedSyntax {
-    if !matches!(p.cur(), T![+] | T![-]) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.bump_with_context(p.cur(), CssLexContext::PseudoNthSelector);
-    parse_number(p, CssLexContext::PseudoNthSelector).ok();
-
-    Present(m.complete(p, CSS_NTH_MULTIPLIER))
 }
 
 #[inline]
