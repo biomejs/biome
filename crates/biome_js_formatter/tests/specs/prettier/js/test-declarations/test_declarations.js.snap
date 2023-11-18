@@ -223,18 +223,6 @@ it(
  
  // Should break
  
-@@ -152,10 +142,7 @@
-   () => {},
- );
- 
--test.describe.only.parallel(
--  "does something really long and complicated so I have to write a very long name for the test",
--  () => {},
--);
-+test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.describe.parallel.serial(
-   "does something really long and complicated so I have to write a very long name for the testThis is a very",
 ```
 
 # Output
@@ -384,7 +372,10 @@ xskip(
   () => {},
 );
 
-test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
+test.describe.only.parallel(
+  "does something really long and complicated so I have to write a very long name for the test",
+  () => {},
+);
 
 test.describe.parallel.serial(
   "does something really long and complicated so I have to write a very long name for the testThis is a very",
@@ -470,11 +461,11 @@ it(
   127:   "does something really long and complicated so I have to write a very long name for the test",
   134:   "does something really long and complicated so I have to write a very long name for the test",
   141:   "does something really long and complicated so I have to write a very long name for the test",
-  145: test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
-  148:   "does something really long and complicated so I have to write a very long name for the testThis is a very",
-  153:   "does something really long and complicated so I have to write a very long name for the test",
-  158:   "does something really long and complicated so I have to write a very long name for the test",
-  167:   does something really long and complicated so I have to write a very long name for the test`, () => {
+  146:   "does something really long and complicated so I have to write a very long name for the test",
+  151:   "does something really long and complicated so I have to write a very long name for the testThis is a very",
+  156:   "does something really long and complicated so I have to write a very long name for the test",
+  161:   "does something really long and complicated so I have to write a very long name for the test",
+  170:   does something really long and complicated so I have to write a very long name for the test`, () => {
 ```
 
 
