@@ -38,6 +38,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts
@@ -81,6 +82,7 @@ Quote properties: As needed
 Trailing comma: ES5
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts
@@ -124,6 +126,7 @@ Quote properties: As needed
 Trailing comma: None
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts

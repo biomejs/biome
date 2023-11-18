@@ -48,6 +48,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```js
@@ -86,6 +87,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: As needed
+Bracket spacing: true
 -----
 
 ```js
