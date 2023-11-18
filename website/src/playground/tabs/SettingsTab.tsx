@@ -735,9 +735,7 @@ function FormatterSettings({
 						name="bracketSpacing"
 						type="checkbox"
 						checked={bracketSpacing}
-						onChange={(e) =>
-							setBracketSpacing(e.target.checked)
-						}
+						onChange={(e) => setBracketSpacing(e.target.checked)}
 					/>
 				</div>
 			</section>
