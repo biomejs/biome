@@ -38,21 +38,7 @@ break;// comment4b
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,11 @@
- switch (1) {
--  default: // comment1
-+  default:
-+  // comment1
- }
- 
- switch (2) {
--  default: // comment2
-+  default:
-+  // comment2
-   //comment2a
- }
- 
-@@ -18,10 +20,10 @@
+@@ -18,10 +18,10 @@
      break; // comment4b
  }
  
@@ -76,13 +62,11 @@ break;// comment4b
 
 ```js
 switch (1) {
-  default:
-  // comment1
+  default: // comment1
 }
 
 switch (2) {
-  default:
-  // comment2
+  default: // comment2
   //comment2a
 }
 
