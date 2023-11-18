@@ -129,10 +129,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssKeyframesSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_NTH_MULTIPLIER => {
-                    let $pattern = unsafe { $crate::CssNthMultiplier::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
                     let $pattern = unsafe { $crate::CssNthOffset::new_unchecked(node) };
                     $body

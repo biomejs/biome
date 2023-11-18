@@ -1260,47 +1260,6 @@ pub struct CssKeyframesSelectorFields {
     pub css_percentage: SyntaxResult<CssPercentage>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssNthMultiplier {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssNthMultiplier {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssNthMultiplierFields {
-        CssNthMultiplierFields {
-            sign: self.sign(),
-            value: self.value(),
-        }
-    }
-    pub fn sign(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn value(&self) -> Option<CssNumber> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssNthMultiplier {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssNthMultiplierFields {
-    pub sign: SyntaxResult<SyntaxToken>,
-    pub value: Option<CssNumber>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNthOffset {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2859,26 +2818,6 @@ impl AnyCssCompoundSelector {
     pub fn as_css_compound_selector(&self) -> Option<&CssCompoundSelector> {
         match &self {
             AnyCssCompoundSelector::CssCompoundSelector(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssNthMultiplier {
-    CssNthMultiplier(CssNthMultiplier),
-    CssNumber(CssNumber),
-}
-impl AnyCssNthMultiplier {
-    pub fn as_css_nth_multiplier(&self) -> Option<&CssNthMultiplier> {
-        match &self {
-            AnyCssNthMultiplier::CssNthMultiplier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_number(&self) -> Option<&CssNumber> {
-        match &self {
-            AnyCssNthMultiplier::CssNumber(item) => Some(item),
             _ => None,
         }
     }
@@ -4450,45 +4389,6 @@ impl From<CssKeyframesSelector> for SyntaxNode {
 }
 impl From<CssKeyframesSelector> for SyntaxElement {
     fn from(n: CssKeyframesSelector) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssNthMultiplier {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NTH_MULTIPLIER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_NTH_MULTIPLIER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssNthMultiplier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNthMultiplier")
-            .field("sign", &support::DebugSyntaxResult(self.sign()))
-            .field("value", &support::DebugOptionalElement(self.value()))
-            .finish()
-    }
-}
-impl From<CssNthMultiplier> for SyntaxNode {
-    fn from(n: CssNthMultiplier) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssNthMultiplier> for SyntaxElement {
-    fn from(n: CssNthMultiplier) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6267,67 +6167,6 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssNthMultiplier> for AnyCssNthMultiplier {
-    fn from(node: CssNthMultiplier) -> AnyCssNthMultiplier {
-        AnyCssNthMultiplier::CssNthMultiplier(node)
-    }
-}
-impl From<CssNumber> for AnyCssNthMultiplier {
-    fn from(node: CssNumber) -> AnyCssNthMultiplier {
-        AnyCssNthMultiplier::CssNumber(node)
-    }
-}
-impl AstNode for AnyCssNthMultiplier {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssNthMultiplier::KIND_SET.union(CssNumber::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_NTH_MULTIPLIER | CSS_NUMBER)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_NTH_MULTIPLIER => {
-                AnyCssNthMultiplier::CssNthMultiplier(CssNthMultiplier { syntax })
-            }
-            CSS_NUMBER => AnyCssNthMultiplier::CssNumber(CssNumber { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyCssNthMultiplier::CssNthMultiplier(it) => &it.syntax,
-            AnyCssNthMultiplier::CssNumber(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyCssNthMultiplier::CssNthMultiplier(it) => it.syntax,
-            AnyCssNthMultiplier::CssNumber(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssNthMultiplier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyCssNthMultiplier::CssNthMultiplier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssNthMultiplier::CssNumber(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssNthMultiplier> for SyntaxNode {
-    fn from(n: AnyCssNthMultiplier) -> SyntaxNode {
-        match n {
-            AnyCssNthMultiplier::CssNthMultiplier(it) => it.into(),
-            AnyCssNthMultiplier::CssNumber(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssNthMultiplier> for SyntaxElement {
-    fn from(n: AnyCssNthMultiplier) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<CssPseudoClassFunctionCompoundSelector> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionCompoundSelector) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(node)
@@ -7364,11 +7203,6 @@ impl std::fmt::Display for AnyCssCompoundSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssNthMultiplier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyCssPseudoClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -7555,11 +7389,6 @@ impl std::fmt::Display for CssKeyframesBlock {
     }
 }
 impl std::fmt::Display for CssKeyframesSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssNthMultiplier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

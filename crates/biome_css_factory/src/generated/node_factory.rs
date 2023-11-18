@@ -480,32 +480,6 @@ pub fn css_keyframes_selector(
         ],
     ))
 }
-pub fn css_nth_multiplier(sign_token: SyntaxToken) -> CssNthMultiplierBuilder {
-    CssNthMultiplierBuilder {
-        sign_token,
-        value: None,
-    }
-}
-pub struct CssNthMultiplierBuilder {
-    sign_token: SyntaxToken,
-    value: Option<CssNumber>,
-}
-impl CssNthMultiplierBuilder {
-    pub fn with_value(mut self, value: CssNumber) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssNthMultiplier {
-        CssNthMultiplier::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_NTH_MULTIPLIER,
-            [
-                Some(SyntaxElement::Token(self.sign_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
     CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NTH_OFFSET,
