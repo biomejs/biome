@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -53,8 +54,9 @@ JsModule {
 
 0: JS_MODULE@0..36
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..35
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
     0: TS_TYPE_ALIAS_DECLARATION@0..21
       0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@5..7
@@ -87,4 +89,4 @@ JsModule {
               0: JSX_IDENT@30..33 "div" [] []
             3: R_ANGLE@33..34 ">" [] []
       1: SEMICOLON@34..35 ";" [] []
-  3: EOF@35..36 "" [Newline("\n")] []
+  4: EOF@35..36 "" [Newline("\n")] []

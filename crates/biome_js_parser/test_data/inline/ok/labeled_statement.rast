@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -38,8 +39,9 @@ JsModule {
 
 0: JS_MODULE@0..30
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..29
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..29
     0: JS_LABELED_STATEMENT@0..9
       0: IDENT@0..6 "label1" [] []
       1: COLON@6..8 ":" [] [Whitespace(" ")]
@@ -61,4 +63,4 @@ JsModule {
         0: JS_NUMBER_LITERAL_EXPRESSION@28..29
           0: JS_NUMBER_LITERAL@28..29 "2" [] []
         1: (empty)
-  3: EOF@29..30 "" [Newline("\n")] []
+  4: EOF@29..30 "" [Newline("\n")] []

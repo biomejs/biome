@@ -1,4 +1,5 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
@@ -75,8 +76,9 @@ JsScript {
 
 0: JS_SCRIPT@0..73
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..72
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..72
     0: JS_CLASS_DECLARATION@0..39
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -122,7 +124,7 @@ JsScript {
               1: SEMICOLON@67..69 ";" [] [Whitespace(" ")]
           3: R_CURLY@69..71 "}" [] [Whitespace(" ")]
       9: R_CURLY@71..72 "}" [] []
-  3: EOF@72..73 "" [Newline("\n")] []
+  4: EOF@72..73 "" [Newline("\n")] []
 --
 await_in_static_initialization_block_member.js:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -21,6 +21,7 @@ html:lang(de, fr) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -281,7 +282,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..132
-  0: CSS_RULE_LIST@0..131
+  0: (empty)
+  1: CSS_RULE_LIST@0..131
     0: CSS_RULE@0..17
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
@@ -447,7 +449,7 @@ CssRoot {
         0: L_CURLY@129..130 "{" [] []
         1: CSS_DECLARATION_LIST@130..130
         2: R_CURLY@130..131 "}" [] []
-  1: EOF@131..132 "" [Newline("\n")] []
+  2: EOF@131..132 "" [Newline("\n")] []
 
 ```
 

@@ -954,7 +954,34 @@ fn is_commonjs_or_amd_call(
         return Ok(false);
     };
     let result = match reference.name()?.text() {
-        "require" => true,
+        "require" => {
+            let args = arguments.args();
+            match args.len() {
+                0 => false,
+                // `require` can be called with any expression that resolves to a
+                // string. This check is only an escape hatch to allow a complex
+                // expression to break rather than group onto the previous line.
+                //
+                // EX: `require(path.join(__dirname, 'relative/path'))`
+                // Without condition:
+                //   require(path.join(
+                //     __dirname,
+                //     'relative/path'));
+                // With condition:
+                //   require(
+                //     path.join(__dirname, 'relative/path')
+                //   );
+                1 => matches!(
+                    args.first(),
+                    Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(_)
+                        )
+                    )))
+                ),
+                _ => true,
+            }
+        }
         "define" => {
             let in_statement = call.parent::<JsExpressionStatement>().is_some();
             if in_statement {

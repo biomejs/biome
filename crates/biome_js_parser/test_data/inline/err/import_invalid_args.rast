@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -98,8 +99,9 @@ JsModule {
 
 0: JS_MODULE@0..79
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..78
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
     0: JS_EXPRESSION_STATEMENT@0..8
       0: JS_IMPORT_CALL_EXPRESSION@0..8
         0: IMPORT_KW@0..6 "import" [] []
@@ -156,7 +158,7 @@ JsModule {
               0: JS_STRING_LITERAL@72..77 "\"bar\"" [] []
           2: R_PAREN@77..78 ")" [] []
       1: (empty)
-  3: EOF@78..79 "" [Newline("\n")] []
+  4: EOF@78..79 "" [Newline("\n")] []
 --
 import_invalid_args.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

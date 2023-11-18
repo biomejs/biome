@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -271,8 +272,9 @@ JsModule {
 
 0: JS_MODULE@0..162
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..161
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..161
     0: JS_EXPRESSION_STATEMENT@0..18
       0: JS_PARENTHESIZED_EXPRESSION@0..17
         0: L_PAREN@0..1 "(" [] []
@@ -450,4 +452,4 @@ JsModule {
               0: IDENT@158..159 "c" [] []
         2: R_PAREN@159..160 ")" [] []
       1: SEMICOLON@160..161 ";" [] []
-  3: EOF@161..162 "" [Newline("\n")] []
+  4: EOF@161..162 "" [Newline("\n")] []

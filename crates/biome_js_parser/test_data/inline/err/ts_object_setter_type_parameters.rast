@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -68,8 +69,9 @@ JsModule {
 
 0: JS_MODULE@0..29
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..28
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..28
     0: JS_EXPRESSION_STATEMENT@0..28
       0: JS_PARENTHESIZED_EXPRESSION@0..27
         0: L_PAREN@0..1 "(" [] []
@@ -112,7 +114,7 @@ JsModule {
           2: R_CURLY@25..26 "}" [] []
         2: R_PAREN@26..27 ")" [] []
       1: SEMICOLON@27..28 ";" [] []
-  3: EOF@28..29 "" [Newline("\n")] []
+  4: EOF@28..29 "" [Newline("\n")] []
 --
 ts_object_setter_type_parameters.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -23,6 +23,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -187,7 +188,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..79
-  0: CSS_RULE_LIST@0..78
+  0: (empty)
+  1: CSS_RULE_LIST@0..78
     0: CSS_RULE@0..5
       0: CSS_SELECTOR_LIST@0..3
         0: CSS_COMPOUND_SELECTOR@0..3
@@ -284,7 +286,7 @@ CssRoot {
         0: L_CURLY@76..77 "{" [] []
         1: CSS_DECLARATION_LIST@77..77
         2: R_CURLY@77..78 "}" [] []
-  1: EOF@78..79 "" [Newline("\n")] []
+  2: EOF@78..79 "" [Newline("\n")] []
 
 ```
 

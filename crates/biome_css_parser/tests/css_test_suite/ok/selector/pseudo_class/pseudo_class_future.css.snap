@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -90,7 +91,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..25
-  0: CSS_RULE_LIST@0..25
+  0: (empty)
+  1: CSS_RULE_LIST@0..25
     0: CSS_RULE@0..25
       0: CSS_SELECTOR_LIST@0..23
         0: CSS_COMPOUND_SELECTOR@0..23
@@ -136,7 +138,7 @@ CssRoot {
         0: L_CURLY@23..24 "{" [] []
         1: CSS_DECLARATION_LIST@24..24
         2: R_CURLY@24..25 "}" [] []
-  1: EOF@25..25 "" [] []
+  2: EOF@25..25 "" [] []
 
 ```
 

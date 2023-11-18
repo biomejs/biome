@@ -716,14 +716,33 @@ impl CssRelativeSelectorBuilder {
         ))
     }
 }
-pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRoot {
-    CssRoot::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ROOT,
-        [
-            Some(SyntaxElement::Node(rules.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRootBuilder {
+    CssRootBuilder {
+        rules,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct CssRootBuilder {
+    rules: CssRuleList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl CssRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> CssRoot {
+        CssRoot::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.rules.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn css_rule(prelude: CssSelectorList, block: CssBlock) -> CssRule {
     CssRule::unwrap_cast(SyntaxNode::new_detached(

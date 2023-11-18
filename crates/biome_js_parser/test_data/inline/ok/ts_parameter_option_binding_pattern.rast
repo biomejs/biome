@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -129,8 +130,9 @@ JsModule {
 
 0: JS_MODULE@0..155
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..154
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..154
     0: TS_DECLARE_STATEMENT@0..154
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: TS_MODULE_DECLARATION@8..154
@@ -218,4 +220,4 @@ JsModule {
                     7: SEMICOLON@147..148 ";" [] []
                 9: R_CURLY@148..152 "}" [Newline("\n"), Whitespace("  ")] []
           2: R_CURLY@152..154 "}" [Newline("\n")] []
-  3: EOF@154..155 "" [Newline("\n")] []
+  4: EOF@154..155 "" [Newline("\n")] []

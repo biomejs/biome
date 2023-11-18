@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -37,8 +38,9 @@ JsModule {
 
 0: JS_MODULE@0..38
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..37
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..37
     0: JS_SWITCH_STATEMENT@0..37
       0: SWITCH_KW@0..7 "switch" [] [Whitespace(" ")]
       1: L_PAREN@7..8 "(" [] []
@@ -60,4 +62,4 @@ JsModule {
           1: COLON@34..35 ":" [] []
           2: JS_STATEMENT_LIST@35..35
       6: R_CURLY@35..37 "}" [Newline("\n")] []
-  3: EOF@37..38 "" [Newline("\n")] []
+  4: EOF@37..38 "" [Newline("\n")] []

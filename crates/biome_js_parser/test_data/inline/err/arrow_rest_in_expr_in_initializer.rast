@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -63,8 +64,9 @@ JsModule {
 
 0: JS_MODULE@0..36
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..35
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
     0: JS_FOR_STATEMENT@0..35
       0: FOR_KW@0..4 "for" [] [Whitespace(" ")]
       1: L_PAREN@4..5 "(" [] []
@@ -106,7 +108,7 @@ JsModule {
         0: L_CURLY@33..34 "{" [] []
         1: JS_STATEMENT_LIST@34..34
         2: R_CURLY@34..35 "}" [] []
-  3: EOF@35..36 "" [Newline("\n")] []
+  4: EOF@35..36 "" [Newline("\n")] []
 --
 arrow_rest_in_expr_in_initializer.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

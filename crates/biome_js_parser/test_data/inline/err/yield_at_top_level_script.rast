@@ -1,4 +1,5 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
@@ -22,8 +23,9 @@ JsScript {
 
 0: JS_SCRIPT@0..20
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..19
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..19
     0: JS_EXPRESSION_STATEMENT@0..19
       0: JS_BOGUS_EXPRESSION@0..18
         0: YIELD_KW@0..16 "yield" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
@@ -32,7 +34,7 @@ JsScript {
           1: JS_NUMBER_LITERAL_EXPRESSION@16..18
             0: JS_NUMBER_LITERAL@16..18 "10" [] []
       1: SEMICOLON@18..19 ";" [] []
-  3: EOF@19..20 "" [Newline("\n")] []
+  4: EOF@19..20 "" [Newline("\n")] []
 --
 yield_at_top_level_script.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

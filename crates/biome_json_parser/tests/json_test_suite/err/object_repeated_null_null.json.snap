@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonObjectValue {
         l_curly_token: L_CURLY@0..1 "{" [] [],
         json_member_list: JsonMemberList [
@@ -59,7 +60,8 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..21
-  0: JSON_OBJECT_VALUE@0..21
+  0: (empty)
+  1: JSON_OBJECT_VALUE@0..21
     0: L_CURLY@0..1 "{" [] []
     1: JSON_MEMBER_LIST@1..20
       0: JSON_MEMBER@1..5
@@ -86,7 +88,7 @@ JsonRoot {
         2: JSON_NULL_VALUE@16..20
           0: NULL_KW@16..20 "null" [] []
     2: R_CURLY@20..21 "}" [] []
-  1: EOF@21..21 "" [] []
+  2: EOF@21..21 "" [] []
 
 ```
 

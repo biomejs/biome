@@ -30,6 +30,7 @@ a:is(:not(:hover)) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -1279,7 +1280,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..552
-  0: CSS_RULE_LIST@0..551
+  0: (empty)
+  1: CSS_RULE_LIST@0..551
     0: CSS_RULE@0..13
       0: CSS_SELECTOR_LIST@0..11
         0: CSS_COMPLEX_SELECTOR@0..11
@@ -2107,7 +2109,7 @@ CssRoot {
         0: L_CURLY@549..550 "{" [] []
         1: CSS_DECLARATION_LIST@550..550
         2: R_CURLY@550..551 "}" [] []
-  1: EOF@551..552 "" [Newline("\n")] []
+  2: EOF@551..552 "" [Newline("\n")] []
 
 ```
 

@@ -43,6 +43,7 @@ CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
 CssRoot =
+	bom: 'UNICODE_BOM'?
 	rules: CssRuleList
 	eof: 'EOF'
 

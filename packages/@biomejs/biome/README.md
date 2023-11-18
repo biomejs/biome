@@ -75,6 +75,20 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 
 **Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) or [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
+
+## Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://opencollective.com/shiguredo" target="_blank"><img src="https://images.opencollective.com/shiguredo/8552ade/logo.png?height=80" width="80"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 [bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -179,8 +180,9 @@ JsModule {
 
 0: JS_MODULE@0..94
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..93
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..93
     0: JS_CLASS_DECLARATION@0..93
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -283,7 +285,7 @@ JsModule {
             2: JS_STATEMENT_LIST@90..90
             3: R_CURLY@90..91 "}" [] []
       9: R_CURLY@91..93 "}" [Newline("\n")] []
-  3: EOF@93..94 "" [Newline("\n")] []
+  4: EOF@93..94 "" [Newline("\n")] []
 --
 ts_decorator_this_parameter_option.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

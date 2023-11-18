@@ -26,7 +26,6 @@ pub(crate) struct CssTokenSource<'src> {
 
     /// Offset of the last cached lookahead token from the current [BufferedLexer] token.
     lookahead_offset: usize,
-    config: CssParserOptions,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -43,20 +42,15 @@ impl<'src> CssTokenSource<'src> {
             trivia_list: vec![],
             lookahead_offset: 0,
             non_trivia_lookahead: VecDeque::new(),
-            config: CssParserOptions::default(),
         }
-    }
-
-    pub(crate) fn with_config(self, config: CssParserOptions) -> Self {
-        Self { config, ..self }
     }
 
     /// Creates a new token source for the given string
     pub fn from_str(source: &'src str, config: CssParserOptions) -> Self {
-        let lexer = CssLexer::from_str(source);
+        let lexer = CssLexer::from_str(source).with_config(config);
 
         let buffered = BufferedLexer::new(lexer);
-        let mut source = CssTokenSource::new(buffered).with_config(config);
+        let mut source = CssTokenSource::new(buffered);
 
         source.next_non_trivia_token(CssLexContext::default(), true);
         source
@@ -77,13 +71,6 @@ impl<'src> CssTokenSource<'src> {
 
             match trivia_kind {
                 Err(_) => {
-                    // Not trivia
-                    break;
-                }
-                Ok(trivia_kind)
-                    if trivia_kind.is_single_line_comment()
-                        && !self.config.allow_single_line_comments =>
-                {
                     // Not trivia
                     break;
                 }

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -62,8 +63,9 @@ JsModule {
 
 0: JS_MODULE@0..45
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..44
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..44
     0: JS_BOGUS_STATEMENT@0..10
       0: JS_DECORATOR@0..10
         0: AT@0..1 "@" [] []
@@ -97,7 +99,7 @@ JsModule {
                 0: IDENT@41..43 "Z" [] [Whitespace(" ")]
               1: (empty)
           5: R_CURLY@43..44 "}" [] []
-  3: EOF@44..45 "" [Newline("\n")] []
+  4: EOF@44..45 "" [Newline("\n")] []
 --
 decorator_enum_export_default_declaration_clause.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

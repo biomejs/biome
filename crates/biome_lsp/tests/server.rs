@@ -419,8 +419,9 @@ async fn document_lifecycle() -> Result<()> {
 
     const EXPECTED: &str = "0: JS_MODULE@0..57
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..57
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..57
     0: JS_EXPRESSION_STATEMENT@0..18
       0: JS_CALL_EXPRESSION@0..17
         0: JS_IDENTIFIER_EXPRESSION@0..15
@@ -457,7 +458,7 @@ async fn document_lifecycle() -> Result<()> {
           1: JS_CALL_ARGUMENT_LIST@55..55
           2: R_PAREN@55..56 \")\" [] []
       1: SEMICOLON@56..57 \";\" [] []
-  3: EOF@57..57 \"\" [] []
+  4: EOF@57..57 \"\" [] []
 ";
 
     assert_eq!(res.cst, EXPECTED);

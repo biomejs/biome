@@ -14,12 +14,12 @@ pub(crate) struct CssParser<'source> {
 
 #[derive(Default, Debug, Clone, Copy)]
 pub struct CssParserOptions {
-    pub allow_single_line_comments: bool,
+    pub allow_wrong_line_comments: bool,
 }
 
 impl CssParserOptions {
-    pub fn with_allow_single_line_comments(mut self) -> Self {
-        self.allow_single_line_comments = true;
+    pub fn with_allow_wrong_line_comments(mut self) -> Self {
+        self.allow_wrong_line_comments = true;
         self
     }
 }

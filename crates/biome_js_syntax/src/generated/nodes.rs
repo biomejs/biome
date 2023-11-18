@@ -4439,23 +4439,27 @@ impl JsModule {
     }
     pub fn as_fields(&self) -> JsModuleFields {
         JsModuleFields {
+            bom_token: self.bom_token(),
             interpreter_token: self.interpreter_token(),
             directives: self.directives(),
             items: self.items(),
             eof_token: self.eof_token(),
         }
     }
-    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directives(&self) -> JsDirectiveList {
-        support::list(&self.syntax, 1usize)
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn items(&self) -> JsModuleItemList {
+    pub fn directives(&self) -> JsDirectiveList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn items(&self) -> JsModuleItemList {
+        support::list(&self.syntax, 3usize)
+    }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -4469,6 +4473,7 @@ impl Serialize for JsModule {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsModuleFields {
+    pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
     pub directives: JsDirectiveList,
     pub items: JsModuleItemList,
@@ -5851,23 +5856,27 @@ impl JsScript {
     }
     pub fn as_fields(&self) -> JsScriptFields {
         JsScriptFields {
+            bom_token: self.bom_token(),
             interpreter_token: self.interpreter_token(),
             directives: self.directives(),
             statements: self.statements(),
             eof_token: self.eof_token(),
         }
     }
-    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directives(&self) -> JsDirectiveList {
-        support::list(&self.syntax, 1usize)
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn statements(&self) -> JsStatementList {
+    pub fn directives(&self) -> JsDirectiveList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn statements(&self) -> JsStatementList {
+        support::list(&self.syntax, 3usize)
+    }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -5881,6 +5890,7 @@ impl Serialize for JsScript {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsScriptFields {
+    pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
     pub directives: JsDirectiveList,
     pub statements: JsStatementList,
@@ -20490,6 +20500,10 @@ impl std::fmt::Debug for JsModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsModule")
             .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field(
                 "interpreter_token",
                 &support::DebugOptionalElement(self.interpreter_token()),
             )
@@ -21876,6 +21890,10 @@ impl AstNode for JsScript {
 impl std::fmt::Debug for JsScript {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsScript")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
             .field(
                 "interpreter_token",
                 &support::DebugOptionalElement(self.interpreter_token()),

@@ -12,6 +12,7 @@ pub(crate) struct FormatJsModule;
 impl FormatNodeRule<JsModule> for FormatJsModule {
     fn fmt_fields(&self, node: &JsModule, f: &mut JsFormatter) -> FormatResult<()> {
         let JsModuleFields {
+            bom_token,
             interpreter_token,
             directives,
             items,
@@ -21,6 +22,7 @@ impl FormatNodeRule<JsModule> for FormatJsModule {
         write![
             f,
             [
+                bom_token.format(),
                 FormatInterpreterToken::new(interpreter_token.as_ref()),
                 format_leading_comments(node.syntax()),
                 directives.format()

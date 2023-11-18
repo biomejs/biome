@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -76,8 +77,9 @@ JsModule {
 
 0: JS_MODULE@0..60
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..59
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..59
     0: TS_DECLARE_STATEMENT@0..26
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: TS_ENUM_DECLARATION@8..26
@@ -126,4 +128,4 @@ JsModule {
               0: IDENT@56..58 "Z" [] [Whitespace(" ")]
             1: (empty)
         5: R_CURLY@58..59 "}" [] []
-  3: EOF@59..60 "" [Newline("\n")] []
+  4: EOF@59..60 "" [Newline("\n")] []

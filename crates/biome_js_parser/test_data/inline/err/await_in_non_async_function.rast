@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -41,8 +42,9 @@ JsModule {
 
 0: JS_MODULE@0..30
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..29
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..29
     0: JS_FUNCTION_DECLARATION@0..29
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -66,7 +68,7 @@ JsModule {
                 0: JS_NUMBER_LITERAL@24..26 "10" [] []
             1: SEMICOLON@26..28 ";" [] [Whitespace(" ")]
         3: R_CURLY@28..29 "}" [] []
-  3: EOF@29..30 "" [Newline("\n")] []
+  4: EOF@29..30 "" [Newline("\n")] []
 --
 await_in_non_async_function.js:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

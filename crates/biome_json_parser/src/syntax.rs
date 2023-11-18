@@ -23,6 +23,7 @@ const VALUE_RECOVERY_SET: TokenSet<JsonSyntaxKind> =
 
 pub(crate) fn parse_root(p: &mut JsonParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
 
     let value = match parse_value(p) {
         Present(value) => Present(value),

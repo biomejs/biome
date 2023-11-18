@@ -52,12 +52,14 @@ AnyJsRoot =
 	JsScript | JsModule | JsExpressionSnipped
 
 JsScript =
+	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
 	statements: JsStatementList
 	eof: 'EOF'
 
 JsModule =
+	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
 	items: JsModuleItemList
