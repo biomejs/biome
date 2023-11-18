@@ -79,11 +79,16 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
             )
         });
 
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
         write!(
             f,
             [
                 &l_curly_token.format(),
-                group(&soft_space_or_block_indent(&format_inner)).should_expand(should_expand),
+                group(&soft_block_indent_with_conditional_space(
+                    &format_inner,
+                    should_insert_space_around_brackets
+                ))
+                .should_expand(should_expand),
                 r_curly_token.format(),
             ]
         )

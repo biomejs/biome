@@ -35,4 +35,23 @@ Bracket spacing: true
 function foo([foo, /* not used */ /* not used */ ,]) {}
 ```
 
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: false
+-----
+
+```js
+function foo([foo, /* not used */ /* not used */ ,]) {}
+```
+
 

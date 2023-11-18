@@ -69,12 +69,12 @@ action => {};
 (action = 1) => {};
 "#;
 
-const APPLY_BRACKET_SPACING_BEFORE: &str = r#"import { Foo } from 'bar';
+const APPLY_BRACKET_SPACING_BEFORE: &str = r#"import { Foo } from "bar";
 let foo = { a, b };
 const { a, b } = foo;
 "#;
 
-const APPLY_BRACKET_SPACING_AFTER: &str = r#"import {Foo} from 'bar';
+const APPLY_BRACKET_SPACING_AFTER: &str = r#"import {Foo} from "bar";
 let foo = {a, b};
 const {a, b} = foo;
 "#;

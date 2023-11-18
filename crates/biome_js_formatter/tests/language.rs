@@ -4,7 +4,8 @@ use biome_formatter::{
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
-    ArrowParentheses, JsFormatContext, JsFormatOptions, QuoteProperties, QuoteStyle, Semicolons,
+    ArrowParentheses, BracketSpacing, JsFormatContext, JsFormatOptions, QuoteProperties,
+    QuoteStyle, Semicolons,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
@@ -267,6 +268,10 @@ impl JsSerializableFormatOptions {
             .with_arrow_parentheses(
                 self.arrow_parentheses
                     .map_or_else(|| ArrowParentheses::Always, |value| value.into()),
+            )
+            .with_bracket_spacing(
+                self.bracket_spacing
+                    .map_or_else(BracketSpacing::default, |value| value.into()),
             )
     }
 }
