@@ -926,6 +926,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noStaticElementInteractions" => {
+                            result.no_static_element_interactions = Deserializable::deserialize(
+                                &value,
+                                "noStaticElementInteractions",
+                                diagnostics,
+                            );
+                        }
                         "noThisInStatic" => {
                             result.no_this_in_static =
                                 Deserializable::deserialize(&value, "noThisInStatic", diagnostics);
@@ -1023,6 +1030,7 @@ impl Deserializable for Nursery {
                                     "noInvalidNewBuiltin",
                                     "noMisleadingInstantiator",
                                     "noMisrefactoredShorthandAssign",
+                                    "noStaticElementInteractions",
                                     "noThisInStatic",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",

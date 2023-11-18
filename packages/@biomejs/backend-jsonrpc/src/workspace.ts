@@ -773,6 +773,10 @@ export interface Nursery {
 	 */
 	noMisrefactoredShorthandAssign?: RuleConfiguration;
 	/**
+	 * Static elements should not be interactive.
+	 */
+	noStaticElementInteractions?: RuleConfiguration;
+	/**
 	 * Disallow this and super in static contexts.
 	 */
 	noThisInStatic?: RuleConfiguration;
@@ -1467,6 +1471,7 @@ export type Category =
 	| "lint/nursery/noInvalidNewBuiltin"
 	| "lint/nursery/noMisleadingInstantiator"
 	| "lint/nursery/noMisrefactoredShorthandAssign"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noThisInStatic"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"

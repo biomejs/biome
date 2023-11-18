@@ -1100,6 +1100,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noStaticElementInteractions": {
+					"description": "Static elements should not be interactive.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noThisInStatic": {
 					"description": "Disallow this and super in static contexts.",
 					"anyOf": [

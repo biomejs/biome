@@ -1,0 +1,1925 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+/* static, but no interactions */
+<div />;
+<span />;
+<big />;
+<blockquote />;
+<footer />;
+<picture />;
+<strike />;
+<time />;
+<div className="foo" />;
+<div className="foo" {...props} />;
+
+/* Named components are excluded because we don't know what elements they return */
+<TestComponent onClick={doFoo} />;
+<Button onClick={doFoo} />;
+
+
+/* aria-hidden is allowed because it is hidden from screen reader */
+<div onClick={() => void 0} aria-hidden />;
+<div onClick={() => void 0} aria-hidden={true} />;
+<div onClick={null} />;
+
+/* All flavors of input */
+<input onClick={() => void 0} />;
+<input type="button" onClick={() => void 0} />;
+<input type="checkbox" onClick={() => void 0} />;
+<input type="color" onClick={() => void 0} />;
+<input type="date" onClick={() => void 0} />;
+<input type="datetime" onClick={() => void 0} />;
+<input type="datetime-local" onClick={() => void 0} />;
+<input type="email" onClick={() => void 0} />;
+<input type="file" onClick={() => void 0} />;
+<input type="hidden" onClick={() => void 0} />;
+<input type="image" onClick={() => void 0} />;
+<input type="month" onClick={() => void 0} />;
+<input type="number" onClick={() => void 0} />;
+<input type="password" onClick={() => void 0} />;
+<input type="radio" onClick={() => void 0} />;
+<input type="range" onClick={() => void 0} />;
+<input type="reset" onClick={() => void 0} />;
+<input type="search" onClick={() => void 0} />;
+<input type="submit" onClick={() => void 0} />;
+<input type="tel" onClick={() => void 0} />;
+<input type="text" onClick={() => void 0} />;
+<input type="time" onClick={() => void 0} />;
+<input type="url" onClick={() => void 0} />;
+<input type="week" onClick={() => void 0} />;
+
+/* Presentation is a special case role that indicates intentional static semantics */
+<div role="presentation" onClick={() => {}} />;
+<div role="presentation" onKeyDown={() => {}} />;
+
+/* HTML elements with an inherent interactive role */
+<button onClick={() => void 0} className="foo" />;
+<datalist onClick={() => {}} />;
+<menuitem onClick={() => {}} />;
+<option onClick={() => void 0} className="foo" />;
+<select onClick={() => void 0} className="foo" />;
+<textarea onClick={() => void 0} className="foo" />;
+<a onClick={() => void 0} href="http://x.y.z" />;
+<a onClick={() => void 0} href="http://x.y.z" tabIndex="0" />;
+<audio onClick={() => {}} />;
+<form onClick={() => {}} />;
+<form onSubmit={() => {}} />;
+
+/* HTML elements attributed with an interactive role */
+<div role="button" onClick={() => {}} />;
+<div role="checkbox" onClick={() => {}} />;
+<div role="columnheader" onClick={() => {}} />;
+<div role="combobox" onClick={() => {}} />;
+<div role="form" onClick={() => {}} />;
+<div role="gridcell" onClick={() => {}} />;
+<div role="link" onClick={() => {}} />;
+<div role="menuitem" onClick={() => {}} />;
+<div role="menuitemcheckbox" onClick={() => {}} />;
+<div role="menuitemradio" onClick={() => {}} />;
+<div role="option" onClick={() => {}} />;
+<div role="radio" onClick={() => {}} />;
+<div role="rowheader" onClick={() => {}} />;
+<div role="searchbox" onClick={() => {}} />;
+<div role="slider" onClick={() => {}} />;
+<div role="spinbutton" onClick={() => {}} />;
+<div role="switch" onClick={() => {}} />;
+<div role="tab" onClick={() => {}} />;
+<div role="textbox" onClick={() => {}} />;
+<div role="treeitem" onClick={() => {}} />;
+
+/* HTML elements with an inherent, non-interactive role */
+<address onClick={() => {}} />;
+<article onClick={() => {}} />;
+<article onDblClick={() => void 0} />;
+<aside onClick={() => {}} />;
+<blockquote onClick={() => {}} />;
+<br onClick={() => {}} />;
+<canvas onClick={() => {}} />;
+<caption onClick={() => {}} />;
+<code onClick={() => {}} />;
+<details onClick={() => {}} />;
+<dd onClick={() => {}} />;
+<del onClick={() => {}} />;
+<dfn onClick={() => {}} />;
+<dir onClick={() => {}} />;
+<dl onClick={() => {}} />;
+<dt onClick={() => {}} />;
+<em onClick={() => {}} />;
+<embed onClick={() => {}} />;
+<fieldset onClick={() => {}} />;
+<figcaption onClick={() => {}} />;
+<figure onClick={() => {}} />;
+<footer onClick={() => {}} />;
+<h1 onClick={() => {}} />;
+<h2 onClick={() => {}} />;
+<h3 onClick={() => {}} />;
+<h4 onClick={() => {}} />;
+<h5 onClick={() => {}} />;
+<h6 onClick={() => {}} />;
+<hr onClick={() => {}} />;
+<html onClick={() => {}} />;
+<iframe onClick={() => {}} />;
+<img onClick={() => {}} />;
+<ins onClick={() => {}} />;
+<label onClick={() => {}} />;
+<legend onClick={() => {}} />;
+<li onClick={() => {}} />;
+<main onClick={() => void 0} />;
+<mark onClick={() => {}} />;
+<marquee onClick={() => {}} />;
+<menu onClick={() => {}} />;
+<meter onClick={() => {}} />;
+<nav onClick={() => {}} />;
+<ol onClick={() => {}} />;
+<optgroup onClick={() => {}} />;
+<output onClick={() => {}} />;
+<p onClick={() => {}} />;
+<pre onClick={() => {}} />;
+<progress onClick={() => {}} />;
+<ruby onClick={() => {}} />;
+<section onClick={() => {}} aria-label="Aa" />;
+<section onClick={() => {}} aria-labelledby="js_1" />;
+<strong onClick={() => {}} />;
+<sub onClick={() => {}} />;
+<sup onClick={() => {}} />;
+<table onClick={() => {}} />;
+<tbody onClick={() => {}} />;
+<tfoot onClick={() => {}} />;
+<th onClick={() => {}} />;
+<thead onClick={() => {}} />;
+<time onClick={() => {}} />;
+<tr onClick={() => {}} />;
+<video onClick={() => {}} />;
+<ul onClick={() => {}} />;
+
+/* HTML elements attributed with an abstract role */
+<div role="command" onClick={() => {}} />;
+<div role="composite" onClick={() => {}} />;
+<div role="input" onClick={() => {}} />;
+<div role="landmark" onClick={() => {}} />;
+<div role="range" onClick={() => {}} />;
+<div role="roletype" onClick={() => {}} />;
+<div role="sectionhead" onClick={() => {}} />;
+<div role="select" onClick={() => {}} />;
+<div role="structure" onClick={() => {}} />;
+<div role="widget" onClick={() => {}} />;
+<div role="window" onClick={() => {}} />;
+<div role="alert" onClick={() => {}} />;
+<div role="alertdialog" onClick={() => {}} />;
+<div role="application" onClick={() => {}} />;
+<div role="article" onClick={() => {}} />;
+<div role="banner" onClick={() => {}} />;
+<div role="cell" onClick={() => {}} />;
+<div role="complementary" onClick={() => {}} />;
+<div role="contentinfo" onClick={() => {}} />;
+<div role="definition" onClick={() => {}} />;
+<div role="dialog" onClick={() => {}} />;
+<div role="directory" onClick={() => {}} />;
+<div role="document" onClick={() => {}} />;
+<div role="feed" onClick={() => {}} />;
+<div role="figure" onClick={() => {}} />;
+<div role="grid" onClick={() => {}} />;
+<div role="group" onClick={() => {}} />;
+<div role="heading" onClick={() => {}} />;
+<div role="img" onClick={() => {}} />;
+<div role="list" onClick={() => {}} />;
+<div role="listbox" onClick={() => {}} />;
+<div role="listitem" onClick={() => {}} />;
+<div role="log" onClick={() => {}} />;
+<div role="main" onClick={() => {}} />;
+<div role="marquee" onClick={() => {}} />;
+<div role="math" onClick={() => {}} />;
+<div role="menu" onClick={() => {}} />;
+<div role="menubar" onClick={() => {}} />;
+<div role="navigation" onClick={() => {}} />;
+<div role="note" onClick={() => {}} />;
+<div role="progressbar" onClick={() => {}} />;
+<div role="radiogroup" onClick={() => {}} />;
+<div role="region" onClick={() => {}} />;
+<div role="row" onClick={() => {}} />;
+<div role="rowgroup" onClick={() => {}} />;
+<div role="section" onClick={() => {}} />;
+<div role="search" onClick={() => {}} />;
+<div role="separator" onClick={() => {}} />;
+<div role="scrollbar" onClick={() => {}} />;
+<div role="status" onClick={() => {}} />;
+<div role="table" onClick={() => {}} />;
+<div role="tablist" onClick={() => {}} />;
+<div role="tabpanel" onClick={() => {}} />;
+<td onClick={() => {}} />;
+<div role="term" onClick={() => {}} />;
+<div role="timer" onClick={() => {}} />;
+<div role="toolbar" onClick={() => {}} />;
+<div role="tooltip" onClick={() => {}} />;
+<div role="tree" onClick={() => {}} />;
+<div role="treegrid" onClick={() => {}} />;
+
+/* All the possible allowed handlers */
+<div onCopy={() => {}} />;
+<div onCut={() => {}} />;
+<div onPaste={() => {}} />;
+<div onCompositionEnd={() => {}} />;
+<div onCompositionStart={() => {}} />;
+<div onCompositionUpdate={() => {}} />;
+<div onChange={() => {}} />;
+<div onInput={() => {}} />;
+<div onSubmit={() => {}} />;
+<div onSelect={() => {}} />;
+<div onTouchCancel={() => {}} />;
+<div onTouchEnd={() => {}} />;
+<div onTouchMove={() => {}} />;
+<div onTouchStart={() => {}} />;
+<div onScroll={() => {}} />;
+<div onWheel={() => {}} />;
+<div onAbort={() => {}} />;
+<div onCanPlay={() => {}} />;
+<div onCanPlayThrough={() => {}} />;
+<div onDurationChange={() => {}} />;
+<div onEmptied={() => {}} />;
+<div onEncrypted={() => {}} />;
+<div onEnded={() => {}} />;
+<div onError={() => {}} />;
+<div onLoadedData={() => {}} />;
+<div onLoadedMetadata={() => {}} />;
+<div onLoadStart={() => {}} />;
+<div onPause={() => {}} />;
+<div onPlay={() => {}} />;
+<div onPlaying={() => {}} />;
+<div onProgress={() => {}} />;
+<div onRateChange={() => {}} />;
+<div onSeeked={() => {}} />;
+<div onSeeking={() => {}} />;
+<div onStalled={() => {}} />;
+<div onSuspend={() => {}} />;
+<div onTimeUpdate={() => {}} />;
+<div onVolumeChange={() => {}} />;
+<div onWaiting={() => {}} />;
+<div onLoad={() => {}} />;
+<div onError={() => {}} />;
+<div onAnimationStart={() => {}} />;
+<div onAnimationEnd={() => {}} />;
+<div onAnimationIteration={() => {}} />;
+<div onTransitionEnd={() => {}} />;
+
+// biome-ignore lint/nursery/noStaticElementInteractions: this should be allowed
+<div onClick={() => {}} />;
+
+```
+
+# Diagnostics
+```
+valid.jsx:65:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    63 │ <a onClick={() => void 0} href="http://x.y.z" tabIndex="0" />;
+    64 │ <audio onClick={() => {}} />;
+  > 65 │ <form onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ <form onSubmit={() => {}} />;
+    67 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:71:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    69 │ <div role="button" onClick={() => {}} />;
+    70 │ <div role="checkbox" onClick={() => {}} />;
+  > 71 │ <div role="columnheader" onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ <div role="combobox" onClick={() => {}} />;
+    73 │ <div role="form" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:73:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    71 │ <div role="columnheader" onClick={() => {}} />;
+    72 │ <div role="combobox" onClick={() => {}} />;
+  > 73 │ <div role="form" onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ <div role="gridcell" onClick={() => {}} />;
+    75 │ <div role="link" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:81:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    79 │ <div role="option" onClick={() => {}} />;
+    80 │ <div role="radio" onClick={() => {}} />;
+  > 81 │ <div role="rowheader" onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ <div role="searchbox" onClick={() => {}} />;
+    83 │ <div role="slider" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:88:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    86 │ <div role="tab" onClick={() => {}} />;
+    87 │ <div role="textbox" onClick={() => {}} />;
+  > 88 │ <div role="treeitem" onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 
+    90 │ /* HTML elements with an inherent, non-interactive role */
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:92:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    90 │ /* HTML elements with an inherent, non-interactive role */
+    91 │ <address onClick={() => {}} />;
+  > 92 │ <article onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    93 │ <article onDblClick={() => void 0} />;
+    94 │ <aside onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:93:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    91 │ <address onClick={() => {}} />;
+    92 │ <article onClick={() => {}} />;
+  > 93 │ <article onDblClick={() => void 0} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    94 │ <aside onClick={() => {}} />;
+    95 │ <blockquote onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:94:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    92 │ <article onClick={() => {}} />;
+    93 │ <article onDblClick={() => void 0} />;
+  > 94 │ <aside onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    95 │ <blockquote onClick={() => {}} />;
+    96 │ <br onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:95:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    93 │ <article onDblClick={() => void 0} />;
+    94 │ <aside onClick={() => {}} />;
+  > 95 │ <blockquote onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │ <br onClick={() => {}} />;
+    97 │ <canvas onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:96:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    94 │ <aside onClick={() => {}} />;
+    95 │ <blockquote onClick={() => {}} />;
+  > 96 │ <br onClick={() => {}} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    97 │ <canvas onClick={() => {}} />;
+    98 │ <caption onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:98:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+     96 │ <br onClick={() => {}} />;
+     97 │ <canvas onClick={() => {}} />;
+   > 98 │ <caption onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     99 │ <code onClick={() => {}} />;
+    100 │ <details onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:100:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+     98 │ <caption onClick={() => {}} />;
+     99 │ <code onClick={() => {}} />;
+  > 100 │ <details onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    101 │ <dd onClick={() => {}} />;
+    102 │ <del onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:101:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+     99 │ <code onClick={() => {}} />;
+    100 │ <details onClick={() => {}} />;
+  > 101 │ <dd onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    102 │ <del onClick={() => {}} />;
+    103 │ <dfn onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:103:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    101 │ <dd onClick={() => {}} />;
+    102 │ <del onClick={() => {}} />;
+  > 103 │ <dfn onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    104 │ <dir onClick={() => {}} />;
+    105 │ <dl onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:104:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    102 │ <del onClick={() => {}} />;
+    103 │ <dfn onClick={() => {}} />;
+  > 104 │ <dir onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    105 │ <dl onClick={() => {}} />;
+    106 │ <dt onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:105:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    103 │ <dfn onClick={() => {}} />;
+    104 │ <dir onClick={() => {}} />;
+  > 105 │ <dl onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    106 │ <dt onClick={() => {}} />;
+    107 │ <em onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:106:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    104 │ <dir onClick={() => {}} />;
+    105 │ <dl onClick={() => {}} />;
+  > 106 │ <dt onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    107 │ <em onClick={() => {}} />;
+    108 │ <embed onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:109:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    107 │ <em onClick={() => {}} />;
+    108 │ <embed onClick={() => {}} />;
+  > 109 │ <fieldset onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ <figcaption onClick={() => {}} />;
+    111 │ <figure onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:110:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    108 │ <embed onClick={() => {}} />;
+    109 │ <fieldset onClick={() => {}} />;
+  > 110 │ <figcaption onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    111 │ <figure onClick={() => {}} />;
+    112 │ <footer onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:111:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    109 │ <fieldset onClick={() => {}} />;
+    110 │ <figcaption onClick={() => {}} />;
+  > 111 │ <figure onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    112 │ <footer onClick={() => {}} />;
+    113 │ <h1 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:112:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    110 │ <figcaption onClick={() => {}} />;
+    111 │ <figure onClick={() => {}} />;
+  > 112 │ <footer onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    113 │ <h1 onClick={() => {}} />;
+    114 │ <h2 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:113:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    111 │ <figure onClick={() => {}} />;
+    112 │ <footer onClick={() => {}} />;
+  > 113 │ <h1 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │ <h2 onClick={() => {}} />;
+    115 │ <h3 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:114:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    112 │ <footer onClick={() => {}} />;
+    113 │ <h1 onClick={() => {}} />;
+  > 114 │ <h2 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    115 │ <h3 onClick={() => {}} />;
+    116 │ <h4 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:115:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    113 │ <h1 onClick={() => {}} />;
+    114 │ <h2 onClick={() => {}} />;
+  > 115 │ <h3 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    116 │ <h4 onClick={() => {}} />;
+    117 │ <h5 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:116:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    114 │ <h2 onClick={() => {}} />;
+    115 │ <h3 onClick={() => {}} />;
+  > 116 │ <h4 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │ <h5 onClick={() => {}} />;
+    118 │ <h6 onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:117:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    115 │ <h3 onClick={() => {}} />;
+    116 │ <h4 onClick={() => {}} />;
+  > 117 │ <h5 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    118 │ <h6 onClick={() => {}} />;
+    119 │ <hr onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:118:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    116 │ <h4 onClick={() => {}} />;
+    117 │ <h5 onClick={() => {}} />;
+  > 118 │ <h6 onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    119 │ <hr onClick={() => {}} />;
+    120 │ <html onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:121:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    119 │ <hr onClick={() => {}} />;
+    120 │ <html onClick={() => {}} />;
+  > 121 │ <iframe onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    122 │ <img onClick={() => {}} />;
+    123 │ <ins onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:122:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    120 │ <html onClick={() => {}} />;
+    121 │ <iframe onClick={() => {}} />;
+  > 122 │ <img onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    123 │ <ins onClick={() => {}} />;
+    124 │ <label onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:124:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    122 │ <img onClick={() => {}} />;
+    123 │ <ins onClick={() => {}} />;
+  > 124 │ <label onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │ <legend onClick={() => {}} />;
+    126 │ <li onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:125:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    123 │ <ins onClick={() => {}} />;
+    124 │ <label onClick={() => {}} />;
+  > 125 │ <legend onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    126 │ <li onClick={() => {}} />;
+    127 │ <main onClick={() => void 0} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:126:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    124 │ <label onClick={() => {}} />;
+    125 │ <legend onClick={() => {}} />;
+  > 126 │ <li onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │ <main onClick={() => void 0} />;
+    128 │ <mark onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:127:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    125 │ <legend onClick={() => {}} />;
+    126 │ <li onClick={() => {}} />;
+  > 127 │ <main onClick={() => void 0} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ <mark onClick={() => {}} />;
+    129 │ <marquee onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:128:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    126 │ <li onClick={() => {}} />;
+    127 │ <main onClick={() => void 0} />;
+  > 128 │ <mark onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    129 │ <marquee onClick={() => {}} />;
+    130 │ <menu onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:129:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    127 │ <main onClick={() => void 0} />;
+    128 │ <mark onClick={() => {}} />;
+  > 129 │ <marquee onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    130 │ <menu onClick={() => {}} />;
+    131 │ <meter onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:130:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    128 │ <mark onClick={() => {}} />;
+    129 │ <marquee onClick={() => {}} />;
+  > 130 │ <menu onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    131 │ <meter onClick={() => {}} />;
+    132 │ <nav onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:131:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    129 │ <marquee onClick={() => {}} />;
+    130 │ <menu onClick={() => {}} />;
+  > 131 │ <meter onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    132 │ <nav onClick={() => {}} />;
+    133 │ <ol onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:132:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    130 │ <menu onClick={() => {}} />;
+    131 │ <meter onClick={() => {}} />;
+  > 132 │ <nav onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ <ol onClick={() => {}} />;
+    134 │ <optgroup onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:133:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    131 │ <meter onClick={() => {}} />;
+    132 │ <nav onClick={() => {}} />;
+  > 133 │ <ol onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    134 │ <optgroup onClick={() => {}} />;
+    135 │ <output onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:134:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    132 │ <nav onClick={() => {}} />;
+    133 │ <ol onClick={() => {}} />;
+  > 134 │ <optgroup onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    135 │ <output onClick={() => {}} />;
+    136 │ <p onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:135:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    133 │ <ol onClick={() => {}} />;
+    134 │ <optgroup onClick={() => {}} />;
+  > 135 │ <output onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    136 │ <p onClick={() => {}} />;
+    137 │ <pre onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:136:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    134 │ <optgroup onClick={() => {}} />;
+    135 │ <output onClick={() => {}} />;
+  > 136 │ <p onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    137 │ <pre onClick={() => {}} />;
+    138 │ <progress onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:137:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    135 │ <output onClick={() => {}} />;
+    136 │ <p onClick={() => {}} />;
+  > 137 │ <pre onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    138 │ <progress onClick={() => {}} />;
+    139 │ <ruby onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:138:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    136 │ <p onClick={() => {}} />;
+    137 │ <pre onClick={() => {}} />;
+  > 138 │ <progress onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    139 │ <ruby onClick={() => {}} />;
+    140 │ <section onClick={() => {}} aria-label="Aa" />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:139:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    137 │ <pre onClick={() => {}} />;
+    138 │ <progress onClick={() => {}} />;
+  > 139 │ <ruby onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    140 │ <section onClick={() => {}} aria-label="Aa" />;
+    141 │ <section onClick={() => {}} aria-labelledby="js_1" />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:140:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    138 │ <progress onClick={() => {}} />;
+    139 │ <ruby onClick={() => {}} />;
+  > 140 │ <section onClick={() => {}} aria-label="Aa" />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    141 │ <section onClick={() => {}} aria-labelledby="js_1" />;
+    142 │ <strong onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:141:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    139 │ <ruby onClick={() => {}} />;
+    140 │ <section onClick={() => {}} aria-label="Aa" />;
+  > 141 │ <section onClick={() => {}} aria-labelledby="js_1" />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    142 │ <strong onClick={() => {}} />;
+    143 │ <sub onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:145:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    143 │ <sub onClick={() => {}} />;
+    144 │ <sup onClick={() => {}} />;
+  > 145 │ <table onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    146 │ <tbody onClick={() => {}} />;
+    147 │ <tfoot onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:146:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    144 │ <sup onClick={() => {}} />;
+    145 │ <table onClick={() => {}} />;
+  > 146 │ <tbody onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    147 │ <tfoot onClick={() => {}} />;
+    148 │ <th onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:147:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    145 │ <table onClick={() => {}} />;
+    146 │ <tbody onClick={() => {}} />;
+  > 147 │ <tfoot onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    148 │ <th onClick={() => {}} />;
+    149 │ <thead onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:148:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    146 │ <tbody onClick={() => {}} />;
+    147 │ <tfoot onClick={() => {}} />;
+  > 148 │ <th onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    149 │ <thead onClick={() => {}} />;
+    150 │ <time onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:149:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    147 │ <tfoot onClick={() => {}} />;
+    148 │ <th onClick={() => {}} />;
+  > 149 │ <thead onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    150 │ <time onClick={() => {}} />;
+    151 │ <tr onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:150:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    148 │ <th onClick={() => {}} />;
+    149 │ <thead onClick={() => {}} />;
+  > 150 │ <time onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    151 │ <tr onClick={() => {}} />;
+    152 │ <video onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:153:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    151 │ <tr onClick={() => {}} />;
+    152 │ <video onClick={() => {}} />;
+  > 153 │ <ul onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    154 │ 
+    155 │ /* HTML elements attributed with an abstract role */
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:167:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    165 │ <div role="widget" onClick={() => {}} />;
+    166 │ <div role="window" onClick={() => {}} />;
+  > 167 │ <div role="alert" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    168 │ <div role="alertdialog" onClick={() => {}} />;
+    169 │ <div role="application" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:168:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    166 │ <div role="window" onClick={() => {}} />;
+    167 │ <div role="alert" onClick={() => {}} />;
+  > 168 │ <div role="alertdialog" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    169 │ <div role="application" onClick={() => {}} />;
+    170 │ <div role="article" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:169:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    167 │ <div role="alert" onClick={() => {}} />;
+    168 │ <div role="alertdialog" onClick={() => {}} />;
+  > 169 │ <div role="application" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    170 │ <div role="article" onClick={() => {}} />;
+    171 │ <div role="banner" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:170:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    168 │ <div role="alertdialog" onClick={() => {}} />;
+    169 │ <div role="application" onClick={() => {}} />;
+  > 170 │ <div role="article" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ <div role="banner" onClick={() => {}} />;
+    172 │ <div role="cell" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:171:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    169 │ <div role="application" onClick={() => {}} />;
+    170 │ <div role="article" onClick={() => {}} />;
+  > 171 │ <div role="banner" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    172 │ <div role="cell" onClick={() => {}} />;
+    173 │ <div role="complementary" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:172:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    170 │ <div role="article" onClick={() => {}} />;
+    171 │ <div role="banner" onClick={() => {}} />;
+  > 172 │ <div role="cell" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    173 │ <div role="complementary" onClick={() => {}} />;
+    174 │ <div role="contentinfo" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:173:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    171 │ <div role="banner" onClick={() => {}} />;
+    172 │ <div role="cell" onClick={() => {}} />;
+  > 173 │ <div role="complementary" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    174 │ <div role="contentinfo" onClick={() => {}} />;
+    175 │ <div role="definition" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:174:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    172 │ <div role="cell" onClick={() => {}} />;
+    173 │ <div role="complementary" onClick={() => {}} />;
+  > 174 │ <div role="contentinfo" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    175 │ <div role="definition" onClick={() => {}} />;
+    176 │ <div role="dialog" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:175:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    173 │ <div role="complementary" onClick={() => {}} />;
+    174 │ <div role="contentinfo" onClick={() => {}} />;
+  > 175 │ <div role="definition" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    176 │ <div role="dialog" onClick={() => {}} />;
+    177 │ <div role="directory" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:176:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    174 │ <div role="contentinfo" onClick={() => {}} />;
+    175 │ <div role="definition" onClick={() => {}} />;
+  > 176 │ <div role="dialog" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    177 │ <div role="directory" onClick={() => {}} />;
+    178 │ <div role="document" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:177:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    175 │ <div role="definition" onClick={() => {}} />;
+    176 │ <div role="dialog" onClick={() => {}} />;
+  > 177 │ <div role="directory" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    178 │ <div role="document" onClick={() => {}} />;
+    179 │ <div role="feed" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:178:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    176 │ <div role="dialog" onClick={() => {}} />;
+    177 │ <div role="directory" onClick={() => {}} />;
+  > 178 │ <div role="document" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    179 │ <div role="feed" onClick={() => {}} />;
+    180 │ <div role="figure" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:179:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    177 │ <div role="directory" onClick={() => {}} />;
+    178 │ <div role="document" onClick={() => {}} />;
+  > 179 │ <div role="feed" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    180 │ <div role="figure" onClick={() => {}} />;
+    181 │ <div role="grid" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:180:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    178 │ <div role="document" onClick={() => {}} />;
+    179 │ <div role="feed" onClick={() => {}} />;
+  > 180 │ <div role="figure" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    181 │ <div role="grid" onClick={() => {}} />;
+    182 │ <div role="group" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:181:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    179 │ <div role="feed" onClick={() => {}} />;
+    180 │ <div role="figure" onClick={() => {}} />;
+  > 181 │ <div role="grid" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    182 │ <div role="group" onClick={() => {}} />;
+    183 │ <div role="heading" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:182:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    180 │ <div role="figure" onClick={() => {}} />;
+    181 │ <div role="grid" onClick={() => {}} />;
+  > 182 │ <div role="group" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    183 │ <div role="heading" onClick={() => {}} />;
+    184 │ <div role="img" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:183:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    181 │ <div role="grid" onClick={() => {}} />;
+    182 │ <div role="group" onClick={() => {}} />;
+  > 183 │ <div role="heading" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    184 │ <div role="img" onClick={() => {}} />;
+    185 │ <div role="list" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:184:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    182 │ <div role="group" onClick={() => {}} />;
+    183 │ <div role="heading" onClick={() => {}} />;
+  > 184 │ <div role="img" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    185 │ <div role="list" onClick={() => {}} />;
+    186 │ <div role="listbox" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:185:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    183 │ <div role="heading" onClick={() => {}} />;
+    184 │ <div role="img" onClick={() => {}} />;
+  > 185 │ <div role="list" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    186 │ <div role="listbox" onClick={() => {}} />;
+    187 │ <div role="listitem" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:187:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    185 │ <div role="list" onClick={() => {}} />;
+    186 │ <div role="listbox" onClick={() => {}} />;
+  > 187 │ <div role="listitem" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    188 │ <div role="log" onClick={() => {}} />;
+    189 │ <div role="main" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:188:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    186 │ <div role="listbox" onClick={() => {}} />;
+    187 │ <div role="listitem" onClick={() => {}} />;
+  > 188 │ <div role="log" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    189 │ <div role="main" onClick={() => {}} />;
+    190 │ <div role="marquee" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:189:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    187 │ <div role="listitem" onClick={() => {}} />;
+    188 │ <div role="log" onClick={() => {}} />;
+  > 189 │ <div role="main" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    190 │ <div role="marquee" onClick={() => {}} />;
+    191 │ <div role="math" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:190:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    188 │ <div role="log" onClick={() => {}} />;
+    189 │ <div role="main" onClick={() => {}} />;
+  > 190 │ <div role="marquee" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    191 │ <div role="math" onClick={() => {}} />;
+    192 │ <div role="menu" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:191:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    189 │ <div role="main" onClick={() => {}} />;
+    190 │ <div role="marquee" onClick={() => {}} />;
+  > 191 │ <div role="math" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    192 │ <div role="menu" onClick={() => {}} />;
+    193 │ <div role="menubar" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:192:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    190 │ <div role="marquee" onClick={() => {}} />;
+    191 │ <div role="math" onClick={() => {}} />;
+  > 192 │ <div role="menu" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    193 │ <div role="menubar" onClick={() => {}} />;
+    194 │ <div role="navigation" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:193:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    191 │ <div role="math" onClick={() => {}} />;
+    192 │ <div role="menu" onClick={() => {}} />;
+  > 193 │ <div role="menubar" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    194 │ <div role="navigation" onClick={() => {}} />;
+    195 │ <div role="note" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:194:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    192 │ <div role="menu" onClick={() => {}} />;
+    193 │ <div role="menubar" onClick={() => {}} />;
+  > 194 │ <div role="navigation" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    195 │ <div role="note" onClick={() => {}} />;
+    196 │ <div role="progressbar" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:195:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    193 │ <div role="menubar" onClick={() => {}} />;
+    194 │ <div role="navigation" onClick={() => {}} />;
+  > 195 │ <div role="note" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    196 │ <div role="progressbar" onClick={() => {}} />;
+    197 │ <div role="radiogroup" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:197:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    195 │ <div role="note" onClick={() => {}} />;
+    196 │ <div role="progressbar" onClick={() => {}} />;
+  > 197 │ <div role="radiogroup" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    198 │ <div role="region" onClick={() => {}} />;
+    199 │ <div role="row" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:198:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    196 │ <div role="progressbar" onClick={() => {}} />;
+    197 │ <div role="radiogroup" onClick={() => {}} />;
+  > 198 │ <div role="region" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    199 │ <div role="row" onClick={() => {}} />;
+    200 │ <div role="rowgroup" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:200:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    198 │ <div role="region" onClick={() => {}} />;
+    199 │ <div role="row" onClick={() => {}} />;
+  > 200 │ <div role="rowgroup" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    201 │ <div role="section" onClick={() => {}} />;
+    202 │ <div role="search" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:202:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    200 │ <div role="rowgroup" onClick={() => {}} />;
+    201 │ <div role="section" onClick={() => {}} />;
+  > 202 │ <div role="search" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    203 │ <div role="separator" onClick={() => {}} />;
+    204 │ <div role="scrollbar" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:205:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    203 │ <div role="separator" onClick={() => {}} />;
+    204 │ <div role="scrollbar" onClick={() => {}} />;
+  > 205 │ <div role="status" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    206 │ <div role="table" onClick={() => {}} />;
+    207 │ <div role="tablist" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:206:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    204 │ <div role="scrollbar" onClick={() => {}} />;
+    205 │ <div role="status" onClick={() => {}} />;
+  > 206 │ <div role="table" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    207 │ <div role="tablist" onClick={() => {}} />;
+    208 │ <div role="tabpanel" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:207:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    205 │ <div role="status" onClick={() => {}} />;
+    206 │ <div role="table" onClick={() => {}} />;
+  > 207 │ <div role="tablist" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    208 │ <div role="tabpanel" onClick={() => {}} />;
+    209 │ <td onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:208:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    206 │ <div role="table" onClick={() => {}} />;
+    207 │ <div role="tablist" onClick={() => {}} />;
+  > 208 │ <div role="tabpanel" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    209 │ <td onClick={() => {}} />;
+    210 │ <div role="term" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:209:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    207 │ <div role="tablist" onClick={() => {}} />;
+    208 │ <div role="tabpanel" onClick={() => {}} />;
+  > 209 │ <td onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    210 │ <div role="term" onClick={() => {}} />;
+    211 │ <div role="timer" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:210:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    208 │ <div role="tabpanel" onClick={() => {}} />;
+    209 │ <td onClick={() => {}} />;
+  > 210 │ <div role="term" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    211 │ <div role="timer" onClick={() => {}} />;
+    212 │ <div role="toolbar" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:211:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    209 │ <td onClick={() => {}} />;
+    210 │ <div role="term" onClick={() => {}} />;
+  > 211 │ <div role="timer" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    212 │ <div role="toolbar" onClick={() => {}} />;
+    213 │ <div role="tooltip" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:212:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    210 │ <div role="term" onClick={() => {}} />;
+    211 │ <div role="timer" onClick={() => {}} />;
+  > 212 │ <div role="toolbar" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    213 │ <div role="tooltip" onClick={() => {}} />;
+    214 │ <div role="tree" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:213:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    211 │ <div role="timer" onClick={() => {}} />;
+    212 │ <div role="toolbar" onClick={() => {}} />;
+  > 213 │ <div role="tooltip" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    214 │ <div role="tree" onClick={() => {}} />;
+    215 │ <div role="treegrid" onClick={() => {}} />;
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:214:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    212 │ <div role="toolbar" onClick={() => {}} />;
+    213 │ <div role="tooltip" onClick={() => {}} />;
+  > 214 │ <div role="tree" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    215 │ <div role="treegrid" onClick={() => {}} />;
+    216 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+```
+valid.jsx:215:1 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Static elements should not be interactive.
+  
+    213 │ <div role="tooltip" onClick={() => {}} />;
+    214 │ <div role="tree" onClick={() => {}} />;
+  > 215 │ <div role="treegrid" onClick={() => {}} />;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    216 │ 
+    217 │ /* All the possible allowed handlers */
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value
+  
+
+```
+
+
