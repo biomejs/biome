@@ -162,6 +162,9 @@ pub struct JsFormatOptions {
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     arrow_parentheses: ArrowParentheses,
 
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    bracket_spacing: BracketSpacing,
+
     /// Information related to the current file
     source_type: JsFileSource,
 }
@@ -180,11 +183,17 @@ impl JsFormatOptions {
             trailing_comma: TrailingComma::default(),
             semicolons: Semicolons::default(),
             arrow_parentheses: ArrowParentheses::default(),
+            bracket_spacing: BracketSpacing::default(),
         }
     }
 
     pub fn with_arrow_parentheses(mut self, arrow_parentheses: ArrowParentheses) -> Self {
         self.arrow_parentheses = arrow_parentheses;
+        self
+    }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
         self
     }
 
@@ -237,6 +246,10 @@ impl JsFormatOptions {
         self.arrow_parentheses = arrow_parentheses;
     }
 
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = bracket_spacing;
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -275,6 +288,10 @@ impl JsFormatOptions {
 
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
+    }
+
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
@@ -339,7 +356,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Quote properties: {}", self.quote_properties)?;
         writeln!(f, "Trailing comma: {}", self.trailing_comma)?;
         writeln!(f, "Semicolons: {}", self.semicolons)?;
-        writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)
+        writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())
     }
 }
 
@@ -637,5 +655,32 @@ impl Deserializable for ArrowParentheses {
                 None
             }
         }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSpacing(bool);
+
+impl BracketSpacing {
+    /// Return the boolean value for this [BracketSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for BracketSpacing {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for BracketSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }

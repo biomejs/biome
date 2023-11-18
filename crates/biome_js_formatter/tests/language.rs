@@ -224,6 +224,9 @@ pub struct JsSerializableFormatOptions {
 
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     pub arrow_parentheses: Option<JsSerializableArrowParentheses>,
+
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    pub bracket_spacing: Option<bool>,
 }
 
 impl JsSerializableFormatOptions {

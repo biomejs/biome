@@ -268,6 +268,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             language_setting.formatter.trailing_comma = formatter.trailing_comma;
             language_setting.formatter.semicolons = formatter.semicolons;
             language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
             language_setting.formatter.enabled = formatter.enabled;
             language_setting.formatter.line_width = formatter.line_width;
             language_setting.formatter.indent_width = formatter
@@ -513,6 +514,9 @@ impl OverrideSettings {
                 }
                 if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
                     options.set_arrow_parentheses(arrow_parentheses);
+                }
+                if let Some(bracket_spacing) = js_formatter.bracket_spacing {
+                    options.set_bracket_spacing(bracket_spacing);
                 }
             }
 
