@@ -432,6 +432,7 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_js_unicode_table",
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
