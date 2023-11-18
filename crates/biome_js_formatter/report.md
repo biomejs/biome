@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 93.84
+**Average compatibility**: 94.08
 
     <details>
     	<summary>Definition</summary>
@@ -8,7 +8,7 @@
     	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
     </details>
 
-    **Compatible lines**: 94.73
+    **Compatible lines**: 94.97
     <details>
         <summary>Definition</summary>
 
@@ -2816,17 +2816,8 @@
 
 
 # js/comments/trailing_space.js
-```diff
--#!/there/is-space-here->
-+#!/there/is-space-here->         
- 
- // Do not trim trailing whitespace from this source file!
- 
- // There is some space here ->
 
-```
-
-**Prettier Similarity**: 80.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/comments/try.js
@@ -5101,37 +5092,8 @@
 
 
 # js/method-chain/13018.js
-```diff
- foo(_a).bar().leet();
- foo(-a).bar().leet();
--foo(+a).bar().leet();
--foo(~a).bar().leet();
--foo(++a).bar().leet();
--foo(--a).bar().leet();
--foo(a++).bar().leet();
--foo(a--).bar().leet();
-+foo(+a)
-+  .bar()
-+  .leet();
-+foo(~a)
-+  .bar()
-+  .leet();
-+foo(++a)
-+  .bar()
-+  .leet();
-+foo(--a)
-+  .bar()
-+  .leet();
-+foo(a++)
-+  .bar()
-+  .leet();
-+foo(a--)
-+  .bar()
-+  .leet();
 
-```
-
-**Prettier Similarity**: 10.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/method-chain/bracket_0-1.js
@@ -5719,120 +5681,8 @@
 
 
 # js/quote-props/objects.js
-```diff
- const a = {
-   a: "a",
- };
- 
- const b = {
-   b: "b",
- };
- 
- const b2 = {
-   // Escapes should stay as escapes and not be unquoted.
-   "\u0062": "b",
-   "\u0031": "1",
- };
- 
- const c = {
-   c1: "c1",
-   c2: "c2",
- };
- 
- const d = {
-   d1: "d1",
-   "d-2": "d2",
- };
- 
- // None of these should become quoted, regardless of the quoteProps value.
- const e = {
-   NaN: null,
-   1: null,
-   1.5: null,
--  0.1: null,
--  1: null,
-+  .1: null,
-+  1.: null,
-   1.0: null,
-   999999999999999999999: null,
-   0.99999999999999999: null,
--  1e2: null,
--  1e3: null,
--  1e100: null,
-+  1E2: null,
-+  1e+3: null,
-+  1e+100: null,
-   0b10: null,
-   0o10: null,
-   0xf: null,
-   2n: null,
- };
- 
- const f = {
-   // These should be unquoted for quoteProps=as-needed.
-   NaN: null,
-   1: null,
--  1.5: null,
-+  "1.5": null,
-   // These should never be unquoted. `1e+100` technically could (it’s the only
-   // one where `String(Number(key)) === key`), but we came to the conclusion
-   // that it is unexpected.
-   ".1": null,
-   "1.": null,
-   "1.0": null,
--  "999999999999999999999": null,
-+  999999999999999999999: null,
-   "0.99999999999999999": null,
-   "1E2": null,
-   "1e+3": null,
-   "1e+100": null,
-   "0b10": null,
-   "0o10": null,
-   "0xf": null,
-   "2n": null,
- };
- 
- Object.entries({
-   // To force quotes for quoteProps=consistent.
-   "a-": "a-",
-   // These can be quoted:
-   NaN: "NaN",
-   1: "1",
-   1.5: "1.5",
-   // Prettier will normalize these to `0.1` and `1` – then they can be quoted.
--  0.1: ".1",
--  1: "1.",
-+  .1: ".1",
-+  1.: "1.",
-   // These should never be quoted. The _actual_ keys are shown as comments.
-   // Copy-paste this into the console to verify. If we were to convert these
-   // numbers into decimal (which completely valid), “information/intent” is
-   // lost. Either way, writing code like this is super confusing.
-   1.0: "1.0", // 1
-   999999999999999999999: "999999999999999999999", // 1e+21
-   0.99999999999999999: "0.99999999999999999", // 1
--  1e2: "1E2", // 100
--  1e3: "1e+3", // 1000
--  1e100: "1e+100", // 1e+100 – this one is identical, but would be inconsistent to quote.
-+  1E2: "1E2", // 100
-+  1e+3: "1e+3", // 1000
-+  1e+100: "1e+100", // 1e+100 – this one is identical, but would be inconsistent to quote.
-   0b10: "0b10", // 2
-   0o10: "0o10", // 8
-   0xf: "0xf", // 15
-   2n: "2n", // 2
-   0xan: "0xan", // 10
- });
- 
- // Negative numbers cannot be unquoted.
- !{
-   "-1": null,
-   "-1.5": null,
- };
 
-```
-
-**Prettier Similarity**: 87.63%
+**Prettier Similarity**: 100.00%
 
 
 # js/quote-props/with_member_expressions.js
@@ -6351,55 +6201,8 @@
 
 
 # js/require/require.js
-```diff
- const {
-   one,
-   two,
-   three,
-   four,
-   five,
-   six,
-   seven,
-   eight,
-   nine,
-   ten,
- } = require("./my-utils");
- const {
-   one1,
-   two1,
-   three1,
-   four1,
-   five1,
-   six1,
-   seven1,
-   eight1,
-   nine1,
-   ten1,
-   eleven1,
- } = require("./my-utils");
- 
- const MyReallyExtrememlyLongModuleName = require("MyReallyExtrememlyLongModuleName");
- 
--const plugin = require(
--  global.STANDALONE
--    ? path.join(__dirname, "../standalone.js")
--    : path.join(__dirname, ".."),
--);
-+const plugin = require(global.STANDALONE
-+  ? path.join(__dirname, "../standalone.js")
-+  : path.join(__dirname, ".."));
- 
--const plugin2 = require(
--  path.join(__dirname, global.STANDALONE ? "../standalone.js" : ".."),
--);
-+const plugin2 = require(path.join(
-+  __dirname,
-+  global.STANDALONE ? "../standalone.js" : "..",
-+));
 
-```
-
-**Prettier Similarity**: 78.38%
+**Prettier Similarity**: 100.00%
 
 
 # js/reserved-word/interfaces.js
@@ -7199,51 +7002,6 @@
 ```
 
 **Prettier Similarity**: 87.69%
-
-
-# js/throw_expressions/throw_expression.js
-```diff
--function save(filename = throw new TypeError("Argument required")) {}
-+function save(filename = throw new TypeError("Argument required")
-+)
-+{
-+}
- 
- lint(ast, {
--  with: () => throw new Error("avoid using 'with' statements."),
-+  with: () => throw new Error("avoid using 'with' statements.")
- });
- 
- function getEncoder(encoding) {
--  const encoder =
--    encoding === "utf8"
--      ? new UTF8Encoder()
--      : encoding === "utf16le"
--      ? new UTF16Encoder(false)
--      : encoding === "utf16be"
--      ? new UTF16Encoder(true)
--      : throw new Error("Unsupported encoding");
-+  const encoder = encoding === "utf8" ? new UTF8Encoder()
-+                : encoding === "utf16le" ? new UTF16Encoder(false)
-+                : encoding === "utf16be" ? new UTF16Encoder(true)
-+                :
-+  throw new Error("Unsupported encoding");
- }
- 
- class Product {
-   get id() {
-     return this._id;
-   }
-   set id(value) {
--    this._id = value || throw new Error("Invalid value");
-+    this._id = value ||
-+    throw new Error("Invalid value");
-   }
- }
-
-```
-
-**Prettier Similarity**: 53.85%
 
 
 # js/throw_statement/binaryish.js
@@ -9692,23 +9450,8 @@
 
 
 # typescript/compiler/castParentheses.ts
-```diff
--﻿class a {
-+class a {
-   static b: any;
- }
- 
- var b = <any>a;
- var b = (<any>a).b;
- var b = (<any>a.b).c;
- var b = (<any>a.b()).c;
- var b = <any>new a();
- var b = <any>new a.b();
- var b = (<any>new a()).b;
 
-```
-
-**Prettier Similarity**: 90.91%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/compiler/castTest.ts
@@ -9722,15 +9465,8 @@
 
 
 # typescript/compiler/commentInNamespaceDeclarationWithIdentifierPathName.ts
-```diff
--﻿namespace hello.hi.world {
-+namespace hello.hi.world {
-   function foo() {}
- }
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/compiler/commentsInterface.ts
@@ -10503,14 +10239,8 @@
 
 
 # typescript/conformance/es6/templates/templateStringWithEmbeddedTypeAssertionOnAdditionES6.ts
-```diff
--﻿// @target: ES6
-+// @target: ES6
- var x = `abc${<any>(10 + 10)}def`;
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/expressions/asOperator/asOperatorContextualType.ts
@@ -10882,37 +10612,8 @@
 
 
 # typescript/conformance/types/tuple/contextualTypeWithTuple.ts
-```diff
--﻿// no error
-+// no error
- var numStrTuple: [number, string] = [5, "hello"];
- var numStrTuple2: [number, string] = [5, "foo", true];
- var numStrBoolTuple: [number, string, boolean] = [5, "foo", true];
- var objNumTuple: [{ a: string }, number] = [{ a: "world" }, 5];
- var strTupleTuple: [string, [number, {}]] = ["bar", [5, { x: 1, y: 1 }]];
- class C {}
- class D {}
- var unionTuple: [C, string | number] = [new C(), "foo"];
- var unionTuple1: [C, string | number] = [new C(), "foo"];
- var unionTuple2: [C, string | number, D] = [new C(), "foo", new D()];
- var unionTuple3: [number, string | number] = [10, "foo"];
- 
- numStrTuple = numStrTuple2;
- numStrTuple = numStrBoolTuple;
- 
- // error
- objNumTuple = [{}, 5];
- numStrBoolTuple = numStrTuple;
- var strStrTuple: [string, string] = ["foo", "bar", 5];
- 
- unionTuple = unionTuple1;
- unionTuple = unionTuple2;
- unionTuple2 = unionTuple;
- numStrTuple = unionTuple3;
 
-```
-
-**Prettier Similarity**: 96.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/tuple/emptyTuples/emptyTuplesTypeAssertion02.ts
@@ -10921,44 +10622,8 @@
 
 
 # typescript/conformance/types/tuple/indexerWithTuple.ts
-```diff
--﻿var strNumTuple: [string, number] = ["foo", 10];
-+var strNumTuple: [string, number] = ["foo", 10];
- var numTupleTuple: [number, [string, number]] = [10, ["bar", 20]];
- var unionTuple1: [number, string | number] = [10, "foo"];
- var unionTuple2: [boolean, string | number] = [true, "foo"];
- 
- // no error
- var idx0 = 0;
- var idx1 = 1;
- var ele10 = strNumTuple[0]; // string
- var ele11 = strNumTuple[1]; // number
- var ele12 = strNumTuple[2]; // string | number
- var ele13 = strNumTuple[idx0]; // string | number
- var ele14 = strNumTuple[idx1]; // string | number
- var ele15 = strNumTuple["0"]; // string
- var ele16 = strNumTuple["1"]; // number
- var strNumTuple1 = numTupleTuple[1]; //[string, number];
- var ele17 = numTupleTuple[2]; // number | [string, number]
- var eleUnion10 = unionTuple1[0]; // number
- var eleUnion11 = unionTuple1[1]; // string | number
- var eleUnion12 = unionTuple1[2]; // string | number
- var eleUnion13 = unionTuple1[idx0]; // string | number
- var eleUnion14 = unionTuple1[idx1]; // string | number
- var eleUnion15 = unionTuple1["0"]; // number
- var eleUnion16 = unionTuple1["1"]; // string | number
- 
- var eleUnion20 = unionTuple2[0]; // boolean
- var eleUnion21 = unionTuple2[1]; // string | number
- var eleUnion22 = unionTuple2[2]; // string | number | boolean
- var eleUnion23 = unionTuple2[idx0]; // string | number | boolean
- var eleUnion24 = unionTuple2[idx1]; // string | number | boolean
- var eleUnion25 = unionTuple2["0"]; // boolean
- var eleUnion26 = unionTuple2["1"]; // string | number
 
-```
-
-**Prettier Similarity**: 96.88%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/tuple/tupleElementTypes1.ts
@@ -10982,35 +10647,8 @@
 
 
 # typescript/conformance/types/tuple/typeInferenceWithTupleType.ts
-```diff
--﻿function combine<T, U>(x: T, y: U): [T, U] {
-+function combine<T, U>(x: T, y: U): [T, U] {
-   return [x, y];
- }
- 
- var combineResult = combine("string", 10);
- var combineEle1 = combineResult[0]; // string
- var combineEle2 = combineResult[1]; // number
- 
- function zip<T, U>(array1: T[], array2: U[]): [[T, U]] {
-   if (array1.length != array2.length) {
-     return [[undefined, undefined]];
-   }
-   var length = array1.length;
-   var zipResult: [[T, U]];
-   for (var i = 0; i < length; ++i) {
-     zipResult.push([array1[i], array2[i]]);
-   }
-   return zipResult;
- }
- 
- var zipResult = zip(["foo", "bar"], [5, 6]);
- var zipResultEle = zipResult[0]; // [string, number]
- var zipResultEleEle = zipResult[0][0]; // string
 
-```
-
-**Prettier Similarity**: 95.65%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/tuple/wideningTuples1.ts
@@ -11089,377 +10727,38 @@
 
 
 # typescript/conformance/types/union/unionTypeCallSignatures.ts
-```diff
--﻿var numOrDate: number | Date;
-+var numOrDate: number | Date;
- var strOrBoolean: string | boolean;
- var strOrNum: string | number;
- 
- // If each type in U has call signatures and the sets of call signatures are identical ignoring return types,
- // U has the same set of call signatures, but with return types that are unions of the return types of the respective call signatures from each type in U.
- var unionOfDifferentReturnType: { (a: number): number } | { (a: number): Date };
- numOrDate = unionOfDifferentReturnType(10);
- strOrBoolean = unionOfDifferentReturnType("hello"); // error
- unionOfDifferentReturnType1(true); // error in type of parameter
- 
- var unionOfDifferentReturnType1:
-   | { (a: number): number; (a: string): string }
-   | { (a: number): Date; (a: string): boolean };
- numOrDate = unionOfDifferentReturnType1(10);
- strOrBoolean = unionOfDifferentReturnType1("hello");
- unionOfDifferentReturnType1(true); // error in type of parameter
- unionOfDifferentReturnType1(); // error missing parameter
- 
- var unionOfDifferentParameterTypes:
-   | { (a: number): number }
-   | { (a: string): Date };
- unionOfDifferentParameterTypes(10); // error - no call signatures
- unionOfDifferentParameterTypes("hello"); // error - no call signatures
- unionOfDifferentParameterTypes(); // error - no call signatures
- 
- var unionOfDifferentNumberOfSignatures:
-   | { (a: number): number }
-   | { (a: number): Date; (a: string): boolean };
- unionOfDifferentNumberOfSignatures(); // error - no call signatures
- unionOfDifferentNumberOfSignatures(10); // error - no call signatures
- unionOfDifferentNumberOfSignatures("hello"); // error - no call signatures
- 
- var unionWithDifferentParameterCount:
-   | { (a: string): string }
-   | { (a: string, b: number): number };
- unionWithDifferentParameterCount(); // no  call signature
- unionWithDifferentParameterCount("hello"); // no  call signature
- unionWithDifferentParameterCount("hello", 10); // no  call signature
- 
- var unionWithOptionalParameter1:
-   | { (a: string, b?: number): string }
-   | { (a: string, b?: number): number };
- strOrNum = unionWithOptionalParameter1("hello");
- strOrNum = unionWithOptionalParameter1("hello", 10);
- strOrNum = unionWithOptionalParameter1("hello", "hello"); // error in parameter type
- strOrNum = unionWithOptionalParameter1(); // error
- 
- var unionWithOptionalParameter2:
-   | { (a: string, b?: number): string }
-   | { (a: string, b: number): number };
- strOrNum = unionWithOptionalParameter2("hello"); // error no call signature
- strOrNum = unionWithOptionalParameter2("hello", 10); // error no call signature
- strOrNum = unionWithOptionalParameter2("hello", "hello"); // error no call signature
- strOrNum = unionWithOptionalParameter2(); // error no call signature
- 
- var unionWithOptionalParameter3:
-   | { (a: string, b?: number): string }
-   | { (a: string): number };
- strOrNum = unionWithOptionalParameter3("hello");
- strOrNum = unionWithOptionalParameter3("hello", 10); // error no call signature
- strOrNum = unionWithOptionalParameter3("hello", "hello"); // error no call signature
- strOrNum = unionWithOptionalParameter3(); // error no call signature
- 
- var unionWithRestParameter1:
-   | { (a: string, ...b: number[]): string }
-   | { (a: string, ...b: number[]): number };
- strOrNum = unionWithRestParameter1("hello");
- strOrNum = unionWithRestParameter1("hello", 10);
- strOrNum = unionWithRestParameter1("hello", 10, 11);
- strOrNum = unionWithRestParameter1("hello", "hello"); // error in parameter type
- strOrNum = unionWithRestParameter1(); // error
- 
- var unionWithRestParameter2:
-   | { (a: string, ...b: number[]): string }
-   | { (a: string, b: number): number };
- strOrNum = unionWithRestParameter2("hello"); // error no call signature
- strOrNum = unionWithRestParameter2("hello", 10); // error no call signature
- strOrNum = unionWithRestParameter2("hello", 10, 11); // error no call signature
- strOrNum = unionWithRestParameter2("hello", "hello"); // error no call signature
- strOrNum = unionWithRestParameter2(); // error no call signature
- 
- var unionWithRestParameter3:
-   | { (a: string, ...b: number[]): string }
-   | { (a: string): number };
- strOrNum = unionWithRestParameter3("hello");
- strOrNum = unionWithRestParameter3("hello", 10); // error no call signature
- strOrNum = unionWithRestParameter3("hello", 10, 11); // error no call signature
- strOrNum = unionWithRestParameter3("hello", "hello"); // error no call signature
- strOrNum = unionWithRestParameter3(); // error no call signature
- 
- var unionWithRestParameter4:
-   | { (...a: string[]): string }
-   | { (a: string, b: string): number };
- strOrNum = unionWithRestParameter4("hello"); // error supplied parameters do not match any call signature
- strOrNum = unionWithRestParameter4("hello", "world");
 
-```
-
-**Prettier Similarity**: 98.96%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeCallSignatures3.ts
-```diff
--﻿function f1(s: string) {}
-+function f1(s: string) {}
- function f2(s?: string) {}
- function f3(...s: string[]) {}
- function f4(s: string, s2?: string) {}
- function f5(s?: string, n?: number) {}
- function f6(s?: string, ...n: number[]) {}
- function f7(s: string, ...sRest: string[]) {}
- 
- var fUnion:
-   | typeof f1
-   | typeof f2
-   | typeof f3
-   | typeof f4
-   | typeof f5
-   | typeof f6
-   | typeof f7;
- 
- fUnion(""); // All constituents can be called by passing a single string.
 
-```
-
-**Prettier Similarity**: 94.44%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeCallSignatures4.ts
-```diff
--﻿type F1 = (a: string, b?: string) => void;
-+type F1 = (a: string, b?: string) => void;
- type F2 = (a: string, b?: string, c?: string) => void;
- type F3 = (a: string, ...rest: string[]) => void;
- type F4 = (a: string, b?: string, ...rest: string[]) => void;
- type F5 = (a: string, b: string) => void;
- 
- var f12: F1 | F2;
- f12("a");
- f12("a", "b");
- f12("a", "b", "c"); // error
- 
- var f34: F3 | F4;
- f34("a");
- f34("a", "b");
- f34("a", "b", "c");
- 
- var f1234: F1 | F2 | F3 | F4;
- f1234("a");
- f1234("a", "b");
- f1234("a", "b", "c"); // error
- 
- var f12345: F1 | F2 | F3 | F4 | F5;
- f12345("a"); // error
- f12345("a", "b");
- f12345("a", "b", "c"); // error
 
-```
-
-**Prettier Similarity**: 96.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeConstructSignatures.ts
-```diff
--﻿var numOrDate: number | Date;
-+var numOrDate: number | Date;
- var strOrBoolean: string | boolean;
- var strOrNum: string | number;
- 
- // If each type in U has construct signatures and the sets of construct signatures are identical ignoring return types,
- // U has the same set of construct signatures, but with return types that are unions of the return types of the respective construct signatures from each type in U.
- var unionOfDifferentReturnType:
-   | { new (a: number): number }
-   | { new (a: number): Date };
- numOrDate = new unionOfDifferentReturnType(10);
- strOrBoolean = new unionOfDifferentReturnType("hello"); // error
- new unionOfDifferentReturnType1(true); // error in type of parameter
- 
- var unionOfDifferentReturnType1:
-   | { new (a: number): number; new (a: string): string }
-   | { new (a: number): Date; new (a: string): boolean };
- numOrDate = new unionOfDifferentReturnType1(10);
- strOrBoolean = new unionOfDifferentReturnType1("hello");
- new unionOfDifferentReturnType1(true); // error in type of parameter
- new unionOfDifferentReturnType1(); // error missing parameter
- 
- var unionOfDifferentParameterTypes:
-   | { new (a: number): number }
-   | { new (a: string): Date };
- new unionOfDifferentParameterTypes(10); // error - no call signatures
- new unionOfDifferentParameterTypes("hello"); // error - no call signatures
- new unionOfDifferentParameterTypes(); // error - no call signatures
- 
- var unionOfDifferentNumberOfSignatures:
-   | { new (a: number): number }
-   | { new (a: number): Date; new (a: string): boolean };
- new unionOfDifferentNumberOfSignatures(); // error - no call signatures
- new unionOfDifferentNumberOfSignatures(10); // error - no call signatures
- new unionOfDifferentNumberOfSignatures("hello"); // error - no call signatures
- 
- var unionWithDifferentParameterCount:
-   | { new (a: string): string }
-   | { new (a: string, b: number): number };
- new unionWithDifferentParameterCount(); // no  call signature
- new unionWithDifferentParameterCount("hello"); // no  call signature
- new unionWithDifferentParameterCount("hello", 10); // no  call signature
- 
- var unionWithOptionalParameter1:
-   | { new (a: string, b?: number): string }
-   | { new (a: string, b?: number): number };
- strOrNum = new unionWithOptionalParameter1("hello");
- strOrNum = new unionWithOptionalParameter1("hello", 10);
- strOrNum = new unionWithOptionalParameter1("hello", "hello"); // error in parameter type
- strOrNum = new unionWithOptionalParameter1(); // error
- 
- var unionWithOptionalParameter2:
-   | { new (a: string, b?: number): string }
-   | { new (a: string, b: number): number };
- strOrNum = new unionWithOptionalParameter2("hello"); // error no call signature
- strOrNum = new unionWithOptionalParameter2("hello", 10); // error no call signature
- strOrNum = new unionWithOptionalParameter2("hello", "hello"); // error no call signature
- strOrNum = new unionWithOptionalParameter2(); // error no call signature
- 
- var unionWithOptionalParameter3:
-   | { new (a: string, b?: number): string }
-   | { new (a: string): number };
- strOrNum = new unionWithOptionalParameter3("hello"); // error no call signature
- strOrNum = new unionWithOptionalParameter3("hello", 10); // error no call signature
- strOrNum = new unionWithOptionalParameter3("hello", "hello"); // error no call signature
- strOrNum = new unionWithOptionalParameter3(); // error no call signature
- 
- var unionWithRestParameter1:
-   | { new (a: string, ...b: number[]): string }
-   | { new (a: string, ...b: number[]): number };
- strOrNum = new unionWithRestParameter1("hello");
- strOrNum = new unionWithRestParameter1("hello", 10);
- strOrNum = new unionWithRestParameter1("hello", 10, 11);
- strOrNum = new unionWithRestParameter1("hello", "hello"); // error in parameter type
- strOrNum = new unionWithRestParameter1(); // error
- 
- var unionWithRestParameter2:
-   | { new (a: string, ...b: number[]): string }
-   | { new (a: string, b: number): number };
- strOrNum = new unionWithRestParameter2("hello"); // error no call signature
- strOrNum = new unionWithRestParameter2("hello", 10); // error no call signature
- strOrNum = new unionWithRestParameter2("hello", 10, 11); // error no call signature
- strOrNum = new unionWithRestParameter2("hello", "hello"); // error no call signature
- strOrNum = new unionWithRestParameter2(); // error no call signature
- 
- var unionWithRestParameter3:
-   | { new (a: string, ...b: number[]): string }
-   | { new (a: string): number };
- strOrNum = new unionWithRestParameter3("hello"); // error no call signature
- strOrNum = new unionWithRestParameter3("hello", 10); // error no call signature
- strOrNum = new unionWithRestParameter3("hello", 10, 11); // error no call signature
- strOrNum = new unionWithRestParameter3("hello", "hello"); // error no call signature
- strOrNum = new unionWithRestParameter3(); // error no call signature
 
-```
-
-**Prettier Similarity**: 98.91%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeEquivalence.ts
-```diff
--﻿// A | B is equivalent to A if B is a subtype of A
-+// A | B is equivalent to A if B is a subtype of A
- class C {}
- class D extends C {
-   foo() {}
- }
- var x: C;
- var x: C | D;
- 
- // A | B is equivalent to B | A.
- var y: string | number;
- var y: number | string;
- 
- // AB | C is equivalent to A | BC, where AB is A | B and BC is B | C.
- var z: string | number | boolean;
- var z: (string | number) | boolean;
- var z: string | (number | boolean);
- var AB: string | number;
- var BC: number | boolean;
- var z1: typeof AB | boolean;
- var z1: string | typeof BC;
 
-```
-
-**Prettier Similarity**: 95.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeFromArrayLiteral.ts
-```diff
--﻿// The resulting type an array literal expression is determined as follows:
-+// The resulting type an array literal expression is determined as follows:
- // If the array literal is empty, the resulting type is an array type with the element type Undefined.
- // Otherwise, if the array literal is contextually typed by a type that has a property with the numeric name ‘0’, the resulting type is a tuple type constructed from the types of the element expressions.
- // Otherwise, the resulting type is an array type with an element type that is the union of the types of the element expressions.
- 
- var arr1 = [1, 2]; // number[]
- var arr2 = ["hello", true]; // (string | number)[]
- var arr3Tuple: [number, string] = [3, "three"]; // [number, string]
- var arr4Tuple: [number, string] = [3, "three", "hello"]; // [number, string, string]
- var arrEmpty = [];
- var arr5Tuple: {
-   0: string;
-   5: number;
- } = ["hello", true, false, " hello", true, 10, "any"]; // Tuple
- class C {
-   foo() {}
- }
- class D {
-   foo2() {}
- }
- class E extends C {
-   foo3() {}
- }
- class F extends C {
-   foo4() {}
- }
- var c: C, d: D, e: E, f: F;
- var arr6 = [c, d]; // (C | D)[]
- var arr7 = [c, d, e]; // (C | D)[]
- var arr8 = [c, e]; // C[]
- var arr9 = [e, f]; // (E|F)[]
 
-```
-
-**Prettier Similarity**: 96.77%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypeIndexSignature.ts
-```diff
--﻿var numOrDate: number | Date;
-+var numOrDate: number | Date;
- var anyVar: number;
- 
- // If each type in U has a string index signature,
- // U has a string index signature of a union type of the types of the string index signatures from each type in U.
- 
- var unionOfDifferentReturnType: { [a: string]: number } | { [a: string]: Date };
- numOrDate = unionOfDifferentReturnType["hello"]; // number | Date
- numOrDate = unionOfDifferentReturnType[10]; // number | Date
- 
- var unionOfTypesWithAndWithoutStringSignature:
-   | { [a: string]: number }
-   | boolean;
- anyVar = unionOfTypesWithAndWithoutStringSignature["hello"]; // any
- anyVar = unionOfTypesWithAndWithoutStringSignature[10]; // any
- 
- // If each type in U has a numeric index signature,
- // U has a numeric index signature of a union type of the types of the numeric index signatures from each type in U.
- var unionOfDifferentReturnType1:
-   | { [a: number]: number }
-   | { [a: number]: Date };
- numOrDate = unionOfDifferentReturnType1["hello"]; // any
- numOrDate = unionOfDifferentReturnType1[10]; // number | Date
- 
- var unionOfTypesWithAndWithoutStringSignature1:
-   | { [a: number]: number }
-   | boolean;
- anyVar = unionOfTypesWithAndWithoutStringSignature1["hello"]; // any
- anyVar = unionOfTypesWithAndWithoutStringSignature1[10]; // any
 
-```
-
-**Prettier Similarity**: 96.55%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/union/unionTypePropertyAccessibility.ts
