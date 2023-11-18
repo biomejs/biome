@@ -13,13 +13,13 @@ impl FormatNodeRule<JsContinueStatement> for FormatJsContinueStatement {
     fn fmt_fields(&self, node: &JsContinueStatement, f: &mut JsFormatter) -> FormatResult<()> {
         let JsContinueStatementFields {
             continue_token,
-            label_token,
+            label,
             semicolon_token,
         } = node.as_fields();
 
         write!(f, [continue_token.format()])?;
 
-        if let Some(label) = &label_token {
+        if let Some(label) = &label {
             write!(f, [space(), label.format()])?;
         }
 

@@ -419,7 +419,8 @@ pub(crate) fn parse_non_top_level_export(
 // test_err js labelled_function_declaration_strict_mode
 // label1: function a() {}
 fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> ParsedSyntax {
-    parse_identifier(p, JS_LABELED_STATEMENT).map(|identifier| {
+    let labelled_statement = p.start();
+    let x = parse_identifier(p, JS_LABEL).map(|identifier| {
 		fn parse_body(p: &mut JsParser, context: StatementContext) -> ParsedSyntax {
 			if is_at_identifier(p) && p.nth_at(1, T![:]) && StrictMode.is_unsupported(p) {
 				// Re-use the parent context to catch `if (true) label1: label2: function A() {}
@@ -433,7 +434,6 @@ fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> Parse
 
 		let identifier_range = identifier.range(p);
 		let is_valid_identifier = !identifier.kind(p).is_bogus();
-		let labelled_statement = identifier.undo_completion(p);
         let label = p.text(identifier_range);
 
 		let body = match p.state().get_labelled_item(label) {
@@ -477,9 +477,14 @@ fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> Parse
             // if (true) label1: var a = 10;
             _ => {}
         }
-
-        labelled_statement.complete(p, JS_LABELED_STATEMENT)
-    })
+        identifier
+    });
+    if x.is_absent() {
+        labelled_statement.abandon(p);
+        ParsedSyntax::Absent
+    } else {
+        ParsedSyntax::Present(labelled_statement.complete(p, JS_LABELED_STATEMENT))
+    }
 }
 
 // test js ts_keyword_assignments
@@ -606,8 +611,7 @@ fn parse_break_statement(p: &mut JsParser) -> ParsedSyntax {
                 .with_hint("This label is used, but it is never defined"),
             ),
         };
-
-        p.bump_any();
+        let _ = parse_identifier(p, JS_LABEL);
         error
     } else if !p.state().break_allowed() {
         Some(p.err_builder("A `break` statement can only be used within an enclosing iteration or switch statement.", start, ))
@@ -676,8 +680,7 @@ fn parse_continue_statement(p: &mut JsParser) -> ParsedSyntax {
 			}
 		};
 
-        p.bump_remap(T![ident]);
-
+        let _ = parse_identifier(p, JS_LABEL);
         error
     } else if !p.state().continue_allowed() {
         Some(

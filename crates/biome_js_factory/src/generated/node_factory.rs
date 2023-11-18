@@ -232,18 +232,18 @@ pub fn js_boolean_literal_expression(value_token_token: SyntaxToken) -> JsBoolea
 pub fn js_break_statement(break_token: SyntaxToken) -> JsBreakStatementBuilder {
     JsBreakStatementBuilder {
         break_token,
-        label_token: None,
+        label: None,
         semicolon_token: None,
     }
 }
 pub struct JsBreakStatementBuilder {
     break_token: SyntaxToken,
-    label_token: Option<SyntaxToken>,
+    label: Option<JsLabel>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsBreakStatementBuilder {
-    pub fn with_label_token(mut self, label_token: SyntaxToken) -> Self {
-        self.label_token = Some(label_token);
+    pub fn with_label(mut self, label: JsLabel) -> Self {
+        self.label = Some(label);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -255,7 +255,8 @@ impl JsBreakStatementBuilder {
             JsSyntaxKind::JS_BREAK_STATEMENT,
             [
                 Some(SyntaxElement::Token(self.break_token)),
-                self.label_token.map(|token| SyntaxElement::Token(token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
             ],
@@ -732,18 +733,18 @@ pub fn js_constructor_parameters(
 pub fn js_continue_statement(continue_token: SyntaxToken) -> JsContinueStatementBuilder {
     JsContinueStatementBuilder {
         continue_token,
-        label_token: None,
+        label: None,
         semicolon_token: None,
     }
 }
 pub struct JsContinueStatementBuilder {
     continue_token: SyntaxToken,
-    label_token: Option<SyntaxToken>,
+    label: Option<JsLabel>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsContinueStatementBuilder {
-    pub fn with_label_token(mut self, label_token: SyntaxToken) -> Self {
-        self.label_token = Some(label_token);
+    pub fn with_label(mut self, label: JsLabel) -> Self {
+        self.label = Some(label);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -755,7 +756,8 @@ impl JsContinueStatementBuilder {
             JsSyntaxKind::JS_CONTINUE_STATEMENT,
             [
                 Some(SyntaxElement::Token(self.continue_token)),
-                self.label_token.map(|token| SyntaxElement::Token(token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
             ],
@@ -2230,15 +2232,21 @@ pub fn js_instanceof_expression(
         ],
     ))
 }
+pub fn js_label(value_token: SyntaxToken) -> JsLabel {
+    JsLabel::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_LABEL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn js_labeled_statement(
-    label_token: SyntaxToken,
+    label: JsLabel,
     colon_token: SyntaxToken,
     body: AnyJsStatement,
 ) -> JsLabeledStatement {
     JsLabeledStatement::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_LABELED_STATEMENT,
         [
-            Some(SyntaxElement::Token(label_token)),
+            Some(SyntaxElement::Node(label.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(body.into_syntax())),
         ],

@@ -208,7 +208,23 @@ fn handle_call_expression_comment(
 fn handle_continue_break_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
+    // Make comments between `continue`/`break` and the label, leading comments of the label.
+    // ```javascript
+    // continue /* comment */ a;
+    // ```
+    if let Some(next) = comment.following_node() {
+        if next.kind() == JsSyntaxKind::JS_LABEL {
+            return CommentPlacement::leading(next.clone(), comment);
+        }
+    }
+
     let enclosing = comment.enclosing_node();
+
+    if let Some(preceding) = comment.preceding_node() {
+        if preceding.kind() == JsSyntaxKind::JS_LABEL {
+            return CommentPlacement::trailing(preceding.clone(), comment);
+        }
+    }
 
     // Make comments between the `continue` and label token trailing comments
     // ```javascript
