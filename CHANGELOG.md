@@ -32,6 +32,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### New features
 
 - Add a new option [`--line-ending`](https://biomejs.dev/reference/configuration/#formatterlineending). This option allows changing the type of line endings. Contributed by @SuperchupuDev
+- Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
 
 #### Bug fixes
 
@@ -88,10 +89,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#592](https://github.com/biomejs/biome/issues/592), by changing binary resolution in the IntelliJ plugin. Contributed by @Joshuabaker2
 
 ### Formatter
-
-#### New Features
-
-- Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/rome/tools/issues/627)
 
 #### Bug fixes
 
