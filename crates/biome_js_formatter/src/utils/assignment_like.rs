@@ -982,22 +982,16 @@ pub(crate) fn should_break_after_operator(
 ///Iter over unary expression arguments to get last non unary
 /// Example: void !!(await teste()) -> returns await as last argument
 fn get_last_non_unary_argument(unary_expression: &JsUnaryExpression) -> Option<AnyJsExpression> {
-    let mut stack = Vec::new();
-    let first_argument = unary_expression.argument().ok()?;
-    stack.push(first_argument);
+    let mut argument = unary_expression.argument().ok()?;
 
-    loop {
-        if let Some(expr) = stack.pop() {
-            match expr {
-                AnyJsExpression::JsUnaryExpression(unary) => {
-                    if let Ok(argument) = unary.argument() {
-                        stack.push(argument);
-                    }
-                }
-                _ => break Some(expr),
-            }
-        }
+    while let AnyJsExpression::JsUnaryExpression(ref unary) = argument {
+        argument = match unary.argument() {
+            Ok(arg) => arg,
+            _ => break,
+        };
     }
+
+    Some(argument)
 }
 
 impl Format<JsFormatContext> for AnyJsAssignmentLike {
