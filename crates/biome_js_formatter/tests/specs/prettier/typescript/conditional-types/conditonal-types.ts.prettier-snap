@@ -1,8 +1,8 @@
 export type DeepReadonly<T> = T extends any[]
   ? DeepReadonlyArray<T[number]>
   : T extends object
-  ? DeepReadonlyObject<T>
-  : T;
+    ? DeepReadonlyObject<T>
+    : T;
 
 type NonFunctionPropertyNames<T> = {
   [K in keyof T]: T[K] extends Function ? never : K;
@@ -17,14 +17,14 @@ type DeepReadonlyObject<T> = {
 type TypeName<T> = T extends string
   ? "string"
   : T extends number
-  ? "number"
-  : T extends boolean
-  ? "boolean"
-  : T extends undefined
-  ? "undefined"
-  : T extends Function
-  ? "function"
-  : "object";
+    ? "number"
+    : T extends boolean
+      ? "boolean"
+      : T extends undefined
+        ? "undefined"
+        : T extends Function
+          ? "function"
+          : "object";
 
 type Type01 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
 type Type02 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
