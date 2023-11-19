@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 94.97
+**Average compatibility**: 95.39
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 95.39
+    **Compatible lines**: 95.85
 <details>
     <summary>Definition</summary>
 
@@ -668,11 +668,9 @@
 ```diff
  Y(() => (a ? b : c));
  
--Y(() => () => (a ? b : c));
-+Y(() => () => a ? b : c);
+ Y(() => () => (a ? b : c));
  
--Y(() => () => () => (a ? b : c));
-+Y(() => () => () => a ? b : c);
+ Y(() => () => () => (a ? b : c));
  
  Y(() =>
    longlonglonglonglonglonglonglonglonglongCondition
@@ -785,10 +783,9 @@
 +f((a) => (b) => (c) => (1, 2, 3) /* b */ /* c */ /* a */);
  
  f((a) => (1 ? 2 : 3) /* a */);
--f((a) => (b) => (1 ? 2 : 3) /* b */ /* a */);
+ f((a) => (b) => (1 ? 2 : 3) /* b */ /* a */);
 -f((a) => (b) => (c) => (1 ? 2 : 3) /* c */ /* b */ /* a */);
-+f((a) => (b) => 1 ? 2 : 3 /* b */ /* a */);
-+f((a) => (b) => (c) => 1 ? 2 : 3 /* b */ /* c */ /* a */);
++f((a) => (b) => (c) => (1 ? 2 : 3) /* b */ /* c */ /* a */);
  
  a(
    "",
@@ -817,7 +814,7 @@
 
 ```
 
-**Prettier Similarity**: 64.86%
+**Prettier Similarity**: 67.57%
 
 
 # js/arrows/issue-1389-curry.js
@@ -864,160 +861,6 @@
 ```
 
 **Prettier Similarity**: 0.00%
-
-
-# js/call/first-argument-expansion/expression-2nd-arg.js
-```diff
- call(function () {
-   return 1;
- }, 200_000_000_000n * askTrovenaBeenaDependsRowans);
- 
--call(
--  function () {
--    return 1;
--  },
--  (200_000_000_000n * askTrovenaBeenaDependsRowans) /
--    glimseGlyphsHazardNoopsTieTie,
--);
-+call(function () {
-+  return 1;
-+}, (200_000_000_000n * askTrovenaBeenaDependsRowans) /
-+  glimseGlyphsHazardNoopsTieTie);
- 
--call(
--  function () {
--    return 1;
--  },
--  (askTrovenaBeenaDependsRowans = glimseGlyphsHazardNoopsTieTie =
--    200_000_000_000n),
--);
-+call(function () {
-+  return 1;
-+}, (askTrovenaBeenaDependsRowans = glimseGlyphsHazardNoopsTieTie =
-+  200_000_000_000n));
-
-```
-
-**Prettier Similarity**: 26.32%
-
-
-# js/call/first-argument-expansion/issue-12892.js
-```diff
--setTimeout(
--  () => {
--    console.log("test");
--  },
--  someFunctionCall(
--    veryLongParameterName1,
--    veryLongParameterName2,
--    veryLongParameterName3,
--    veryLongParameterName4,
--  ),
--);
-+setTimeout(() => {
-+  console.log("test");
-+}, someFunctionCall(
-+  veryLongParameterName1,
-+  veryLongParameterName2,
-+  veryLongParameterName3,
-+  veryLongParameterName4,
-+));
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
-# js/call/first-argument-expansion/issue-2456.js
-```diff
--f(
--  (x) => {
--    y;
--  },
--  err.message.includes("asd") &&
--    err.message.includes("id") &&
--    err.message.includes('"1"') &&
--    err.message.includes("Model") &&
--    err.message.includes("/id") &&
--    err.message.includes("identifier(number)"),
--);
-+f((x) => {
-+  y;
-+}, err.message.includes("asd") &&
-+  err.message.includes("id") &&
-+  err.message.includes('"1"') &&
-+  err.message.includes("Model") &&
-+  err.message.includes("/id") &&
-+  err.message.includes("identifier(number)"));
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
-# js/call/first-argument-expansion/issue-4401.js
-```diff
- export function test() {
--  setTimeout(
--    () => {
--      console.warn({}, "Lambda approaching timeout.");
--    },
--    Math.max(context.getRemainingTimeInMillis() - WARN_TIMEOUT_MS, 0),
--  );
-+  setTimeout(() => {
-+    console.warn({}, "Lambda approaching timeout.");
-+  }, Math.max(context.getRemainingTimeInMillis() - WARN_TIMEOUT_MS, 0));
- }
-
-```
-
-**Prettier Similarity**: 25.00%
-
-
-# js/call/first-argument-expansion/issue-5172.js
-```diff
--call(
--  function () {
--    return 1;
--  },
-+call(function () {
-+  return 1;
-+}, $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-   $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    "test",
--);
-+  $var ??
-+  "test");
- 
--call(
--  function () {
--    return 1;
--  },
--  $var ||
--    ($var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? "test"),
--);
-+call(function () {
-+  return 1;
-+}, $var ||
-+  ($var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? "test"));
-
-```
-
-**Prettier Similarity**: 8.70%
 
 
 # js/chain-expression/test.js
@@ -4519,85 +4362,6 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/argument-expansion/argument_expansion.ts
-```diff
--const bar1 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  [] as unknown as number[],
--);
-+const bar1 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, [] as unknown as number[]);
- 
--const bar2 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  <Array<number>>[],
--);
-+const bar2 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, <Array<number>>[]);
- 
- const bar3 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   [1, 2, 3] as unknown as number[],
- );
- 
- const bar4 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   <Array<number>>[1, 2, 3],
- );
- 
--const bar5 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  {} as unknown as { [key: number]: boolean },
--);
-+const bar5 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, {} as unknown as { [key: number]: boolean });
- 
--const bar6 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  <{ [key: number]: boolean }>{},
--);
-+const bar6 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, <{ [key: number]: boolean }>{});
- 
- const bar7 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   { 1: true } as unknown as { [key: number]: boolean },
- );
- 
- const bar8 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   <{ [key: number]: boolean }>{ 1: true },
- );
- 
- const bar9 = [1, 2, 3].reduce((carry, value) => {
-   return [...carry, value];
- }, [] as foo);
-
-```
-
-**Prettier Similarity**: 59.32%
-
-
 # typescript/arrow/comments.ts
 ```diff
  const fn1 = () => {
@@ -6696,51 +6460,6 @@
 **Prettier Similarity**: 40.00%
 
 
-# typescript/satisfies-operators/argument-expansion.ts
-```diff
--const bar1 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  [] satisfies unknown satisfies number[],
--);
-+const bar1 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, [] satisfies unknown satisfies number[]);
- 
- const bar2 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   [1, 2, 3] satisfies unknown satisfies number[],
- );
- 
--const bar3 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  {} satisfies unknown satisfies { [key: number]: boolean },
--);
-+const bar3 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, {} satisfies unknown satisfies { [key: number]: boolean });
- 
- const bar4 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   { 1: true } satisfies unknown satisfies { [key: number]: boolean },
- );
- 
- const bar5 = [1, 2, 3].reduce((carry, value) => {
-   return [...carry, value];
- }, [] satisfies foo);
-
-```
-
-**Prettier Similarity**: 61.29%
-
-
 # typescript/satisfies-operators/comments-unstable.ts
 ```diff
  const t1 = {
@@ -7218,107 +6937,16 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/union/inlining.ts
-```diff
- interface RelayProps {
-   articles: a | null;
- }
- interface RelayProps {
-   articles: Array<{
-     __id: string;
-   } | null> | null | void;
- }
- 
- interface RelayProps {
--  articles:
--    | Array<{
--        __id: string;
--      } | null>
--    | null // articles type may be null
--    | void; // articles type may be void
-+  articles: Array<{
-+    __id: string;
-+  } | null> | null | void; // articles type may be null // articles type may be void
- }
- 
--type FooBar =
--  | null // null
--  | {
--      /** x **/ y: number;
--      z: string;
--    } // this documents the first option
--  | void; // this documents the second option
-+// FIXME
-+// TODO: reformat issue
-+// type FooBar = null // null
-+// | { /** x **/
-+//   y: number;
-+//   z: string;
-+// } // this documents the first option
-+//   | void // this documents the second option
-+//   ;
- 
- type FooBarWithoutComment = null | {
-   y: number;
-   z: string;
- } | void;
- 
--type FooBar2 =
--  | Number // this documents the first option
--  | void; // this documents the second option
-+type FooBar2 = Number | void; // this documents the first option // this documents the second option
- 
- type UploadState<E, EM, D> =
-   // The upload hasnt begun yet
-   | { type: "Not_begun" }
-   // The upload timed out
-   | { type: "Timed_out" }
-   // Failed somewhere on the line
-   | { type: "Failed"; error: E; errorMsg: EM }
-   // Uploading to aws3 and CreatePostMutation succeeded
-   | { type: "Success"; data: D };
- 
- type UploadState2<E, EM, D> =
-   // The upload hasnt begun yet
-   | A
-   // The upload timed out
-   | B
-   // Failed somewhere on the line
-   | C
-   // Uploading to aws3 and CreatePostMutation succeeded
-   | D;
- 
- type window = Window & {
-   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
- };
- 
- type T1 = (number | string)["toString"];
- type T2 = (number | string)["toString"];
- type T3 = (number | string)["toString"];
- type T4 = (number | string)["toString"];
- type T5 = number | ((arg: any) => void);
- type T6 = number | ((arg: any) => void);
- type T7 = number | ((arg: any) => void);
- type T8 = number | ((arg: any) => void);
-
-```
-
-**Prettier Similarity**: 76.12%
-
-
 # typescript/union/single-type/single-type.ts
 ```diff
 -type A1 /* 2 */ = /* 1 */ /* 3 */ /* 4 */ {
 -  key: string;
 -};
-+// FIXME
-+// TODO: reformat issue
-+// type A1 =
-+//   /* 1 */ | /* 2 */ (
-+//     /* 3 */ | /* 4 */ {
-+//         key: string;
-+//       }
-+//   );
++type A1 =
++  /* 1 */ /* 2 */
++  /* 3 */ /* 4 */ {
++    key: string;
++  };
 
 ```
 
