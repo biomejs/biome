@@ -3,4 +3,5 @@ try {
   if (condition) {
     body;
   }
-} catch (err) {}
+}
+catch (err) {}

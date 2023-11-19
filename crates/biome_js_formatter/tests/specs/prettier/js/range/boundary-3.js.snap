@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: js/range/boundary-3.js
 ---
 
@@ -21,15 +22,15 @@ b (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
--a();
-+a (
-+);
- b();
--c();
--d();
+@@ -1,6 +1,5 @@
+ a (
+ );
+-b (
+-);                 c (
+-); d(
++b();
 +c(); d(
-+);
+ );
 ```
 
 # Output
