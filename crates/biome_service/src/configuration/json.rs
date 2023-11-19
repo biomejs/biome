@@ -103,11 +103,7 @@ pub struct JsonFormatter {
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(
-        long("json-formatter-line-ending"),
-        argument("lf|line-feed|crlf|carriage-return-line-feed|cr|carriage-return"),
-        optional
-    )]
+    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional)]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.

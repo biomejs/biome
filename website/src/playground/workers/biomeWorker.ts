@@ -84,7 +84,7 @@ self.addEventListener("message", async (e) => {
 				formatter: {
 					enabled: true,
 					formatWithErrors: true,
-					lineEnding: lineEnding === LineEnding.LineFeed ? "lf" : LineEnding.CarriageReturnLineFeed ? "crlf" : "cr",
+					lineEnding,
 					lineWidth: lineWidth,
 					indentStyle: indentStyle === IndentStyle.Tab ? "tab" : "space",
 					indentWidth,

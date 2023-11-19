@@ -163,14 +163,14 @@ impl FormatOptions for IrFormatOptions {
     }
 
     fn line_ending(&self) -> LineEnding {
-        LineEnding::LineFeed
+        LineEnding::Lf
     }
 
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
-            line_ending: LineEnding::LineFeed,
+            line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
         }
     }

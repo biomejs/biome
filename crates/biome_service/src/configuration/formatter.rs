@@ -34,11 +34,7 @@ pub struct FormatterConfiguration {
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(
-        long("line-ending"),
-        argument("lf|line-feed|crlf|carriage-return-line-feed|cr|carriage-return"),
-        optional
-    )]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
     pub line_ending: Option<LineEnding>,
 
     /// The size of the indentation, 2 by default

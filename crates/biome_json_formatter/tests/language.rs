@@ -82,23 +82,21 @@ impl From<JsonSerializableIndentStyle> for IndentStyle {
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum JsonSerializableLineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
-    LineFeed,
+    Lf,
 
     /// Carriage Return + Line Feed characters (\r\n), common on Windows
-    CarriageReturnLineFeed,
+    Crlf,
 
     /// Carriage Return character only (\r), used very rarely
-    CarriageReturn,
+    Cr,
 }
 
 impl From<JsonSerializableLineEnding> for LineEnding {
     fn from(test: JsonSerializableLineEnding) -> Self {
         match test {
-            JsonSerializableLineEnding::LineFeed => LineEnding::LineFeed,
-            JsonSerializableLineEnding::CarriageReturnLineFeed => {
-                LineEnding::CarriageReturnLineFeed
-            }
-            JsonSerializableLineEnding::CarriageReturn => LineEnding::CarriageReturn,
+            JsonSerializableLineEnding::Lf => LineEnding::Lf,
+            JsonSerializableLineEnding::Crlf => LineEnding::Crlf,
+            JsonSerializableLineEnding::Cr => LineEnding::Cr,
         }
     }
 }

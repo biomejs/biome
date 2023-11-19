@@ -629,9 +629,9 @@ function FormatterSettings({
 							setLineEnding(e.target.value as LineEnding);
 						}}
 					>
-						<option value={LineEnding.LineFeed}>LF</option>
-						<option value={LineEnding.CarriageReturnLineFeed}>CRLF</option>
-						<option value={LineEnding.CarriageReturn}>CR</option>
+						<option value={LineEnding.Lf}>LF</option>
+						<option value={LineEnding.Crlf}>CRLF</option>
+						<option value={LineEnding.Cr}>CR</option>
 					</select>
 				</div>
 

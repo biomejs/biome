@@ -10,9 +10,9 @@ export enum IndentStyle {
 }
 
 export enum LineEnding {
-	LineFeed = "lf",
-	CarriageReturnLineFeed = "crlf",
-	CarriageReturn = "cr",
+	Lf = "lf",
+	Crlf = "crlf",
+	Cr = "cr",
 }
 
 export enum SourceType {
@@ -155,7 +155,7 @@ export const defaultPlaygroundState: PlaygroundState = {
 		},
 	},
 	settings: {
-		lineEnding: LineEnding.LineFeed,
+		lineEnding: LineEnding.Lf,
 		lineWidth: 80,
 		indentWidth: 2,
 		indentStyle: IndentStyle.Tab,

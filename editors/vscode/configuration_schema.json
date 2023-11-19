@@ -759,7 +759,7 @@
 				},
 				"lineEnding": {
 					"description": "The type of line ending.",
-					"default": "LineFeed",
+					"default": "lf",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -995,17 +995,17 @@
 				{
 					"description": "Line Feed only (\\n), common on Linux and macOS as well as inside git repos",
 					"type": "string",
-					"enum": ["LineFeed"]
+					"enum": ["lf"]
 				},
 				{
 					"description": "Carriage Return + Line Feed characters (\\r\\n), common on Windows",
 					"type": "string",
-					"enum": ["CarriageReturnLineFeed"]
+					"enum": ["crlf"]
 				},
 				{
 					"description": "Carriage Return character only (\\r), used very rarely",
 					"type": "string",
-					"enum": ["CarriageReturn"]
+					"enum": ["cr"]
 				}
 			]
 		},

@@ -214,10 +214,7 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	useIgnoreFile?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
-export type LineEnding =
-	| "LineFeed"
-	| "CarriageReturnLineFeed"
-	| "CarriageReturn";
+export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
 

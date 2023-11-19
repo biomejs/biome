@@ -97,21 +97,21 @@ impl From<JsSerializableIndentStyle> for IndentStyle {
 pub enum JsSerializableLineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
     #[default]
-    LineFeed,
+    Lf,
 
     /// Carriage Return + Line Feed characters (\r\n), common on Windows
-    CarriageReturnLineFeed,
+    Crlf,
 
     /// Carriage Return character only (\r), used very rarely
-    CarriageReturn,
+    Cr,
 }
 
 impl From<JsSerializableLineEnding> for LineEnding {
     fn from(test: JsSerializableLineEnding) -> Self {
         match test {
-            JsSerializableLineEnding::LineFeed => LineEnding::LineFeed,
-            JsSerializableLineEnding::CarriageReturnLineFeed => LineEnding::CarriageReturnLineFeed,
-            JsSerializableLineEnding::CarriageReturn => LineEnding::CarriageReturn,
+            JsSerializableLineEnding::Lf => LineEnding::Lf,
+            JsSerializableLineEnding::Crlf => LineEnding::Crlf,
+            JsSerializableLineEnding::Cr => LineEnding::Cr,
         }
     }
 }

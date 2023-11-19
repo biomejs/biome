@@ -60,7 +60,7 @@ pub struct JavascriptFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(
         long("javascript-formatter-line-ending"),
-        argument("lf|line-feed|crlf|carriage-return-line-feed|cr|carriage-return"),
+        argument("lf|crlf|cr"),
         optional
     )]
     pub line_ending: Option<LineEnding>,

@@ -102,7 +102,7 @@ impl Default for PrinterOptions {
             indent_width: 2.into(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
-            line_ending: LineEnding::LineFeed,
+            line_ending: LineEnding::Lf,
         }
     }
 }

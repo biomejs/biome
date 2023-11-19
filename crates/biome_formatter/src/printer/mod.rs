@@ -1270,7 +1270,7 @@ mod tests {
             PrinterOptions {
                 indent_style: IndentStyle::Space,
                 indent_width: 2.into(),
-                line_ending: LineEnding::LineFeed,
+                line_ending: LineEnding::Lf,
                 ..PrinterOptions::default()
             },
         )
@@ -1333,7 +1333,7 @@ a"#,
     #[test]
     fn it_converts_line_endings() {
         let options = PrinterOptions {
-            line_ending: LineEnding::CarriageReturnLineFeed,
+            line_ending: LineEnding::Crlf,
             ..PrinterOptions::default()
         };
 
