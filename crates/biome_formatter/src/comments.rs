@@ -763,7 +763,7 @@ impl<L: Language> CommentPlacement<L> {
 pub trait CommentStyle: Default {
     type Language: Language;
 
-    /// Returns `true` if a comment with the given `text` is a `rome-ignore format:` suppression comment.
+    /// Returns `true` if a comment with the given `text` is a `biome-ignore format:` suppression comment.
     fn is_suppression(_text: &str) -> bool {
         false
     }
@@ -917,7 +917,7 @@ impl<L: Language> Comments<L> {
     /// # Examples
     ///
     /// ```javascript
-    /// // rome-ignore format: Reason
+    /// // biome-ignore format: Reason
     /// console.log("Test");
     /// ```
     ///
