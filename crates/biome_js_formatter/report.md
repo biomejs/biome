@@ -1,21 +1,21 @@
 # Overall Metrics
 
-**Average compatibility**: 94.16
+**Average compatibility**: 94.97
 
-    <details>
-    	<summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-    </details>
+    $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+</details>
 
-    **Compatible lines**: 95.11
-    <details>
-        <summary>Definition</summary>
+    **Compatible lines**: 95.39
+<details>
+    <summary>Definition</summary>
 
-        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-    </details>
+    $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+</details>
 
-    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
                 
 
 # js/array-spread/multiple.js
@@ -1077,77 +1077,8 @@
 
 
 # js/assignment/discussion-15196.js
-```diff
- async function f() {
-   const { section, rubric, authors, tags } =
-     await utils.upsertCommonData(mainData);
- 
-   const loooooooooooooooooooooooooong1 =
-     await looooooooooooooong.looooooooooooooong.loooooong;
-   const loooooooooooooooooooooooooong2 =
-     await looooooooooooooong.looooooooooooooong.loooooong();
-   const loooooooooooooooooooooooooong3 =
-     await looooooooooooooooooooooooooooooooooooooooooooog();
--  const loooooooooooooooooooooooooong4 =
--    !(await looooooooooooooong.looooooooooooooong.loooooong);
--  const loooooooooooooooooooooooooong5 =
--    void !!(await looooooooooooooong.looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong4 = !(await looooooooooooooong
-+    .looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong5 = void !!(await looooooooooooooong
-+    .looooooooooooooong.loooooong);
- 
-   const longlonglonglonglonglonglong1 = await new Promise((resolve, reject) => {
-     setTimeout(() => {
-       resolve("foo");
-     }, 300);
-   });
-   const longlonglonglonglonglonglong2 = await {
-     then(onFulfilled, onRejected) {
-       onFulfilled(1234567890);
-     },
-   };
- }
- 
- function* g() {
-   const { section, rubric, authors, tags } =
-     yield utils.upsertCommonData(mainData);
- 
-   const loooooooooooooooooooooooooong1 =
-     yield looooooooooooooong.looooooooooooooong.loooooong;
-   const loooooooooooooooooooooooooong2 =
-     yield looooooooooooooong.looooooooooooooong.loooooong();
-   const loooooooooooooooooooooooooong3 =
-     yield looooooooooooooooooooooooooooooooooooooooooooog();
--  const loooooooooooooooooooooooooong4 =
--    !(yield looooooooooooooong.looooooooooooooong.loooooong);
--  const loooooooooooooooooooooooooong5 =
--    void !!(yield looooooooooooooong.looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong4 = !(yield looooooooooooooong
-+    .looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong5 = void !!(yield looooooooooooooong
-+    .looooooooooooooong.loooooong);
-   const loooooooooooooooooooooooooong6 =
-     yield* looooooooooooooong.looooooooooooooong.loooooong;
- 
-   const longlonglonglonglonglonglong1 = yield qwertyuiop(
-     asdfghjkl,
-     zxcvbnm,
-     qwertyuiop,
-     asdfghjkl,
-   );
-   const longlonglonglonglonglonglong2 = yield {
-     qwertyuiop: 1234567890,
-     asdfghjkl: 1234567890,
-     zxcvbnm: 123456789,
-   };
- 
-   const x = yield;
- }
 
-```
-
-**Prettier Similarity**: 86.21%
+**Prettier Similarity**: 100.00%
 
 
 # js/assignment/issue-10218.js
@@ -5597,24 +5528,18 @@
 
 
 # js/range/array.js
-```diff
--a = [, , , , , , , a];
-+a = [, , , , , , , a];
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/boundary-2.js
 ```diff
--function a() {
+ function a(
+ ){
 -  a();
 -  b();
 -  c();
 -  d();
-+function a(
-+){
 +a (
 +);
 +b();
@@ -5625,29 +5550,28 @@
 
 ```
 
-**Prettier Similarity**: 11.11%
+**Prettier Similarity**: 33.33%
 
 
 # js/range/boundary-3.js
 ```diff
--a();
-+a (
-+);
- b();
--c();
--d();
+ a (
+ );
+-b (
+-);                 c (
+-); d(
++b();
 +c(); d(
-+);
+ );
 
 ```
 
-**Prettier Similarity**: 20.00%
+**Prettier Similarity**: 50.00%
 
 
 # js/range/boundary.js
 ```diff
--foo = 1.0;
--bar = 1.0;
+-foo = 1.0000;bar = 1.0;
 -baz = 1.0;
 +foo = 1.0000;bar = 1.0;baz=1.0000;
  // The range will be 13~26
@@ -5656,13 +5580,13 @@
 
 ```
 
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 60.00%
 
 
 # js/range/class-declaration.js
 ```diff
-+
-+
+ 
+ 
  class a {
    b() {}
  }
@@ -5672,44 +5596,22 @@
 
 ```
 
-**Prettier Similarity**: 57.14%
+**Prettier Similarity**: 85.71%
 
 
 # js/range/different-levels.js
-```diff
--call(1, 2, 3);
-+call(1,2,3)
- call(1, 2, 3);
- function f() {
-   call(1, 2, 3);
- }
 
-```
-
-**Prettier Similarity**: 80.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/directive.js
-```diff
- "aaa";
--"bbb";
-+'bbb';
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/function-body.js
-```diff
--let fn = a((x) => {
-+let fn =a((x ) => {
-   quux(); //
- });
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/function-declaration.js
@@ -5718,23 +5620,8 @@
 
 
 # js/range/ignore-indentation.js
-```diff
--function ugly({ a = 1, b = 2 }) {
--  function ugly({ a = 1, b = 2 }) {
--    function ugly({ a = 1, b = 2 }) {
--      `multiline template string
-+function ugly ( {a=1,     b     =   2     }      ) {
-+  function ugly ( {a=1,     b     =   2     }      ) {
-+    function ugly ( {a=1,     b     =   2     }      ) {
-+  	  	     `multiline template string
-               with too much indentation`;
-     }
-   }
- }
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/issue-3789-1.js
@@ -5773,111 +5660,35 @@
 
 
 # js/range/module-export1.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
- export * from "d";
- 
--export const x = 42;
-+export    const  x
-+  =  42
-+
-+export   default    42
- 
--export default 42;
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-export2.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
--export * from "d";
-+export *  from   'd'
- 
- export const x = 42;
- 
--export default 42;
-+export   default    42
-+
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-export3.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
--export * from "d";
-+export *  from   'd'
- 
--export const x = 42;
-+export    const  x
-+  =  42
- 
- export default 42;
-+
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-import.js
-```diff
- import def, { named } from "x";
- 
--export * from "d";
-+export *  from   'd'
-+
-+export    const  x
-+  =  42
- 
--export const x = 42;
-+export   default    42
- 
--export default 42;
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/multiple-statements.js
-```diff
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
- 
- call(1, 2, 3);
- 
- call(1, 2, 3);
- 
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
 
-```
-
-**Prettier Similarity**: 45.45%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/multiple-statements2.js
 ```diff
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
+ call(
+   1, 2,3
+ );
  
  call(1, 2, 3);
  
@@ -5890,7 +5701,7 @@
 
 ```
 
-**Prettier Similarity**: 45.45%
+**Prettier Similarity**: 72.73%
 
 
 # js/range/nested-print-width.js
@@ -5904,18 +5715,8 @@
 
 
 # js/range/nested2.js
-```diff
- try {
-   if (condition) {
-     body;
-   }
--} catch (err) {}
-+}
-+catch (err) {}
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/nested3.js
@@ -5925,17 +5726,16 @@
 -  if (condition) {
 -    body;
 -  }
--} catch (err) {}
 +1;
 +if (condition) {
 +  body;
 +}
-+}
-+catch (err) {}
+ }
+ catch (err) {}
 
 ```
 
-**Prettier Similarity**: 14.29%
+**Prettier Similarity**: 42.86%
 
 
 # js/range/object-expression.js
@@ -5944,87 +5744,28 @@
 
 
 # js/range/object-expression2.js
-```diff
-+
- const y = [
-   {
-     a: 1,
-   },
-   {
-     a: 1,
-     b: 2,
-   },
- ];
 
-```
-
-**Prettier Similarity**: 90.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range-end.js
-```diff
- // Unchanged
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
-+
- 
--call(1, 2, 3);
-+call(1, 2, 3);
 
-```
-
-**Prettier Similarity**: 28.57%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range-start.js
-```diff
- call(1, 2, 3);
- 
-+
- // Unchanged
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
 
-```
-
-**Prettier Similarity**: 42.86%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range.js
-```diff
--function ugly({ a = 1, b = 2 }) {
--  function ugly({ a = 1, b = 2 }) {
--    function ugly({ a = 1, b = 2 }) {
--      `multiline template string
-+function ugly ( {a=1,     b     =   2     }      ) {
-+  function ugly ( {a=1,     b     =   2     }      ) {
-+    function ugly ( {a=1,     b     =   2     }      ) {
-+             `multiline template string
-               with too much indentation`;
-     }
-   }
- }
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/start-equals-end.js
-```diff
--foo = 1.0;
--bar = 1.0;
--baz = 1.0;
-+foo = 1.0000;bar = 1.0000;baz=1.0000;
- // The range will be 13~13, should not format anything
 
-```
-
-**Prettier Similarity**: 25.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/try-catch.js
@@ -12241,16 +11982,8 @@
 
 
 # typescript/range/export-assignment.ts
-```diff
--f();
-+f ( );
- export = f;
--g();
-+g(  )
 
-```
-
-**Prettier Similarity**: 33.33%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/range/issue-4926.ts
