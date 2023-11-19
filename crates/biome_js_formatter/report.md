@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.62
+**Average compatibility**: 95.63
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 96.05
+    **Compatible lines**: 96.09
 <details>
     <summary>Definition</summary>
 
@@ -5860,111 +5860,8 @@
 
 
 # js/template-literals/indention.js
-```diff
- [
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-   `,
-   `
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-   `,
-   `
-           1. Go to "-{chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer"
-           )}" ${chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer",
-           )}
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-           2. Go to "${chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer",
-           )}" ${chalk.green.underline(
--            "https://www.example.com/drupedalKangarooTransformer",
--          )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
- # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- 
-     2. Go to "${chalk.green.underline(
-       "https://www.example.com/drupedalKangarooTransformer",
-     )}"
- 
- # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- `,
-   `
-   # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- 
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}"
- 
-   # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
-   `,
- ];
 
-```
-
-**Prettier Similarity**: 88.89%
+**Prettier Similarity**: 100.00%
 
 
 # js/template-literals/logical-expressions.js
