@@ -302,25 +302,26 @@ fn handle_labelled_statement_comment(
     }
 }
 
+/// Moves comments in declaration statements to behind the identifier
+///
+/// ```javascript
+/// declare module /* comment */ A {}
+/// declare /* module */ global {}
+/// ```
 fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
     match (comment.enclosing_node().kind(), comment.following_node()) {
+        // Check if it is a declare statement
         (JsSyntaxKind::TS_DECLARE_STATEMENT, Some(following)) => {
-            println!("following: {:?}", following);
-            comment.enclosing_node().children().for_each(|child| {
-                println!("child: {:?}", child);
-                child.children().for_each(|child| {
-                    println!("\tchild: {:?}", child);
-                });
-            });
             match following.kind() {
                 JsSyntaxKind::TS_GLOBAL_DECLARATION => {
-                    CommentPlacement::leading(following.clone(), comment)
+                    // Global declarations have no identifier, so keep at default
+                    CommentPlacement::Default(comment)
                 }
                 JsSyntaxKind::TS_MODULE_DECLARATION => {
-                    for child in comment.enclosing_node().children() {
-                        for grandchild in child.children() {
-                            return CommentPlacement::leading(grandchild, comment);
-                        }
+                    // Move comment after the module keyword
+                    // This is the first child of the module declaration which is the identifier
+                    if following.first_child().is_none() == false {
+                        return CommentPlacement::leading(following.first_child().unwrap().clone(), comment);
                     }
                     CommentPlacement::Default(comment)
                 }

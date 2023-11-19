@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 94.21
+**Average compatibility**: 94.08
 
     <details>
     	<summary>Definition</summary>
@@ -8,7 +8,7 @@
     	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
     </details>
 
-    **Compatible lines**: 95.03
+    **Compatible lines**: 94.97
     <details>
         <summary>Definition</summary>
 
@@ -2100,8 +2100,26 @@
 
 
 # js/comments/break-continue-statements.js
+```diff
+ for (;;) {
+   break; /* comment */
+   continue; /* comment */
+ }
+ 
+ loop: for (;;) {
+-  break /* comment */ loop;
+-  break loop /* comment */;
+-  continue /* comment */ loop;
+-  continue loop /* comment */;
++  break loop; /* comment */
++  break loop; /* comment */
++  continue loop; /* comment */
++  continue loop; /* comment */
+ }
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 63.64%
 
 
 # js/comments/call_comment.js
@@ -3984,8 +4002,108 @@
 
 
 # js/for/continue-and-break-comment-1.js
+```diff
+ for (;;) {
+   continue; // comment
+ }
+ 
+ for (;;) {
+   break; // comment
+ }
+ 
+ for (const f of []) {
+   continue; // comment
+ }
+ 
+ for (const f of []) {
+   break; // comment
+ }
+ 
+ for (const f in {}) {
+   continue; // comment
+ }
+ 
+ for (const f in {}) {
+   break; // comment
+ }
+ 
+ while (true) {
+   continue; // comment
+ }
+ 
+ while (true) {
+   break; // comment
+ }
+ 
+ do {
+   continue; // comment
+ } while (true);
+ 
+ do {
+   break; // comment
+ } while (true);
+ 
+ label1: for (;;) {
+   continue label1; // comment
+ }
+ 
+ label2: {
+   break label2; // comment
+ }
+ 
+ for (;;) {
+   continue; /* comment */
+ }
+ 
+ for (;;) {
+   break; /* comment */
+ }
+ 
+ for (const f of []) {
+   continue; /* comment */
+ }
+ 
+ for (const f of []) {
+   break; /* comment */
+ }
+ 
+ for (const f in {}) {
+   continue; /* comment */
+ }
+ 
+ for (const f in {}) {
+   break; /* comment */
+ }
+ 
+ while (true) {
+   continue; /* comment */
+ }
+ 
+ while (true) {
+   break; /* comment */
+ }
+ 
+ do {
+   continue; /* comment */
+ } while (true);
+ 
+ do {
+   break; /* comment */
+ } while (true);
+ 
+ label1: for (;;) {
+-  continue label1 /* comment */;
++  continue label1; /* comment */
+ }
+ 
+ label2: {
+-  break label2 /* comment */;
++  break label2; /* comment */
+ }
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 97.89%
 
 
 # js/for/continue-and-break-comment-2.js
@@ -4055,28 +4173,20 @@
  for (const f in {}) break;
  /* comment */
  
- label1: for (;;) continue label1 /* comment */;
+-label1: for (;;) continue label1 /* comment */;
++label1: for (;;) continue label1; /* comment */
  
--label1: for (;;) continue label1;
--/* comment */
-+// FIXME: TODO: reformat issue
-+// label1: for (;;) continue label1
-+// /* comment */
-+// ;
+ label1: for (;;) continue label1;
+ /* comment */
  
--label1: for (;;) continue label1; // comment
-+// label1: for (;;) continue label1 // comment
-+// ;
+ label1: for (;;) continue label1; // comment
  
--label1: for (;;) continue label1;
--// comment
-+// label1: for (;;) continue label1
-+// // comment
-+// ;
+ label1: for (;;) continue label1;
+ // comment
 
 ```
 
-**Prettier Similarity**: 87.67%
+**Prettier Similarity**: 98.55%
 
 
 # js/for/for.js
@@ -6311,11 +6421,15 @@
 # js/switch/comments2.js
 ```diff
  switch (1) {
-   default: // comment1
+-  default: // comment1
++  default:
++  // comment1
  }
  
  switch (2) {
-   default: // comment2
+-  default: // comment2
++  default:
++  // comment2
    //comment2a
  }
  
@@ -6347,7 +6461,7 @@
 
 ```
 
-**Prettier Similarity**: 74.07%
+**Prettier Similarity**: 62.07%
 
 
 # js/switch/empty_lines.js
@@ -6842,10 +6956,11 @@
    () => {},
  );
  
- test.describe.only.parallel(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
+-test.describe.only.parallel(
+-  "does something really long and complicated so I have to write a very long name for the test",
+-  () => {},
+-);
++test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
  
  test.describe.parallel.serial(
    "does something really long and complicated so I have to write a very long name for the testThis is a very",
@@ -6886,7 +7001,7 @@
 
 ```
 
-**Prettier Similarity**: 89.74%
+**Prettier Similarity**: 87.69%
 
 
 # js/throw_statement/binaryish.js
@@ -10452,8 +10567,13 @@
 
 
 # typescript/conformance/types/moduleDeclaration/kind-detection.ts
+```diff
+-declare namespace /* module */ A {}
++declare /* module */ namespace A {}
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 0.00%
 
 
 # typescript/conformance/types/moduleDeclaration/moduleDeclaration.ts
@@ -11249,14 +11369,15 @@
  
  // note lack of trailing comma in the index signature
  type TooLongSingleParam = {
-   [
-     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
-   ]: string;
+-  [
+-    looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
+-  ]: string;
++  [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
  };
 
 ```
 
-**Prettier Similarity**: 48.39%
+**Prettier Similarity**: 38.71%
 
 
 # typescript/error-recovery/jsdoc_only_types.ts
@@ -12840,8 +12961,39 @@
 
 
 # typescript/tuple/dangling-comments.ts
+```diff
+-type Foo1 = [
+-  /* comment */
+-];
++type Foo1 = [/* comment */];
+ 
+ type Foo2 = [
+   // comment
+ ];
+ 
+ type Foo3 = [
+   // comment1
+   // comment2
+ ];
+ 
+ type Foo4 = [
+   // comment1
+   // comment2
+ ];
+ 
+-type Foo5 = [
+-  /* comment1 */
+-];
++type Foo5 = [/* comment1 */];
+ 
+ type Foo6 = [
+   /* comment1 */
+   /* comment2 */
+ ];
 
-**Prettier Similarity**: 100.00%
+```
+
+**Prettier Similarity**: 76.92%
 
 
 # typescript/tuple/trailing-comma-for-empty-tuples.ts
