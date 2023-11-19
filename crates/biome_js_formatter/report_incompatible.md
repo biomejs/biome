@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 94.08
+**Average compatibility**: 94.16
 
     <details>
     	<summary>Definition</summary>
@@ -8,7 +8,7 @@
     	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
     </details>
 
-    **Compatible lines**: 94.97
+    **Compatible lines**: 95.11
     <details>
         <summary>Definition</summary>
 
@@ -940,24 +940,6 @@
 **Prettier Similarity**: 86.21%
 
 
-# js/async/nested2.js
-```diff
- async function f() {
-   await Promise.all(
--    (await readdir("src")).map(async (path) => {
-+    (
-+      await readdir("src")
-+    ).map(async (path) => {
-       import(`./${path}`);
-     }),
-   );
- }
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
 # js/call/first-argument-expansion/expression-2nd-arg.js
 ```diff
  call(function () {
@@ -1167,29 +1149,6 @@
 ```
 
 **Prettier Similarity**: 40.00%
-
-
-# js/comments/break-continue-statements.js
-```diff
- for (;;) {
-   break; /* comment */
-   continue; /* comment */
- }
- 
- loop: for (;;) {
--  break /* comment */ loop;
--  break loop /* comment */;
--  continue /* comment */ loop;
--  continue loop /* comment */;
-+  break loop; /* comment */
-+  break loop; /* comment */
-+  continue loop; /* comment */
-+  continue loop; /* comment */
- }
-
-```
-
-**Prettier Similarity**: 63.64%
 
 
 # js/comments/empty-statements.js
@@ -2256,111 +2215,6 @@
 **Prettier Similarity**: 90.48%
 
 
-# js/for/continue-and-break-comment-1.js
-```diff
- for (;;) {
-   continue; // comment
- }
- 
- for (;;) {
-   break; // comment
- }
- 
- for (const f of []) {
-   continue; // comment
- }
- 
- for (const f of []) {
-   break; // comment
- }
- 
- for (const f in {}) {
-   continue; // comment
- }
- 
- for (const f in {}) {
-   break; // comment
- }
- 
- while (true) {
-   continue; // comment
- }
- 
- while (true) {
-   break; // comment
- }
- 
- do {
-   continue; // comment
- } while (true);
- 
- do {
-   break; // comment
- } while (true);
- 
- label1: for (;;) {
-   continue label1; // comment
- }
- 
- label2: {
-   break label2; // comment
- }
- 
- for (;;) {
-   continue; /* comment */
- }
- 
- for (;;) {
-   break; /* comment */
- }
- 
- for (const f of []) {
-   continue; /* comment */
- }
- 
- for (const f of []) {
-   break; /* comment */
- }
- 
- for (const f in {}) {
-   continue; /* comment */
- }
- 
- for (const f in {}) {
-   break; /* comment */
- }
- 
- while (true) {
-   continue; /* comment */
- }
- 
- while (true) {
-   break; /* comment */
- }
- 
- do {
-   continue; /* comment */
- } while (true);
- 
- do {
-   break; /* comment */
- } while (true);
- 
- label1: for (;;) {
--  continue label1 /* comment */;
-+  continue label1; /* comment */
- }
- 
- label2: {
--  break label2 /* comment */;
-+  break label2; /* comment */
- }
-
-```
-
-**Prettier Similarity**: 97.89%
-
-
 # js/for/continue-and-break-comment-without-blocks.js
 ```diff
  for (;;) continue;
@@ -2423,20 +2277,28 @@
  for (const f in {}) break;
  /* comment */
  
--label1: for (;;) continue label1 /* comment */;
-+label1: for (;;) continue label1; /* comment */
+ label1: for (;;) continue label1 /* comment */;
  
- label1: for (;;) continue label1;
- /* comment */
+-label1: for (;;) continue label1;
+-/* comment */
++// FIXME: TODO: reformat issue
++// label1: for (;;) continue label1
++// /* comment */
++// ;
  
- label1: for (;;) continue label1; // comment
+-label1: for (;;) continue label1; // comment
++// label1: for (;;) continue label1 // comment
++// ;
  
- label1: for (;;) continue label1;
- // comment
+-label1: for (;;) continue label1;
+-// comment
++// label1: for (;;) continue label1
++// // comment
++// ;
 
 ```
 
-**Prettier Similarity**: 98.55%
+**Prettier Similarity**: 87.67%
 
 
 # js/identifier/for-of/let.js
@@ -3551,15 +3413,11 @@
 # js/switch/comments2.js
 ```diff
  switch (1) {
--  default: // comment1
-+  default:
-+  // comment1
+   default: // comment1
  }
  
  switch (2) {
--  default: // comment2
-+  default:
-+  // comment2
+   default: // comment2
    //comment2a
  }
  
@@ -3591,7 +3449,7 @@
 
 ```
 
-**Prettier Similarity**: 62.07%
+**Prettier Similarity**: 74.07%
 
 
 # js/template-literals/indention.js
@@ -3758,220 +3616,6 @@
 ```
 
 **Prettier Similarity**: 87.10%
-
-
-# js/test-declarations/test_declarations.js
-```diff
- // Shouldn't break
- 
- it("does something really long and complicated so I have to write a very long name for the test", () => {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function () {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function (done) {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function myAssertions(done) {
-   console.log("hello!");
- });
- 
- it(`does something really long and complicated so I have to write a very long name for the test`, function () {
-   console.log("hello!");
- });
- 
- it(`{foo + bar} does something really long and complicated so I have to write a very long name for the test`, function () {
-   console.log("hello!");
- });
- 
- it(`handles
-   some
-     newlines
-   does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- });
- 
- test("does something really long and complicated so I have to write a very long name for the test", (done) => {
-   console.log("hello!");
- });
- 
- test(`does something really long and complicated so I have to write a very long name for the test`, (done) => {
-   console.log("hello!");
- });
- 
- describe("does something really long and complicated so I have to write a very long name for the describe block", () => {
-   it("an example test", (done) => {
-     console.log("hello!");
-   });
- });
- 
- describe(`does something really long and complicated so I have to write a very long name for the describe block`, () => {
-   it(`an example test`, (done) => {
-     console.log("hello!");
-   });
- });
- 
- xdescribe("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- fdescribe("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- describe.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- describe.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- fit("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- xit("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- it.only("does something really long and complicated so I have to write a very long name for the test", () => {
-   console.log("hello!");
- });
- 
- it.only(`does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- });
- 
- it.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- ftest("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- xtest("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- skip("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.step("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.step(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.describe("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.describe(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe
--  .only("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.only("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe
--  .parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .parallel(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.parallel(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe.parallel
--  .only("does something really long and complicated so I have to write a very long name for the testThis is a very", () => {});
-+test.describe.parallel.only("does something really long and complicated so I have to write a very long name for the testThis is a very", () => {});
- 
--test.describe.parallel
--  .only(`does something really long and complicated so I have to write a very long name for the testThis is a very`, () => {});
-+test.describe.parallel.only(`does something really long and complicated so I have to write a very long name for the testThis is a very`, () => {});
- 
--test.describe
--  .serial("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.serial("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .serial(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.serial(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe.serial
--  .only("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.serial.only("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe.serial
--  .only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.serial.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- // Should break
- 
- it.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   10,
-   () => {
-     console.log("hello!");
-   },
- );
- 
- it.only.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {
-     console.log("hello!");
-   },
- );
- 
- it.only.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   (a, b, c) => {
-     console.log("hello!");
-   },
- );
- 
- xskip(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
--test.describe.only.parallel(
--  "does something really long and complicated so I have to write a very long name for the test",
--  () => {},
--);
-+test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.describe.parallel.serial(
-   "does something really long and complicated so I have to write a very long name for the testThis is a very",
-   () => {},
- );
- 
- test.serial(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
- test.describe.dummy.serial(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
- // timeout
- 
- it(`handles
-   some
-     newlines
-   does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- }, 2500);
- 
- it("does something quick", () => {
-   console.log("hello!");
- }, 1000000000);
- 
- it("succeeds if the test finishes in time", () =>
-   new Promise((resolve) => setTimeout(resolve, 10)));
- 
- it(
-   "succeeds if the test finishes in time",
-   () => new Promise((resolve) => setTimeout(resolve, 10)),
-   250,
- );
-
-```
-
-**Prettier Similarity**: 87.69%
 
 
 # js/with/indent.js
@@ -7578,42 +7222,6 @@
 ```
 
 **Prettier Similarity**: 63.64%
-
-
-# typescript/tuple/dangling-comments.ts
-```diff
--type Foo1 = [
--  /* comment */
--];
-+type Foo1 = [/* comment */];
- 
- type Foo2 = [
-   // comment
- ];
- 
- type Foo3 = [
-   // comment1
-   // comment2
- ];
- 
- type Foo4 = [
-   // comment1
-   // comment2
- ];
- 
--type Foo5 = [
--  /* comment1 */
--];
-+type Foo5 = [/* comment1 */];
- 
- type Foo6 = [
-   /* comment1 */
-   /* comment2 */
- ];
-
-```
-
-**Prettier Similarity**: 76.92%
 
 
 # typescript/type-arguments-bit-shift-left-like/1.ts
