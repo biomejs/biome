@@ -142,7 +142,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_array_hole_comment)
                 .or_else(handle_call_expression_comment)
                 .or_else(handle_continue_break_comment)
-                .or_else(handle_class_comment),
+                .or_else(handle_class_comment)
+                .or_else(handle_declare_comment),
         }
     }
 }
@@ -296,6 +297,22 @@ fn handle_labelled_statement_comment(
     match comment.enclosing_node().kind() {
         JsSyntaxKind::JS_LABELED_STATEMENT => {
             CommentPlacement::leading(comment.enclosing_node().clone(), comment)
+        }
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    match (comment.enclosing_node().kind(), comment.following_node()) {
+        (JsSyntaxKind::TS_DECLARE_STATEMENT, Some(following)) => {
+            println!("following: {:?}", following);
+            comment.enclosing_node().children().for_each(|child| {
+                println!("child: {:?}", child);
+                child.children().for_each(|child| {
+                    println!("\tchild: {:?}", child);
+                });
+            });
+            CommentPlacement::trailing(comment.enclosing_node().clone(), comment)
         }
         _ => CommentPlacement::Default(comment),
     }

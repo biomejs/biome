@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: typescript/conformance/types/moduleDeclaration/kind-detection.ts
+---
+
+# Input
+
+```ts
+declare /* module */ namespace A {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-declare namespace /* module */ A {}
++declare namespace A {} /* module */
+```
+
+# Output
+
+```ts
+declare namespace A {} /* module */
+```
+
+

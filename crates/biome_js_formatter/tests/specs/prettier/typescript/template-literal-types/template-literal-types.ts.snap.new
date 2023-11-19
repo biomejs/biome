@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: typescript/template-literal-types/template-literal-types.ts
+---
+
+# Input
+
+```ts
+let x: `foo-${infer bar}`;
+type HelloWorld = `${Hello}, ${World}`
+type SeussFish = `${Quantity | Color} fish`;
+declare function setAlignment(value: `${VerticalAlignment}-${HorizontalAlignment}`): void;
+type PropEventSource<T> = {
+  on(eventName: `${string & keyof T}Changed`, callback: () => void): void;
+};
+type PropEventSource<T> = {
+  on<K extends string & keyof T>
+    (eventName: `${K}Changed`, callback: (newValue: T[K]) => void ): void;
+};
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ let x: `foo-${infer bar}`;
+ type HelloWorld = `${Hello}, ${World}`;
+ type SeussFish = `${Quantity | Color} fish`;
+-declare function setAlignment(
++declarefunction setAlignment(
+   value: `${VerticalAlignment}-${HorizontalAlignment}`,
+ ): void;
+ type PropEventSource<T> = {
+```
+
+# Output
+
+```ts
+let x: `foo-${infer bar}`;
+type HelloWorld = `${Hello}, ${World}`;
+type SeussFish = `${Quantity | Color} fish`;
+declarefunction setAlignment(
+  value: `${VerticalAlignment}-${HorizontalAlignment}`,
+): void;
+type PropEventSource<T> = {
+  on(eventName: `${string & keyof T}Changed`, callback: () => void): void;
+};
+type PropEventSource<T> = {
+  on<K extends string & keyof T>(
+    eventName: `${K}Changed`,
+    callback: (newValue: T[K]) => void,
+  ): void;
+};
+```
+
+# Errors
+```
+template-literal-types.ts:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'infer' declarations are only permitted in the 'extends' clause of a conditional type.
+  
+  > 1 │ let x: `foo-${infer bar}`;
+      │               ^^^^^^^^^
+    2 │ type HelloWorld = `${Hello}, ${World}`
+    3 │ type SeussFish = `${Quantity | Color} fish`;
+  
+
+```
+
+

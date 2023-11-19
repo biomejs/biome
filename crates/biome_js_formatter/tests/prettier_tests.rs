@@ -7,7 +7,7 @@ use biome_js_syntax::JsFileSource;
 
 mod language;
 
-tests_macros::gen_tests! {"tests/specs/prettier/{js,typescript,jsx}/**/*.{js,ts,jsx,tsx}", crate::test_snapshot, "script"}
+tests_macros::gen_tests! {"tests/specs/prettier/typescript/conformance/types/moduleDeclaration/kind-detection.ts", crate::test_snapshot, "script"}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);

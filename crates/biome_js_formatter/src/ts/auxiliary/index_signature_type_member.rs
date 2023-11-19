@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatTypeMemberSeparator;
 
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::{TsIndexSignatureTypeMember, TsIndexSignatureTypeMemberFields};
 
 #[derive(Debug, Clone, Default)]
@@ -29,9 +29,11 @@ impl FormatNodeRule<TsIndexSignatureTypeMember> for FormatTsIndexSignatureTypeMe
         write![
             f,
             [
-                l_brack_token.format(),
-                parameter.format(),
-                r_brack_token.format(),
+                group(&format_args![
+                    l_brack_token.format(),
+                    soft_block_indent(&format_args![parameter.format()]),
+                    r_brack_token.format(),
+                ]),
                 type_annotation.format(),
                 FormatTypeMemberSeparator::new(separator_token.as_ref()),
             ]
