@@ -1260,7 +1260,8 @@ struct FitsState {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::printer::{LineEnding, PrintWidth, Printer, PrinterOptions};
+    use crate::printer::{PrintWidth, Printer, PrinterOptions};
+    use crate::LineEnding;
     use crate::{format_args, write, Document, FormatState, IndentStyle, Printed, VecBuffer};
 
     fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
@@ -1269,6 +1270,7 @@ mod tests {
             PrinterOptions {
                 indent_style: IndentStyle::Space,
                 indent_width: 2.into(),
+                line_ending: LineEnding::Lf,
                 ..PrinterOptions::default()
             },
         )
@@ -1331,7 +1333,7 @@ a"#,
     #[test]
     fn it_converts_line_endings() {
         let options = PrinterOptions {
-            line_ending: LineEnding::CarriageReturnLineFeed,
+            line_ending: LineEnding::Crlf,
             ..PrinterOptions::default()
         };
 

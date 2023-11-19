@@ -5,7 +5,7 @@ use biome_formatter::printer::PrinterOptions;
 use biome_formatter::token::string::Quote;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
-    LineWidth, TransformSourceMap,
+    LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -138,6 +138,9 @@ pub struct JsFormatOptions {
     /// The indent width.
     indent_width: IndentWidth,
 
+    /// The type of line ending.
+    line_ending: LineEnding,
+
     /// What's the max width of a line. Defaults to 80.
     line_width: LineWidth,
 
@@ -169,6 +172,7 @@ impl JsFormatOptions {
             source_type,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             jsx_quote_style: QuoteStyle::default(),
@@ -191,6 +195,11 @@ impl JsFormatOptions {
 
     pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
         self.indent_width = indent_width;
+        self
+    }
+
+    pub fn with_line_ending(mut self, line_ending: LineEnding) -> Self {
+        self.line_ending = line_ending;
         self
     }
 
@@ -234,6 +243,10 @@ impl JsFormatOptions {
 
     pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
         self.indent_width = indent_width;
+    }
+
+    pub fn set_line_ending(&mut self, line_ending: LineEnding) {
+        self.line_ending = line_ending;
     }
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
@@ -306,6 +319,10 @@ impl FormatOptions for JsFormatOptions {
         self.line_width
     }
 
+    fn line_ending(&self) -> LineEnding {
+        self.line_ending
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -315,6 +332,7 @@ impl fmt::Display for JsFormatOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.get())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;

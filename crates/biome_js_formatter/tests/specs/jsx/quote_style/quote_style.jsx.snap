@@ -27,6 +27,7 @@ info: jsx/quote_style/quote_style.jsx
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -47,6 +48,7 @@ Arrow parentheses: Always
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -67,6 +69,7 @@ Arrow parentheses: Always
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Single Quotes
 JSX quote style: Single Quotes
@@ -87,6 +90,7 @@ Arrow parentheses: Always
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Single Quotes
 JSX quote style: Double Quotes
@@ -107,6 +111,7 @@ Arrow parentheses: Always
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Single Quotes

@@ -22,6 +22,7 @@ let abcde = "very long value that will cause a line break", fghij = "this should
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes

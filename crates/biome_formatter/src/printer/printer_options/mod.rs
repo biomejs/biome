@@ -1,4 +1,4 @@
-use crate::{FormatOptions, IndentStyle, IndentWidth, LineWidth};
+use crate::{FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth};
 
 /// Options that affect how the [crate::Printer] prints the format tokens
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -53,6 +53,7 @@ where
             .with_indent_style(options.indent_style())
             .with_indent_width(options.indent_width())
             .with_print_width(options.line_width().into())
+            .with_line_ending(options.line_ending())
     }
 }
 
@@ -74,6 +75,12 @@ impl PrinterOptions {
         self
     }
 
+    pub fn with_line_ending(mut self, line_ending: LineEnding) -> Self {
+        self.line_ending = line_ending;
+
+        self
+    }
+
     pub(crate) fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -82,29 +89,10 @@ impl PrinterOptions {
     pub(super) const fn indent_width(&self) -> IndentWidth {
         self.indent_width
     }
-}
 
-#[allow(dead_code)]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum LineEnding {
-    ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
-    LineFeed,
-
-    /// Carriage Return + Line Feed characters (\r\n), common on Windows
-    CarriageReturnLineFeed,
-
-    /// Carriage Return character only (\r), used very rarely
-    CarriageReturn,
-}
-
-impl LineEnding {
-    #[inline]
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            LineEnding::LineFeed => "\n",
-            LineEnding::CarriageReturnLineFeed => "\r\n",
-            LineEnding::CarriageReturn => "\r",
-        }
+    #[allow(dead_code)]
+    pub(super) const fn line_ending(&self) -> LineEnding {
+        self.line_ending
     }
 }
 
@@ -114,7 +102,7 @@ impl Default for PrinterOptions {
             indent_width: 2.into(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
-            line_ending: LineEnding::LineFeed,
+            line_ending: LineEnding::Lf,
         }
     }
 }

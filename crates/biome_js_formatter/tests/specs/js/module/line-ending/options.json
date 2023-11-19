@@ -1,0 +1,10 @@
+{
+	"cases": [
+		{
+			"line_ending": "Crlf"
+		},
+    {
+      "line_ending": "Cr"
+    }
+	]
+}

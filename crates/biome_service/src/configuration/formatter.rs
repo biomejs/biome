@@ -3,7 +3,7 @@ use crate::configuration::overrides::OverrideFormatterConfiguration;
 use crate::settings::{to_matcher, FormatSettings};
 use crate::WorkspaceError;
 use biome_deserialize::StringSet;
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -36,6 +36,11 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
     pub indent_width: Option<u8>,
+
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     #[serde(
@@ -72,6 +77,7 @@ impl Default for FormatterConfiguration {
             indent_size: Some(2),
             indent_width: Some(2),
             indent_style: Some(PlainIndentStyle::default()),
+            line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
             ignore: None,
             include: None,
@@ -102,7 +108,9 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
         if let Some(indent_style) = other.indent_style {
             self.indent_style = Some(indent_style);
         }
-
+        if let Some(line_ending) = other.line_ending {
+            self.line_ending = Some(line_ending);
+        }
         if let Some(line_width) = other.line_width {
             self.line_width = Some(line_width);
         }
@@ -148,6 +156,7 @@ impl TryFrom<FormatterConfiguration> for FormatSettings {
             enabled: conf.enabled.unwrap_or_default(),
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: to_matcher(conf.ignore.as_ref())?,
@@ -175,6 +184,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             enabled: conf.enabled.unwrap_or_default(),
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: None,
