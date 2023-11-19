@@ -312,7 +312,20 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
                     println!("\tchild: {:?}", child);
                 });
             });
-            CommentPlacement::trailing(comment.enclosing_node().clone(), comment)
+            match following.kind() {
+                JsSyntaxKind::TS_GLOBAL_DECLARATION => {
+                    CommentPlacement::leading(following.clone(), comment)
+                }
+                JsSyntaxKind::TS_MODULE_DECLARATION => {
+                    for child in comment.enclosing_node().children() {
+                        for grandchild in child.children() {
+                            return CommentPlacement::leading(grandchild, comment);
+                        }
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                _ => CommentPlacement::Default(comment),
+            }
         }
         _ => CommentPlacement::Default(comment),
     }
