@@ -37,12 +37,4 @@
 		<title>implicit role</title>
 		<span>Pass</span>
 	</svg>
-	<svg role="presentation">
-		<title>presentation role with title</title>
-		<span id="sample">Pass</span>
-	</svg>
-	<svg role="button">
-		<title>button role with title</title>
-		<span id="sample">Pass</span>
-	</svg>
 </>;

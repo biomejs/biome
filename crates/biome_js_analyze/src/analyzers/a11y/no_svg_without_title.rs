@@ -135,8 +135,9 @@ impl Rule for NoSvgWithoutTitle {
                 }
                 Some(())
             }
-            // if not "img" role, the svg element should have a valid title element
-            _ => Some(()),
+            // if role attribute is empty, the svg element should have title element
+            "" => Some(()),
+            _ => None,
         }
     }
 
