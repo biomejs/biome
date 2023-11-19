@@ -332,6 +332,7 @@ impl fmt::Display for JsFormatOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.get())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;

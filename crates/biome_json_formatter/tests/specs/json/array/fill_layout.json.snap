@@ -22,6 +22,7 @@ info: json/array/fill_layout.json
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 -----
 
