@@ -6,14 +6,15 @@ use crate::js::expressions::arrow_function_expression::{
 use crate::js::lists::array_element_list::can_concisely_print_array_list;
 use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
+use crate::utils::member_chain::SimpleArgument;
 use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::{format_args, format_element, write, VecBuffer};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
-    AnyTsReturnType, AnyTsType, JsCallArgumentList, JsCallArguments, JsCallArgumentsFields,
-    JsCallExpression, JsExpressionStatement, JsFunctionExpression, JsImportCallExpression,
-    JsLanguage,
+    AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
+    JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
+    JsImportCallExpression, JsLanguage, TsAsExpressionFields, TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -796,7 +797,8 @@ fn should_group_first_argument(
             }
 
             Ok(!comments.has_comments(first.syntax())
-                && !can_group_expression_argument(&second, false, comments)?)
+                && !can_group_expression_argument(&second, false, comments)?
+                && is_relatively_short_argument(second))
         }
         _ => Ok(false),
     }
@@ -856,6 +858,97 @@ fn should_group_last_argument(
             }
         }
         _ => Ok(false),
+    }
+}
+
+/// Check if `ty` is a relatively simple type annotation, allowing a few
+/// additional cases through. The simplicity is determined as
+/// either being a keyword type or any reference type with no additional type
+/// parameters. For example:
+///     number          => true
+///     unknown         => true
+///     HTMLElement     => true
+///     string | object => false
+///     Foo<string>     => false
+///
+/// Note that Prettier allows extracting the inner type from arrays and
+/// single-argument generic types, but for now, this implementation does not.
+fn is_simple_ts_type(ty: AnyTsType) -> bool {
+    match ty {
+        // Any keyword or literal types
+        AnyTsType::TsAnyType(_)
+        | AnyTsType::TsBigintLiteralType(_)
+        | AnyTsType::TsBigintType(_)
+        | AnyTsType::TsBooleanLiteralType(_)
+        | AnyTsType::TsBooleanType(_)
+        | AnyTsType::TsNeverType(_)
+        | AnyTsType::TsNullLiteralType(_)
+        | AnyTsType::TsNumberLiteralType(_)
+        | AnyTsType::TsNumberType(_)
+        | AnyTsType::TsObjectType(_)
+        | AnyTsType::TsStringLiteralType(_)
+        | AnyTsType::TsStringType(_)
+        | AnyTsType::TsSymbolType(_)
+        | AnyTsType::TsTemplateLiteralType(_)
+        | AnyTsType::TsThisType(_)
+        | AnyTsType::TsUndefinedType(_)
+        | AnyTsType::TsUnknownType(_)
+        | AnyTsType::TsVoidType(_) => true,
+
+        // Any reference with no generic type arguments
+        AnyTsType::TsReferenceType(reference) => reference.type_arguments().is_none(),
+
+        _ => false,
+    }
+}
+
+/// Checks if `argument` is "short" enough to be groupable. This aims to be
+/// logically similar to Prettier's [`isHopefullyShortCallArgument`](https://github.com/prettier/prettier/blob/093745f0ec429d3db47c1edd823357e0ef24e226/src/language-js/print/call-arguments.js#L279),
+fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
+    match argument {
+        AnyJsExpression::JsBinaryExpression(binary_expression) => {
+            if let JsBinaryExpressionFields {
+                left: Ok(left),
+                operator_token: _,
+                right: Ok(right),
+            } = binary_expression.as_fields()
+            {
+                SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::TsAsExpression(as_expression) => {
+            if let TsAsExpressionFields {
+                expression: Ok(expression),
+                as_token: _,
+                ty: Ok(annotation),
+            } = as_expression.as_fields()
+            {
+                is_simple_ts_type(annotation) && SimpleArgument::from(expression).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::TsSatisfiesExpression(as_expression) => {
+            if let TsSatisfiesExpressionFields {
+                expression: Ok(expression),
+                satisfies_token: _,
+                ty: Ok(annotation),
+            } = as_expression.as_fields()
+            {
+                is_simple_ts_type(annotation) && SimpleArgument::from(expression).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsRegexLiteralExpression(_),
+        ) => true,
+        AnyJsExpression::JsCallExpression(call) => call
+            .arguments()
+            .map_or(false, |args| args.args().len() <= 1),
+        _ => SimpleArgument::from(argument).is_simple(),
     }
 }
 

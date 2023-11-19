@@ -41,7 +41,7 @@ use biome_rowan::{AstSeparatedList, SyntaxResult};
 /// [TsNonNullAssertionExpression]: [biome_js_syntax::TsNonNullAssertionExpression]
 /// [Prettier]: https://github.com/prettier/prettier/blob/a9de2a128cc8eea84ddd90efdc210378a894ab6b/src/language-js/utils/index.js#L802-L886
 #[derive(Debug)]
-pub(crate) enum SimpleArgument {
+pub enum SimpleArgument {
     Expression(AnyJsExpression),
     Assignment(AnyJsAssignment),
     Name(AnyJsName),
