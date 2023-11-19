@@ -312,13 +312,6 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
     match (comment.enclosing_node().kind(), comment.following_node()) {
         // Check if it is a declare statement
         (JsSyntaxKind::TS_DECLARE_STATEMENT, Some(following)) => {
-            println!("following: {:?}", following);
-            following.children().for_each(|child| {
-                println!("\tchild: {:?}", child);
-                child.children().for_each(|grandchild| {
-                    println!("\t\tgrandchild: {:?}", grandchild);
-                });
-            });
             match following.kind() {
                 JsSyntaxKind::TS_GLOBAL_DECLARATION => {
                     // Global declarations have no identifier, so keep at default
@@ -331,27 +324,16 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
                 | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
                     // Move comment after the module keyword
                     // This is the first child of the module declaration which is the identifier
-                    if following.first_child().is_some() {
-                        return CommentPlacement::leading(
-                            following.first_child().unwrap().clone(),
-                            comment,
-                        );
+                    if let Some(first_child) = following.first_child() {
+                        return CommentPlacement::leading(first_child.clone(), comment);
                     }
                     CommentPlacement::Default(comment)
                 }
                 JsSyntaxKind::JS_CLASS_DECLARATION => {
-                    if following.first_child().is_some()
-                        && following.first_child().unwrap().next_sibling().is_some()
-                    {
-                        return CommentPlacement::leading(
-                            following
-                                .first_child()
-                                .unwrap()
-                                .next_sibling()
-                                .unwrap()
-                                .clone(),
-                            comment,
-                        );
+                    if let Some(first_child) = following.first_child() {
+                        if let Some(second_child) = first_child.next_sibling() {
+                            return CommentPlacement::leading(second_child.clone(), comment);
+                        }
                     }
                     CommentPlacement::Default(comment)
                 }
