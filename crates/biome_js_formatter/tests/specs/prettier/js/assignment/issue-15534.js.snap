@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/assignment/issue-15534.js
+---
+
+# Input
+
+```js
+params["redirectTo"] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+params["redirectTo"]["codePointAt"]["name"] =
+  `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+params.redirectTo.bar.bar.ba.barab["foo"].abr =
+  `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,11 @@
+-params["redirectTo"] =
+-  `${window.location.pathname}${window.location.search}${window.location.hash}`;
++params[
++  "redirectTo"
++] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+ 
+-params["redirectTo"]["codePointAt"]["name"] =
+-  `${window.location.pathname}${window.location.search}${window.location.hash}`;
++params["redirectTo"]["codePointAt"][
++  "name"
++] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+ 
+-params.redirectTo.bar.bar.ba.barab["foo"].abr =
+-  `${window.location.pathname}${window.location.search}${window.location.hash}`;
++params.redirectTo.bar.bar.ba.barab[
++  "foo"
++].abr = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+```
+
+# Output
+
+```js
+params[
+  "redirectTo"
+] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+params["redirectTo"]["codePointAt"][
+  "name"
+] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+params.redirectTo.bar.bar.ba.barab[
+  "foo"
+].abr = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3: ] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    7: ] = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+   11: ].abr = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+```
+
+
