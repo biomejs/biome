@@ -90,6 +90,7 @@ impl PrinterOptions {
         self.indent_width
     }
 
+    #[allow(dead_code)]
     pub(super) const fn line_ending(&self) -> LineEnding {
         self.line_ending
     }

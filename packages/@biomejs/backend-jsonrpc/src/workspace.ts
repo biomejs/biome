@@ -116,6 +116,10 @@ export interface FormatterConfiguration {
 	 */
 	indentWidth?: number;
 	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
+	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
@@ -210,6 +214,10 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	useIgnoreFile?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
+export type LineEnding =
+	| "LineFeed"
+	| "CarriageReturnLineFeed"
+	| "CarriageReturn";
 /**
 	* Validated value for the `line_width` formatter options
 
@@ -244,6 +252,10 @@ export interface JavascriptFormatter {
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
 	jsxQuoteStyle?: QuoteStyle;
+	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
 	/**
 	 * What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
 	 */
@@ -294,6 +306,10 @@ export interface JsonFormatter {
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
 	indentWidth?: number;
+	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
 	/**
 	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
 	 */
@@ -1195,6 +1211,10 @@ export interface OverrideFormatterConfiguration {
 	 * The size of the indentation, 2 by default
 	 */
 	indentWidth?: number;
+	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
 	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */
