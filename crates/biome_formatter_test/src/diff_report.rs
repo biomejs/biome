@@ -300,11 +300,11 @@ impl DiffReport {
 
         header.push_str(
             r"
-    <details>
-    	<summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-    </details>
+    $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+</details>
 
     ",
         );
@@ -318,13 +318,13 @@ impl DiffReport {
 
         header.push_str(
                 r"
-    <details>
-        <summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-    </details>
+    $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+</details>
 
-    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
                 ",
             );
 
