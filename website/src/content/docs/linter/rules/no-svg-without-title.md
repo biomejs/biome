@@ -93,6 +93,12 @@ To make svg accessible, the following methods are available:
 ```
 
 ```jsx
+<svg role="img"  aria-labelledby="title">
+    <span id="title">Pass</span>
+</svg>
+```
+
+```jsx
 <svg role="img" aria-label="title">
     <span id="title">Pass</span>
 </svg>
