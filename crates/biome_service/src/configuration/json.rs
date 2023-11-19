@@ -1,6 +1,6 @@
 use crate::configuration::merge::MergeWith;
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
-use biome_formatter::LineWidth;
+use biome_formatter::{LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -100,6 +100,15 @@ pub struct JsonFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
+
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(
+        long("json-formatter-line-ending"),
+        argument("lf|line-feed|crlf|carriage-return-line-feed|cr|carriage-return"),
+        optional
+    )]
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
     #[serde(

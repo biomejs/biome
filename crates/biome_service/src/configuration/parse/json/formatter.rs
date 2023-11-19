@@ -34,6 +34,7 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
             "indentStyle",
             "indentSize",
             "indentWidth",
+            "lineEnding",
             "lineWidth",
             "ignore",
             "include",
@@ -68,6 +69,10 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
                 }
                 "indentWidth" => {
                     result.indent_width =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "lineEnding" => {
+                    result.line_ending =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "lineWidth" => {

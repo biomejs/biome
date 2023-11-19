@@ -1,4 +1,6 @@
-use biome_formatter::{FormatContext, FormatResult, Formatted, IndentStyle, LineWidth, Printed};
+use biome_formatter::{
+    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
+};
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
@@ -91,6 +93,29 @@ impl From<JsSerializableIndentStyle> for IndentStyle {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize, Default)]
+pub enum JsSerializableLineEnding {
+    ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
+    #[default]
+    LineFeed,
+
+    /// Carriage Return + Line Feed characters (\r\n), common on Windows
+    CarriageReturnLineFeed,
+
+    /// Carriage Return character only (\r), used very rarely
+    CarriageReturn,
+}
+
+impl From<JsSerializableLineEnding> for LineEnding {
+    fn from(test: JsSerializableLineEnding) -> Self {
+        match test {
+            JsSerializableLineEnding::LineFeed => LineEnding::LineFeed,
+            JsSerializableLineEnding::CarriageReturnLineFeed => LineEnding::CarriageReturnLineFeed,
+            JsSerializableLineEnding::CarriageReturn => LineEnding::CarriageReturn,
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum JsSerializableQuoteStyle {
     Double,
@@ -176,6 +201,9 @@ pub struct JsSerializableFormatOptions {
     /// The indent width.
     pub indent_width: Option<u8>,
 
+    /// The style for the end of line characters.
+    pub line_ending: Option<JsSerializableLineEnding>,
+
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,
 
@@ -207,6 +235,7 @@ impl JsSerializableFormatOptions {
                     .map(|value| value.into())
                     .unwrap_or_default(),
             )
+            .with_line_ending(self.line_ending.unwrap_or_default().into())
             .with_line_width(
                 self.line_width
                     .and_then(|width| LineWidth::try_from(width).ok())

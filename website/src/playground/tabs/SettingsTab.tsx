@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
 	ArrowParentheses,
 	IndentStyle,
+	LineEnding,
 	LintRules,
 	type PlaygroundState,
 	QuoteProperties,
@@ -36,6 +37,7 @@ export default function SettingsTab({
 		currentFile,
 		files,
 		settings: {
+			lineEnding,
 			lineWidth,
 			indentWidth,
 			indentStyle,
@@ -53,6 +55,10 @@ export default function SettingsTab({
 		},
 	},
 }: SettingsTabProps) {
+	const setLineEnding = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"lineEnding",
+	);
 	const setLineWidth = createPlaygroundSettingsSetter(
 		setPlaygroundState,
 		"lineWidth",
@@ -234,6 +240,8 @@ export default function SettingsTab({
 				/>
 			)}
 			<FormatterSettings
+				lineEnding={lineEnding}
+				setLineEnding={setLineEnding}
 				lineWidth={lineWidth}
 				setLineWidth={setLineWidth}
 				indentStyle={indentStyle}
@@ -563,6 +571,8 @@ function SyntaxSettings({
 }
 
 function FormatterSettings({
+	lineEnding,
+	setLineEnding,
 	lineWidth,
 	setLineWidth,
 	indentStyle,
@@ -582,6 +592,8 @@ function FormatterSettings({
 	arrowParentheses,
 	setArrowParentheses,
 }: {
+	lineEnding: LineEnding;
+	setLineEnding: (value: LineEnding) => void;
 	lineWidth: number;
 	setLineWidth: (value: number) => void;
 	indentStyle: IndentStyle;
@@ -606,6 +618,22 @@ function FormatterSettings({
 			<h2>Formatter options</h2>
 			<section>
 				<LineWidthInput lineWidth={lineWidth} setLineWidth={setLineWidth} />
+
+				<div className="field-row">
+					<label htmlFor="lineEnding">Line Ending</label>
+					<select
+						id="lineEnding"
+						name="lineEnding"
+						value={LineEnding}
+						onChange={(e) => {
+							setLineEnding(e.target.value as LineEnding);
+						}}
+					>
+						<option value={LineEnding.LineFeed}>LF</option>
+						<option value={LineEnding.CarriageReturnLineFeed}>CRLF</option>
+						<option value={LineEnding.CarriageReturn}>CR</option>
+					</select>
+				</div>
 
 				<div className="field-row">
 					<label htmlFor="indentStyle">Indent Style</label>

@@ -10,6 +10,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import {
 	ArrowParentheses,
 	IndentStyle,
+	LineEnding,
 	LintRules,
 	LoadingState,
 	type PlaygroundSettings,
@@ -306,6 +307,9 @@ function initState(
 		currentFile: Object.keys(files)[0] ?? "main.js",
 		files,
 		settings: {
+			lineEnding:
+				(searchParams.get("lineEnding") as LineEnding) ??
+				defaultPlaygroundState.settings.lineEnding,
 			lineWidth: parseInt(
 				searchParams.get("lineWidth") ??
 					String(defaultPlaygroundState.settings.lineWidth),

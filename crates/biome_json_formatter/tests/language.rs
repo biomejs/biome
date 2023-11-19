@@ -1,4 +1,6 @@
-use biome_formatter::{FormatContext, FormatResult, Formatted, IndentStyle, LineWidth, Printed};
+use biome_formatter::{
+    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
+};
 use biome_formatter_test::TestFormatLanguage;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
@@ -77,6 +79,30 @@ impl From<JsonSerializableIndentStyle> for IndentStyle {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+pub enum JsonSerializableLineEnding {
+    ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
+    LineFeed,
+
+    /// Carriage Return + Line Feed characters (\r\n), common on Windows
+    CarriageReturnLineFeed,
+
+    /// Carriage Return character only (\r), used very rarely
+    CarriageReturn,
+}
+
+impl From<JsonSerializableLineEnding> for LineEnding {
+    fn from(test: JsonSerializableLineEnding) -> Self {
+        match test {
+            JsonSerializableLineEnding::LineFeed => LineEnding::LineFeed,
+            JsonSerializableLineEnding::CarriageReturnLineFeed => {
+                LineEnding::CarriageReturnLineFeed
+            }
+            JsonSerializableLineEnding::CarriageReturn => LineEnding::CarriageReturn,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
 pub struct JsonSerializableFormatOptions {
     /// The indent style.
@@ -84,6 +110,9 @@ pub struct JsonSerializableFormatOptions {
 
     /// The indent width.
     pub indent_width: Option<u8>,
+
+    /// The type of line ending.
+    pub line_ending: Option<JsonSerializableLineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,

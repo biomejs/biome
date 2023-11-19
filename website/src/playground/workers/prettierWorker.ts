@@ -6,6 +6,7 @@ import pluginEstree from "prettier/plugins/estree.mjs";
 import {
 	ArrowParentheses,
 	IndentStyle,
+	LineEnding,
 	type PlaygroundSettings,
 	type PrettierOptions,
 	type PrettierOutput,
@@ -28,6 +29,7 @@ self.addEventListener("message", async (e) => {
 
 		case "format": {
 			const {
+				lineEnding,
 				lineWidth,
 				indentStyle,
 				indentWidth,
@@ -42,6 +44,7 @@ self.addEventListener("message", async (e) => {
 			const filename = e.data.filename as string;
 
 			const prettierOutput = await formatWithPrettier(code, {
+				lineEnding,
 				lineWidth,
 				indentStyle,
 				indentWidth,
@@ -71,6 +74,7 @@ self.addEventListener("message", async (e) => {
 async function formatWithPrettier(
 	code: string,
 	options: {
+		lineEnding: LineEnding;
 		lineWidth: number;
 		indentStyle: IndentStyle;
 		indentWidth: number;
@@ -87,6 +91,7 @@ async function formatWithPrettier(
 		const prettierOptions: PrettierOptions = {
 			useTabs: options.indentStyle === IndentStyle.Tab,
 			tabWidth: options.indentWidth,
+			endOfLine: options.lineEnding,
 			printWidth: options.lineWidth,
 			filepath: options.filepath,
 			plugins: [parserBabel, pluginEstree],

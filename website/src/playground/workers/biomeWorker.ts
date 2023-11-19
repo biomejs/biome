@@ -9,6 +9,7 @@ import {
 	ArrowParentheses,
 	type BiomeOutput,
 	IndentStyle,
+	LineEnding,
 	LintRules,
 	LoadingState,
 	type PlaygroundSettings,
@@ -62,6 +63,7 @@ self.addEventListener("message", async (e) => {
 			}
 
 			const {
+				lineEnding,
 				lineWidth,
 				indentStyle,
 				indentWidth,
@@ -82,6 +84,7 @@ self.addEventListener("message", async (e) => {
 				formatter: {
 					enabled: true,
 					formatWithErrors: true,
+					lineEnding: lineEnding === LineEnding.LineFeed ? "lf" : LineEnding.CarriageReturnLineFeed ? "crlf" : "cr",
 					lineWidth: lineWidth,
 					indentStyle: indentStyle === IndentStyle.Tab ? "tab" : "space",
 					indentWidth,

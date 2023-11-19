@@ -1,7 +1,7 @@
 use crate::configuration::PlainIndentStyle;
 use crate::configuration::{deserialize_line_width, serialize_line_width};
 use crate::MergeWith;
-use biome_formatter::LineWidth;
+use biome_formatter::{LineEnding, LineWidth};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use bpaf::Bpaf;
@@ -55,6 +55,15 @@ pub struct JavascriptFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
+
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(
+        long("javascript-formatter-line-ending"),
+        argument("lf|line-feed|crlf|carriage-return-line-feed|cr|carriage-return"),
+        optional
+    )]
+    pub line_ending: Option<LineEnding>,
 
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[serde(skip_serializing_if = "Option::is_none")]
