@@ -58,6 +58,7 @@ async function traverseDir(dir, input_config) {
 				'jsfmt.spec.js.snap'
 			);
 			const snapFile = path.basename(file) + '.prettier-snap';
+			const snapOriginalFile = path.basename(file) + '.prettier-snap-original';
 
 			const snapshot = require(snapshotPath);
 
@@ -103,6 +104,7 @@ async function traverseDir(dir, input_config) {
 				const outputEndOffset = outputEnd.index;
 				snapshotContent = snapshotContent.substring(outputStartOffset, outputEndOffset);
 
+				let originalSnapshot = snapshotContent;
 				try {
 					// We need to reformat prettier snapshot
 					// because Biome and Prettier have different default options
@@ -111,6 +113,12 @@ async function traverseDir(dir, input_config) {
 				} catch (error) {
 					console.error(`Prettier format error in ${filePath}: ${error}`);
 				}
+
+				if (originalSnapshot !== snapshotContent) {
+					// Prettier has a reformat issue
+					await fs.writeFile(path.resolve(outDir, snapOriginalFile), originalSnapshot);
+				}
+
 				// Write the expected output to an additional prettier-snap
 				// file in the specs directory
 				await fs.writeFile(path.resolve(outDir, snapFile), snapshotContent);
