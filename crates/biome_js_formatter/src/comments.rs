@@ -11,12 +11,7 @@ use biome_formatter::{
 };
 use biome_js_syntax::suppression::parse_suppression_comment;
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
-use biome_js_syntax::{
-    AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
-    JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
-    JsFormalParameter, JsFunctionBody, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
-};
+use biome_js_syntax::{AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression, JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause, JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement, JsLanguage, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration};
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 
 pub type JsComments = Comments<JsLanguage>;
@@ -116,6 +111,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_mapped_type_comment)
                 .or_else(handle_switch_default_case_comment)
+                .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
                 .or_else(handle_function_declaration_comment)
@@ -155,6 +151,29 @@ fn handle_typecast_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlac
         }
         _ => CommentPlacement::Default(comment),
     }
+}
+
+
+fn handle_after_arrow_fat_arrow_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    if  JsArrowFunctionExpression::can_cast(comment.enclosing_node().kind()) {
+        if let Some(js_ident_binding) = comment.preceding_node().and_then(JsIdentifierBinding::cast_ref) {
+            return CommentPlacement::trailing(js_ident_binding.into_syntax(), comment);
+        }
+        if let Some(js_parameters) =  comment.preceding_node().and_then(JsParameters::cast_ref){
+            if let Some(last) = js_parameters.items().last() {
+                if let Ok(last) = last {
+                    return CommentPlacement::trailing(last.into_syntax(), comment);
+                }
+            };
+        }
+
+        if let Some(following_node) = comment.following_node() {
+            return CommentPlacement::leading(following_node.clone(), comment);
+        }
+    }
+    CommentPlacement::Default(comment)
 }
 
 fn handle_after_arrow_param_comment(
