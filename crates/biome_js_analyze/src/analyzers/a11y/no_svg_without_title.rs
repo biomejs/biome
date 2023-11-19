@@ -62,7 +62,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js
-    /// <svg role="img"  aria-labelledby="title">
+    /// <svg role="img" aria-labelledby="title">
     ///     <span id="title">Pass</span>
     /// </svg>
     /// ```
