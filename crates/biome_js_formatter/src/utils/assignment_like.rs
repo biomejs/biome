@@ -979,8 +979,8 @@ pub(crate) fn should_break_after_operator(
     Ok(result)
 }
 
-///Iter over unary expression arguments to get last non unary
-/// Example: void !!(await teste()) -> returns await as last argument
+/// Iterate over unary expression arguments to get last non-unary
+/// Example: void !!(await test()) -> returns await as last argument
 fn get_last_non_unary_argument(unary_expression: &JsUnaryExpression) -> Option<AnyJsExpression> {
     let mut argument = unary_expression.argument().ok()?;
 
