@@ -38,9 +38,13 @@ impl FormatNodeRule<JsAwaitExpression> for FormatJsAwaitExpression {
 
                 let indented = format_with(|f| write!(f, [soft_block_indent(&format_inner)]));
 
-                return if ancestor_await_or_block.map_or(false, |ancestor| {
-                    JsAwaitExpression::can_cast(ancestor.kind())
-                }) {
+                return if let Some(parent_js_await_expression) =
+                    ancestor_await_or_block.and_then(JsAwaitExpression::cast)
+                {
+                    if !parent_js_await_expression.needs_parentheses() {
+                        return write!(f, [group(&indented)]);
+                    }
+
                     write!(f, [indented])
                 } else {
                     write!(f, [group(&indented)])
