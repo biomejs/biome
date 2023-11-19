@@ -10,14 +10,14 @@ expression: invalid.jsx
 		<title></title>
 		<circle />
 	</svg>
-	<svg role="img" aria-label="title">
-		<span id="">foo</span>
-	</svg>
 	<svg role="img" title="title">
 		<span id="">foo</span>
 	</svg>
 	<svg role="img" aria-labelledby="title">
 		<span id="">foo</span>
+	</svg>
+	<svg role="">
+		<span>implicit role</span>
 	</svg>
 </>;
 
@@ -64,8 +64,8 @@ invalid.jsx:7:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━
   
     5 │ 		<circle />
     6 │ 	</svg>
-  > 7 │ 	<svg role="img" aria-label="title">
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 7 │ 	<svg role="img" title="title">
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 		<span id="">foo</span>
     9 │ 	</svg>
   
@@ -81,8 +81,8 @@ invalid.jsx:10:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   
      8 │ 		<span id="">foo</span>
      9 │ 	</svg>
-  > 10 │ 	<svg role="img" title="title">
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │ 	<svg role="img" aria-labelledby="title">
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ 		<span id="">foo</span>
     12 │ 	</svg>
   
@@ -98,9 +98,9 @@ invalid.jsx:13:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   
     11 │ 		<span id="">foo</span>
     12 │ 	</svg>
-  > 13 │ 	<svg role="img" aria-labelledby="title">
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 		<span id="">foo</span>
+  > 13 │ 	<svg role="">
+       │ 	^^^^^^^^^^^^^
+    14 │ 		<span>implicit role</span>
     15 │ 	</svg>
   
   i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.

@@ -1,21 +1,21 @@
 # Overall Metrics
 
-**Average compatibility**: 94.08
+**Average compatibility**: 95.62
 
-    <details>
-    	<summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-    </details>
+    $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+</details>
 
-    **Compatible lines**: 94.97
-    <details>
-        <summary>Definition</summary>
+    **Compatible lines**: 96.05
+<details>
+    <summary>Definition</summary>
 
-        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-    </details>
+    $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+</details>
 
-    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
                 
 
 # js/array-spread/multiple.js
@@ -778,11 +778,9 @@
 ```diff
  Y(() => (a ? b : c));
  
--Y(() => () => (a ? b : c));
-+Y(() => () => a ? b : c);
+ Y(() => () => (a ? b : c));
  
--Y(() => () => () => (a ? b : c));
-+Y(() => () => () => a ? b : c);
+ Y(() => () => () => (a ? b : c));
  
  Y(() =>
    longlonglonglonglonglonglonglonglonglongCondition
@@ -895,10 +893,9 @@
 +f((a) => (b) => (c) => (1, 2, 3) /* b */ /* c */ /* a */);
  
  f((a) => (1 ? 2 : 3) /* a */);
--f((a) => (b) => (1 ? 2 : 3) /* b */ /* a */);
+ f((a) => (b) => (1 ? 2 : 3) /* b */ /* a */);
 -f((a) => (b) => (c) => (1 ? 2 : 3) /* c */ /* b */ /* a */);
-+f((a) => (b) => 1 ? 2 : 3 /* b */ /* a */);
-+f((a) => (b) => (c) => 1 ? 2 : 3 /* b */ /* c */ /* a */);
++f((a) => (b) => (c) => (1 ? 2 : 3) /* b */ /* c */ /* a */);
  
  a(
    "",
@@ -927,7 +924,7 @@
 
 ```
 
-**Prettier Similarity**: 64.86%
+**Prettier Similarity**: 67.57%
 
 
 # js/arrows/currying.js
@@ -1077,77 +1074,8 @@
 
 
 # js/assignment/discussion-15196.js
-```diff
- async function f() {
-   const { section, rubric, authors, tags } =
-     await utils.upsertCommonData(mainData);
- 
-   const loooooooooooooooooooooooooong1 =
-     await looooooooooooooong.looooooooooooooong.loooooong;
-   const loooooooooooooooooooooooooong2 =
-     await looooooooooooooong.looooooooooooooong.loooooong();
-   const loooooooooooooooooooooooooong3 =
-     await looooooooooooooooooooooooooooooooooooooooooooog();
--  const loooooooooooooooooooooooooong4 =
--    !(await looooooooooooooong.looooooooooooooong.loooooong);
--  const loooooooooooooooooooooooooong5 =
--    void !!(await looooooooooooooong.looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong4 = !(await looooooooooooooong
-+    .looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong5 = void !!(await looooooooooooooong
-+    .looooooooooooooong.loooooong);
- 
-   const longlonglonglonglonglonglong1 = await new Promise((resolve, reject) => {
-     setTimeout(() => {
-       resolve("foo");
-     }, 300);
-   });
-   const longlonglonglonglonglonglong2 = await {
-     then(onFulfilled, onRejected) {
-       onFulfilled(1234567890);
-     },
-   };
- }
- 
- function* g() {
-   const { section, rubric, authors, tags } =
-     yield utils.upsertCommonData(mainData);
- 
-   const loooooooooooooooooooooooooong1 =
-     yield looooooooooooooong.looooooooooooooong.loooooong;
-   const loooooooooooooooooooooooooong2 =
-     yield looooooooooooooong.looooooooooooooong.loooooong();
-   const loooooooooooooooooooooooooong3 =
-     yield looooooooooooooooooooooooooooooooooooooooooooog();
--  const loooooooooooooooooooooooooong4 =
--    !(yield looooooooooooooong.looooooooooooooong.loooooong);
--  const loooooooooooooooooooooooooong5 =
--    void !!(yield looooooooooooooong.looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong4 = !(yield looooooooooooooong
-+    .looooooooooooooong.loooooong);
-+  const loooooooooooooooooooooooooong5 = void !!(yield looooooooooooooong
-+    .looooooooooooooong.loooooong);
-   const loooooooooooooooooooooooooong6 =
-     yield* looooooooooooooong.looooooooooooooong.loooooong;
- 
-   const longlonglonglonglonglonglong1 = yield qwertyuiop(
-     asdfghjkl,
-     zxcvbnm,
-     qwertyuiop,
-     asdfghjkl,
-   );
-   const longlonglonglonglonglonglong2 = yield {
-     qwertyuiop: 1234567890,
-     asdfghjkl: 1234567890,
-     zxcvbnm: 123456789,
-   };
- 
-   const x = yield;
- }
 
-```
-
-**Prettier Similarity**: 86.21%
+**Prettier Similarity**: 100.00%
 
 
 # js/assignment/issue-10218.js
@@ -1281,21 +1209,8 @@
 
 
 # js/async/nested2.js
-```diff
- async function f() {
-   await Promise.all(
--    (await readdir("src")).map(async (path) => {
-+    (
-+      await readdir("src")
-+    ).map(async (path) => {
-       import(`./${path}`);
-     }),
-   );
- }
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # js/async/parens.js
@@ -1579,65 +1494,13 @@
 
 
 # js/call/first-argument-expansion/expression-2nd-arg.js
-```diff
- call(function () {
-   return 1;
- }, 200_000_000_000n * askTrovenaBeenaDependsRowans);
- 
--call(
--  function () {
--    return 1;
--  },
--  (200_000_000_000n * askTrovenaBeenaDependsRowans) /
--    glimseGlyphsHazardNoopsTieTie,
--);
-+call(function () {
-+  return 1;
-+}, (200_000_000_000n * askTrovenaBeenaDependsRowans) /
-+  glimseGlyphsHazardNoopsTieTie);
- 
--call(
--  function () {
--    return 1;
--  },
--  (askTrovenaBeenaDependsRowans = glimseGlyphsHazardNoopsTieTie =
--    200_000_000_000n),
--);
-+call(function () {
-+  return 1;
-+}, (askTrovenaBeenaDependsRowans = glimseGlyphsHazardNoopsTieTie =
-+  200_000_000_000n));
 
-```
-
-**Prettier Similarity**: 26.32%
+**Prettier Similarity**: 100.00%
 
 
 # js/call/first-argument-expansion/issue-12892.js
-```diff
--setTimeout(
--  () => {
--    console.log("test");
--  },
--  someFunctionCall(
--    veryLongParameterName1,
--    veryLongParameterName2,
--    veryLongParameterName3,
--    veryLongParameterName4,
--  ),
--);
-+setTimeout(() => {
-+  console.log("test");
-+}, someFunctionCall(
-+  veryLongParameterName1,
-+  veryLongParameterName2,
-+  veryLongParameterName3,
-+  veryLongParameterName4,
-+));
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/call/first-argument-expansion/issue-13237.js
@@ -1651,95 +1514,18 @@
 
 
 # js/call/first-argument-expansion/issue-2456.js
-```diff
--f(
--  (x) => {
--    y;
--  },
--  err.message.includes("asd") &&
--    err.message.includes("id") &&
--    err.message.includes('"1"') &&
--    err.message.includes("Model") &&
--    err.message.includes("/id") &&
--    err.message.includes("identifier(number)"),
--);
-+f((x) => {
-+  y;
-+}, err.message.includes("asd") &&
-+  err.message.includes("id") &&
-+  err.message.includes('"1"') &&
-+  err.message.includes("Model") &&
-+  err.message.includes("/id") &&
-+  err.message.includes("identifier(number)"));
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/call/first-argument-expansion/issue-4401.js
-```diff
- export function test() {
--  setTimeout(
--    () => {
--      console.warn({}, "Lambda approaching timeout.");
--    },
--    Math.max(context.getRemainingTimeInMillis() - WARN_TIMEOUT_MS, 0),
--  );
-+  setTimeout(() => {
-+    console.warn({}, "Lambda approaching timeout.");
-+  }, Math.max(context.getRemainingTimeInMillis() - WARN_TIMEOUT_MS, 0));
- }
 
-```
-
-**Prettier Similarity**: 25.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/call/first-argument-expansion/issue-5172.js
-```diff
--call(
--  function () {
--    return 1;
--  },
-+call(function () {
-+  return 1;
-+}, $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-+  $var ??
-   $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    $var ??
--    "test",
--);
-+  $var ??
-+  "test");
- 
--call(
--  function () {
--    return 1;
--  },
--  $var ||
--    ($var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? "test"),
--);
-+call(function () {
-+  return 1;
-+}, $var ||
-+  ($var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? $var ?? "test"));
 
-```
-
-**Prettier Similarity**: 8.70%
+**Prettier Similarity**: 100.00%
 
 
 # js/call/first-argument-expansion/jsx.js
@@ -2100,26 +1886,8 @@
 
 
 # js/comments/break-continue-statements.js
-```diff
- for (;;) {
-   break; /* comment */
-   continue; /* comment */
- }
- 
- loop: for (;;) {
--  break /* comment */ loop;
--  break loop /* comment */;
--  continue /* comment */ loop;
--  continue loop /* comment */;
-+  break loop; /* comment */
-+  break loop; /* comment */
-+  continue loop; /* comment */
-+  continue loop; /* comment */
- }
 
-```
-
-**Prettier Similarity**: 63.64%
+**Prettier Similarity**: 100.00%
 
 
 # js/comments/call_comment.js
@@ -3758,34 +3526,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/explicit-resource-management/valid-module-block-top-level-await-using-binding.js
-```diff
--const m = module {
-+const m = module;
-+{
-   await using foo = bar();
--};
-+}
-
-```
-
-**Prettier Similarity**: 25.00%
-
-
-# js/explicit-resource-management/valid-module-block-top-level-using-binding.js
-```diff
--module {
-+module;
-+{
-   using foo = bar();
--};
-+}
-
-```
-
-**Prettier Similarity**: 25.00%
-
-
 # js/explicit-resource-management/valid-using-as-identifier-computed-member.js
 
 **Prettier Similarity**: 100.00%
@@ -4002,108 +3742,8 @@
 
 
 # js/for/continue-and-break-comment-1.js
-```diff
- for (;;) {
-   continue; // comment
- }
- 
- for (;;) {
-   break; // comment
- }
- 
- for (const f of []) {
-   continue; // comment
- }
- 
- for (const f of []) {
-   break; // comment
- }
- 
- for (const f in {}) {
-   continue; // comment
- }
- 
- for (const f in {}) {
-   break; // comment
- }
- 
- while (true) {
-   continue; // comment
- }
- 
- while (true) {
-   break; // comment
- }
- 
- do {
-   continue; // comment
- } while (true);
- 
- do {
-   break; // comment
- } while (true);
- 
- label1: for (;;) {
-   continue label1; // comment
- }
- 
- label2: {
-   break label2; // comment
- }
- 
- for (;;) {
-   continue; /* comment */
- }
- 
- for (;;) {
-   break; /* comment */
- }
- 
- for (const f of []) {
-   continue; /* comment */
- }
- 
- for (const f of []) {
-   break; /* comment */
- }
- 
- for (const f in {}) {
-   continue; /* comment */
- }
- 
- for (const f in {}) {
-   break; /* comment */
- }
- 
- while (true) {
-   continue; /* comment */
- }
- 
- while (true) {
-   break; /* comment */
- }
- 
- do {
-   continue; /* comment */
- } while (true);
- 
- do {
-   break; /* comment */
- } while (true);
- 
- label1: for (;;) {
--  continue label1 /* comment */;
-+  continue label1; /* comment */
- }
- 
- label2: {
--  break label2 /* comment */;
-+  break label2; /* comment */
- }
 
-```
-
-**Prettier Similarity**: 97.89%
+**Prettier Similarity**: 100.00%
 
 
 # js/for/continue-and-break-comment-2.js
@@ -4173,20 +3813,28 @@
  for (const f in {}) break;
  /* comment */
  
--label1: for (;;) continue label1 /* comment */;
-+label1: for (;;) continue label1; /* comment */
+ label1: for (;;) continue label1 /* comment */;
  
- label1: for (;;) continue label1;
- /* comment */
+-label1: for (;;) continue label1;
+-/* comment */
++// FIXME: TODO: reformat issue
++// label1: for (;;) continue label1
++// /* comment */
++// ;
  
- label1: for (;;) continue label1; // comment
+-label1: for (;;) continue label1; // comment
++// label1: for (;;) continue label1 // comment
++// ;
  
- label1: for (;;) continue label1;
- // comment
+-label1: for (;;) continue label1;
+-// comment
++// label1: for (;;) continue label1
++// // comment
++// ;
 
 ```
 
-**Prettier Similarity**: 98.55%
+**Prettier Similarity**: 87.67%
 
 
 # js/for/for.js
@@ -4913,58 +4561,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/embed.js
-```diff
--foo(/* HTML */ `<!-- bar1 -->
--    bar
--    <!-- bar2 -->`);
--foo(/* HTML */ `
--  <!-- bar1 -->
--  bar
--  <!-- bar2 -->
--`);
--foo(/* HTML */ `<div>
--    <p>bar</p>
--    foo
--  </div>`);
--foo(/* HTML */ `
--  <div>
--    <p>bar</p>
--    foo
--  </div>
--`);
--foo(/* GraphQL */ `
--  query {
--    foo {
--      bar
--    }
--  }
--`);
--foo(/* ... */ css`
--  color: magenta;
--`);
--const a = (b) => /* HTML */ `<!-- bar1 -->
--    bar
--    <!-- bar2 -->`;
--const c = (b) => /* HTML */ `
--  <!-- bar1 -->
--  bar
--  <!-- bar2 -->
--`;
-+foo(/* HTML */ `<!-- bar1 --> bar <!-- bar2 -->`);
-+foo(/* HTML */ ` <!-- bar1 --> bar <!-- bar2 --> `);
-+foo(/* HTML */ `<div><p>bar</p>foo</div>`);
-+foo(/* HTML */ ` <div><p>bar</p>foo</div> `);
-+foo(/* GraphQL */ `query { foo { bar } }`);
-+foo(/* ... */ css`color:magenta`);
-+const a = (b) => /* HTML */ `<!-- bar1 --> bar <!-- bar2 -->`;
-+const c = (b) => /* HTML */ ` <!-- bar1 --> bar <!-- bar2 --> `;
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 # js/last-argument-expansion/empty-lines.js
 
 **Prettier Similarity**: 100.00%
@@ -5291,26 +4887,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi-babylon-extensions/no-semi.js
-```diff
- a;
--::b.c;
-+::b.c
- 
- class A {
-   a = b;
-   in;
-   c;
- 
-   a = b;
-   instanceof() {}
- }
-
-```
-
-**Prettier Similarity**: 90.91%
-
-
 # js/no-semi/class.js
 
 **Prettier Similarity**: 100.00%
@@ -5431,43 +5007,6 @@
 # js/objects/expand.js
 
 **Prettier Similarity**: 100.00%
-
-
-# js/objects/expression.js
-```diff
- () => ({})``;
- ({})``;
- a = () => ({}).x;
- ({}) && a, b;
--({})::b, 0;
--({})::b()``[""].c++ && 0 ? 0 : 0, 0;
-+({}
-+::b, 0)
-+({}
-+::b()``[''].c++ && 0 ? 0 : 0, 0)
- ({})(), 0;
- ({} = 0);
- ({} = 0), 1;
- 
- const a1 = {
-   someKey: (shortName, shortName),
- };
- 
- const a2 = {
-   someKey:
-     (longLongLongLongLongLongLongLongLongLongLongLongLongLongName, shortName),
- };
- 
- const a3 = {
-   someKey:
-     (longLongLongLongLongLongLongLongLongLongLongLongLongLongName,
-     longLongLongLongLongLongLongLongLongLongLongLongLongLongName,
-     longLongLongLongLongLongLongLongLongLongLongLongLongLongName),
- };
-
-```
-
-**Prettier Similarity**: 85.19%
 
 
 # js/objects/getter-setter.js
@@ -5720,24 +5259,18 @@
 
 
 # js/range/array.js
-```diff
--a = [, , , , , , , a];
-+a = [, , , , , , , a];
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/boundary-2.js
 ```diff
--function a() {
+ function a(
+ ){
 -  a();
 -  b();
 -  c();
 -  d();
-+function a(
-+){
 +a (
 +);
 +b();
@@ -5748,29 +5281,28 @@
 
 ```
 
-**Prettier Similarity**: 11.11%
+**Prettier Similarity**: 33.33%
 
 
 # js/range/boundary-3.js
 ```diff
--a();
-+a (
-+);
- b();
--c();
--d();
+ a (
+ );
+-b (
+-);                 c (
+-); d(
++b();
 +c(); d(
-+);
+ );
 
 ```
 
-**Prettier Similarity**: 20.00%
+**Prettier Similarity**: 50.00%
 
 
 # js/range/boundary.js
 ```diff
--foo = 1.0;
--bar = 1.0;
+-foo = 1.0000;bar = 1.0;
 -baz = 1.0;
 +foo = 1.0000;bar = 1.0;baz=1.0000;
  // The range will be 13~26
@@ -5779,13 +5311,13 @@
 
 ```
 
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 60.00%
 
 
 # js/range/class-declaration.js
 ```diff
-+
-+
+ 
+ 
  class a {
    b() {}
  }
@@ -5795,44 +5327,22 @@
 
 ```
 
-**Prettier Similarity**: 57.14%
+**Prettier Similarity**: 85.71%
 
 
 # js/range/different-levels.js
-```diff
--call(1, 2, 3);
-+call(1,2,3)
- call(1, 2, 3);
- function f() {
-   call(1, 2, 3);
- }
 
-```
-
-**Prettier Similarity**: 80.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/directive.js
-```diff
- "aaa";
--"bbb";
-+'bbb';
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/function-body.js
-```diff
--let fn = a((x) => {
-+let fn =a((x ) => {
-   quux(); //
- });
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/function-declaration.js
@@ -5841,23 +5351,8 @@
 
 
 # js/range/ignore-indentation.js
-```diff
--function ugly({ a = 1, b = 2 }) {
--  function ugly({ a = 1, b = 2 }) {
--    function ugly({ a = 1, b = 2 }) {
--      `multiline template string
-+function ugly ( {a=1,     b     =   2     }      ) {
-+  function ugly ( {a=1,     b     =   2     }      ) {
-+    function ugly ( {a=1,     b     =   2     }      ) {
-+  	  	     `multiline template string
-               with too much indentation`;
-     }
-   }
- }
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/issue-3789-1.js
@@ -5896,111 +5391,35 @@
 
 
 # js/range/module-export1.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
- export * from "d";
- 
--export const x = 42;
-+export    const  x
-+  =  42
-+
-+export   default    42
- 
--export default 42;
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-export2.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
--export * from "d";
-+export *  from   'd'
- 
- export const x = 42;
- 
--export default 42;
-+export   default    42
-+
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-export3.js
-```diff
--import def, { named } from "x";
-+import  def , {named}  from    'x'
- 
--export * from "d";
-+export *  from   'd'
- 
--export const x = 42;
-+export    const  x
-+  =  42
- 
- export default 42;
-+
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/module-import.js
-```diff
- import def, { named } from "x";
- 
--export * from "d";
-+export *  from   'd'
-+
-+export    const  x
-+  =  42
- 
--export const x = 42;
-+export   default    42
- 
--export default 42;
 
-```
-
-**Prettier Similarity**: 44.44%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/multiple-statements.js
-```diff
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
- 
- call(1, 2, 3);
- 
- call(1, 2, 3);
- 
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
 
-```
-
-**Prettier Similarity**: 45.45%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/multiple-statements2.js
 ```diff
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
+ call(
+   1, 2,3
+ );
  
  call(1, 2, 3);
  
@@ -6013,7 +5432,7 @@
 
 ```
 
-**Prettier Similarity**: 45.45%
+**Prettier Similarity**: 72.73%
 
 
 # js/range/nested-print-width.js
@@ -6027,18 +5446,8 @@
 
 
 # js/range/nested2.js
-```diff
- try {
-   if (condition) {
-     body;
-   }
--} catch (err) {}
-+}
-+catch (err) {}
 
-```
-
-**Prettier Similarity**: 66.67%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/nested3.js
@@ -6048,17 +5457,16 @@
 -  if (condition) {
 -    body;
 -  }
--} catch (err) {}
 +1;
 +if (condition) {
 +  body;
 +}
-+}
-+catch (err) {}
+ }
+ catch (err) {}
 
 ```
 
-**Prettier Similarity**: 14.29%
+**Prettier Similarity**: 42.86%
 
 
 # js/range/object-expression.js
@@ -6067,87 +5475,28 @@
 
 
 # js/range/object-expression2.js
-```diff
-+
- const y = [
-   {
-     a: 1,
-   },
-   {
-     a: 1,
-     b: 2,
-   },
- ];
 
-```
-
-**Prettier Similarity**: 90.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range-end.js
-```diff
- // Unchanged
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
-+
- 
--call(1, 2, 3);
-+call(1, 2, 3);
 
-```
-
-**Prettier Similarity**: 28.57%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range-start.js
-```diff
- call(1, 2, 3);
- 
-+
- // Unchanged
--call(1, 2, 3);
-+call(
-+  1, 2,3
-+);
 
-```
-
-**Prettier Similarity**: 42.86%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/range.js
-```diff
--function ugly({ a = 1, b = 2 }) {
--  function ugly({ a = 1, b = 2 }) {
--    function ugly({ a = 1, b = 2 }) {
--      `multiline template string
-+function ugly ( {a=1,     b     =   2     }      ) {
-+  function ugly ( {a=1,     b     =   2     }      ) {
-+    function ugly ( {a=1,     b     =   2     }      ) {
-+             `multiline template string
-               with too much indentation`;
-     }
-   }
- }
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/start-equals-end.js
-```diff
--foo = 1.0;
--bar = 1.0;
--baz = 1.0;
-+foo = 1.0000;bar = 1.0000;baz=1.0000;
- // The range will be 13~13, should not format anything
 
-```
-
-**Prettier Similarity**: 25.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/range/try-catch.js
@@ -6421,15 +5770,11 @@
 # js/switch/comments2.js
 ```diff
  switch (1) {
--  default: // comment1
-+  default:
-+  // comment1
+   default: // comment1
  }
  
  switch (2) {
--  default: // comment2
-+  default:
-+  // comment2
+   default: // comment2
    //comment2a
  }
  
@@ -6461,7 +5806,7 @@
 
 ```
 
-**Prettier Similarity**: 62.07%
+**Prettier Similarity**: 74.07%
 
 
 # js/switch/empty_lines.js
@@ -6791,217 +6136,8 @@
 
 
 # js/test-declarations/test_declarations.js
-```diff
- // Shouldn't break
- 
- it("does something really long and complicated so I have to write a very long name for the test", () => {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function () {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function (done) {
-   console.log("hello!");
- });
- 
- it("does something really long and complicated so I have to write a very long name for the test", function myAssertions(done) {
-   console.log("hello!");
- });
- 
- it(`does something really long and complicated so I have to write a very long name for the test`, function () {
-   console.log("hello!");
- });
- 
- it(`{foo + bar} does something really long and complicated so I have to write a very long name for the test`, function () {
-   console.log("hello!");
- });
- 
- it(`handles
-   some
-     newlines
-   does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- });
- 
- test("does something really long and complicated so I have to write a very long name for the test", (done) => {
-   console.log("hello!");
- });
- 
- test(`does something really long and complicated so I have to write a very long name for the test`, (done) => {
-   console.log("hello!");
- });
- 
- describe("does something really long and complicated so I have to write a very long name for the describe block", () => {
-   it("an example test", (done) => {
-     console.log("hello!");
-   });
- });
- 
- describe(`does something really long and complicated so I have to write a very long name for the describe block`, () => {
-   it(`an example test`, (done) => {
-     console.log("hello!");
-   });
- });
- 
- xdescribe("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- fdescribe("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- describe.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- describe.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- fit("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- xit("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- it.only("does something really long and complicated so I have to write a very long name for the test", () => {
-   console.log("hello!");
- });
- 
- it.only(`does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- });
- 
- it.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- ftest("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- xtest("does something really long and complicated so I have to write a very long name for the describe block", () => {});
- 
- skip(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- skip("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.step("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.step(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- test.describe("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.describe(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe
--  .only("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.only("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe
--  .parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .parallel(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.parallel(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe.parallel
--  .only("does something really long and complicated so I have to write a very long name for the testThis is a very", () => {});
-+test.describe.parallel.only("does something really long and complicated so I have to write a very long name for the testThis is a very", () => {});
- 
--test.describe.parallel
--  .only(`does something really long and complicated so I have to write a very long name for the testThis is a very`, () => {});
-+test.describe.parallel.only(`does something really long and complicated so I have to write a very long name for the testThis is a very`, () => {});
- 
--test.describe
--  .serial("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.serial("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe
--  .serial(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.serial(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
--test.describe.serial
--  .only("does something really long and complicated so I have to write a very long name for the test", () => {});
-+test.describe.serial.only("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
--test.describe.serial
--  .only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
-+test.describe.serial.only(`does something really long and complicated so I have to write a very long name for the test`, () => {});
- 
- // Should break
- 
- it.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   10,
-   () => {
-     console.log("hello!");
-   },
- );
- 
- it.only.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {
-     console.log("hello!");
-   },
- );
- 
- it.only.only(
-   "does something really long and complicated so I have to write a very long name for the test",
-   (a, b, c) => {
-     console.log("hello!");
-   },
- );
- 
- xskip(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
--test.describe.only.parallel(
--  "does something really long and complicated so I have to write a very long name for the test",
--  () => {},
--);
-+test.describe.only.parallel("does something really long and complicated so I have to write a very long name for the test", () => {});
- 
- test.describe.parallel.serial(
-   "does something really long and complicated so I have to write a very long name for the testThis is a very",
-   () => {},
- );
- 
- test.serial(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
- test.describe.dummy.serial(
-   "does something really long and complicated so I have to write a very long name for the test",
-   () => {},
- );
- 
- // timeout
- 
- it(`handles
-   some
-     newlines
-   does something really long and complicated so I have to write a very long name for the test`, () => {
-   console.log("hello!");
- }, 2500);
- 
- it("does something quick", () => {
-   console.log("hello!");
- }, 1000000000);
- 
- it("succeeds if the test finishes in time", () =>
-   new Promise((resolve) => setTimeout(resolve, 10)));
- 
- it(
-   "succeeds if the test finishes in time",
-   () => new Promise((resolve) => setTimeout(resolve, 10)),
-   250,
- );
 
-```
-
-**Prettier Similarity**: 87.69%
+**Prettier Similarity**: 100.00%
 
 
 # js/throw_statement/binaryish.js
@@ -8615,82 +7751,8 @@
 
 
 # typescript/argument-expansion/argument_expansion.ts
-```diff
--const bar1 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  [] as unknown as number[],
--);
-+const bar1 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, [] as unknown as number[]);
- 
--const bar2 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  <Array<number>>[],
--);
-+const bar2 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, <Array<number>>[]);
- 
- const bar3 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   [1, 2, 3] as unknown as number[],
- );
- 
- const bar4 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   <Array<number>>[1, 2, 3],
- );
- 
--const bar5 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  {} as unknown as { [key: number]: boolean },
--);
-+const bar5 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, {} as unknown as { [key: number]: boolean });
- 
--const bar6 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  <{ [key: number]: boolean }>{},
--);
-+const bar6 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, <{ [key: number]: boolean }>{});
- 
- const bar7 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   { 1: true } as unknown as { [key: number]: boolean },
- );
- 
- const bar8 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   <{ [key: number]: boolean }>{ 1: true },
- );
- 
- const bar9 = [1, 2, 3].reduce((carry, value) => {
-   return [...carry, value];
- }, [] as foo);
 
-```
-
-**Prettier Similarity**: 59.32%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/argument-expansion/arrow-with-return-type.ts
@@ -8759,31 +7821,6 @@
 # typescript/as/array-pattern.ts
 
 **Prettier Similarity**: 100.00%
-
-
-# typescript/as/as-const-embedded.ts
-```diff
- const GQL_QUERY_WITH_CONST = /* GraphQL */ `
--  query S {
--    shop
--  }
-+  query S { shop }
- ` as const;
- 
- const HTML_WITH_CONST = /* HTML */ `
--  <div>
--    <h1>foo</h1>
--    <p>foo</p>
--  </div>
-+<div>
-+<h1>foo</h1>
-+  <p>foo</p>
-+</div>
- ` as const;
-
-```
-
-**Prettier Similarity**: 41.67%
 
 
 # typescript/as/as.ts
@@ -12577,16 +11614,8 @@
 
 
 # typescript/range/export-assignment.ts
-```diff
--f();
-+f ( );
- export = f;
--g();
-+g(  )
 
-```
-
-**Prettier Similarity**: 33.33%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/range/issue-4926.ts
@@ -12630,48 +11659,8 @@
 
 
 # typescript/satisfies-operators/argument-expansion.ts
-```diff
--const bar1 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return [...carry, value];
--  },
--  [] satisfies unknown satisfies number[],
--);
-+const bar1 = [1, 2, 3].reduce((carry, value) => {
-+  return [...carry, value];
-+}, [] satisfies unknown satisfies number[]);
- 
- const bar2 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return [...carry, value];
-   },
-   [1, 2, 3] satisfies unknown satisfies number[],
- );
- 
--const bar3 = [1, 2, 3].reduce(
--  (carry, value) => {
--    return { ...carry, [value]: true };
--  },
--  {} satisfies unknown satisfies { [key: number]: boolean },
--);
-+const bar3 = [1, 2, 3].reduce((carry, value) => {
-+  return { ...carry, [value]: true };
-+}, {} satisfies unknown satisfies { [key: number]: boolean });
- 
- const bar4 = [1, 2, 3].reduce(
-   (carry, value) => {
-     return { ...carry, [value]: true };
-   },
-   { 1: true } satisfies unknown satisfies { [key: number]: boolean },
- );
- 
- const bar5 = [1, 2, 3].reduce((carry, value) => {
-   return [...carry, value];
- }, [] satisfies foo);
 
-```
-
-**Prettier Similarity**: 61.29%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/satisfies-operators/assignment.ts
@@ -12961,39 +11950,8 @@
 
 
 # typescript/tuple/dangling-comments.ts
-```diff
--type Foo1 = [
--  /* comment */
--];
-+type Foo1 = [/* comment */];
- 
- type Foo2 = [
-   // comment
- ];
- 
- type Foo3 = [
-   // comment1
-   // comment2
- ];
- 
- type Foo4 = [
-   // comment1
-   // comment2
- ];
- 
--type Foo5 = [
--  /* comment1 */
--];
-+type Foo5 = [/* comment1 */];
- 
- type Foo6 = [
-   /* comment1 */
-   /* comment2 */
- ];
 
-```
-
-**Prettier Similarity**: 76.92%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/tuple/trailing-comma-for-empty-tuples.ts
@@ -13498,91 +12456,8 @@
 
 
 # typescript/union/inlining.ts
-```diff
- interface RelayProps {
-   articles: a | null;
- }
- interface RelayProps {
-   articles: Array<{
-     __id: string;
-   } | null> | null | void;
- }
- 
- interface RelayProps {
--  articles:
--    | Array<{
--        __id: string;
--      } | null>
--    | null // articles type may be null
--    | void; // articles type may be void
-+  articles: Array<{
-+    __id: string;
-+  } | null> | null | void; // articles type may be null // articles type may be void
- }
- 
--type FooBar =
--  | null // null
--  | {
--      /** x **/ y: number;
--      z: string;
--    } // this documents the first option
--  | void; // this documents the second option
-+// FIXME
-+// TODO: reformat issue
-+// type FooBar = null // null
-+// | { /** x **/
-+//   y: number;
-+//   z: string;
-+// } // this documents the first option
-+//   | void // this documents the second option
-+//   ;
- 
- type FooBarWithoutComment = null | {
-   y: number;
-   z: string;
- } | void;
- 
--type FooBar2 =
--  | Number // this documents the first option
--  | void; // this documents the second option
-+type FooBar2 = Number | void; // this documents the first option // this documents the second option
- 
- type UploadState<E, EM, D> =
-   // The upload hasnt begun yet
-   | { type: "Not_begun" }
-   // The upload timed out
-   | { type: "Timed_out" }
-   // Failed somewhere on the line
-   | { type: "Failed"; error: E; errorMsg: EM }
-   // Uploading to aws3 and CreatePostMutation succeeded
-   | { type: "Success"; data: D };
- 
- type UploadState2<E, EM, D> =
-   // The upload hasnt begun yet
-   | A
-   // The upload timed out
-   | B
-   // Failed somewhere on the line
-   | C
-   // Uploading to aws3 and CreatePostMutation succeeded
-   | D;
- 
- type window = Window & {
-   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function;
- };
- 
- type T1 = (number | string)["toString"];
- type T2 = (number | string)["toString"];
- type T3 = (number | string)["toString"];
- type T4 = (number | string)["toString"];
- type T5 = number | ((arg: any) => void);
- type T6 = number | ((arg: any) => void);
- type T7 = number | ((arg: any) => void);
- type T8 = number | ((arg: any) => void);
 
-```
-
-**Prettier Similarity**: 76.12%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/union/single-type/single-type.ts
@@ -13590,14 +12465,11 @@
 -type A1 /* 2 */ = /* 1 */ /* 3 */ /* 4 */ {
 -  key: string;
 -};
-+// FIXME
-+// TODO: reformat issue
-+// type A1 =
-+//   /* 1 */ | /* 2 */ (
-+//     /* 3 */ | /* 4 */ {
-+//         key: string;
-+//       }
-+//   );
++type A1 =
++  /* 1 */ /* 2 */
++  /* 3 */ /* 4 */ {
++    key: string;
++  };
 
 ```
 

@@ -91,8 +91,9 @@ impl Format<JsFormatContext> for AnyTemplateElementList {
 
                     let tab_width = f.options().tab_width();
 
-                    indention =
-                        TemplateElementIndention::after_last_new_line(chunk_text, tab_width);
+                    indention = TemplateElementIndention::after_last_new_line(
+                        chunk_text, tab_width, indention,
+                    );
                     after_new_line = chunk_text.ends_with('\n');
                 }
             }
@@ -262,11 +263,15 @@ impl TemplateElementIndention {
     }
 
     /// Computes the indention after the last new line character.
-    fn after_last_new_line(text: &str, tab_width: TabWidth) -> Self {
+    fn after_last_new_line(
+        text: &str,
+        tab_width: TabWidth,
+        previous_indention: TemplateElementIndention,
+    ) -> Self {
         let by_new_line = text.rsplit_once('\n');
 
         let size = match by_new_line {
-            None => 0,
+            None => previous_indention.0,
             Some((_, after_new_line)) => {
                 let tab_width: u32 = u8::from(tab_width).into();
                 let mut size: u32 = 0;

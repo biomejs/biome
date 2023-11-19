@@ -1,3 +1,5 @@
+use crate::prelude::*;
+use biome_formatter::CstFormatContext;
 use biome_js_syntax::{
     AnyTsType, JsSyntaxKind, JsSyntaxNode, TsIntersectionTypeElementList, TsUnionTypeVariantList,
 };
@@ -54,7 +56,9 @@ pub(crate) fn is_simple_type(ty: &AnyTsType) -> bool {
 /// Logic ported from [prettier], function `shouldHugType`
 ///
 /// [prettier]: https://github.com/prettier/prettier/blob/main/src/language-js/print/type-annotation.js#L27-L56
-pub(crate) fn should_hug_type(ty: &AnyTsType) -> bool {
+pub(crate) fn should_hug_type(ty: &AnyTsType, f: &Formatter<JsFormatContext>) -> bool {
+    let comments = f.context().comments();
+
     if is_simple_type(ty) || is_object_like_type(ty) {
         return true;
     }
@@ -70,6 +74,18 @@ pub(crate) fn should_hug_type(ty: &AnyTsType) -> bool {
             )
         });
 
+        let successful = union_type
+            .types()
+            .iter()
+            .filter_map(|node: Result<AnyTsType, biome_rowan::SyntaxError>| node.ok());
+
+        let comments = union_type
+            .types()
+            .iter()
+            .filter_map(|node: Result<AnyTsType, biome_rowan::SyntaxError>| node.ok())
+            .filter(|node| comments.has_comments(node.syntax()))
+            .count();
+
         let void_count = union_type
             .types()
             .iter()
@@ -81,7 +97,8 @@ pub(crate) fn should_hug_type(ty: &AnyTsType) -> bool {
             })
             .count();
 
-        union_type.types().len() - 1 == void_count && has_object_type
+        union_type.types().len() - 1 == void_count && has_object_type && comments == 0
+            || successful.count() == 1
     } else {
         false
     }

@@ -105,14 +105,16 @@ impl DiffReport {
     fn is_ignored(file_name: &str) -> bool {
         // ignore unstable syntaxes and embedded languages in template literals
         let patterns = [
+            // Experimental syntaxes
             "arrows-bind",
             "async-do-expressions",
             "async-do-expressions",
+            "babylon-extensions",
             "decimal",
             "do-expressions",
             "export-default-from",
             "function-bind",
-            "module-blocks",
+            "module-block",
             "partial-application",
             "pipeline",
             "record",
@@ -121,6 +123,7 @@ impl DiffReport {
             "v8intrinsic",
             "v8_intrinsic",
             "bind-expressions",
+            "js/objects/expression.js",
             "destructuring-private-fields",
             "/do/",
             "export-extension",
@@ -128,11 +131,13 @@ impl DiffReport {
             "deferred-import-evaluation", // `import defer` syntax
             "source-phase-imports",       // `import source` syntax
             "import-reflection",          // `import module` syntax
-            // embedded languages in template literals
+            // Embedded languages in template literals
             "js/multiparser",
             "js/range/issue-7082.js",
             "js/template-literals/css-prop.js",
             "js/template-literals/styled",
+            "js/last-argument-expansion/embed.js",
+            "typescript/as/as-const-embedded.ts",
         ];
 
         patterns.iter().any(|pattern| file_name.contains(pattern))
@@ -300,11 +305,11 @@ impl DiffReport {
 
         header.push_str(
             r"
-    <details>
-    	<summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-    	$$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
-    </details>
+    $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
+</details>
 
     ",
         );
@@ -318,13 +323,13 @@ impl DiffReport {
 
         header.push_str(
                 r"
-    <details>
-        <summary>Definition</summary>
+<details>
+    <summary>Definition</summary>
 
-        $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
-    </details>
+    $$average = \frac{\sum_{file}^{files}matching\_lines_{file}}{max(lines_{rome}, lines_{prettier})}$$
+</details>
 
-    [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
+[Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
                 ",
             );
 
