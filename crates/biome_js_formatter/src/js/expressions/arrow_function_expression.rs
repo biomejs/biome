@@ -505,13 +505,16 @@ impl Format<JsFormatContext> for ArrowChain {
                     f,
                     [format_with(|f| {
                         if should_add_parens {
-                            write!(f, [if_group_fits_on_line(&text("("))])?;
-                        }
-
-                        write!(f, [format_tail_body])?;
-
-                        if should_add_parens {
-                            write!(f, [if_group_fits_on_line(&text(")"))])?;
+                            write!(
+                                f,
+                                [
+                                    if_group_fits_on_line(&text("(")),
+                                    format_tail_body,
+                                    if_group_fits_on_line(&text(")"))
+                                ]
+                            )?;
+                        } else {
+                            write!(f, [format_tail_body])?;
                         }
 
                         Ok(())
