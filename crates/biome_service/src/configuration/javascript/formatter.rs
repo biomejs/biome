@@ -56,15 +56,6 @@ pub struct JavascriptFormatter {
     #[bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
-    /// The type of line ending.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(
-        long("javascript-formatter-line-ending"),
-        argument("lf|crlf|cr"),
-        optional
-    )]
-    pub line_ending: Option<LineEnding>,
-
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(
@@ -74,7 +65,16 @@ pub struct JavascriptFormatter {
     )]
     pub indent_width: Option<u8>,
 
-    /// What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+    /// The type of line ending applied to JavaScript (and its super languages) files.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(
+        long("javascript-formatter-line-ending"),
+        argument("lf|crlf|cr"),
+        optional
+    )]
+    pub line_ending: Option<LineEnding>,
+
+    /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
         serialize_with = "serialize_line_width"

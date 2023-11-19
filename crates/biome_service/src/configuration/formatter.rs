@@ -32,15 +32,15 @@ pub struct FormatterConfiguration {
     #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
-    /// The type of line ending.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
-    pub line_ending: Option<LineEnding>,
-
     /// The size of the indentation, 2 by default
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
     pub indent_width: Option<u8>,
+
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     #[serde(

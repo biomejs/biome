@@ -26,6 +26,7 @@ The configuration that is contained inside the file `biome.json`
         --indent-style=<tab|space>  The indent style.
         --indent-size=NUMBER  The size of the indentation, 2 by default (deprecated, use `indent-width`)
         --indent-width=NUMBER  The size of the indentation, 2 by default
+        --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
@@ -44,7 +45,9 @@ The configuration that is contained inside the file `biome.json`
                               (and its super languages) files. Default to 2.
         --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to JavaScript
                               (and its super languages) files. Default to 2.
-        --javascript-formatter-line-width=NUMBER  What's the max width of a line, applied to JavaScript
+        --javascript-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to JavaScript
+                              (and its super languages) files.
+        --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to JavaScript
                               (and its super languages) files. Defaults to 80.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
                               files.
@@ -54,8 +57,10 @@ The configuration that is contained inside the file `biome.json`
                               languages) files. Default to 2.
         --json-formatter-indent-size=NUMBER  The size of the indentation applied to JSON (and its super
                               languages) files. Default to 2.
-        --json-formatter-line-width=NUMBER  What's the max width of a line, applied to JSON (and its
-                              super languages) files. Defaults to 80.
+        --json-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to JSON (and its super
+                              languages) files.
+        --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its super
+                              languages) files. Defaults to 80.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,

@@ -101,12 +101,12 @@ pub struct JsonFormatter {
     #[bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional)]
     pub indent_size: Option<u8>,
 
-    /// The type of line ending.
+    /// The type of line ending applied to JSON (and its super languages) files.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional)]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+    /// What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
         serialize_with = "serialize_line_width"
