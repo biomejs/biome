@@ -51,7 +51,7 @@ pub fn is_meaningful_jsx_text(text: &str) -> bool {
 ///
 /// ```javascript
 /// <div>
-//   {/* rome-ignore format: reason */}
+//   {/* biome-ignore format: reason */}
 //   <div a={  some} />
 //   </div>
 /// ```
