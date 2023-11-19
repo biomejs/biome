@@ -331,7 +331,7 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
                 | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
                     // Move comment after the module keyword
                     // This is the first child of the module declaration which is the identifier
-                    if following.first_child().is_none() == false {
+                    if following.first_child().is_some() {
                         return CommentPlacement::leading(
                             following.first_child().unwrap().clone(),
                             comment,
@@ -340,8 +340,8 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
                     CommentPlacement::Default(comment)
                 }
                 JsSyntaxKind::JS_CLASS_DECLARATION => {
-                    if following.first_child().is_none() == false
-                        && following.first_child().unwrap().next_sibling().is_none() == false
+                    if following.first_child().is_some()
+                        && following.first_child().unwrap().next_sibling().is_some()
                     {
                         return CommentPlacement::leading(
                             following
@@ -356,11 +356,11 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
                     CommentPlacement::Default(comment)
                 }
                 JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => {
-                    let first_identifier = following.descendants().find(|node| {
-                        node.kind() == JsSyntaxKind::JS_IDENTIFIER_BINDING
-                    });
-                    if first_identifier.is_none() == false {
-                        return CommentPlacement::leading(first_identifier.unwrap().clone(), comment);
+                    let first_identifier = following
+                        .descendants()
+                        .find(|node| node.kind() == JsSyntaxKind::JS_IDENTIFIER_BINDING);
+                    if let Some(first_identifier_exists) = first_identifier {
+                        return CommentPlacement::leading(first_identifier_exists.clone(), comment);
                     }
                     CommentPlacement::Default(comment)
                 }
