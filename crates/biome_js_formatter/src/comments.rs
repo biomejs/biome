@@ -142,7 +142,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_array_hole_comment)
                 .or_else(handle_call_expression_comment)
                 .or_else(handle_continue_break_comment)
-                .or_else(handle_class_comment),
+                .or_else(handle_class_comment)
+                .or_else(handle_declare_comment),
         }
     }
 }
@@ -296,6 +297,57 @@ fn handle_labelled_statement_comment(
     match comment.enclosing_node().kind() {
         JsSyntaxKind::JS_LABELED_STATEMENT => {
             CommentPlacement::leading(comment.enclosing_node().clone(), comment)
+        }
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+/// Moves comments in declaration statements to behind the identifier
+///
+/// ```javascript
+/// declare module /* comment */ A {}
+/// declare /* module */ global {}
+/// ```
+fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    match (comment.enclosing_node().kind(), comment.following_node()) {
+        // Check if it is a declare statement
+        (JsSyntaxKind::TS_DECLARE_STATEMENT, Some(following)) => {
+            match following.kind() {
+                JsSyntaxKind::TS_GLOBAL_DECLARATION => {
+                    // Global declarations have no identifier, so keep at default
+                    CommentPlacement::Default(comment)
+                }
+                JsSyntaxKind::TS_MODULE_DECLARATION
+                | JsSyntaxKind::TS_ENUM_DECLARATION
+                | JsSyntaxKind::TS_INTERFACE_DECLARATION
+                | JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION
+                | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
+                    // Move comment after the module keyword
+                    // This is the first child of the module declaration which is the identifier
+                    if let Some(first_child) = following.first_child() {
+                        return CommentPlacement::leading(first_child.clone(), comment);
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                JsSyntaxKind::JS_CLASS_DECLARATION => {
+                    if let Some(first_child) = following.first_child() {
+                        if let Some(second_child) = first_child.next_sibling() {
+                            return CommentPlacement::leading(second_child.clone(), comment);
+                        }
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => {
+                    let first_identifier = following
+                        .descendants()
+                        .find(|node| node.kind() == JsSyntaxKind::JS_IDENTIFIER_BINDING);
+                    if let Some(first_identifier_exists) = first_identifier {
+                        return CommentPlacement::leading(first_identifier_exists.clone(), comment);
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                _ => CommentPlacement::Default(comment),
+            }
         }
         _ => CommentPlacement::Default(comment),
     }
