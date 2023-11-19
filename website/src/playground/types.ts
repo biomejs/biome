@@ -9,12 +9,6 @@ export enum IndentStyle {
 	Space = "space",
 }
 
-export enum LineEnding {
-	Lf = "lf",
-	Crlf = "crlf",
-	Cr = "cr",
-}
-
 export enum SourceType {
 	Module = "module",
 	Script = "script",
@@ -110,7 +104,6 @@ export const emptyBiomeOutput: BiomeOutput = {
 };
 
 export interface PlaygroundSettings {
-	lineEnding: LineEnding;
 	lineWidth: number;
 	indentStyle: IndentStyle;
 	indentWidth: number;
@@ -155,7 +148,6 @@ export const defaultPlaygroundState: PlaygroundState = {
 		},
 	},
 	settings: {
-		lineEnding: LineEnding.Lf,
 		lineWidth: 80,
 		indentWidth: 2,
 		indentStyle: IndentStyle.Tab,

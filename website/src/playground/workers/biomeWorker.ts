@@ -62,7 +62,6 @@ self.addEventListener("message", async (e) => {
 			}
 
 			const {
-				lineEnding,
 				lineWidth,
 				indentStyle,
 				indentWidth,
@@ -83,8 +82,7 @@ self.addEventListener("message", async (e) => {
 				formatter: {
 					enabled: true,
 					formatWithErrors: true,
-					lineEnding,
-					lineWidth,
+					lineWidth: lineWidth,
 					indentStyle: indentStyle === IndentStyle.Tab ? "tab" : "space",
 					indentWidth,
 				},
