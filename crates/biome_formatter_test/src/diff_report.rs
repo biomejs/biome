@@ -103,26 +103,36 @@ impl DiffReport {
     }
 
     fn is_ignored(file_name: &str) -> bool {
+        // ignore unstable syntaxes and embedded languages in template literals
         let patterns = [
             "arrows-bind",
             "async-do-expressions",
-            "async-do-expressions.js",
-            "decimal.js",
-            "do-expressions.js",
+            "async-do-expressions",
+            "decimal",
+            "do-expressions",
             "export-default-from",
-            "function-bind.js",
+            "function-bind",
             "module-blocks",
             "partial-application",
             "pipeline",
             "record",
-            "throw-expressions.js",
-            "v8intrinsic.js",
+            "throw-expression",
+            "throw_expression",
+            "v8intrinsic",
             "v8_intrinsic",
             "bind-expressions",
             "destructuring-private-fields",
             "/do/",
             "export-extension",
             "js/tuple",
+            "deferred-import-evaluation", // `import defer` syntax
+            "source-phase-imports",       // `import source` syntax
+            "import-reflection",          // `import module` syntax
+            // embedded languages in template literals
+            "js/multiparser",
+            "js/range/issue-7082.js",
+            "js/template-literals/css-prop.js",
+            "js/template-literals/styled",
         ];
 
         patterns.iter().any(|pattern| file_name.contains(pattern))

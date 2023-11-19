@@ -2079,15 +2079,19 @@ impl CssRoot {
     }
     pub fn as_fields(&self) -> CssRootFields {
         CssRootFields {
+            bom_token: self.bom_token(),
             rules: self.rules(),
             eof_token: self.eof_token(),
         }
     }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
     pub fn rules(&self) -> CssRuleList {
-        support::list(&self.syntax, 0usize)
+        support::list(&self.syntax, 1usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -2101,6 +2105,7 @@ impl Serialize for CssRoot {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssRootFields {
+    pub bom_token: Option<SyntaxToken>,
     pub rules: CssRuleList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
@@ -4850,6 +4855,10 @@ impl AstNode for CssRoot {
 impl std::fmt::Debug for CssRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssRoot")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
             .field("rules", &self.rules())
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()

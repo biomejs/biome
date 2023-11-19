@@ -14,11 +14,8 @@ expression: snapshot
 
 ```
 JsonRoot {
-    value: JsonBogusValue {
-        items: [
-            ERROR_TOKEN@0..3 "\u{feff}" [] [],
-        ],
-    },
+    bom_token: UNICODE_BOM@0..3 "\u{feff}" [] [],
+    value: missing (required),
     eof_token: EOF@3..3 "" [] [],
 }
 ```
@@ -27,18 +24,23 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..3
-  0: JSON_BOGUS_VALUE@0..3
-    0: ERROR_TOKEN@0..3 "\u{feff}" [] []
-  1: EOF@3..3 "" [] []
+  0: UNICODE_BOM@0..3 "\u{feff}" [] []
+  1: (empty)
+  2: EOF@3..3 "" [] []
 
 ```
 
 ## Diagnostics
 
 ```
-structure_UTF8_BOM_no_data.json:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+structure_UTF8_BOM_no_data.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `�`
+  × Expected an array, an object, or a literal but instead found the end of the file.
+  
+  > 1 │ �
+      │ 
+  
+  i Expected an array, an object, or a literal here.
   
   > 1 │ �
       │ 

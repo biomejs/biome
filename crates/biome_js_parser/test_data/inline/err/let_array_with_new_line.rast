@@ -1,9 +1,12 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
         JsLabeledStatement {
-            label_token: IDENT@0..11 "L" [Comments("// SCRIPT"), Newline("\n")] [],
+            label: JsLabel {
+                value_token: IDENT@0..11 "L" [Comments("// SCRIPT"), Newline("\n")] [],
+            },
             colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
             body: JsBogusStatement {
                 items: [
@@ -41,10 +44,12 @@ JsScript {
 
 0: JS_SCRIPT@0..26
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..25
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..25
     0: JS_LABELED_STATEMENT@0..25
-      0: IDENT@0..11 "L" [Comments("// SCRIPT"), Newline("\n")] []
+      0: JS_LABEL@0..11
+        0: IDENT@0..11 "L" [Comments("// SCRIPT"), Newline("\n")] []
       1: COLON@11..13 ":" [] [Whitespace(" ")]
       2: JS_BOGUS_STATEMENT@13..25
         0: JS_VARIABLE_DECLARATION@13..24
@@ -64,7 +69,7 @@ JsScript {
                 1: JS_NUMBER_LITERAL_EXPRESSION@23..24
                   0: JS_NUMBER_LITERAL@23..24 "0" [] []
         1: SEMICOLON@24..25 ";" [] []
-  3: EOF@25..26 "" [Newline("\n")] []
+  4: EOF@25..26 "" [Newline("\n")] []
 --
 let_array_with_new_line.js:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

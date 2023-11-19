@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -23,8 +24,9 @@ JsModule {
 
 0: JS_MODULE@0..19
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..18
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..18
     0: JS_CLASS_DECLARATION@0..17
       0: JS_DECORATOR_LIST@0..0
       1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
@@ -38,7 +40,7 @@ JsModule {
       9: R_CURLY@16..17 "}" [] []
     1: JS_EMPTY_STATEMENT@17..18
       0: SEMICOLON@17..18 ";" [] []
-  3: EOF@18..19 "" [Newline("\n")] []
+  4: EOF@18..19 "" [Newline("\n")] []
 --
 typescript_abstract_classes_incomplete.ts:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

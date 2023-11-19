@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -32,8 +33,9 @@ JsModule {
 
 0: JS_MODULE@0..14
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..13
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
     0: TS_ENUM_DECLARATION@0..4
       0: (empty)
       1: ENUM_KW@0..4 "enum" [] []
@@ -53,7 +55,7 @@ JsModule {
       5: (empty)
     3: JS_EMPTY_STATEMENT@12..13
       0: SEMICOLON@12..13 ";" [] []
-  3: EOF@13..14 "" [Newline("\n")] []
+  4: EOF@13..14 "" [Newline("\n")] []
 --
 enum_no_l_curly.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

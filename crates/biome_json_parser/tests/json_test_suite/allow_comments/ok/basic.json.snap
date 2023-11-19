@@ -15,6 +15,7 @@ expression: snapshot
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonArrayValue {
         l_brack_token: L_BRACK@0..13 "[" [Comments("/*leading*/"), Whitespace(" ")] [],
         elements: JsonArrayElementList [
@@ -36,7 +37,8 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..32
-  0: JSON_ARRAY_VALUE@0..31
+  0: (empty)
+  1: JSON_ARRAY_VALUE@0..31
     0: L_BRACK@0..13 "[" [Comments("/*leading*/"), Whitespace(" ")] []
     1: JSON_ARRAY_ELEMENT_LIST@13..19
       0: JSON_NUMBER_VALUE@13..14
@@ -45,6 +47,8 @@ JsonRoot {
       2: JSON_BOOLEAN_VALUE@15..19
         0: TRUE_KW@15..19 "true" [] []
     2: R_BRACK@19..31 "]" [] [Whitespace(" "), Comments("// trivial")]
-  1: EOF@31..32 "" [Newline("\n")] []
+  2: EOF@31..32 "" [Newline("\n")] []
 
 ```
+
+

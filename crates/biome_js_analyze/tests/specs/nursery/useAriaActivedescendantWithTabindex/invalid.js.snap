@@ -10,7 +10,7 @@ expression: invalid.js
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useAriaActivedescendantWithTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce elements with aria-activedescendant are tabbable.
   
@@ -23,6 +23,10 @@ invalid.js:1:1 lint/nursery/useAriaActivedescendantWithTabindex ━━━━━�
   
   i Add the tabIndex attribute to the element with a value greater than or equal to -1.
   
+  i Unsafe fix: Add the tabIndex attribute.
+  
+    1 │ <div·aria-activedescendant={someID}··tabIndex="0"·/>;
+      │                                    ++++++++++++++    
 
 ```
 

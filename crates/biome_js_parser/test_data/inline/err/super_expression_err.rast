@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -111,8 +112,9 @@ JsModule {
 
 0: JS_MODULE@0..81
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..80
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..80
     0: JS_CLASS_DECLARATION@0..71
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -185,7 +187,7 @@ JsModule {
           1: JS_CALL_ARGUMENT_LIST@78..78
           2: R_PAREN@78..79 ")" [] []
       1: SEMICOLON@79..80 ";" [] []
-  3: EOF@80..81 "" [Newline("\n")] []
+  4: EOF@80..81 "" [Newline("\n")] []
 --
 super_expression_err.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

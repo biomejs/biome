@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -1007,8 +1008,9 @@ JsModule {
 
 0: JS_MODULE@0..589
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..588
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..588
     0: JS_VARIABLE_STATEMENT@0..20
       0: JS_VARIABLE_DECLARATION@0..19
         0: (empty)
@@ -1673,4 +1675,4 @@ JsModule {
               2: R_ANGLE@585..587 ">" [] [Whitespace(" ")]
           1: (empty)
       2: R_CURLY@587..588 "}" [] []
-  3: EOF@588..589 "" [Newline("\n")] []
+  4: EOF@588..589 "" [Newline("\n")] []

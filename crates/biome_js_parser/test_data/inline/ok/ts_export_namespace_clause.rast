@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -59,8 +60,9 @@ JsModule {
 
 0: JS_MODULE@0..74
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..73
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..73
     0: JS_EXPORT@0..44
       0: JS_DECORATOR_LIST@0..0
       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
@@ -98,4 +100,4 @@ JsModule {
         2: JS_NAME@65..72
           0: IDENT@65..72 "mathLib" [] []
         3: SEMICOLON@72..73 ";" [] []
-  3: EOF@73..74 "" [Newline("\n")] []
+  4: EOF@73..74 "" [Newline("\n")] []

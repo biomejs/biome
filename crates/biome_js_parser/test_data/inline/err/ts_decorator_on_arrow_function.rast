@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -329,8 +330,9 @@ JsModule {
 
 0: JS_MODULE@0..203
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..202
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..202
     0: JS_VARIABLE_STATEMENT@0..62
       0: JS_VARIABLE_DECLARATION@0..61
         0: (empty)
@@ -538,7 +540,7 @@ JsModule {
                   2: JS_STATEMENT_LIST@200..200
                   3: R_CURLY@200..201 "}" [] []
       1: SEMICOLON@201..202 ";" [] []
-  3: EOF@202..203 "" [Newline("\n")] []
+  4: EOF@202..203 "" [Newline("\n")] []
 --
 ts_decorator_on_arrow_function.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -29,8 +30,9 @@ JsModule {
 
 0: JS_MODULE@0..21
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..20
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
     0: JS_IF_STATEMENT@0..20
       0: IF_KW@0..3 "if" [] [Whitespace(" ")]
       1: L_PAREN@3..4 "(" [] []
@@ -46,7 +48,7 @@ JsModule {
         4: JS_CLASS_MEMBER_LIST@19..19
         5: R_CURLY@19..20 "}" [] []
       5: (empty)
-  3: EOF@20..21 "" [Newline("\n")] []
+  4: EOF@20..21 "" [Newline("\n")] []
 --
 class_in_single_statement_context.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

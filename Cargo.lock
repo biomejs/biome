@@ -249,6 +249,7 @@ dependencies = [
  "quickcheck_macros",
  "tests_macros",
  "tracing",
+ "unicode-bom",
 ]
 
 [[package]]
@@ -431,6 +432,7 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_js_unicode_table",
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
@@ -475,6 +477,7 @@ dependencies = [
  "smallvec",
  "tests_macros",
  "tracing",
+ "unicode-bom",
 ]
 
 [[package]]
@@ -589,6 +592,7 @@ dependencies = [
  "quickcheck_macros",
  "tests_macros",
  "tracing",
+ "unicode-bom",
 ]
 
 [[package]]
@@ -3272,6 +3276,12 @@ name = "unicode-bidi"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d54675592c1dbefd78cbd98db9bacd89886e1ca50692a0692baefffdeb92dd58"
+
+[[package]]
+name = "unicode-bom"
+version = "2.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7eec5d1121208364f6793f7d2e222bf75a915c19557537745b195b253dd64217"
 
 [[package]]
 name = "unicode-ident"

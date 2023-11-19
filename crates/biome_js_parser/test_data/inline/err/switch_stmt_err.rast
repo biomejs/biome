@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -156,8 +157,9 @@ JsModule {
 
 0: JS_MODULE@0..151
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..150
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..150
     0: JS_SWITCH_STATEMENT@0..13
       0: SWITCH_KW@0..7 "switch" [] [Whitespace(" ")]
       1: (empty)
@@ -266,7 +268,7 @@ JsModule {
           2: COLON@147..149 ":" [] [Whitespace(" ")]
           3: JS_STATEMENT_LIST@149..149
       6: R_CURLY@149..150 "}" [] []
-  3: EOF@150..151 "" [Newline("\n")] []
+  4: EOF@150..151 "" [Newline("\n")] []
 --
 switch_stmt_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

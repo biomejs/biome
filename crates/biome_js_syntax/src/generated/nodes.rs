@@ -725,15 +725,15 @@ impl JsBreakStatement {
     pub fn as_fields(&self) -> JsBreakStatementFields {
         JsBreakStatementFields {
             break_token: self.break_token(),
-            label_token: self.label_token(),
+            label: self.label(),
             semicolon_token: self.semicolon_token(),
         }
     }
     pub fn break_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn label_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+    pub fn label(&self) -> Option<JsLabel> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 2usize)
@@ -751,7 +751,7 @@ impl Serialize for JsBreakStatement {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsBreakStatementFields {
     pub break_token: SyntaxResult<SyntaxToken>,
-    pub label_token: Option<SyntaxToken>,
+    pub label: Option<JsLabel>,
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1560,15 +1560,15 @@ impl JsContinueStatement {
     pub fn as_fields(&self) -> JsContinueStatementFields {
         JsContinueStatementFields {
             continue_token: self.continue_token(),
-            label_token: self.label_token(),
+            label: self.label(),
             semicolon_token: self.semicolon_token(),
         }
     }
     pub fn continue_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn label_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+    pub fn label(&self) -> Option<JsLabel> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 2usize)
@@ -1586,7 +1586,7 @@ impl Serialize for JsContinueStatement {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsContinueStatementFields {
     pub continue_token: SyntaxResult<SyntaxToken>,
-    pub label_token: Option<SyntaxToken>,
+    pub label: Option<JsLabel>,
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4118,6 +4118,42 @@ pub struct JsInstanceofExpressionFields {
     pub right: SyntaxResult<AnyJsExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsLabel {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsLabel {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsLabelFields {
+        JsLabelFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsLabel {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsLabelFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsLabeledStatement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4133,13 +4169,13 @@ impl JsLabeledStatement {
     }
     pub fn as_fields(&self) -> JsLabeledStatementFields {
         JsLabeledStatementFields {
-            label_token: self.label_token(),
+            label: self.label(),
             colon_token: self.colon_token(),
             body: self.body(),
         }
     }
-    pub fn label_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn label(&self) -> SyntaxResult<JsLabel> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4159,7 +4195,7 @@ impl Serialize for JsLabeledStatement {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsLabeledStatementFields {
-    pub label_token: SyntaxResult<SyntaxToken>,
+    pub label: SyntaxResult<JsLabel>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<AnyJsStatement>,
 }
@@ -4439,23 +4475,27 @@ impl JsModule {
     }
     pub fn as_fields(&self) -> JsModuleFields {
         JsModuleFields {
+            bom_token: self.bom_token(),
             interpreter_token: self.interpreter_token(),
             directives: self.directives(),
             items: self.items(),
             eof_token: self.eof_token(),
         }
     }
-    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directives(&self) -> JsDirectiveList {
-        support::list(&self.syntax, 1usize)
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn items(&self) -> JsModuleItemList {
+    pub fn directives(&self) -> JsDirectiveList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn items(&self) -> JsModuleItemList {
+        support::list(&self.syntax, 3usize)
+    }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -4469,6 +4509,7 @@ impl Serialize for JsModule {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsModuleFields {
+    pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
     pub directives: JsDirectiveList,
     pub items: JsModuleItemList,
@@ -5851,23 +5892,27 @@ impl JsScript {
     }
     pub fn as_fields(&self) -> JsScriptFields {
         JsScriptFields {
+            bom_token: self.bom_token(),
             interpreter_token: self.interpreter_token(),
             directives: self.directives(),
             statements: self.statements(),
             eof_token: self.eof_token(),
         }
     }
-    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn directives(&self) -> JsDirectiveList {
-        support::list(&self.syntax, 1usize)
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn statements(&self) -> JsStatementList {
+    pub fn directives(&self) -> JsDirectiveList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn statements(&self) -> JsStatementList {
+        support::list(&self.syntax, 3usize)
+    }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -5881,6 +5926,7 @@ impl Serialize for JsScript {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsScriptFields {
+    pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
     pub directives: JsDirectiveList,
     pub statements: JsStatementList,
@@ -17034,10 +17080,7 @@ impl std::fmt::Debug for JsBreakStatement {
                 "break_token",
                 &support::DebugSyntaxResult(self.break_token()),
             )
-            .field(
-                "label_token",
-                &support::DebugOptionalElement(self.label_token()),
-            )
+            .field("label", &support::DebugOptionalElement(self.label()))
             .field(
                 "semicolon_token",
                 &support::DebugOptionalElement(self.semicolon_token()),
@@ -17795,10 +17838,7 @@ impl std::fmt::Debug for JsContinueStatement {
                 "continue_token",
                 &support::DebugSyntaxResult(self.continue_token()),
             )
-            .field(
-                "label_token",
-                &support::DebugOptionalElement(self.label_token()),
-            )
+            .field("label", &support::DebugOptionalElement(self.label()))
             .field(
                 "semicolon_token",
                 &support::DebugOptionalElement(self.semicolon_token()),
@@ -20183,6 +20223,47 @@ impl From<JsInstanceofExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for JsLabel {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_LABEL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_LABEL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsLabel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsLabel")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<JsLabel> for SyntaxNode {
+    fn from(n: JsLabel) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsLabel> for SyntaxElement {
+    fn from(n: JsLabel) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for JsLabeledStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20207,10 +20288,7 @@ impl AstNode for JsLabeledStatement {
 impl std::fmt::Debug for JsLabeledStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsLabeledStatement")
-            .field(
-                "label_token",
-                &support::DebugSyntaxResult(self.label_token()),
-            )
+            .field("label", &support::DebugSyntaxResult(self.label()))
             .field(
                 "colon_token",
                 &support::DebugSyntaxResult(self.colon_token()),
@@ -20489,6 +20567,10 @@ impl AstNode for JsModule {
 impl std::fmt::Debug for JsModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsModule")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
             .field(
                 "interpreter_token",
                 &support::DebugOptionalElement(self.interpreter_token()),
@@ -21876,6 +21958,10 @@ impl AstNode for JsScript {
 impl std::fmt::Debug for JsScript {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsScript")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
             .field(
                 "interpreter_token",
                 &support::DebugOptionalElement(self.interpreter_token()),
@@ -37640,6 +37726,11 @@ impl std::fmt::Display for JsInitializerClause {
     }
 }
 impl std::fmt::Display for JsInstanceofExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsLabel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

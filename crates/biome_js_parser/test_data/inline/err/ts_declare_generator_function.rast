@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -80,8 +81,9 @@ JsModule {
 
 0: JS_MODULE@0..95
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..94
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..94
     0: JS_BOGUS_STATEMENT@0..31
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: JS_BOGUS_STATEMENT@8..31
@@ -126,7 +128,7 @@ JsModule {
                     1: TS_VOID_TYPE@88..92
                       0: VOID_KW@88..92 "void" [] []
           2: R_CURLY@92..94 "}" [Newline("\n")] []
-  3: EOF@94..95 "" [Newline("\n")] []
+  4: EOF@94..95 "" [Newline("\n")] []
 --
 ts_declare_generator_function.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

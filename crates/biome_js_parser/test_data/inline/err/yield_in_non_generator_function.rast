@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -82,8 +83,9 @@ JsModule {
 
 0: JS_MODULE@0..59
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..58
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..58
     0: JS_FUNCTION_DECLARATION@0..29
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -135,7 +137,7 @@ JsModule {
                   0: JS_NUMBER_LITERAL@53..55 "10" [] []
             1: SEMICOLON@55..57 ";" [] [Whitespace(" ")]
         3: R_CURLY@57..58 "}" [] []
-  3: EOF@58..59 "" [Newline("\n")] []
+  4: EOF@58..59 "" [Newline("\n")] []
 --
 yield_in_non_generator_function.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

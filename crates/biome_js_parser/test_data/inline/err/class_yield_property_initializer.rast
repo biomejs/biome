@@ -1,4 +1,5 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
@@ -65,8 +66,9 @@ JsScript {
 
 0: JS_SCRIPT@0..71
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..70
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..70
     0: JS_FUNCTION_DECLARATION@0..70
       0: ASYNC_KW@0..16 "async" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
       1: FUNCTION_KW@16..24 "function" [] []
@@ -107,7 +109,7 @@ JsScript {
                 4: SEMICOLON@63..64 ";" [] []
             9: R_CURLY@64..68 "}" [Newline("\n"), Whitespace("  ")] []
         3: R_CURLY@68..70 "}" [Newline("\n")] []
-  3: EOF@70..71 "" [Newline("\n")] []
+  4: EOF@70..71 "" [Newline("\n")] []
 --
 class_yield_property_initializer.js:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -41,6 +41,7 @@ JsonBogus = SyntaxElement*
 JsonBogusValue = SyntaxElement*
 
 JsonRoot =
+    bom: 'UNICODE_BOM'?
     value: AnyJsonValue
     eof: 'EOF'
 

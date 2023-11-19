@@ -358,6 +358,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsInstanceofExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_LABEL => {
+                    let $pattern = unsafe { $crate::JsLabel::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_LABELED_STATEMENT => {
                     let $pattern = unsafe { $crate::JsLabeledStatement::new_unchecked(node) };
                     $body

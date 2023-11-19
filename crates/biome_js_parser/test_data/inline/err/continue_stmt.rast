@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -43,7 +44,9 @@ JsModule {
                     JsBogusStatement {
                         items: [
                             CONTINUE_KW@43..55 "continue" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
-                            IDENT@55..58 "foo" [] [],
+                            JsLabel {
+                                value_token: IDENT@55..58 "foo" [] [],
+                            },
                             SEMICOLON@58..59 ";" [] [],
                         ],
                     },
@@ -52,7 +55,9 @@ JsModule {
             },
         },
         JsLabeledStatement {
-            label_token: IDENT@61..65 "foo" [Newline("\n")] [],
+            label: JsLabel {
+                value_token: IDENT@61..65 "foo" [Newline("\n")] [],
+            },
             colon_token: COLON@65..67 ":" [] [Whitespace(" ")],
             body: JsBlockStatement {
                 l_curly_token: L_CURLY@67..68 "{" [] [],
@@ -60,7 +65,9 @@ JsModule {
                     JsBogusStatement {
                         items: [
                             CONTINUE_KW@68..80 "continue" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
-                            IDENT@80..83 "foo" [] [],
+                            JsLabel {
+                                value_token: IDENT@80..83 "foo" [] [],
+                            },
                             SEMICOLON@83..84 ";" [] [],
                         ],
                     },
@@ -74,8 +81,9 @@ JsModule {
 
 0: JS_MODULE@0..87
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..86
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..86
     0: JS_FUNCTION_DECLARATION@0..28
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -107,21 +115,24 @@ JsModule {
         1: JS_STATEMENT_LIST@43..59
           0: JS_BOGUS_STATEMENT@43..59
             0: CONTINUE_KW@43..55 "continue" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-            1: IDENT@55..58 "foo" [] []
+            1: JS_LABEL@55..58
+              0: IDENT@55..58 "foo" [] []
             2: SEMICOLON@58..59 ";" [] []
         2: R_CURLY@59..61 "}" [Newline("\n")] []
     2: JS_LABELED_STATEMENT@61..86
-      0: IDENT@61..65 "foo" [Newline("\n")] []
+      0: JS_LABEL@61..65
+        0: IDENT@61..65 "foo" [Newline("\n")] []
       1: COLON@65..67 ":" [] [Whitespace(" ")]
       2: JS_BLOCK_STATEMENT@67..86
         0: L_CURLY@67..68 "{" [] []
         1: JS_STATEMENT_LIST@68..84
           0: JS_BOGUS_STATEMENT@68..84
             0: CONTINUE_KW@68..80 "continue" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-            1: IDENT@80..83 "foo" [] []
+            1: JS_LABEL@80..83
+              0: IDENT@80..83 "foo" [] []
             2: SEMICOLON@83..84 ";" [] []
         2: R_CURLY@84..86 "}" [Newline("\n")] []
-  3: EOF@86..87 "" [Newline("\n")] []
+  4: EOF@86..87 "" [Newline("\n")] []
 --
 continue_stmt.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

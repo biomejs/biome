@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [],
     eof_token: EOF@0..0 "" [] [],
 }
@@ -23,7 +24,10 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..0
-  0: CSS_RULE_LIST@0..0
-  1: EOF@0..0 "" [] []
+  0: (empty)
+  1: CSS_RULE_LIST@0..0
+  2: EOF@0..0 "" [] []
 
 ```
+
+

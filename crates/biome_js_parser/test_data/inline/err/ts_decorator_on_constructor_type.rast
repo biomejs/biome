@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -293,8 +294,9 @@ JsModule {
 
 0: JS_MODULE@0..224
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..223
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..223
     0: TS_TYPE_ALIAS_DECLARATION@0..63
       0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@5..7
@@ -478,7 +480,7 @@ JsModule {
         5: TS_STRING_TYPE@216..222
           0: STRING_KW@216..222 "string" [] []
       5: SEMICOLON@222..223 ";" [] []
-  3: EOF@223..224 "" [Newline("\n")] []
+  4: EOF@223..224 "" [Newline("\n")] []
 --
 ts_decorator_on_constructor_type.ts:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -2,8 +2,9 @@
 
 use crate::{
     AnyJsArrayAssignmentPatternElement, AnyJsAssignmentPattern, AnyJsSwitchClause,
-    JsForVariableDeclaration, JsStatementList, JsSyntaxKind, JsSyntaxToken as SyntaxToken,
-    JsVariableDeclaration, JsVariableDeclarator, TsModuleDeclaration, T,
+    JsBreakStatement, JsContinueStatement, JsForVariableDeclaration, JsLabeledStatement,
+    JsStatementList, JsSyntaxKind, JsSyntaxToken as SyntaxToken, JsVariableDeclaration,
+    JsVariableDeclarator, TsModuleDeclaration, T,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
@@ -188,5 +189,23 @@ mod tests {
         let var_decl = JsVariableDeclaration::cast(root).unwrap();
 
         assert!(var_decl.is_var());
+    }
+}
+
+impl JsLabeledStatement {
+    pub fn label_token(&self) -> SyntaxResult<SyntaxToken> {
+        self.label()?.value_token()
+    }
+}
+
+impl JsBreakStatement {
+    pub fn label_token(&self) -> Option<SyntaxToken> {
+        self.label()?.value_token().ok()
+    }
+}
+
+impl JsContinueStatement {
+    pub fn label_token(&self) -> Option<SyntaxToken> {
+        self.label()?.value_token().ok()
     }
 }

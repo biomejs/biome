@@ -31,6 +31,7 @@ h1:-webkit-any(.h1class, #bar) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -882,7 +883,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..526
-  0: CSS_RULE_LIST@0..525
+  0: (empty)
+  1: CSS_RULE_LIST@0..525
     0: CSS_RULE@0..25
       0: CSS_SELECTOR_LIST@0..23
         0: CSS_COMPOUND_SELECTOR@0..23
@@ -1447,7 +1449,7 @@ CssRoot {
         0: L_CURLY@523..524 "{" [] []
         1: CSS_DECLARATION_LIST@524..524
         2: R_CURLY@524..525 "}" [] []
-  1: EOF@525..526 "" [Newline("\n")] []
+  2: EOF@525..526 "" [Newline("\n")] []
 
 ```
 

@@ -475,7 +475,11 @@ impl OverrideSettings {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
 
-            if included == Some(true) || excluded == Some(false) {
+            if excluded == Some(true) {
+                return options;
+            }
+
+            if included == Some(true) {
                 let js_formatter = &pattern.languages.javascript.formatter;
                 let formatter = &pattern.formatter;
 
@@ -522,8 +526,10 @@ impl OverrideSettings {
         self.patterns.iter().fold(options, |mut options, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            if excluded == Some(true) {
+                return options;
+            }
+            if included == Some(true) {
                 let json_formatter = &pattern.languages.json.formatter;
 
                 if let Some(indent_style) = json_formatter
@@ -557,8 +563,10 @@ impl OverrideSettings {
         self.patterns.iter().fold(options, |mut options, pattern| {
             let included = pattern.include.as_ref().map(|p| p.matches_path(path));
             let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            if excluded == Some(true) {
+                return options;
+            }
+            if included == Some(true) {
                 let js_parser = &pattern.languages.javascript.parser;
 
                 options.parse_class_parameter_decorators =

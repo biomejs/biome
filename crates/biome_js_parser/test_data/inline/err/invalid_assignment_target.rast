@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -143,8 +144,9 @@ JsModule {
 
 0: JS_MODULE@0..63
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..62
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..62
     0: JS_EXPRESSION_STATEMENT@0..8
       0: JS_ASSIGNMENT_EXPRESSION@0..7
         0: JS_BOGUS_ASSIGNMENT@0..4
@@ -227,7 +229,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@60..61
             0: IDENT@60..61 "b" [] []
       1: SEMICOLON@61..62 ";" [] []
-  3: EOF@62..63 "" [Newline("\n")] []
+  4: EOF@62..63 "" [Newline("\n")] []
 --
 invalid_assignment_target.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

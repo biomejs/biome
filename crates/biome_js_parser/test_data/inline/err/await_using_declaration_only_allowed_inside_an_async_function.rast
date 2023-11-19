@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -161,8 +162,9 @@ JsModule {
 
 0: JS_MODULE@0..113
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..112
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..112
     0: JS_FUNCTION_DECLARATION@0..36
       0: (empty)
       1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
@@ -266,7 +268,7 @@ JsModule {
                             0: IDENT@108..110 "y" [] [Whitespace(" ")]
             3: R_CURLY@110..111 "}" [] []
       1: SEMICOLON@111..112 ";" [] []
-  3: EOF@112..113 "" [Newline("\n")] []
+  4: EOF@112..113 "" [Newline("\n")] []
 --
 await_using_declaration_only_allowed_inside_an_async_function.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -48,6 +48,7 @@ a, b > .foo::before {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -628,7 +629,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..393
-  0: CSS_RULE_LIST@0..392
+  0: (empty)
+  1: CSS_RULE_LIST@0..392
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
@@ -1001,7 +1003,7 @@ CssRoot {
         0: L_CURLY@390..391 "{" [] []
         1: CSS_DECLARATION_LIST@391..391
         2: R_CURLY@391..392 "}" [] []
-  1: EOF@392..393 "" [Newline("\n")] []
+  2: EOF@392..393 "" [Newline("\n")] []
 
 ```
 

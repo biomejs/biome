@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -17,8 +18,9 @@ JsModule {
 
 0: JS_MODULE@0..9
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..8
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..8
     0: JS_EXPRESSION_STATEMENT@0..8
       0: JS_IMPORT_CALL_EXPRESSION@0..8
         0: IMPORT_KW@0..6 "import" [] []
@@ -26,7 +28,7 @@ JsModule {
         2: (empty)
         3: R_PAREN@7..8 ")" [] []
       1: (empty)
-  3: EOF@8..9 "" [Newline("\n")] []
+  4: EOF@8..9 "" [Newline("\n")] []
 --
 error[SyntaxError]: expected an expression, or an assignment but instead found ')'
   ┌─ import_call.js:1:8

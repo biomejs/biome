@@ -388,6 +388,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_AWAIT_EXPRESSION",
         "JS_DECORATOR",
         "JS_DECORATOR_LIST",
+        "JS_LABEL",
         // TypeScript
         "TS_IDENTIFIER_BINDING",
         "TS_ANY_TYPE",

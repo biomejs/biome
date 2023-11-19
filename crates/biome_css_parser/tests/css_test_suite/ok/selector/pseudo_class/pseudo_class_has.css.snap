@@ -24,6 +24,7 @@ div:has(p) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -669,7 +670,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..283
-  0: CSS_RULE_LIST@0..282
+  0: (empty)
+  1: CSS_RULE_LIST@0..282
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
@@ -1091,7 +1093,7 @@ CssRoot {
         0: L_CURLY@280..281 "{" [] []
         1: CSS_DECLARATION_LIST@281..281
         2: R_CURLY@281..282 "}" [] []
-  1: EOF@282..283 "" [Newline("\n")] []
+  2: EOF@282..283 "" [Newline("\n")] []
 
 ```
 

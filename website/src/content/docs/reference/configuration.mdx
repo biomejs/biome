@@ -693,15 +693,15 @@ How many characters can be written on a single line in JSON (and its super langu
 
 A list of patterns.
 
-Use this configuration to change the behaviour of the tools for certain files. The overrides are absolute, and they have precedence over the top-level configuration.
+Use this configuration to change the behaviour of the tools for certain files.
 
-When a file is matched against an override pattern, **only** the configuration specified in that pattern will be applied. If not configuration is set, Biome's defaults are applied.
+When a file is matched against an override pattern, the configuration specified in that pattern will be override the top-level configuration.
 
 The order of the patterns matter. If a file *can* match three patterns, only the first one is used.
 
 ### `overrides.<ITEM>.ignore`
 
-A list of Unix shell style patterns. Biome ignores files and folders that match these patterns.
+A list of Unix shell style patterns. Biome will not apply the override to files that match the pattern.
 
 <CodeBlockHeader filename="biome.json" />
 
@@ -715,7 +715,7 @@ A list of Unix shell style patterns. Biome ignores files and folders that match 
 
 ### `overrides.<ITEM>.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that match these patterns.
+A list of Unix shell style patterns. Biome will apply the override only to files that match the pattern.
 
 <CodeBlockHeader filename="biome.json" />
 
