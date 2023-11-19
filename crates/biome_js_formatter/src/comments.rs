@@ -312,16 +312,55 @@ fn handle_declare_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlace
     match (comment.enclosing_node().kind(), comment.following_node()) {
         // Check if it is a declare statement
         (JsSyntaxKind::TS_DECLARE_STATEMENT, Some(following)) => {
+            println!("following: {:?}", following);
+            following.children().for_each(|child| {
+                println!("\tchild: {:?}", child);
+                child.children().for_each(|grandchild| {
+                    println!("\t\tgrandchild: {:?}", grandchild);
+                });
+            });
             match following.kind() {
                 JsSyntaxKind::TS_GLOBAL_DECLARATION => {
                     // Global declarations have no identifier, so keep at default
                     CommentPlacement::Default(comment)
                 }
-                JsSyntaxKind::TS_MODULE_DECLARATION => {
+                JsSyntaxKind::TS_MODULE_DECLARATION
+                | JsSyntaxKind::TS_ENUM_DECLARATION
+                | JsSyntaxKind::TS_INTERFACE_DECLARATION
+                | JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION
+                | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
                     // Move comment after the module keyword
                     // This is the first child of the module declaration which is the identifier
                     if following.first_child().is_none() == false {
-                        return CommentPlacement::leading(following.first_child().unwrap().clone(), comment);
+                        return CommentPlacement::leading(
+                            following.first_child().unwrap().clone(),
+                            comment,
+                        );
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                JsSyntaxKind::JS_CLASS_DECLARATION => {
+                    if following.first_child().is_none() == false
+                        && following.first_child().unwrap().next_sibling().is_none() == false
+                    {
+                        return CommentPlacement::leading(
+                            following
+                                .first_child()
+                                .unwrap()
+                                .next_sibling()
+                                .unwrap()
+                                .clone(),
+                            comment,
+                        );
+                    }
+                    CommentPlacement::Default(comment)
+                }
+                JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => {
+                    let first_identifier = following.descendants().find(|node| {
+                        node.kind() == JsSyntaxKind::JS_IDENTIFIER_BINDING
+                    });
+                    if first_identifier.is_none() == false {
+                        return CommentPlacement::leading(first_identifier.unwrap().clone(), comment);
                     }
                     CommentPlacement::Default(comment)
                 }
