@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.39
+**Average compatibility**: 95.62
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 95.85
+    **Compatible lines**: 96.05
 <details>
     <summary>Definition</summary>
 
@@ -3526,34 +3526,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/explicit-resource-management/valid-module-block-top-level-await-using-binding.js
-```diff
--const m = module {
-+const m = module;
-+{
-   await using foo = bar();
--};
-+}
-
-```
-
-**Prettier Similarity**: 25.00%
-
-
-# js/explicit-resource-management/valid-module-block-top-level-using-binding.js
-```diff
--module {
-+module;
-+{
-   using foo = bar();
--};
-+}
-
-```
-
-**Prettier Similarity**: 25.00%
-
-
 # js/explicit-resource-management/valid-using-as-identifier-computed-member.js
 
 **Prettier Similarity**: 100.00%
@@ -4589,58 +4561,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/embed.js
-```diff
--foo(/* HTML */ `<!-- bar1 -->
--    bar
--    <!-- bar2 -->`);
--foo(/* HTML */ `
--  <!-- bar1 -->
--  bar
--  <!-- bar2 -->
--`);
--foo(/* HTML */ `<div>
--    <p>bar</p>
--    foo
--  </div>`);
--foo(/* HTML */ `
--  <div>
--    <p>bar</p>
--    foo
--  </div>
--`);
--foo(/* GraphQL */ `
--  query {
--    foo {
--      bar
--    }
--  }
--`);
--foo(/* ... */ css`
--  color: magenta;
--`);
--const a = (b) => /* HTML */ `<!-- bar1 -->
--    bar
--    <!-- bar2 -->`;
--const c = (b) => /* HTML */ `
--  <!-- bar1 -->
--  bar
--  <!-- bar2 -->
--`;
-+foo(/* HTML */ `<!-- bar1 --> bar <!-- bar2 -->`);
-+foo(/* HTML */ ` <!-- bar1 --> bar <!-- bar2 --> `);
-+foo(/* HTML */ `<div><p>bar</p>foo</div>`);
-+foo(/* HTML */ ` <div><p>bar</p>foo</div> `);
-+foo(/* GraphQL */ `query { foo { bar } }`);
-+foo(/* ... */ css`color:magenta`);
-+const a = (b) => /* HTML */ `<!-- bar1 --> bar <!-- bar2 -->`;
-+const c = (b) => /* HTML */ ` <!-- bar1 --> bar <!-- bar2 --> `;
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 # js/last-argument-expansion/empty-lines.js
 
 **Prettier Similarity**: 100.00%
@@ -4967,26 +4887,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi-babylon-extensions/no-semi.js
-```diff
- a;
--::b.c;
-+::b.c
- 
- class A {
-   a = b;
-   in;
-   c;
- 
-   a = b;
-   instanceof() {}
- }
-
-```
-
-**Prettier Similarity**: 90.91%
-
-
 # js/no-semi/class.js
 
 **Prettier Similarity**: 100.00%
@@ -5107,43 +5007,6 @@
 # js/objects/expand.js
 
 **Prettier Similarity**: 100.00%
-
-
-# js/objects/expression.js
-```diff
- () => ({})``;
- ({})``;
- a = () => ({}).x;
- ({}) && a, b;
--({})::b, 0;
--({})::b()``[""].c++ && 0 ? 0 : 0, 0;
-+({}
-+::b, 0)
-+({}
-+::b()``[''].c++ && 0 ? 0 : 0, 0)
- ({})(), 0;
- ({} = 0);
- ({} = 0), 1;
- 
- const a1 = {
-   someKey: (shortName, shortName),
- };
- 
- const a2 = {
-   someKey:
-     (longLongLongLongLongLongLongLongLongLongLongLongLongLongName, shortName),
- };
- 
- const a3 = {
-   someKey:
-     (longLongLongLongLongLongLongLongLongLongLongLongLongLongName,
-     longLongLongLongLongLongLongLongLongLongLongLongLongLongName,
-     longLongLongLongLongLongLongLongLongLongLongLongLongLongName),
- };
-
-```
-
-**Prettier Similarity**: 85.19%
 
 
 # js/objects/getter-setter.js
@@ -7958,31 +7821,6 @@
 # typescript/as/array-pattern.ts
 
 **Prettier Similarity**: 100.00%
-
-
-# typescript/as/as-const-embedded.ts
-```diff
- const GQL_QUERY_WITH_CONST = /* GraphQL */ `
--  query S {
--    shop
--  }
-+  query S { shop }
- ` as const;
- 
- const HTML_WITH_CONST = /* HTML */ `
--  <div>
--    <h1>foo</h1>
--    <p>foo</p>
--  </div>
-+<div>
-+<h1>foo</h1>
-+  <p>foo</p>
-+</div>
- ` as const;
-
-```
-
-**Prettier Similarity**: 41.67%
 
 
 # typescript/as/as.ts
