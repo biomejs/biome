@@ -624,7 +624,7 @@ function FormatterSettings({
 					<select
 						id="lineEnding"
 						name="lineEnding"
-						value={LineEnding}
+						value={lineEnding}
 						onChange={(e) => {
 							setLineEnding(e.target.value as LineEnding);
 						}}
