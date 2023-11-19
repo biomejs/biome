@@ -113,7 +113,7 @@ use crate::utils::member_chain::chain_member::{CallExpressionPosition, ChainMemb
 use crate::utils::member_chain::groups::{
     MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
 };
-use crate::utils::member_chain::simple_argument::SimpleArgument;
+pub use crate::utils::member_chain::simple_argument::SimpleArgument;
 use crate::utils::test_call::is_test_call_expression;
 use crate::JsLabels;
 use biome_formatter::{write, Buffer};
