@@ -250,11 +250,11 @@ export interface JavascriptFormatter {
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * The type of line ending.
+	 * The type of line ending applied to JavaScript (and its super languages) files.
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
 	/**
@@ -304,11 +304,11 @@ export interface JsonFormatter {
 	 */
 	indentWidth?: number;
 	/**
-	 * The type of line ending.
+	 * The type of line ending applied to JSON (and its super languages) files.
 	 */
 	lineEnding?: LineEnding;
 	/**
-	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
 }

@@ -873,11 +873,11 @@
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending.",
+					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.",
+					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteProperties": {
@@ -965,11 +965,11 @@
 					"minimum": 0.0
 				},
 				"lineEnding": {
-					"description": "The type of line ending.",
+					"description": "The type of line ending applied to JSON (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
-					"description": "What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.",
+					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
