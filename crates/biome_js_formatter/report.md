@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.63
+**Average compatibility**: 95.81
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 96.09
+    **Compatible lines**: 96.41
 <details>
     <summary>Definition</summary>
 
@@ -1263,11 +1263,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/explicit-resource-management.js
-
-**Prettier Similarity**: 100.00%
-
-
 # js/babel-plugins/export-namespace-from.js
 
 **Prettier Similarity**: 100.00%
@@ -1811,30 +1806,6 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/comments-closure-typecast/styled-components.js
-```diff
- const OverlapWrapper =
-   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
-   (styled.div)`
--    position: relative;
-+position:relative;
-     > {
--      position: absolute;
--      bottom: ${(p) => p.overlap === "previous" && 0};
--      top: ${(p) => p.overlap === "next" && 0};
--    }
--  `;
-+  position: absolute;
-+  bottom: ${(p) => p.overlap === "previous" && 0};
-+top: ${(p) => p.overlap === "next" && 0};
-+}
-+`;
-
-```
-
-**Prettier Similarity**: 40.00%
-
-
 # js/comments-closure-typecast/superclass.js
 
 **Prettier Similarity**: 100.00%
@@ -2079,18 +2050,6 @@
 ```
 
 **Prettier Similarity**: 50.00%
-
-
-# js/comments/html-like/comment.js
-```diff
- <!--
--alert(1); 
-+alert(1)
- -->
-
-```
-
-**Prettier Similarity**: 66.67%
 
 
 # js/comments/if.js
@@ -3407,183 +3366,6 @@
 
 
 # js/es6modules/export_default_new_expression.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/for-await-using-of-comments.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/invalid-duplicate-using-bindings.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/invalid-script-top-level-using-binding.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/using-declarations.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-expr-using-in.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-expr-using-instanceof.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-expr-using.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-using-asi-assignment.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-using-binding-basic.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-using-binding-escaped.js
-```diff
- async function f() {
--  await using ab = c;
-+  await using \u0061b = c;
- }
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
-# js/explicit-resource-management/valid-await-using-binding-non-bmp.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-using-binding-using.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-await-using-comments.js
-```diff
- async function f() {
-   {
--    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f(); /*5*/
-+    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f() /*5*/;
-   }
-   {
-     /*0*/ for (
-       /*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ =
-           /*6*/ x /*7*/ /*8*/ /*9*/ /*10*/;
-       ;
--
-     );
-   }
-   {
-     /*0*/ for (/*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ of /*6*/ x /*7*/ /*8*/);
-   }
-   {
-     /*0*/ for await (/*1*/ /*2*/ /*3*/ await using /*4*/ /*5*/ b /*6*/ of /*7*/ x /*8*/ /*9*/);
-   }
- }
-
-```
-
-**Prettier Similarity**: 89.47%
-
-
-# js/explicit-resource-management/valid-for-await-using-binding-escaped-of-of.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-for-using-binding-escaped-of-of.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-for-using-binding-of-of.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-for-using-declaration.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-computed-member.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-expression-statement.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-for-await-of.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-for-in.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-for-init.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-for-of.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-as-identifier-in.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-binding-basic.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-binding-escaped.js
-```diff
- {
--  using ab = c;
-+  using \u0061b = c;
- }
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
-# js/explicit-resource-management/valid-using-binding-non-bmp.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/explicit-resource-management/valid-using-binding-using.js
 
 **Prettier Similarity**: 100.00%
 
@@ -6995,36 +6777,6 @@
 **Prettier Similarity**: 100.00%
 
 
-# jsx/template/styled-components.js
-```diff
- <style jsx>{`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>{tpl`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>
--  {`
--    p {
--      color: red;
--    }
-+  {`p {
-+     color: red;
-+     }
-   `}
- </style>;
-
-```
-
-**Prettier Similarity**: 78.95%
-
-
 # jsx/text-wrap/test.js
 ```diff
  // Wrapping text
@@ -9501,13 +9253,8 @@
 
 
 # typescript/conformance/types/moduleDeclaration/kind-detection.ts
-```diff
--declare namespace /* module */ A {}
-+declare /* module */ namespace A {}
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conformance/types/moduleDeclaration/moduleDeclaration.ts
@@ -10303,15 +10050,14 @@
  
  // note lack of trailing comma in the index signature
  type TooLongSingleParam = {
--  [
--    looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
--  ]: string;
-+  [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
+   [
+     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
+   ]: string;
  };
 
 ```
 
-**Prettier Similarity**: 38.71%
+**Prettier Similarity**: 48.39%
 
 
 # typescript/error-recovery/jsdoc_only_types.ts
@@ -10342,16 +10088,6 @@
 ```
 
 **Prettier Similarity**: 6.67%
-
-
-# typescript/explicit-resource-management/await-using-with-type-declaration.ts
-
-**Prettier Similarity**: 100.00%
-
-
-# typescript/explicit-resource-management/using-with-type-declaration.ts
-
-**Prettier Similarity**: 100.00%
 
 
 # typescript/export-default/function_as.ts
@@ -12218,95 +11954,40 @@
 
 # typescript/union/consistent-with-flow/single-type.ts
 ```diff
--type A1 =
--  | A
--  // A comment to force break
--  | B;
--type A2 =
--  | (
--      | A
--      // A comment to force break
--      | B
--    )
--  | (
--      | A
--      // A comment to force break
--      | B
--    );
--type A3 =
--  | A
--  // A comment to force break
--  | B;
--type A4 =
--  | A
--  // A comment to force break
--  | B;
--type A5 =
--  | ({ key: string } | { key: string } | { key: string } | { key: string })
--  | { key: string }
--  | { key: string };
+ type A1 =
+   | A
+   // A comment to force break
+   | B;
+ type A2 =
+   | (
+       | A
+       // A comment to force break
+       | B
+     )
+   | (
+       | A
+       // A comment to force break
+       | B
+     );
+ type A3 =
+   | A
+   // A comment to force break
+   | B;
+ type A4 =
+   | A
+   // A comment to force break
+   | B;
+ type A5 =
+   | ({ key: string } | { key: string } | { key: string } | { key: string })
+   | { key: string }
+   | { key: string };
 -type A6 =
 -  /*1*/
 -  | A
 -  // A comment to force break
 -  | B;
--
--type B1 =
--  | A
--  // A comment to force break
--  | B;
--type B2 =
--  | A
--  // A comment to force break
--  | B;
 +// FIXME
-+// TODO: we emit invalid AST
-+// type A1 =
-+//   | (
-+//     | (
-+//       | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     )
-+//   );
-+// type A2 =
-+//   | (
-+//     | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//   );
-+// type A3 =
-+//   | ( | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         ) );
-+// type A4 =
-+//   | ( | ( | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         ) ) );
-+// type A5 =
-+//   | (
-+//     | (
-+//       | { key: string }
-+//       | { key: string }
-+//       | { key: string }
-+//       | { key: string }
-+//     )
-+//     | { key: string }
-+//     | { key: string }
-+//   );
++// TODO: reformat issue
 +// type A6 = | (
 +//   /*1*/ | (
 +//     | (
@@ -12316,35 +11997,19 @@
 +//         )
 +//   )
 +//   );
-+//
-+// type B1 =
-+//   | (
-+//     & (
-+//       (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     )
-+//   );
-+// type B2 =
-+//   | (
-+//     & (
-+//       | (
-+//         & (
-+//           (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//         )
-+//       )
-+//     )
-+//   );
+ 
+ type B1 =
+   | A
+   // A comment to force break
+   | B;
+ type B2 =
+   | A
+   // A comment to force break
+   | B;
 
 ```
 
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 76.60%
 
 
 # typescript/union/consistent-with-flow/within-tuple.ts

@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.62
+**Average compatibility**: 95.81
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 96.05
+    **Compatible lines**: 96.41
 <details>
     <summary>Definition</summary>
 
@@ -896,30 +896,6 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/comments-closure-typecast/styled-components.js
-```diff
- const OverlapWrapper =
-   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
-   (styled.div)`
--    position: relative;
-+position:relative;
-     > {
--      position: absolute;
--      bottom: ${(p) => p.overlap === "previous" && 0};
--      top: ${(p) => p.overlap === "next" && 0};
--    }
--  `;
-+  position: absolute;
-+  bottom: ${(p) => p.overlap === "previous" && 0};
-+top: ${(p) => p.overlap === "next" && 0};
-+}
-+`;
-
-```
-
-**Prettier Similarity**: 40.00%
-
-
 # js/comments/empty-statements.js
 ```diff
 -a; /* a */ // b
@@ -1054,18 +1030,6 @@
 ```
 
 **Prettier Similarity**: 50.00%
-
-
-# js/comments/html-like/comment.js
-```diff
- <!--
--alert(1); 
-+alert(1)
- -->
-
-```
-
-**Prettier Similarity**: 66.67%
 
 
 # js/comments/jsdoc-nestled-dangling.js
@@ -1859,58 +1823,6 @@
 ```
 
 **Prettier Similarity**: 91.67%
-
-
-# js/explicit-resource-management/valid-await-using-binding-escaped.js
-```diff
- async function f() {
--  await using ab = c;
-+  await using \u0061b = c;
- }
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
-# js/explicit-resource-management/valid-await-using-comments.js
-```diff
- async function f() {
-   {
--    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f(); /*5*/
-+    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f() /*5*/;
-   }
-   {
-     /*0*/ for (
-       /*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ =
-           /*6*/ x /*7*/ /*8*/ /*9*/ /*10*/;
-       ;
--
-     );
-   }
-   {
-     /*0*/ for (/*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ of /*6*/ x /*7*/ /*8*/);
-   }
-   {
-     /*0*/ for await (/*1*/ /*2*/ /*3*/ await using /*4*/ /*5*/ b /*6*/ of /*7*/ x /*8*/ /*9*/);
-   }
- }
-
-```
-
-**Prettier Similarity**: 89.47%
-
-
-# js/explicit-resource-management/valid-using-binding-escaped.js
-```diff
- {
--  using ab = c;
-+  using \u0061b = c;
- }
-
-```
-
-**Prettier Similarity**: 66.67%
 
 
 # js/export-default/escaped/default-escaped.js
@@ -2814,114 +2726,6 @@
 **Prettier Similarity**: 74.07%
 
 
-# js/template-literals/indention.js
-```diff
- [
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-   `,
-   `
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-   `,
-   `
-           1. Go to "-{chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer"
-           )}" ${chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer",
-           )}
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}" ${chalk.green.underline(
--        "https://www.example.com/drupedalKangarooTransformer",
--      )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
-       1. Go to "-{chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer"
-       )}" ${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}
-           2. Go to "${chalk.green.underline(
-             "https://www.example.com/drupedalKangarooTransformer",
-           )}" ${chalk.green.underline(
--            "https://www.example.com/drupedalKangarooTransformer",
--          )}
-+    "https://www.example.com/drupedalKangarooTransformer",
-+  )}
-   `,
-   `
- # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- 
-     2. Go to "${chalk.green.underline(
-       "https://www.example.com/drupedalKangarooTransformer",
-     )}"
- 
- # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- `,
-   `
-   # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
- 
-       2. Go to "${chalk.green.underline(
-         "https://www.example.com/drupedalKangarooTransformer",
-       )}"
- 
-   # blabla ${a} ${chalk.green.underline(
-     "https://www.example.com/drupedalKangarooTransformer",
-   )}
-   `,
- ];
-
-```
-
-**Prettier Similarity**: 88.89%
-
-
 # js/ternaries/func-call.js
 ```diff
  fn(
@@ -3596,36 +3400,6 @@
 ```
 
 **Prettier Similarity**: 84.38%
-
-
-# jsx/template/styled-components.js
-```diff
- <style jsx>{`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>{tpl`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>
--  {`
--    p {
--      color: red;
--    }
-+  {`p {
-+     color: red;
-+     }
-   `}
- </style>;
-
-```
-
-**Prettier Similarity**: 78.95%
 
 
 # jsx/text-wrap/test.js
@@ -5238,16 +5012,6 @@
 **Prettier Similarity**: 33.33%
 
 
-# typescript/conformance/types/moduleDeclaration/kind-detection.ts
-```diff
--declare namespace /* module */ A {}
-+declare /* module */ namespace A {}
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 # typescript/custom/abstract/abstractProperties.ts
 ```diff
  abstract class Foo {
@@ -5541,15 +5305,14 @@
  
  // note lack of trailing comma in the index signature
  type TooLongSingleParam = {
--  [
--    looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
--  ]: string;
-+  [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
+   [
+     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
+   ]: string;
  };
 
 ```
 
-**Prettier Similarity**: 38.71%
+**Prettier Similarity**: 48.39%
 
 
 # typescript/error-recovery/jsdoc_only_types.ts
@@ -6646,95 +6409,40 @@
 
 # typescript/union/consistent-with-flow/single-type.ts
 ```diff
--type A1 =
--  | A
--  // A comment to force break
--  | B;
--type A2 =
--  | (
--      | A
--      // A comment to force break
--      | B
--    )
--  | (
--      | A
--      // A comment to force break
--      | B
--    );
--type A3 =
--  | A
--  // A comment to force break
--  | B;
--type A4 =
--  | A
--  // A comment to force break
--  | B;
--type A5 =
--  | ({ key: string } | { key: string } | { key: string } | { key: string })
--  | { key: string }
--  | { key: string };
+ type A1 =
+   | A
+   // A comment to force break
+   | B;
+ type A2 =
+   | (
+       | A
+       // A comment to force break
+       | B
+     )
+   | (
+       | A
+       // A comment to force break
+       | B
+     );
+ type A3 =
+   | A
+   // A comment to force break
+   | B;
+ type A4 =
+   | A
+   // A comment to force break
+   | B;
+ type A5 =
+   | ({ key: string } | { key: string } | { key: string } | { key: string })
+   | { key: string }
+   | { key: string };
 -type A6 =
 -  /*1*/
 -  | A
 -  // A comment to force break
 -  | B;
--
--type B1 =
--  | A
--  // A comment to force break
--  | B;
--type B2 =
--  | A
--  // A comment to force break
--  | B;
 +// FIXME
-+// TODO: we emit invalid AST
-+// type A1 =
-+//   | (
-+//     | (
-+//       | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     )
-+//   );
-+// type A2 =
-+//   | (
-+//     | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//   );
-+// type A3 =
-+//   | ( | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         ) );
-+// type A4 =
-+//   | ( | ( | (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         ) ) );
-+// type A5 =
-+//   | (
-+//     | (
-+//       | { key: string }
-+//       | { key: string }
-+//       | { key: string }
-+//       | { key: string }
-+//     )
-+//     | { key: string }
-+//     | { key: string }
-+//   );
++// TODO: reformat issue
 +// type A6 = | (
 +//   /*1*/ | (
 +//     | (
@@ -6744,35 +6452,19 @@
 +//         )
 +//   )
 +//   );
-+//
-+// type B1 =
-+//   | (
-+//     & (
-+//       (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//     )
-+//   );
-+// type B2 =
-+//   | (
-+//     & (
-+//       | (
-+//         & (
-+//           (
-+//           | A
-+//           // A comment to force break
-+//           | B
-+//         )
-+//         )
-+//       )
-+//     )
-+//   );
+ 
+ type B1 =
+   | A
+   // A comment to force break
+   | B;
+ type B2 =
+   | A
+   // A comment to force break
+   | B;
 
 ```
 
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 76.60%
 
 
 # typescript/union/single-type/single-type.ts

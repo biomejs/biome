@@ -131,13 +131,18 @@ impl DiffReport {
             "deferred-import-evaluation", // `import defer` syntax
             "source-phase-imports",       // `import source` syntax
             "import-reflection",          // `import module` syntax
+            "explicit-resource-management",
             // Embedded languages in template literals
+            "html-like",
             "js/multiparser",
             "js/range/issue-7082.js",
             "js/template-literals/css-prop.js",
             "js/template-literals/styled",
             "js/last-argument-expansion/embed.js",
             "typescript/as/as-const-embedded.ts",
+            "js/last-argument-expansion/embed.js",
+            "typescript/as/as-const-embedded.ts",
+            "styled-components",
         ];
 
         patterns.iter().any(|pattern| file_name.contains(pattern))
