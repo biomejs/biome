@@ -109,11 +109,12 @@ impl DiffReport {
             "arrows-bind",
             "async-do-expressions",
             "async-do-expressions",
+            "babylon-extensions",
             "decimal",
             "do-expressions",
             "export-default-from",
             "function-bind",
-            "module-blocks",
+            "module-block",
             "partial-application",
             "pipeline",
             "record",
@@ -122,6 +123,7 @@ impl DiffReport {
             "v8intrinsic",
             "v8_intrinsic",
             "bind-expressions",
+            "js/objects/expression.js",
             "destructuring-private-fields",
             "/do/",
             "export-extension",
@@ -134,6 +136,8 @@ impl DiffReport {
             "js/range/issue-7082.js",
             "js/template-literals/css-prop.js",
             "js/template-literals/styled",
+            "js/last-argument-expansion/embed.js",
+            "typescript/as/as-const-embedded.ts",
         ];
 
         patterns.iter().any(|pattern| file_name.contains(pattern))
