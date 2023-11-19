@@ -29,5 +29,4 @@ the snapshots:
 3. Go to `crates/biome_formatter_test/src/prettier` directory
 4. Install prettier ``pnpm install``
 5. Go to `crates/biome_js_formatter/tests/specs/prettier` directory
-6. Run
-   `node crates/biome_js_formatter/tests/specs/prettier/prepare_tests.js <prettier root directory>`
+6. Run `node prepare_tests.js <prettier root directory>`
