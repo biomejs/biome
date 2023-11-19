@@ -35,6 +35,7 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
             "semicolons",
             "arrowParentheses",
             "bracketSpacing",
+            "bracketSameLine",
             "enabled",
             "indentStyle",
             "indentSize",
@@ -74,6 +75,10 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
                 }
                 "bracketSpacing" => {
                     result.bracket_spacing =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "bracketSameLine" => {
+                    result.bracket_same_line =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "enabled" => {
