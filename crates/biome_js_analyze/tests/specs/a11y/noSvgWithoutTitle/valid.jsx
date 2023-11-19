@@ -22,12 +22,27 @@
 		<title id="title">Pass</title>
 	</svg>
 	<svg role="img" aria-label="title">
-		<span id="title">Pass</span>
+		<span>Pass</span>
+	</svg>
+	<svg role="img" aria-label="title">
+		<span id="sample">Pass</span>
 	</svg>
 	<svg role="img" aria-labelledby="title">
 		<title id="title">Pass</title>
 	</svg>
 	<svg role="img" aria-labelledby="title">
 		<span id="title">Pass</span>
+	</svg>
+	<svg role="">
+		<title>implicit role</title>
+		<span>Pass</span>
+	</svg>
+	<svg role="presentation">
+		<title>presentation role with title</title>
+		<span id="sample">Pass</span>
+	</svg>
+	<svg role="button">
+		<title>button role with title</title>
+		<span id="sample">Pass</span>
 	</svg>
 </>;
