@@ -201,7 +201,7 @@ pub struct JsSerializableFormatOptions {
     /// The indent width.
     pub indent_width: Option<u8>,
 
-    /// The style for the end of line characters.
+    /// The type of line ending.
     pub line_ending: Option<JsSerializableLineEnding>,
 
     /// What's the max width of a line. Defaults to 80.

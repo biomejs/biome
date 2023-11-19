@@ -225,7 +225,8 @@ where
                 let max_width = options.line_width().get() as usize;
 
                 // There are some logs that print different line endings, and we can't snapshot those
-                // otherwise we risk automatically having them replaced with LF by Git
+                // otherwise we risk automatically having them replaced with LF by git.
+                //
                 // This is a workaround, and it might not work for all cases.
                 const CRLF_PATTERN: &str = "\r\n";
                 const CR_PATTERN: &str = "\r";
