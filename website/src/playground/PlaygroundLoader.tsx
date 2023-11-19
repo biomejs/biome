@@ -335,6 +335,9 @@ function initState(
 			arrowParentheses:
 				(searchParams.get("arrowParentheses") as ArrowParentheses) ??
 				defaultPlaygroundState.settings.arrowParentheses,
+			bracketSpacing:
+				searchParams.get("bracketSpacing") === "true" ??
+				defaultPlaygroundState.settings.bracketSpacing,
 			lintRules:
 				(searchParams.get("lintRules") as LintRules) ??
 				defaultPlaygroundState.settings.lintRules,

@@ -36,6 +36,10 @@ pub struct JavascriptFormatter {
     #[bpaf(long("arrow-parentheses"), argument("always|as-needed"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[bpaf(long("bracket-spacing"), argument("true|false"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_spacing: Option<bool>,
 
     /// Control the formatter for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional)]
@@ -88,6 +92,9 @@ impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
     fn merge_with(&mut self, other: JavascriptFormatter) {
         if let Some(arrow_parentheses) = other.arrow_parentheses {
             self.arrow_parentheses = Some(arrow_parentheses);
+        }
+        if let Some(bracket_spacing) = other.bracket_spacing {
+            self.bracket_spacing = Some(bracket_spacing);
         }
         if let Some(quote_properties) = other.quote_properties {
             self.quote_properties = Some(quote_properties);

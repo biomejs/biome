@@ -601,6 +601,32 @@ pub const fn space() -> Space {
     Space
 }
 
+/// Optionally inserts a single space if the given condition is true.
+///
+/// # Examples
+///
+/// ```
+/// use biome_formatter::format;
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let elements = format!(SimpleFormatContext::default(), [text("a"), maybe_space(true), text("b")])?;
+/// let nospace = format!(SimpleFormatContext::default(), [text("a"), maybe_space(false), text("b")])?;
+///
+/// assert_eq!("a b", elements.print()?.as_code());
+/// assert_eq!("ab", nospace.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+#[inline]
+pub fn maybe_space(should_insert: bool) -> Option<Space> {
+    if should_insert {
+        Some(Space)
+    } else {
+        None
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Space;
 
@@ -1044,6 +1070,110 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::Soft,
+    }
+}
+
+/// Conditionally adds spaces around the content if its enclosing group fits
+/// within a single line and the caller suggests that the space should be added.
+/// Otherwise indents the content and separates it by line breaks.
+///
+/// # Examples
+///
+/// Adds line breaks and indents the content if the enclosing group doesn't fit on the line.
+///
+/// ```
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let context = SimpleFormatContext::new(SimpleFormatOptions {
+///     line_width: LineWidth::try_from(10).unwrap(),
+///     ..SimpleFormatOptions::default()
+/// });
+///
+/// let elements = format!(context, [
+///     group(&format_args![
+///         text("{"),
+///         soft_block_indent_with_maybe_space(&format_args![
+///             text("aPropertyThatExceeds"),
+///             text(":"),
+///             space(),
+///             text("'line width'"),
+///         ], false),
+///         text("}")
+///     ])
+/// ])?;
+///
+/// assert_eq!(
+///     "{\n\taPropertyThatExceeds: 'line width'\n}",
+///     elements.print()?.as_code()
+/// );
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Adds spaces around the content if the caller requests it and the group fits on the line.
+///
+/// ```
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         text("{"),
+///         soft_block_indent_with_maybe_space(&format_args![
+///             text("a"),
+///             text(":"),
+///             space(),
+///             text("5"),
+///         ], true),
+///         text("}")
+///     ])
+/// ])?;
+///
+/// assert_eq!(
+///     "{ a: 5 }",
+///     elements.print()?.as_code()
+/// );
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Does not add spaces around the content if the caller denies it and the group fits on the line.
+/// ```
+/// use biome_formatter::{format, format_args};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         text("{"),
+///         soft_block_indent_with_maybe_space(&format_args![
+///             text("a"),
+///             text(":"),
+///             space(),
+///             text("5"),
+///         ], false),
+///         text("}")
+///     ])
+/// ])?;
+///
+/// assert_eq!(
+///     "{a: 5}",
+///     elements.print()?.as_code()
+/// );
+/// # Ok(())
+/// # }
+/// ```
+pub fn soft_block_indent_with_maybe_space<Context>(
+    content: &impl Format<Context>,
+    should_add_space: bool,
+) -> BlockIndent<Context> {
+    if should_add_space {
+        soft_space_or_block_indent(content)
+    } else {
+        soft_block_indent(content)
     }
 }
 

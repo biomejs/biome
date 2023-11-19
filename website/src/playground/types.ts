@@ -113,6 +113,7 @@ export interface PlaygroundSettings {
 	trailingComma: TrailingComma;
 	semicolons: Semicolons;
 	arrowParentheses: ArrowParentheses;
+	bracketSpacing: boolean;
 	lintRules: LintRules;
 	enabledLinting: boolean;
 	importSortingEnabled: boolean;
@@ -157,6 +158,7 @@ export const defaultPlaygroundState: PlaygroundState = {
 		trailingComma: TrailingComma.All,
 		semicolons: Semicolons.Always,
 		arrowParentheses: ArrowParentheses.Always,
+		bracketSpacing: true,
 		lintRules: LintRules.Recommended,
 		enabledLinting: true,
 		importSortingEnabled: true,

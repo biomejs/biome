@@ -62,6 +62,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts
@@ -115,6 +116,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts
@@ -168,6 +170,7 @@ Quote properties: Preserve
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```ts

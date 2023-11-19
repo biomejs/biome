@@ -1,0 +1,132 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/export/bracket-spacing/export_bracket_spacing.js
+---
+
+# Input
+
+```js
+export {a,
+    b as c
+} from "fancy" assert { type: "json"}
+
+
+export {
+    lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem,
+    lorem_lorem_lorem_lorem_lorem_ as ipsum_ipsum_ipsum_ipsum_ipsum_ipsum_
+} from "fancy" assert { type: "json", "type2": "json", type23: "json", "type24": "json"}
+
+
+export { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong"
+
+export { loooooooooooooooooooooooooooooooooooooooooooooooooong, } from "loooooooooooooooooooooooooooooooooooooooooooooong"
+
+export { 
+// comment 
+loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong"
+
+export { a as b } from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong"
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+-----
+
+```js
+export { a, b as c } from "fancy" assert { type: "json" };
+
+export {
+	lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem,
+	lorem_lorem_lorem_lorem_lorem_ as ipsum_ipsum_ipsum_ipsum_ipsum_ipsum_,
+} from "fancy" assert {
+	type: "json",
+	"type2": "json",
+	type23: "json",
+	"type24": "json",
+};
+
+export { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export {
+	// comment
+	loooooooooooooooooooooooooooooooooooooooooooooooooong,
+} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export { a as b } from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong";
+```
+
+# Lines exceeding max width of 80 characters
+```
+   13: export { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong";
+   15: export { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong";
+   22: export { a as b } from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong";
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: false
+-----
+
+```js
+export {a, b as c} from "fancy" assert {type: "json"};
+
+export {
+	lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem_lorem,
+	lorem_lorem_lorem_lorem_lorem_ as ipsum_ipsum_ipsum_ipsum_ipsum_ipsum_,
+} from "fancy" assert {
+	type: "json",
+	"type2": "json",
+	type23: "json",
+	"type24": "json",
+};
+
+export {loooooooooooooooooooooooooooooooooooooooooooooooooong} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export {loooooooooooooooooooooooooooooooooooooooooooooooooong} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export {
+	// comment
+	loooooooooooooooooooooooooooooooooooooooooooooooooong,
+} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+
+export {a as b} from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong";
+```
+
+# Lines exceeding max width of 80 characters
+```
+   13: export {loooooooooooooooooooooooooooooooooooooooooooooooooong} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+   15: export {loooooooooooooooooooooooooooooooooooooooooooooooooong} from "loooooooooooooooooooooooooooooooooooooooooooooong";
+   22: export {a as b} from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong";
+```
+
+

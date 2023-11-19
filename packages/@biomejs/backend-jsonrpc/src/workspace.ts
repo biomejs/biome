@@ -230,6 +230,10 @@ export interface JavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: boolean;
+	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
 	enabled?: boolean;
