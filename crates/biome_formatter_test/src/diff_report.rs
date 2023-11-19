@@ -105,6 +105,7 @@ impl DiffReport {
     fn is_ignored(file_name: &str) -> bool {
         // ignore unstable syntaxes and embedded languages in template literals
         let patterns = [
+            // Experimental syntaxes
             "arrows-bind",
             "async-do-expressions",
             "async-do-expressions",
@@ -128,7 +129,7 @@ impl DiffReport {
             "deferred-import-evaluation", // `import defer` syntax
             "source-phase-imports",       // `import source` syntax
             "import-reflection",          // `import module` syntax
-            // embedded languages in template literals
+            // Embedded languages in template literals
             "js/multiparser",
             "js/range/issue-7082.js",
             "js/template-literals/css-prop.js",
