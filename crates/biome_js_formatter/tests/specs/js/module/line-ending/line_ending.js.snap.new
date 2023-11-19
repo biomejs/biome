@@ -1,0 +1,140 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: "js\\module\\line-ending\\line_ending.js"
+---
+
+# Input
+
+```js
+// Original file in LF
+// just some random code
+export const env = createEnv({
+  DISCORD_TOKEN: { type: 'string' },
+  TOPGG_TOKEN: { type: 'string' },
+
+  GUILD_LOGS: { type: 'string' },
+  GLOBAL_DETECTOR_LOGS: { type: 'string' },
+  TEST_GUILD: { type: 'string' },
+
+  SUPPORT_INVITE: { type: 'string' },
+  GAS_INVITE: { type: 'string' },
+
+  DOCS_LINK: { type: 'string' },
+
+  NODE_ENV: { type: 'string' },
+});
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+// Original file in LF
+// just some random code
+export const env = createEnv({
+	DISCORD_TOKEN: { type: "string" },
+	TOPGG_TOKEN: { type: "string" },
+
+	GUILD_LOGS: { type: "string" },
+	GLOBAL_DETECTOR_LOGS: { type: "string" },
+	TEST_GUILD: { type: "string" },
+
+	SUPPORT_INVITE: { type: "string" },
+	GAS_INVITE: { type: "string" },
+
+	DOCS_LINK: { type: "string" },
+
+	NODE_ENV: { type: "string" },
+});
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: CRLF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+// Original file in LF<CRLF>
+// just some random code<CRLF>
+export const env = createEnv({<CRLF>
+	DISCORD_TOKEN: { type: "string" },<CRLF>
+	TOPGG_TOKEN: { type: "string" },<CRLF>
+<CRLF>
+	GUILD_LOGS: { type: "string" },<CRLF>
+	GLOBAL_DETECTOR_LOGS: { type: "string" },<CRLF>
+	TEST_GUILD: { type: "string" },<CRLF>
+<CRLF>
+	SUPPORT_INVITE: { type: "string" },<CRLF>
+	GAS_INVITE: { type: "string" },<CRLF>
+<CRLF>
+	DOCS_LINK: { type: "string" },<CRLF>
+<CRLF>
+	NODE_ENV: { type: "string" },<CRLF>
+});<CRLF>
+```
+
+## Output 3
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: CR
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+-----
+
+```js
+// Original file in LF<CR>
+// just some random code<CR>
+export const env = createEnv({<CR>
+	DISCORD_TOKEN: { type: "string" },<CR>
+	TOPGG_TOKEN: { type: "string" },<CR>
+<CR>
+	GUILD_LOGS: { type: "string" },<CR>
+	GLOBAL_DETECTOR_LOGS: { type: "string" },<CR>
+	TEST_GUILD: { type: "string" },<CR>
+<CR>
+	SUPPORT_INVITE: { type: "string" },<CR>
+	GAS_INVITE: { type: "string" },<CR>
+<CR>
+	DOCS_LINK: { type: "string" },<CR>
+<CR>
+	NODE_ENV: { type: "string" },<CR>
+});<CR>
+```
+
+
