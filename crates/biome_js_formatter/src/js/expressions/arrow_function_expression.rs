@@ -122,24 +122,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                 if body_has_soft_line_break {
                     write![f, [format_signature, space(), format_body]]
                 } else {
-                    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
-                    // but only if the body isn't an object/function or class expression because parentheses are always required in that
-                    // case and added by the object expression itself
-                    let should_add_parens = match &body {
-                        AnyJsExpression(expression @ JsConditionalExpression(_)) => {
-                            let are_parentheses_mandatory = matches!(
-                                resolve_left_most_expression(expression),
-                                AnyJsExpressionLeftSide::AnyJsExpression(
-                                    JsObjectExpression(_)
-                                        | JsFunctionExpression(_)
-                                        | JsClassExpression(_)
-                                )
-                            );
-
-                            !are_parentheses_mandatory
-                        }
-                        _ => false,
-                    };
+                    let should_add_parens = should_add_parens(&body);
 
                     let is_last_call_arg = matches!(
                         self.options.call_arg_layout,
@@ -303,6 +286,29 @@ fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
     let result = has_rest_object_or_array_parameter(&parameters);
 
     Ok(result)
+}
+
+fn should_add_parens(body: &AnyJsFunctionBody) -> bool {
+    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
+    // but only if the body isn't an object/function or class expression because parentheses are always required in that
+    // case and added by the object expression itself
+    match &body {
+        AnyJsFunctionBody::AnyJsExpression(
+            expression @ AnyJsExpression::JsConditionalExpression(_),
+        ) => {
+            let are_parentheses_mandatory = matches!(
+                resolve_left_most_expression(expression),
+                AnyJsExpressionLeftSide::AnyJsExpression(
+                    AnyJsExpression::JsObjectExpression(_)
+                        | AnyJsExpression::JsFunctionExpression(_)
+                        | AnyJsExpression::JsClassExpression(_)
+                )
+            );
+
+            !are_parentheses_mandatory
+        }
+        _ => false,
+    }
 }
 
 fn has_rest_object_or_array_parameter(parameters: &AnyJsArrowFunctionParameters) -> bool {
@@ -494,7 +500,23 @@ impl Format<JsFormatContext> for ArrowChain {
                     ])]
                 )?;
             } else {
-                write!(f, [format_tail_body])?;
+                let should_add_parens = should_add_parens(&tail_body);
+                write!(
+                    f,
+                    [format_with(|f| {
+                        if should_add_parens {
+                            write!(f, [if_group_fits_on_line(&text("("))])?;
+                        }
+
+                        write!(f, [format_tail_body])?;
+
+                        if should_add_parens {
+                            write!(f, [if_group_fits_on_line(&text(")"))])?;
+                        }
+
+                        Ok(())
+                    })]
+                )?;
             }
 
             // Format the trailing comments of all arrow function EXCEPT the first one because
