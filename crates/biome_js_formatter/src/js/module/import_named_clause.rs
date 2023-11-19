@@ -79,7 +79,7 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
                                     f,
                                     [
                                         l_curly_token.format(),
-                                        conditional_space(should_insert_space_around_brackets),
+                                        maybe_space(should_insert_space_around_brackets),
                                         specifier.format(),
                                     ]
                                 )?;
@@ -91,7 +91,7 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
                                 write!(
                                     f,
                                     [
-                                        conditional_space(should_insert_space_around_brackets),
+                                        maybe_space(should_insert_space_around_brackets),
                                         r_curly_token.format()
                                     ]
                                 )

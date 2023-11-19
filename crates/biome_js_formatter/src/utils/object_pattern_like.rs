@@ -165,7 +165,7 @@ impl Format<JsFormatContext> for JsObjectPatternLike {
         let format_properties = format_with(|f| {
             write!(
                 f,
-                [soft_block_indent_with_conditional_space(
+                [soft_block_indent_with_maybe_space(
                     &format_with(|f| self.write_properties(f)),
                     should_insert_space_around_brackets
                 )]

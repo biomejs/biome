@@ -610,8 +610,8 @@ pub const fn space() -> Space {
 /// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
-/// let elements = format!(SimpleFormatContext::default(), [text("a"), conditional_space(true), text("b")])?;
-/// let nospace = format!(SimpleFormatContext::default(), [text("a"), conditional_space(false), text("b")])?;
+/// let elements = format!(SimpleFormatContext::default(), [text("a"), maybe_space(true), text("b")])?;
+/// let nospace = format!(SimpleFormatContext::default(), [text("a"), maybe_space(false), text("b")])?;
 ///
 /// assert_eq!("a b", elements.print()?.as_code());
 /// assert_eq!("ab", nospace.print()?.as_code());
@@ -619,7 +619,7 @@ pub const fn space() -> Space {
 /// # }
 /// ```
 #[inline]
-pub fn conditional_space(should_insert: bool) -> Option<Space> {
+pub fn maybe_space(should_insert: bool) -> Option<Space> {
     if should_insert {
         Some(Space)
     } else {
@@ -1094,7 +1094,7 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 /// let elements = format!(context, [
 ///     group(&format_args![
 ///         text("{"),
-///         soft_block_indent_with_conditional_space(&format_args![
+///         soft_block_indent_with_maybe_space(&format_args![
 ///             text("aPropertyThatExceeds"),
 ///             text(":"),
 ///             space(),
@@ -1122,7 +1122,7 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 /// let elements = format!(SimpleFormatContext::default(), [
 ///     group(&format_args![
 ///         text("{"),
-///         soft_block_indent_with_conditional_space(&format_args![
+///         soft_block_indent_with_maybe_space(&format_args![
 ///             text("a"),
 ///             text(":"),
 ///             space(),
@@ -1149,7 +1149,7 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 /// let elements = format!(SimpleFormatContext::default(), [
 ///     group(&format_args![
 ///         text("{"),
-///         soft_block_indent_with_conditional_space(&format_args![
+///         soft_block_indent_with_maybe_space(&format_args![
 ///             text("a"),
 ///             text(":"),
 ///             space(),
@@ -1166,7 +1166,7 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 /// # Ok(())
 /// # }
 /// ```
-pub fn soft_block_indent_with_conditional_space<Context>(
+pub fn soft_block_indent_with_maybe_space<Context>(
     content: &impl Format<Context>,
     should_add_space: bool,
 ) -> BlockIndent<Context> {

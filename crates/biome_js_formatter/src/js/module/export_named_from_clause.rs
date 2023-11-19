@@ -37,7 +37,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
                 write!(
                     f,
                     [
-                        conditional_space(should_insert_space_around_brackets),
+                        maybe_space(should_insert_space_around_brackets),
                         node.format()
                     ]
                 )?;
@@ -46,7 +46,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
                     write!(f, [format_removed(&separator)])?;
                 }
 
-                write!(f, [conditional_space(should_insert_space_around_brackets)])?;
+                write!(f, [maybe_space(should_insert_space_around_brackets)])?;
             }
             _ => {
                 if specifiers.syntax().has_leading_newline() {
@@ -54,7 +54,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
                 } else {
                     write!(
                         f,
-                        [group(&soft_block_indent_with_conditional_space(
+                        [group(&soft_block_indent_with_maybe_space(
                             &specifiers.format(),
                             should_insert_space_around_brackets
                         )),]

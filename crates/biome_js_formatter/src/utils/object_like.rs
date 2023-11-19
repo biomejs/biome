@@ -64,7 +64,7 @@ impl Format<JsFormatContext> for JsObjectLike {
             let should_expand = self.members_have_leading_newline();
             write!(
                 f,
-                [group(&soft_block_indent_with_conditional_space(
+                [group(&soft_block_indent_with_maybe_space(
                     &members,
                     should_insert_space_around_brackets
                 ))

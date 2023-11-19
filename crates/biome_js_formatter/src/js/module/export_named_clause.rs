@@ -34,7 +34,7 @@ impl FormatNodeRule<JsExportNamedClause> for FormatJsExportNamedClause {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             write!(
                 f,
-                [group(&soft_block_indent_with_conditional_space(
+                [group(&soft_block_indent_with_maybe_space(
                     &specifiers.format(),
                     should_insert_space_around_brackets
                 ),)]

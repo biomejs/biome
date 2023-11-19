@@ -36,7 +36,7 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
                     assertion_kind.format(),
                     space(),
                     l_curly_token.format(),
-                    group(&soft_block_indent_with_conditional_space(
+                    group(&soft_block_indent_with_maybe_space(
                         &assertions.format(),
                         should_insert_space_around_brackets
                     )),

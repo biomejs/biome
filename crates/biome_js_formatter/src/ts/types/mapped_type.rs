@@ -84,7 +84,7 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
             f,
             [
                 &l_curly_token.format(),
-                group(&soft_block_indent_with_conditional_space(
+                group(&soft_block_indent_with_maybe_space(
                     &format_inner,
                     should_insert_space_around_brackets
                 ))

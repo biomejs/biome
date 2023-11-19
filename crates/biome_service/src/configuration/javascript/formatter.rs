@@ -37,7 +37,7 @@ pub struct JavascriptFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[bpaf(long("bracket-spacing"), argument("BOOLEAN"), optional)]
+    #[bpaf(long("bracket-spacing"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<bool>,
 

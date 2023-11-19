@@ -26,8 +26,8 @@ Formatting options specific to the JavaScript files
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
                               Defaults to "always".
-        --bracket-spacing=BOOLEAN  Whether to insert spaces around brackets in object literals. Defaults
-                              to true.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its super
                               languages) files.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
