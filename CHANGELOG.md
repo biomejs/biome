@@ -54,6 +54,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types) now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
 
+- Fix [#784](https://github.com/biomejs/biome/issues/784), [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title) fixes false-positives to `aria-label` and reports svg's role attribute is other than `img`. Contributed by @unvalley
+
 ### Parser
 
 ### VSCode
