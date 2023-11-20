@@ -207,6 +207,7 @@ define_categories! {
     // parse categories
     "parse",
     "parse/noSuperWithoutExtends",
+    "parse/noInitializerWithDefinite",
     "parse/noDuplicatePrivateClassMembers",
 
     // Lint groups
