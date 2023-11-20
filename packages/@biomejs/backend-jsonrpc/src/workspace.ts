@@ -1590,6 +1590,7 @@ export type Category =
 	| "internalError/panic"
 	| "parse"
 	| "parse/noSuperWithoutExtends"
+	| "parse/noInitializerWithDefinite"
 	| "parse/noDuplicatePrivateClassMembers"
 	| "lint"
 	| "lint/a11y"
