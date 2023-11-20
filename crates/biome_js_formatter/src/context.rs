@@ -703,7 +703,7 @@ impl From<bool> for BracketSpacing {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -715,12 +715,6 @@ impl BracketSameLine {
     /// Return the boolean value for this [BracketSameLine]
     pub fn value(&self) -> bool {
         self.0
-    }
-}
-
-impl Default for BracketSameLine {
-    fn default() -> Self {
-        Self(false)
     }
 }
 
