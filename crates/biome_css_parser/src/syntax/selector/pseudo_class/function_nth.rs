@@ -51,8 +51,7 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET: TokenSet<CssSyntaxKind> =
     token_set![T![odd], T![even]];
 
-const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![+], T![-]];
+const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-]];
 
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET: TokenSet<CssSyntaxKind> =
     PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET
@@ -89,7 +88,10 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
     let kind = if p.eat_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET) {
         CSS_PSEUDO_CLASS_NTH_IDENTIFIER
     } else {
-        p.eat_ts_with_context(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET, CssLexContext::PseudoNthSelector);
+        p.eat_ts_with_context(
+            PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET,
+            CssLexContext::PseudoNthSelector,
+        );
 
         parse_number(p, CssLexContext::PseudoNthSelector).ok();
 
