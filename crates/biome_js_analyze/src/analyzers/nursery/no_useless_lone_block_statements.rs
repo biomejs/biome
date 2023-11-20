@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, JsBlockStatement, JsCatchClause, JsElseClause, JsFileSource, JsFinallyClause,
-    JsLabeledStatement, JsStatementList, JsSyntaxKind, JsVariableStatement,
+    AnyJsStatement, JsBlockStatement, JsFileSource, JsLabeledStatement, JsStatementList,
+    JsSyntaxKind, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
