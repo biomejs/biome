@@ -26,17 +26,9 @@ impl Rule for NoInitializerWithDefinite {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if let Some(parent) = node.clone().into_syntax().parent().clone() {
-            if parent.kind() == JsSyntaxKind::JS_VARIABLE_DECLARATOR {
-                if let Some(initializer) = parent
-                    .children()
-                    .find(|sibling| sibling.kind() == JsSyntaxKind::JS_INITIALIZER_CLAUSE)
-                {
-                    return Some(initializer.text_range());
-                }
-            }
-        }
-        None
+        node.parent::<JsVariableDeclarator>()
+            .and_then(|var_declarator| var_declarator.initializer())
+            .map(|init| init.text_range())
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -45,7 +37,6 @@ impl Rule for NoInitializerWithDefinite {
             state,
             "Declarations with initializers cannot also have definite assignment assertions.",
         );
-
         Some(diagnostic)
     }
 }
