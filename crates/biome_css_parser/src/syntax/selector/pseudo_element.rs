@@ -58,7 +58,7 @@ pub(crate) fn parse_pseudo_element_function_identifier(p: &mut CssParser) -> Par
 
     let m = p.start();
 
-    p.bump_any();
+    p.eat_ts(PSEUDO_ELEMENT_FUNCTION_IDENTIFIER_SET);
     p.bump(T!['(']);
 
     let start_identifier = p.cur_range().start();

@@ -586,6 +586,35 @@ pub trait Parser: Sized {
         true
     }
 
+    /// Consume the next token if token set matches.
+    fn eat_ts(&mut self, kinds: TokenSet<Self::Kind>) -> bool {
+        if !self.at_ts(kinds) {
+            return false;
+        }
+
+        self.do_bump(self.cur());
+
+        true
+    }
+
+    /// Consume the next token if token set matches using the specified `context.
+    fn eat_ts_with_context(
+        &mut self,
+        kinds: TokenSet<Self::Kind>,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) -> bool
+    where
+        Self::Source: BumpWithContext,
+    {
+        if !self.at_ts(kinds) {
+            return false;
+        }
+
+        self.do_bump_with_context(self.cur(), context);
+
+        true
+    }
+
     /// Try to eat a specific token kind, if the kind is not there then adds an error to the events stack
     /// using the specified `context.
     fn expect_with_context(
