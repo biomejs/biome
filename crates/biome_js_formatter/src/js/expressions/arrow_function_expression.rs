@@ -64,7 +64,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature(&arrow, self.options.call_arg_layout.is_some()),
+                            format_signature(&arrow, self.options.call_arg_layout.is_some(), false),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -190,6 +190,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
+    ancestor_call_expr_or_logical_expr: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
         if let Some(async_token) = arrow.async_token() {
@@ -226,7 +227,11 @@ fn format_signature(
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
-                    write!(f, [params.format()])?;
+                    if ancestor_call_expr_or_logical_expr {
+                        write!(f, [dedent(&params.format())])?;
+                    } else {
+                        write!(f, [params.format()])?;
+                    }
                 }
             };
 
@@ -418,6 +423,13 @@ impl Format<JsFormatContext> for ArrowChain {
         } = self;
 
         let head_parent = head.syntax().parent();
+        let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
+            matches!(
+                ancestor.kind(),
+                JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            )
+        });
+
         let tail_body = tail.body()?;
 
         let is_assignment_rhs = self.options.assignment_layout.is_some();
@@ -452,7 +464,11 @@ impl Format<JsFormatContext> for ArrowChain {
                         f,
                         [
                             format_leading_comments(arrow.syntax()),
-                            format_signature(arrow, self.options.call_arg_layout.is_some())
+                            format_signature(
+                                arrow,
+                                self.options.call_arg_layout.is_some(),
+                                ancestor_call_expr_or_logical_expr
+                            )
                         ]
                     )?;
 
