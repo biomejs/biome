@@ -82,7 +82,7 @@ or directly head to the [Getting Started guide][getting-started] to start using 
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://opencollective.com/shiguredo" target="_blank"><img src="https://images.opencollective.com/shiguredo/8552ade/logo.png?height=80" width="80"></a>
+        <a href="https://shiguredo.jp/" target="_blank"><img src="https://images.opencollective.com/shiguredo/8552ade/logo.png?height=80" width="80"></a>
       </td>
     </tr>
   </tbody>
