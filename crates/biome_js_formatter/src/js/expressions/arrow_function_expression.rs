@@ -109,14 +109,12 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                 f,
                                 [group(&format_args![
                                     format_signature,
-                                    group(&format_args![
-                                        indent(&format_args![
-                                            hard_line_break(),
-                                            text("("),
-                                            soft_block_indent(&format_body),
-                                            text(")")
-                                        ]),
-                                    ])
+                                    group(&format_args![indent(&format_args![
+                                        hard_line_break(),
+                                        text("("),
+                                        soft_block_indent(&format_body),
+                                        text(")")
+                                    ]),])
                                 ])]
                             );
                         }
@@ -491,9 +489,10 @@ impl Format<JsFormatContext> for ArrowChain {
         });
 
         let mut has_comment = false;
-        if let AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence)) = &tail_body
+        if let AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence)) =
+            &tail_body
         {
-             has_comment = f.context().comments().has_comments(sequence.syntax());
+            has_comment = f.context().comments().has_comments(sequence.syntax());
         }
 
         let format_tail_body_inner = format_with(|f| {
@@ -511,14 +510,12 @@ impl Format<JsFormatContext> for ArrowChain {
                 if has_comment {
                     write!(
                         f,
-                           [ group(&format_args![
-                                indent(&format_args![
-                                    hard_line_break(),
-                                    text("("),
-                                    soft_block_indent(&format_tail_body),
-                                    text(")")
-                                ]),
-                            ])]
+                        [group(&format_args![indent(&format_args![
+                            hard_line_break(),
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ]),])]
                     )?;
                 } else {
                     write!(
