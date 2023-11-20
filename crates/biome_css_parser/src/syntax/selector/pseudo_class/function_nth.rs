@@ -115,7 +115,7 @@ fn parse_nth_offset(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.eat_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET);
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET);
     parse_regular_number(p).or_add_diagnostic(p, expected_number);
 
     Present(m.complete(p, CSS_NTH_OFFSET))
