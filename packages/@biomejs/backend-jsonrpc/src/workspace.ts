@@ -230,6 +230,10 @@ export interface JavascriptFormatter {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
+	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	 */
+	bracketSameLine?: boolean;
+	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: boolean;
