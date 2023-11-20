@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 
 use biome_diagnostics::category;
-use biome_js_syntax::{JsSyntaxKind, TextRange, TsDefiniteVariableAnnotation};
+use biome_js_syntax::{JsVariableDeclarator, TextRange, TsDefiniteVariableAnnotation};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -28,7 +28,7 @@ impl Rule for NoInitializerWithDefinite {
         let node = ctx.query();
         node.parent::<JsVariableDeclarator>()
             .and_then(|var_declarator| var_declarator.initializer())
-            .map(|init| init.text_range())
+            .map(|init| init.into_syntax().text_range())
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
