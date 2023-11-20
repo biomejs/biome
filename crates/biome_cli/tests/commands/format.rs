@@ -80,30 +80,33 @@ const {a, b} = foo;
 "#;
 
 const APPLY_BRACKET_SAME_LINE_BEFORE: &str = r#"<Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue}
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
 />;
 
 <Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue}
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
 >
-    Hi
-</Foo>"#;
+	Hi
+</Foo>;
+"#;
 
 const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue} />;
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
 
 <Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue}>
-    Hi
-</Foo>"#;
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}>
+	Hi
+</Foo>;
+"#;
 
 // Without this, Test (windows-latest) fails with: `warning: constant `DEFAULT_CONFIGURATION_BEFORE` is never used`
 #[allow(dead_code)]
