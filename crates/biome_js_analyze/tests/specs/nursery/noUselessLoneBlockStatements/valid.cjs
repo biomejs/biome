@@ -46,3 +46,24 @@ function g() {
  for(i = 0; f(i); i++) {}
  return i;
 }
+
+function JsTryStatement() {
+    try {
+     foo();
+    } catch (error) {
+     bar();
+    } finally {
+     baz();
+    }
+   }
+   
+
+function JsTryFinallyStatement() {
+ try {
+  foo();
+ } catch (error) {
+  bar();
+ } finally {
+  baz();
+ }
+}

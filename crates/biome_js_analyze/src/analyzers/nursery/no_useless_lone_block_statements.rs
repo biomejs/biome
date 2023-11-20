@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, JsBlockStatement, JsElseClause, JsFileSource, JsLabeledStatement,
-    JsStatementList, JsVariableStatement,
+    AnyJsStatement, JsBlockStatement, JsCatchClause, JsElseClause, JsFileSource, JsFinallyClause,
+    JsLabeledStatement, JsStatementList, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -150,7 +150,16 @@ fn in_control_structure(block: &JsBlockStatement) -> bool {
         if JsElseClause::can_cast(syntax_kind) {
             return true;
         }
+
+        if JsCatchClause::can_cast(syntax_kind) {
+            return true;
+        }
+
+        if JsFinallyClause::can_cast(syntax_kind) {
+            return true;
+        }
     }
+
     matches!(
         block.parent(),
         Some(
@@ -163,6 +172,7 @@ fn in_control_structure(block: &JsBlockStatement) -> bool {
                 | AnyJsStatement::JsWithStatement(_)
                 | AnyJsStatement::JsSwitchStatement(_)
                 | AnyJsStatement::JsTryStatement(_)
+                | AnyJsStatement::JsTryFinallyStatement(_)
         )
     )
 }
