@@ -5,7 +5,7 @@ use biome_js_syntax::{JsSyntaxKind, TextRange, TsDefiniteVariableAnnotation};
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Catch a `SyntaxError` when initializing a variable with a definite assertion.
+    /// Disallow initializing a variable with a definite assertion to prevent `SyntaxError`.
     ///
     /// ## Examples
     ///
