@@ -1,5 +1,10 @@
 use biome_deserialize::StringSet;
-use biome_service::{configuration::FilesConfiguration, settings::to_matcher, Configuration};
+use biome_fs::RomePath;
+use biome_service::{
+    configuration::FilesConfiguration,
+    workspace::{FeatureName, IsPathIgnoredParams},
+    Configuration,
+};
 
 use crate::{CliDiagnostic, CliSession};
 
@@ -21,43 +26,35 @@ pub(crate) fn store_changed_files(
     };
 
     let fs = &mut session.app.fs;
+    let ws = &mut session.app.workspace;
 
     let changed_files = fs.get_changed_files(base)?;
+
+    println!("changed files: {:?}", changed_files);
+
+    let filtered_changed_files: Vec<String> = changed_files
+        .iter()
+        .filter(|file| {
+            !ws.is_path_ignored(IsPathIgnoredParams {
+                rome_path: RomePath::new(file),
+                feature: FeatureName::Lint,
+            })
+            .unwrap_or(false)
+        })
+        .map(|file| file.to_string())
+        .collect();
+
+    println!("filtered changed files: {:?}", filtered_changed_files);
+
+    if filtered_changed_files.is_empty() {
+        return Err(CliDiagnostic::no_files_processed());
+    }
 
     let files_config = configuration
         .files
         .get_or_insert_with(FilesConfiguration::default);
 
-    let included_files = &mut files_config.include;
-    let ignored_files = &files_config.ignore;
-
-    let included_matcher = to_matcher(included_files.as_ref())?;
-    let ignored_matcher = to_matcher(ignored_files.as_ref())?;
-
-    let filtered_changed_files: Vec<String> = match (included_matcher, ignored_matcher) {
-        (Some(included), Some(ignored)) => changed_files
-            .iter()
-            .filter(|file| included.matches(file) && !ignored.matches(file))
-            .map(|path| path.to_string())
-            .collect(),
-        (Some(included), None) => changed_files
-            .iter()
-            .filter(|file| included.matches(file))
-            .map(|path| path.to_string())
-            .collect(),
-        (None, Some(ignored)) => changed_files
-            .iter()
-            .filter(|file| !ignored.matches(file))
-            .map(|path| path.to_string())
-            .collect(),
-        (None, None) => changed_files.iter().map(|path| path.to_string()).collect(),
-    };
-
-    if filtered_changed_files.is_empty() {
-        return Err(CliDiagnostic::no_files_processed());
-    };
-
-    let included_files = included_files.get_or_insert_with(StringSet::default);
+    let included_files = &mut files_config.include.get_or_insert_with(StringSet::default);
 
     included_files.clear();
     included_files.extend(filtered_changed_files);
