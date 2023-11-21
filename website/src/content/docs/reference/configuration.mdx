@@ -33,7 +33,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json"
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
 }
 ```
 
@@ -45,7 +45,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "extends": ["./formatter.json", "./linter.json"]
 }
 ```
@@ -53,7 +53,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "formatter": {
     "indentSize": 2
   },
@@ -68,7 +68,7 @@ A list of paths to other JSON files that will extend the current configuration f
 
 ```json
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "linter": {
     "rules": {
       "complexity": {
@@ -443,6 +443,15 @@ How big the indentation should be.
 
 > Default: `2`
 
+### `formatter.lineEnding`
+
+The type of line ending.
+- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
+- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
+- `cr` Carriage Return character only (`\r`), used very rarely
+
+> Default: `lf`
+
 ### `formatter.lineWidth`
 
 How many characters can be written on a single line.
@@ -606,6 +615,15 @@ How big the indentation should be for JavaScript (and its super languages) files
 
 > Default: `2`
 
+### `javascript.formatter.lineEnding`
+
+The type of line ending for JavaScript (and its super languages) files.
+- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
+- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
+- `cr` Carriage Return character only (`\r`), used very rarely
+
+> Default: `lf`
+
 ### `javascript.formatter.lineWidth`
 
 How many characters can be written on a single line in JavaScript (and its super languages) files.
@@ -682,6 +700,15 @@ The style of the indentation for JSON (and its super languages) files. It can be
 How big the indentation should be for JSON (and its super languages) files.
 
 > Default: `2`
+
+### `json.formatter.lineEnding`
+
+The type of line ending for JSON (and its super languages) files.
+- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
+- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
+- `cr` Carriage Return character only (`\r`), used very rarely
+
+> Default: `lf`
 
 ### `json.formatter.lineWidth`
 
@@ -796,7 +823,7 @@ You can disable certain rules for certain glob paths, and disable the linter for
 
 ### `overrides.<ITEM>.organizeImports`
 
-It will include the options of [top level organize imports](#organize_imports), minus `ignore` and `include`.
+It will include the options of [top level organize imports](#organizeimports), minus `ignore` and `include`.
 
 ### `overrides.<ITEM>.javascript`
 
