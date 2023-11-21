@@ -278,7 +278,7 @@ This command runs several sub-commands:
 
 - `cargo codegen-bindings`, it will update the TypeScript types released inside the JS APIs;
 
-- `cargo codegen-schema`, it will update the JSON Schema file of the configuration, used by VSCode.
+- `cargo codegen-schema`, it will update the JSON Schema file of the configuration, used by the npm packages.
 
 ### Commit your work
 
