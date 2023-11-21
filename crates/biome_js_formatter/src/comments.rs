@@ -194,10 +194,8 @@ fn handle_after_arrow_fat_arrow_comment(
         //  ) => c;
         // ```
         if let Some(js_parameters) = comment.preceding_node().and_then(JsParameters::cast_ref) {
-            if let Some(last) = js_parameters.items().last() {
-                if let Ok(last) = last {
-                    return CommentPlacement::trailing(last.into_syntax(), comment);
-                }
+            if let Some(Ok(last)) = js_parameters.items().last() {
+                return CommentPlacement::trailing(last.into_syntax(), comment);
             };
         }
         // input
