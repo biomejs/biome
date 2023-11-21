@@ -102,7 +102,22 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     AnyJsExpression(JsTemplateExpression(template)) => {
                         is_multiline_template_starting_on_same_line(template)
                     }
-                    AnyJsExpression(JsSequenceExpression(_)) => {
+                    AnyJsExpression(JsSequenceExpression(sequence)) => {
+                        let has_comment = f.context().comments().has_comments(sequence.syntax());
+                        if has_comment {
+                            return write!(
+                                f,
+                                [group(&format_args![
+                                    format_signature,
+                                    group(&format_args![indent(&format_args![
+                                        hard_line_break(),
+                                        text("("),
+                                        soft_block_indent(&format_body),
+                                        text(")")
+                                    ]),])
+                                ])]
+                            );
+                        }
                         return write!(
                             f,
                             [group(&format_args![
@@ -495,6 +510,12 @@ impl Format<JsFormatContext> for ArrowChain {
             )
         });
 
+        let has_comment = matches!(
+          &tail_body,
+          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence))
+          if f.context().comments().has_comments(sequence.syntax())
+        );
+
         let format_tail_body_inner = format_with(|f| {
             let format_tail_body = FormatMaybeCachedFunctionBody {
                 body: &tail_body,
@@ -507,14 +528,26 @@ impl Format<JsFormatContext> for ArrowChain {
                 tail_body,
                 AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(_))
             ) {
-                write!(
-                    f,
-                    [group(&format_args![
-                        text("("),
-                        soft_block_indent(&format_tail_body),
-                        text(")")
-                    ])]
-                )?;
+                if has_comment {
+                    write!(
+                        f,
+                        [group(&format_args![indent(&format_args![
+                            hard_line_break(),
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ]),])]
+                    )?;
+                } else {
+                    write!(
+                        f,
+                        [group(&format_args![
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ])]
+                    )?;
+                }
             } else {
                 let should_add_parens = should_add_parens(&tail_body);
                 write!(
