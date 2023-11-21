@@ -1,11 +1,10 @@
-use std::process::{Command, Output};
-
 use biome_deserialize::StringSet;
 use biome_service::{configuration::FilesConfiguration, settings::to_matcher, Configuration};
 
-use crate::CliDiagnostic;
+use crate::{CliDiagnostic, CliSession};
 
 pub(crate) fn store_changed_files(
+    session: &mut CliSession,
     configuration: &mut Configuration,
     since: Option<String>,
 ) -> Result<(), CliDiagnostic> {
@@ -21,54 +20,48 @@ pub(crate) fn store_changed_files(
         (None, None) => return Err(CliDiagnostic::incompatible_end_configuration("The `--changed` flag was set, but Biome couldn't determine the base to compare against. Either set configuration.vcs.defaultBranch or use the --since argument.")),
     };
 
-    let output = run_git_diff(base)?;
+    let fs = &mut session.app.fs;
 
-    if !output.status.success() {
-        todo!("Handle error when git command fails");
-    }
+    let changed_files = fs.get_changed_paths(base)?;
 
     let files_config = configuration
         .files
         .get_or_insert_with(FilesConfiguration::default);
 
-    let included_files = files_config.include.get_or_insert_with(StringSet::default);
+    let included_files = &mut files_config.include;
+    let ignored_files = &files_config.ignore;
 
-    let matcher = to_matcher(Some(included_files))?;
+    let included_matcher = to_matcher(included_files.as_ref())?;
+    let ignored_matcher = to_matcher(ignored_files.as_ref())?;
 
-    // Process the output to get 'changed_files'
-    let changed_files: Vec<String> = match matcher {
-        Some(matcher) if !included_files.is_empty() => {
-            // Filter and collect lines that match and are non-empty
-            String::from_utf8_lossy(&output.stdout)
-                .lines()
-                .filter(|line| !line.is_empty() && matcher.matches(line))
-                .map(ToString::to_string)
-                .collect()
-        }
-        _ => {
-            // Collect all non-empty lines if no matcher or 'included_files' is empty
-            String::from_utf8_lossy(&output.stdout)
-                .lines()
-                .filter(|line| !line.is_empty())
-                .map(ToString::to_string)
-                .collect()
-        }
+    let filtered_changed_files: Vec<String> = match (included_matcher, ignored_matcher) {
+        (Some(included), Some(ignored)) => changed_files
+            .iter()
+            .filter(|file| included.matches(file) && !ignored.matches(file))
+            .map(|path| path.to_string())
+            .collect(),
+        (Some(included), None) => changed_files
+            .iter()
+            .filter(|file| included.matches(file))
+            .map(|path| path.to_string())
+            .collect(),
+
+        (None, Some(ignored)) => changed_files
+            .iter()
+            .filter(|file| !ignored.matches(file))
+            .map(|path| path.to_string())
+            .collect(),
+        (None, None) => changed_files.iter().map(|path| path.to_string()).collect(),
     };
 
-    if changed_files.is_empty() {
+    if filtered_changed_files.is_empty() {
         return Err(CliDiagnostic::no_files_processed());
     };
 
+    let included_files = included_files.get_or_insert_with(StringSet::default);
+
     included_files.clear();
-    included_files.extend(changed_files);
+    included_files.extend(filtered_changed_files);
 
     Ok(())
-}
-
-fn run_git_diff(base: &str) -> std::io::Result<Output> {
-    return Command::new("git")
-        .arg("diff")
-        .arg("--name-only")
-        .arg(format!("{}...HEAD", base))
-        .output();
 }

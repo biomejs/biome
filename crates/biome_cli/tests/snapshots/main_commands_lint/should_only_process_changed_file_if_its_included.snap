@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "include": ["file.js"]
+  },
+  "vcs": {
+    "defaultBranch": "main"
+  }
+}
+```
+
+## `file.js`
+
+```js
+console.log('file');
+```
+
+## `file2.js`
+
+```js
+console.log('file2');
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file(s) in <TIME>
+```
+
+

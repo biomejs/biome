@@ -84,7 +84,7 @@ pub(crate) fn lint(
     }
 
     if changed {
-        store_changed_files(&mut fs_configuration, since)?;
+        store_changed_files(&mut session, &mut fs_configuration, since)?;
     }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {

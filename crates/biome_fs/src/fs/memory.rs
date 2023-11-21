@@ -1,7 +1,7 @@
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::{Entry, IntoIter};
 use std::io;
-use std::panic::AssertUnwindSafe;
+use std::panic::{AssertUnwindSafe, RefUnwindSafe};
 use std::path::{Path, PathBuf};
 use std::str;
 use std::sync::Arc;
@@ -19,6 +19,13 @@ pub struct MemoryFileSystem {
     files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
+    on_get_changed_files: Option<
+        Arc<
+            AssertUnwindSafe<
+                Mutex<Option<Box<dyn FnOnce() -> Vec<String> + Send + 'static + RefUnwindSafe>>>,
+            >,
+        >,
+    >,
 }
 
 impl Default for MemoryFileSystem {
@@ -27,6 +34,7 @@ impl Default for MemoryFileSystem {
             files: Default::default(),
             errors: Default::default(),
             allow_write: true,
+            on_get_changed_files: None,
         }
     }
 }
@@ -89,6 +97,13 @@ impl MemoryFileSystem {
     pub fn files(self) -> IntoIter<PathBuf, FileEntry> {
         let files = self.files.0.into_inner();
         files.into_iter()
+    }
+
+    pub fn set_on_get_changed_files(
+        &mut self,
+        cfn: Box<dyn FnOnce() -> Vec<String> + Send + RefUnwindSafe + 'static>,
+    ) {
+        self.on_get_changed_files = Some(Arc::new(AssertUnwindSafe(Mutex::new(Some(cfn)))));
     }
 }
 
@@ -165,6 +180,16 @@ impl FileSystem for MemoryFileSystem {
     fn path_exists(&self, path: &Path) -> bool {
         let files = self.files.0.read();
         files.get(path).is_some()
+    }
+
+    fn get_changed_paths(&self, _base: &str) -> io::Result<Vec<String>> {
+        let cb_arc = self.on_get_changed_files.as_ref().unwrap().clone();
+
+        let mut cb_guard = cb_arc.lock();
+
+        let cb = cb_guard.take().unwrap();
+
+        Ok(cb())
     }
 }
 
