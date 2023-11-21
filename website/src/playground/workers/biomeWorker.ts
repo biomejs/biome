@@ -74,6 +74,7 @@ self.addEventListener("message", async (e) => {
 				semicolons,
 				arrowParentheses,
 				bracketSpacing,
+				bracketSameLine,
 				importSortingEnabled,
 				unsafeParameterDecoratorsEnabled,
 				allowComments,
@@ -113,6 +114,7 @@ self.addEventListener("message", async (e) => {
 								? "always"
 								: "asNeeded",
 						bracketSpacing,
+						bracketSameLine,
 					},
 					parser: {
 						unsafeParameterDecoratorsEnabled,

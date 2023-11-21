@@ -269,6 +269,8 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             language_setting.formatter.semicolons = formatter.semicolons;
             language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
             language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
+            language_setting.formatter.bracket_same_line =
+                formatter.bracket_same_line.map(Into::into);
             language_setting.formatter.enabled = formatter.enabled;
             language_setting.formatter.line_width = formatter.line_width;
             language_setting.formatter.indent_width = formatter
@@ -517,6 +519,9 @@ impl OverrideSettings {
                 }
                 if let Some(bracket_spacing) = js_formatter.bracket_spacing {
                     options.set_bracket_spacing(bracket_spacing);
+                }
+                if let Some(bracket_same_line) = js_formatter.bracket_same_line {
+                    options.set_bracket_same_line(bracket_same_line);
                 }
             }
 

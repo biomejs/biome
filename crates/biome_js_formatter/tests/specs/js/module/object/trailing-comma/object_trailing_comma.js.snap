@@ -37,6 +37,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -67,6 +68,7 @@ Trailing comma: ES5
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -97,6 +99,7 @@ Trailing comma: None
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js

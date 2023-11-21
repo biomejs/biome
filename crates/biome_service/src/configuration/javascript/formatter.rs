@@ -40,6 +40,10 @@ pub struct JavascriptFormatter {
     #[bpaf(long("bracket-spacing"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<bool>,
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    #[bpaf(long("bracket-same-line"), argument("true|false"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_same_line: Option<bool>,
 
     /// Control the formatter for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional)]
@@ -95,6 +99,9 @@ impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
         }
         if let Some(bracket_spacing) = other.bracket_spacing {
             self.bracket_spacing = Some(bracket_spacing);
+        }
+        if let Some(bracket_same_line) = other.bracket_same_line {
+            self.bracket_same_line = Some(bracket_same_line);
         }
         if let Some(quote_properties) = other.quote_properties {
             self.quote_properties = Some(quote_properties);

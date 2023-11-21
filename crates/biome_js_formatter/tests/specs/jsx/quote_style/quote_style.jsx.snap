@@ -36,6 +36,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx
@@ -58,6 +59,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx
@@ -80,6 +82,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx
@@ -102,6 +105,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx
@@ -124,6 +128,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx

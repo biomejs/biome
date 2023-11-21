@@ -4,8 +4,8 @@ use biome_formatter::{
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
-    ArrowParentheses, BracketSpacing, JsFormatContext, JsFormatOptions, QuoteProperties,
-    QuoteStyle, Semicolons,
+    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatContext, JsFormatOptions,
+    QuoteProperties, QuoteStyle, Semicolons,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
@@ -228,6 +228,9 @@ pub struct JsSerializableFormatOptions {
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     pub bracket_spacing: Option<bool>,
+
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    pub bracket_same_line: Option<bool>,
 }
 
 impl JsSerializableFormatOptions {
@@ -272,6 +275,10 @@ impl JsSerializableFormatOptions {
             .with_bracket_spacing(
                 self.bracket_spacing
                     .map_or_else(BracketSpacing::default, |value| value.into()),
+            )
+            .with_bracket_same_line(
+                self.bracket_same_line
+                    .map_or_else(BracketSameLine::default, |value| value.into()),
             )
     }
 }

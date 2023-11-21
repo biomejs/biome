@@ -79,6 +79,35 @@ let foo = {a, b};
 const {a, b} = foo;
 "#;
 
+const APPLY_BRACKET_SAME_LINE_BEFORE: &str = r#"<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
+
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+>
+	Hi
+</Foo>;
+"#;
+
+const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+/>;
+
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}>
+	Hi
+</Foo>;
+"#;
+
 // Without this, Test (windows-latest) fails with: `warning: constant `DEFAULT_CONFIGURATION_BEFORE` is never used`
 #[allow(dead_code)]
 const DEFAULT_CONFIGURATION_BEFORE: &str = r#"function f() {
@@ -698,6 +727,51 @@ fn applies_custom_bracket_spacing() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_bracket_same_line() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_BRACKET_SAME_LINE_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--bracket-same-line"),
+                ("true"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut file = fs
+        .open(file_path)
+        .expect("formatting target file was removed by the CLI");
+
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("failed to read file from memory FS");
+
+    assert_eq!(content, APPLY_BRACKET_SAME_LINE_AFTER);
+
+    drop(file);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_bracket_same_line",
         fs,
         console,
         result,

@@ -165,6 +165,9 @@ pub struct JsFormatOptions {
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     bracket_spacing: BracketSpacing,
 
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    bracket_same_line: BracketSameLine,
+
     /// Information related to the current file
     source_type: JsFileSource,
 }
@@ -184,6 +187,7 @@ impl JsFormatOptions {
             semicolons: Semicolons::default(),
             arrow_parentheses: ArrowParentheses::default(),
             bracket_spacing: BracketSpacing::default(),
+            bracket_same_line: BracketSameLine::default(),
         }
     }
 
@@ -194,6 +198,11 @@ impl JsFormatOptions {
 
     pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
         self.bracket_spacing = bracket_spacing;
+        self
+    }
+
+    pub fn with_bracket_same_line(mut self, bracket_same_line: BracketSameLine) -> Self {
+        self.bracket_same_line = bracket_same_line;
         self
     }
 
@@ -250,6 +259,10 @@ impl JsFormatOptions {
         self.bracket_spacing = bracket_spacing;
     }
 
+    pub fn set_bracket_same_line(&mut self, bracket_same_line: BracketSameLine) {
+        self.bracket_same_line = bracket_same_line;
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -292,6 +305,10 @@ impl JsFormatOptions {
 
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn bracket_same_line(&self) -> BracketSameLine {
+        self.bracket_same_line
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
@@ -357,7 +374,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Trailing comma: {}", self.trailing_comma)?;
         writeln!(f, "Semicolons: {}", self.semicolons)?;
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
-        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
+        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())
     }
 }
 
@@ -680,6 +698,27 @@ impl Default for BracketSpacing {
 }
 
 impl From<bool> for BracketSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSameLine(bool);
+
+impl BracketSameLine {
+    /// Return the boolean value for this [BracketSameLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for BracketSameLine {
     fn from(value: bool) -> Self {
         Self(value)
     }
