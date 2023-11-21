@@ -102,6 +102,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
+        
+      - name: Install musl toolchain
+        if: matrix.code-target == 'linux-x64-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
 
       - name: Audit crates.io dependencies
         if: matrix.code-target == 'linux-x64'
