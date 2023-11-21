@@ -14,18 +14,20 @@ use crate::{FileSystem, RomePath, TraversalContext, TraversalScope};
 
 use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
 
+type OnGetChangedFiles = Option<
+    Arc<
+        AssertUnwindSafe<
+            Mutex<Option<Box<dyn FnOnce() -> Vec<String> + Send + 'static + RefUnwindSafe>>>,
+        >,
+    >,
+>;
+
 /// Fully in-memory file system, stores the content of all known files in a hashmap
 pub struct MemoryFileSystem {
     files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
-    on_get_changed_files: Option<
-        Arc<
-            AssertUnwindSafe<
-                Mutex<Option<Box<dyn FnOnce() -> Vec<String> + Send + 'static + RefUnwindSafe>>>,
-            >,
-        >,
-    >,
+    on_get_changed_files: OnGetChangedFiles,
 }
 
 impl Default for MemoryFileSystem {
