@@ -488,12 +488,11 @@ impl Format<JsFormatContext> for ArrowChain {
             )
         });
 
-        let mut has_comment = false;
-        if let AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence)) =
-            &tail_body
-        {
-            has_comment = f.context().comments().has_comments(sequence.syntax());
-        }
+        let has_comment = matches!(
+          &tail_body,
+          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence)) 
+          if f.context().comments().has_comments(sequence.syntax())
+        );
 
         let format_tail_body_inner = format_with(|f| {
             let format_tail_body = FormatMaybeCachedFunctionBody {
