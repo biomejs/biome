@@ -47,11 +47,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
 }
 
 fn is_non_strict_mode(root_path: &Path, file_path: &Path) -> bool {
-    let test_cases_paths = [
-        "js/with",
-        "js/sloppy-mode",
-        "js/identifier/parentheses/const.js",
-    ];
+    let test_cases_paths = ["js/with/", "js/sloppy-mode/", "js/identifier/"];
 
     test_cases_paths.iter().any(|path| {
         file_path
