@@ -45,7 +45,6 @@ pub(crate) fn store_changed_files(
             .filter(|file| included.matches(file))
             .map(|path| path.to_string())
             .collect(),
-
         (None, Some(ignored)) => changed_files
             .iter()
             .filter(|file| !ignored.matches(file))
