@@ -281,8 +281,6 @@ Here's a sample of the headings:
 ### Linter
 
 ### Parser
-
-### VSCode
 ```
 
 When you edit a blank section:
@@ -355,17 +353,14 @@ When releasing a new version of a Biome, follow these steps:
 
 1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
 
-1. [ ] Update `version` in [Biome's LSP package.json](./editors/vscode/package.json) if applicable.
-   Note that the LSP follows a [distinct versioning scheme](https://biomejs.dev/internals/versioning/#visual-studio-code-extension).
+2. [ ] Update `version` in each published crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
-1. [ ] Update `version` in each published crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
-
-1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
+3. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
    Then execute `just gen-lint`.
 
-1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+4. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
 
 ## Resources
 
