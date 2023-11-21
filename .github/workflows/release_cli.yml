@@ -62,7 +62,7 @@ jobs:
           - os: ubuntu-20.04
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
-          - os: alpine-3.14
+          - os: ubuntu-20.04
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
           - os: macos-11
