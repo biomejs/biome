@@ -490,7 +490,7 @@ impl Format<JsFormatContext> for ArrowChain {
 
         let has_comment = matches!(
           &tail_body,
-          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence)) 
+          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence))
           if f.context().comments().has_comments(sequence.syntax())
         );
 
