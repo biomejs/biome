@@ -137,37 +137,7 @@ c */? foo : bar : bar;
 ```diff
 --- Prettier
 +++ Biome
-@@ -63,11 +63,11 @@
-     */
-     foo
-   : test
--    ? /* comment
-+  ? /* comment
-   comment
-     comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
- 
- test ? /* comment */ foo : bar;
- 
-@@ -88,29 +88,30 @@
-            comment
-       A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
-     */
--    test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
-   comment
-     comment
-    */
--      bar;
-+    bar;
- 
+@@ -99,12 +99,13 @@
  // It is at least possible to delete the extra newline that was
  // unfortunately added before the second condition above:
  test
@@ -179,19 +149,10 @@ c */? foo : bar : bar;
             comment
      */
 -  : test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
++    test
+     ? foo
+     : /* comment
    comment
-     comment
-    */
--      bar;
-+    bar;
- 
- test ? foo : /* comment */ bar;
- 
 ```
 
 # Output
@@ -262,11 +223,11 @@ test
     */
     foo
   : test
-  ? /* comment
+    ? /* comment
   comment
     comment */
-    foo
-  : bar;
+      foo
+    : bar;
 
 test ? /* comment */ foo : bar;
 
@@ -287,13 +248,13 @@ test
            comment
       A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
     */
-  test
-  ? foo
-  : /* comment
+    test
+    ? foo
+    : /* comment
   comment
     comment
    */
-    bar;
+      bar;
 
 // It is at least possible to delete the extra newline that was
 // unfortunately added before the second condition above:
@@ -304,13 +265,13 @@ test
      comment
            comment
     */
-  test
-  ? foo
-  : /* comment
+    test
+    ? foo
+    : /* comment
   comment
     comment
    */
-    bar;
+      bar;
 
 test ? foo : /* comment */ bar;
 
