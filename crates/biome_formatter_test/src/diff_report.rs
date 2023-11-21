@@ -127,6 +127,7 @@ impl DiffReport {
             "destructuring-private-fields",
             "/do/",
             "export-extension",
+            "js/export-default/escaped/default-escaped.js", // re-export of default export is unstable
             "js/tuple",
             "deferred-import-evaluation", // `import defer` syntax
             "source-phase-imports",       // `import source` syntax
@@ -316,7 +317,7 @@ impl DiffReport {
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    ",
+",
         );
 
         write!(
@@ -328,6 +329,7 @@ impl DiffReport {
 
         header.push_str(
                 r"
+
 <details>
     <summary>Definition</summary>
 
@@ -335,7 +337,7 @@ impl DiffReport {
 </details>
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-                ",
+",
             );
 
         let report = format!("{header}\n\n{report}");
