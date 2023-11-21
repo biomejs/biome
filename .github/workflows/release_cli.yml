@@ -77,7 +77,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     needs: check
-    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
+    # if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
+    if: always()
     env:
       version: ${{ needs.check.outputs.version }}
     outputs:
