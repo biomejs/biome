@@ -37,6 +37,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -72,6 +73,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: As needed
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js

@@ -14,8 +14,9 @@ use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
 use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
-    JsFormalParameter, JsFunctionBody, JsIdentifierExpression, JsIfStatement, JsLanguage,
-    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration,
+    JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
+    JsLanguage, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement,
+    TsInterfaceDeclaration,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 
@@ -108,7 +109,6 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_method_comment)
                 .or_else(handle_for_comment)
                 .or_else(handle_root_comments)
-                .or_else(handle_array_hole_comment)
                 .or_else(handle_variable_declarator_comment)
                 .or_else(handle_parameter_comment)
                 .or_else(handle_labelled_statement_comment)
@@ -116,6 +116,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_mapped_type_comment)
                 .or_else(handle_switch_default_case_comment)
+                .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
                 .or_else(handle_function_declaration_comment)
@@ -127,7 +128,6 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_for_comment)
                 .or_else(handle_root_comments)
                 .or_else(handle_parameter_comment)
-                .or_else(handle_array_hole_comment)
                 .or_else(handle_labelled_statement_comment)
                 .or_else(handle_call_expression_comment)
                 .or_else(handle_mapped_type_comment)
@@ -156,6 +156,63 @@ fn handle_typecast_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlac
         }
         _ => CommentPlacement::Default(comment),
     }
+}
+
+/// Move the arrow function's comment to the same position as the prettier
+fn handle_after_arrow_fat_arrow_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    if JsArrowFunctionExpression::can_cast(comment.enclosing_node().kind()) {
+        // input
+        // ```javascript
+        // num => // comment
+        // c;
+        // ```
+        // output
+        // ```javascript
+        //(
+        //   num, // comment
+        // ) => c;
+        // ```
+        if let Some(js_ident_binding) = comment
+            .preceding_node()
+            .and_then(JsIdentifierBinding::cast_ref)
+        {
+            return CommentPlacement::trailing(js_ident_binding.into_syntax(), comment);
+        }
+        // input
+        // ```javascript
+        // (num1,num2) => // comment
+        // c;
+        // ```
+        // output
+        // ```javascript
+        // (
+        //     num1,
+        //     num2, // comment
+        //  ) => c;
+        // ```
+        if let Some(js_parameters) = comment.preceding_node().and_then(JsParameters::cast_ref) {
+            if let Some(Ok(last)) = js_parameters.items().last() {
+                return CommentPlacement::trailing(last.into_syntax(), comment);
+            };
+        }
+        // input
+        // ```javascript
+        // () => // comment
+        // c;
+        // ```
+        // output
+        // ```javascript
+        // () =>
+        // // comment
+        // c;
+        // ```
+        if let Some(following_node) = comment.following_node() {
+            return CommentPlacement::leading(following_node.clone(), comment);
+        }
+    }
+    CommentPlacement::Default(comment)
 }
 
 fn handle_after_arrow_param_comment(

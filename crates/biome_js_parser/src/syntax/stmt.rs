@@ -1390,7 +1390,6 @@ fn parse_variable_declarator(
 
                         .with_detail(ts_annotation.range(p), "Annotation")
                 );
-                initializer.change_to_bogus(p);
             }
         }
 

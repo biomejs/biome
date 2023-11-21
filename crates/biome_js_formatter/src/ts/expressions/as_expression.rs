@@ -62,7 +62,6 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesExpression {
         let expression = self.expression();
         let operation_token = self.operation_token()?;
         let ty = self.ty()?;
-
         let format_inner = format_with(|f| {
             write!(f, [expression.format(), space(), operation_token.format()])?;
 

@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.46
+**Average compatibility**: 95.94
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,8 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-    **Compatible lines**: 95.52
+**Compatible lines**: 95.98
+
 <details>
     <summary>Definition</summary>
 
@@ -16,7 +17,7 @@
 </details>
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-                
+
 
 # js/arrays/issue-10159.js
 ```diff
@@ -140,199 +141,6 @@
 ```
 
 **Prettier Similarity**: 54.55%
-
-
-# js/arrows/chain-as-arg.js
-```diff
- const w = a.b(
-   (
--    c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--    d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--  ) =>
-+      c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+      d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+    ) =>
-     (e) =>
-       0,
- );
- 
- const x = a.b(
-   (
--    c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--    d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--  ) =>
-+      c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+      d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+    ) =>
-     (e) =>
-       0,
- )(x);
- 
- const y = a.b(
-   1,
-   (
--    c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--    d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--  ) =>
-+      c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+      d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+    ) =>
-     (e) =>
-       0,
- )(x);
- 
- const z = a.b(
-   (
--    c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--    d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--  ) =>
-+      c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+      d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+    ) =>
-     (e) =>
-       0,
-   2,
- )(x);
-
-```
-
-**Prettier Similarity**: 67.57%
-
-
-# js/arrows/chain-in-logical-expression.js
-```diff
- const x =
-   a.b ??
-   ((
--    c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--    d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
--  ) =>
-+      c = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+      d = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef",
-+    ) =>
-     (e) =>
-       0);
-
-```
-
-**Prettier Similarity**: 62.50%
-
-
-# js/arrows/comment.js
-```diff
- /**
-  * Curried function that ends with a BEM CSS Selector
-  *
-  * @param {String} block - the BEM Block you'd like to select.
-  * @returns {Function}
-  */
- export const bem =
-   (block) =>
-   /**
-    * @param {String} [element] - the BEM Element within that block; if undefined, selects the block itself.
-    * @returns {Function}
-    */
-   (element) =>
-   /**
-    * @param {?String} [modifier] - the BEM Modifier for the Block or Element; if undefined, selects the Block or Element unmodified.
-    * @returns {String}
-    */
-   (modifier) =>
-     [
-       ".",
-       css(block),
-       element ? `__${css(element)}` : "",
-       modifier ? `--${css(modifier)}` : "",
-     ].join("");
- 
- <FlatList
-   renderItem={(
-     info, // $FlowExpectedError - bad widgetCount type 6, should be Object
-   ) => <span>{info.item.widget.missingProp}</span>}
-   data={data}
- />;
- 
- func(
--  () =>
--    // comment
--    a,
-+  () => a, // comment
- );
- func(
--  () => () =>
--    // comment
--    a,
-+  () =>
-+    () => // comment
-+      a,
- );
- func(
--  () => () => () =>
--    // comment
--    a,
-+  () =>
-+    () =>
-+    () => // comment
-+      a,
- );
- 
--func(() =>
--  // comment
--  a ? b : c,
-+func(
-+  () => (a ? b : c), // comment
- );
- func(
--  () => () =>
--    // comment
--    a ? b : c,
-+  () =>
-+    () => // comment
-+      a ? b : c,
- );
- func(
--  () => () => () =>
--    // comment
--    a ? b : c,
-+  () =>
-+    () =>
-+    () => // comment
-+      a ? b : c,
- );
- 
- func(
--  () =>
--    (
--      // comment
--      a, b, c
--    ),
-+  () => ( // comment
-+    a, b, c
-+  ),
- );
- func(
--  () => () =>
--    (
--      // comment
-+  () =>
-+    () => ( // comment
-       a, b, c
-     ),
- );
- func(
--  () => () => () =>
--    (
--      // comment
-+  () =>
-+    () =>
-+    () => ( // comment
-       a, b, c
-     ),
- );
-
-```
-
-**Prettier Similarity**: 65.48%
 
 
 # js/arrows/curried.js
@@ -886,130 +694,6 @@
 ```
 
 **Prettier Similarity**: 18.18%
-
-
-# js/binary-expressions/in_instanceof.js
-```diff
--(!foo) in bar;
--(!foo) in bar;
-+!foo in bar;
-+!foo in bar;
- !(foo in bar);
--(!foo) in bar;
-+!foo in bar;
- 
--(!foo) instanceof Bar;
--(!foo) instanceof Bar;
-+!foo instanceof Bar;
-+!foo instanceof Bar;
- !(foo instanceof Bar);
--(!foo) instanceof Bar;
-+!foo instanceof Bar;
- 
--(~foo) in bar;
--(~foo) in bar;
-+~foo in bar;
-+~foo in bar;
- ~(foo in bar);
--(~foo) in bar;
-+~foo in bar;
- 
--(~foo) instanceof Bar;
--(~foo) instanceof Bar;
-+~foo instanceof Bar;
-+~foo instanceof Bar;
- ~(foo instanceof Bar);
--(~foo) instanceof Bar;
-+~foo instanceof Bar;
- 
--(+foo) in bar;
--(+foo) in bar;
-++foo in bar;
-++foo in bar;
- +(foo in bar);
--(+foo) in bar;
-++foo in bar;
- 
--(+foo) instanceof Bar;
--(+foo) instanceof Bar;
-++foo instanceof Bar;
-++foo instanceof Bar;
- +(foo instanceof Bar);
--(+foo) instanceof Bar;
-++foo instanceof Bar;
- 
--(-foo) in bar;
--(-foo) in bar;
-+-foo in bar;
-+-foo in bar;
- -(foo in bar);
--(-foo) in bar;
-+-foo in bar;
- 
--(-foo) instanceof Bar;
--(-foo) instanceof Bar;
-+-foo instanceof Bar;
-+-foo instanceof Bar;
- -(foo instanceof Bar);
--(-foo) instanceof Bar;
-+-foo instanceof Bar;
- 
--(void 0) in bar;
--(void 0) in bar;
-+void 0 in bar;
-+void 0 in bar;
- void (0 in bar);
--(void 0) in bar;
-+void 0 in bar;
- 
--(void 0) instanceof bar;
--(void 0) instanceof bar;
-+void 0 instanceof bar;
-+void 0 instanceof bar;
- void (0 instanceof bar);
--(void 0) instanceof bar;
-+void 0 instanceof bar;
- 
--(delete 0) in bar;
--(delete 0) in bar;
-+delete 0 in bar;
-+delete 0 in bar;
- delete (0 in bar);
--(delete 0) in bar;
-+delete 0 in bar;
- 
--(delete 0) instanceof bar;
--(delete 0) instanceof bar;
-+delete 0 instanceof bar;
-+delete 0 instanceof bar;
- delete (0 instanceof bar);
--(delete 0) instanceof bar;
-+delete 0 instanceof bar;
- 
--(typeof 0) in bar;
--(typeof 0) in bar;
-+typeof 0 in bar;
-+typeof 0 in bar;
- typeof (0 in bar);
--(typeof 0) in bar;
-+typeof 0 in bar;
- 
--(typeof 0) instanceof bar;
--(typeof 0) instanceof bar;
-+typeof 0 instanceof bar;
-+typeof 0 instanceof bar;
- typeof (0 instanceof bar);
--(typeof 0) instanceof bar;
-+typeof 0 instanceof bar;
- 
- ++x instanceof bar; // not ambiguous, because ++(x instanceof bar) is obviously invalid
- 
--(!!foo) instanceof Bar;
-+!!foo instanceof Bar;
-
-```
-
-**Prettier Similarity**: 41.10%
 
 
 # js/chain-expression/test.js
@@ -2422,20 +2106,6 @@
 **Prettier Similarity**: 91.67%
 
 
-# js/export-default/escaped/default-escaped.js
-```diff
- // export asyn\u{63} from "async";
--export nc from "async";
-+export
-+n\u{63};
-+from;
-+("async");
-
-```
-
-**Prettier Similarity**: 20.00%
-
-
 # js/export/blank-line-between-specifiers.js
 ```diff
  export {
@@ -2549,172 +2219,6 @@
 ```
 
 **Prettier Similarity**: 87.67%
-
-
-# js/identifier/for-of/let.js
-```diff
- for ((let) of foo);
- for (foo of let);
- for (foo of let.a);
- for (foo of let[a]);
--for ((let).a of foo);
--for ((let)[a] of foo);
-+for (let.a of foo);
-+for (let[a] of foo);
- for ((let)().a of foo);
- for (letFoo of foo);
- 
- for (let.a in foo);
--for ((let)[a] in foo);
-+for (let[a] in foo);
- 
- for (let of of let);
-
-```
-
-**Prettier Similarity**: 76.92%
-
-
-# js/identifier/parentheses/const.js
-```diff
--const [a = (let[0] = 1)] = 2;
-+const [a = ((let)[0] = 1)] = 2;
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
-# js/identifier/parentheses/let.js
-```diff
- let.a = 1;
- 
- let.a[0] = 1;
- 
--(let)[a] = 1;
-+let[a] = 1;
- 
--(let)[a].b.c.e = 1;
-+let[a].b.c.e = 1;
- 
- foo[let[a]] = 1;
- 
- (let)[let[a]] = 1;
- 
--(let)[a] ??= 1;
-+let[a] ??= 1;
- 
- foo = let[a];
- 
- let()[a] = 1;
- 
- foo(let)[a] = 1;
- 
- foo(let[a])[a] = 1;
- 
--(let)[0] = 1;
-+let[0] = 1;
- 
--(let)["a"] = 1;
-+let["a"] = 1;
- 
- let = 1;
- 
- var let = 1;
- 
- [let[a]] = 1;
- 
- ({ a: let[a] } = 1);
- 
- alert((let[0] = 1));
- 
--((let)[0] = 1) || 2;
-+(let[0] = 1) || 2;
- 
--((let)[0] = 1), 2;
-+(let[0] = 1), 2;
- 
--((let)[0] = 1) ? a : b;
-+(let[0] = 1) ? a : b;
- 
- if ((let[0] = 1));
- 
- while ((let[0] = 1));
- 
- do {} while ((let[0] = 1));
- 
- var a = (let[0] = 1);
- 
--((let)[0] = 1) instanceof a;
-+(let[0] = 1) instanceof a;
- 
- void (let[0] = 1);
- 
--((let)[0] = 1)();
-+(let[0] = 1)();
- 
- new (let[0] = 1)();
- 
- ((let)[0] = 1)``;
- 
- ((let)[0] = 1).toString;
- 
- ((let)[0] = 1)?.toString;
- 
- [...(let[0] = 1)];
- 
- foo = () => (let[0] = 1);
- 
- function* foo() {
-   yield (let[0] = 1);
- }
- 
- async function foo() {
-   await (let[0] = 1);
- }
- 
- function foo() {
-   return (let[0] = 1);
- }
- 
--while (true) (let)[0] = 1;
-+while (true) let[0] = 1;
- 
- throw (let[0] = 1);
- 
- ({ foo: (let[0] = 1) });
- 
- [(let[0] = 1)];
- 
--for ((let)[0] = 1; ; );
-+for (let[0] = 1; ; );
- for ((let)[0] in {});
- for ((let)[0] of []);
- 
- switch ((let[0] = 1)) {
- }
- 
- switch (foo) {
-   case (let[0] = 1):
- }
- 
--with ((let[0] = 1));
-+with (let[0] = 1);
- 
--(let)[x].foo();
-+let[x].foo();
- 
- let.let[x].foo();
- 
- a = let[x].foo();
- 
- (let)[2];
- 
- a[1] + (let[2] = 2);
-
-```
-
-**Prettier Similarity**: 87.27%
 
 
 # js/if/expr_and_same_line_comments.js
@@ -3250,16 +2754,6 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/sloppy-mode/function-declaration-in-if.js
-```diff
--if (false) function foo() {}
-+if (false) function foo(){}
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 # js/sloppy-mode/function-declaration-in-while.js
 ```diff
 -while (false) function foo() {}
@@ -3788,19 +3282,6 @@
 ```
 
 **Prettier Similarity**: 87.10%
-
-
-# js/with/indent.js
-```diff
--with (0) {
--}
-+with (0) {}
- 
- with (0) 1;
-
-```
-
-**Prettier Similarity**: 50.00%
 
 
 # jsx/comments/in-attributes.js
@@ -5204,21 +4685,6 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/as/expression-statement.ts
-```diff
- // expression statemnt of "as" expression hardly ever makes sense, but it's still valid.
- const [type, x] = [0, 0];
--(type) as unknown;
-+// FIXME
-+// TODO: parse issue
-+// (type) as unknown;
- x as unknown;
-
-```
-
-**Prettier Similarity**: 50.00%
-
-
 # typescript/assignment/issue-5370.ts
 ```diff
 -const durabilityMetricsSelectable: Immutable.OrderedSet<SomeReportingMetric> =
@@ -6582,22 +6048,6 @@
 **Prettier Similarity**: 77.14%
 
 
-# typescript/definite/definite.ts
-```diff
- class MyComponent {
-   ngModel!: ng.INgModelController;
- }
- 
--const x!: string = "";
-+const x!: string = '';
- 
- var y!: MyComponent;
-
-```
-
-**Prettier Similarity**: 85.71%
-
-
 # typescript/definite/without-annotation.ts
 ```diff
  class Foo {
@@ -7485,55 +6935,6 @@
 ```
 
 **Prettier Similarity**: 57.14%
-
-
-# typescript/satisfies-operators/expression-statement.ts
-```diff
- let type: "foo" | "bar" = "foo";
- 
- // demonstrating how "satisfies" expression can be practically used as expression statement.
- const _ = () => {
-   switch (type) {
-     case "foo":
-       return 1;
-     case "bar":
-       return 2;
-     default:
-       // exhaustiveness check idiom
--      (type) satisfies never;
-+      type satisfies never;
-       throw new Error("unreachable");
-   }
- };
- 
- function needParens() {
-   (let) satisfies unknown;
-   (interface) satisfies unknown;
--  (module) satisfies unknown;
--  (using) satisfies unknown;
-+  module satisfies unknown;
-+  using satisfies unknown;
-   (yield) satisfies unknown;
-   (await) satisfies unknown;
- }
- 
- function noNeedParens() {
-   async satisfies unknown;
-   satisfies satisfies unknown;
-   as satisfies unknown;
- 
-   abc satisfies unknown; // not a keyword
- }
- 
- function satisfiesChain() {
-   satisfies satisfies satisfies satisfies satisfies;
--  (type) satisfies never satisfies unknown;
-+  type satisfies never satisfies unknown;
- }
-
-```
-
-**Prettier Similarity**: 89.19%
 
 
 # typescript/test-declarations/test_declarations.ts

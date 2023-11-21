@@ -129,6 +129,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssKeyframesSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
+                    let $pattern = unsafe { $crate::CssNthOffset::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_NUMBER => {
                     let $pattern = unsafe { $crate::CssNumber::new_unchecked(node) };
                     $body
@@ -158,6 +162,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssPseudoClassFunctionIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_NTH => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassFunctionNth::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST => {
                     let $pattern = unsafe {
                         $crate::CssPseudoClassFunctionRelativeSelectorList::new_unchecked(node)
@@ -181,6 +190,29 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_IDENTIFIER => {
                     let $pattern = unsafe { $crate::CssPseudoClassIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_NTH => {
+                    let $pattern = unsafe { $crate::CssPseudoClassNth::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_IDENTIFIER => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassNthIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_NUMBER => {
+                    let $pattern = unsafe { $crate::CssPseudoClassNthNumber::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassNthSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_OF_NTH_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssPseudoClassOfNthSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR => {

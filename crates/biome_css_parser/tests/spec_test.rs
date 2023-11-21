@@ -22,7 +22,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         "ok" => ExpectedOutcome::Pass,
         "error" => ExpectedOutcome::Fail,
         "undefined" => ExpectedOutcome::Undefined,
-        "allow_single_line_comments" => ExpectedOutcome::Pass,
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
@@ -135,7 +134,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-:lang(fr-be, "de") > q {}
+:nth-child(+2n- 1) {}
 
     "#;
     let root = parse_css(

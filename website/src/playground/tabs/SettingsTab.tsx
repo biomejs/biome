@@ -46,6 +46,7 @@ export default function SettingsTab({
 			semicolons,
 			arrowParentheses,
 			bracketSpacing,
+			bracketSameLine,
 			lintRules,
 			enabledLinting,
 			importSortingEnabled,
@@ -93,6 +94,10 @@ export default function SettingsTab({
 	const setBracketSpacing = createPlaygroundSettingsSetter(
 		setPlaygroundState,
 		"bracketSpacing",
+	);
+	const setBracketSameLine = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"bracketSameLine",
 	);
 	const setLintRules = createPlaygroundSettingsSetter(
 		setPlaygroundState,
@@ -259,6 +264,8 @@ export default function SettingsTab({
 				setArrowParentheses={setArrowParentheses}
 				bracketSpacing={bracketSpacing}
 				setBracketSpacing={setBracketSpacing}
+				bracketSameLine={bracketSameLine}
+				setBracketSameLine={setBracketSameLine}
 			/>
 			<LinterSettings
 				lintRules={lintRules}
@@ -590,6 +597,8 @@ function FormatterSettings({
 	setArrowParentheses,
 	bracketSpacing,
 	setBracketSpacing,
+	bracketSameLine,
+	setBracketSameLine,
 }: {
 	lineWidth: number;
 	setLineWidth: (value: number) => void;
@@ -611,6 +620,8 @@ function FormatterSettings({
 	setArrowParentheses: (value: ArrowParentheses) => void;
 	bracketSpacing: boolean;
 	setBracketSpacing: (value: boolean) => void;
+	bracketSameLine: boolean;
+	setBracketSameLine: (value: boolean) => void;
 }) {
 	return (
 		<>
@@ -736,6 +747,16 @@ function FormatterSettings({
 						type="checkbox"
 						checked={bracketSpacing}
 						onChange={(e) => setBracketSpacing(e.target.checked)}
+					/>
+				</div>
+				<div className="field-row">
+					<label htmlFor="bracketSameLine">Bracket Same Line</label>
+					<input
+						id="bracketSameLine"
+						name="bracketSameLine"
+						type="checkbox"
+						checked={bracketSameLine}
+						onChange={(e) => setBracketSameLine(e.target.checked)}
 					/>
 				</div>
 			</section>

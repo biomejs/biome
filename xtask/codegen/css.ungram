@@ -160,6 +160,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionCompoundSelectorList
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
+	| CssPseudoClassFunctionNth
 
 CssPseudoClassIdentifier =
 	name: CssIdentifier
@@ -251,6 +252,72 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 AnyCssPseudoValue =
 	CssIdentifier
 	| CssString
+
+// :nth-child(2n+1 of li, .test) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionNth =
+	name: CssIdentifier
+	'('
+	selector: AnyCssPseudoClassNthSelector
+	')'
+
+AnyCssPseudoClassNthSelector =
+	CssPseudoClassNthSelector
+	| CssBogusSelector
+
+// :nth-child(2n+1 of li, .test) {}
+//        ^^^^^^^^^^^^^^^^^
+CssPseudoClassNthSelector =
+	nth: AnyCssPseudoClassNth
+	of_selector: CssPseudoClassOfNthSelector?
+
+// :nth-child(odd) {}
+//            ^^^
+// :nth-child(2n) {}
+//            ^^^
+// :nth-child(2n+1) {}
+//            ^^^^
+AnyCssPseudoClassNth =
+	CssPseudoClassNthNumber
+	| CssPseudoClassNthIdentifier
+	| CssPseudoClassNth
+
+// :nth-child(+2) {}
+//            ^^
+// :nth-child(2) {}
+//            ^
+CssPseudoClassNthNumber =
+	sign: ('+' | '-')?
+	value: CssNumber
+
+// :nth-child(odd) {}
+//            ^^^
+CssPseudoClassNthIdentifier =
+	value: ('even' | 'odd')
+
+// :nth-child(n+8) {}
+//            ^^^
+// :nth-child(2n+1) {}
+//            ^^^^
+// :nth-child(+2n+1) {}
+//            ^^^^^
+CssPseudoClassNth =
+	sign: ('+' | '-')?
+  value: CssNumber?
+	symbol: 'n'
+	offset: CssNthOffset?
+
+// :nth-child(2n+1) {}
+//              ^^
+CssNthOffset =
+	sign: ('+' | '-')
+	value: CssNumber
+
+// :nth-child(2n+1 of li, .test) {}
+//             		 ^^^^^^^^^^^^
+CssPseudoClassOfNthSelector =
+	'of'
+	selector_list: CssSelectorList
 
 // div {}
 // ^^^
