@@ -23,9 +23,13 @@ impl FormatNodeRule<JsNamedImportSpecifiers> for FormatJsNamedImportSpecifiers {
                 [format_dangling_comments(node.syntax()).with_soft_block_indent()]
             )?;
         } else {
+            let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             write!(
                 f,
-                [group(&soft_space_or_block_indent(&specifiers.format()))]
+                [group(&soft_block_indent_with_maybe_space(
+                    &specifiers.format(),
+                    should_insert_space_around_brackets
+                ))]
             )?;
         }
 

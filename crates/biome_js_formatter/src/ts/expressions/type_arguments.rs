@@ -68,7 +68,7 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
         let first_argument_can_be_hugged_or_is_null_type = match ts_type_argument_list.first() {
             _ if ts_type_argument_list.len() != 1 => false,
             Some(Ok(AnyTsType::TsNullLiteralType(_))) => true,
-            Some(Ok(ty)) => should_hug_type(&ty),
+            Some(Ok(ty)) => should_hug_type(&ty, f),
             _ => false,
         };
 

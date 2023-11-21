@@ -72,13 +72,29 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
                                     specifiers: _,
                                     r_curly_token,
                                 } = specifiers.as_fields();
-                                write!(f, [l_curly_token.format(), space(), specifier.format(),])?;
+                                let should_insert_space_around_brackets =
+                                    f.options().bracket_spacing().value();
+
+                                write!(
+                                    f,
+                                    [
+                                        l_curly_token.format(),
+                                        maybe_space(should_insert_space_around_brackets),
+                                        specifier.format(),
+                                    ]
+                                )?;
 
                                 if let Some(separator) = separator {
                                     format_removed(separator).fmt(f)?;
                                 }
 
-                                write!(f, [space(), r_curly_token.format()])
+                                write!(
+                                    f,
+                                    [
+                                        maybe_space(should_insert_space_around_brackets),
+                                        r_curly_token.format()
+                                    ]
+                                )
                             }
                         }
                         (

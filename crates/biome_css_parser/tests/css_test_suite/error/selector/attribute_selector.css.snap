@@ -20,6 +20,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -150,7 +151,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..66
-  0: CSS_RULE_LIST@0..65
+  0: (empty)
+  1: CSS_RULE_LIST@0..65
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
@@ -225,7 +227,7 @@ CssRoot {
                     0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
                 2: S_KW@64..65 "s" [] []
               3: (empty)
-  1: EOF@65..66 "" [Newline("\n")] []
+  2: EOF@65..66 "" [Newline("\n")] []
 
 ```
 

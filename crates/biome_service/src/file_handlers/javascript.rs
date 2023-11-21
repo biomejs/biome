@@ -19,17 +19,16 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
 };
 use biome_js_formatter::context::trailing_comma::TrailingComma;
-use biome_js_formatter::context::ArrowParentheses;
-use biome_js_formatter::context::JsFormatOptions;
-use biome_js_formatter::context::Semicolons;
-use biome_js_formatter::context::{QuoteProperties, QuoteStyle};
+use biome_js_formatter::context::{
+    ArrowParentheses, BracketSpacing, JsFormatOptions, QuoteProperties, QuoteStyle, Semicolons,
+};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
@@ -53,6 +52,8 @@ pub struct JsFormatterSettings {
     pub trailing_comma: Option<TrailingComma>,
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
+    pub bracket_spacing: Option<BracketSpacing>,
+    pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
@@ -123,7 +124,8 @@ impl Language for JsLanguage {
             .with_quote_properties(language.quote_properties.unwrap_or_default())
             .with_trailing_comma(language.trailing_comma.unwrap_or_default())
             .with_semicolons(language.semicolons.unwrap_or_default())
-            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default());
+            .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
+            .with_bracket_spacing(language.bracket_spacing.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
     }

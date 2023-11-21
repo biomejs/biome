@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -109,8 +110,9 @@ JsModule {
 
 0: JS_MODULE@0..62
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..61
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..61
     0: JS_EXPRESSION_STATEMENT@0..28
       0: JSX_TAG_EXPRESSION@0..27
         0: JSX_ELEMENT@0..27
@@ -170,7 +172,7 @@ JsModule {
                 0: IDENT@58..59 "b" [] []
             3: R_ANGLE@59..60 ">" [] []
       1: SEMICOLON@60..61 ";" [] []
-  3: EOF@61..62 "" [Newline("\n")] []
+  4: EOF@61..62 "" [Newline("\n")] []
 --
 jsx_namespace_member_element_name.jsx:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -480,6 +480,15 @@ pub fn css_keyframes_selector(
         ],
     ))
 }
+pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
+    CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NTH_OFFSET,
+        [
+            Some(SyntaxElement::Token(sign_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_number(value_token: SyntaxToken) -> CssNumber {
     CssNumber::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NUMBER,
@@ -501,49 +510,261 @@ pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPerce
         ],
     ))
 }
-pub fn css_pseudo_class_selector(
-    colon_token: SyntaxToken,
+pub fn css_pseudo_class_function_compound_selector(
     name: CssIdentifier,
-) -> CssPseudoClassSelectorBuilder {
-    CssPseudoClassSelectorBuilder {
-        colon_token,
-        name,
-        parameters: None,
+    l_paren_token: SyntaxToken,
+    selector: AnyCssCompoundSelector,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionCompoundSelector {
+    CssPseudoClassFunctionCompoundSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_compound_selector_list(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    compound_selector_list: CssCompoundSelectorList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionCompoundSelectorList {
+    CssPseudoClassFunctionCompoundSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(compound_selector_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_identifier(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    ident: CssIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionIdentifier {
+    CssPseudoClassFunctionIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_nth(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    selector: AnyCssPseudoClassNthSelector,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionNth {
+    CssPseudoClassFunctionNth::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_NTH,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_relative_selector_list(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    relative_selector_list: CssRelativeSelectorList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionRelativeSelectorList {
+    CssPseudoClassFunctionRelativeSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(relative_selector_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_selector(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionSelector {
+    CssPseudoClassFunctionSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_selector_list(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    selector_list: CssSelectorList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionSelectorList {
+    CssPseudoClassFunctionSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_value_list(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    value_list: CssPseudoValueList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionValueList {
+    CssPseudoClassFunctionValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value_list.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_identifier(name: CssIdentifier) -> CssPseudoClassIdentifier {
+    CssPseudoClassIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_IDENTIFIER,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_pseudo_class_nth(symbol_token: SyntaxToken) -> CssPseudoClassNthBuilder {
+    CssPseudoClassNthBuilder {
+        symbol_token,
+        sign_token: None,
+        value: None,
+        offset: None,
     }
 }
-pub struct CssPseudoClassSelectorBuilder {
-    colon_token: SyntaxToken,
-    name: CssIdentifier,
-    parameters: Option<CssPseudoClassSelectorParameters>,
+pub struct CssPseudoClassNthBuilder {
+    symbol_token: SyntaxToken,
+    sign_token: Option<SyntaxToken>,
+    value: Option<CssNumber>,
+    offset: Option<CssNthOffset>,
 }
-impl CssPseudoClassSelectorBuilder {
-    pub fn with_parameters(mut self, parameters: CssPseudoClassSelectorParameters) -> Self {
-        self.parameters = Some(parameters);
+impl CssPseudoClassNthBuilder {
+    pub fn with_sign_token(mut self, sign_token: SyntaxToken) -> Self {
+        self.sign_token = Some(sign_token);
         self
     }
-    pub fn build(self) -> CssPseudoClassSelector {
-        CssPseudoClassSelector::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR,
+    pub fn with_value(mut self, value: CssNumber) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn with_offset(mut self, offset: CssNthOffset) -> Self {
+        self.offset = Some(offset);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNth {
+        CssPseudoClassNth::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH,
             [
-                Some(SyntaxElement::Token(self.colon_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.parameters
+                self.sign_token.map(|token| SyntaxElement::Token(token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.symbol_token)),
+                self.offset
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
 }
-pub fn css_pseudo_class_selector_parameters(
-    l_paren_token: SyntaxToken,
-    parameter: AnyCssValue,
-    r_paren_token: SyntaxToken,
-) -> CssPseudoClassSelectorParameters {
-    CssPseudoClassSelectorParameters::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR_PARAMETERS,
+pub fn css_pseudo_class_nth_identifier(value_token: SyntaxToken) -> CssPseudoClassNthIdentifier {
+    CssPseudoClassNthIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_IDENTIFIER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_pseudo_class_nth_number(value: CssNumber) -> CssPseudoClassNthNumberBuilder {
+    CssPseudoClassNthNumberBuilder {
+        value,
+        sign_token: None,
+    }
+}
+pub struct CssPseudoClassNthNumberBuilder {
+    value: CssNumber,
+    sign_token: Option<SyntaxToken>,
+}
+impl CssPseudoClassNthNumberBuilder {
+    pub fn with_sign_token(mut self, sign_token: SyntaxToken) -> Self {
+        self.sign_token = Some(sign_token);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNthNumber {
+        CssPseudoClassNthNumber::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_NUMBER,
+            [
+                self.sign_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_pseudo_class_nth_selector(
+    nth: AnyCssPseudoClassNth,
+) -> CssPseudoClassNthSelectorBuilder {
+    CssPseudoClassNthSelectorBuilder {
+        nth,
+        of_selector: None,
+    }
+}
+pub struct CssPseudoClassNthSelectorBuilder {
+    nth: AnyCssPseudoClassNth,
+    of_selector: Option<CssPseudoClassOfNthSelector>,
+}
+impl CssPseudoClassNthSelectorBuilder {
+    pub fn with_of_selector(mut self, of_selector: CssPseudoClassOfNthSelector) -> Self {
+        self.of_selector = Some(of_selector);
+        self
+    }
+    pub fn build(self) -> CssPseudoClassNthSelector {
+        CssPseudoClassNthSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PSEUDO_CLASS_NTH_SELECTOR,
+            [
+                Some(SyntaxElement::Node(self.nth.into_syntax())),
+                self.of_selector
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_pseudo_class_of_nth_selector(
+    of_token: SyntaxToken,
+    selector_list: CssSelectorList,
+) -> CssPseudoClassOfNthSelector {
+    CssPseudoClassOfNthSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_OF_NTH_SELECTOR,
         [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(parameter.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(of_token)),
+            Some(SyntaxElement::Node(selector_list.into_syntax())),
+        ],
+    ))
+}
+pub fn css_pseudo_class_selector(
+    colon_token: SyntaxToken,
+    class: AnyCssPseudoClass,
+) -> CssPseudoClassSelector {
+    CssPseudoClassSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_SELECTOR,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(class.into_syntax())),
         ],
     ))
 }
@@ -579,10 +800,10 @@ pub fn css_pseudo_element_function_selector(
         ],
     ))
 }
-pub fn css_pseudo_element_identifier(ident: CssIdentifier) -> CssPseudoElementIdentifier {
+pub fn css_pseudo_element_identifier(name: CssIdentifier) -> CssPseudoElementIdentifier {
     CssPseudoElementIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_ELEMENT_IDENTIFIER,
-        [Some(SyntaxElement::Node(ident.into_syntax()))],
+        [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
 pub fn css_pseudo_element_selector(
@@ -606,14 +827,59 @@ pub fn css_ratio(numerator: CssNumber, denominator: CssNumber) -> CssRatio {
         ],
     ))
 }
-pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRoot {
-    CssRoot::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_ROOT,
-        [
-            Some(SyntaxElement::Node(rules.into_syntax())),
-            Some(SyntaxElement::Token(eof_token)),
-        ],
-    ))
+pub fn css_relative_selector(selector: AnyCssSelector) -> CssRelativeSelectorBuilder {
+    CssRelativeSelectorBuilder {
+        selector,
+        combinator_token: None,
+    }
+}
+pub struct CssRelativeSelectorBuilder {
+    selector: AnyCssSelector,
+    combinator_token: Option<SyntaxToken>,
+}
+impl CssRelativeSelectorBuilder {
+    pub fn with_combinator_token(mut self, combinator_token: SyntaxToken) -> Self {
+        self.combinator_token = Some(combinator_token);
+        self
+    }
+    pub fn build(self) -> CssRelativeSelector {
+        CssRelativeSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_RELATIVE_SELECTOR,
+            [
+                self.combinator_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.selector.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_root(rules: CssRuleList, eof_token: SyntaxToken) -> CssRootBuilder {
+    CssRootBuilder {
+        rules,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct CssRootBuilder {
+    rules: CssRuleList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl CssRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> CssRoot {
+        CssRoot::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.rules.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn css_rule(prelude: CssSelectorList, block: CssBlock) -> CssRule {
     CssRule::unwrap_cast(SyntaxNode::new_detached(
@@ -743,6 +1009,27 @@ where
         }),
     ))
 }
+pub fn css_compound_selector_list<I, S>(items: I, separators: S) -> CssCompoundSelectorList
+where
+    I: IntoIterator<Item = AnyCssCompoundSelector>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssCompoundSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOUND_SELECTOR_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
     I: IntoIterator<Item = CssDeclaration>,
@@ -786,6 +1073,48 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_pseudo_value_list<I, S>(items: I, separators: S) -> CssPseudoValueList
+where
+    I: IntoIterator<Item = AnyCssPseudoValue>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssPseudoValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_VALUE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_relative_selector_list<I, S>(items: I, separators: S) -> CssRelativeSelectorList
+where
+    I: IntoIterator<Item = AnyCssRelativeSelector>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssRelativeSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_RELATIVE_SELECTOR_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_rule_list<I>(items: I) -> CssRuleList

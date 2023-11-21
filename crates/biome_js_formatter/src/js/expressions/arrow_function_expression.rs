@@ -64,7 +64,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature(&arrow, self.options.call_arg_layout.is_some()),
+                            format_signature(&arrow, self.options.call_arg_layout.is_some(), false),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -102,7 +102,22 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     AnyJsExpression(JsTemplateExpression(template)) => {
                         is_multiline_template_starting_on_same_line(template)
                     }
-                    AnyJsExpression(JsSequenceExpression(_)) => {
+                    AnyJsExpression(JsSequenceExpression(sequence)) => {
+                        let has_comment = f.context().comments().has_comments(sequence.syntax());
+                        if has_comment {
+                            return write!(
+                                f,
+                                [group(&format_args![
+                                    format_signature,
+                                    group(&format_args![indent(&format_args![
+                                        hard_line_break(),
+                                        text("("),
+                                        soft_block_indent(&format_body),
+                                        text(")")
+                                    ]),])
+                                ])]
+                            );
+                        }
                         return write!(
                             f,
                             [group(&format_args![
@@ -122,24 +137,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                 if body_has_soft_line_break {
                     write![f, [format_signature, space(), format_body]]
                 } else {
-                    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
-                    // but only if the body isn't an object/function or class expression because parentheses are always required in that
-                    // case and added by the object expression itself
-                    let should_add_parens = match &body {
-                        AnyJsExpression(expression @ JsConditionalExpression(_)) => {
-                            let are_parentheses_mandatory = matches!(
-                                resolve_left_most_expression(expression),
-                                AnyJsExpressionLeftSide::AnyJsExpression(
-                                    JsObjectExpression(_)
-                                        | JsFunctionExpression(_)
-                                        | JsClassExpression(_)
-                                )
-                            );
-
-                            !are_parentheses_mandatory
-                        }
-                        _ => false,
-                    };
+                    let should_add_parens = should_add_parens(&body);
 
                     let is_last_call_arg = matches!(
                         self.options.call_arg_layout,
@@ -207,6 +205,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
+    ancestor_call_expr_or_logical_expr: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
         if let Some(async_token) = arrow.async_token() {
@@ -243,7 +242,11 @@ fn format_signature(
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
-                    write!(f, [params.format()])?;
+                    if ancestor_call_expr_or_logical_expr {
+                        write!(f, [dedent(&params.format())])?;
+                    } else {
+                        write!(f, [params.format()])?;
+                    }
                 }
             };
 
@@ -303,6 +306,29 @@ fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
     let result = has_rest_object_or_array_parameter(&parameters);
 
     Ok(result)
+}
+
+fn should_add_parens(body: &AnyJsFunctionBody) -> bool {
+    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
+    // but only if the body isn't an object/function or class expression because parentheses are always required in that
+    // case and added by the object expression itself
+    match &body {
+        AnyJsFunctionBody::AnyJsExpression(
+            expression @ AnyJsExpression::JsConditionalExpression(_),
+        ) => {
+            let are_parentheses_mandatory = matches!(
+                resolve_left_most_expression(expression),
+                AnyJsExpressionLeftSide::AnyJsExpression(
+                    AnyJsExpression::JsObjectExpression(_)
+                        | AnyJsExpression::JsFunctionExpression(_)
+                        | AnyJsExpression::JsClassExpression(_)
+                )
+            );
+
+            !are_parentheses_mandatory
+        }
+        _ => false,
+    }
 }
 
 fn has_rest_object_or_array_parameter(parameters: &AnyJsArrowFunctionParameters) -> bool {
@@ -412,6 +438,13 @@ impl Format<JsFormatContext> for ArrowChain {
         } = self;
 
         let head_parent = head.syntax().parent();
+        let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
+            matches!(
+                ancestor.kind(),
+                JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            )
+        });
+
         let tail_body = tail.body()?;
 
         let is_assignment_rhs = self.options.assignment_layout.is_some();
@@ -446,7 +479,11 @@ impl Format<JsFormatContext> for ArrowChain {
                         f,
                         [
                             format_leading_comments(arrow.syntax()),
-                            format_signature(arrow, self.options.call_arg_layout.is_some())
+                            format_signature(
+                                arrow,
+                                self.options.call_arg_layout.is_some(),
+                                ancestor_call_expr_or_logical_expr
+                            )
                         ]
                     )?;
 
@@ -473,6 +510,12 @@ impl Format<JsFormatContext> for ArrowChain {
             )
         });
 
+        let has_comment = matches!(
+          &tail_body,
+          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence))
+          if f.context().comments().has_comments(sequence.syntax())
+        );
+
         let format_tail_body_inner = format_with(|f| {
             let format_tail_body = FormatMaybeCachedFunctionBody {
                 body: &tail_body,
@@ -485,16 +528,47 @@ impl Format<JsFormatContext> for ArrowChain {
                 tail_body,
                 AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(_))
             ) {
+                if has_comment {
+                    write!(
+                        f,
+                        [group(&format_args![indent(&format_args![
+                            hard_line_break(),
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ]),])]
+                    )?;
+                } else {
+                    write!(
+                        f,
+                        [group(&format_args![
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ])]
+                    )?;
+                }
+            } else {
+                let should_add_parens = should_add_parens(&tail_body);
                 write!(
                     f,
-                    [group(&format_args![
-                        text("("),
-                        soft_block_indent(&format_tail_body),
-                        text(")")
-                    ])]
+                    [format_with(|f| {
+                        if should_add_parens {
+                            write!(
+                                f,
+                                [
+                                    if_group_fits_on_line(&text("(")),
+                                    format_tail_body,
+                                    if_group_fits_on_line(&text(")"))
+                                ]
+                            )?;
+                        } else {
+                            write!(f, [format_tail_body])?;
+                        }
+
+                        Ok(())
+                    })]
                 )?;
-            } else {
-                write!(f, [format_tail_body])?;
             }
 
             // Format the trailing comments of all arrow function EXCEPT the first one because

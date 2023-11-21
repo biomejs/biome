@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -22,8 +23,9 @@ JsModule {
 
 0: JS_MODULE@0..10
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..9
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..9
     0: JS_EXPRESSION_STATEMENT@0..9
       0: JS_BOGUS_EXPRESSION@0..8
         0: YIELD_KW@0..6 "yield" [] [Whitespace(" ")]
@@ -32,7 +34,7 @@ JsModule {
           1: JS_NUMBER_LITERAL_EXPRESSION@6..8
             0: JS_NUMBER_LITERAL@6..8 "10" [] []
       1: SEMICOLON@8..9 ";" [] []
-  3: EOF@9..10 "" [Newline("\n")] []
+  4: EOF@9..10 "" [Newline("\n")] []
 --
 yield_at_top_level_module.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

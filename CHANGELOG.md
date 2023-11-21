@@ -29,6 +29,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### New features
+
+- Add a new option [`--line-ending`](https://biomejs.dev/reference/configuration/#formatterlineending). This option allows changing the type of line endings. Contributed by @SuperchupuDev
+- Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
+
 #### Bug fixes
 
 - Fix [#301](https://github.com/biomejs/biome/issues/301), the formatter should not break before the `in` keyword. Contributed by @ematipico
@@ -54,6 +59,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types) now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
 
+- Fix [#784](https://github.com/biomejs/biome/issues/784), [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title) fixes false-positives to `aria-label` and reports svg's role attribute is implicit. Contributed by @unvalley
+
 ### Parser
 
 ### VSCode
@@ -73,6 +80,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix how `overrides` behave. Now `ignore` and `include` apply or not the override pattern, so they override each other.
   Now the options inside `overrides` override the top-level options.
 - Bootstrap the logger only when needed. Contributed by @ematipico
+- Fix how `overrides` are run. The properties `ignore` and `include` have different semantics and only apply/not apply an override. Contributed by @ematipico
 
 ### Editors
 

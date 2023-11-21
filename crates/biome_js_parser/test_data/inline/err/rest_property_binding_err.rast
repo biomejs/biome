@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -279,8 +280,9 @@ JsModule {
 
 0: JS_MODULE@0..179
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..178
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..178
     0: JS_VARIABLE_STATEMENT@0..16
       0: JS_VARIABLE_DECLARATION@0..15
         0: (empty)
@@ -431,7 +433,7 @@ JsModule {
                         0: IDENT@174..175 "a" [] []
             1: SEMICOLON@175..176 ";" [] []
         3: R_CURLY@176..178 "}" [Newline("\n")] []
-  3: EOF@178..179 "" [Newline("\n")] []
+  4: EOF@178..179 "" [Newline("\n")] []
 --
 rest_property_binding_err.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

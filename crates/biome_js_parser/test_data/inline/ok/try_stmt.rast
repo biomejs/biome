@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -123,8 +124,9 @@ JsModule {
 
 0: JS_MODULE@0..112
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..111
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..111
     0: JS_TRY_STATEMENT@0..15
       0: TRY_KW@0..4 "try" [] [Whitespace(" ")]
       1: JS_BLOCK_STATEMENT@4..7
@@ -212,4 +214,4 @@ JsModule {
           0: L_CURLY@109..110 "{" [] []
           1: JS_STATEMENT_LIST@110..110
           2: R_CURLY@110..111 "}" [] []
-  3: EOF@111..112 "" [Newline("\n")] []
+  4: EOF@111..112 "" [Newline("\n")] []

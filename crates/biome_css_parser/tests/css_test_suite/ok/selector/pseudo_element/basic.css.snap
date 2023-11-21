@@ -48,6 +48,7 @@ a, b > .foo::before {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -62,7 +63,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@1..3 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@3..9 "after" [] [Whitespace(" ")],
                                 },
                             },
@@ -89,7 +90,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@19..21 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@21..30 "backdrop" [] [Whitespace(" ")],
                                 },
                             },
@@ -116,7 +117,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@35..37 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@37..44 "before" [] [Whitespace(" ")],
                                 },
                             },
@@ -143,7 +144,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@53..55 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@55..59 "cue" [] [Whitespace(" ")],
                                 },
                             },
@@ -208,7 +209,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@85..87 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@87..98 "cue-region" [] [Whitespace(" ")],
                                 },
                             },
@@ -287,7 +288,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@137..141 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@141..155 "grammar-error" [] [Whitespace(" ")],
                                 },
                             },
@@ -310,7 +311,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@157..161 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@161..168 "marker" [] [Whitespace(" ")],
                                 },
                             },
@@ -363,7 +364,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@207..211 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@211..223 "placeholder" [] [Whitespace(" ")],
                                 },
                             },
@@ -386,7 +387,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@225..229 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@229..239 "selection" [] [Whitespace(" ")],
                                 },
                             },
@@ -475,7 +476,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@277..281 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@281..296 "spelling-error" [] [Whitespace(" ")],
                                 },
                             },
@@ -498,7 +499,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@298..302 "::" [Newline("\n"), Newline("\n")] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@302..314 "target-text" [] [Whitespace(" ")],
                                 },
                             },
@@ -527,7 +528,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@329..331 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@331..352 "-webkit-slider-thumb" [] [Whitespace(" ")],
                                 },
                             },
@@ -554,7 +555,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@357..359 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@359..366 "bEfOrE" [] [Whitespace(" ")],
                                 },
                             },
@@ -604,7 +605,7 @@ CssRoot {
                             CssPseudoElementSelector {
                                 double_colon_token: COLON2@381..383 "::" [] [],
                                 element: CssPseudoElementIdentifier {
-                                    ident: CssIdentifier {
+                                    name: CssIdentifier {
                                         value_token: IDENT@383..390 "before" [] [Whitespace(" ")],
                                     },
                                 },
@@ -628,7 +629,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..393
-  0: CSS_RULE_LIST@0..392
+  0: (empty)
+  1: CSS_RULE_LIST@0..392
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
@@ -1001,7 +1003,7 @@ CssRoot {
         0: L_CURLY@390..391 "{" [] []
         1: CSS_DECLARATION_LIST@391..391
         2: R_CURLY@391..392 "}" [] []
-  1: EOF@392..393 "" [Newline("\n")] []
+  2: EOF@392..393 "" [Newline("\n")] []
 
 ```
 

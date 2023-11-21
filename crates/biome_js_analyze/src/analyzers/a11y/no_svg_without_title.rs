@@ -62,6 +62,12 @@ declare_rule! {
     /// ```
     ///
     /// ```js
+    /// <svg role="img" aria-labelledby="title">
+    ///     <span id="title">Pass</span>
+    /// </svg>
+    /// ```
+    ///
+    /// ```js
     /// <svg role="img" aria-label="title">
     ///     <span id="title">Pass</span>
     /// </svg>
@@ -108,7 +114,7 @@ impl Rule for NoSvgWithoutTitle {
         };
 
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(text) = role_attribute_value
+        let Some(role_attribute_text) = role_attribute_value
             .as_jsx_string()?
             .inner_string_text()
             .ok()
@@ -116,21 +122,23 @@ impl Rule for NoSvgWithoutTitle {
             return Some(());
         };
 
-        if text.to_lowercase() == "img" {
-            let [aria_label, aria_labelledby] = node
-                .attributes()
-                .find_by_names(["aria-label", "aria-labelledby"]);
-
-            let jsx_child_list = jsx_element.children();
-            let is_valid = is_valid_attribute_value(aria_label, &jsx_child_list).unwrap_or(false)
-                || is_valid_attribute_value(aria_labelledby, &jsx_child_list).unwrap_or(false);
-
-            if !is_valid {
-                return Some(());
+        match role_attribute_text.to_lowercase().as_str() {
+            "img" => {
+                let [aria_label, aria_labelledby] = node
+                    .attributes()
+                    .find_by_names(["aria-label", "aria-labelledby"]);
+                let is_valid_a11y_attribute = aria_label.is_some()
+                    || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
+                        .unwrap_or(false);
+                if is_valid_a11y_attribute {
+                    return None;
+                }
+                Some(())
             }
-        };
-
-        None
+            // if role attribute is empty, the svg element should have title element
+            "" => Some(()),
+            _ => None,
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -25,8 +26,9 @@ JsModule {
 
 0: JS_MODULE@0..20
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..19
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..19
     0: JS_BOGUS_STATEMENT@0..7
       0: RETURN_KW@0..6 "return" [] []
       1: SEMICOLON@6..7 ";" [] []
@@ -36,7 +38,7 @@ JsModule {
         0: JS_REFERENCE_IDENTIFIER@15..18
           0: IDENT@15..18 "foo" [] []
       2: SEMICOLON@18..19 ";" [] []
-  3: EOF@19..20 "" [Newline("\n")] []
+  4: EOF@19..20 "" [Newline("\n")] []
 --
 return_stmt_err.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

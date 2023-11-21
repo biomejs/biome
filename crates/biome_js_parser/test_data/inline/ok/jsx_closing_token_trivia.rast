@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -48,8 +49,9 @@ JsModule {
 
 0: JS_MODULE@0..69
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..68
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..68
     0: JS_EXPRESSION_STATEMENT@0..32
       0: JSX_TAG_EXPRESSION@0..31
         0: JSX_SELF_CLOSING_ELEMENT@0..31
@@ -79,4 +81,4 @@ JsModule {
               0: JSX_IDENT@62..66 "open" [] []
             3: R_ANGLE@66..67 ">" [] []
       1: SEMICOLON@67..68 ";" [] []
-  3: EOF@68..69 "" [Newline("\n")] []
+  4: EOF@68..69 "" [Newline("\n")] []

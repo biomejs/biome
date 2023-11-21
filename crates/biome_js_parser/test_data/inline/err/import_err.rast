@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -278,8 +279,9 @@ JsModule {
 
 0: JS_MODULE@0..229
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..228
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..228
     0: JS_IMPORT@0..7
       0: IMPORT_KW@0..6 "import" [] []
       1: (empty)
@@ -473,7 +475,7 @@ JsModule {
       0: JS_NUMBER_LITERAL_EXPRESSION@226..227
         0: JS_NUMBER_LITERAL@226..227 "4" [] []
       1: SEMICOLON@227..228 ";" [] []
-  3: EOF@228..229 "" [Newline("\n")] []
+  4: EOF@228..229 "" [Newline("\n")] []
 --
 import_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

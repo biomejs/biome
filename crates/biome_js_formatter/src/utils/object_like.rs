@@ -60,10 +60,15 @@ impl Format<JsFormatContext> for JsObjectLike {
                 [format_dangling_comments(self.syntax()).with_block_indent(),]
             )?;
         } else {
+            let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             let should_expand = self.members_have_leading_newline();
             write!(
                 f,
-                [group(&soft_space_or_block_indent(&members)).should_expand(should_expand)]
+                [group(&soft_block_indent_with_maybe_space(
+                    &members,
+                    should_insert_space_around_brackets
+                ))
+                .should_expand(should_expand)]
             )?;
         }
 

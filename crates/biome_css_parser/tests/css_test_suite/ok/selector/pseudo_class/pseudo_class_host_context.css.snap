@@ -1,0 +1,150 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+:host-context(h1) {}
+:host-context(   h1   ) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..1 ":" [] [],
+                            class: CssPseudoClassFunctionCompoundSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..13 "host-context" [] [],
+                                },
+                                l_paren_token: L_PAREN@13..14 "(" [] [],
+                                selector: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@14..16 "h1" [] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                                r_paren_token: R_PAREN@16..18 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@18..19 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@19..20 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@20..22 ":" [Newline("\n")] [],
+                            class: CssPseudoClassFunctionCompoundSelector {
+                                name: CssIdentifier {
+                                    value_token: IDENT@22..34 "host-context" [] [],
+                                },
+                                l_paren_token: L_PAREN@34..38 "(" [] [Whitespace("   ")],
+                                selector: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@38..43 "h1" [] [Whitespace("   ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                                r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@45..46 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@46..47 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..48
+  0: (empty)
+  1: CSS_RULE_LIST@0..47
+    0: CSS_RULE@0..20
+      0: CSS_SELECTOR_LIST@0..18
+        0: CSS_COMPOUND_SELECTOR@0..18
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..18
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..18
+              0: COLON@0..1 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@1..18
+                0: CSS_IDENTIFIER@1..13
+                  0: IDENT@1..13 "host-context" [] []
+                1: L_PAREN@13..14 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@14..16
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@14..16
+                    0: CSS_IDENTIFIER@14..16
+                      0: IDENT@14..16 "h1" [] []
+                  2: CSS_SUB_SELECTOR_LIST@16..16
+                3: R_PAREN@16..18 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@18..20
+        0: L_CURLY@18..19 "{" [] []
+        1: CSS_DECLARATION_LIST@19..19
+        2: R_CURLY@19..20 "}" [] []
+    1: CSS_RULE@20..47
+      0: CSS_SELECTOR_LIST@20..45
+        0: CSS_COMPOUND_SELECTOR@20..45
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@20..45
+            0: CSS_PSEUDO_CLASS_SELECTOR@20..45
+              0: COLON@20..22 ":" [Newline("\n")] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@22..45
+                0: CSS_IDENTIFIER@22..34
+                  0: IDENT@22..34 "host-context" [] []
+                1: L_PAREN@34..38 "(" [] [Whitespace("   ")]
+                2: CSS_COMPOUND_SELECTOR@38..43
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@38..43
+                    0: CSS_IDENTIFIER@38..43
+                      0: IDENT@38..43 "h1" [] [Whitespace("   ")]
+                  2: CSS_SUB_SELECTOR_LIST@43..43
+                3: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@45..47
+        0: L_CURLY@45..46 "{" [] []
+        1: CSS_DECLARATION_LIST@46..46
+        2: R_CURLY@46..47 "}" [] []
+  2: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+

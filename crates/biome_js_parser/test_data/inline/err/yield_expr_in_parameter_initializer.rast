@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -96,8 +97,9 @@ JsModule {
 
 0: JS_MODULE@0..72
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..71
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..71
     0: JS_FUNCTION_DECLARATION@0..35
       0: (empty)
       1: FUNCTION_KW@0..8 "function" [] []
@@ -160,7 +162,7 @@ JsModule {
         1: JS_DIRECTIVE_LIST@70..70
         2: JS_STATEMENT_LIST@70..70
         3: R_CURLY@70..71 "}" [] []
-  3: EOF@71..72 "" [Newline("\n")] []
+  4: EOF@71..72 "" [Newline("\n")] []
 --
 yield_expr_in_parameter_initializer.js:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -36,8 +37,9 @@ JsModule {
 
 0: JS_MODULE@0..26
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..25
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..25
     0: JS_CLASS_DECLARATION@0..25
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -57,7 +59,7 @@ JsModule {
             0: IDENT@19..22 "foo" [] []
           2: SEMICOLON@22..24 ";" [] [Whitespace(" ")]
       9: R_CURLY@24..25 "}" [] []
-  3: EOF@25..26 "" [Newline("\n")] []
+  4: EOF@25..26 "" [Newline("\n")] []
 --
 class_member_modifier.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

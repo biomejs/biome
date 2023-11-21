@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -40,8 +41,9 @@ JsModule {
 
 0: JS_MODULE@0..36
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..35
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
     0: TS_DECLARE_STATEMENT@0..35
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: JS_CLASS_DECLARATION@8..35
@@ -65,7 +67,7 @@ JsModule {
               2: R_PAREN@31..32 ")" [] []
             3: SEMICOLON@32..34 ";" [] [Whitespace(" ")]
         9: R_CURLY@34..35 "}" [] []
-  3: EOF@35..36 "" [Newline("\n")] []
+  4: EOF@35..36 "" [Newline("\n")] []
 --
 ts_ambient_async_method.ts:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

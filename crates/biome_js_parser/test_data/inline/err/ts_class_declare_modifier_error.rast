@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -220,8 +221,9 @@ JsModule {
 
 0: JS_MODULE@0..242
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..241
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..241
     0: JS_CLASS_DECLARATION@0..241
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -352,7 +354,7 @@ JsModule {
               0: STRING_KW@232..238 "string" [] []
           3: SEMICOLON@238..239 ";" [] []
       9: R_CURLY@239..241 "}" [Newline("\n")] []
-  3: EOF@241..242 "" [Newline("\n")] []
+  4: EOF@241..242 "" [Newline("\n")] []
 --
 ts_class_declare_modifier_error.ts:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

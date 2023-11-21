@@ -43,6 +43,7 @@ CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
 CssRoot =
+	bom: 'UNICODE_BOM'?
 	rules: CssRuleList
 	eof: 'EOF'
 
@@ -148,13 +149,175 @@ AnyCssAttributeMatcherValue = CssString | CssIdentifier
 // ^^^^^^^^^^^^
 CssPseudoClassSelector =
 	':'
-	name: CssIdentifier
-	parameters: CssPseudoClassSelectorParameters?
+	class: AnyCssPseudoClass
 
-CssPseudoClassSelectorParameters =
+AnyCssPseudoClass =
+	CssPseudoClassIdentifier
+	| CssPseudoClassFunctionIdentifier
+	| CssPseudoClassFunctionSelector
+	| CssPseudoClassFunctionSelectorList
+	| CssPseudoClassFunctionCompoundSelector
+	| CssPseudoClassFunctionCompoundSelectorList
+	| CssPseudoClassFunctionRelativeSelectorList
+	| CssPseudoClassFunctionValueList
+	| CssPseudoClassFunctionNth
+
+CssPseudoClassIdentifier =
+	name: CssIdentifier
+
+// :first-of-type {}
+//  ^^^^^^^^^^^^^
+CssPseudoClassFunctionIdentifier =
+ 	name: CssIdentifier
 	'('
-	parameter: AnyCssValue
+	ident: CssIdentifier
 	')'
+
+// :global(.class div) {}
+//  ^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionSelector =
+ 	name: CssIdentifier
+	'('
+	selector: AnyCssSelector
+	')'
+
+// :not(div + #id:hover) {}
+//  ^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionSelectorList =
+ 	name: CssIdentifier
+	'('
+	selector_list: CssSelectorList
+	')'
+
+// :-webkit-any(i,p,:link,span:focus) {}
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionCompoundSelectorList =
+ 	name: CssIdentifier
+	'('
+	compound_selector_list: CssCompoundSelectorList
+	')'
+
+// :-webkit-any(i,p,:link,span:focus) {}
+//              ^^^^^^^^^^^^^^^^^^^^
+CssCompoundSelectorList = (AnyCssCompoundSelector (',' AnyCssCompoundSelector)*)
+
+// :host(span:focus) {}
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionCompoundSelector =
+ 	name: CssIdentifier
+	'('
+	selector: AnyCssCompoundSelector
+	')'
+
+AnyCssCompoundSelector =
+	CssCompoundSelector
+	| CssBogusSelector
+
+// :has(> img, +dt) {}
+// ^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionRelativeSelectorList =
+ 	name: CssIdentifier
+	'('
+	relative_selector_list: CssRelativeSelectorList
+	')'
+
+// :has(> img, +dt) {}
+//      ^^^^^^^^^^
+CssRelativeSelectorList = (AnyCssRelativeSelector (',' AnyCssRelativeSelector)*)
+
+AnyCssRelativeSelector =
+	CssRelativeSelector
+	| CssBogusSelector
+
+// :has(> img, +dt) {}
+//      ^^^^^  ^^^
+CssRelativeSelector =
+	combinator: ('>' | '+' | '~' | '||')?
+	selector: AnyCssSelector
+
+// :lang(de, fr) {}
+// ^^^^^^^^^^^^^
+CssPseudoClassFunctionValueList =
+ 	name: CssIdentifier
+	'('
+	value_list: CssPseudoValueList
+	')'
+
+// :lang(de, fr) {}
+//      ^^^^^^^^
+CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
+
+// :lang(de, fr) {}
+//       ^^  ^^
+AnyCssPseudoValue =
+	CssIdentifier
+	| CssString
+
+// :nth-child(2n+1 of li, .test) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionNth =
+	name: CssIdentifier
+	'('
+	selector: AnyCssPseudoClassNthSelector
+	')'
+
+AnyCssPseudoClassNthSelector =
+	CssPseudoClassNthSelector
+	| CssBogusSelector
+
+// :nth-child(2n+1 of li, .test) {}
+//        ^^^^^^^^^^^^^^^^^
+CssPseudoClassNthSelector =
+	nth: AnyCssPseudoClassNth
+	of_selector: CssPseudoClassOfNthSelector?
+
+// :nth-child(odd) {}
+//            ^^^
+// :nth-child(2n) {}
+//            ^^^
+// :nth-child(2n+1) {}
+//            ^^^^
+AnyCssPseudoClassNth =
+	CssPseudoClassNthNumber
+	| CssPseudoClassNthIdentifier
+	| CssPseudoClassNth
+
+// :nth-child(+2) {}
+//            ^^
+// :nth-child(2) {}
+//            ^
+CssPseudoClassNthNumber =
+	sign: ('+' | '-')?
+	value: CssNumber
+
+// :nth-child(odd) {}
+//            ^^^
+CssPseudoClassNthIdentifier =
+	value: ('even' | 'odd')
+
+// :nth-child(n+8) {}
+//            ^^^
+// :nth-child(2n+1) {}
+//            ^^^^
+// :nth-child(+2n+1) {}
+//            ^^^^^
+CssPseudoClassNth =
+	sign: ('+' | '-')?
+  value: CssNumber?
+	symbol: 'n'
+	offset: CssNthOffset?
+
+// :nth-child(2n+1) {}
+//              ^^
+CssNthOffset =
+	sign: ('+' | '-')
+	value: CssNumber
+
+// :nth-child(2n+1 of li, .test) {}
+//             		 ^^^^^^^^^^^^
+CssPseudoClassOfNthSelector =
+	'of'
+	selector_list: CssSelectorList
 
 // div {}
 // ^^^
@@ -178,7 +341,7 @@ AnyCssPseudoElement =
 // a::after {}
 //    ^^^^^
 CssPseudoElementIdentifier =
-	ident: CssIdentifier
+	name: CssIdentifier
 
 // video::cue-region(#scroll > .div) {}
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^

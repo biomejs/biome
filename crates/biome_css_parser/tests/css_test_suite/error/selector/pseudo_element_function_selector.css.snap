@@ -17,6 +17,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -122,7 +123,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..36
-  0: CSS_RULE_LIST@0..35
+  0: (empty)
+  1: CSS_RULE_LIST@0..35
     0: CSS_RULE@0..18
       0: CSS_SELECTOR_LIST@0..16
         0: CSS_COMPOUND_SELECTOR@0..16
@@ -186,7 +188,7 @@ CssRoot {
                 1: L_PAREN@34..35 "(" [] []
                 2: (empty)
                 3: (empty)
-  1: EOF@35..36 "" [Newline("\n")] []
+  2: EOF@35..36 "" [Newline("\n")] []
 
 ```
 

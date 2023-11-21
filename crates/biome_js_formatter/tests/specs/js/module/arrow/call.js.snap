@@ -63,6 +63,7 @@ romise.then(result => result.veryLongVariable.veryLongPropertyName > someOtherVa
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -70,6 +71,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
 -----
 
 ```js
@@ -133,6 +135,7 @@ romise.then((result) =>
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -140,6 +143,7 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: As needed
+Bracket spacing: true
 -----
 
 ```js

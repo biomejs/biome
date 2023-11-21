@@ -27,8 +27,10 @@ impl FormatNodeRule<JsDefaultClause> for FormatJsDefaultClause {
         }
 
         if consequent.is_empty() {
-            write!(f, [hard_line_break()])
-        } else if first_child_is_block_stmt {
+            return Ok(());
+        }
+
+        if first_child_is_block_stmt {
             write!(f, [space(), consequent.format()])
         } else {
             // no line break needed after because it is added by the indent in the switch statement

@@ -17,6 +17,7 @@ div, a {
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -55,7 +56,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..12
-  0: CSS_RULE_LIST@0..11
+  0: (empty)
+  1: CSS_RULE_LIST@0..11
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..7
         0: CSS_COMPOUND_SELECTOR@0..3
@@ -75,7 +77,7 @@ CssRoot {
         0: L_CURLY@7..8 "{" [] []
         1: CSS_DECLARATION_LIST@8..8
         2: R_CURLY@8..11 "}" [Newline("\n"), Newline("\n")] []
-  1: EOF@11..12 "" [Newline("\n")] []
+  2: EOF@11..12 "" [Newline("\n")] []
 
 ```
 

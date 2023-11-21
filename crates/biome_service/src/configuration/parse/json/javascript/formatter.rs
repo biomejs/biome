@@ -34,10 +34,12 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
             "trailingComma",
             "semicolons",
             "arrowParentheses",
+            "bracketSpacing",
             "enabled",
             "indentStyle",
             "indentSize",
             "indentWidth",
+            "lineEnding",
             "lineWidth",
         ];
         let mut result = Self::Output::default();
@@ -70,6 +72,10 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
                     result.arrow_parentheses =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
+                "bracketSpacing" => {
+                    result.bracket_spacing =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
                 "enabled" => {
                     result.enabled = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
@@ -88,6 +94,10 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
                 }
                 "indentWidth" => {
                     result.indent_width =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "lineEnding" => {
+                    result.line_ending =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "lineWidth" => {

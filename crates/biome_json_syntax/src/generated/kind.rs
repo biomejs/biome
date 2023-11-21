@@ -8,8 +8,11 @@
 pub enum JsonSyntaxKind {
     #[doc(hidden)]
     TOMBSTONE,
-    #[doc = r" Marks the end of the file.May have trivia attached"]
+    #[doc = r" Marks the end of the file. May have trivia attached"]
     EOF,
+    #[doc = r" Any Unicode BOM character that may be present at the start of"]
+    #[doc = r" a file."]
+    UNICODE_BOM,
     COLON,
     COMMA,
     L_PAREN,
@@ -95,4 +98,4 @@ impl JsonSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [:] => { $ crate :: JsonSyntaxKind :: COLON } ; [,] => { $ crate :: JsonSyntaxKind :: COMMA } ; ['('] => { $ crate :: JsonSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: JsonSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: JsonSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: JsonSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: JsonSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: JsonSyntaxKind :: R_BRACK } ; [null] => { $ crate :: JsonSyntaxKind :: NULL_KW } ; [true] => { $ crate :: JsonSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: JsonSyntaxKind :: FALSE_KW } ; [ident] => { $ crate :: JsonSyntaxKind :: IDENT } ; [EOF] => { $ crate :: JsonSyntaxKind :: EOF } ; [#] => { $ crate :: JsonSyntaxKind :: HASH } ; }
+macro_rules ! T { [:] => { $ crate :: JsonSyntaxKind :: COLON } ; [,] => { $ crate :: JsonSyntaxKind :: COMMA } ; ['('] => { $ crate :: JsonSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: JsonSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: JsonSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: JsonSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: JsonSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: JsonSyntaxKind :: R_BRACK } ; [null] => { $ crate :: JsonSyntaxKind :: NULL_KW } ; [true] => { $ crate :: JsonSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: JsonSyntaxKind :: FALSE_KW } ; [ident] => { $ crate :: JsonSyntaxKind :: IDENT } ; [EOF] => { $ crate :: JsonSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: JsonSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: JsonSyntaxKind :: HASH } ; }

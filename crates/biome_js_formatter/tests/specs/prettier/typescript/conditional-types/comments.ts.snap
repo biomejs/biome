@@ -1,0 +1,198 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/conditional-types/comments.ts
+---
+
+# Input
+
+```ts
+type A = B extends T
+  ? // comment
+    foo
+  : bar;
+
+type A = B extends test /* comment
+  comment
+      comment
+*/
+  ? foo
+  : bar;
+
+type T = test extends B
+  ? /* comment
+          comment
+    comment
+          comment
+  */
+    foo
+  : bar;
+
+type T = test extends B
+  ? /* comment
+       comment
+       comment
+       comment
+    */
+    foo
+  : test extends B
+  ? /* comment
+  comment
+    comment */
+    foo
+  : bar;
+
+type T = test extends B
+  ? /* comment */
+    foo
+  : bar;
+
+type T = test extends B
+  ? foo
+  : /* comment
+         comment
+     comment
+           comment
+    */
+  bar;
+
+type T = test extends B
+  ? foo
+  : /* comment
+         comment
+     comment
+           comment
+    */
+  test extends B
+  ? foo
+  : /* comment
+  comment
+    comment
+   */
+    bar;
+
+type T = test extends B
+  ? foo
+  : /* comment */
+  bar;
+
+type T = test extends B ? test extends B /* c
+c */? foo : bar : bar;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -27,11 +27,11 @@
+     */
+     foo
+   : test extends B
+-    ? /* comment
++  ? /* comment
+   comment
+     comment */
+-      foo
+-    : bar;
++    foo
++  : bar;
+ 
+ type T = test extends B ? /* comment */ foo : bar;
+ 
+@@ -51,13 +51,13 @@
+      comment
+            comment
+     */
+-    test extends B
+-    ? foo
+-    : /* comment
++  test extends B
++  ? foo
++  : /* comment
+   comment
+     comment
+    */
+-      bar;
++    bar;
+ 
+ type T = test extends B ? foo : /* comment */ bar;
+ 
+```
+
+# Output
+
+```ts
+type A = B extends T
+  ? // comment
+    foo
+  : bar;
+
+type A = B extends test /* comment
+  comment
+      comment
+*/
+  ? foo
+  : bar;
+
+type T = test extends B
+  ? /* comment
+          comment
+    comment
+          comment
+  */
+    foo
+  : bar;
+
+type T = test extends B
+  ? /* comment
+       comment
+       comment
+       comment
+    */
+    foo
+  : test extends B
+  ? /* comment
+  comment
+    comment */
+    foo
+  : bar;
+
+type T = test extends B ? /* comment */ foo : bar;
+
+type T = test extends B
+  ? foo
+  : /* comment
+         comment
+     comment
+           comment
+    */
+    bar;
+
+type T = test extends B
+  ? foo
+  : /* comment
+         comment
+     comment
+           comment
+    */
+  test extends B
+  ? foo
+  : /* comment
+  comment
+    comment
+   */
+    bar;
+
+type T = test extends B ? foo : /* comment */ bar;
+
+type T = test extends B
+  ? test extends B /* c
+c */
+    ? foo
+    : bar
+  : bar;
+```
+
+

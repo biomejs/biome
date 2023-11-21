@@ -27,6 +27,7 @@ pub fn is_id_continue(c: char) -> bool {
 /// assert!(is_js_ident("id0"));
 /// assert!(is_js_ident("$id$"));
 /// assert!(is_js_ident("_id_"));
+/// assert!(is_js_ident("𐊧"));
 ///
 /// assert!(!is_js_ident(""));
 /// assert!(!is_js_ident("@"));
