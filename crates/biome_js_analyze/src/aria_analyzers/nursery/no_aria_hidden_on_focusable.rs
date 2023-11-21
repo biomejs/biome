@@ -74,15 +74,12 @@ impl Rule for NoAriaHiddenOnFocusable {
                     let tabindex_text = tabindex_static.text();
                     let tabindex_val = tabindex_text.trim().parse::<i32>();
 
-                    match tabindex_val {
-                        Ok(num) => {
-                            if num >= 0 {
-                                return Some(());
-                            } else {
-                                return None;
-                            }
+                    if let Ok(num) = tabindex_val {
+                        if num >= 0 {
+                            return Some(());
+                        } else {
+                            return None;
                         }
-                        Err(_) => {}
                     }
                 }
             }
