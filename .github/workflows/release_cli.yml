@@ -6,8 +6,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - packages/@biomejs/biome/package.json
+      - feat/alpine
+    # paths:
+    #   - packages/@biomejs/biome/package.json
 
 jobs:
   check:
