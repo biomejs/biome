@@ -63,6 +63,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -117,6 +118,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -171,6 +173,7 @@ Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts

@@ -28,6 +28,9 @@ Formatting options specific to the JavaScript files
                               Defaults to "always".
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX tags
+                              to the end of the last line, rather than being alone on the following line.
+                              Defaults to false.
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its super
                               languages) files.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
