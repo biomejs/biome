@@ -22,7 +22,7 @@ pub(crate) fn store_changed_files(
 
     let fs = &mut session.app.fs;
 
-    let changed_files = fs.get_changed_paths(base)?;
+    let changed_files = fs.get_changed_files(base)?;
 
     let files_config = configuration
         .files

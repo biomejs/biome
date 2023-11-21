@@ -182,7 +182,7 @@ impl FileSystem for MemoryFileSystem {
         files.get(path).is_some()
     }
 
-    fn get_changed_paths(&self, _base: &str) -> io::Result<Vec<String>> {
+    fn get_changed_files(&self, _base: &str) -> io::Result<Vec<String>> {
         let cb_arc = self.on_get_changed_files.as_ref().unwrap().clone();
 
         let mut cb_guard = cb_arc.lock();

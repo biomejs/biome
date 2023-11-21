@@ -49,7 +49,7 @@ impl FileSystem for OsFileSystem {
         path.exists()
     }
 
-    fn get_changed_paths(&self, base: &str) -> io::Result<Vec<String>> {
+    fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         let output = Command::new("git")
             .arg("diff")
             .arg("--name-only")
