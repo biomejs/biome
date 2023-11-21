@@ -11,12 +11,6 @@ use biome_service::{Configuration, VERSION};
 use std::fs;
 use xtask::{project_root, Mode, Result};
 
-const VSCODE_FRONTMATTER: &str = r#"---
-title: VSCode extension
-description: Notes about the Biome's VSCode extension
----
-"#;
-
 const CHANGELOG_FRONTMATTER: &str = r#"---
 title: Changelog
 description: The changelog of Biome
@@ -29,13 +23,10 @@ tableOfContents:
 pub(crate) fn generate_files() -> Result<()> {
     generate_configuration_schema(Mode::Overwrite)?;
     let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
-    let readme = fs::read_to_string(project_root().join("editors/vscode/README.md"))?;
     let changelog = fs::read_to_string(project_root().join("CHANGELOG.md"))?;
     let default_configuration =
         project_root().join("website/src/components/generated/DefaultConfiguration.mdx");
-    fs::remove_file(project_root().join("website/src/content/docs/reference/vscode.mdx")).ok();
     fs::remove_file(project_root().join("website/src/content/docs/internals/changelog.mdx")).ok();
-    let vscode = format!("{VSCODE_FRONTMATTER}{readme}");
     let changelog = format!("{CHANGELOG_FRONTMATTER}{changelog}");
 
     let configuration_content = serde_json::to_string(&Configuration::default()).unwrap();
@@ -62,10 +53,6 @@ pub(crate) fn generate_files() -> Result<()> {
 
     fs::write(default_configuration, configuration)?;
 
-    fs::write(
-        project_root().join("website/src/content/docs/reference/vscode.mdx"),
-        vscode,
-    )?;
     fs::write(
         project_root().join("website/src/content/docs/internals/changelog.mdx"),
         changelog,
