@@ -237,7 +237,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   For example, it's possible to modify the formatter `lineWidth`, and even `quoteStyle` for certain files that are included in glob path `generated/**`:
 
-  ```json
+  ```json title="biome.json"
   {
     "formatter": {
       "lineWidth": 100
@@ -260,7 +260,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   Or, you can disable certain rules for certain path, and disable the linter for other paths:
 
-  ```json
+  ```json title="biome.json"
   {
     "linter": {
       "enabled": true,
@@ -426,7 +426,7 @@ The following rules are now recommended:
 - Enhance diagnostic for infer type handling in the parser. The 'infer' keyword can only be utilized within the 'extends' clause of a conditional type. Using it outside of this context will result in an error. Ensure that any type declarations using 'infer' are correctly placed within the conditional type structure to avoid parsing issues. Contributed by @denbezrukov
 - Add support for parsing trailing commas inside JSON files:
 
-  ```json
+  ```json title="biome.json"
   {
     "json": {
       "parser": {
@@ -843,7 +843,7 @@ The following rules are promoted:
 
 - The organize imports tool is enabled by default. If you don't want to use it, you need to disable it explicitly:
 
-  ```json
+  ```json title="biome.json"
   {
     "organizeImports": {
       "enabled": false
@@ -927,7 +927,7 @@ The following rules are promoted:
 
 - Add a new option to ignore unknown files:
 
-    ```json
+    ```json title="biome.json"
     {
        "files": {
           "ignoreUnknown": true
@@ -938,7 +938,7 @@ The following rules are promoted:
 
 - Add a new `"javascript"` option to support the unsafe/experimental parameter decorators:
 
-    ```json
+    ```json title="biome.json"
     {
        "javascript": {
           "parser": {
@@ -950,7 +950,7 @@ The following rules are promoted:
 
 - Add a new `"extends"` option, useful to split the configuration file in multiple files:
 
-  ```json
+  ```json title="biome.json"
   {
     "extends": ["../sharedFormatter.json", "linter.json"]
   }
@@ -974,7 +974,7 @@ The following rules are promoted:
 
 - Add a configuration to enable parsing comments inside JSON files:
 
-  ```json
+  ```json title="biome.json"
   {
     "json": {
       "parser": {
@@ -1251,7 +1251,7 @@ The following rules are now recommended:
 
   Old configuration:
 
-  ```json
+  ```json title="biome.json"
   {
     "linter": {
        "rules": {
@@ -1272,7 +1272,7 @@ The following rules are now recommended:
 
   New configuration:
 
-  ```json
+  ```json title="biome.json"
   {
     "linter": {
        "rules": {
@@ -1348,7 +1348,7 @@ The following rules are now recommended:
 
   This syntax is only supported via configuration, because it's a non-standard syntax.
 
-    ```json
+    ```json title="biome.json"
     {
        "javascript": {
           "parser": {
@@ -1359,7 +1359,7 @@ The following rules are now recommended:
     ```
 - Add support for parsing comments inside JSON files:
 
-  ```json
+  ```json title="biome.json"
   {
     "json": {
       "parser": {

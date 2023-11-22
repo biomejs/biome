@@ -41,7 +41,7 @@ Or check the [CLI reference section](/reference/cli#biomeformat).
 You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
 The following defaults are applied:
 
-```json
+```json title="biome.json"
 {
   "formatter": {
     "enabled": true,
@@ -60,13 +60,13 @@ There are times when the formatted code isn't ideal.
 
 For these cases, you can use a format suppression comment:
 
-```js
+```js title="example.js"
 // biome-ignore format: <explanation>
 ```
 
 Example:
 
-```js
+```js title="example.js"
 const expr =
   // biome-ignore format: the array should not be formatted
   [

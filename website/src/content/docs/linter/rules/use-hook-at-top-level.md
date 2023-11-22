@@ -23,18 +23,18 @@ function Component1({ a }) {
 <pre class="language-text"><code class="language-text">correctness/useHookAtTopLevel.js:3:9 <a href="https://biomejs.dev/linter/rules/use-hook-at-top-level">lint/correctness/useHookAtTopLevel</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.</span>
-  
+
     <strong>1 │ </strong>function Component1({ a }) {
     <strong>2 │ </strong>    if (a == 1) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>        useEffect();
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>    }
     <strong>5 │ </strong>}
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level</span>
-  
+
 </code></pre>
 
 ## Valid
@@ -49,7 +49,7 @@ function Component1() {
 
 Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
 
-```json
+```json title="biome.json"
 {
     "//": "...",
     "options": {

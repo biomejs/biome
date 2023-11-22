@@ -5,7 +5,6 @@ description: Learn how to set up a new project with Biome.
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
-import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 
 ## System Requirements
@@ -45,9 +44,7 @@ To create the configuration, run the `init` command in the root folder of your p
 
 After running the `init` command, you'll now have a new `biome.json` file in your directory:
 
-<CodeBlockHeader filename="biome.json" />
-
-```json
+```json title="biome.json"
 {
   "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "organizeImports": {
