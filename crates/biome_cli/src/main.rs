@@ -18,7 +18,7 @@ use tokio::runtime::Runtime;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[cfg(all(not(target = "x86_64-unknown-linux-musl"), not(target_os = "windows")))]
+#[cfg(all(not(target_os = "windows"), not(all(target_arch = "aarch64", target_env = "musl"))))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
