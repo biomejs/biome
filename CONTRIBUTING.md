@@ -380,12 +380,12 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Core Contributors team
 
-- [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
+- [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 
 ### Maintainers team
 
+- [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
-- [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
