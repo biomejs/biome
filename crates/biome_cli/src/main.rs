@@ -18,9 +18,14 @@ use tokio::runtime::Runtime;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[cfg(all(not(target_os = "windows"), not(all(target_arch = "aarch64", target_env = "musl"))))]
+#[cfg(all(any(target_os = "macos", target_os = "linux"), not(target_env = "musl")))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
+#[cfg(all(target_env = "musl", target_os = "linux"))]
+#[global_allocator]
+// system allocator
+static GLOBAL: std::alloc::System = std::alloc::System;
 
 fn main() -> ExitCode {
     setup_panic_handler();
