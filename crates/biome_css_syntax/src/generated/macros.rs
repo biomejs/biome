@@ -286,6 +286,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_PSEUDO_CLASS => {
+                    let $pattern = unsafe { $crate::CssBogusPseudoClass::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_RULE => {
                     let $pattern = unsafe { $crate::CssBogusRule::new_unchecked(node) };
                     $body

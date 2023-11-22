@@ -1,0 +1,11 @@
+:dir( {}
+:dir() {}
+:dir(ltr {}
+:dir(invalid {}
+:dir(.invalid) {}
+:dir(.invalid {}
+:dir(ltr .class {}
+:dir(ltr .class) {}
+:dir(invalid .class {}
+:dir(invalid .class) {}
+:dir(.invalid
