@@ -1,6 +1,6 @@
 # Overall Metrics
 
-**Average compatibility**: 95.94
+**Average compatibility**: 96.13
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 95.98
+**Compatible lines**: 96.69
 
 <details>
     <summary>Definition</summary>
@@ -131,15 +131,13 @@
    7234932941,
    7234932722,
    7234932312,
-+  // comment before a hole 1
    ,
--  // comment before a hole 1
+   // comment before a hole 1
    7234932841,
    ,
    7234932843,
--  ,
+   ,
    // comment after a hole 1
-+  ,
    7234932436,
  ];
  
@@ -148,22 +146,20 @@
    0x234932722,
    0x234932312,
 -
-+  // comment before a hole 2
    ,
--  // comment before a hole 2
+   // comment before a hole 2
    0x234932841,
    ,
    0x234932843,
--  ,
-   // comment after a hole 2
-+  ,
+   ,
 +
+   // comment after a hole 2
    0x234932436,
  ];
 
 ```
 
-**Prettier Similarity**: 82.14%
+**Prettier Similarity**: 96.43%
 
 
 # js/arrays/numbers-with-trailing-comments.js
@@ -2477,14 +2473,11 @@
      */
      foo
    : test
--    ? /* comment
-+  ? /* comment
+     ? /* comment
    comment
      comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
+       foo
+     : bar;
  
  test ? /* comment */ foo : bar;
  
@@ -2505,17 +2498,13 @@
             comment
        A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
      */
--    test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
+     test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  // It is at least possible to delete the extra newline that was
  // unfortunately added before the second condition above:
@@ -2528,16 +2517,13 @@
             comment
      */
 -  : test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
++    test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  test ? foo : /* comment */ bar;
  
@@ -2550,7 +2536,7 @@
 
 ```
 
-**Prettier Similarity**: 89.43%
+**Prettier Similarity**: 97.56%
 
 
 # js/conditional/new-expression.js
@@ -2559,430 +2545,13 @@
 
 
 # js/conditional/new-ternary-examples.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- // EXAMPLES
- //  mostly taken from https://github.com/prettier/prettier/issues/9561
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessageShort =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessageWithABreak =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number, and you need to take a prompt action on it."
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number, and you need to take a prompt action on it."
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const typeofExample = definition.encode
-   ? definition.encode(
-       typeof row[field] !== "undefined"
-         ? row[field]
-         : typeof definition.default !== "undefined"
--          ? definition.default
--          : null,
-+        ? definition.default
-+        : null,
-     )
-   : typeof row[field] !== "undefined"
--    ? row[field]
--    : typeof definition.default !== "undefined"
--      ? definition.default
--      : null;
-+  ? row[field]
-+  : typeof definition.default !== "undefined"
-+  ? definition.default
-+  : null;
- 
- // (the following is semantically equivalent to the above, but written in a more-confusing style – it'd be hard to grok no matter the formatting)
- const typeofExampleFlipped = definition.encode
-   ? definition.encode(
-       typeof row[field] === "undefined"
-         ? typeof definition.default === "undefined"
-           ? null
-           : definition.default
-         : row[field],
-     )
-   : typeof row[field] === "undefined"
--    ? typeof definition.default === "undefined"
--      ? null
--      : definition.default
--    : row[field];
-+  ? typeof definition.default === "undefined"
-+    ? null
-+    : definition.default
-+  : row[field];
- 
- // JSX Examples:
- 
- const typicalLongConsequentWithNullAlternate = (
-   <div>
-     {children && !isEmptyChildren(children) ? (
-       <FooComponent
-         className="a bunch of css classes might go here, wow so many"
-         foo={foo}
-         bar={includeBar ? bar : null}
-       />
-     ) : null}
-   </div>
- );
- 
- const reactRouterExampleJSX = (
-   <div>
-     {children && !isEmptyChildren(children)
-       ? children
-       : props.match
--        ? component
--          ? React.createElement(component, props)
--          : render
--            ? render(props)
--            : null
--        : null}
-+      ? component
-+        ? React.createElement(component, props)
-+        : render
-+        ? render(props)
-+        : null
-+      : null}
-   </div>
- );
- 
- const reactRouterExampleNonJSX =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
- 
- inJSXExpressionContainer.withLongConditionals.example = (
-   <div>
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition)
-       ? someReallyLargeExpression.toMakeMeowNoise().willCauseParens()
-       : someReallyLongCondition || moreInThisLongCondition
--        ? bark()
--        : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-+      ? bark()
-+      : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-   </div>
- );
- 
- inJSXExpressionContainer.withLoops.orBooleans.example = (
-   <div>
-     {items
-       ? items.map((item) =>
-           item.display ? (
-             <Item item={item} attr="breaks ternary but not consequent" />
-           ) : (
-             <Blank />
-           ),
-         )
-       : null}
- 
-     {showTheStuff &&
-       (foo ? (
-         <Thing thing={foooooooooooooooooooooooooo} bar="bazzzzzz" />
-       ) : (
-         <OtherThing />
-       ))}
-   </div>
- );
- 
- inJSXExpressionContainer.withNullConditional = (
-   <div>
-     {isACat() ? null : <Foo />}
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition) ? null : (
-       <Foo />
-     )}
-     {isACat() &&
-     (someReallyLongCondition ||
-       moreInThisLongCondition ||
-       evenMoreInThisExtraLongConditional) ? null : (
-       <Foo />
-     )}
-   </div>
- );
 
-```
-
-**Prettier Similarity**: 73.33%
+**Prettier Similarity**: 100.00%
 
 
 # js/conditional/new-ternary-spec.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- 
- // remain on one line if possible:
- const short = isLoud() ? makeNoise() : silent();
- 
- // next, put everything after the =
- const lessShort = isLoudReallyLoud()
-   ? makeNoiseReallyLoudly.omgSoLoud()
-   : silent();
- 
- // next, indent the consequent:
- const andIndented = isLoudReallyReallyReallyReallyLoud()
-   ? makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud()
-   : silent();
- 
- // unless the consequent is short (less than ten characters long):
- const shortSoCase = isLoudReallyReallyReallyReallyLoud()
-   ? silent()
-   : makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud();
- 
- // if chained, always break and put after the =
- const chainedShort = isCat() ? meow() : isDog() ? bark() : silent();
- 
- // when a consequent breaks in a chain:
- const chainedWithLongConsequent = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // nested ternary in consequent always breaks:
- const chainedWithTernaryConsequent = isCat()
-   ? aNestedCondition
-     ? theResult()
-     : theAlternate()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // consequent and terminal alternate break:
- const consequentAndTerminalAlternateBreak = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : someReallyLargeExpression
--        .thatWouldCauseALineBreak()
--        .willCauseAnIndentButNotParens();
-+  ? bark()
-+  : someReallyLargeExpression
-+      .thatWouldCauseALineBreak()
-+      .willCauseAnIndentButNotParens();
- 
- // multiline conditions and consequents/alternates:
- const multilineConditionsConsequentsAndAlternates =
-   isAnAdorableKittyCat() && (someReallyLongCondition || moreInThisLongCondition)
-     ? someReallyLargeExpression
-         .thatWouldCauseALineBreak()
-         .willCauseAnIndentButNotParens()
-     : isNotAnAdorableKittyCat() &&
--        (someReallyLongCondition || moreInThisLongCondition)
--      ? bark()
--      : shortCondition()
--        ? shortConsequent()
--        : someReallyLargeExpression
--            .thatWouldCauseALineBreak()
--            .willCauseAnIndentButNotParens();
-+      (someReallyLongCondition || moreInThisLongCondition)
-+    ? bark()
-+    : shortCondition()
-+    ? shortConsequent()
-+    : someReallyLargeExpression
-+        .thatWouldCauseALineBreak()
-+        .willCauseAnIndentButNotParens();
- 
- // illustrating case of mostly short conditionals
- const mostlyShort =
-   x === 1
-     ? "one"
-     : x === 2
--      ? "two"
--      : x === 3
--        ? "three"
--        : x === 5 &&
--            y === 7 &&
--            someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
--          ? "four"
--          : x === 6
--            ? "six"
--            : "idk";
-+    ? "two"
-+    : x === 3
-+    ? "three"
-+    : x === 5 &&
-+      y === 7 &&
-+      someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
-+    ? "four"
-+    : x === 6
-+    ? "six"
-+    : "idk";
- 
- // long conditional, short consequent/alternate, not chained - do indent after ?
- const longConditional =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : "bar";
- 
- // long conditional, short consequent/alternate, chained
- // (break on short consequents iff in chained ternary and its conditional broke)
- const longConditionalChained =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : anotherCondition
--      ? "bar"
--      : "baz";
-+    ? "bar"
-+    : "baz";
- 
- // As a function parameter, don't add an extra indent:
- definition.encode(
-   typeof row[field] !== "undefined"
-     ? row[field]
-     : typeof definition.default !== "undefined"
--      ? definition.default
--      : null,
-+    ? definition.default
-+    : null,
-   typeof row[field] === "undefined"
-     ? typeof definition.default === "undefined"
-       ? null
-       : definition.default
-     : row[field],
- );
- 
- // In a return, break and over-indent:
- const inReturn = () => {
-   if (short) {
-     return foo ? 1 : 2;
-   }
-   return typeof row[aVeryLongFieldName] !== "undefined"
-     ? row[aVeryLongFieldName]
-     : null;
- };
- 
- // Remove current JSX Mode, and replace it with this algorithm:
- // When a ternary's parent is a JSXExpressionContainer which is not in a JSXAttribute,
- // force the consequent to break,
- // and if the alternate breaks,
- // add a newline before the closing curly brace.
- // Special case when the consequent is `null`:
- // do not add a line before or after it,
- // and wrap the alternate in parens.
- 
- const someJSX = (
-   <div>
-     Typical jsx case:
-     {showFoo ? <Foo attribute="such and such stuff here" /> : <Bar short />}
-     Nested, and with a non-jsx consequent is the same:
-     {component ? (
-       React.createElement(component, props)
-     ) : render ? (
-       <div>{render(props)}</div>
-     ) : (
-       <div>Nothing is here</div>
-     )}
-     As is a non-jsx consequent:
-     {showTheJSXElement ? <div>the stuff</div> : renderOtherStuff()}
-     But if the alternate breaks, add a newline before the closing curly brace:
-     {showTheThing || pleaseShowTheThing ? (
-       <Foo attribute="such and such stuff here" />
-     ) : (
-       <Bar
-         attribute="such and such stuff here"
-         another="more stuff here"
-         third="and even more, hooray!"
-       />
-     )}
-     When the consequent is `null` and the alternate breaks, hug it with parens
-     to match boolean behavior:
-     {!thing ? null : (
-       <TheThing
-         thing={thing}
-         someVeryLongPropertyThatBreaksTheAlternate="hello"
-       />
-     )}
-   </div>
- );
- 
- ternaryWithJSXElements.hasNoSpecialCasing = component ? (
-   <div>{React.createElement(component, props)}</div>
- ) : render ? (
-   <div>{render(props)}</div>
- ) : (
-   <div>Nothing is here</div>
- );
- 
- jsxExpressionContainer.inJSXAttribute.hasNoSpecialCasing = (
-   <Foo
-     withJSX={isRed ? <RedColorThing /> : <GreenColorThing />}
-     withJSXBroken={
-       isRed || isSomeOtherLongCondition.thatBreaksTheLine() ? (
-         <RedColorThing />
-       ) : (
-         <GreenColorThing />
-       )
-     }
-   />
- );
 
-```
-
-**Prettier Similarity**: 84.90%
+**Prettier Similarity**: 100.00%
 
 
 # js/conditional/no-confusing-arrow.js
@@ -3031,19 +2600,15 @@
    return !linkTo
      ? false
      : typeof linkTo === "function"
--      ? linkTo(record, reference)
--      : linkToRecord(rootPath, sourceId, linkTo_as_string);
-+    ? linkTo(record, reference)
-+    : linkToRecord(rootPath, sourceId, linkTo_as_string);
+       ? linkTo(record, reference)
+       : linkToRecord(rootPath, sourceId, linkTo_as_string);
  }
  function foo2() {
    return React.isValidElement(emptyText)
      ? React.cloneElement(emptyText)
      : emptyText === ""
--      ? " " // em space, forces the display of an empty line of normal height
--      : translate(emptyText, { _: emptyText });
-+    ? " " // em space, forces the display of an empty line of normal height
-+    : translate(emptyText, { _: emptyText });
+       ? " " // em space, forces the display of an empty line of normal height
+       : translate(emptyText, { _: emptyText });
  }
  
  // Function call ideally wouldnt break break
@@ -3090,17 +2655,13 @@
    payload
      ? payload.id || (payload.data ? payload.data.id : null)
      : requestPayload
--      ? requestPayload.id
--      : null,
-+    ? requestPayload.id
-+    : null,
+       ? requestPayload.id
+       : null,
    payload && payload.data
      ? payload.data
      : requestPayload && requestPayload.data
--      ? requestPayload.data
--      : null,
-+    ? requestPayload.data
-+    : null,
+       ? requestPayload.data
+       : null,
  );
  
  const delayedDataProvider = new Proxy(restProvider, {
@@ -3146,12 +2707,9 @@
  const badComments = schema.model
    ? schema
    : // If model is an array where the items schema is a referred model then we need to use that
--    schema.type === "array"
--    ? schema.items
--    : schema;
-+  schema.type === "array"
-+  ? schema.items
-+  : schema;
+     schema.type === "array"
+     ? schema.items
+     : schema;
  
  const anotherBadComment = refModel
    ? // If we're in a shared params file then reference the model name directly
@@ -3164,7 +2722,7 @@
 
 ```
 
-**Prettier Similarity**: 91.03%
+**Prettier Similarity**: 98.08%
 
 
 # js/cursor/comments-1.js
@@ -5839,404 +5397,18 @@
 
 
 # js/ternaries/indent.js
-```diff
- aaaaaaaaaaaaaaa
-   ? bbbbbbbbbbbbbbbbbb
-   : ccccccccccccccc
--    ? ddddddddddddddd
--    : eeeeeeeeeeeeeee
--      ? fffffffffffffff
--      : gggggggggggggggg;
-+  ? ddddddddddddddd
-+  : eeeeeeeeeeeeeee
-+  ? fffffffffffffff
-+  : gggggggggggggggg;
- 
- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
- 
- a
-   ? {
-       a: 0,
-     }
-   : {
-       a: {
-         a: 0,
-       }
-         ? {
-             a: 0,
-           }
-         : {
-             y: {
-               a: 0,
-             }
-               ? {
-                   a: 0,
-                 }
-               : {
-                   a: 0,
-                 },
-           },
-     };
- 
- a
-   ? {
-       a: function () {
-         return a
-           ? {
-               a: [
-                 a
-                   ? {
-                       a: 0,
-                       b: [a ? [0, 1] : []],
-                     }
-                   : [
-                       [
-                         0,
-                         {
-                           a: 0,
-                         },
-                         a ? 0 : 1,
-                       ],
-                       function () {
-                         return a
-                           ? {
-                               a: 0,
-                             }
-                           : [
-                               {
-                                 a: 0,
-                               },
-                               {},
-                             ];
-                       },
-                     ],
-               ],
-             }
-           : [
-               a
-                 ? function () {
-                     a
-                       ? a(
-                           a
-                             ? {
-                                 a: a({
-                                   a: 0,
-                                 }),
-                               }
-                             : [
-                                 0,
-                                 a(),
-                                 a(
-                                   a(),
-                                   {
-                                     a: 0,
-                                   },
-                                   a
-                                     ? a()
-                                     : a({
-                                         a: 0,
-                                       }),
-                                 ),
-                                 a()
-                                   ? {
-                                       a: a(),
-                                       b: [],
-                                     }
-                                   : {},
-                               ],
-                         )
-                       : a(
-                           a()
-                             ? {
-                                 a: 0,
-                               }
-                             : (function (a) {
-                                 return a()
-                                   ? [
-                                       {
-                                         a: 0,
-                                         b: a(),
-                                       },
-                                     ]
-                                   : a([
-                                       a
-                                         ? {
-                                             a: 0,
-                                           }
-                                         : {},
-                                       {
-                                         a: 0,
-                                       },
-                                     ]);
-                               })(
-                                 a
-                                   ? function (a) {
-                                       return function () {
-                                         return 0;
-                                       };
-                                     }
-                                   : function (a) {
-                                       return function () {
-                                         return 1;
-                                       };
-                                     },
-                               ),
-                         );
-                   }
-                 : function () {},
-             ];
-       },
-     }
-   : a;
 
-```
-
-**Prettier Similarity**: 97.33%
+**Prettier Similarity**: 100.00%
 
 
 # js/ternaries/nested-in-condition.js
-```diff
- $var = (
-   $number % 10 >= 2 && ($number % 100 < 10 || $number % 100 >= 20)
-     ? kochabCooieGameOnOboleUnweave
-     : annularCooeedSplicesWalksWayWay
- )
-   ? anodyneCondosMalateOverateRetinol
-   : averredBathersBoxroomBuggyNurl;
- 
- const value = (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- )
-   ? true
-     ? true
-     : false
-   : true
--    ? true
--    : false;
-+  ? true
-+  : false;
- 
- (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- ) ? (
-   <Element>
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element>
- ) : (
-   <Element2>
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element2>
- );
 
-```
-
-**Prettier Similarity**: 95.00%
+**Prettier Similarity**: 100.00%
 
 
 # js/ternaries/nested.js
-```diff
- let icecream =
-   what == "cone"
-     ? (p) => (!!p ? `here's your ${p} cone` : `just the empty cone for you`)
-     : (p) => `here's your ${p} ${what}`;
- 
- const value = condition1
-   ? value1
-   : condition2
--    ? value2
--    : condition3
--      ? value3
--      : value4;
-+  ? value2
-+  : condition3
-+  ? value3
-+  : value4;
- 
- const StorybookLoader = ({ match }) =>
-   match.params.storyId === "button" ? (
-     <ButtonStorybook />
-   ) : match.params.storyId === "color" ? (
-     <ColorBook />
-   ) : match.params.storyId === "typography" ? (
-     <TypographyBook />
-   ) : match.params.storyId === "loading" ? (
-     <LoaderStorybook />
-   ) : match.params.storyId === "deal-list" ? (
-     <DealListStory />
-   ) : (
-     <Message>
-       <Title>{"Missing story book"}</Title>
-       <Content>
-         <BackButton />
-       </Content>
-     </Message>
-   );
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessage =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessage2 =
-   state == "success"
-     ? 1 //'Payment completed successfully'
-     : state == "processing"
--      ? 2 //'Payment processing'
--      : state == "invalid_cvc"
--        ? 3 //'There was an issue with your CVC number'
--        : true //state == 'invalid_expiry'
--          ? 4 //'Expiry must be sometime in the past.'
--          : 5; // 'There was an issue with the payment.  Please contact support.'
-+    ? 2 //'Payment processing'
-+    : state == "invalid_cvc"
-+    ? 3 //'There was an issue with your CVC number'
-+    : true //state == 'invalid_expiry'
-+    ? 4 //'Expiry must be sometime in the past.'
-+    : 5; // 'There was an issue with the payment.  Please contact support.'
- 
- const foo = (
-   <div
-     className={
-       "match-achievement-medal-type type" +
-       (medals[0].record
-         ? "-record"
-         : medals[0].unique
--          ? "-unique"
--          : medals[0].type)
-+        ? "-unique"
-+        : medals[0].type)
-     }
-   >
-     {medals[0].record
-       ? i18n("Record")
-       : medals[0].unique
--        ? i18n("Unique")
--        : medals[0].type === 0
--          ? i18n("Silver")
--          : medals[0].type === 1
--            ? i18n("Gold")
--            : medals[0].type === 2
--              ? i18n("Platinum")
--              : i18n("Theme")}
-+      ? i18n("Unique")
-+      : medals[0].type === 0
-+      ? i18n("Silver")
-+      : medals[0].type === 1
-+      ? i18n("Gold")
-+      : medals[0].type === 2
-+      ? i18n("Platinum")
-+      : i18n("Theme")}
-   </div>
- );
- 
- a
-   ? literalline
-   : {
--        123: 12,
--      }
--    ? line
--    : softline;
-+      123: 12,
-+    }
-+  ? line
-+  : softline;
- 
- const config = {
-   onFailure:
-     onFailure !== undefined
-       ? onFailure
-       : (error) => {
-           notify(
-             typeof error === "string"
-               ? error
-               : error.message || "ra.notification.http_error",
-             "warning",
-             {
-               _:
-                 typeof error === "string"
-                   ? error
-                   : error && error.message
--                    ? error.message
--                    : undefined,
-+                  ? error.message
-+                  : undefined,
-             },
-           );
-           refresh();
-         },
- };
- 
- showNotification(
-   typeof error === "string" ? error : error.message || body,
-   level || "warning",
-   {
-     messageArgs,
-     undoable: false,
-   },
- );
- 
- const result =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
 
-```
-
-**Prettier Similarity**: 69.78%
+**Prettier Similarity**: 100.00%
 
 
 # js/ternaries/parenthesis.js
@@ -6930,174 +6102,8 @@
 
 
 # jsx/jsx/conditional-expression.js
-```diff
- // There are two ways to print ConditionalExpressions: "normal mode" and
- // "JSX mode". This is normal mode (when breaking):
- //
- //   test
- //     ? consequent
- //     : alternate;
- //
- // And this is JSX mode (when breaking):
- //
- //   test ? (
- //     consequent
- //   ) : (
- //     alternate
- //   );
- //
- // When non-breaking, they look the same:
- //
- //  test ? consequent : alternate;
- //
- // We only print a conditional expression in JSX mode if its test,
- // consequent, or alternate are JSXElements.
- // Otherwise, we print in normal mode.
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // The line does not break.
- normalModeNonBreaking ? "a" : "b";
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // Its consequent is very long, so it breaks out to multiple lines.
- normalModeBreaking
-   ? johnJacobJingleHeimerSchmidtHisNameIsMyNameTooWheneverWeGoOutThePeopleAlwaysShoutThereGoesJohnJacobJingleHeimerSchmidtYaDaDaDaDaDaDa
-   : "c";
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is non-breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div /> ? jsxModeFromElementNonBreaking : "a";
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? <div /> : "a";
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? "a" : <div />;
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div>
-   <span>
-     thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-   </span>
- </div> ? (
-   "jsx mode from element breaking"
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   "a"
- ) : (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // non-breaking.
- <div>{a ? "a" : b ? "b" : "c"}</div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // breaking.
- <div>
-   {thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     ? "a"
-     : b
--      ? "b"
--      : "c"}
-+    ? "b"
-+    : "c"}
- </div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is non-breaking.
- cable ? "satellite" : isPublic ? "affairs" : network ? <span id="c" /> : "dun";
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the end). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   "satellite"
- ) : isPublic ? (
-   "affairs"
- ) : network ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the beginning). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : sateline ? (
-   "public"
- ) : affairs ? (
-   "network"
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is breaking; notice the consequents
- // and alternates in the entire chain get wrapped in parens.
- <div>
-   {properties.length > 1 ||
-   (properties.length === 1 && properties[0].apps.size > 1) ? (
-     draggingApp == null || newPropertyName == null ? (
-       <MigrationPropertyListItem />
-     ) : (
-       <MigrationPropertyListItem apps={Immutable.List()} />
-     )
-   ) : null}
- </div>;
- 
- // #3552
- foo ? (
-   <span>
-     loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong jsx
-   </span>
- ) : undefined;
 
-```
-
-**Prettier Similarity**: 98.76%
+**Prettier Similarity**: 100.00%
 
 
 # jsx/jsx/expression.js
@@ -8905,176 +7911,18 @@
 
 
 # typescript/conditional-types/comments.ts
-```diff
- type A = B extends T
-   ? // comment
-     foo
-   : bar;
- 
- type A = B extends test /* comment
-   comment
-       comment
- */
-   ? foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-           comment
-     comment
-           comment
-   */
-     foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-        comment
-        comment
-        comment
-     */
-     foo
-   : test extends B
--    ? /* comment
-+  ? /* comment
-   comment
-     comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
- 
- type T = test extends B ? /* comment */ foo : bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
-     bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
--    test extends B
--    ? foo
--    : /* comment
-+  test extends B
-+  ? foo
-+  : /* comment
-   comment
-     comment
-    */
--      bar;
-+    bar;
- 
- type T = test extends B ? foo : /* comment */ bar;
- 
- type T = test extends B
-   ? test extends B /* c
- c */
-     ? foo
-     : bar
-   : bar;
 
-```
-
-**Prettier Similarity**: 89.86%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conditional-types/conditonal-types.ts
-```diff
- export type DeepReadonly<T> = T extends any[]
-   ? DeepReadonlyArray<T[number]>
-   : T extends object
--    ? DeepReadonlyObject<T>
--    : T;
-+  ? DeepReadonlyObject<T>
-+  : T;
- 
- type NonFunctionPropertyNames<T> = {
-   [K in keyof T]: T[K] extends Function ? never : K;
- }[keyof T];
- 
- interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
- 
- type DeepReadonlyObject<T> = {
-   readonly [P in NonFunctionPropertyNames<T>]: DeepReadonly<T[P]>;
- };
- 
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Type01 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type02 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type03 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type04 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type05 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type06 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type07 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type08 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- 
- type T1 = () => void extends T ? U : V;
- type T1a = () => void extends T ? U : V;
- type T1b = () => void extends T ? U : V;
- type T2 = (() => void) extends T ? U : V;
- 
- type U1 = new () => X extends T ? U : V;
- type U1a = new () => X extends T ? U : V;
- type U1b = new () => X extends T ? U : V;
- type U2 = (new () => X) extends T ? U : V;
 
-```
-
-**Prettier Similarity**: 78.26%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conditional-types/infer-type.ts
-```diff
- type TestReturnType<T extends (...args: any[]) => any> = T extends (
-   ...args: any[]
- ) => infer R
-   ? R
-   : any;
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? U
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? U
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
 
-```
-
-**Prettier Similarity**: 69.23%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conditional-types/nested-in-condition.ts
@@ -9083,60 +7931,8 @@
 
 
 # typescript/conditional-types/new-ternary-spec.ts
-```diff
- // TypeScript has the same behavior, including a line break after =, but no parens around "conditional":
- type KnownKeys<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends { [_ in keyof T]: infer U }
-   ? {} extends U
-     ? never
-     : U
-   : never;
- 
- type KnownKeysWithLongExtends<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends {
-   [_ in keyof T]: SomeReallyLongThingThatBreaksTheLine<infer U>;
- }
-   ? U
-   : never;
- 
- // TypeScript examples:
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? SomeReallyLongThingThatBreaksTheLine<U>
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? SomeReallyLongThingThatBreaksTheLine<U>
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
 
-```
-
-**Prettier Similarity**: 67.57%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/conditional-types/parentheses.ts
@@ -11415,22 +10211,8 @@
 
 
 # typescript/keyword-types/conditional-types.ts
-```diff
- export type UnwrappedResultRow<T> = {
-   [P in keyof T]: T[P] extends Req<infer a>
-     ? a
-     : T[P] extends Opt<infer b>
--      ? b
--      : // TEST
--        never;
-+    ? b
-+    : // TEST
-+      never;
- };
 
-```
-
-**Prettier Similarity**: 62.50%
+**Prettier Similarity**: 100.00%
 
 
 # typescript/keyword-types/keyword-types-with-parens-comments.ts
