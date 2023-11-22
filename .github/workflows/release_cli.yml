@@ -121,7 +121,7 @@ jobs:
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-musl
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols"
           # Inline the version of the npm package in the CLI binary
