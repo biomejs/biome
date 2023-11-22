@@ -105,45 +105,158 @@ impl DiffReport {
     fn is_ignored(file_name: &str) -> bool {
         // ignore unstable syntaxes and embedded languages in template literals
         let patterns = [
-            // Experimental syntaxes
-            "arrows-bind",
-            "async-do-expressions",
-            "async-do-expressions",
-            "babylon-extensions",
-            "decimal",
-            "do-expressions",
-            "export-default-from",
-            "function-bind",
-            "module-block",
-            "partial-application",
-            "pipeline",
-            "record",
-            "throw-expression",
-            "throw_expression",
-            "v8intrinsic",
-            "v8_intrinsic",
-            "bind-expressions",
-            "js/objects/expression.js",
-            "destructuring-private-fields",
-            "/do/",
-            "export-extension",
-            "js/export-default/escaped/default-escaped.js", // re-export of default export is unstable
+            // v8-specific syntaxes
+            "js/v8_intrinsic",
+            // Babel plugins (mostly experimental syntaxes)
+            "js/babel-plugins/",
+            // Experimental syntax: `do {}`
+            "js/async-do-expressions/",
+            "js/do/",
+            // Experimental syntax: `export X from "mod"`
+            "js/export-default/export-default-from/",
+            "js/export-default/escaped/default-escaped.js",
+            // Experimental syntax: `module <id> {}`
+            "js/module-blocks",
+            "js/explicit-resource-management/valid-module-block-top-level-await-using-binding.js",
+            "js/explicit-resource-management/valid-module-block-top-level-using-binding.js",
+            // Experimental syntax: `#[]` and `#{}`
             "js/tuple",
-            "deferred-import-evaluation", // `import defer` syntax
-            "source-phase-imports",       // `import source` syntax
-            "import-reflection",          // `import module` syntax
-            "explicit-resource-management",
+            "js/record",
+            "js/arrays/tuple-and-record.js",
+            "js/arrows/tuple-and-record.js",
+            "js/binary-expressions/tuple-and-record.js",
+            "js/class-extends/tuple-and-record.js",
+            "js/comments-closure-typecast/tuple-and-record.js",
+            "js/comments/tuple-and-record.js",
+            "js/function-single-destructuring/tuple-and-record.js",
+            "js/method-chain/tuple-and-record.js",
+            // Experimental syntax: pipeline operator `|>`
+            "js/comments-pipeline-own-line",
+            "js/partial-application",
+            "js/pipeline-operator",
+            // Experimental syntax: `::`
+            "js/arrows-bind/",
+            "js/bind-expressions/",
+            "js/objects/expression.js",
+            "js/no-semi-babylon-extensions/no-semi.js",
+            // Experimental syntax: `let { #x: x } = ...`
+            "js/destructuring-private-fields",
+            // Experimental syntax: `import defer`
+            "js/deferred-import-evaluation/",
+            // Experimental syntax: `import source`
+            "js/source-phase-imports/",
+            // Experimental syntax: `import module`
+            "js/import-reflection/",
             // Embedded languages in template literals
-            "html-like",
-            "js/multiparser",
-            "js/range/issue-7082.js",
+            "js/multiparser-comments/",
+            "js/multiparser-css/",
+            "js/multiparser-graphql/",
+            "js/multiparser-html/",
+            "js/multiparser-invalid/",
+            "js/multiparser-markdown/",
+            "js/multiparser-text/",
             "js/template-literals/css-prop.js",
-            "js/template-literals/styled",
+            "js/template-literals/styled-components-with-expressions.js",
+            "js/template-literals/styled-jsx-with-expressions.js",
+            "js/template-literals/styled-jsx.js",
+            "js/range/issue-7082.js",
             "js/last-argument-expansion/embed.js",
             "typescript/as/as-const-embedded.ts",
             "js/last-argument-expansion/embed.js",
             "typescript/as/as-const-embedded.ts",
-            "styled-components",
+            /*// Experimental syntax: property and class decorators
+            "js/decorators",
+            "js/decorator-auto-accessors/",
+            "js/decorators-export/",
+            "js/ignore/class-expression-decorator.js",
+            "js/ignore/decorator.js",
+            // Experimental syntax: `import {} from "" assert {}` and `import {} from "" with {}`
+            "js/import-assertions/",
+            "js/import-attributes/",
+            // Experimental syntax: `using <id> =`
+            "js/explicit-resource-management",
+            // ES2016 syntax: exponentiation operator `**`
+            "js/async/exponentiation.js",
+            "js/binary-expressions/exp.js",
+            // ES2017 syntax: `async function` and `async () =>`
+            "js/async/",
+            "js/arrows/newline-before-arrow/newline-before-arrow.js",
+            "js/assignment/discussion-15196.js",
+            "js/assignment/issue-5610.js",
+            "js/assignment/issue-7091.js",
+            "js/assignment/issue-10218.js",
+            "js/assignment/lone-arg.js",
+            "js/ignore/issue-14404.js",
+            // ES2017 syntax: trailing comma in function call
+            "js/trailing-comma/function-calls.js",
+            "js/arrows/arrow-chain-with-trailing-comments.js",
+            // ES2018 syntax: object spread and rest `{ ...x }`
+            "js/spread",
+            "js/destructuring/",
+            "js/destructuring-ignore/",
+            "js/assignment/destructuring-heuristic.js",
+            "js/assignment/destructuring.js",
+            "js/function-single-destructuring/object.js",
+            "js/last-argument-expansion/assignment-pattern.js",
+            "js/last-argument-expansion/issue-10708.js",
+            "js/last-argument-expansion/issue-7518.js",
+            // ES2018 syntax: async iterator
+            "js/for-await/",
+            // ES2019 syntax: private class field `#field`
+            "js/classes-private-fields",
+            "js/no-semi/private-field.js",
+            // ES2019 syntax: `try {} catch {}`
+            "js/optional-catch-binding",
+            // ES2020 syntax: `a ?? b`
+            "js/nullish-coalescing",
+            "js/arrows/chain-in-logical-expression.js",
+            // ES2020 syntax: `prop?.`
+            "js/optional-chaining/",
+            "js/optional-chaining-assignment/",
+            "js/chain-expression/test.js",
+            // Es2020 syntax: bigint
+            "js/big-int/",
+            "js/objects/bigint-key.js",
+            // ES2021 syntax: numeric separator `1_000`
+            "js/literal-numeric-separator/",
+            "js/quote-props/numeric-separator.js",
+            // ES2021 syntax: `??=`, `&&=`, ...
+            "js/logical-assignment/",
+            // ES2022 syntax: private brand check `#field in`
+            "js/private-in",
+            // ES2022 syntax: private methods
+            "js/classes/keyword-property/private.js",
+            "js/decorator-auto-accessors/private.js",
+            "js/decorator-auto-accessors/static-private.js",
+            // ES2022 syntax: class fields
+            "js/classes/class-fields-features.js",
+            // ES2022 syntax: `static {}`
+            "js/class-static-block/",
+            // ES2022 syntax: top-level await
+            "js/top-level-await/",
+            // ES2022 syntax: `/regex/d`
+            "js/regex/d-flag.js",
+            // ES2023 syntax: shebang `#!/usr/bin/node`
+            "js/shebang/",
+            // ES2024 syntax: `/regex/v`
+            "js/regex/v-flag.js",*/
+            /*// JSX
+            "jsx/",
+            "js/binary-expressions/inline-jsx.js",
+            "js/binary-expressions/jsx_parent.js",
+            "js/call/first-argument-expansion/jsx.js",
+            "js/comments-closure-typecast/styled-components.js",
+            "js/comments/html-like/",
+            "js/comments/jsx.js",
+            "js/comments/return-statement.js",
+            "js/last-argument-expansion/jsx.js",
+            "js/trailing-comma/jsx.js",
+            "js/throw_statement/jsx.js",
+            "js/unicode/nbsp-jsx.js",
+            "js/yield/jsx-without-parenthesis.js",
+            "js/yield/jsx.js",*/
+            /*// TypeScript
+            "typescript/",*/
         ];
 
         patterns.iter().any(|pattern| file_name.contains(pattern))
@@ -282,7 +395,7 @@ impl DiffReport {
             diff,
         } in report_metric_data.files.iter()
         {
-            writeln!(report, "# {}", filename).unwrap();
+            writeln!(report, "### {}", filename).unwrap();
 
             if let Some(diff) = diff {
                 writeln!(report, "```diff").unwrap();
@@ -300,7 +413,7 @@ impl DiffReport {
             writeln!(report).unwrap();
         }
 
-        let mut header = String::from("# Overall Metrics\n\n");
+        let mut header = String::from("## Overall Metrics\n\n");
 
         writeln!(
             header,
@@ -337,7 +450,8 @@ impl DiffReport {
 </details>
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
-",
+
+## Test cases",
             );
 
         let report = format!("{header}\n\n{report}");
