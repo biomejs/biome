@@ -44,7 +44,7 @@ rayon                = "1.5.1"
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
-tikv-jemallocator = "0.5.0"
+tikv-jemallocator    = "0.5.0"
 tokio                = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing              = { workspace = true }
 tracing-appender     = "0.2"
