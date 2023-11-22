@@ -28,10 +28,11 @@ brew install biome
 
 You have to pick the correct binary for your platform for Biome work. The following table should help you do so.
 
-| CPU Architecture | Windows        | macOS                          | Linux         |
-|------------------|----------------|--------------------------------|---------------|
-| `arm64`          | `win32-arm64`  | `darwin-arm64` (M1 or newer)   | `linux-arm64` |
-| `x64`            | `win32-x64`    | `darwin-x64`                   | `linux-x64`   |
+| CPU Architecture | Windows        | macOS                          | Linux         | Linux (musl)       |
+|------------------|----------------|--------------------------------|---------------|--------------------|
+| `arm64`          | `win32-arm64`  | `darwin-arm64` (M1 or newer)   | `linux-arm64` | `linux-arm64-musl` |
+| `x64`            | `win32-x64`    | `darwin-x64`                   | `linux-x64`   | `linux-x64-musl`   |
+
 
 > NOTE: Use the Linux variant for Windows Subsystem for Linux (WSL)
 
