@@ -66,6 +66,9 @@ jobs:
           - os: ubuntu-20.04
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+            code-target: linux-amd64-musl
           # - os: macos-11
           #   target: x86_64-apple-darwin
           #   code-target: darwin-x64
@@ -104,7 +107,7 @@ jobs:
           sudo apt-get install -y gcc-aarch64-linux-gnu
         
       - name: Install musl toolchain
-        if: matrix.code-target == 'linux-x64-musl'
+        if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-amd64-musl'
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
@@ -118,6 +121,7 @@ jobs:
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-musl-gcc
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols"
           # Inline the version of the npm package in the CLI binary
