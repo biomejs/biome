@@ -18,13 +18,16 @@ use tokio::runtime::Runtime;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[cfg(all(any(target_os = "macos", target_os = "linux"), not(target_env = "musl")))]
+#[cfg(all(
+    any(target_os = "macos", target_os = "linux"),
+    not(target_env = "musl")
+))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-#[cfg(all(target_env = "musl", target_os = "linux"))]
+// Jemallocator does not work on aarch64 with musl, so we'll use the system allocator instead
+#[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
-// system allocator
 static GLOBAL: std::alloc::System = std::alloc::System;
 
 fn main() -> ExitCode {
