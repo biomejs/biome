@@ -58,7 +58,7 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = "0.1.29"
 
 [target.'cfg(not(windows))'.dependencies]
-tikv-jemallocator = { version = "0.5.4", features = [] }
+tikv-jemallocator = { version = "0.5.4", default-features = false}
 
 [dev-dependencies]
 biome_js_formatter   = { workspace = true }
