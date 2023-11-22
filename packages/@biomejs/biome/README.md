@@ -78,16 +78,29 @@ or directly head to the [Getting Started guide][getting-started] to start using 
 
 ## Sponsors
 
+### Gold Sponsors
+
 <table>
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://images.opencollective.com/shiguredo/8552ade/logo.png?height=80" width="80"></a>
+        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg?height=120" width="120"></a>
       </td>
     </tr>
   </tbody>
 </table>
 
+### Bronze Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.kanamekey.com" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 [bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
