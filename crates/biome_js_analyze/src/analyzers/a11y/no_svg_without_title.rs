@@ -24,7 +24,7 @@ declare_rule! {
     ///     <title></title>
     ///     <circle />
     /// </svg>
-    /// ``
+    /// ```
     ///
     /// ```js,expect_diagnostic
     /// <svg>foo</svg>
