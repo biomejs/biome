@@ -46,21 +46,21 @@ function tooComplex() {
 <pre class="language-text"><code class="language-text">complexity/noExcessiveCognitiveComplexity.js:1:10 <a href="https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity">lint/complexity/noExcessiveCognitiveComplexity</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Excessive complexity detected.</span>
-
+  
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>function tooComplex() {
    <strong>   │ </strong>         <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>    for (let x = 0; x &lt; 10; x++) {
     <strong>3 │ </strong>        for (let y = 0; y &lt; 10; y++) {
-
+  
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.</span>
-
+  
 </code></pre>
 
 ## Options
 
 Allows to specify the maximum allowed complexity.
 
-```json title="biome.json"
+```json
 {
     "//": "...",
     "options": {

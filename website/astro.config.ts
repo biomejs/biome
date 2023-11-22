@@ -134,18 +134,10 @@ export default defineConfig({
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 					],
 				},

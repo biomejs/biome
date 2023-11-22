@@ -21,13 +21,13 @@ console.log(event)
 <pre class="language-text"><code class="language-text">style/noRestrictedGlobals.js:1:13 <a href="https://biomejs.dev/linter/rules/no-restricted-globals">lint/style/noRestrictedGlobals</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Do not use the global variable </span><span style="color: Orange;"><strong>event</strong></span><span style="color: Orange;">.</span>
-
+  
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>console.log(event)
    <strong>   │ </strong>            <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-
+  
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a local variable instead.</span>
-
+  
 </code></pre>
 
 ### Valid
@@ -43,7 +43,7 @@ function f(event) {
 Use the options to specify additional globals that you want to restrict in your
 source code.
 
-```json title="biome.json"
+```json
 {
     "//": "...",
     "options": {
