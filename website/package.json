@@ -57,5 +57,8 @@
 	},
 	"engines": {
 		"pnpm": "^8.0.0"
+	},
+	"dependencies": {
+		"astro": "^3.6.0"
 	}
 }
