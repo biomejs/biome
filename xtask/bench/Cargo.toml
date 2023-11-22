@@ -41,7 +41,7 @@ humansize = { version = "2.1.2", optional = true }
 [target.'cfg(target_os = "windows")'.dependencies]
 mimalloc = "0.1.29"
 
-[target.'cfg(not(all(target_arch = "aarch64", target_os = "linux", target_env = "musl", not(target_os = "windows"))))'.dependencies]
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = { version = "0.5.4" }
 
 [features]
