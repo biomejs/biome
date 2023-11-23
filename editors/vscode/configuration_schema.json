@@ -757,11 +757,6 @@
 					"format": "uint8",
 					"minimum": 0.0
 				},
-				"lineEnding": {
-					"description": "The type of line ending.",
-					"default": "lf",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"default": 80,
@@ -845,14 +840,6 @@
 						{ "type": "null" }
 					]
 				},
-				"bracketSameLine": {
-					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
-					"type": ["boolean", "null"]
-				},
-				"bracketSpacing": {
-					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
-					"type": ["boolean", "null"]
-				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"type": ["boolean", "null"]
@@ -880,12 +867,8 @@
 					"description": "The type of quotes used in JSX. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
-				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
+					"description": "What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteProperties": {
@@ -972,12 +955,8 @@
 					"format": "uint8",
 					"minimum": 0.0
 				},
-				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
-				},
 				"lineWidth": {
-					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
+					"description": "What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				}
 			},
@@ -997,25 +976,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"LineEnding": {
-			"oneOf": [
-				{
-					"description": "Line Feed only (\\n), common on Linux and macOS as well as inside git repos",
-					"type": "string",
-					"enum": ["lf"]
-				},
-				{
-					"description": "Carriage Return + Line Feed characters (\\r\\n), common on Windows",
-					"type": "string",
-					"enum": ["crlf"]
-				},
-				{
-					"description": "Carriage Return character only (\\r), used very rarely",
-					"type": "string",
-					"enum": ["cr"]
-				}
-			]
 		},
 		"LineWidth": {
 			"description": "Validated value for the `line_width` formatter options\n\nThe allowed range of values is 1..=320",
@@ -1290,10 +1250,6 @@
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
-				},
-				"lineEnding": {
-					"description": "The type of line ending.",
-					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",

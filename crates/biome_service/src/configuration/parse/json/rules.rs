@@ -992,6 +992,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useRegexLiterals" => {
+                            result.use_regex_literals = Deserializable::deserialize(
+                                &value,
+                                "useRegexLiterals",
+                                diagnostics,
+                            );
+                        }
                         "useShorthandAssign" => {
                             result.use_shorthand_assign = Deserializable::deserialize(
                                 &value,
@@ -1034,6 +1041,7 @@ impl Deserializable for Nursery {
                                     "useAwait",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
+                                    "useRegexLiterals",
                                     "useShorthandAssign",
                                     "useValidAriaRole",
                                 ],

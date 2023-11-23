@@ -17,6 +17,7 @@ pub(crate) mod use_as_const_assertion;
 pub(crate) mod use_await;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
+pub(crate) mod use_regex_literals;
 pub(crate) mod use_shorthand_assign;
 
 declare_group! {
@@ -38,6 +39,7 @@ declare_group! {
             self :: use_await :: UseAwait ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_regex_literals :: UseRegexLiterals ,
             self :: use_shorthand_assign :: UseShorthandAssign ,
         ]
      }
